@@ -768,6 +768,10 @@ export interface FontWeightConfigs {
     enableVariableFontWeight?: boolean;
     enableDeviceFontWeightCategory?: boolean;
 }
+export enum IncrementalUpdatePolicy {
+    NONE = 0,
+    PARAGRAPH_CACHE = 1
+}
 export class ColorShaderStyle_serializer {
     public static write(buffer: SerializerBase, value: ColorShaderStyle): void {
         let valueSerializer: SerializerBase = buffer

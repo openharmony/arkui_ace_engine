@@ -391,10 +391,23 @@ void SpanItem::SpanDumpInfo()
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("--------Content: ")
                         .append("\"")
-                        .append(UtfUtils::Str16DebugToStr8(content))
+                        .append(StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(content)))
                         .append("\"")
                         .append(",spanItemType:")
-                        .append(StringUtils::ToString(spanItemType)));
+                        .append(StringUtils::ToString(spanItemType))
+                        .append(",NeedRemoveNewLine:")
+                        .append(needRemoveNewLine ? "true" : "false")
+                        .append(",position:")
+                        .append(std::to_string(position))
+                        .append(",length:")
+                        .append(std::to_string(length))
+                        .append(",placeholderIndex:")
+                        .append(std::to_string(placeholderIndex))
+                        .append(",interval:[")
+                        .append(std::to_string(interval.first))
+                        .append(",")
+                        .append(std::to_string(interval.second))
+                        .append("]"));
     auto textStyle = textStyle_;
     if (!textStyle || (spanItemType != SpanItemType::NORMAL && spanItemType != SpanItemType::SYMBOL)) {
         return;
@@ -443,6 +456,11 @@ void SpanItem::SpanDumpInfoAdvance()
     ADD_FONT_STYLE_DESC_UTILS(TextCase, TextCase);
     ADD_LINE_STYLE_DESC_UTILS(TextOverflow, TextOverflow);
     ADD_LINE_STYLE_DESC_UTILS(WordBreak, WordBreak);
+    auto textShadowStr = StringUtils::ConvertTextShadowToString(textStyle->GetTextShadows());
+    std::string propTextShadowStr;
+    if (fontStyle && fontStyle->HasTextShadow()) {
+        propTextShadowStr = StringUtils::ConvertTextShadowToString(fontStyle->GetTextShadowValue());
+    }
     dumpLog.AddDesc(std::string("WordSpacing: ")
                         .append(textStyle->GetWordSpacing().ToString())
                         .append(" Decoration: ")
@@ -462,7 +480,11 @@ void SpanItem::SpanDumpInfoAdvance()
                         .append(" ")
                         .append(fontStyle && fontStyle->HasTextDecorationColor()
                                     ? fontStyle->GetTextDecorationColorValue().ColorToString()
-                                    : "Na"));
+                                    : "Na")
+                        .append(" TextShadow: ")
+                        .append(textShadowStr)
+                        .append(" self: ")
+                        .append(fontStyle && fontStyle->HasTextShadow() ? propTextShadowStr : "Na"));
 }
 
 #define DEFINE_SPAN_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                           \
@@ -2102,6 +2124,7 @@ void PlaceholderSpanItem::DumpInfo() const
 void PlaceholderSpanItem::DumpTextStyleInfo() const
 {
     auto& dumpLog = DumpLog::GetInstance();
+    CHECK_NULL_VOID(textStyle_);
     auto textStyle = textStyle_.value_or(TextStyle());
     dumpLog.AddDesc(
         std::string("FontSize: ")

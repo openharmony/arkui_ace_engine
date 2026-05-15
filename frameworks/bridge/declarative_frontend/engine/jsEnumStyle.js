@@ -2437,6 +2437,12 @@ let TextHeightAdaptivePolicy;
   TextHeightAdaptivePolicy[TextHeightAdaptivePolicy.LAYOUT_CONSTRAINT_FIRST = 2] = 'LAYOUT_CONSTRAINT_FIRST';
 })(TextHeightAdaptivePolicy || (TextHeightAdaptivePolicy = {}));
 
+let IncrementalUpdatePolicy;
+(function (IncrementalUpdatePolicy) {
+  IncrementalUpdatePolicy[IncrementalUpdatePolicy.NONE = 0] = 'NONE';
+  IncrementalUpdatePolicy[IncrementalUpdatePolicy.PARAGRAPH_CACHE = 1] = 'PARAGRAPH_CACHE';
+})(IncrementalUpdatePolicy || (IncrementalUpdatePolicy = {}));
+
 let ArrowPosition;
 (function (ArrowPosition) {
   ArrowPosition[ArrowPosition.END = 0] = 'END';

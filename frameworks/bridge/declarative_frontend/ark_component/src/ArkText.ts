@@ -1185,6 +1185,23 @@ class TextDirectionModifier extends ModifierWithKey<TextDirection> {
   }
 }
 
+class TextIncrementalUpdatePolicyModifier extends ModifierWithKey<IncrementalUpdatePolicy> {
+  constructor(value: IncrementalUpdatePolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textIncrementalUpdatePolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetIncrementalUpdatePolicy(node);
+    } else {
+      getUINativeModule().text.setIncrementalUpdatePolicy(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1482,6 +1499,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   textDirection(value: TextDirection): this {
     modifierWithKey(this._modifiersWithKeys, TextDirectionModifier.identity, TextDirectionModifier, value);
+    return this;
+  }
+  incrementalUpdatePolicy(value: IncrementalUpdatePolicy): this {
+    modifierWithKey(this._modifiersWithKeys, TextIncrementalUpdatePolicyModifier.identity,
+      TextIncrementalUpdatePolicyModifier, value);
     return this;
   }
 }

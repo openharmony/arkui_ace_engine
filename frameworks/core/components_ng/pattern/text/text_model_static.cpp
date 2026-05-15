@@ -452,6 +452,16 @@ void TextModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const st
     TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
+void TextModelStatic::SetIncrementalUpdatePolicy(
+    FrameNode* frameNode, const std::optional<IncrementalUpdatePolicy>& policy)
+{
+    if (policy.has_value()) {
+        TextModelNG::SetIncrementalUpdatePolicy(frameNode, policy.value());
+    } else {
+        TextModelNG::ResetIncrementalUpdatePolicy(frameNode);
+    }
+}
+
 void TextModelStatic::SetOptimizeTrailingSpace(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
     TextModelNG::SetOptimizeTrailingSpace(frameNode, valueOpt.value_or(false));

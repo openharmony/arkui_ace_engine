@@ -461,16 +461,14 @@ ACE_FORCE_EXPORT TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontS
     const RefPtr<Pattern>& pattern = nullptr);
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
+    TextStyle& textStyle, bool isSymbol, const RefPtr<Pattern>& pattern = nullptr);
+
+void UpdateTextStyleFromProperty(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
+    TextStyle& textStyle, const RefPtr<Pattern>& pattern = nullptr);
 
 ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false,
     const std::unique_ptr<SymbolStyle>& symbolStyle = nullptr, const RefPtr<Pattern>& pattern = nullptr);
-
-void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
-void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme);
 
 ACE_FORCE_EXPORT std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 ACE_FORCE_EXPORT std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);

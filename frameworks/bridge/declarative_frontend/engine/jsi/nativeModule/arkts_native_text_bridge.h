@@ -151,6 +151,8 @@ public:
     static ArkUINativeModuleValue ResetTextDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetIncrementalUpdatePolicy(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetIncrementalUpdatePolicy(ArkUIRuntimeCallInfo *runtimeCallInfo);
 
 private:
     static void ParseAIEntityColorAndPreview(

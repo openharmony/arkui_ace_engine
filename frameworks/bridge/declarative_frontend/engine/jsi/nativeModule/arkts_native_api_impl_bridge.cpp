@@ -6394,6 +6394,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectedDragPreviewStyle));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectedDragPreviewStyle));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncrementalUpdatePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetIncrementalUpdatePolicy));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncrementalUpdatePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetIncrementalUpdatePolicy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 }
 

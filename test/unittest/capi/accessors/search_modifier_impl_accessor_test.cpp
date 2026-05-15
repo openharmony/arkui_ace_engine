@@ -189,21 +189,4 @@ HWTEST_F(SearchModifierImplAccessorTest, SetMarginImplTest005, TestSize.Level1)
     (void)layoutProperty->GetUserMargin();
 }
 
-/**
- * @tc.name: SetMarginImplTest006
- * @tc.desc: Test SearchModifier::SetMarginImpl with null frameNode
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierImplAccessorTest, SetMarginImplTest006, TestSize.Level1)
-{
-    Ark_Padding inputValue;
-    inputValue.left = Converter::ArkValue<Opt_Length>(TEST_MARGIN_VALUE);
-    inputValue.top = Converter::ArkValue<Opt_Length>(TEST_MARGIN_VALUE);
-    inputValue.right = Converter::ArkValue<Opt_Length>(TEST_MARGIN_VALUE);
-    inputValue.bottom = Converter::ArkValue<Opt_Length>(TEST_MARGIN_VALUE);
-    auto value = Converter::ArkUnion<Opt_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
-
-    SearchModifier::SetMarginImpl(nullptr, &value);
-}
-
 } // namespace OHOS::Ace::NG

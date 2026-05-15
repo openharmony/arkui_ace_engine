@@ -48,6 +48,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
+#include "core/components_ng/pattern/text/span/span_group_hash_calculator.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/text/html_utils.h"
@@ -92,6 +93,7 @@ bool IsJumpLink(const std::string& content)
     std::regex pattern(R"(https?://[^\s]+)");
     return std::regex_match(content, pattern);
 }
+
 }; // namespace
 
 TextPattern::TextPattern()
@@ -105,6 +107,17 @@ TextPattern::~TextPattern()
     // node destruct, need to stop text race animation
     CHECK_NULL_VOID(contentMod_);
     contentMod_->StopTextRace();
+    if (paragraphCache_) {
+        paragraphCache_->Clear();
+        paragraphCache_.Reset();
+    }
+}
+
+void TextPattern::InitParagraphCache()
+{
+    if (!paragraphCache_) {
+        paragraphCache_ = AceType::MakeRefPtr<LRUMap<uint64_t, ParagraphCacheInfo>>();
+    }
 }
 
 void TextPattern::OnWindowHide()
@@ -318,6 +331,12 @@ RefPtr<PreviewMenuController> TextPattern::GetOrCreatePreviewMenuController()
         previewController_ = AceType::MakeRefPtr<PreviewMenuController>(WeakClaim(this));
     }
     return previewController_;
+}
+
+bool TextPattern::IsAIDetectInitialized()
+{
+    CHECK_NULL_RETURN(GetDataDetectorAdapter(), false);
+    return GetDataDetectorAdapter()->aiDetectInitialized_;
 }
 
 bool TextPattern::CanAIEntityDrag()
@@ -5424,7 +5443,9 @@ void TextPattern::DumpInfo()
     dumpLog.AddDesc(
         std::string("isSpanStringMode: ")
             .append(std::to_string(isSpanStringMode_))
-            .append(std::string(" externalParagraph: ").append(std::to_string(externalParagraph_.has_value()))));
+            .append(std::string(" externalParagraph: ").append(std::to_string(externalParagraph_.has_value())))
+            .append(std::string(" incrementalUpdatePolicy: ").append(std::to_string(static_cast<int32_t>(
+                textLayoutProp->GetIncrementalUpdatePolicy().value_or(IncrementalUpdatePolicy::NONE))))));
     DumpTextStyleInfo();
     if (contentMod_) {
         contentMod_->ContentModifierDump();
@@ -5706,6 +5727,12 @@ void TextPattern::DumpTextStyleInfo5()
     auto hasIncludeFontPadding = textLayoutProp->GetIncludeFontPaddingValue(false) ? "true" : "false";
     auto hasFallbackLineSpacing = textLayoutProp->GetFallbackLineSpacingValue(false) ? "true" : "false";
     if (textStyle_.has_value()) {
+        auto textShadowStr = StringUtils::ConvertTextShadowToString(textStyle_->GetTextShadows());
+        std::string propTextShadowStr;
+        if (textLayoutProp->HasTextShadow()) {
+            propTextShadowStr = StringUtils::ConvertTextShadowToString(
+                textLayoutProp->GetTextShadow().value_or(std::vector<Shadow>()));
+        }
         dumpLog.AddDesc(
             std::string("Decoration: ")
                 .append(StringUtils::ToString(textStyle_->GetTextDecorationStyle()))
@@ -5726,6 +5753,10 @@ void TextPattern::DumpTextStyleInfo5()
                 .append(textLayoutProp->HasTextDecorationColor()
                             ? textLayoutProp->GetTextDecorationColorValue(Color::BLACK).ColorToString()
                             : "Na")
+                .append(" TextShadow: ")
+                .append(textShadowStr)
+                .append(" prop: ")
+                .append(textLayoutProp->HasTextShadow() ? propTextShadowStr : "Na")
                 .append(" IncludeFontPadding: ")
                 .append(textStyle_->GetIncludeFontPadding() ? "true" : "false")
                 .append(" prop: ")
@@ -5802,10 +5833,19 @@ void TextPattern::DumpTextEngineInfo()
         dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines()))
                         .append(" DidExceedMaxLinesInner:")
                         .append(std::to_string(pManager_->DidExceedMaxLinesInner())));
+        std::string paragraphHeights;
+        for (size_t i = 0; i < paragraphs.size(); ++i) {
+            auto paragraph = paragraphs[i].paragraph;
+            if (paragraph) {
+                paragraphHeights.append(std::to_string(paragraph->GetHeight())).append(",");
+            }
+        }
         dumpLog.AddDesc(std::string("GetTextWidth:")
                             .append(std::to_string(pManager_->GetTextWidth()))
                             .append(" GetHeight:")
                             .append(std::to_string(pManager_->GetHeight()))
+                            .append(" paragraphHeights:")
+                            .append(paragraphHeights)
                             .append(" GetMaxWidth:")
                             .append(std::to_string(pManager_->GetMaxWidth()))
                             .append(" GetMaxIntrinsicWidth:")
@@ -5814,6 +5854,7 @@ void TextPattern::DumpTextEngineInfo()
                             .append(std::to_string(pManager_->GetLineCount()))
                             .append(" GetLongestLine:")
                             .append(std::to_string(pManager_->GetLongestLine()))
+                            .append(" GetLongestLineWithIndent:")
                             .append(std::to_string(pManager_->GetLongestLineWithIndent())));
     }
     dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
@@ -5851,7 +5892,17 @@ void TextPattern::DumpParagraphsInfo()
                                 .append(";align:")
                                 .append(StringUtils::ToString(paraStyle.align))
                                 .append(";isEndAddParagraphSpacing:")
-                                .append(std::to_string(paraStyle.isEndAddParagraphSpacing)));
+                                .append(std::to_string(paraStyle.isEndAddParagraphSpacing))
+                                .append(";start:")
+                                .append(std::to_string(info.start))
+                                .append(";end:")
+                                .append(std::to_string(info.end))
+                                .append(";paragraphSpacing:")
+                                .append(paraStyle.paragraphSpacing.ToString())
+                                .append(";isFirstParagraphLineSpacing:")
+                                .append(std::to_string(paraStyle.isFirstParagraphLineSpacing))
+                                .append(";firstSpanTextStyleUid:")
+                                .append(std::to_string(info.firstSpanTextStyleUid)));
         }
     }
 }
@@ -5957,7 +6008,7 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return false;
 }
 
-void TextPattern::UpdateStyledStringByColorMode()
+void TextPattern::UpdateStyledStringByColorMode(bool needUpdateSpanStyleHash)
 {
     CHECK_NULL_VOID(isSpanStringMode_);
     auto host = GetHost();
@@ -5971,6 +6022,9 @@ void TextPattern::UpdateStyledStringByColorMode()
             continue;
         }
         resourceMgr->ReloadResources();
+    }
+    if (needUpdateSpanStyleHash) {
+        UpdateSpanStyleHash(spans_);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -6774,6 +6828,19 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
     FREE_NODE_CHECK(host, SetStyledString, value,
         closeSelectOverlay);  // call SetStyledStringMultiThread() by multi thread
     AllocStyledString();
+    
+    // Initialize or clear paragraph cache based on IncrementalUpdatePolicy property.
+    // NONE: Clear cache to disable incremental update (default behavior).
+    // PARAGRAPH_CACHE: Initialize cache to enable incremental update with paragraph-level cache.
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    auto policy = layoutProperty ? layoutProperty->GetIncrementalUpdatePolicyValue(IncrementalUpdatePolicy::NONE)
+                                 : IncrementalUpdatePolicy::NONE;
+    if (policy == IncrementalUpdatePolicy::PARAGRAPH_CACHE) {
+        InitParagraphCache();
+    } else {
+        paragraphCache_ = nullptr;
+    }
+    
     isSpanStringMode_ = true;
     if (closeSelectOverlay) {
         CloseSelectOverlay();
@@ -6787,16 +6854,37 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
         styledString_->ReplaceSpanString(0, length, value);
     }
     spans_ = styledString_->GetSpanItems();
+    UpdateSpanGroupHash(value->GetSpanItems());
     StyledStringRegisterResource();
     if (SystemProperties::GetTextTraceEnabled()) {
         ACE_TEXT_SCOPED_TRACE(
             "TextPattern::SetStyledString[id:%d][size:%d]", host->GetId(), static_cast<int32_t>(spans_.size()));
     }
     ProcessSpanString();
-    UpdateStyledStringByColorMode();
+    UpdateStyledStringByColorMode(false);
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(WeakClaim(Referenced::RawPtr(host)));
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextPattern::UpdateSpanGroupHash(const std::list<RefPtr<SpanItem>>& spans)
+{
+    CHECK_NULL_VOID(paragraphCache_);
+    if (!spanGroupHashResult_) {
+        spanGroupHashResult_ = std::make_unique<SpanGroupHashResult>();
+    }
+    CHECK_NULL_VOID(spanGroupHashResult_);
+    *spanGroupHashResult_ = SpanGroupHashCalculator::Calculate(spans);
+}
+
+void TextPattern::UpdateSpanStyleHash(const std::list<RefPtr<SpanItem>>& spans)
+{
+    CHECK_NULL_VOID(spanGroupHashResult_);
+    auto styleHashes = SpanGroupHashCalculator::CalculateStyleHashes(spans);
+    if (styleHashes.size() != spanGroupHashResult_->contentHashes.size()) {
+        return;
+    }
+    spanGroupHashResult_->styleHashes = std::move(styleHashes);
 }
 
 void TextPattern::StyledStringRegisterResource()
@@ -8148,14 +8236,13 @@ RefPtr<LayoutProperty> TextPattern::CreateLayoutProperty()
 RefPtr<LayoutAlgorithm> TextPattern::CreateLayoutAlgorithm()
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    if (textLayoutProperty &&
-        textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
-        return MakeRefPtr<TextLayoutAlgorithm>(
-            spans_, pManager_, isSpanStringMode_, textStyle_.value_or(TextStyle()), true);
-    } else {
-        return MakeRefPtr<TextLayoutAlgorithm>(
-            spans_, pManager_, isSpanStringMode_, textStyle_.value_or(TextStyle()));
+    auto textStyle = textStyle_.value_or(TextStyle());
+    const bool isMarquee =
+        textLayoutProperty && textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE;
+    if (!paragraphCache_ || isMarquee) {
+        return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_, textStyle, isMarquee);
     }
+    return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_, textStyle, GetParagraphCache());
 }
 
 RefPtr<AccessibilityProperty> TextPattern::CreateAccessibilityProperty()

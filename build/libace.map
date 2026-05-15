@@ -1994,6 +1994,8 @@
       "OHOS::Ace::NG::TextLayoutadapter::IsRightTOLeftArabic(int)";
       "OHOS::Ace::NG::TextLayoutAlgorithm::GetTextStyle() const";
       "OHOS::Ace::NG::TextLayoutAlgorithm::TextLayoutAlgorithm(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>>>, OHOS::Ace::RefPtr<OHOS::Ace::NG::ParagraphManager>, bool, OHOS::Ace::TextStyle const&, bool)";
+      "OHOS::Ace::NG::TextLayoutAlgorithm::TextLayoutAlgorithm(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>>>, OHOS::Ace::RefPtr<OHOS::Ace::NG::ParagraphManager>, bool, OHOS::Ace::TextStyle const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::LRUMap<unsigned long, OHOS::Ace::NG::ParagraphCacheInfo>> const&)";
+      "OHOS::Ace::NG::TextLayoutAlgorithm::TextLayoutAlgorithm(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>>>, OHOS::Ace::RefPtr<OHOS::Ace::NG::ParagraphManager>, bool, OHOS::Ace::TextStyle const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::LRUMap<unsigned long long, OHOS::Ace::NG::ParagraphCacheInfo>> const&)";
       "OHOS::Ace::NG::TextLayoutProperty::FromJson(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>> const&)";
       "OHOS::Ace::NG::TextLayoutProperty::OnEnableSmallLanguageTruncationUpdate(bool)";
       "OHOS::Ace::NG::TextLayoutProperty::UpdateEnableSmallLanguageTruncation(bool const&)";

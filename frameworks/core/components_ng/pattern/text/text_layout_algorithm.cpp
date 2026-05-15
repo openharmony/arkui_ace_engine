@@ -38,6 +38,32 @@ namespace {
 constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
 
+uint64_t CombineGroupHashWithStateFlags(
+    uint64_t groupHash, const std::list<RefPtr<SpanItem>>& group, bool needShowAIDetect,
+    bool createdBeforeAIDetectReady)
+{
+    constexpr uint64_t MAGIC_NUMBER = 0x9e3779b9;
+    constexpr int32_t LEFT_SHIFT = 6;
+    constexpr int32_t RIGHT_SHIFT = 2;
+    const auto& lastSpan = group.empty() ? nullptr : group.back();
+    const uint64_t removeNewLineFlag = lastSpan && lastSpan->needRemoveNewLine ? 1U : 0U;
+    const uint64_t aiDetectFlag = needShowAIDetect ? 1U : 0U;
+    const uint64_t createdBeforeAIDetectReadyFlag = createdBeforeAIDetectReady ? 1U : 0U;
+    const uint64_t stateFlags =
+        (removeNewLineFlag << 2U) | (aiDetectFlag << 1U) | createdBeforeAIDetectReadyFlag;
+    return groupHash ^ (stateFlags + MAGIC_NUMBER + (groupHash << LEFT_SHIFT) + (groupHash >> RIGHT_SHIFT));
+}
+
+int32_t GetFirstSpanTextStyleUid(const std::list<RefPtr<SpanItem>>& group, int32_t fallbackUid)
+{
+    for (const auto& span : group) {
+        if (span) {
+            return span->nodeId_;
+        }
+    }
+    return fallbackUid;
+}
+
 uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
 {
     double minTextSizeHeight = textStyle.GetAdaptMinFontSize().ConvertToPxDistributeWithEnv(
@@ -60,10 +86,23 @@ uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF&
     uint32_t maxLines = contentConstraint.maxSize.Height() / (lineHeight) + 1;
     return std::max(maxLines, static_cast<uint32_t>(0));
 }
+
+void HandleEmptyParagraphStyle(const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spanGroup)
+{
+    CHECK_NULL_VOID(paragraph && spanGroup.size() == 1);
+    auto spanItem = spanGroup.front();
+    CHECK_NULL_VOID(spanItem);
+    auto content = spanItem->GetSpanContent(spanItem->GetSpanContent());
+    CHECK_NULL_VOID(content.empty());
+    auto textStyle = spanItem->GetTextStyle();
+    CHECK_NULL_VOID(textStyle.has_value());
+    paragraph->PushStyle(textStyle.value());
+}
+
 }; // namespace
 
 TextLayoutAlgorithm::TextLayoutAlgorithm(
-    std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> pManager, const bool isSpanStringMode,
+    std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> pManager, bool isSpanStringMode,
     const TextStyle& textStyle, bool isMarquee)
 {
     if (SystemProperties::GetTextTraceEnabled()) {
@@ -91,6 +130,31 @@ TextLayoutAlgorithm::TextLayoutAlgorithm(
         return;
     }
     ParagraphUtil::ConstructParagraphSpanGroup(spans, spans_, spanStringHasMaxLines_);
+}
+
+TextLayoutAlgorithm::TextLayoutAlgorithm(
+    std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> pManager, bool isSpanStringMode,
+    const TextStyle& textStyle, const RefPtr<LRUMap<uint64_t, ParagraphCacheInfo>>& paragraphCache)
+{
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::TextLayoutAlgorithm[styleUid:%d][isSpanStringMode:%d][size:%d]",
+            textStyle.GetTextStyleUid(), isSpanStringMode, static_cast<int32_t>(spans.size()));
+    }
+    paragraphManager_ = pManager;
+    isSpanStringMode_ = isSpanStringMode;
+    textStyle_ = textStyle;
+    paragraphCache_ = paragraphCache;
+
+    if (!isSpanStringMode) {
+        if (!spans.empty()) {
+            spans_.emplace_back(std::move(spans));
+        }
+        return;
+    }
+    if (spans.empty()) {
+        return;
+    }
+    ParagraphUtil::ConstructParagraphSpanGroupForHash(spans, spans_, spanStringHasMaxLines_);
 }
 
 TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
@@ -377,8 +441,292 @@ bool TextLayoutAlgorithm::CreateParagraph(
         return UpdateSingleParagraph(layoutWrapper, paraStyle, textStyle, content, maxWidth);
     } else {
         paragraphManager_->Reset();
-        return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
+        return TextLayoutAlgorithm::UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
     }
+}
+
+bool TextLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layoutWrapper,
+    ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle)
+{
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::UpdateParagraphBySpan");
+    }
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    // Drag rendering and non-span-string flow depend on the base span rebuild path.
+    if (!isSpanStringMode_ || textPattern->IsDragging() || !paragraphCache_) {
+        return MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
+    }
+
+    // Check IncrementalUpdatePolicy property to decide whether use cache path.
+    // Default value is NONE, which means no cache and rebuild all paragraphs each layout.
+    // PARAGRAPH_CACHE enables incremental update with paragraph-level cache.
+    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto policy = layoutProperty->GetIncrementalUpdatePolicyValue(IncrementalUpdatePolicy::NONE);
+    if (policy == IncrementalUpdatePolicy::NONE) {
+        return MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
+    }
+
+    auto spanGroupHashResult = textPattern->GetSpanGroupHashResult();
+    // Cache path requires aligned content/style hashes for each span group.
+    if (!spanGroupHashResult || spanGroupHashResult->contentHashes.empty() ||
+        spanGroupHashResult->contentHashes.size() != spanGroupHashResult->styleHashes.size()) {
+        return MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
+    }
+
+    return UpdateParagraphBySpanWithCache(layoutWrapper, paraStyle, maxWidth, textStyle,
+        spanGroupHashResult->contentHashes, spanGroupHashResult->styleHashes);
+}
+
+void TextLayoutAlgorithm::UpdateCachedSpanGroup(const std::list<RefPtr<SpanItem>>& group, int32_t currentParagraphIndex,
+    const RefPtr<TextPattern>& pattern, const ChildrenListWithGuard& children,
+    std::list<RefPtr<LayoutWrapper>>::const_iterator& iterItems, std::vector<WeakPtr<FrameNode>>& imageNodeList,
+    std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholderInfo, int32_t& spanTextLength)
+{
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::UpdateCachedSpanGroup");
+    }
+    for (const auto& child : group) {
+        if (!child) {
+            continue;
+        }
+        child->paragraphIndex = currentParagraphIndex;
+        child->SetTextPattern(pattern);
+        if (child->spanItemType == SpanItemType::NORMAL) {
+            child->length = child->content.length();
+            spanTextLength += static_cast<int32_t>(child->length);
+            child->position = spanTextLength;
+        } else if (child->spanItemType == SpanItemType::IMAGE) {
+            if (iterItems == children.end() || !(*iterItems)) {
+                TAG_LOGW(AceLogTag::ACE_TEXT, "iterItems is at end or null when processing IMAGE span");
+                return;
+            }
+            auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
+            if (!imageSpanItem) {
+                TAG_LOGW(AceLogTag::ACE_TEXT, "DynamicCast to ImageSpanItem failed");
+                return;
+            }
+            imageSpanItem->placeholderIndex = preParagraphsPlaceholderCount_++;
+            imageSpanItem->content = u" ";
+            ++spanTextLength;
+            imageSpanItem->position = spanTextLength;
+            imageSpanItem->length = 1;
+            auto imageNode = (*iterItems)->GetHostNode();
+            imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
+            ++iterItems;
+        } else if (child->spanItemType == SpanItemType::CustomSpan) {
+            auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
+            if (!customSpanItem) {
+                TAG_LOGW(AceLogTag::ACE_TEXT, "DynamicCast to CustomSpanItem failed");
+                return;
+            }
+            customSpanItem->placeholderIndex = preParagraphsPlaceholderCount_++;
+            customSpanItem->content = u" ";
+            ++spanTextLength;
+            customSpanItem->position = spanTextLength;
+            customSpanItem->length = 1;
+            CustomSpanPlaceholderInfo customSpanPlaceholder;
+            customSpanPlaceholder.paragraphIndex = currentParagraphIndex;
+            customSpanPlaceholder.customSpanIndex = customSpanItem->placeholderIndex;
+            if (customSpanItem->onDraw.has_value()) {
+                customSpanPlaceholder.onDraw = customSpanItem->onDraw.value();
+            }
+            customSpanPlaceholderInfo.emplace_back(customSpanPlaceholder);
+        }
+    }
+}
+
+bool TextLayoutAlgorithm::BuildSpanGroup(const std::list<RefPtr<SpanItem>>& group, int32_t currentParagraphIndex,
+    const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph,
+    const ChildrenListWithGuard& children, std::list<RefPtr<LayoutWrapper>>::const_iterator& iterItems,
+    std::vector<WeakPtr<FrameNode>>& imageNodeList,
+    std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholderInfo, int32_t& spanTextLength)
+{
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::BuildSpanGroup");
+    }
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto aiSpanMap = pattern->GetAISpanMap();
+    for (const auto& child : group) {
+        if (!child) {
+            continue;
+        }
+        child->paragraphIndex = currentParagraphIndex;
+        child->SetTextPattern(pattern);
+        if (child->spanItemType == SpanItemType::NORMAL) {
+            child->aiSpanMap = aiSpanMap;
+            AddTextSpanToParagraph(child, spanTextLength, frameNode, paragraph);
+            aiSpanMap = child->aiSpanMap;
+        } else if (child->spanItemType == SpanItemType::IMAGE) {
+            if (iterItems == children.end() || !(*iterItems)) {
+                return false;
+            }
+            auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
+            if (!imageSpanItem) {
+                return false;
+            }
+            AddImageToParagraph(imageSpanItem, (*iterItems), paragraph, spanTextLength);
+            auto imageNode = (*iterItems)->GetHostNode();
+            imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
+            ++iterItems;
+        } else if (child->spanItemType == SpanItemType::CustomSpan) {
+            auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
+            if (!customSpanItem) {
+                return false;
+            }
+            CustomSpanPlaceholderInfo customSpanPlaceholder;
+            customSpanPlaceholder.paragraphIndex = currentParagraphIndex;
+            UpdateParagraphByCustomSpan(customSpanItem, paragraph, spanTextLength, customSpanPlaceholder);
+            customSpanPlaceholderInfo.emplace_back(customSpanPlaceholder);
+        }
+    }
+    return true;
+}
+
+ParagraphStyle TextLayoutAlgorithm::CreateSpanParagraphStyle(LayoutWrapper* layoutWrapper,
+    const std::list<RefPtr<SpanItem>>& group, const ParagraphStyle& paraStyle, const TextStyle& textStyle,
+    int32_t& maxLines, bool isFirstGroup, bool hasNextGroup)
+{
+    ParagraphStyle spanParagraphStyle = paraStyle;
+    if (paraStyle.maxLines != UINT32_MAX) {
+        if (!paragraphManager_->GetParagraphs().empty()) {
+            maxLines -= static_cast<int32_t>(paragraphManager_->GetParagraphs().back().paragraph->GetLineCount());
+        }
+        spanParagraphStyle.maxLines = std::max(maxLines, 0);
+    }
+
+    auto paraStyleSpanItem = GetParagraphStyleSpanItem(group);
+    if (!paraStyleSpanItem) {
+        return spanParagraphStyle;
+    }
+
+    ParagraphUtil::GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle, group);
+    if (paraStyleSpanItem->fontStyle->HasFontSize()) {
+        spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
+    spanParagraphStyle.isEndAddParagraphSpacing =
+        paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&
+        Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) && hasNextGroup;
+    spanParagraphStyle.isFirstParagraphLineSpacing = isFirstGroup;
+    return spanParagraphStyle;
+}
+
+void TextLayoutAlgorithm::AppendCachedParagraphInfo(uint64_t groupHash, const ParagraphCacheInfo& paragraphInfo,
+    int32_t& spanTextLength)
+{
+    auto cachedParagraphInfo = paragraphInfo;
+    auto paragraphLength = cachedParagraphInfo.end - cachedParagraphInfo.start;
+    cachedParagraphInfo.start = spanTextLength - paragraphLength;
+    cachedParagraphInfo.end = spanTextLength;
+    paragraphManager_->AddParagraph({ .paragraph = cachedParagraphInfo.paragraph,
+        .paragraphStyle = cachedParagraphInfo.paragraph->GetParagraphStyle(),
+        .firstSpanTextStyleUid = cachedParagraphInfo.firstSpanTextStyleUid,
+        .start = cachedParagraphInfo.start,
+        .end = cachedParagraphInfo.end });
+    spanTextLength = cachedParagraphInfo.end;
+}
+
+void TextLayoutAlgorithm::StoreParagraphCache(uint64_t groupHash, const std::list<RefPtr<SpanItem>>& group,
+    const RefPtr<Paragraph>& paragraph, const ParagraphStyle& spanParagraphStyle, int32_t paraStart,
+    int32_t spanTextLength)
+{
+    auto firstSpanTextStyleUid = GetFirstSpanTextStyleUid(group, spanParagraphStyle.textStyleUid);
+    paragraphCache_->Put(groupHash, { .paragraph = paragraph,
+        .start = paraStart,
+        .end = spanTextLength,
+        .firstSpanTextStyleUid = firstSpanTextStyleUid });
+    paragraphManager_->AddParagraph({ .paragraph = paragraph,
+        .paragraphStyle = spanParagraphStyle,
+        .firstSpanTextStyleUid = firstSpanTextStyleUid,
+        .start = paraStart,
+        .end = spanTextLength });
+}
+
+bool TextLayoutAlgorithm::UpdateParagraphBySpanWithCache(LayoutWrapper* layoutWrapper,
+    ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle,
+    const std::vector<uint64_t>& spanGroupHash, const std::vector<uint64_t>& spanGroupStyleHash)
+{
+    if (SystemProperties::GetTextTraceEnabled()) {
+        size_t cacheSize = paragraphCache_ ? paragraphCache_->Size() : 0;
+        ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::UpdateParagraphBySpanWithCache "
+            "[spanGroupHash:%zu][spanGroupStyleHash:%zu][spans:%zu][cacheSize:%zu]",
+            spanGroupHash.size(), spanGroupStyleHash.size(), spans_.size(), cacheSize);
+    }
+    if (!paragraphCache_) {
+        return MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
+    }
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    if (spanGroupHash.size() != spans_.size() || spanGroupStyleHash.size() != spans_.size() ||
+        spanGroupHash.size() != spanGroupStyleHash.size()) {
+        return MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
+    }
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    InheritParentTextStyle(textStyle);
+    const auto& children = GetAllChildrenWithBuild(layoutWrapper);
+    auto iterItems = children.begin();
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto needShowAIDetect = pattern->NeedShowAIDetect();
+    auto createdBeforeAIDetectReady = needShowAIDetect && !pattern->IsAIDetectInitialized();
+    int32_t spanTextLength = 0;
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholderInfo;
+    int32_t paragraphIndex = -1;
+    preParagraphsPlaceholderCount_ = 0;
+    auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
+    auto shouldGetCachedParagraph = !(textStyle.NeedReLayout() || textStyle.NeedReCreateParagraph());
+    auto fallbackToBase = [this, weak = AceType::WeakClaim(this), layoutWrapper, paraStyle, maxWidth, textStyle]() {
+        auto algorithm = weak.Upgrade();
+        CHECK_NULL_RETURN(algorithm, false);
+        algorithm->paragraphCache_->SetCapacity(SIZE_MAX);
+        return MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
+    };
+    paragraphCache_->SetCapacity(spans_.size());
+
+    for (auto groupIt = spans_.begin(); groupIt != spans_.end(); ++groupIt) {
+        ++paragraphIndex;
+        auto& group = *groupIt;
+        auto groupHash = spanGroupHash[static_cast<size_t>(paragraphIndex)] ^
+                         spanGroupStyleHash[static_cast<size_t>(paragraphIndex)];
+        groupHash = CombineGroupHashWithStateFlags(groupHash, group, needShowAIDetect, createdBeforeAIDetectReady);
+        if (shouldGetCachedParagraph) {
+            auto cachedParagraph = paragraphCache_->Get(groupHash);
+            if (cachedParagraph != paragraphCache_->End()) {
+                UpdateCachedSpanGroup(group, paragraphIndex, pattern, children, iterItems, imageNodeList,
+                    customSpanPlaceholderInfo, spanTextLength);
+                AppendCachedParagraphInfo(groupHash, cachedParagraph->second, spanTextLength);
+                continue;
+            }
+        }
+
+        auto spanParagraphStyle = CreateSpanParagraphStyle(layoutWrapper, group, paraStyle, textStyle, maxLines,
+            groupIt == spans_.begin(), std::next(groupIt) != spans_.end());
+
+        auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle);
+        CHECK_NULL_RETURN(paragraph, false);
+        auto paraStart = spanTextLength;
+        if (!BuildSpanGroup(group, paragraphIndex, frameNode, paragraph, children, iterItems,
+            imageNodeList, customSpanPlaceholderInfo, spanTextLength)) {
+            return fallbackToBase();
+        }
+        HandleEmptyParagraphStyle(paragraph, group);
+        paragraph->Build();
+        ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle, GetIndentMaxWidth(maxWidth));
+        if (paraStyle.maxLines != UINT32_MAX) {
+            paragraph->Layout(static_cast<float>(maxWidth));
+        }
+        StoreParagraphCache(groupHash, group, paragraph, spanParagraphStyle, paraStart, spanTextLength);
+    }
+    paragraphCache_->SetCapacity(SIZE_MAX);
+    pattern->SetImageSpanNodeList(imageNodeList);
+    pattern->InitCustomSpanPlaceholderInfo(customSpanPlaceholderInfo);
+    return true;
 }
 
 bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
@@ -468,7 +816,7 @@ bool TextLayoutAlgorithm::ReLayoutParagraphs(
         CHECK_NULL_RETURN(paragraph, false);
         if (!needReCreateParagraph_ && needReLayout) {
             paragraph->ReLayout(maxSize.Width(), parStyle, textStyles);
-        } else {
+        } else if (!NearEqual(maxSize.Width(), paragraph->GetMaxWidth())) {
             paragraph->Layout(maxSize.Width());
         }
     }
@@ -520,7 +868,9 @@ bool TextLayoutAlgorithm::LayoutParagraphs(float maxWidth)
     for (auto pIter = paragraphInfo.begin(); pIter != paragraphInfo.end(); pIter++) {
         auto paragraph = pIter->paragraph;
         CHECK_NULL_RETURN(paragraph, false);
-        paragraph->Layout(maxWidth);
+        if (!NearEqual(maxWidth, paragraph->GetMaxWidth()) || NearEqual(0.0f, paragraph->GetMaxWidth())) {
+            paragraph->Layout(maxWidth);
+        }
     }
     return true;
 }

@@ -91,6 +91,7 @@ public:
     static void SetContentTransition(FrameNode* frameNode, const std::optional<TextEffectStrategy> value,
         const std::optional<TextFlipDirection> direction, const std::optional<bool> enableBlur);
     static void SetSelectDetectEnable(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetIncrementalUpdatePolicy(FrameNode* frameNode, const std::optional<IncrementalUpdatePolicy>& value);
 };
 } // namespace OHOS::Ace::NG
 

@@ -5453,6 +5453,14 @@ typedef struct Opt_ImmersiveMode {
     Ark_Tag tag;
     Ark_ImmersiveMode value;
 } Opt_ImmersiveMode;
+typedef enum Ark_IncrementalUpdatePolicy {
+    ARK_INCREMENTAL_UPDATE_POLICY_NONE = 0,
+    ARK_INCREMENTAL_UPDATE_POLICY_PARAGRAPH_CACHE = 1,
+} Ark_IncrementalUpdatePolicy;
+typedef struct Opt_IncrementalUpdatePolicy {
+    Ark_Tag tag;
+    Ark_IncrementalUpdatePolicy value;
+} Opt_IncrementalUpdatePolicy;
 typedef enum Ark_IndexerAlign {
     ARK_INDEXER_ALIGN_LEFT = 0,
     ARK_INDEXER_ALIGN_RIGHT = 1,
@@ -26905,6 +26913,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                       const Opt_Boolean* value);
     void (*setFontVariations)(Ark_NativePointer node,
                               const Opt_Array_text_FontVariation* value);
+    void (*setIncrementalUpdatePolicy)(Ark_NativePointer node,
+                                       const Opt_IncrementalUpdatePolicy* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_arkui_component_units_Font* fontValue,
                     const Opt_FontSettingOptions* options);
