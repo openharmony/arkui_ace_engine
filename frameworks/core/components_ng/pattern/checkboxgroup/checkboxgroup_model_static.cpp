@@ -89,6 +89,7 @@ void CheckBoxGroupModelStatic::ResetCheckMarkColor(FrameNode* frameNode)
 
 void CheckBoxGroupModelStatic::SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size)
 {
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(size, LpxAttribute::LPX_MARK_SIZE, frameNode);
     if (size.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, size.value(), frameNode);
     } else {
@@ -98,6 +99,7 @@ void CheckBoxGroupModelStatic::SetCheckMarkSize(FrameNode* frameNode, const std:
 
 void CheckBoxGroupModelStatic::SetCheckMarkWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
 {
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(width, LpxAttribute::LPX_MARK_STROKE_WIDTH, frameNode);
     if (width.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(
             CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, width.value(), frameNode);

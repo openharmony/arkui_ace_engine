@@ -85,6 +85,7 @@ void CheckBoxModelStatic::ResetCheckMarkColor(FrameNode* frameNode)
 
 void CheckBoxModelStatic::SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size)
 {
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(size, LpxAttribute::LPX_MARK_SIZE, frameNode);
     if (size.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkSize, size.value(), frameNode);
     } else {
@@ -95,6 +96,7 @@ void CheckBoxModelStatic::SetCheckMarkSize(FrameNode* frameNode, const std::opti
 
 void CheckBoxModelStatic::SetCheckMarkWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
 {
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(width, LpxAttribute::LPX_MARK_STROKE_WIDTH, frameNode);
     if (width.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkWidth, width.value(), frameNode);
     } else {

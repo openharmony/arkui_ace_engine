@@ -485,4 +485,112 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNgt012, TestSize.Level1)
     CheckBoxModelStatic::TriggerChange(frameNode, SELECTED);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelect(), SELECTED);
 }
+
+/**
+ * @tc.name: SetCheckMarkSizeLpx001
+ * @tc.desc: Test SetCheckMarkSize registers LPX attribute when dimension unit is LPX
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, SetCheckMarkSizeLpx001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set CheckMarkSize with LPX unit, then with VP unit.
+     * @tc.expected: step2. lpxAttributes_ contains LPX_MARK_SIZE after LPX set,
+     *               and does not contain LPX_MARK_SIZE after VP set.
+     */
+    CheckBoxModelStatic::SetCheckMarkSize(frameNode, Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MARK_SIZE), 0);
+
+    CheckBoxModelStatic::SetCheckMarkSize(frameNode, Dimension(10.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MARK_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetCheckMarkSizeLpx002
+ * @tc.desc: Test SetCheckMarkSize unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, SetCheckMarkSizeLpx002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set CheckMarkSize with LPX unit, then with nullopt.
+     * @tc.expected: step2. lpxAttributes_ contains LPX_MARK_SIZE after LPX set,
+     *               and does not contain LPX_MARK_SIZE after nullopt set.
+     */
+    CheckBoxModelStatic::SetCheckMarkSize(frameNode, Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MARK_SIZE), 0);
+
+    CheckBoxModelStatic::SetCheckMarkSize(frameNode, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MARK_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetCheckMarkWidthLpx001
+ * @tc.desc: Test SetCheckMarkWidth registers LPX attribute when dimension unit is LPX
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, SetCheckMarkWidthLpx001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set CheckMarkWidth with LPX unit, then with VP unit.
+     * @tc.expected: step2. lpxAttributes_ contains LPX_MARK_STROKE_WIDTH after LPX set,
+     *               and does not contain LPX_MARK_STROKE_WIDTH after VP set.
+     */
+    CheckBoxModelStatic::SetCheckMarkWidth(frameNode, Dimension(5.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MARK_STROKE_WIDTH), 0);
+
+    CheckBoxModelStatic::SetCheckMarkWidth(frameNode, Dimension(5.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MARK_STROKE_WIDTH), 0);
+}
+
+/**
+ * @tc.name: SetCheckMarkWidthLpx002
+ * @tc.desc: Test SetCheckMarkWidth unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, SetCheckMarkWidthLpx002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set CheckMarkWidth with LPX unit, then with nullopt.
+     * @tc.expected: step2. lpxAttributes_ contains LPX_MARK_STROKE_WIDTH after LPX set,
+     *               and does not contain LPX_MARK_STROKE_WIDTH after nullopt set.
+     */
+    CheckBoxModelStatic::SetCheckMarkWidth(frameNode, Dimension(5.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MARK_STROKE_WIDTH), 0);
+
+    CheckBoxModelStatic::SetCheckMarkWidth(frameNode, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MARK_STROKE_WIDTH), 0);
+}
 } // namespace OHOS::Ace::NG

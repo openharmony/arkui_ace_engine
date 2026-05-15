@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 void ButtonModelNG::SetFontSize(const Dimension& fontSize)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE);
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize);
 }
 
@@ -699,6 +700,7 @@ void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::op
 
 void ButtonModelNG::SetBorderRadius(const Dimension& radius)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_BORDER_RADIUS);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radius;
     borderRadius.radiusTopRight = radius;
@@ -710,6 +712,7 @@ void ButtonModelNG::SetBorderRadius(const Dimension& radius)
 
 void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& radius)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_BORDER_RADIUS, frameNode);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radius;
     borderRadius.radiusTopRight = radius;
@@ -723,6 +726,10 @@ void ButtonModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLef
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
 {
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radiusTopLeft;
     borderRadius.radiusTopRight = radiusTopRight;
@@ -736,6 +743,10 @@ void ButtonModelNG::SetLocalizedBorderRadius(const std::optional<Dimension>& rad
     const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
     const std::optional<Dimension>& radiusBottomEnd)
 {
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusTopStart, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusTopEnd, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusBottomStart, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS);
+    ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(radiusBottomEnd, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopStart = radiusTopStart;
     borderRadius.radiusTopEnd = radiusTopEnd;
@@ -749,6 +760,10 @@ void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Di
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
 {
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS, frameNode);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radiusTopLeft;
     borderRadius.radiusTopRight = radiusTopRight;
@@ -802,6 +817,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
 
 void ButtonModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
@@ -857,10 +873,14 @@ void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const ButtonParameters& 
     if (buttonParameters.maxLines.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, buttonParameters.maxLines.value(), frameNode);
     }
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+        buttonParameters.minFontSize, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, frameNode);
     if (buttonParameters.minFontSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             ButtonLayoutProperty, MinFontSize, buttonParameters.minFontSize.value(), frameNode);
     }
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+        buttonParameters.maxFontSize, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, frameNode);
     if (buttonParameters.maxFontSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             ButtonLayoutProperty, MaxFontSize, buttonParameters.maxFontSize.value(), frameNode);
@@ -869,6 +889,8 @@ void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const ButtonParameters& 
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value(), frameNode);
     }
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(
+        buttonParameters.fontSize, LpxAttribute::LPX_FONT_SIZE, frameNode);
     if (buttonParameters.fontSize.has_value()) {
         auto fontSize = buttonParameters.fontSize.value();
         if (GreatOrEqual(fontSize.Value(), 0.0)) {
