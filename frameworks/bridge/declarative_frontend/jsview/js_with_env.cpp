@@ -37,7 +37,6 @@ void JSWithEnv::Pop()
     }
 
     ViewStackModel::GetInstance()->PopContainer();
-    return ;
 }
 
 void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
