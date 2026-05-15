@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -473,5 +474,105 @@ RefPtr<FrameNode> Tabs::GetTabBarActiveItem()
         index++;
     }
     return nullptr;
+}
+
+void Tabs::SetTabBarWidth(const Dimension& tabBarWidth, const RefPtr<ResourceObject>& resObj)
+{
+    SetTabBarWidth(tabBarWidth);
+    CHECK_NULL_VOID(resObj);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::HandleBarWidth(Referenced::RawPtr(tabsNode), resObj);
+}
+
+void Tabs::SetTabBarHeight(const Dimension& tabBarHeight, const RefPtr<ResourceObject>& resObj)
+{
+    SetTabBarHeight(tabBarHeight);
+    CHECK_NULL_VOID(resObj);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::HandleBarHeight(Referenced::RawPtr(tabsNode), resObj);
+}
+
+void Tabs::SetDivider(const TabsItemDivider& divider, const RefPtr<ResourceObject>& widthResObj,
+    const RefPtr<ResourceObject>& colorResObj, const RefPtr<ResourceObject>& startMarginResObj,
+    const RefPtr<ResourceObject>& endMarginResObj)
+{
+    SetDivider(divider);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::HandleDividerStrokeWidth(Referenced::RawPtr(tabsNode), widthResObj);
+    NG::TabsModelNG::HandleDividerColor(Referenced::RawPtr(tabsNode), colorResObj);
+    NG::TabsModelNG::HandleDividerStartMargin(Referenced::RawPtr(tabsNode), startMarginResObj);
+    NG::TabsModelNG::HandleDividerEndMargin(Referenced::RawPtr(tabsNode), endMarginResObj);
+}
+
+void Tabs::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option, const RefPtr<ResourceObject>& resObj)
+{
+    SetScrollableBarModeOptions(option);
+    CHECK_NULL_VOID(resObj);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::HandleScrollableBarMargin(Referenced::RawPtr(tabsNode), resObj);
+}
+
+void Tabs::SetEffectNodeOption(const TabsEffectNodeOption& option, const RefPtr<ResourceObject>& resObj)
+{
+    SetEffectNodeOption(option);
+    CHECK_NULL_VOID(resObj);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::HandleBarGridGutter(Referenced::RawPtr(tabsNode), resObj);
+}
+
+void Tabs::SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption, const RefPtr<ResourceObject>& resObj)
+{
+    SetBarBackgroundBlurStyle(styleOption);
+    CHECK_NULL_VOID(resObj);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::HandleBackgroundBlurStyleInactiveColor(Referenced::RawPtr(tabsNode), resObj);
+}
+
+void Tabs::SetBarBackgroundColor(const Color& backgroundColor, const RefPtr<ResourceObject>& resObj)
+{
+    SetBarBackgroundColor(backgroundColor);
+    CHECK_NULL_VOID(resObj);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::HandleBarBackgroundColor(Referenced::RawPtr(tabsNode), resObj);
+}
+
+void Tabs::SetBarBackgroundEffect(const EffectOption& effectOption, const RefPtr<ResourceObject>& resObj)
+{
+    SetBarBackgroundEffect(effectOption);
+    CHECK_NULL_VOID(resObj);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::HandleBackgroundEffectInactiveColor(Referenced::RawPtr(tabsNode), resObj);
 }
 } // namespace OHOS::Ace::Kit

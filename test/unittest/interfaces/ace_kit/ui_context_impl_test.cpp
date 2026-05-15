@@ -24,9 +24,13 @@
 #include "ui/base/ace_type.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/color_inverter.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "core/common/color_inverter.h"
 
 #include <thread>
 #include <chrono>
@@ -728,5 +732,236 @@ HWTEST_F(UIContextImplTest, AddWindowSizeChangeCallbackTest001, TestSize.Level1)
      */
     uiContext_->AddWindowSizeChangeCallback(1);
     SUCCEED();
+}
+
+/**
+ * @tc.name: GetLocalColorModeTest001
+ * @tc.desc: Test GetLocalColorMode with valid context
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetLocalColorModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get local color mode from valid context
+     */
+    auto mockPipeline = NG::MockPipelineContext::GetCurrent();
+    ASSERT_NE(mockPipeline, nullptr);
+    mockPipeline->SetLocalColorMode(Ace::ColorMode::DARK);
+    auto colorMode = uiContext_->GetLocalColorMode();
+    mockPipeline->SetLocalColorMode(Ace::ColorMode::COLOR_MODE_UNDEFINED);
+    /**
+     * @tc.expected: step1. Should return a valid ColorMode value
+     */
+    EXPECT_NE(static_cast<int32_t>(colorMode), static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED));
+}
+
+/**
+ * @tc.name: GetLocalColorModeTest002
+ * @tc.desc: Test GetLocalColorMode with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetLocalColorModeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create UIContextImpl with null pipeline context
+     */
+    UIContextImpl nullContext(nullptr);
+    /**
+     * @tc.steps: step2. Get local color mode from null context
+     * @tc.expected: step2. Should return COLOR_MODE_UNDEFINED
+     */
+    EXPECT_EQ(nullContext.GetLocalColorMode(), ColorMode::COLOR_MODE_UNDEFINED);
+}
+
+/**
+ * @tc.name: GetColorModeTest001
+ * @tc.desc: Test GetColorMode with valid context
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetColorModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set mock color mode to DARK
+     */
+    MockContainer::mockColorMode_ = Ace::ColorMode::DARK;
+    /**
+     * @tc.steps: step2. Get color mode from valid context
+     * @tc.expected: step2. Should return DARK
+     */
+    EXPECT_EQ(uiContext_->GetColorMode(), ColorMode::DARK);
+    /**
+     * @tc.steps: step3. Reset to LIGHT
+     */
+    MockContainer::mockColorMode_ = Ace::ColorMode::LIGHT;
+    EXPECT_EQ(uiContext_->GetColorMode(), ColorMode::LIGHT);
+}
+
+/**
+ * @tc.name: GetColorModeTest002
+ * @tc.desc: Test GetColorMode with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetColorModeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create UIContextImpl with null pipeline context
+     */
+    UIContextImpl nullContext(nullptr);
+    /**
+     * @tc.steps: step2. Get color mode from null context
+     * @tc.expected: step2. Should return COLOR_MODE_UNDEFINED
+     */
+    EXPECT_EQ(nullContext.GetColorMode(), ColorMode::COLOR_MODE_UNDEFINED);
+}
+
+/**
+ * @tc.name: GetFontScaleTest001
+ * @tc.desc: Test GetFontScale with valid context
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetFontScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get font scale from valid context
+     * @tc.expected: step1. Should return a positive float value
+     */
+    auto fontScale = uiContext_->GetFontScale();
+    EXPECT_GT(fontScale, 0.0f);
+}
+
+/**
+ * @tc.name: GetFontScaleTest002
+ * @tc.desc: Test GetFontScale with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetFontScaleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create UIContextImpl with null pipeline context
+     */
+    UIContextImpl nullContext(nullptr);
+    /**
+     * @tc.steps: step2. Get font scale from null context
+     * @tc.expected: step2. Should return default value 1.0f
+     */
+    EXPECT_EQ(nullContext.GetFontScale(), 1.0f);
+}
+
+/**
+ * @tc.name: GetConfigPerformTest001
+ * @tc.desc: Test GetConfigPerform returns SystemProperties value
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetConfigPerformTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set g_isConfigChangePerform to false
+     */
+    g_isConfigChangePerform = false;
+    /**
+     * @tc.expected: step1. GetConfigPerform should return false
+     */
+    EXPECT_FALSE(uiContext_->GetConfigPerform());
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true
+     */
+    g_isConfigChangePerform = true;
+    /**
+     * @tc.expected: step2. GetConfigPerform should return true
+     */
+    EXPECT_TRUE(uiContext_->GetConfigPerform());
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: GetInstanceIdTest001
+ * @tc.desc: Test GetInstanceId with valid context
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetInstanceIdTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get instance id from valid context
+     * @tc.expected: step1. Should return a valid instance id
+     */
+    auto instanceId = uiContext_->GetInstanceId();
+    EXPECT_GE(instanceId, 0);
+}
+
+/**
+ * @tc.name: GetInstanceIdTest002
+ * @tc.desc: Test GetInstanceId with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetInstanceIdTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create UIContextImpl with null pipeline context
+     */
+    UIContextImpl nullContext(nullptr);
+    /**
+     * @tc.steps: step2. Get instance id from null context
+     * @tc.expected: step2. Should return -1
+     */
+    EXPECT_EQ(nullContext.GetInstanceId(), -1);
+}
+
+/**
+ * @tc.name: HasDarkResourceTest001
+ * @tc.desc: Test HasDarkResource with null ResourceObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, HasDarkResourceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call HasDarkResource with null resObj
+     * @tc.expected: step1. Should return false
+     */
+    EXPECT_FALSE(uiContext_->HasDarkResource(nullptr));
+}
+
+/**
+ * @tc.name: HasDarkResourceTest002
+ * @tc.desc: Test HasDarkResource with resource decoupling disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, HasDarkResourceTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Disable resource decoupling and create a ResourceObject
+     */
+    g_isResourceDecoupling = false;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    /**
+     * @tc.steps: step2. Call HasDarkResource with decoupling disabled
+     * @tc.expected: step2. Should return false
+     */
+    EXPECT_FALSE(uiContext_->HasDarkResource(resObj));
+    g_isResourceDecoupling = true;
+}
+
+/**
+ * @tc.name: GetInvertFuncTest001
+ * @tc.desc: Test GetInvertFunc returns a callable function
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetInvertFuncTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetInvertFunc with valid parameters
+     */
+    std::function<uint32_t(uint32_t)> colorInvertFunc = [](uint32_t color) -> uint32_t { return color; };
+    ColorInverter::GetInstance().EnableColorInvert(0, "test_tag", std::move(colorInvertFunc));
+    auto func = uiContext_->GetInvertFunc(0, "test_tag");
+    /**
+     * @tc.expected: step1. Should return a non-null callable
+     */
+    ASSERT_TRUE(func != nullptr);
+    /**
+     * @tc.steps: step2. Call the returned function
+     * @tc.expected: step2. Should return the input color unchanged (mock default)
+     */
+    uint32_t input = 0xFF000000;
+    EXPECT_EQ(func(input), input);
 }
 } // namespace OHOS::Ace::Kit
