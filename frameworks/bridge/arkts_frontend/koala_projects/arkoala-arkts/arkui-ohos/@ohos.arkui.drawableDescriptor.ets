@@ -103,10 +103,21 @@ export class DrawableDescriptor {
 export class PixelMapDrawableDescriptor extends DrawableDescriptor {
   @JSONStringifyIgnore private finalization: NativeDestructor
 
-  constructor(src?: image.PixelMap) {
+  constructor(src?: image.PixelMap | ResourceStr) {
     super()
-    this.pixelMap = src
-    ArkUIAniModule._Drawable_CreatePixelMapDrawable(this, src)
+    if (src == undefined) {
+      ArkUIAniModule._Drawable_CreatePixelMapDrawable(this, undefined)
+    } else if (src instanceof ResourceStr) {
+      if (src instanceof string) {
+        ArkUIAniModule._Drawable_CreatePixelMapDrawableByString(this, src as string)
+      } else if (src instanceof Resource) {
+        let resourceObjectKPointer = SystemOps.createResourceObject(src as Resource)
+        ArkUIAniModule._Drawable_CreatePixelMapDrawableByResource(this, resourceObjectKPointer)
+      }
+    } else {
+      this.pixelMap = src as image.PixelMap
+      ArkUIAniModule._Drawable_CreatePixelMapDrawable(this, src as image.PixelMap)
+    }
     this.finalization = new NativeDestructor(this.nativeObj)
     finalizerRegister(this, this.finalization)
   }
@@ -198,6 +209,7 @@ class AnimationOptionsImpl implements AnimationOptions {
   iterations?: int;
   frameDurations?: Array<int>;
   autoPlay?: boolean;
+  stopMode?: AnimationStopMode;
   constructor() { }
 }
 

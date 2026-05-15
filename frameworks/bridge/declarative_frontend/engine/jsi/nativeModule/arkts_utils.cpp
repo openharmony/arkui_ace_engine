@@ -19,22 +19,22 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsnapi_expo.h"
 
-#include "base/utils/utils.h"
 #include "base/i18n/localization.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "frameworks/base/image/pixel_map.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/core/common/card_scope.h"
+#include "frameworks/core/common/color_inverter.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
-#include "frameworks/core/common/color_inverter.h"
 
 using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
@@ -49,6 +49,9 @@ const char TOP_START_PROPERTY[] = "topStart";
 const char TOP_END_PROPERTY[] = "topEnd";
 const char BOTTOM_START_PROPERTY[] = "bottomStart";
 const char BOTTOM_END_PROPERTY[] = "bottomEnd";
+const char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+const char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+const char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
 
 std::string GetBundleNameFromContainer()
 {
@@ -3269,7 +3272,25 @@ bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 
 RefPtr<PixelMap> ArkTSUtils::GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj)
 {
-    return PixelMap::GetFromDrawable(UnwrapNapiValue(vm, obj));
+    auto jsObj = obj->ToObject(vm);
+    if (jsObj->IsUndefined()) {
+        return nullptr;
+    }
+    auto jsTypeName = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "typeName"));
+    if (!jsTypeName->IsString(vm)) {
+        return nullptr;
+    }
+    auto typeName = jsTypeName->ToString(vm)->ToString(vm);
+    if (typeName == DRAWABLE_DESCRIPTOR_NAME || typeName == ANIMATED_DRAWABLE_DESCRIPTOR_NAME ||
+        typeName == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+        auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(UnwrapNapiValue(vm, obj));
+        if (!drawableAddr) {
+            return nullptr;
+        }
+        return drawableAddr->GetPixelMap();
+    } else {
+        return PixelMap::GetFromDrawable(UnwrapNapiValue(vm, obj));
+    }
 }
 
 Rosen::BrightnessBlender* ArkTSUtils::CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj)

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_DRAWABLE_DESCRIPTOR_H
 
 #include "base/image/pixel_map.h"
+#include "core/drawable/drawable_descriptor_info.h"
 
 namespace OHOS::Ace {
 enum class DrawableType {
@@ -83,11 +84,24 @@ public:
 
     virtual void UnRegisterUpdateCallback(int32_t nodeId) {}
 
+    void SetDrawableDescriptorInfo(const RefPtr<DrawableDescriptorInfo>& info)
+    {
+        info_ = info;
+    }
+
+    void SetRawData(uint8_t* data, size_t len)
+    {
+        rawData_.data.reset(data);
+        rawData_.len = len;
+    }
+
 protected:
+    MediaData rawData_;
+    RefPtr<DrawableDescriptorInfo> info_;
     ImageSize imageSize_;
 
 private:
     virtual void CreatePixelMap() {}
 };
-}; // namespace OHOS::Ace
+};     // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_DRAWABLE_DESCRIPTOR_H

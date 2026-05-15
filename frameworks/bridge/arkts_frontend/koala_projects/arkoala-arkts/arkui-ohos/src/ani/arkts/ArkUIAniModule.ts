@@ -248,6 +248,8 @@ export class ArkUIAniModule {
     
     // for drawable
     native static _Drawable_CreatePixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void
+    native static _Drawable_CreatePixelMapDrawableByResource(value: PixelMapDrawableDescriptor, resourceObjectKPointer: KPointer): void
+    native static _Drawable_CreatePixelMapDrawableByString(value: PixelMapDrawableDescriptor, src: string): void
     native static _Drawable_CreateLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
         background?: image.PixelMap, mask?: image.PixelMap): void
     native static _Drawable_CreateAnimatedDrawable(value: AnimatedDrawableDescriptor,

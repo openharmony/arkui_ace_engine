@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -103,34 +103,14 @@ if (is_arkui_x) {
 
     defines = []
     if (current_os == "ohos") {
-      sources += [
-        "adapter/ohos/file_uri_utils_impl.cpp",
-        "adapter/ohos/image_data_impl.cpp",
-        "adapter/ohos/pixel_map_impl.cpp",
-        "adapter/ohos/resource_adapter_impl.cpp",
-        "adapter/ohos/task_pool_impl.cpp",
-      ]
       external_deps += [
-        "ability_base:zuri",
         "ability_runtime:app_context",
-        "app_file_service:fileuri_native",
-        "bundle_framework:appexecfwk_core_headers",
-        "common_event_service:cesfwk_innerkits",
-        "ffrt:libffrt",
         "image_framework:image",
         "image_framework:image_native",
         "resource_management:global_resmgr",
       ]
     } else {
       defines += [ "PREVIEW" ]
-
-      sources += [
-        "adapter/preview/file_uri_utils_preview.cpp",
-        "adapter/preview/image_data_preview.cpp",
-        "adapter/preview/pixel_map_preview.cpp",
-        "adapter/preview/resource_adapter_preview.cpp",
-        "adapter/preview/task_pool_preview.cpp",
-      ]
       if (use_mingw_win) {
         defines += [ "WINDOWS_PLATFORM" ]
         external_deps += [ "resource_management:win_resmgr" ]
