@@ -15,10 +15,13 @@
 
 #include "core/components_ng/pattern/lazy_column_layout/bridge/arkts_native_lazy_column_layout_bridge.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -26,11 +29,90 @@ namespace {
 constexpr int32_t NODE_ARG_INDEX = 0;
 constexpr int32_t VALUE_ARG_INDEX = 1;
 constexpr int32_t SCROLL_INDEX_PARAM_COUNT = 2;
+constexpr int32_t STICKY_STYLE_NONE = 0;
+constexpr int32_t STICKY_STYLE_BOTH = 3;
 constexpr Dimension DEFAULT_SPACE = 0.0_vp;
 
 bool IsStackNodeArg(EcmaVM* vm, const Local<JSValueRef>& value)
 {
     return vm && !value.IsEmpty() && value->IsBoolean() && value->ToBoolean(vm)->Value();
+}
+
+Local<JSValueRef> GetProperty(EcmaVM* vm, const Local<JSValueRef>& object, const char* key)
+{
+    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
+    CHECK_NULL_RETURN(key, panda::JSValueRef::Undefined(vm));
+    if (object.IsEmpty() || !object->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto objectRef = object->ToObject(vm);
+    if (objectRef.IsEmpty()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    return objectRef->Get(vm, panda::StringRef::NewFromUtf8(vm, key));
+}
+
+void CallJsFunction(EcmaVM* vm, const panda::CopyableGlobal<panda::FunctionRef>& func)
+{
+    CHECK_NULL_VOID(vm);
+    panda::LocalScope pandaScope(vm);
+    panda::TryCatch trycatch(vm);
+    func->Call(vm, func.ToLocal(), nullptr, 0);
+}
+
+RefPtr<UINode> BuildHeaderFooterNodeFromFunction(EcmaVM* vm, const Local<JSValueRef>& value)
+{
+    CHECK_NULL_RETURN(vm, nullptr);
+    if (value.IsEmpty() || !value->IsFunction(vm)) {
+        return nullptr;
+    }
+    panda::Local<panda::FunctionRef> func = value->ToObject(vm);
+    if (func.IsEmpty()) {
+        return nullptr;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, nullptr);
+    auto isBuilderNode = stack->IsBuilderNode();
+    auto isExportTexture = stack->IsExportTexture();
+    // Builder modifiers run outside the component creation stack. Use an isolated stack so edge builders
+    // cannot leak nodes into the current component tree.
+    ScopedViewStackProcessor builderViewStackProcessor;
+    stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, nullptr);
+    stack->SetIsBuilderNode(isBuilderNode);
+    stack->SetIsExportTexture(isExportTexture);
+    panda::CopyableGlobal<panda::FunctionRef> globalFunc(vm, func);
+    CallJsFunction(vm, globalFunc);
+    auto builtNode = stack->Finish();
+    if (!builtNode) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout header/footer builder produced no node");
+    }
+    return builtNode;
+}
+
+bool TryParseComponentContentNode(EcmaVM* vm, const Local<JSValueRef>& value, ArkUINodeHandle& contentNode)
+{
+    contentNode = nullptr;
+    CHECK_NULL_RETURN(vm, false);
+    if (value.IsEmpty() || value->IsUndefined() || value->IsNull() || !value->IsObject(vm)) {
+        return false;
+    }
+    auto builderNode = GetProperty(vm, value, "builderNode_");
+    if (builderNode.IsEmpty() || builderNode->IsUndefined() || builderNode->IsNull() || !builderNode->IsObject(vm)) {
+        return false;
+    }
+    auto nodePtrValue = GetProperty(vm, builderNode, "nodePtr_");
+    if (nodePtrValue.IsEmpty() || nodePtrValue->IsUndefined() || nodePtrValue->IsNull() ||
+        !nodePtrValue->IsNativePointer(vm)) {
+        return false;
+    }
+    auto nativePointer = nodePtrValue->ToNativePointer(vm);
+    if (nativePointer.IsEmpty()) {
+        return false;
+    }
+    // ComponentContent owns a BuilderNode internally; the native side only needs the built root node.
+    contentNode = nodePtr(nativePointer->Value());
+    return contentNode != nullptr;
 }
 
 void CallOnVisibleIndexesChange(EcmaVM* vm, panda::Local<panda::FunctionRef> func)
@@ -58,6 +140,12 @@ void LazyColumnLayoutBridge::RegisterLazyColumnLayoutAttributes(
         "setSpace",
         "resetAlignItems",
         "setAlignItems",
+        "setSticky",
+        "resetSticky",
+        "setHeader",
+        "resetHeader",
+        "setFooter",
+        "resetFooter",
         "resetOnVisibleIndexesChange",
         "setOnVisibleIndexesChange",
     };
@@ -67,6 +155,12 @@ void LazyColumnLayoutBridge::RegisterLazyColumnLayoutAttributes(
         panda::FunctionRef::New(vm, LazyColumnLayoutBridge::SetSpace),
         panda::FunctionRef::New(vm, LazyColumnLayoutBridge::ResetAlignItems),
         panda::FunctionRef::New(vm, LazyColumnLayoutBridge::SetAlignItems),
+        panda::FunctionRef::New(vm, LazyColumnLayoutBridge::SetSticky),
+        panda::FunctionRef::New(vm, LazyColumnLayoutBridge::ResetSticky),
+        panda::FunctionRef::New(vm, LazyColumnLayoutBridge::SetHeader),
+        panda::FunctionRef::New(vm, LazyColumnLayoutBridge::ResetHeader),
+        panda::FunctionRef::New(vm, LazyColumnLayoutBridge::SetFooter),
+        panda::FunctionRef::New(vm, LazyColumnLayoutBridge::ResetFooter),
         panda::FunctionRef::New(vm, LazyColumnLayoutBridge::ResetOnVisibleIndexesChange),
         panda::FunctionRef::New(vm, LazyColumnLayoutBridge::SetOnVisibleIndexesChange),
     };
@@ -162,6 +256,156 @@ ArkUINativeModuleValue LazyColumnLayoutBridge::ResetAlignItems(ArkUIRuntimeCallI
         auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
         GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->resetAlignItems(nativeNode);
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyColumnLayoutBridge::SetSticky(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    Local<JSValueRef> argSticky = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        auto stickyStyle = STICKY_STYLE_NONE;
+        if (!argSticky.IsEmpty() && !argSticky->IsUndefined() && !argSticky->IsNull() && argSticky->IsNumber()) {
+            stickyStyle = argSticky->Int32Value(vm);
+        }
+        if (stickyStyle < STICKY_STYLE_NONE || stickyStyle > STICKY_STYLE_BOTH) {
+            stickyStyle = STICKY_STYLE_NONE;
+        }
+        LazyColumnLayoutModel::SetSticky(static_cast<StickyStyle>(stickyStyle));
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    if (argSticky.IsEmpty() || argSticky->IsUndefined() || argSticky->IsNull() || !argSticky->IsNumber()) {
+        GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->resetSticky(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->setSticky(nativeNode, argSticky->Int32Value(vm));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyColumnLayoutBridge::ResetSticky(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        LazyColumnLayoutModel::SetSticky(static_cast<StickyStyle>(STICKY_STYLE_NONE));
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->resetSticky(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyColumnLayoutBridge::SetHeader(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    Local<JSValueRef> headerArg = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        if (!headerArg.IsEmpty() && headerArg->IsFunction(vm)) {
+            panda::Local<panda::FunctionRef> func = headerArg->ToObject(vm);
+            if (func.IsEmpty()) {
+                return panda::JSValueRef::Undefined(vm);
+            }
+            std::function<void()> headerAction = [vm, func = panda::CopyableGlobal(vm, func)]() {
+                CallJsFunction(vm, func);
+            };
+            LazyColumnLayoutModel::SetHeader(std::move(headerAction));
+        } else {
+            LazyColumnLayoutModel::RemoveHeader();
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    if (!headerArg.IsEmpty() && headerArg->IsFunction(vm)) {
+        auto headerNode = BuildHeaderFooterNodeFromFunction(vm, headerArg);
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        LazyColumnLayoutModel::SetHeader(frameNode, headerNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUINodeHandle headerNode = nullptr;
+    if (TryParseComponentContentNode(vm, headerArg, headerNode)) {
+        GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->setHeader(nativeNode, headerNode);
+    } else {
+        GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->resetHeader(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyColumnLayoutBridge::ResetHeader(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        LazyColumnLayoutModel::RemoveHeader();
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->resetHeader(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyColumnLayoutBridge::SetFooter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    Local<JSValueRef> footerArg = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        if (!footerArg.IsEmpty() && footerArg->IsFunction(vm)) {
+            panda::Local<panda::FunctionRef> func = footerArg->ToObject(vm);
+            if (func.IsEmpty()) {
+                return panda::JSValueRef::Undefined(vm);
+            }
+            std::function<void()> footerAction = [vm, func = panda::CopyableGlobal(vm, func)]() {
+                CallJsFunction(vm, func);
+            };
+            LazyColumnLayoutModel::SetFooter(std::move(footerAction));
+        } else {
+            LazyColumnLayoutModel::RemoveFooter();
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    if (!footerArg.IsEmpty() && footerArg->IsFunction(vm)) {
+        auto footerNode = BuildHeaderFooterNodeFromFunction(vm, footerArg);
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        LazyColumnLayoutModel::SetFooter(frameNode, footerNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUINodeHandle footerNode = nullptr;
+    if (TryParseComponentContentNode(vm, footerArg, footerNode)) {
+        GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->setFooter(nativeNode, footerNode);
+    } else {
+        GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->resetFooter(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyColumnLayoutBridge::ResetFooter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        LazyColumnLayoutModel::RemoveFooter();
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getLazyColumnLayoutModifier()->resetFooter(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -34,6 +34,21 @@ class ArkLazyVWaterFlowLayoutComponent extends ArkComponent {
       LazyVWaterFlowColumnsTemplateModifier, value);
     return this;
   }
+  sticky(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyVWaterFlowStickyModifier.identity,
+      LazyVWaterFlowStickyModifier, value);
+    return this;
+  }
+  header(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyVWaterFlowHeaderModifier.identity,
+      LazyVWaterFlowHeaderModifier, value);
+    return this;
+  }
+  footer(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyVWaterFlowFooterModifier.identity,
+      LazyVWaterFlowFooterModifier, value);
+    return this;
+  }
   onVisibleIndexesChange(callback) {
     modifierWithKey(this._modifiersWithKeys, LazyVWaterFlowOnVisibleIndexesChangeModifier.identity,
       LazyVWaterFlowOnVisibleIndexesChangeModifier, callback);
@@ -93,6 +108,48 @@ class LazyVWaterFlowRowsGapModifier extends ModifierWithKey {
 }
 LazyVWaterFlowRowsGapModifier.identity = Symbol('lazyVWaterFlowRowsGap');
 
+class LazyVWaterFlowStickyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isNumber(this.value)) {
+      getUINativeModule().lazyVWaterFlowLayout.resetSticky(node);
+    } else {
+      getUINativeModule().lazyVWaterFlowLayout.setSticky(node, this.value);
+    }
+  }
+}
+LazyVWaterFlowStickyModifier.identity = Symbol('lazyVWaterFlowSticky');
+
+class LazyVWaterFlowHeaderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVWaterFlowLayout.resetHeader(node);
+    } else {
+      getUINativeModule().lazyVWaterFlowLayout.setHeader(node, this.value);
+    }
+  }
+}
+LazyVWaterFlowHeaderModifier.identity = Symbol('lazyVWaterFlowHeader');
+
+class LazyVWaterFlowFooterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVWaterFlowLayout.resetFooter(node);
+    } else {
+      getUINativeModule().lazyVWaterFlowLayout.setFooter(node, this.value);
+    }
+  }
+}
+LazyVWaterFlowFooterModifier.identity = Symbol('lazyVWaterFlowFooter');
+
 class LazyVWaterFlowOnVisibleIndexesChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -126,6 +183,18 @@ class LazyVWaterFlowLayout extends JSContainerBase {
     } else {
       getUINativeModule().lazyVWaterFlowLayout.setColumnsTemplate(true, value);
     }
+    return this;
+  }
+  static sticky(value) {
+    getUINativeModule().lazyVWaterFlowLayout.setSticky(true, value);
+    return this;
+  }
+  static header(value) {
+    getUINativeModule().lazyVWaterFlowLayout.setHeader(true, value);
+    return this;
+  }
+  static footer(value) {
+    getUINativeModule().lazyVWaterFlowLayout.setFooter(true, value);
     return this;
   }
   static onVisibleIndexesChange(callback) {

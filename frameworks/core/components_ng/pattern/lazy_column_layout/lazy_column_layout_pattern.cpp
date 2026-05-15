@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -35,7 +36,19 @@ RefPtr<LayoutProperty> LazyColumnLayoutPattern::CreateLayoutProperty()
 
 RefPtr<LayoutAlgorithm> LazyColumnLayoutPattern::CreateLayoutAlgorithm()
 {
-    return MakeRefPtr<LazyColumnLayoutAlgorithm>(layoutInfo_);
+    auto algorithm = MakeRefPtr<LazyColumnLayoutAlgorithm>(layoutInfo_);
+    algorithm->SetHeader(GetHeaderNode());
+    algorithm->SetFooter(GetFooterNode());
+    return algorithm;
+}
+
+StickyStyle LazyColumnLayoutPattern::GetStickyStyle() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, StickyStyle::NONE);
+    auto layoutProperty = host->GetLayoutProperty<LazyColumnLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, StickyStyle::NONE);
+    return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
 }
 
 FocusPattern LazyColumnLayoutPattern::GetFocusPattern() const
@@ -46,6 +59,27 @@ FocusPattern LazyColumnLayoutPattern::GetFocusPattern() const
 ScopeFocusAlgorithm LazyColumnLayoutPattern::GetScopeFocusAlgorithm()
 {
     return ScopeFocusAlgorithm(ScopeFocusDirection::UNIVERSAL, false, true, ScopeType::OTHERS);
+}
+
+float LazyColumnLayoutPattern::GetHeaderMainSize() const
+{
+    return layoutInfo_ ? layoutInfo_->headerMainSize_ : 0.0f;
+}
+
+float LazyColumnLayoutPattern::GetFooterMainSize() const
+{
+    return layoutInfo_ ? layoutInfo_->footerMainSize_ : 0.0f;
+}
+
+void LazyColumnLayoutPattern::OnModifyDone()
+{
+    LazyLayoutPattern::OnModifyDone();
+    SyncHeaderFooter();
+}
+
+void LazyColumnLayoutPattern::BeforeCreateLayoutWrapper()
+{
+    SyncHeaderFooter(false);
 }
 
 AdjustOffset LazyColumnLayoutPattern::GetAdjustOffset() const
@@ -142,6 +176,121 @@ void LazyColumnLayoutPattern::ProcessIdleTask(int64_t deadline)
     layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     layoutInfo_->deadline_ = deadline;
     FrameNode::ProcessOffscreenNode(GetHost(), true);
+}
+
+void LazyColumnLayoutPattern::AddHeader(const RefPtr<UINode>& header)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!IsValidHeaderFooter(header, true)) {
+        return;
+    }
+    HeaderFooterUtils::ReplaceHeaderFooter(host, header_, header, 0);
+    SyncHeaderFooter();
+}
+
+void LazyColumnLayoutPattern::AddFooter(const RefPtr<UINode>& footer)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!IsValidHeaderFooter(footer, false)) {
+        return;
+    }
+    // Footer is appended on first mount; SyncHeaderFooter keeps it behind data nodes after LazyForEach updates.
+    HeaderFooterUtils::ReplaceHeaderFooter(host, footer_, footer);
+    SyncHeaderFooter();
+}
+
+bool LazyColumnLayoutPattern::IsValidHeaderFooter(const RefPtr<UINode>& edge, bool isHeader) const
+{
+    CHECK_NULL_RETURN(edge, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (edge == host) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout rejects itself as header / footer");
+        return false;
+    }
+    auto peerEdge = isHeader ? footer_.Upgrade() : header_.Upgrade();
+    if (peerEdge && peerEdge == edge) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout rejects duplicated header/footer edge");
+        return false;
+    }
+    auto currentEdge = isHeader ? header_.Upgrade() : footer_.Upgrade();
+    if (currentEdge == edge) {
+        return true;
+    }
+    auto parent = edge->GetParent();
+    if (parent && parent != host) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout rejects header / footer with another parent");
+        return false;
+    }
+    if (parent == host && currentEdge != edge) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout rejects existing child as header / footer");
+        return false;
+    }
+    if (!HeaderFooterUtils::GetHeaderFooterFrameNode(edge)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout rejects header / footer without frame content");
+        return false;
+    }
+    return true;
+}
+
+void LazyColumnLayoutPattern::RemoveHeader()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    HeaderFooterUtils::RemoveHeaderFooter(host, header_);
+}
+
+void LazyColumnLayoutPattern::RemoveFooter()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    HeaderFooterUtils::RemoveHeaderFooter(host, footer_);
+}
+
+RefPtr<FrameNode> LazyColumnLayoutPattern::GetHeaderNode() const
+{
+    return HeaderFooterUtils::GetHeaderFooterFrameNode(header_);
+}
+
+RefPtr<FrameNode> LazyColumnLayoutPattern::GetFooterNode() const
+{
+    return HeaderFooterUtils::GetHeaderFooterFrameNode(footer_);
+}
+
+void LazyColumnLayoutPattern::SyncHeaderFooter(bool markDirty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool needMeasure = false;
+
+    // LazyForEach may append or remove data nodes after header/footer are mounted, so normalize edge positions before
+    // every wrapper creation instead of relying only on the first mount order.
+    auto header = header_.Upgrade();
+    if (header) {
+        auto headerIndex = host->GetChildIndex(header);
+        if (headerIndex > 0) {
+            header->MovePosition(0);
+            needMeasure = true;
+        }
+        HeaderFooterUtils::UpdateEdgeAccessibility(header);
+    }
+
+    auto footer = footer_.Upgrade();
+    if (footer) {
+        auto footerIndex = host->GetChildIndex(footer);
+        auto lastIndex = static_cast<int32_t>(host->GetChildren().size()) - 1;
+        if (footerIndex >= 0 && footerIndex != lastIndex) {
+            footer->MovePosition(lastIndex);
+            needMeasure = true;
+        }
+        HeaderFooterUtils::UpdateEdgeAccessibility(footer);
+    }
+
+    if (needMeasure && markDirty) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void LazyColumnLayoutPattern::OnAttachToMainTree()

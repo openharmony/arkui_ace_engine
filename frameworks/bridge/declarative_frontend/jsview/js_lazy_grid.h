@@ -25,6 +25,9 @@ public:
     static void JsRowsGap(const JSCallbackInfo& info);
     static void JsColumnsGap(const JSCallbackInfo& info);
     static void JsColumnsTemplate(const std::string& value);
+    static void JsSticky(const JSCallbackInfo& info);
+    static void JsHeader(const JSCallbackInfo& info);
+    static void JsFooter(const JSCallbackInfo& info);
     static void JsOnVisibleIndexesChange(const JSCallbackInfo& info);
     static void Create();
 };

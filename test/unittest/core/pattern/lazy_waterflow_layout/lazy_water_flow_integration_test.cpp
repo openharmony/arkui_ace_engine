@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_property.h"
+#include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -115,6 +117,19 @@ RefPtr<LazyForEachNode> GetLazyForEachChild(const RefPtr<FrameNode>& host, int32
     return AceType::DynamicCast<LazyForEachNode>(host->GetChildAtIndex(childIdx));
 }
 
+void CreateFixedListItemGroup(float height)
+{
+    V2::ListItemGroupOptions groupOptions;
+    ListItemGroupModelNG groupModel;
+    groupModel.Create(groupOptions);
+    ListItemModelNG itemModel;
+    itemModel.Create();
+    ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+    ViewAbstract::SetHeight(CalcLength(height));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
 } // namespace
 
 /**
@@ -171,6 +186,49 @@ HWTEST_F(LazyVWaterFlowParentIntegrationTest, ListParentBottomFillSettles_001, T
     EXPECT_FLOAT_EQ(static_cast<float>(scrollablePattern_->GetTotalOffset()), bottomOffset);
     EXPECT_FLOAT_EQ(pattern_->layoutInfo_->adjustOffset_.start, 0.0f);
     EXPECT_FLOAT_EQ(pattern_->layoutInfo_->adjustOffset_.end, 0.0f);
+}
+
+/**
+ * @tc.name: ListParentFrontDeleteKeepsLazyChildAtGroupBoundary_001
+ * @tc.desc: In List { ListItemGroup; LazyVWaterFlowLayout { LazyForEach } }, deleting the lazy child's first
+ *           visible item must not move the LazyVWaterFlow host down. The remaining items are already relaid
+ *           out at y=0 in the child's local coordinates; a negative adjustOffset.start would make List apply
+ *           an opposite host shift and leave a one-item gap below the group.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowParentIntegrationTest, ListParentFrontDeleteKeepsLazyChildAtGroupBoundary_001, TestSize.Level1)
+{
+    CreateList();
+    CreateFixedListItemGroup(LAZY_WATER_FLOW_ITEM_HEIGHT);
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    auto builder = AceType::MakeRefPtr<IntegrationMockLazy>(INTEGRATION_ITEM_COUNT);
+    CreateLazyForEach(builder, GetElmtId());
+    CreateDone();
+
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->layoutInfo_, nullptr);
+    ASSERT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    auto firstPosBefore = pattern_->layoutInfo_->GetPos(0);
+    ASSERT_NE(firstPosBefore, nullptr);
+    EXPECT_NEAR(firstPosBefore->startPos, 0.0f, 0.01f);
+    const float hostYBefore = frameNode_->GetGeometryNode()->GetFrameOffset().GetY();
+    EXPECT_NEAR(hostYBefore, LAZY_WATER_FLOW_ITEM_HEIGHT, 0.01f);
+
+    auto lazyForEachNode = GetLazyForEachChild(frameNode_, 0);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    builder->Erase(0);
+    lazyForEachNode->OnDataDeleted(0);
+    FlushUITasks();
+
+    const float hostYAfter = frameNode_->GetGeometryNode()->GetFrameOffset().GetY();
+    EXPECT_NEAR(hostYAfter, hostYBefore, 0.01f);
+    ASSERT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    auto firstPosAfter = pattern_->layoutInfo_->GetPos(0);
+    ASSERT_NE(firstPosAfter, nullptr);
+    EXPECT_NEAR(firstPosAfter->startPos, 0.0f, 0.01f);
 }
 
 /**

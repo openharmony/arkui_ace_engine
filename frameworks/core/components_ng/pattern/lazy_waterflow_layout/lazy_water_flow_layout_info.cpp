@@ -322,7 +322,7 @@ float LazyWaterFlowLayoutInfo::GetAverageItemHeight() const
 float LazyWaterFlowLayoutInfo::ResolveLaneFrontPos() const
 {
     if (lanes_.empty()) {
-        return 0.0f;
+        return headerMainSize_;
     }
     float frontPos = std::numeric_limits<float>::max();
     for (const auto& lane : lanes_) {
@@ -357,7 +357,7 @@ void LazyWaterFlowLayoutInfo::EstimateTotalOffset(int32_t prevStart, int32_t sta
     const float average = GetAverageItemHeight();
     const float frontPos = ResolveLaneFrontPos();
     const float prevOffset = totalOffset_;
-    float newOffset = frontPos;
+    float newOffset = frontPos - headerMainSize_;
     if (startIdx > 0 && Positive(average)) {
         newOffset -= EstimateSectionHeight(average, 0, startIdx - 1, mainGap);
     }
@@ -389,14 +389,14 @@ void LazyWaterFlowLayoutInfo::FinalizeAfterDataChangeReset(int32_t prevStart, in
 float LazyWaterFlowLayoutInfo::EstimateTotalHeight(float mainGap) const
 {
     if (totalItemCount_ <= 0) {
-        return 0.0f;
+        return headerMainSize_;
     }
     // Lanes are in self-local content coords (EstimateTotalOffset already materialized any prefix delta), so
     // windowHeight = max(lane.endPos) is content-coord directly.
     // Lanes are in self-local content coords (EstimateTotalOffset already absorbed any prefix delta).
     const int32_t measuredEnd = EndIndex();
     const int32_t measuredStart = StartIndex();
-    float windowEndPos = 0.0f;
+    float windowEndPos = headerMainSize_;
     for (const auto& lane : lanes_) {
         windowEndPos = std::max(windowEndPos, lane.endPos);
     }
@@ -407,7 +407,8 @@ float LazyWaterFlowLayoutInfo::EstimateTotalHeight(float mainGap) const
             return std::max(windowHeight, maxHeight_);
         }
         const auto laneCount = static_cast<float>(std::max(lanes_.size(), static_cast<size_t>(1)));
-        const float height = static_cast<float>(totalItemCount_) * (average + mainGap) / laneCount;
+        const float height = headerMainSize_ +
+            static_cast<float>(totalItemCount_) * (average + mainGap) / laneCount;
         return std::max({ windowHeight, maxHeight_, height });
     }
     if (measuredEnd >= totalItemCount_ - 1) {
@@ -785,7 +786,7 @@ void LazyWaterFlowLayoutInfo::ResetWithLaneOffset(std::optional<float> laneBaseP
             }
         }
         if (!basePos.has_value()) {
-            basePos = 0.0f;
+            basePos = headerMainSize_;
         }
     }
     for (auto& lane : lanes_) {
@@ -822,7 +823,7 @@ void LazyWaterFlowLayoutInfo::UpdateLanesIndex(int32_t /*updateIdx*/)
 void LazyWaterFlowLayoutInfo::SyncItemPositions(float mainGap)
 {
     posMap_.clear();
-    laneEndPos_.assign(lanes_.size(), 0.0f);
+    laneEndPos_.assign(lanes_.size(), headerMainSize_);
     for (size_t laneIdx = 0; laneIdx < lanes_.size(); ++laneIdx) {
         auto& lane = lanes_[laneIdx];
         NormalizeLaneStart(lane);
@@ -909,6 +910,8 @@ void LazyWaterFlowLayoutInfo::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("itemStartIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("itemEndIndex:" + std::to_string(endIndex_));
     DumpLog::GetInstance().AddDesc("itemTotalCount:" + std::to_string(totalItemCount_));
+    DumpLog::GetInstance().AddDesc("headerMainSize:" + std::to_string(headerMainSize_));
+    DumpLog::GetInstance().AddDesc("footerMainSize:" + std::to_string(footerMainSize_));
     DumpLog::GetInstance().AddDesc("estimatedItemSize:" + std::to_string(estimateItemSize_));
     DumpLog::GetInstance().AddDesc("totalMainSize:" + std::to_string(totalMainSize_));
     DumpLog::GetInstance().AddDesc("layoutedStartIndex:" + std::to_string(layoutedStartIndex_));
@@ -923,6 +926,8 @@ void LazyWaterFlowLayoutInfo::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("itemStartIndex", startIndex_);
     json->Put("itemEndIndex", endIndex_);
     json->Put("itemTotalCount", totalItemCount_);
+    json->Put("headerMainSize", headerMainSize_);
+    json->Put("footerMainSize", footerMainSize_);
     json->Put("estimatedItemSize", estimateItemSize_);
     json->Put("totalMainSize", totalMainSize_);
     json->Put("layoutedStartIndex", layoutedStartIndex_);

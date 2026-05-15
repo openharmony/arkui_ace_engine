@@ -18,6 +18,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -71,5 +72,60 @@ void LazyVGridLayoutModelStatic::SetColumnsTemplate(FrameNode* frameNode, const 
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnsTemplate, value, frameNode);
+}
+
+void LazyGridLayoutModelStatic::SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle)
+{
+    if (stickyStyle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            LazyGridLayoutProperty, StickyStyle, static_cast<StickyStyle>(stickyStyle.value()), frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty<LazyGridLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            LazyGridLayoutProperty, StickyStyle, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void LazyGridLayoutModelStatic::SetHeader(FrameNode* frameNode, const RefPtr<UINode>& headerNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyGridLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!headerNode) {
+        pattern->RemoveHeader();
+        return;
+    }
+    pattern->AddHeader(headerNode);
+}
+
+void LazyGridLayoutModelStatic::SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footerNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyGridLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!footerNode) {
+        pattern->RemoveFooter();
+        return;
+    }
+    pattern->AddFooter(footerNode);
+}
+
+void LazyGridLayoutModelStatic::RemoveHeader(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyGridLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveHeader();
+}
+
+void LazyGridLayoutModelStatic::RemoveFooter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyGridLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveFooter();
 }
 } // namespace OHOS::Ace::NG

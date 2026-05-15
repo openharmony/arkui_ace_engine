@@ -64,7 +64,7 @@ public:
     static void ShiftMeasureWindow(
         float delta, float& viewStart, float& viewEnd, float& cacheStartPos, float& cacheEndPos);
 
-    static bool IsBusinessItemVisible(int32_t businessIndex, int32_t layoutedStartIndex, int32_t layoutedEndIndex);
+    static bool IsItemVisible(int32_t itemIndex, int32_t layoutedStartIndex, int32_t layoutedEndIndex);
 
     // "auto" -> "1fr" so the downstream parser understands.
     static std::string PreParseWaterFlowTemplate(const std::string& args);

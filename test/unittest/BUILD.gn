@@ -1128,6 +1128,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_layout/header_footer_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_layout/lazy_layout_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.cpp",
