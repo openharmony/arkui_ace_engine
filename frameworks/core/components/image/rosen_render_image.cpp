@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components/image/image_component.h"
 #include "core/components/image/rosen_render_image.h"
 
 #ifndef USE_ROSEN_DRAWING

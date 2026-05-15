@@ -22,6 +22,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/image/image_component.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"

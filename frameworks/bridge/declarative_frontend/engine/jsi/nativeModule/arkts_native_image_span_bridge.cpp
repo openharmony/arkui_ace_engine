@@ -20,6 +20,7 @@
 #include "base/image/pixel_map.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components/image/image_component.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 
