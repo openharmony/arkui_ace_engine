@@ -1694,4 +1694,70 @@ HWTEST_F(VideoTestNg, VideoModelNGUpdateControllerBarTest004, TestSize.Level0)
     ASSERT_TRUE(fullScreenLayoutProperty);
     EXPECT_FALSE(fullScreenLayoutProperty->GetControlsValue(false));
 }
+
+/**
+ * @tc.name: VideoPatternCreateControlBarTest001
+ * @tc.desc: Test VideoPattern::CreateControlBar() when IsFullScreen returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternCreateControlBarTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and enter full screen mode
+     * @tc.expected: step1. Video created successfully and IsFullScreen is true
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->fullScreenNodeId_ = VIDEO_NODE_ID_1;
+    EXPECT_TRUE(pattern->IsFullScreen());
+
+    /**
+     * @tc.steps: step2. Call CreateControlBar() when IsFullScreen is true
+     * @tc.expected: step2. ControlBar created successfully with padding.bottom set to LIFT_HEIGHT
+     */
+    auto controlId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto controlBar = pattern->CreateControlBar(controlId);
+    ASSERT_NE(controlBar, nullptr);
+    auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(controlBarLayoutProperty, nullptr);
+    auto& padding = controlBarLayoutProperty->GetPaddingProperty();
+    ASSERT_TRUE(padding);
+    auto bottomPadding = padding->bottom;
+    ASSERT_TRUE(bottomPadding.has_value());
+}
+
+/**
+ * @tc.name: VideoPatternCreateControlBarTest002
+ * @tc.desc: Test VideoPattern::CreateControlBar() when IsFullScreen returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternCreateControlBarTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video without entering full screen mode
+     * @tc.expected: step1. Video created successfully and IsFullScreen is false
+     */
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_FALSE(pattern->IsFullScreen());
+
+    /**
+     * @tc.steps: step2. Call CreateControlBar() when IsFullScreen is false
+     * @tc.expected: step2. ControlBar created successfully without padding.bottom
+     */
+    auto controlId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto controlBar = pattern->CreateControlBar(controlId);
+    ASSERT_NE(controlBar, nullptr);
+    auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(controlBarLayoutProperty, nullptr);
+    auto& padding = controlBarLayoutProperty->GetPaddingProperty();
+    if (padding) {
+        auto bottomPadding = padding->bottom;
+        EXPECT_FALSE(bottomPadding.has_value());
+    }
+}
 } // namespace OHOS::Ace::NG
