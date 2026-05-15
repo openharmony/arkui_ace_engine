@@ -49,12 +49,12 @@ struct ArkUIDrawableDescriptor {
     void (*setPixelMapList)(void* object, void* pixelMapVec);
     void (*setAnimatedTotalDuration)(void* object, int32_t duration);
     void (*setAnimatedIterations)(void* object, int32_t iterations);
-    void (*setAnimatedPath)(void* object, const char* path);
-    void (*setAnimatedResource)(void* object, void* resourceObject);
+    void (*setDrawablePath)(void* object, const char* path);
+    void (*setDrawableResource)(void* object, void* resourceObject);
     void (*setAnimatedAutoPlay)(void* object, bool autoPlay);
     void (*setAnimatedDurations)(void* object, const void* durationsVec);
-    void (*loadSyncAnimated)(void* object, int32_t* width, int32_t* height, int32_t* errorCode);
-    void (*loadAsyncAnimated)(void* object, const ArkUIDrawableAsync& asyncCtx);
+    void (*loadSync)(void* object, int32_t* width, int32_t* height, int32_t* errorCode);
+    void (*loadAsync)(void* object, const ArkUIDrawableAsync& asyncCtx);
     void* (*getAnimatedController)(void* object, const char* id);
     void (*startAnimated)(void* object);
     void (*stopAnimated)(void* object);

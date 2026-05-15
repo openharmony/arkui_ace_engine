@@ -157,6 +157,11 @@ public:
     const Offset& GetGlobalLocation() const;
     AxisEvent ConvertToAxisEvent() const;
     const std::shared_ptr<const MMI::PointerEvent>& GetPointerEvent() const;
+    size_t GetSize() const
+    {
+        static constexpr size_t AXIS_INFO_SIZE = 1880;
+        return AXIS_INFO_SIZE;
+    }
 
 private:
     AxisAction action_ = AxisAction::NONE;

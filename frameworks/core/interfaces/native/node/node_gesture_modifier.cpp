@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_drag_modifier.h"

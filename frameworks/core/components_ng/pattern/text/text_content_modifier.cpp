@@ -1634,7 +1634,7 @@ void TextContentModifier::AddDefaultShadow()
         auto frameNode = textPattern->GetHost();
         ACE_UINODE_TRACE(frameNode);
     }
-    Shadow emptyShadow;
+    Shadow emptyShadow(0.0);
     auto blurRadius = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetBlurRadius());
     auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
     auto offsetY = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetY());

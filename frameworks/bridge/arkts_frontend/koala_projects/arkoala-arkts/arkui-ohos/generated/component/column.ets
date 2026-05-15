@@ -307,6 +307,21 @@ export function ColumnImpl(
     })
 }
 
+@memo
+export function Column(
+    @memo @memo_skip
+    style: ((attributes: ColumnAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkColumnComponent>((): ArkColumnComponent => {
+        return new ArkColumnComponent()
+    })
+    NodeAttach<ArkColumnPeer>((): ArkColumnPeer => ArkColumnPeer.create(receiver), (_: ArkColumnPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ColumnOptions_serializer {
     public static write(buffer: SerializerBase, value: ColumnOptions): void {
         let valueSerializer: SerializerBase = buffer

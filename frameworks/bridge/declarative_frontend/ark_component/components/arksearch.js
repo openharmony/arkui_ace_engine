@@ -1089,6 +1089,46 @@ function loadComponent() {
     }
     SearchSelectedDragPreviewStyleModifier.identity = Symbol('searchSelectedDragPreviewStyle');
 
+    class SearchStrokeJoinStyleModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().search.resetStrokeJoinStyle(node);
+        }
+        else {
+          getUINativeModule().search.setStrokeJoinStyle(node, this.value);
+        }
+      }
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    SearchStrokeJoinStyleModifier.identity = Symbol('searchStrokeJoinStyle');
+    
+    class SearchShaderStyleModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().search.resetShaderStyle(node, this.value);
+        } else {
+          if (this.value.options) {
+            getUINativeModule().search.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+              this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+          } else {
+            getUINativeModule().search.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+              this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+          }
+        }
+      }
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    SearchShaderStyleModifier.identity = Symbol('searchShaderStyle');
     class ArkSearchComponent extends globalThis.__ArkComponent__ {
       constructor(nativePtr, classType) {
         super(nativePtr, classType);
@@ -1421,6 +1461,15 @@ function loadComponent() {
           SearchSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
         return this;
       }
+      strokeJoinStyle(value) {
+        modifierWithKey(this._modifiersWithKeys, SearchStrokeJoinStyleModifier.identity,
+          SearchStrokeJoinStyleModifier, value);
+        return this;
+      }
+      shaderStyle(value) {
+        modifierWithKey(this._modifiersWithKeys, SearchShaderStyleModifier.identity, SearchShaderStyleModifier, value);
+        return this;
+      }
     }
     loadComponent.componentObj = { 'component': ArkSearchComponent };
   }
@@ -1600,6 +1649,19 @@ class JSSearch extends JSViewAbstract {
     } else {
       getUINativeModule().search.setSelectedDragPreviewStyle(true, null);
     }
+  }
+  static strokeJoinStyle(value) {
+    getUINativeModule().search.setStrokeJoinStyle(true, value);
+  }
+  static shaderStyle(value) {
+    if (value.options) {
+      getUINativeModule().search.setShaderStyle(true, value.options.center, value.options.radius, value.options.angle,
+        value.options.direction, value.options.repeating, value.options.colors, value.options.color);
+    } else {
+      getUINativeModule().search.setShaderStyle(true, value.center, value.radius, value.angle,
+        value.direction, value.repeating, value.colors, value.color);
+    }
+    return this;
   }
   static decoration(value) {
     if (value) {

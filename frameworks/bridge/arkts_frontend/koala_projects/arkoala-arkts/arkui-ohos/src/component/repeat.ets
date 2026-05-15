@@ -106,3 +106,15 @@ export function RepeatImpl<T>(
     style?.(receiver)
     RepeatImplForOptions<T>(style, receiver.arr);
 }
+
+/** @memo */
+export function Repeat<T>(
+    /** @memo */
+    style: ((attributes: RepeatAttribute<T>) => void) | undefined,
+): void {
+    const receiver = remember(() => {
+        return new ArkRepeatComponent<T>()
+    })
+    style?.(receiver)
+    RepeatImplForOptions<T>(style, receiver.arr);
+}

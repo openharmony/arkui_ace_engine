@@ -16,12 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_ALGORITHM_H
 
-#include <string>
-#include <utility>
-
 #include "frameworks/core/components_ng/layout/box_layout_algorithm.h"
 #include "frameworks/core/components_ng/layout/layout_wrapper.h"
-#include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
 
 namespace OHOS::Ace::NG {
 

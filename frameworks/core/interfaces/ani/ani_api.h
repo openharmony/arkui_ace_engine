@@ -82,6 +82,8 @@ struct Array_ResourceColor;
 struct Ark_ResourceColor;
 typedef struct webview_WebviewControllerPeer {
     std::function<int32_t()> getWebIdFunc = nullptr;
+    std::function<bool()> getWebDebuggingAccessFunc = nullptr;
+    std::function<int32_t()> getWebDebuggingPortFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
     std::function<long()> getNativePtrFunc = nullptr;
     std::function<void()> releaseRefFunc = nullptr;
@@ -561,6 +563,7 @@ struct ArkUIAniCommonModifier {
     ArkUI_Int32 (*getCurrentInstanceId)();
     ArkUI_Int32 (*getFocusedInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
+    ani_long (*builderProxyNodeMockConstruct)(ArkUI_Int32 id);
     ani_ref (*getSharedLocalStorage)();
     void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
     void (*setCustomCallback)(ani_long ptr, void* fnMeasure, void* fnLayout);

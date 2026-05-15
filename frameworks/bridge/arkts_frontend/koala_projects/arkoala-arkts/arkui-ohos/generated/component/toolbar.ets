@@ -136,6 +136,21 @@ export function ToolBarItemImpl(
     })
 }
 
+@memo
+export function ToolBarItem(
+    @memo @memo_skip
+    style: ((attributes: ToolBarItemAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkToolBarItemComponent>((): ArkToolBarItemComponent => {
+        return new ArkToolBarItemComponent()
+    })
+    NodeAttach<ArkToolBarItemPeer>((): ArkToolBarItemPeer => ArkToolBarItemPeer.create(receiver), (_: ArkToolBarItemPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ToolBarItemOptions_serializer {
     public static write(buffer: SerializerBase, value: ToolBarItemOptions): void {
         let valueSerializer: SerializerBase = buffer

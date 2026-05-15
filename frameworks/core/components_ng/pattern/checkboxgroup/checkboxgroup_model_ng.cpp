@@ -72,11 +72,13 @@ void CheckBoxGroupModelNG::SetCheckMarkColor(const Color& color)
 
 void CheckBoxGroupModelNG::SetCheckMarkSize(const Dimension& size)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(size, LpxAttribute::LPX_MARK_SIZE);
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, size);
 }
 
 void CheckBoxGroupModelNG::SetCheckMarkWidth(const Dimension& width)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(width, LpxAttribute::LPX_MARK_STROKE_WIDTH);
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, width);
 }
 
@@ -162,11 +164,13 @@ void CheckBoxGroupModelNG::SetCheckMarkColor(FrameNode* frameNode, const Color& 
 
 void CheckBoxGroupModelNG::SetCheckMarkSize(FrameNode* frameNode, const Dimension& size)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(size, LpxAttribute::LPX_MARK_SIZE, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, size, frameNode);
 }
 
 void CheckBoxGroupModelNG::SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(width, LpxAttribute::LPX_MARK_STROKE_WIDTH, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, width, frameNode);
 }
 

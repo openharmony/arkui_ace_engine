@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,17 +17,23 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_PIXEL_MAP_DRAWABLE_DESCRIPTOR_H
 
 #include <memory>
+#include <mutex>
 
 #include "core/drawable/drawable_descriptor.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT PixelMapDrawableDescriptor : public DrawableDescriptor {
+    DECLARE_ACE_TYPE(PixelMapDrawableDescriptor, DrawableDescriptor);
 public:
     PixelMapDrawableDescriptor() = default;
     explicit PixelMapDrawableDescriptor(const RefPtr<PixelMap>& pixelmap) : pixelmap_(pixelmap) {}
-    ~PixelMapDrawableDescriptor() = default;
+    ~PixelMapDrawableDescriptor() override = default;
 
     RefPtr<PixelMap> GetPixelMap() override;
+
+    DrawableDescriptorLoadResult LoadSync() override;
+
+    void LoadAsync(const LoadCallback&& callback) override;
 
     void SetPixelMap(const RefPtr<PixelMap>& pixelmap)
     {
@@ -39,17 +45,11 @@ public:
         return DrawableType::PIXELMAP;
     }
 
-    void SetRawData(uint8_t* data, size_t len)
-    {
-        rawData_.data.reset(data);
-        rawData_.len = len;
-    }
-
 private:
     void CreatePixelMap() override;
 
-    MediaData rawData_;
     RefPtr<PixelMap> pixelmap_;
+    mutable std::mutex loadMutx_;
 };
 }; // namespace OHOS::Ace
 

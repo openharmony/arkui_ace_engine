@@ -23,6 +23,10 @@
 #include <dlfcn.h>
 #endif
 
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+#include "application_context.h"
+#endif
+
 namespace OHOS::Ace {
 namespace {
 #if defined(WINDOWS_PLATFORM)
@@ -34,40 +38,10 @@ constexpr char LIBACE_MODULE[] = "libace_compatible.so";
 #else
 constexpr char LIBACE_MODULE[] = "libace_compatible.z.so";
 #endif
-constexpr char CREATE_DRAWABLE[] = "OHOS_ACE_CreateDrawableDescriptorByType";
-constexpr char GET_PIXELMAP[] = "OHOS_ACE_DrawableDescriptor_GetPixelMap";
 constexpr char PARSE_RESOURCE_OBJECT[] = "OHOS_ACE_ParseResourceObject";
-constexpr char ANIMATED_GET_CONTROLLER[] = "OHOS_ACE_AnimatedDrawableDescriptor_GetAnimationController";
-constexpr char ANIMATED_SET_PIXELMAP_LIST[] = "OHOS_ACE_AnimatedDrawableDescriptor_SetPixelMapList";
-constexpr char ANIMATED_SET_PATH[] = "OHOS_ACE_AnimatedDrawableDescriptor_SetPath";
-constexpr char ANIMATED_LOAD_SYNC[] = "OHOS_ACE_AnimatedDrawableDescriptorLoadSync";
-constexpr char ANIMATED_SET_RESORUCE[] = "OHOS_ACE_AnimatedDrawableDescriptor_SetResource";
-constexpr char ANIMATED_SET_TOTAL_DRURATION[] = "OHOS_ACE_AnimatedDrawableDescriptor_SetTotalDuration";
-constexpr char ANIMATED_SET_DURATIONS[] = "OHOS_ACE_AnimatedDrawableDescriptor_SetDurations";
-constexpr char ANIMATED_SET_ITERATIONS[] = "OHOS_ACE_AnimatedDrawableDescriptor_SetIterations";
-constexpr char ANIMATED_SET_AUTOPLAY[] = "OHOS_ACE_AnimatedDrawableDescriptor_SetAutoPlay";
-constexpr char ANIMATED_START[] = "OHOS_ACE_AnimationController_Start";
-constexpr char ANIMATED_PAUSE[] = "OHOS_ACE_AnimationController_Pause";
-constexpr char ANIMATED_STOP[] = "OHOS_ACE_AnimationController_Stop";
-constexpr char ANIMATED_RESUME[] = "OHOS_ACE_AnimationController_Resume";
-constexpr char ANIMATED_GET_STATUS[] = "OHOS_ACE_AnimationController_GetStatus";
-constexpr char INCREASE_REFCOUNT_DRAWABLE[] = "OHOS_ACE_IncreaseRefDrawableDescriptor";
-constexpr char DECREASE_REFCOUNT_DRAWABLE[] = "OHOS_ACE_DecreaseRefDrawableDescriptor";
 
-using CreateDrawableFunc = void* (*)(uint32_t type);
-using GetControllerFunc = void* (*)(void* object, const char*);
 using ParseObjectFunc = void* (*)(void* object);
-using GetStatusFunc = int32_t (*)(void* object);
-using GetPixelMapFunc = void (*)(void* object, std::shared_ptr<Media::PixelMap>& pixelmap);
-using SetPixelMapListFunc = void (*)(void* object, std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps);
-using SetPathFunc = void (*)(void* object, const char* path);
-using SetResourceFunc = void (*)(void* object, void* resource);
-using SetTotalDurationFunc = void (*)(void* object, int32_t duration);
-using SetIterationsFunc = void (*)(void* object, int32_t iteration);
-using SetDurationsFunc = void (*)(void* object, const std::vector<int32_t>& durations);
-using SetAutoPlayFunc = void (*)(void* object, bool autoPlay);
-using ObjectFunc = void (*)(void* object);
-using LoadSyncFunc = void (*)(void* object, int32_t& width, int32_t& height, int32_t& errorCode);
+using GetArkUIDrawableDescriptorFunc = const ArkUIDrawableDescriptor* (*)();
 
 class LibraryHandle {
 public:
@@ -139,136 +113,68 @@ FuncType GetAceFunction(const char* funcName)
 
 } // namespace
 
-void* CreateDrawableC(uint32_t type)
-{
-    auto entry = GetAceFunction<CreateDrawableFunc>(CREATE_DRAWABLE);
-    return entry ? entry(type) : nullptr;
-}
-
-void GetPixelMapC(void* object, std::shared_ptr<Media::PixelMap>& pixelmap)
-{
-    if (auto entry = GetAceFunction<GetPixelMapFunc>(GET_PIXELMAP)) {
-        entry(object, pixelmap);
-    }
-}
-
 void* ParseResourceObject(void* value)
 {
     auto entry = GetAceFunction<ParseObjectFunc>(PARSE_RESOURCE_OBJECT);
     return entry ? entry(value) : nullptr;
 }
 
-int32_t AnimatedGetStatusC(void* object)
+std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager()
 {
-    if (auto entry = GetAceFunction<GetStatusFunc>(ANIMATED_GET_STATUS)) {
-        return entry(object);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    std::shared_ptr<AbilityRuntime::Platform::ApplicationContext> applicationContext =
+        AbilityRuntime::Platform::ApplicationContext::GetInstance();
+    if (!applicationContext) {
+        HILOGE("Failed to get applicationContext!");
+        return nullptr;
     }
-    return -1;
+    auto resMgr = applicationContext->GetResourceManager();
+    if (!resMgr) {
+        HILOGE("Failed to get resource manager!");
+    }
+    return resMgr;
+#else
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    return resMgr;
+#endif
 }
 
-void* AnimatedGetController(void* object, const char* id)
+const ArkUIDrawableDescriptor* GetArkUIDrawableModifier()
 {
-    if (auto entry = GetAceFunction<GetControllerFunc>(ANIMATED_GET_CONTROLLER)) {
-        return entry(object, id);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    return GetArkUIDrawableDescriptor();
+#else
+#ifdef WINDOWS_PLATFORM
+    static HMODULE handle = nullptr;
+#else
+    static void* handle = nullptr;
+#endif
+    static void* drawable = nullptr;
+    static bool initialized = false;
+    if (!initialized) {
+#ifdef WINDOWS_PLATFORM
+        handle = LoadLibrary(LIBACE_MODULE);
+        if (handle != nullptr) {
+            drawable = (void*)GetProcAddress(handle, DRAWABLE_FUNC_NAME);
+            initialized = true;
+        }
+#else
+        handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+        if (handle != nullptr) {
+            drawable = dlsym(handle, DRAWABLE_FUNC_NAME);
+            initialized = true;
+        }
+#endif
     }
-    return nullptr;
-}
-
-void AnimatedLoadSync(void* object, int32_t& width, int32_t& height, int32_t& errorCode)
-{
-    if (auto entry = GetAceFunction<LoadSyncFunc>(ANIMATED_LOAD_SYNC)) {
-        entry(object, width, height, errorCode);
+    if (handle == nullptr) {
+        return nullptr;
     }
-}
-
-void AnimatedSetPixelMapListC(void* object, std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps)
-{
-    if (auto entry = GetAceFunction<SetPixelMapListFunc>(ANIMATED_SET_PIXELMAP_LIST)) {
-        entry(object, pixelMaps);
+    auto entry = reinterpret_cast<GetArkUIDrawableDescriptorFunc>(drawable);
+    if (entry == nullptr) {
+        return nullptr;
     }
-}
-
-void AnimatedSetPath(void* object, const char* path)
-{
-    if (auto entry = GetAceFunction<SetPathFunc>(ANIMATED_SET_PATH)) {
-        entry(object, path);
-    }
-}
-
-void AnimatedSetResource(void* object, void* resource)
-{
-    if (auto entry = GetAceFunction<SetResourceFunc>(ANIMATED_SET_RESORUCE)) {
-        entry(object, resource);
-    }
-}
-
-void AnimatedSetTotalDurationC(void* object, int32_t duration)
-{
-    if (auto entry = GetAceFunction<SetTotalDurationFunc>(ANIMATED_SET_TOTAL_DRURATION)) {
-        entry(object, duration);
-    }
-}
-
-void AnimatedSetDurationsC(void* object, const std::vector<int32_t>& durations)
-{
-    if (auto entry = GetAceFunction<SetDurationsFunc>(ANIMATED_SET_DURATIONS)) {
-        entry(object, durations);
-    }
-}
-
-void AnimatedSetIterationsC(void* object, int32_t iteration)
-{
-    if (auto entry = GetAceFunction<SetIterationsFunc>(ANIMATED_SET_ITERATIONS)) {
-        entry(object, iteration);
-    }
-}
-
-void AnimatedSetAutoPlayC(void* object, bool autoPlay)
-{
-    if (auto entry = GetAceFunction<SetAutoPlayFunc>(ANIMATED_SET_AUTOPLAY)) {
-        entry(object, autoPlay);
-    }
-}
-
-void AnimatedStartC(void* object)
-{
-    if (auto entry = GetAceFunction<ObjectFunc>(ANIMATED_START)) {
-        entry(object);
-    }
-}
-
-void AnimatedStopC(void* object)
-{
-    if (auto entry = GetAceFunction<ObjectFunc>(ANIMATED_STOP)) {
-        entry(object);
-    }
-}
-
-void AnimatedPauseC(void* object)
-{
-    if (auto entry = GetAceFunction<ObjectFunc>(ANIMATED_PAUSE)) {
-        entry(object);
-    }
-}
-
-void AnimatedResumeC(void* object)
-{
-    if (auto entry = GetAceFunction<ObjectFunc>(ANIMATED_RESUME)) {
-        entry(object);
-    }
-}
-
-void IncreaseRefCountDrawableC(void* object)
-{
-    if (auto entry = GetAceFunction<ObjectFunc>(INCREASE_REFCOUNT_DRAWABLE)) {
-        entry(object);
-    }
-}
-
-void DecreaseRefCountDrawableC(void* object)
-{
-    if (auto entry = GetAceFunction<ObjectFunc>(DECREASE_REFCOUNT_DRAWABLE)) {
-        entry(object);
-    }
+    const auto* result = entry();
+    return result;
+#endif
 }
 } // namespace OHOS::Ace

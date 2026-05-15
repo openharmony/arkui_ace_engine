@@ -2069,7 +2069,8 @@ bool AceContainer::ClosePopupUIExtension(uint32_t autoFillSessionId)
     return true;
 }
 
-HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
+HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
 {
     HintToTypeWrap hintToTypeWrap;
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
@@ -2080,7 +2081,13 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     std::vector<int> intType;
     std::vector<std::string> metadata;
     placeHolder.push_back(onePlaceHolder);
-    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metadata);
+    bool isSuccess = false;
+    if (msdpType.has_value()) {
+        std::vector<std::string> msdpTypeVector = { msdpType.value() };
+        isSuccess = viewDataWrapOhos->LoadMergeHint2TypeAndMsdpType(placeHolder, msdpTypeVector, intType, metadata);
+    } else {
+        isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metadata);
+    }
     if (!isSuccess) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "Load Hint2Type Failed !");
         return hintToTypeWrap;

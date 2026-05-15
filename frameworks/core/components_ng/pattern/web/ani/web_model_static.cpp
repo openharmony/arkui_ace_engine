@@ -159,6 +159,14 @@ void WebModelStatic::SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOn
     webPatternStatic->UpdateOnLineImageAccessEnabled(isOnLineImageAccessEnabled);
 }
 
+void WebModelStatic::SetWebDebuggingAccessAndPort(FrameNode* frameNode, bool webDebuggingAccess, int32_t port)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebDebuggingAccessEnabledAndPort(std::make_tuple(webDebuggingAccess, port));
+}
+
 void WebModelStatic::SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);

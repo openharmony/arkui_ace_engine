@@ -26,6 +26,7 @@ const ArkUIMenuViewInnerModifier* GetMenuViewInnerModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIMenuViewInnerModifier modifier = {
         .createWithOptionParams = NG::MenuView::Create,
+        .createWithOptionParamsAndPreview = NG::MenuView::Create,
         .createWithCustomNode = NG::MenuView::Create,
         .createWithSelectParams = NG::MenuView::Create,
         .removeMenuHoverScaleStatus = NG::MenuView::RemoveMenuHoverScaleStatus,

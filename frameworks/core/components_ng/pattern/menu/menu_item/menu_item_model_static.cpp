@@ -191,6 +191,7 @@ void MenuItemModelStatic::SetFontColor(FrameNode* frameNode, const std::optional
 void MenuItemModelStatic::SetLabelFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_LABEL_FONT_SIZE, frameNode);
     if (fontSize.has_value() && fontSize.value().IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize.value(), frameNode);
     } else {
@@ -232,6 +233,7 @@ void MenuItemModelStatic::SetLabelFontStyle(FrameNode* frameNode, const std::opt
 void MenuItemModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE, frameNode);
     if (fontSize.has_value() && fontSize.value().IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize.value(), frameNode);
     } else {

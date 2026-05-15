@@ -18,12 +18,14 @@
 
 #include "base/memory/ace_type.h"
 #include "core/animation/animator.h"
-#include "core/animation/keyframe_animation.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
+
+template<class T>
+class KeyframeAnimation;
 
 const double DEFAULT_FOCUS_DURATION = 100.0;
 const double DEFAULT_CLICK_DURATION = 200.0;

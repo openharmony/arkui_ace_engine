@@ -184,6 +184,16 @@ enum class VisualState;
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
         ACE_CHECK_NODE_LPX_ATTRIBUTE(dimension, attribute, frameNode);          \
     } while (false)
+#define ACE_CHECK_OPTIONAL_LPX_ATTRIBUTE(optDimension, attribute)                 \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        if ((optDimension)) {                                                   \
+            ACE_CHECK_NODE_LPX_ATTRIBUTE((optDimension).value(), attribute, frameNode); \
+        } else {                                                                \
+            CHECK_NULL_VOID(frameNode);                                         \
+            (frameNode)->UnRegisterLpxAttribute(attribute);                     \
+        }                                                                       \
+    } while (false)
 #define ACE_CHECK_NODE_LPX_ATTRIBUTE(dimension, attribute, frameNode)            \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
@@ -191,6 +201,15 @@ enum class VisualState;
             (frameNode)->RegisterLpxAttribute(attribute);                        \
         } else {                                                                 \
             (frameNode)->UnRegisterLpxAttribute(attribute);                      \
+        }                                                                       \
+    } while (false)
+#define ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(optDimension, attribute, frameNode) \
+    do {                                                                        \
+        if ((optDimension)) {                                                   \
+            ACE_CHECK_NODE_LPX_ATTRIBUTE((optDimension).value(), attribute, frameNode); \
+        } else {                                                                \
+            CHECK_NULL_VOID(frameNode);                                         \
+            (frameNode)->UnRegisterLpxAttribute(attribute);                     \
         }                                                                       \
     } while (false)
 

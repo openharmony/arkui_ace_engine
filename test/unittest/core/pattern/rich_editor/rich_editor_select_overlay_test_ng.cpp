@@ -24,6 +24,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 
 using namespace testing::ext;

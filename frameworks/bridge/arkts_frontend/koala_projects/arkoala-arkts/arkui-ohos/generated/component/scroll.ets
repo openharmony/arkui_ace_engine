@@ -927,6 +927,21 @@ export function ScrollImpl(
     })
 }
 
+@memo
+export function Scroll(
+    @memo @memo_skip
+    style: ((attributes: ScrollAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkScrollComponent>((): ArkScrollComponent => {
+        return new ArkScrollComponent()
+    })
+    NodeAttach<ArkScrollPeer>((): ArkScrollPeer => ArkScrollPeer.create(receiver), (_: ArkScrollPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class OffsetResult_serializer {
     public static write(buffer: SerializerBase, value: OffsetResult): void {
         let valueSerializer: SerializerBase = buffer

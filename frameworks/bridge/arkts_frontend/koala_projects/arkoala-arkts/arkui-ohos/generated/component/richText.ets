@@ -152,3 +152,18 @@ export function RichTextImpl(
     })
 }
 
+@memo
+export function RichText(
+    @memo @memo_skip
+    style: ((attributes: RichTextAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRichTextComponent>((): ArkRichTextComponent => {
+        return new ArkRichTextComponent()
+    })
+    NodeAttach<ArkRichTextPeer>((): ArkRichTextPeer => ArkRichTextPeer.create(receiver), (_: ArkRichTextPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

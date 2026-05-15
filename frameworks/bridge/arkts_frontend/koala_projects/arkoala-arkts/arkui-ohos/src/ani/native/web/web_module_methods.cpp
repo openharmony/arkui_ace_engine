@@ -223,6 +223,26 @@ static void GetWebviewControllerHandlerFunc(ani_vm* vm, ani_ref savePtr,
         }
         return static_cast<int32_t>(nwebId);
     };
+    auto getWebDebuggingAccessFunc = [vm, object = savePtr]() -> bool {
+        ani_boolean webDebuggingAccess;
+        ani_env* envTemp = GetAniEnv(vm);
+        if (!envTemp || envTemp->Object_CallMethodByName_Boolean(
+            reinterpret_cast<ani_object>(object), "innerGetWebDebuggingAccess", ":z", &webDebuggingAccess) != ANI_OK) {
+            HILOGE("getWebDebuggingAccessFunc callback to call innerGetWebDebuggingAccess failed");
+            return false;
+        }
+        return static_cast<bool>(webDebuggingAccess);
+    };
+    auto getWebDebuggingPortFunc = [vm, object = savePtr]() -> int32_t {
+        ani_int webDebuggingPort;
+        ani_env* envTemp = GetAniEnv(vm);
+        if (!envTemp || envTemp->Object_CallMethodByName_Int(
+            reinterpret_cast<ani_object>(object), "innerGetWebDebuggingPort", ":i", &webDebuggingPort) != ANI_OK) {
+            HILOGE("getWebDebuggingPortFunc callback to call innerGetWebDebuggingPort failed");
+            return 0;
+        }
+        return static_cast<int32_t>(webDebuggingPort);
+    };
     auto completeWindowNewFunc = [vm, object = savePtr](int32_t parentId) {
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp) {
@@ -236,6 +256,8 @@ static void GetWebviewControllerHandlerFunc(ani_vm* vm, ani_ref savePtr,
     };
     webviewControllerPeer->getWebIdFunc = std::move(getWebIdFunc);
     webviewControllerPeer->completeWindowNewFunc = std::move(completeWindowNewFunc);
+    webviewControllerPeer->getWebDebuggingAccessFunc = std::move(getWebDebuggingAccessFunc);
+    webviewControllerPeer->getWebDebuggingPortFunc = std::move(getWebDebuggingPortFunc);
 }
 
 ani_long ExtractorsToWebviewWebviewControllerPtr(ani_env* env, ani_class aniClass, ani_object object)

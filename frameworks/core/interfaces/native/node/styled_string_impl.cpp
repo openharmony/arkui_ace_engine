@@ -21,6 +21,7 @@
 #include "core/interfaces/native/node/styled_string_impl.h"
 #include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/text/html_utils.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -30,6 +31,7 @@ namespace {
     constexpr int32_t DEFAULT_FONT_WEIGHT = 3;
     constexpr int32_t MAX_POINTS = 10;
     constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
+    constexpr double PERCENT_100 = 100.0;
     const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
         1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
@@ -128,6 +130,75 @@ void ParseLeadingMargin(SpanParagraphStyle& spanParagraphStyle, const ArkUIParag
     }
 }
 
+void ParseLinearGradient(const ArkUIParagraphStyle& paragraphStyle, NG::Gradient& gradient)
+{
+    auto linearGradient = paragraphStyle.linearGradient.value();
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    CHECK_NULL_VOID(gradient.GetLinearGradient());
+    if (linearGradient.angle.has_value()) {
+        gradient.GetLinearGradient()->angle =
+            CalcDimension(linearGradient.angle.value(),  DimensionUnit::PX);
+    }
+    if (0 <= linearGradient.direction &&
+            linearGradient.direction <= static_cast<int32_t>(NG::GradientDirection::END_TO_START)) {
+            GradientConvert::SetGradientDirection(gradient,
+                static_cast<NG::GradientDirection> (linearGradient.direction));
+    }
+    for (auto& colorStop : linearGradient.colors) {
+        NG::GradientColor gradientColor;
+        auto color = Color(colorStop.first);
+        gradientColor.SetColor(color);
+        gradientColor.SetHasValue(true);
+        gradientColor.SetDimension(CalcDimension(colorStop.second * NG::PERCENT_100, DimensionUnit::PERCENT));
+        gradient.AddColor(gradientColor);
+    }
+    gradient.SetRepeat(linearGradient.repeating);
+}
+ 
+void ParseRadialGradient(const ArkUIParagraphStyle& paragraphStyle, NG::Gradient& gradient)
+{
+    auto radialGradient = paragraphStyle.radialGradient.value();
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    CHECK_NULL_VOID(gradient.GetRadialGradient());
+    if (radialGradient.centerX.has_value()) {
+        gradient.GetRadialGradient()->radialCenterX =
+            CalcDimension(radialGradient.centerX.value(), DimensionUnit::VP);
+    }
+    if (radialGradient.centerY.has_value()) {
+        gradient.GetRadialGradient()->radialCenterY =
+            CalcDimension(radialGradient.centerY.value(), DimensionUnit::VP);
+    }
+    if (radialGradient.radius.has_value()) {
+        gradient.GetRadialGradient()->radialVerticalSize =
+            CalcDimension(radialGradient.radius.value(), DimensionUnit::VP);
+        gradient.GetRadialGradient()->radialHorizontalSize =
+            CalcDimension(radialGradient.radius.value(), DimensionUnit::VP);
+    }
+    for (auto& colorStop : radialGradient.colors) {
+        NG::GradientColor gradientColor;
+        auto color = Color(colorStop.first);
+        gradientColor.SetColor(color);
+        gradientColor.SetHasValue(true);
+        gradientColor.SetDimension(CalcDimension(colorStop.second * NG::PERCENT_100, DimensionUnit::PERCENT));
+        gradient.AddColor(gradientColor);
+    }
+    gradient.SetRepeat(radialGradient.repeating);
+}
+ 
+void ParseShaderStyle(SpanParagraphStyle& spanParagraphStyle, const ArkUIParagraphStyle& paragraphStyle)
+{
+    CHECK_NULL_VOID(paragraphStyle.linearGradient.has_value() || paragraphStyle.radialGradient.has_value());
+    CHECK_EQUAL_VOID(paragraphStyle.linearGradient.has_value(), paragraphStyle.radialGradient.has_value());
+    NG::Gradient gradient;
+    if (paragraphStyle.linearGradient.has_value()) {
+        ParseLinearGradient(paragraphStyle, gradient);
+    }
+    if (paragraphStyle.radialGradient.has_value()) {
+        ParseRadialGradient(paragraphStyle, gradient);
+    }
+    spanParagraphStyle.SetGradient(gradient);
+}
+
 RefPtr<SpanBase> ParseParagraphStyle(const ArkUISpanStyle& style, int32_t start, int32_t length)
 {
     ArkUIParagraphStyle paragraphStyle = style.paragraphStyle;
@@ -143,6 +214,7 @@ RefPtr<SpanBase> ParseParagraphStyle(const ArkUISpanStyle& style, int32_t start,
     spanParagraphStyle.paragraphSpacing = Dimension(paragraphStyle.paragraphSpacing, DimensionUnit::VP);
     ParseLeadingMargin(spanParagraphStyle, paragraphStyle);
     spanParagraphStyle.textDirection = static_cast<OHOS::Ace::TextDirection>(paragraphStyle.textDirection);
+    ParseShaderStyle(spanParagraphStyle, paragraphStyle);
     auto paragraphStyleSpan = AceType::MakeRefPtr<NapiParagraphStyleSpan>(spanParagraphStyle, start, start + length);
     paragraphStyleSpan->onNapiDrawLeadingMargin_ = paragraphStyle.onDrawLeadingMargin;
     paragraphStyleSpan->onNapiGetLeadingMargin_ = paragraphStyle.onGetLeadingMargin;
@@ -853,6 +925,69 @@ void ApplyDecorationStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
     style.decorationStyle = decorationStyle;
 }
 
+void ConvertRadialGradientOptions(const NG::Gradient& gradient, ArkUIRadialGradientOptions& options) {
+    CHECK_NULL_VOID(gradient.GetRadialGradient());
+    auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
+    auto radialCenterY = gradient.GetRadialGradient()->radialCenterY;
+    if (radialCenterX.has_value()) {
+        options.centerX = radialCenterX.value().ConvertToVp();
+    }
+    if (radialCenterY.has_value()) {
+        options.centerY = radialCenterY.value().ConvertToVp();
+    }
+    auto radialVerticalSize = gradient.GetRadialGradient()->radialVerticalSize;
+    if (radialVerticalSize.has_value()) {
+        options.radius = radialVerticalSize.value().ConvertToVp();
+    }
+    options.repeating = gradient.GetRepeat();
+    auto gradientColors = gradient.GetColors();
+    if (!gradientColors.empty()) {
+        auto size = static_cast<int32_t>(gradientColors.size());
+        for (int32_t index = 0; index < size; index++) {
+            auto color = gradientColors[index];
+            CHECK_NULL_CONTINUE(color.GetDimension().Unit() == DimensionUnit::PERCENT);
+            options.colors.emplace_back(std::pair<uint32_t, float>(color.GetColor().GetValue(),
+                color.GetDimension().Value() / NG::PERCENT_100));
+        }
+    }
+}
+ 
+void ConvertLinearGradientOptions(const NG::Gradient& gradient, ArkUILinearGradientOptions& options)
+{
+    CHECK_NULL_VOID(gradient.GetLinearGradient());
+    if (gradient.GetLinearGradient()->angle.has_value()) {
+        options.angle = gradient.GetLinearGradient()->angle.value().ConvertToPx();
+    }
+    auto direction = GradientConvert::ParseGradientDirection(gradient);
+    options.direction = static_cast<int32_t>(direction.value_or(NG::GradientDirection::NONE));
+    options.repeating = gradient.GetRepeat();
+    auto gradientColors = gradient.GetColors();
+    if (!gradientColors.empty()) {
+        auto size = static_cast<int32_t>(gradientColors.size());
+        for (int32_t index = 0; index < size; index++) {
+            auto color = gradientColors[index];
+            CHECK_NULL_CONTINUE(color.GetDimension().Unit() == DimensionUnit::PERCENT);
+            options.colors.emplace_back(std::pair<uint32_t, float>(color.GetColor().GetValue(),
+                color.GetDimension().Value() / NG::PERCENT_100));
+        }
+    }
+}
+ 
+void ApplyParagraphShaderStyle(const NG::Gradient& gradient, ArkUIParagraphStyle& paragraphStyle)
+{
+    if (gradient.GetType() == NG::GradientType::RADIAL) {
+        CHECK_NULL_VOID(gradient.GetRadialGradient());
+        ArkUIRadialGradientOptions radialGradient;
+        ConvertRadialGradientOptions(gradient, radialGradient);
+        paragraphStyle.radialGradient = radialGradient;
+    } else if (gradient.GetType() == NG::GradientType::LINEAR) {
+        CHECK_NULL_VOID(gradient.GetLinearGradient());
+        ArkUILinearGradientOptions linearGradient;
+        ConvertLinearGradientOptions(gradient, linearGradient);
+        paragraphStyle.linearGradient = linearGradient;
+    }
+}
+
 void ApplyParagraphStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
 {
     CHECK_NULL_VOID(span);
@@ -883,6 +1018,10 @@ void ApplyParagraphStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
             pixelMap->EncodeTlv(data);
             paragraphStyle.pixelMapRawData = data;
         }
+    }
+    auto gradient = spanParagraphStyle.GetGradient();
+    if (gradient.has_value()) {
+        ApplyParagraphShaderStyle(gradient.value(), paragraphStyle);
     }
     style.paragraphStyle = paragraphStyle;
 }

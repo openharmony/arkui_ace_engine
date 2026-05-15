@@ -52,7 +52,7 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             child->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
-            auto controlBarHeight = CalControlBarHeight(pattern->NeedLift());
+            auto controlBarHeight = CalControlBarHeight(pattern->IsFullScreen());
             auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
             child->GetGeometryNode()->SetMarginFrameOffset(
                 { contentOffset.GetX(), contentOffset.GetY() + contentSize.Height() - controlBarHeight });
@@ -81,7 +81,7 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraintForImage.UpdateMinSizeWithCheck(contentSize);
             child->Measure(layoutConstraintForImage);
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG && layoutProperty->GetControlsValue(true)) {
-            auto controlBarHeight = CalControlBarHeight(pattern->NeedLift());
+            auto controlBarHeight = CalControlBarHeight(pattern->IsFullScreen());
             SizeF controlBarSize(contentSize.Width(), controlBarHeight);
             auto layoutConstraintForControlBar = layoutConstraint;
             layoutConstraintForControlBar.UpdateSelfMarginSizeWithCheck(OptionalSizeF(controlBarSize));

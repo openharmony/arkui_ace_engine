@@ -102,10 +102,14 @@ public:
     static ArkUINativeModuleValue ResetTabsOnContentWillChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabsCustomContentTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTabsCustomContentTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTabsBarFloatingStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTabsBarFloatingStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     static void ParseCustomContentTransition(
         const Framework::JSRef<Framework::JSFunc>& transitionFunc, const Framework::JsiCallbackInfo& info);
+    static std::optional<Dimension> ParseBarFloatingDimension(
+        EcmaVM* vm, Local<JSValueRef> value, RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 

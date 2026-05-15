@@ -8820,8 +8820,9 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
+    size_t nativeSize = infoPtr->GetSize();
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+        (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTargetDisplayId())));
     if (infoPtr->GetGestureTypeName() == GestureTypeName::TAP_GESTURE && !infoPtr->GetFingerList().empty()) {
@@ -9696,8 +9697,9 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* inf
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, 0.0f));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO);
+    size_t nativeSize = infoPtr->GetSize();
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+        (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
     return obj;
 }
 
@@ -11330,8 +11332,9 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, (infoPtr->GetTargetDisplayId()))};
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
+    size_t nativeSize = infoPtr->GetSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO);
+        (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO, nativeSize);
     return obj;
 }
 
@@ -11455,8 +11458,9 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_AXIS_INFO);
+    size_t nativeSize = infoPtr->GetSize();
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+        (void*)NATIVE_PTR_TAG_AXIS_INFO, nativeSize);
     return obj;
 }
 

@@ -23,7 +23,6 @@
 #include "base/geometry/size.h"
 #include "base/image/pixel_map.h"
 #include "base/resource/internal_resource.h"
-#include "base/utils/device_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/image/image_dfx.h"

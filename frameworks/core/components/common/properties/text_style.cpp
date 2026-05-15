@@ -210,7 +210,8 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            propPunctuationOverflow_ == rhs.propPunctuationOverflow_ &&
            propIncludeFontPadding_ == rhs.propIncludeFontPadding_ &&
            propFallbackLineSpacing_ == rhs.propFallbackLineSpacing_ && propStrokeWidth_ == rhs.propStrokeWidth_ &&
-           propStrokeColor_ == rhs.propStrokeColor_ && NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
+           propStrokeColor_ == rhs.propStrokeColor_ && propStrokeJoinStyle_ == rhs.propStrokeJoinStyle_ &&
+           NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const

@@ -21,11 +21,14 @@
 
 #include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
+#include "base/error/error_code.h"
+#include "core/components_ng/image_provider/image_utils.h"
+#include "core/drawable/drawable_descriptor_loader.h"
 
 namespace OHOS::Ace {
-
 RefPtr<PixelMap> PixelMapDrawableDescriptor::GetPixelMap()
 {
+    std::scoped_lock<std::mutex> lock(loadMutx_);
     if (pixelmap_) {
         return pixelmap_;
     }
@@ -33,9 +36,43 @@ RefPtr<PixelMap> PixelMapDrawableDescriptor::GetPixelMap()
     return pixelmap_;
 }
 
+DrawableDescriptorLoadResult PixelMapDrawableDescriptor::LoadSync()
+{
+    std::scoped_lock<std::mutex> lock(loadMutx_);
+    if (pixelmap_) {
+        return { pixelmap_->GetWidth(), pixelmap_->GetHeight(), 0 };
+    }
+    if (!info_ && !rawData_.data) {
+        LOGW("Must to set resource/base64/file info.");
+        return { 0, 0, ERROR_CODE_DRAWABLE_LOADER_ERROR };
+    }
+    CreatePixelMap();
+    if (pixelmap_) {
+        return { pixelmap_->GetWidth(), pixelmap_->GetHeight(), 0 };
+    }
+    return { 0, 0, ERROR_CODE_DRAWABLE_LOADER_ERROR };
+}
+
+void PixelMapDrawableDescriptor::LoadAsync(const LoadCallback&& callback)
+{
+    NG::ImageUtils::PostToBg(
+        [weak = WeakClaim(this), callback = std::move(callback)]() {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto result = self->LoadSync();
+            callback(result);
+        },
+        "PixelMapDrawableDescriptorLoadAsync");
+}
+
 void PixelMapDrawableDescriptor::CreatePixelMap()
 {
-    if (rawData_.len == 0 && rawData_.data == nullptr) {
+    if (!rawData_.data && info_) {
+        auto mediaData = DrawableDescriptorLoader::GetInstance()->LoadData(info_);
+        rawData_.len = mediaData.len;
+        rawData_.data.reset(mediaData.data.release());
+    }
+    if (rawData_.len == 0 || rawData_.data == nullptr) {
         return;
     }
     uint32_t errorCode = 0;
@@ -48,5 +85,4 @@ void PixelMapDrawableDescriptor::CreatePixelMap()
     auto pixelmap = imageSource->CreatePixelMap(options);
     pixelmap_ = pixelmap;
 }
-
 } // namespace OHOS::Ace

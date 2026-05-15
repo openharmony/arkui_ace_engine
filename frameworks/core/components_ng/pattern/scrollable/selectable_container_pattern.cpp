@@ -18,8 +18,10 @@
 #include <cmath>
 
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

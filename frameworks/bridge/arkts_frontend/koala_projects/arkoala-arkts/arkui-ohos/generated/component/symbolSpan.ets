@@ -235,6 +235,9 @@ export class ArkSymbolSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SymbolSpanAttribute_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setApplyAttributesFinishAttribute(): void {
+        ArkUIGeneratedNativeModule._SymbolSpanAttribute_setApplyAttributesFinish(this.peer.ptr)
+    }
 }
 export interface SymbolSpanAttribute {
     setSymbolSpanOptions(value: global_resource_Resource): this {
@@ -266,6 +269,9 @@ export interface SymbolSpanAttribute {
     }
     debugLine(sourceLine: string, moduleName?: string): this {
         throw new Error('Unimplemented method debugLine')
+    }
+    applyAttributesFinish(): void {
+        throw new Error('Unimplemented method applyAttributesFinish')
     }
     attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -329,6 +335,10 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
         this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
         return this
     }
+    public applyAttributesFinish(): void {
+        this.getPeer()?.setApplyAttributesFinishAttribute()
+        return
+    }
     public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookSymbolSpanAttributeModifier(this, value);
@@ -357,3 +367,15 @@ export function SymbolSpanImpl(
     })
 }
 
+@memo
+export function SymbolSpan(
+    @memo @memo_skip
+    style: ((attributes: SymbolSpanAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkSymbolSpanComponent>((): ArkSymbolSpanComponent => {
+        return new ArkSymbolSpanComponent()
+    })
+    NodeAttach<ArkSymbolSpanPeer>((): ArkSymbolSpanPeer => ArkSymbolSpanPeer.create(receiver), (_: ArkSymbolSpanPeer): void => {
+        style?.(receiver)
+    })
+}

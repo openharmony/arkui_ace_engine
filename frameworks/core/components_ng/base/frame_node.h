@@ -29,7 +29,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
-#include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -203,6 +202,33 @@ enum class LpxAttribute {
     LPX_SCROLL_BAR_MARGIN_END,
     LPX_INITIAL_OFFSET_X,
     LPX_INITIAL_OFFSET_Y,
+    LPX_PICKER_ITEM_HEIGHT,
+    LPX_PICKER_GRADIENT_HEIGHT,
+    LPX_PICKER_COLUMN_WIDTH,
+    LPX_EDGE_ALIGN_X,
+    LPX_EDGE_ALIGN_Y,
+    LPX_PADDING_LEFT,
+    LPX_PADDING_RIGHT,
+    LPX_PADDING_TOP,
+    LPX_PADDING_BOTTOM,
+    LPX_PADDING_START,
+    LPX_PADDING_END,
+    LPX_PICKER_RADIUS,
+    LPX_BORDER_RADIUS_TOP_LEFT,
+    LPX_BORDER_RADIUS_TOP_RIGHT,
+    LPX_BORDER_RADIUS_BOTTOM_LEFT,
+    LPX_BORDER_RADIUS_BOTTOM_RIGHT,
+    LPX_BORDER_RADIUS,
+    LPX_TRACK_THICKNESS,
+    LPX_BLOCK_BORDER_WIDTH,
+    LPX_TRACK_BORDER_RADIUS,
+    LPX_STEP_SIZE,
+    LPX_BLOCK_SIZE_WIDTH,
+    LPX_BLOCK_SIZE_HEIGHT,
+    LPX_SELECTED_BORDER_RADIUS,
+    LPX_LABEL_FONT_SIZE,
+    LPX_MARK_SIZE,
+    LPX_MARK_STROKE_WIDTH,
     ALWAYS
 };
 
@@ -245,6 +271,11 @@ public:
     ~FrameNode() override;
 
     void OnDelete() override;
+
+    bool HasPreMake()
+    {
+        return hasPreMake_;
+    }
 
     int32_t FrameCount() const override
     {
@@ -1087,6 +1118,7 @@ public:
         uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
     RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
+    bool CheckIfHasMeasured() const;
     bool ReachResponseDeadline() const override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -1764,6 +1796,7 @@ private:
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
     void OnHoverWithHightLight(bool isHover) const;
+    bool IsPreMakeAndScroll();
     bool isAccessibilityPropertyInitialized_ = false;
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1879,6 +1912,8 @@ private:
     // Marks whether the background builder needs to be refreshed due to surface changes.
     bool isNeedRefreshBackgroundBuilder_ = false;
     int32_t refreshBackgroundBuilderId_ = 0;
+
+    bool hasPreMake_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

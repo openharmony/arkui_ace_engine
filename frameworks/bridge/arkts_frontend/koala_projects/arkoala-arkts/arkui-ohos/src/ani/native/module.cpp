@@ -491,6 +491,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
         },
         ani_native_function {
+            "_BuilderProxyNode_Mock_Construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeMockConstruct)
+        },
+        ani_native_function {
             "_ContentSlot_construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ContentSlotConstruct)
@@ -692,6 +697,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function { "_Drawable_CreatePixelMapDrawable", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawable)
+        },
+        ani_native_function { "_Drawable_CreatePixelMapDrawableByResource", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawableByResource)
+        },
+        ani_native_function { "_Drawable_CreatePixelMapDrawableByString", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawableByString)
         },
         ani_native_function { "_Drawable_CreateLayeredDrawable", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateLayeredDrawable)

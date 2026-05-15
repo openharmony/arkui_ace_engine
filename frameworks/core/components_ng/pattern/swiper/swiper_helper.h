@@ -47,6 +47,7 @@ private:
         const std::shared_ptr<SwiperDigitalParameters>& digitalParams,
         RefPtr<SwiperIndicatorLayoutProperty>& indicatorProps, bool isSidebarMiddle, bool isShowArrow);
     static void SetFakeDragImpl(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak);
+    static void SetPreMakeItemsImpl(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_HELPER_H

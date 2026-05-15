@@ -1501,7 +1501,7 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::u
     float scale, const PreparedInfoForDrag& dragInfoData)
 {
     CHECK_NULL_VOID(arkExtraInfoJson);
-    arkExtraInfoJson->Put("enable_animation", !dragInfoData.disableArkuiAnimation);
+    arkExtraInfoJson->Put("enable_animation", dragInfoData.disableArkuiAnimation);
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);

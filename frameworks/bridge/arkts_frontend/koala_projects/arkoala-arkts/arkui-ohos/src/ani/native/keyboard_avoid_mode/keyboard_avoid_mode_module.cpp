@@ -14,9 +14,9 @@
  */
 
 #include "load.h"
+#include "log/log.h"
 #include <memory>
 #include "keyboard_avoid_mode_module.h"
-#include "interfaces/inner_api/drawable_descriptor/base/log.h"
 
 namespace OHOS::Ace::Ani {
 

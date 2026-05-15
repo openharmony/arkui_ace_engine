@@ -271,6 +271,21 @@ export function UIPickerComponentImpl(
     })
 }
 
+@memo
+export function UIPickerComponent(
+    @memo @memo_skip
+    style: ((attributes: UIPickerComponentAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkUIPickerComponentComponent>((): ArkUIPickerComponentComponent => {
+        return new ArkUIPickerComponentComponent()
+    })
+    NodeAttach<ArkUIPickerComponentPeer>((): ArkUIPickerComponentPeer => ArkUIPickerComponentPeer.create(receiver), (_: ArkUIPickerComponentPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class UIPickerComponentOptions_serializer {
     public static write(buffer: SerializerBase, value: UIPickerComponentOptions): void {
         let valueSerializer: SerializerBase = buffer

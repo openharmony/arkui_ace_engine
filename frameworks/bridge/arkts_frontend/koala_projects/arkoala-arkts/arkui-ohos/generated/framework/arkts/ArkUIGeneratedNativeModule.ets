@@ -1942,6 +1942,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SearchAttribute_setTextDirection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SearchAttribute_setStrokeJoinStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SearchAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _SearchAttribute_setSearchButton(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SearchAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2740,6 +2744,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextAreaAttribute_setOrphanCharOptimization(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _TextAreaAttribute_setStrokeJoinStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _TextAreaAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextAreaAttribute_setShowCounter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2945,6 +2953,10 @@ export class ArkUIGeneratedNativeModule {
     native static _TextInputAttribute_setVoiceButton(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setOrphanCharOptimization(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setStrokeJoinStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -5165,7 +5177,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _ImageAttachment_getSizeInVp(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _ImageBitmap_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    native static _ImageBitmap_construct0(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ImageBitmap_construct1(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct
     native static _ImageBitmap_getFinalizer(): KPointer
     @ani.unsafe.Direct
@@ -5954,6 +5968,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ParagraphStyle_getTextDirection(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _ParagraphStyle_getLeadingMarginSpan(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _ParagraphStyle_getShaderStyle(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ParticleHelper_SetDisturbanceFields(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -6429,10 +6445,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SelectExtender_setDivider(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _ShaderStyle_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _ShaderStyle_getFinalizer(): KPointer
-    @ani.unsafe.Direct
     native static _SheetDismiss_construct(): KPointer
     @ani.unsafe.Direct
     native static _SheetDismiss_getFinalizer(): KPointer
@@ -6839,6 +6851,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextStyle_getStrokeColor(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _TextStyle_getFontVariations(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextStyle_getStrokeJoinStyle(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TextTimerController_construct(): KPointer
     @ani.unsafe.Direct

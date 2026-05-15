@@ -508,6 +508,21 @@ export function ShapeImpl(
     })
 }
 
+@memo
+export function Shape(
+    @memo @memo_skip
+    style: ((attributes: ShapeAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkShapeComponent>((): ArkShapeComponent => {
+        return new ArkShapeComponent()
+    })
+    NodeAttach<ArkShapePeer>((): ArkShapePeer => ArkShapePeer.create(receiver), (_: ArkShapePeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ViewportRect_serializer {
     public static write(buffer: SerializerBase, value: ViewportRect): void {
         let valueSerializer: SerializerBase = buffer

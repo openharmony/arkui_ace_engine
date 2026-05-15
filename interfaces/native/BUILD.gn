@@ -158,7 +158,7 @@ if (is_arkui_x) {
 
     sources = [
       "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
-      "native_interface_xcomponent.cpp",
+      "native_interface_xcomponent_cross_platform.cpp",
     ]
 
     deps = [ "//third_party/bounds_checking_function:libsec_static" ]

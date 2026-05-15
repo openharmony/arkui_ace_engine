@@ -238,6 +238,35 @@ void DrawableCreatePixelMapDrawable(
     }
 }
 
+void DrawableCreatePixelMapDrawableByResource(ani_env* env, [[maybe_unused]] ani_class aniClass,
+    ani_object drawableAni, ani_long resourceObjectKPointer)
+{
+    auto* modifier = GetDrawableDescriptorModifier();
+    CHECK_NULL_VOID(modifier);
+    auto* drawable = modifier->createDrawableDescriptorByType(static_cast<uint32_t>(DrawableType::PIXELMAP));
+    CHECK_NULL_VOID(drawable);
+    modifier->increaseRef(drawable);
+    auto ptr = reinterpret_cast<ani_long>(drawable);
+    env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
+    modifier->setDrawableResource(drawable, reinterpret_cast<void*>(resourceObjectKPointer));
+}
+
+void DrawableCreatePixelMapDrawableByString(ani_env* env, [[maybe_unused]] ani_class aniClass,
+    ani_object drawableAni, ani_string resource)
+{
+    auto* modifier = GetDrawableDescriptorModifier();
+    CHECK_NULL_VOID(modifier);
+    auto* drawable = modifier->createDrawableDescriptorByType(static_cast<uint32_t>(DrawableType::PIXELMAP));
+    CHECK_NULL_VOID(drawable);
+    modifier->increaseRef(drawable);
+    auto ptr = reinterpret_cast<ani_long>(drawable);
+    env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
+    auto src = AniUtils::ANIStringToStdString(env, resource);
+    if (!src.empty()) {
+        modifier->setDrawablePath(drawable, src.c_str());
+    }
+}
+
 void DrawableCreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
     ani_object foregroundAni, ani_object backgroundAni, ani_object maskAni)
 {
@@ -372,7 +401,7 @@ void DrawableCreateAnimatedDrawableByResource(ani_env* env, [[maybe_unused]] ani
 
     auto* modifier = GetDrawableDescriptorModifier();
     CHECK_NULL_VOID(modifier);
-    modifier->setAnimatedResource(drawable, reinterpret_cast<void*>(resourceObjectKPointer));
+    modifier->setDrawableResource(drawable, reinterpret_cast<void*>(resourceObjectKPointer));
 
     ani_boolean isOptionsUndefined;
     ANI_CALL(env, Reference_IsUndefined(optionsAni, &isOptionsUndefined), { return; });
@@ -393,7 +422,7 @@ void DrawableCreateAnimatedDrawableByString(ani_env* env, [[maybe_unused]] ani_c
 
     auto src = AniUtils::ANIStringToStdString(env, resource);
     if (!src.empty()) {
-        modifier->setAnimatedPath(drawable, src.c_str());
+        modifier->setDrawablePath(drawable, src.c_str());
     }
 
     ani_boolean isOptionsUndefined;
@@ -522,13 +551,13 @@ ani_object DrawableLoadSync(ani_env* env, [[maybe_unused]] ani_class aniClass, a
     switch (drawableType) {
         case DrawableType::BASE:
         case DrawableType::LAYERED:
-        case DrawableType::PIXELMAP:
             break;
+        case DrawableType::PIXELMAP:
         case DrawableType::ANIMATED: {
             int32_t width = 0;
             int32_t height = 0;
             int32_t errorCode = -1;
-            modifier->loadSyncAnimated(native, &width, &height, &errorCode);
+            modifier->loadSync(native, &width, &height, &errorCode);
             if (errorCode == 0) {
                 retValue = CreateDrawableDescriptorLoadedResult(env, width, height);
             } else {
@@ -563,12 +592,12 @@ ani_object DrawableLoad(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_o
     switch (drawableType) {
         case DrawableType::BASE:
         case DrawableType::LAYERED:
-        case DrawableType::PIXELMAP:
             break;
+        case DrawableType::PIXELMAP:
         case DrawableType::ANIMATED: {
             ArkUIDrawableAsync asyncCtx;
             CreateDrawableLoadCallback(env, asyncCtx, &retValue);
-            modifier->loadAsyncAnimated(native, asyncCtx);
+            modifier->loadAsync(native, asyncCtx);
             break;
         }
         default:

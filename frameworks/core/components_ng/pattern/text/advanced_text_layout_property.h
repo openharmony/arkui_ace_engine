@@ -16,6 +16,75 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_ADVANCED_TEXT_LAYOUT_PROPERTY_H
 #include "ui/base/ace_type.h"
 #include "interfaces/inner_api/ace_kit/include/ui/properties/gradient_property.h"
+ 
+#define ACE_DEFINE_TEXT_COMMON_PROPERTY_ITEM_IN_ADVANCE_PROPS(name, type, changeFlag)           \
+public:                                                                                         \
+    std::optional<type> Get##name() const                                                       \
+    {                                                                                           \
+        CHECK_NULL_RETURN(advancedTextLayoutProperty_, std::nullopt);                           \
+        return advancedTextLayoutProperty_->Get##name();                                        \
+    }                                                                                           \
+    bool Has##name() const                                                                      \
+    {                                                                                           \
+        CHECK_NULL_RETURN(advancedTextLayoutProperty_, false);                                  \
+        return advancedTextLayoutProperty_->Get##name().has_value();                            \
+    }                                                                                           \
+    const type& Get##name##Value() const                                                        \
+    {                                                                                           \
+        return advancedTextLayoutProperty_->Get##name().value();                                \
+    }                                                                                           \
+    const type& Get##name##Value(const type& defaultValue) const                                \
+    {                                                                                           \
+        if (!Has##name()) {                                                                     \
+            return defaultValue;                                                                \
+        }                                                                                       \
+        return advancedTextLayoutProperty_->Get##name().value();                                \
+    }                                                                                           \
+    std::optional<type> Clone##name() const                                                     \
+    {                                                                                           \
+        CHECK_NULL_RETURN(advancedTextLayoutProperty_, std::nullopt);                           \
+        return advancedTextLayoutProperty_->Get##name();                                        \
+    }                                                                                           \
+    void Reset##name()                                                                          \
+    {                                                                                           \
+    CHECK_NULL_VOID(advancedTextLayoutProperty_);                                               \
+        return advancedTextLayoutProperty_->Reset##name();                                      \
+    }
+ 
+#define ACE_DEFINE_TEXT_FIELD_PROPERTY_ITEM_UPDATE_IN_ADVANCE_PROPS(name, type, changeFlag)     \
+public:                                                                                         \
+    void Update##name(const type& value)                                                        \
+    {                                                                                           \
+        if (!advancedTextLayoutProperty_) {                                                     \
+            advancedTextLayoutProperty_ = AceType::MakeRefPtr<AdvancedTextLayoutProperty>();    \
+        }                                                                                       \
+        CHECK_NULL_VOID(advancedTextLayoutProperty_);                                           \
+        if (Has##name()) {                                                                      \
+            if (NearEqual(Get##name##Value(), value)) {                                         \
+                return;                                                                         \
+            }                                                                                   \
+        }                                                                                       \
+        advancedTextLayoutProperty_->Set##name(value);                                          \
+        UpdatePropertyChangeFlag(changeFlag);                                                   \
+    }
+ 
+#define ACE_DEFINE_TEXT_PROPERTY_ITEM_UPDATE_IN_ADVANCE_PROPS(name, type, changeFlag)           \
+public:                                                                                         \
+    void Update##name(const type& value)                                                        \
+    {                                                                                           \
+        if (!advancedTextLayoutProperty_) {                                                     \
+            advancedTextLayoutProperty_ = AceType::MakeRefPtr<AdvancedTextLayoutProperty>();    \
+        }                                                                                       \
+        CHECK_NULL_VOID(advancedTextLayoutProperty_);                                           \
+        if (Has##name()) {                                                                      \
+            if (NearEqual(Get##name##Value(), value)) {                                         \
+                return;                                                                         \
+            }                                                                                   \
+        }                                                                                       \
+        advancedTextLayoutProperty_->Set##name(value);                                          \
+        UpdatePropertyChangeFlag(changeFlag);                                                   \
+        propNeedReCreateParagraph_ = true;                                                      \
+    }
 
 namespace OHOS::Ace {
 class AdvancedTextLayoutProperty : public AceType {

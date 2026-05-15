@@ -20,6 +20,7 @@
 
 #include "base/utils/feature_param.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"

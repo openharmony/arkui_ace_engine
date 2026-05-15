@@ -1185,4 +1185,254 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg027, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->onChangeEvent_, nullptr);
 }
+
+/**
+ * @tc.name: SetThicknessLpx001
+ * @tc.desc: Test SetThickness registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetThicknessLpx001, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    const Dimension VP_DIMENSION = Dimension(10.0, DimensionUnit::VP);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetThickness(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TRACK_THICKNESS), 0);
+
+    SliderModelStatic::SetThickness(frameNode, VP_DIMENSION);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TRACK_THICKNESS), 0);
+}
+
+/**
+ * @tc.name: SetThicknessLpx002
+ * @tc.desc: Test SetThickness unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetThicknessLpx002, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetThickness(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TRACK_THICKNESS), 0);
+
+    SliderModelStatic::SetThickness(frameNode, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TRACK_THICKNESS), 0);
+}
+
+/**
+ * @tc.name: SetStepSizeLpx001
+ * @tc.desc: Test SetStepSize registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetStepSizeLpx001, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    const Dimension VP_DIMENSION = Dimension(10.0, DimensionUnit::VP);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetStepSize(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_STEP_SIZE), 0);
+
+    SliderModelStatic::SetStepSize(frameNode, VP_DIMENSION);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_STEP_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetStepSizeLpx002
+ * @tc.desc: Test SetStepSize unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetStepSizeLpx002, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetStepSize(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_STEP_SIZE), 0);
+
+    SliderModelStatic::SetStepSize(frameNode, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_STEP_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetBlockSizeLpx001
+ * @tc.desc: Test SetBlockSize registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetBlockSizeLpx001, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    const Dimension VP_DIMENSION = Dimension(10.0, DimensionUnit::VP);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetBlockSize(frameNode, LPX_DIMENSION, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_SIZE_WIDTH), 0);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_SIZE_HEIGHT), 0);
+
+    SliderModelStatic::SetBlockSize(frameNode, VP_DIMENSION, VP_DIMENSION);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_SIZE_WIDTH), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_SIZE_HEIGHT), 0);
+}
+
+/**
+ * @tc.name: SetBlockSizeLpx002
+ * @tc.desc: Test SetBlockSize unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetBlockSizeLpx002, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetBlockSize(frameNode, LPX_DIMENSION, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_SIZE_WIDTH), 0);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_SIZE_HEIGHT), 0);
+
+    SliderModelStatic::SetBlockSize(frameNode, std::nullopt, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_SIZE_WIDTH), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_SIZE_HEIGHT), 0);
+}
+
+/**
+ * @tc.name: SetTrackBorderRadiusLpx001
+ * @tc.desc: Test SetTrackBorderRadius registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetTrackBorderRadiusLpx001, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    const Dimension VP_DIMENSION = Dimension(10.0, DimensionUnit::VP);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetTrackBorderRadius(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TRACK_BORDER_RADIUS), 0);
+
+    SliderModelStatic::SetTrackBorderRadius(frameNode, VP_DIMENSION);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TRACK_BORDER_RADIUS), 0);
+}
+
+/**
+ * @tc.name: SetTrackBorderRadiusLpx002
+ * @tc.desc: Test SetTrackBorderRadius unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetTrackBorderRadiusLpx002, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetTrackBorderRadius(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TRACK_BORDER_RADIUS), 0);
+
+    SliderModelStatic::SetTrackBorderRadius(frameNode, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TRACK_BORDER_RADIUS), 0);
+}
+
+/**
+ * @tc.name: SetBlockBorderWidthLpx001
+ * @tc.desc: Test SetBlockBorderWidth registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetBlockBorderWidthLpx001, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    const Dimension VP_DIMENSION = Dimension(10.0, DimensionUnit::VP);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetBlockBorderWidth(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_BORDER_WIDTH), 0);
+
+    SliderModelStatic::SetBlockBorderWidth(frameNode, VP_DIMENSION);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_BORDER_WIDTH), 0);
+}
+
+/**
+ * @tc.name: SetBlockBorderWidthLpx002
+ * @tc.desc: Test SetBlockBorderWidth unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetBlockBorderWidthLpx002, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetBlockBorderWidth(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_BORDER_WIDTH), 0);
+
+    SliderModelStatic::SetBlockBorderWidth(frameNode, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BLOCK_BORDER_WIDTH), 0);
+}
+
+/**
+ * @tc.name: SetSelectedBorderRadiusLpx001
+ * @tc.desc: Test SetSelectedBorderRadius registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetSelectedBorderRadiusLpx001, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    const Dimension VP_DIMENSION = Dimension(10.0, DimensionUnit::VP);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetSelectedBorderRadius(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SELECTED_BORDER_RADIUS), 0);
+
+    SliderModelStatic::SetSelectedBorderRadius(frameNode, VP_DIMENSION);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SELECTED_BORDER_RADIUS), 0);
+}
+
+/**
+ * @tc.name: SetSelectedBorderRadiusLpx002
+ * @tc.desc: Test SetSelectedBorderRadius unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetSelectedBorderRadiusLpx002, TestSize.Level1)
+{
+    const Dimension LPX_DIMENSION = Dimension(10.0, DimensionUnit::LPX);
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    SliderModelStatic::SetSelectedBorderRadius(frameNode, LPX_DIMENSION);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SELECTED_BORDER_RADIUS), 0);
+
+    SliderModelStatic::SetSelectedBorderRadius(frameNode, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SELECTED_BORDER_RADIUS), 0);
+}
 } // namespace OHOS::Ace::NG

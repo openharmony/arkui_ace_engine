@@ -815,6 +815,18 @@ export function AlphabetIndexerImpl(
     })
 }
 
+@memo
+export function AlphabetIndexer(
+    @memo @memo_skip
+    style: ((attributes: AlphabetIndexerAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkAlphabetIndexerComponent>((): ArkAlphabetIndexerComponent => {
+        return new ArkAlphabetIndexerComponent()
+    })
+    NodeAttach<ArkAlphabetIndexerPeer>((): ArkAlphabetIndexerPeer => ArkAlphabetIndexerPeer.create(receiver), (_: ArkAlphabetIndexerPeer): void => {
+        style?.(receiver)
+    })
+}
 export class AlphabetIndexerOptions_serializer {
     public static write(buffer: SerializerBase, value: AlphabetIndexerOptions): void {
         let valueSerializer: SerializerBase = buffer

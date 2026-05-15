@@ -89,6 +89,17 @@ enum class MenuKeyboardAvoidMode {
     TRANSLATE_AND_RESIZE = 1,
 };
 
+enum class MenuGridPosition {
+    UP = 0,
+    DOWN = 1,
+};
+
+struct MenuGridStyleOptions {
+    int32_t count = 3;
+    int32_t horizontalSize = 3;
+    MenuGridPosition position = MenuGridPosition::UP;
+};
+
 enum class AnchoredColorMode {
     FOLLOW_SYSTEM = 0,
     FOLLOW_TARGET = 1,
@@ -153,6 +164,7 @@ struct ACE_FORCE_EXPORT MenuParam {
     RefPtr<UiMaterial> systemMaterial;
     std::optional<DisplayMode> scrollBar;
     std::optional<Dimension> maxHeight;
+    std::optional<MenuGridStyleOptions> gridStyle;
     std::optional<DistortionMode> distortionMode;
     std::optional<EdgeLightMode> edgeLightMode;
     bool isDarkMode = false;

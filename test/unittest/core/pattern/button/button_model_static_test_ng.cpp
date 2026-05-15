@@ -1246,4 +1246,115 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg034, TestSize.Level1)
     ButtonModelStatic::SetCreateWithLabel(frameNode, true);
     EXPECT_EQ(layoutProperty->GetCreateWithLabelValue(), true);
 }
+
+/**
+ * @tc.name: SetFontSizeLpx001
+ * @tc.desc: Test SetFontSize registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, SetFontSizeLpx001, TestSize.Level1)
+{
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    ButtonModelStatic::SetFontSize(frameNode, Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+
+    ButtonModelStatic::SetFontSize(frameNode, Dimension(10.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetFontSizeLpx002
+ * @tc.desc: Test SetFontSize unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, SetFontSizeLpx002, TestSize.Level1)
+{
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    ButtonModelStatic::SetFontSize(frameNode, Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+
+    ButtonModelStatic::SetFontSize(frameNode, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetBorderRadiusLpx001
+ * @tc.desc: Test SetBorderRadius registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, SetBorderRadiusLpx001, TestSize.Level1)
+{
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    ButtonModelStatic::SetBorderRadius(frameNode, Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_RADIUS), 0);
+
+    ButtonModelStatic::SetBorderRadius(frameNode, Dimension(10.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_RADIUS), 0);
+}
+
+/**
+ * @tc.name: SetBorderRadiusLpx002
+ * @tc.desc: Test SetBorderRadius with four corners registers/unregisters LPX attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, SetBorderRadiusLpx002, TestSize.Level1)
+{
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    ButtonModelStatic::SetBorderRadius(frameNode,
+        Dimension(10.0, DimensionUnit::LPX), Dimension(10.0, DimensionUnit::LPX),
+        Dimension(10.0, DimensionUnit::LPX), Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS), 0);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS), 0);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS), 0);
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS), 0);
+
+    ButtonModelStatic::SetBorderRadius(frameNode,
+        Dimension(10.0, DimensionUnit::VP), Dimension(10.0, DimensionUnit::VP),
+        Dimension(10.0, DimensionUnit::VP), Dimension(10.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS), 0);
+}
+
+/**
+ * @tc.name: SetBorderRadiusLpx003
+ * @tc.desc: Test SetBorderRadius with four corners unregisters LPX attribute when nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, SetBorderRadiusLpx003, TestSize.Level1)
+{
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    ButtonModelStatic::SetBorderRadius(frameNode,
+        Dimension(10.0, DimensionUnit::LPX), Dimension(10.0, DimensionUnit::LPX),
+        Dimension(10.0, DimensionUnit::LPX), Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS), 0);
+
+    ButtonModelStatic::SetBorderRadius(frameNode,
+        std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS), 0);
+}
 } // namespace OHOS::Ace::NG

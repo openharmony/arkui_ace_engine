@@ -17,14 +17,9 @@
 #include "ressched_report.h"
 
 #include "base/thread/background_task_executor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace {
 namespace {
-constexpr char DATA_IMAGE_PREFIX[] = "data:image";
-constexpr int32_t DATA_IMAGE_PREFIX_LENGTH = 10;
-constexpr int32_t DATA_IMAGE_LENGTH = 32;
 constexpr int32_t MAX_UPDATE_TEXT_LENGTH = 1024;
 
 bool SafeConvertStringToInt32(const std::string& str, int32_t& result)
@@ -34,25 +29,12 @@ bool SafeConvertStringToInt32(const std::string& str, int32_t& result)
     return !ss.fail();
 }
 
-bool IsDataImageUrl(const std::string& url)
+void GetPayloadPath(const WeakPtr<NG::FrameNode> weakNode, std::string& path)
 {
-    return url.length() >= DATA_IMAGE_PREFIX_LENGTH &&
-        url.compare(0, DATA_IMAGE_PREFIX_LENGTH, DATA_IMAGE_PREFIX) == 0;
-}
-
-std::string ProcessDataImageUrl(const std::string& dataUrl)
-{
-    std::string result = dataUrl.substr(0, DATA_IMAGE_LENGTH);
-    std::replace(result.begin(), result.end(), ',', ';');
-    return result;
-}
-
-std::string ProcessImageUrl(const std::string& url)
-{
-    if (IsDataImageUrl(url)) {
-        return ProcessDataImageUrl(url);
-    }
-    return url;
+    CHECK_EQUAL_VOID(path.empty(), false);
+    auto node = weakNode.Upgrade();
+    CHECK_NULL_VOID(node);
+    path = node->GetPath();
 }
 
 void CheckPayloadTextEmpty(const WeakPtr<NG::FrameNode> weakNode, std::string& text)
@@ -72,19 +54,6 @@ void MergeText(std::string& src, const std::string& target)
         src += ",";
     }
     src += target;
-}
-
-void MergeNodeImageSource(const RefPtr<NG::FrameNode> node, std::string& imgSrc)
-{
-    CHECK_NULL_VOID(node);
-    CHECK_NE_VOID(node->GetTag(), V2::IMAGE_ETS_TAG);
-
-    auto imageLayoutProperty = node->GetLayoutProperty<NG::ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto info = imageLayoutProperty->GetImageSourceInfo();
-    CHECK_NULL_VOID(info);
-
-    MergeText(imgSrc, ProcessImageUrl(info->GetSrc()));
 }
 } // namespace
 
@@ -120,26 +89,24 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
         return;
     }
 
-    EventTarget target = gestureEvent.GetTarget();
     std::unordered_map<std::string, std::string> payload;
-    payload["width"] = target.area.GetWidth().ToString();
-    payload["height"] = target.area.GetHeight().ToString();
     payload["pid"] = std::to_string(AceApplicationInfo::GetInstance().GetPid());
     payload["uid"] = std::to_string(AceApplicationInfo::GetInstance().GetUid());
     payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
     payload["abilityName"] = AceApplicationInfo::GetInstance().GetAbilityName();
     std::string text = "";
-    std::string imgSrc = "";
-    GetComponentTextAndImageSourceRecursive(weakNode, text, imgSrc, GetDepth());
+    std::string path = "";
+    GetComponentTextRecursive(weakNode, text, GetDepth());
     CheckPayloadTextEmpty(weakNode, text);
+    GetPayloadPath(weakNode, path);
 
+    payload["path"] = path.substr(0, MAX_UPDATE_TEXT_LENGTH);
     payload["text"] = text.substr(0, MAX_UPDATE_TEXT_LENGTH);
-    payload["imgSrc"] = imgSrc.substr(0, MAX_UPDATE_TEXT_LENGTH);
     ResSchedReport::GetInstance().ResSchedDataReport("click", payload);
 }
 
-void ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(
-    const WeakPtr<NG::FrameNode> weakNode, std::string& text, std::string& imgSrc, const int32_t remain)
+void ResSchedClickOptimizer::GetComponentTextRecursive(
+    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain)
 {
     CHECK_EQUAL_VOID(remain <= 0, true);
 
@@ -155,11 +122,10 @@ void ResSchedClickOptimizer::GetComponentTextAndImageSourceRecursive(
     }
 
     MergeText(text, nodeText);
-    MergeNodeImageSource(node, imgSrc);
 
     auto& children = node->GetFrameChildren();
     for (auto& childWeak : children) {
-        GetComponentTextAndImageSourceRecursive(childWeak, text, imgSrc, remain - 1);
+        GetComponentTextRecursive(childWeak, text, remain - 1);
     }
 }
 } // namespace OHOS::Ace

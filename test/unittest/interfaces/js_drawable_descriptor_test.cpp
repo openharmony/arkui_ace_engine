@@ -125,35 +125,6 @@ HWTEST_F(JsDrawableDescriptorTest, JsDrawableDescriptorTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsDrawableDescriptorTest007
- * @tc.desc: test CreatDrawable function;
- * @tc.type: FUNC
- */
-HWTEST_F(JsDrawableDescriptorTest, JsDrawableDescriptorTest007, TestSize.Level1)
-{
-    napi_env env = nullptr;
-    void* native = nullptr;
-    JsDrawableDescriptor jsDrawableDescriptor;
-    napi_value result = jsDrawableDescriptor.CreatDrawable(env, native);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.name: JsDrawableDescriptorTest008
- * @tc.desc: test CreatDrawable function with valid native pointer but null env;
- * @tc.type: FUNC
- */
-HWTEST_F(JsDrawableDescriptorTest, JsDrawableDescriptorTest008, TestSize.Level1)
-{
-    napi_env env = nullptr;
-    void* native = malloc(100);
-    JsDrawableDescriptor jsDrawableDescriptor;
-    napi_value result = jsDrawableDescriptor.CreatDrawable(env, native);
-    EXPECT_EQ(result, nullptr);
-    free(native);
-}
-
-/**
  * @tc.name: JsDrawableDescriptorTest009
  * @tc.desc: test CreatLayeredDrawable function;
  * @tc.type: FUNC

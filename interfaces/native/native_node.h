@@ -4278,6 +4278,72 @@ typedef enum {
     NODE_TEXT_INPUT_DECORATION = 7050,
 
     /**
+     * @brief Sets a linear gradient effect for text in the single-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * The setting takes effect only when <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>.
+     * A positive value indicates a clockwise rotation from the origin, (0, 0). The default value is <b>180</b>. \n
+     * .value[1].i32: direction of the linear gradient. When a direction other than
+     * <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b> is set, the <b>angle</b> property is ignored.
+     * The parameter type is {@link ArkUI_LinearGradientDirection}. \n
+     * .value[2].i32: whether the colors are repeated. The default value is <b>false</b>.
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * When <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>, <b>angle</b> at the set value;
+     * otherwise, it is at default value. \n
+     * .value[1].i32: direction of the linear gradient. \n
+     * .value[2].i32: whether the colors are repeated. \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_LINEAR_GRADIENT = 7051,
+
+    /**
+     * @brief Sets a radial gradient effect for text in the single-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0]?.f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1]?.f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2]?.f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3]?.i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.\n \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1].f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2].f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3].i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.  \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_RADIAL_GRADIENT = 7052,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4897,6 +4963,72 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_TEXT_AREA_DECORATION = 8047,
+
+    /**
+     * @brief Sets a linear gradient effect for text in the multi-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * The setting takes effect only when <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>.
+     * A positive value indicates a clockwise rotation from the origin, (0, 0). The default value is <b>180</b>. \n
+     * .value[1].i32: direction of the linear gradient. When a direction other than
+     * <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b> is set, the <b>angle</b> property is ignored.
+     * The parameter type is {@link ArkUI_LinearGradientDirection}. \n
+     * .value[2].i32: whether the colors are repeated. The default value is <b>false</b>.
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * When <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>, <b>angle</b> at the set value;
+     * otherwise, it is at default value. \n
+     * .value[1].i32: direction of the linear gradient. \n
+     * .value[2].i32: whether the colors are repeated. \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_LINEAR_GRADIENT = 8048,
+ 
+    /**
+     * @brief Sets a radial gradient effect for text in the multi-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0]?.f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1]?.f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2]?.f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3]?.i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.\n \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1].f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2].f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3].i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.  \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_RADIAL_GRADIENT = 8049,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.

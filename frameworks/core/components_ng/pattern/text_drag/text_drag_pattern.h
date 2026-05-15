@@ -253,6 +253,7 @@ public:
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode,
         const RefPtr<FrameNode>& hostNode = nullptr);
+    virtual OffsetF ConvertToGlobalOffset(const OffsetF& localOffset, const OffsetF& parentGlobalOffset);
     virtual void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes);
     static RectF GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
         const OffsetF globalOffset, const OffsetF textStartOffset);

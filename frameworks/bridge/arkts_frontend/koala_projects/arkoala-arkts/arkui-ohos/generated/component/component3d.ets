@@ -329,6 +329,21 @@ export function Component3DImpl(
     })
 }
 
+@memo
+export function Component3D(
+    @memo @memo_skip
+    style: ((attributes: Component3DAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkComponent3DComponent>((): ArkComponent3DComponent => {
+        return new ArkComponent3DComponent()
+    })
+    NodeAttach<ArkComponent3DPeer>((): ArkComponent3DPeer => ArkComponent3DPeer.create(receiver), (_: ArkComponent3DPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class SceneOptions_serializer {
     public static write(buffer: SerializerBase, value: SceneOptions): void {
         let valueSerializer: SerializerBase = buffer

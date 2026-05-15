@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_GRID_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_GRID_ELEMENT_H
 
-#include "base/utils/noncopyable.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/render_element.h"

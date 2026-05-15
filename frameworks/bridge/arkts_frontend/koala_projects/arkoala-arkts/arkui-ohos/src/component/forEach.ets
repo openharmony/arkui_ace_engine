@@ -41,6 +41,7 @@ export interface ForEachAttribute<T> extends DynamicNode {
     debugLine(sourceLine: string, moduleName?: string): this {
         return this;
     }
+    applyAttributesFinish(): void {}
 }
 
 export class ArkForEachComponent<T> implements ForEachAttribute<T> {
@@ -75,6 +76,8 @@ export class ArkForEachComponent<T> implements ForEachAttribute<T> {
     public debugLine(sourceLine: string, moduleName?: string): this {
         return this;
     }
+
+    public applyAttributesFinish(): void {}
 }
 
 class ForEachManager {
@@ -154,6 +157,41 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
 
 /** @memo */
 export function ForEachImpl<T>(
+    /** @memo */
+    style: ((attributes: ForEachAttribute<T>) => void) | undefined
+) {
+    const receiver = remember(() => {
+        return new ArkForEachComponent<T>()
+    })
+    style?.(receiver)
+    if (receiver.arr === null || receiver.arr === undefined) {
+        throw new Error('input array function is null or undefined error. Application error!');
+    }
+    if (typeof receiver.itemGenerator !== 'function') {
+        throw new Error('item generator function missing. Application error!');
+    }
+    if (receiver.keyGenerator !== undefined && typeof receiver.keyGenerator !== 'function') {
+        throw new Error('key generator is not a function. Application error!');
+    }
+    let manager = remember(() => new ForEachManager())
+    const hasDataChanged = forEachAttach<T>(receiver, manager);
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set, and reset callbacks if onMove is unset
+     */
+    ForEachOps.SyncOnMoveOps(manager.node!.getPeerPtr(),
+        manager.additionalChild,
+        receiver.onMoveEvent,
+        receiver.itemDragEvent);
+
+    // Only call FinishRender when data has changed to optimize performance
+    if (hasDataChanged) {
+        ArkUIAniModule._ForEach_FinishRender(manager.node!.getPeerPtr());
+    }
+}
+
+/** @memo */
+export function ForEach<T>(
     /** @memo */
     style: ((attributes: ForEachAttribute<T>) => void) | undefined
 ) {

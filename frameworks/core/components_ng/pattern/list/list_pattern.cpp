@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/common/container.h"
+#include "core/common/statistic_event_reporter.h"
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
@@ -28,6 +29,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"

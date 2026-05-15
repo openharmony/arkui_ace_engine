@@ -81,6 +81,7 @@ void SelectModelStatic::SetSpace(FrameNode* frameNode, const std::optional<Dimen
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_SPACE, frameNode);
     if (value) {
         pattern->SetSpace(value.value());
     } else {

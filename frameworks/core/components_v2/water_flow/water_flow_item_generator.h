@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_ITEM_GENERATOR_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_ITEM_GENERATOR_ELEMENT_H
 
-#include "core/components_v2/water_flow/render_water_flow_item.h"
+#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
 

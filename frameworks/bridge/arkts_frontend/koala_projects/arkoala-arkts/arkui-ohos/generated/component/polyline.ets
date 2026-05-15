@@ -163,6 +163,18 @@ export function PolylineImpl(
     })
 }
 
+@memo
+export function Polyline(
+    @memo @memo_skip
+    style: ((attributes: PolylineAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkPolylineComponent>((): ArkPolylineComponent => {
+        return new ArkPolylineComponent()
+    })
+    NodeAttach<ArkPolylinePeer>((): ArkPolylinePeer => ArkPolylinePeer.create(receiver), (_: ArkPolylinePeer): void => {
+        style?.(receiver)
+    })
+}
 export class PolylineOptions_serializer {
     public static write(buffer: SerializerBase, value: PolylineOptions): void {
         let valueSerializer: SerializerBase = buffer

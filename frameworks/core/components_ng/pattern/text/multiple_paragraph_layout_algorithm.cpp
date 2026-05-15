@@ -37,6 +37,7 @@
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -205,6 +206,49 @@ void MultipleParagraphLayoutAlgorithm::UpdateShaderStyle(
     } else {
         textStyle.SetGradient(std::nullopt);
         textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+    }
+}
+
+void MultipleParagraphLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_VOID(paragraphManager_);
+    auto paragraphs = paragraphManager_->GetParagraphs();
+    if (spans_.empty()) {
+        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
+            auto paragraph = pIter->paragraph;
+            if (!paragraph) {
+                continue;
+            }
+            auto textStyle = textStyle_;
+            CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
+            textStyle.SetForeGroundBrushBitMap();
+            paragraph->ReLayoutForeground(textStyle);
+        }
+        return;
+    }
+    if (!spans_.empty()) {
+        size_t itemIndex = -1;
+        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
+            ++itemIndex;
+            auto paragraph = pIter->paragraph;
+            if (!paragraph) {
+                continue;
+            }
+            if (itemIndex >= spans_.size()) {
+                return;
+            }
+            auto spans = spans_[itemIndex];
+            TextStyle textStyle;
+            if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
+                spans.front()->GetTextStyle()->GetGradient().has_value()) {
+                textStyle = spans.front()->GetTextStyle().value();
+            } else {
+                textStyle = textStyle_;
+            }
+            CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
+            textStyle.SetForeGroundBrushBitMap();
+            paragraph->ReLayoutForeground(textStyle);
+        }
     }
 }
 
@@ -876,6 +920,8 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
                 Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) &&
                 std::next(groupIt) != spans_.end();
             spanParagraphStyle.isFirstParagraphLineSpacing = (groupIt == spans_.begin());
+            spanParagraphStyle.colorShaderStyle = paraStyleSpanItem->textLineStyle->GetColorShaderStyle();
+            spanParagraphStyle.SetOptGradient(paraStyleSpanItem->textLineStyle->GetGradient());
         }
         auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
         CHECK_NULL_RETURN(paragraph, false);

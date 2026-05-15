@@ -376,6 +376,18 @@ export function TimePickerImpl(
     })
 }
 
+@memo
+export function TimePicker(
+    @memo @memo_skip
+    style: ((attributes: TimePickerAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkTimePickerComponent>((): ArkTimePickerComponent => {
+        return new ArkTimePickerComponent()
+    })
+    NodeAttach<ArkTimePickerPeer>((): ArkTimePickerPeer => ArkTimePickerPeer.create(receiver), (_: ArkTimePickerPeer): void => {
+        style?.(receiver)
+    })
+}
 export class TimePickerResult_serializer {
     public static write(buffer: SerializerBase, value: TimePickerResult): void {
         let valueSerializer: SerializerBase = buffer

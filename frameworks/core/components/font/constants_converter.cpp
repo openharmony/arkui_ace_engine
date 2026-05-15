@@ -579,6 +579,20 @@ inline void ConvertBitmap(const Bitmap1& source, Bitmap2& destination)
     }
 }
 
+OHOS::Rosen::Drawing::Pen::JoinStyle ConvertJoinStyle(const StrokeJoinStyle& style)
+{
+    switch (style) {
+        case StrokeJoinStyle::MITER_JOIN:
+            return OHOS::Rosen::Drawing::Pen::JoinStyle::MITER_JOIN;
+        case StrokeJoinStyle::ROUND_JOIN:
+            return OHOS::Rosen::Drawing::Pen::JoinStyle::ROUND_JOIN;
+        case StrokeJoinStyle::BEVEL_JOIN:
+            return OHOS::Rosen::Drawing::Pen::JoinStyle::BEVEL_JOIN;
+        default:
+            return OHOS::Rosen::Drawing::Pen::JoinStyle::MITER_JOIN;
+    }
+}
+
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
     ConvertBitmap(textStyle.GetReLayoutTextStyleBitmap(), txtStyle.relayoutChangeBitmap);
@@ -659,6 +673,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
             textStyle.IsAllowScale(), textStyle.GetEnvFontScale())));
         pen.SetColor(textStyle.GetStrokeColor().GetValue());
+        if (textStyle.GetStrokeJoinStyle().has_value()) {
+            pen.SetJoinStyle(ConvertJoinStyle(textStyle.GetStrokeJoinStyle().value()));
+        }
         txtStyle.foregroundPen = pen;
     }
     if (textStyle.GetStrokeWidth().Value() < DEFAULT_STROKE_WIDTH) {

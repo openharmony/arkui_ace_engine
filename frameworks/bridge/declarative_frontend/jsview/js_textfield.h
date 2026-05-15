@@ -152,6 +152,8 @@ public:
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
+    static void SetStrokeJoinStyle(const JSCallbackInfo& info);
+    static void SetShaderStyle(const JSCallbackInfo& info);
     static void SetOrphanCharOptimization(const JSCallbackInfo& info);
     static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
     static NG::KeyboardAppearanceConfig ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj);

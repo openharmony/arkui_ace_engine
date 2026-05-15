@@ -935,4 +935,126 @@ HWTEST_F(NativeStyledStringTest, DestroyTextController001, TestSize.Level1)
     EXPECT_NE(controller, nullptr);
     OH_ArkUI_TextController_Destroy(controller);
 }
+
+/**
+ * @tc.name: TestLinearGradientOptions001
+ * @tc.desc: Test angle, direction, and repeating properties of OH_ArkUI_LinearGradientOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, TestLinearGradientOptions001, TestSize.Level1) {
+    /**
+     * @tc.steps: step1. create linear gradient options
+     */
+    OH_ArkUI_LinearGradientOptions* options = OH_ArkUI_LinearGradientOptions_Create();
+    ASSERT_NE(options, nullptr);
+ 
+    /**
+     * @tc.steps: step2. test set angle
+     */
+    float angle = 45.0f;
+    auto errorCode = OH_ArkUI_LinearGradientOptions_SetAngle(options, angle);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    float getAngle = 0.0f;
+    errorCode = OH_ArkUI_LinearGradientOptions_GetAngle(options, &getAngle);
+    EXPECT_EQ(getAngle, angle);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    /**
+     * @tc.steps: step3. test set direction
+     */
+    ArkUI_LinearGradientDirection direction =
+        ArkUI_LinearGradientDirection::ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT_TOP;
+    errorCode = OH_ArkUI_LinearGradientOptions_SetDirection(options, direction);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    ArkUI_LinearGradientDirection getDirection =
+        ArkUI_LinearGradientDirection::ARKUI_LINEAR_GRADIENT_DIRECTION_NONE;
+    errorCode = OH_ArkUI_LinearGradientOptions_GetDirection(options, &getDirection);
+    EXPECT_EQ(getDirection, direction);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    /**
+     * @tc.steps: step4. test set repeating
+     */
+    bool repeating = true;
+    errorCode = OH_ArkUI_LinearGradientOptions_SetRepeating(options, repeating);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    bool getRepeating = false;
+    errorCode = OH_ArkUI_LinearGradientOptions_GetRepeating(options, &getRepeating);
+    EXPECT_EQ(getRepeating, repeating);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    /**
+     * @tc.steps: step5. destroy linear gradient options
+     */
+    OH_ArkUI_LinearGradientOptions_Destroy(options);
+}
+ 
+/**
+ * @tc.name: TestRadialGradientOptions001
+ * @tc.desc: Test centerX, centerY, radius, and repeating properties of OH_ArkUI_RadialGradientOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeStyledStringTest, TestRadialGradientOptions001, TestSize.Level1) {
+    /**
+     * @tc.steps: step1. create radial gradient options
+     */
+    OH_ArkUI_RadialGradientOptions* options = OH_ArkUI_RadialGradientOptions_Create();
+    ASSERT_NE(options, nullptr);
+ 
+    /**
+     * @tc.steps: step2. test set centerX
+     */
+    float centerX = 50.0f;
+    auto errorCode = OH_ArkUI_RadialGradientOptions_SetCenterX(options, centerX);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    float getCenterX = 0.0f;
+    errorCode = OH_ArkUI_RadialGradientOptions_GetCenterX(options, &getCenterX);
+    EXPECT_EQ(getCenterX, centerX);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    /**
+     * @tc.steps: step3. test set centerY
+     */
+    float centerY = 50.0f;
+    errorCode = OH_ArkUI_RadialGradientOptions_SetCenterY(options, centerY);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    float getCenterY = 0.0f;
+    errorCode = OH_ArkUI_RadialGradientOptions_GetCenterY(options, &getCenterY);
+    EXPECT_EQ(getCenterY, centerY);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    /**
+     * @tc.steps: step4. test set radius
+     */
+    float radius = 100.0f;
+    errorCode = OH_ArkUI_RadialGradientOptions_SetRadius(options, radius);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    float getRadius = 0.0f;
+    errorCode = OH_ArkUI_RadialGradientOptions_GetRadius(options, &getRadius);
+    EXPECT_EQ(getRadius, radius);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    /**
+     * @tc.steps: step5. test set repeating
+     */
+    bool repeating = true;
+    errorCode = OH_ArkUI_RadialGradientOptions_SetRepeating(options, repeating);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    bool getRepeating = false;
+    errorCode = OH_ArkUI_RadialGradientOptions_GetRepeating(options, &getRepeating);
+    EXPECT_EQ(getRepeating, repeating);
+    EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    /**
+     * @tc.steps: step6. destroy radial gradient options
+     */
+    OH_ArkUI_RadialGradientOptions_Destroy(options);
+}
 } // namespace OHOS::Ace

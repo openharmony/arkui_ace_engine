@@ -171,3 +171,18 @@ export function HyperlinkImpl(
     })
 }
 
+@memo
+export function Hyperlink(
+    @memo @memo_skip
+    style: ((attributes: HyperlinkAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkHyperlinkComponent>((): ArkHyperlinkComponent => {
+        return new ArkHyperlinkComponent()
+    })
+    NodeAttach<ArkHyperlinkPeer>((): ArkHyperlinkPeer => ArkHyperlinkPeer.create(receiver), (_: ArkHyperlinkPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

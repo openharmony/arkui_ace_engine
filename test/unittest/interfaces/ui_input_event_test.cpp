@@ -42,8 +42,10 @@ constexpr float CURRENT_LOCAL_WINDOW_X = 21.0f;
 constexpr float CURRENT_LOCAL_WINDOW_Y = 31.0f;
 constexpr float CURRENT_LOCAL_FALLBACK_X = 4.0f;
 constexpr float CURRENT_LOCAL_FALLBACK_Y = 6.0f;
-constexpr float CURRENT_LOCAL_POINTER_X = 0.0f;
-constexpr float CURRENT_LOCAL_POINTER_Y = 0.0f;
+constexpr float CURRENT_LOCAL_FIRST_POINTER_X = 7.0f;
+constexpr float CURRENT_LOCAL_FIRST_POINTER_Y = 9.0f;
+constexpr float CURRENT_LOCAL_SECOND_POINTER_X = 11.0f;
+constexpr float CURRENT_LOCAL_SECOND_POINTER_Y = 13.0f;
 constexpr int32_t INVALID_NODE_ID = -1;
 
 class ScopedCurrentLocalNode final {
@@ -922,36 +924,54 @@ HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest003, TestSize.Level1)
 
 /**
  * @tc.name: PointerEventCurrentLocalTest004
- * @tc.desc: Test current local fallback for indexed touch points without valid node id.
+ * @tc.desc: Test current local fallback for indexed touch points without valid node id in multi-touch.
  * @tc.type: FUNC
  */
 HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest004, TestSize.Level1)
 {
     ArkUITouchEvent touchEvent {};
-    touchEvent.touchPointSize = 1;
+    touchEvent.subKind = ON_TOUCH;
+    touchEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    ArkUITouchPoint touchPoints[] = {
+        MakeTouchPoint(CURRENT_LOCAL_FIRST_POINTER_X, CURRENT_LOCAL_FIRST_POINTER_Y, 17.0f, 19.0f),
+        MakeTouchPoint(CURRENT_LOCAL_SECOND_POINTER_X, CURRENT_LOCAL_SECOND_POINTER_Y, 23.0f, 29.0f),
+    };
+    touchEvent.touchPointes = touchPoints;
+    touchEvent.touchPointSize = static_cast<uint32_t>(sizeof(touchPoints) / sizeof(touchPoints[0]));
     auto uiInputEvent = MakeUiInputEvent(&touchEvent, C_TOUCH_EVENT_ID, INVALID_NODE_ID);
 
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_POINTER_X);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_POINTER_Y);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_FIRST_POINTER_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_FIRST_POINTER_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 1), CURRENT_LOCAL_SECOND_POINTER_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 1), CURRENT_LOCAL_SECOND_POINTER_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, touchEvent.touchPointSize), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, touchEvent.touchPointSize), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
  * @tc.name: PointerEventCurrentLocalTest005
- * @tc.desc: Test hover move current local uses current transform when node id is valid.
+ * @tc.desc: Test current local by index does not support hover move touch event.
  * @tc.type: FUNC
  */
 HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest005, TestSize.Level1)
 {
-    ScopedCurrentLocalNode node;
-    ASSERT_TRUE(node.IsValid());
     ArkUITouchEvent touchEvent {};
     touchEvent.subKind = ON_HOVER_MOVE;
     touchEvent.actionTouchPoint = MakeTouchPoint(
         CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
-    auto uiInputEvent = MakeUiInputEvent(&touchEvent, C_TOUCH_EVENT_ID, node.GetId());
+    auto uiInputEvent = MakeUiInputEvent(&touchEvent, C_TOUCH_EVENT_ID, INVALID_NODE_ID);
 
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_X);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_Y);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 }
 
 /**

@@ -21,6 +21,10 @@
 namespace OHOS::Ace::Ani {
 void DrawableCreatePixelMapDrawable(
     ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni, ani_object pixelAni);
+void DrawableCreatePixelMapDrawableByResource(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
+    ani_long resourceObjectKPointer);
+void DrawableCreatePixelMapDrawableByString(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
+    ani_string resource);
 void DrawableCreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
     ani_object foregroundAni, ani_object backgroundAni, ani_object maskAni);
 void DrawableCreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,

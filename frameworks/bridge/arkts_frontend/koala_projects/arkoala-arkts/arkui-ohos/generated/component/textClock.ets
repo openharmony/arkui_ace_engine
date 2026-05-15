@@ -440,6 +440,18 @@ export function TextClockImpl(
     })
 }
 
+@memo
+export function TextClock(
+    @memo @memo_skip
+    style: ((attributes: TextClockAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkTextClockComponent>((): ArkTextClockComponent => {
+        return new ArkTextClockComponent()
+    })
+    NodeAttach<ArkTextClockPeer>((): ArkTextClockPeer => ArkTextClockPeer.create(receiver), (_: ArkTextClockPeer): void => {
+        style?.(receiver)
+    })
+}
 export class TextClockConfiguration_serializer {
     public static write(buffer: SerializerBase, value: TextClockConfiguration): void {
         let valueSerializer: SerializerBase = buffer

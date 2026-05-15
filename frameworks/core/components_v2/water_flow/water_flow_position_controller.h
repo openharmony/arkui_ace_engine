@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_WATER_FLOW_WATER_FLOW_POSITION_CONTROLLER_H
 
 #include "core/components/scroll/scroll_controller.h"
-#include "core/components/scroll/scrollable.h"
 
 namespace OHOS::Ace::V2 {
 class ACE_FORCE_EXPORT WaterFlowPositionController : public ScrollController {
