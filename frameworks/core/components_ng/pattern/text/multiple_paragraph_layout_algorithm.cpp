@@ -226,36 +226,30 @@ void MultipleParagraphLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayo
         }
         return;
     }
-    if (!spans_.empty()) {
-        size_t itemIndex = -1;
-        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
-            ++itemIndex;
-            auto paragraph = pIter->paragraph;
-            if (!paragraph) {
-                continue;
+    size_t itemIndex = -1;
+    for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
+        ++itemIndex;
+        auto paragraph = pIter->paragraph;
+        CHECK_NULL_CONTINUE(paragraph);
+        CHECK_NULL_VOID(itemIndex < spans_.size());
+        auto spans = spans_[itemIndex];
+        TextStyle textStyle;
+        if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
+            spans.front()->GetTextStyle()->GetGradient().has_value()) {
+            textStyle = spans.front()->GetTextStyle().value();
+            auto& textLineStyle = spans.front()->textLineStyle;
+            auto gradient = textLineStyle->GetGradient();
+            if (gradient.has_value()) {
+                textStyle.SetGradient(GradientConvert::ToGradient(gradient.value()));
+            } else if (textLineStyle->GetColorShaderStyle().has_value()) {
+                textStyle.SetColorShaderStyle(textLineStyle->GetColorShaderStyle());
             }
-            if (itemIndex >= spans_.size()) {
-                return;
-            }
-            auto spans = spans_[itemIndex];
-            TextStyle textStyle;
-            if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
-                spans.front()->GetTextStyle()->GetGradient().has_value()) {
-                textStyle = spans.front()->GetTextStyle().value();
-                auto& textLineStyle = spans.front()->textLineStyle;
-                auto gradient = textLineStyle->GetGradient();
-                if (gradient.has_value()) {
-                    textStyle.SetGradient(GradientConvert::ToGradient(gradient,value()));
-                } else if (textLineStyle->GetColorShaderStyle().has_value()) {
-                    textStyle.SetColorShaderStyle(textLineStyle->GetColorShaderStyle());
-                }
-            } else {
-                textStyle = textStyle_;
-            }
-            CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
-            textStyle.SetForeGroundBrushBitMap();
-            paragraph->ReLayoutForeground(textStyle);
+        } else {
+            textStyle = textStyle_;
         }
+        CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
+        textStyle.SetForeGroundBrushBitMap();
+        paragraph->ReLayoutForeground(textStyle);
     }
 }
 
