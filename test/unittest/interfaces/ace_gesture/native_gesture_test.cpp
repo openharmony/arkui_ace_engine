@@ -24,6 +24,7 @@
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/gestures/gesture_info.h"
+#include "core/interfaces/native/utility/error_message_manager.h"
 #include "frameworks/core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "frameworks/core/components_ng/gestures/recognizers/pan_recognizer.h"
@@ -57,7 +58,7 @@ HWTEST_F(NativeGestureTest, NativeGestureTest004, TestSize.Level1)
     * @tc.steps: step1. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_GestureInterrupter_GetUserData"), std::string::npos);
@@ -1039,7 +1040,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0024, TestSize.Level1)
     * @tc.steps: step1. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify"), std::string::npos);
@@ -1052,7 +1053,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0024, TestSize.Level1)
     * @tc.steps: step2. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify"), std::string::npos);
@@ -1434,7 +1435,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
     * @tc.steps: step2. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_SetAllowableMovement"), std::string::npos);
@@ -1446,7 +1447,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_SetAllowableMovement"), std::string::npos);
@@ -1474,7 +1475,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
     * @tc.steps: step5. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_GetAllowableMovement"), std::string::npos);
@@ -1486,7 +1487,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
     * @tc.steps: step6. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_GetAllowableMovement"), std::string::npos);
@@ -1503,7 +1504,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
     * @tc.steps: step8. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_GetAllowableMovement"), std::string::npos);
@@ -1532,7 +1533,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0046, TestSize.Level1)
     * @tc.steps: step2. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_SetAllowableMovement"), std::string::npos);
@@ -1544,7 +1545,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0046, TestSize.Level1)
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_SetAllowableMovement"), std::string::npos);
@@ -1570,7 +1571,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0046, TestSize.Level1)
     * @tc.steps: step5. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_SetAllowableMovement"), std::string::npos);
@@ -1587,7 +1588,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0046, TestSize.Level1)
     * @tc.steps: step7. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_LongPressGesture_GetAllowableMovement"), std::string::npos);

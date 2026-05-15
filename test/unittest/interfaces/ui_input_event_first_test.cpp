@@ -18,6 +18,7 @@
 #include "interfaces/native/node/event_converter.h"
 #include "native_node.h"
 #include "ui_input_event.h"
+#include "core/interfaces/native/utility/error_message_manager.h"
 #include "frameworks/core/event/ace_events.h"
 #include "frameworks/core/event/axis_event.h"
 #include "frameworks/core/event/crown_event.h"
@@ -1523,7 +1524,7 @@ HWTEST_F(UIInputEventTest, CrownEventTest001, TestSize.Level1)
     * @tc.steps: step1. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT and function name.
     */
-    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_DigitalCrownEvent_SetStopPropagation"), std::string::npos);
@@ -1534,7 +1535,7 @@ HWTEST_F(UIInputEventTest, CrownEventTest001, TestSize.Level1)
     * @tc.steps: step2. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_DigitalCrownEvent_GetAction"), std::string::npos);
@@ -1548,7 +1549,7 @@ HWTEST_F(UIInputEventTest, CrownEventTest001, TestSize.Level1)
     * @tc.steps: step3. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_DigitalCrownEvent_SetStopPropagation"), std::string::npos);
@@ -1559,7 +1560,7 @@ HWTEST_F(UIInputEventTest, CrownEventTest001, TestSize.Level1)
     * @tc.steps: step4. Verify error message contains correct error code and function name.
     * @tc.expect: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
     */
-    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
     errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
     EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
     EXPECT_NE(std::string(errorMsg).find("OH_ArkUI_DigitalCrownEvent_GetAction"), std::string::npos);
