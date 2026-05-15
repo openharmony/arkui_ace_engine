@@ -242,6 +242,13 @@ void MultipleParagraphLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayo
             if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
                 spans.front()->GetTextStyle()->GetGradient().has_value()) {
                 textStyle = spans.front()->GetTextStyle().value();
+                auto& textLineStyle = spans.front()->textLineStyle;
+                auto gradient = textLineStyle->GetGradient();
+                if (gradient.has_value()) {
+                    textStyle.SetGradient(GradientConvert::ToGradient(gradient,value()));
+                } else if (textLineStyle->GetColorShaderStyle().has_value()) {
+                    textStyle.SetColorShaderStyle(textLineStyle->GetColorShaderStyle());
+                }
             } else {
                 textStyle = textStyle_;
             }

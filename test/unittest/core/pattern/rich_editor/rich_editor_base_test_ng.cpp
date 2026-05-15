@@ -86,6 +86,10 @@ void RichEditorBaseTestNg::OnDrawVerify(
     ASSERT_NE(richEditorPattern, nullptr);
     auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
     richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
+
+    /**
+     * @tc.steps: step2. add span
+     */
     if (type == SelectSpanType::TYPESPAN) {
         AddSpan(text);
     } else if (type == SelectSpanType::TYPEIMAGE) {
@@ -108,21 +112,21 @@ void RichEditorBaseTestNg::OnDrawVerify(
     }
 
     /**
-     * @tc.steps: step2. Move handle
+     * @tc.steps: step3. Move handle
      */
     auto controller = richEditorPattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(1.0f, 1.0f));
 
     /**
-     * @tc.steps: step3. Test magnifier open or close
+     * @tc.steps: step4. Test magnifier open or close
      * @tc.expected: magnifier is open
      */
     auto ret = controller->GetShowMagnifier();
     EXPECT_TRUE(ret);
 
     /**
-     * @tc.steps: step4. Craete RichEditorOverlayModifier
+     * @tc.steps: step5. Craete RichEditorOverlayModifier
      */
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
@@ -132,7 +136,7 @@ void RichEditorBaseTestNg::OnDrawVerify(
     ASSERT_NE(richFieldOverlayModifier, nullptr);
 
     /**
-     * @tc.steps: step5. Create DrawingContext
+     * @tc.steps: step6. Create DrawingContext
      */
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -142,19 +146,19 @@ void RichEditorBaseTestNg::OnDrawVerify(
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
 
     /**
-     * @tc.steps: step6. Do onDraw(context)
+     * @tc.steps: step7. Do onDraw(context)
      */
     richFieldOverlayModifier->onDraw(context);
 
     /**
-     * @tc.steps: step7. When handle move done
+     * @tc.steps: step8 When handle move done
      */
     richEditorPattern->ProcessOverlay();
     RectF handleRect;
     richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
 
     /**
-     * @tc.steps: step8. Test magnifier open or close
+     * @tc.steps: step9. Test magnifier open or close
      * @tc.expected: magnifier is close
      */
     ret = controller->GetShowMagnifier();
