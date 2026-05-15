@@ -1426,6 +1426,8 @@ void CalendarPickerPattern::FlushTextStyle()
             SetSelectedType(selected_);
         }
         if (layoutProperty->HasFontSize()) {
+            auto textNode = textLayoutProperty->GetHost();
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(layoutProperty->GetFontSize().value(), LpxAttribute::LPX_FONT_SIZE, textNode);
             textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
         }
         if (layoutProperty->HasWeight()) {
