@@ -811,6 +811,9 @@ public:
         resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
                                                          : GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
+        if (!resourceWrapper) {
+            return false;
+        }
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {
                 return false;
