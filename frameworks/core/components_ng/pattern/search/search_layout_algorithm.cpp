@@ -282,7 +282,11 @@ void SearchLayoutAlgorithm::SetTextFieldLayoutConstraintHeight(LayoutConstraintF
         auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
         auto textFieldLayoutProperty =
             AceType::DynamicCast<TextFieldLayoutProperty>(textFieldWrapper->GetLayoutProperty());
-        if ((textFieldLayoutProperty == nullptr) || (!textFieldLayoutProperty->HasLineHeight())) {
+        if ((textFieldLayoutProperty == nullptr) ||
+            (!textFieldLayoutProperty->HasLineHeight() && (!textFieldLayoutProperty->HasFallbackLineSpacing() ||
+                !textFieldLayoutProperty->GetFallbackLineSpacingValue(false)))) {
+            // In low font-scale scenarios, Burmese text may be clipped.
+            // so that enabling FallbackLineSpacing to prevent text clipping.
             contentConstraint.selfIdealSize.SetHeight(textFieldHeight);
         }
         return;
