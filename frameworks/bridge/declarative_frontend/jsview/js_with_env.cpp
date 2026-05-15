@@ -18,7 +18,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/syntax/with_env_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -32,7 +32,12 @@ void JSWithEnv::Create(const JSCallbackInfo& info)
 
 void JSWithEnv::Pop()
 {
-    ViewStackProcessor::GetInstance()->PopContainer();
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSWithEnv][pop]", &JSWithEnv::Pop);
+    }
+
+    ViewStackModel::GetInstance()->PopContainer();
+    return ;
 }
 
 void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
