@@ -514,4 +514,23 @@ export function ArcSwiperImpl(
     })
 }
 
+@memo
+export function ArcSwiper(
+    @memo
+    style: ((attributes: ArcSwiperAttribute) => void) | undefined,
+    @memo
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkArcSwiperComponent>((): ArkArcSwiperComponent => {
+        return new ArkArcSwiperComponent()
+    })
+    NodeAttach<ArkArcSwiperPeer>((): ArkArcSwiperPeer => ArkArcSwiperPeer.create(receiver), (peer: ArkArcSwiperPeer): void => {
+        receiver.setPeer(peer)
+        style?.(receiver)
+        receiver.setPeer(undefined)
+        content_?.()
+    })
+}
+ 
+
 export type ArcSwiperInterface = (controller?: ArcSwiperController) => ArcSwiperAttribute;
