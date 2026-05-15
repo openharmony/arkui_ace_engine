@@ -16,6 +16,9 @@
 #include "core/interfaces/native/utility/error_message_manager.h"
 
 namespace OHOS::Ace {
+namespace {
+static std::string mockErrorMessage;
+} // namespace
 
 ErrorMessageManager& ErrorMessageManager::GetInstance()
 {
@@ -25,19 +28,19 @@ ErrorMessageManager& ErrorMessageManager::GetInstance()
 
 void ErrorMessageManager::SetErrorCodeAndMessage(ArkUI_Int32 errorCode, const char* errorMessage)
 {
-    (void)errorCode;
-    (void)errorMessage;
+    mockErrorMessage =
+        "error: " + std::string(errorMessage ? errorMessage : "") + " code: " + std::to_string(errorCode);
     return;
 }
 
 void ErrorMessageManager::SetFunctionName(const char* functionName)
 {
-    (void)functionName;
+    mockErrorMessage = functionName ? std::string(functionName) + " " + mockErrorMessage : "";
     return;
 }
 
 const char* ErrorMessageManager::GetErrorMessage() const
 {
-    return "";
+    return mockErrorMessage.c_str();
 }
 } // namespace OHOS::Ace
