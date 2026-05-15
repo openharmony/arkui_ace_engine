@@ -787,7 +787,8 @@
             "If"
         ],
         "ignorePeerMethod": [
-            "attributeModifier"
+            "attributeModifier",
+            "applyAttributesFinish"
         ],
         "ignoreMethodArkts": [
             "testTupleNumberStringEnum",
