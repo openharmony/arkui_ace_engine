@@ -37,3 +37,21 @@ export function BadgeImpl(
         receiver.setPeer(undefined)
     })
 }
+
+@memo
+export function Badge(
+    @memo @memo_skip
+    style: ((attributes: BadgeAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkBadgeComponent>((): ArkBadgeComponent => {
+        return new ArkBadgeComponent()
+    })
+    NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (peer: ArkBadgePeer): void => {
+        content_?.()
+        receiver.setPeer(peer)
+        style?.(receiver)
+        receiver.setPeer(undefined)
+    })
+}
