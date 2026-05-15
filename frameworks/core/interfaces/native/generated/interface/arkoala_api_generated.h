@@ -4540,7 +4540,6 @@ typedef struct Opt_CredentialType {
     Ark_CredentialType value;
 } Opt_CredentialType;
 typedef enum Ark_CrownAction {
-    ARK_CROWN_ACTION_BEGIN = 0,
     ARK_CROWN_ACTION_UPDATE = 1,
     ARK_CROWN_ACTION_END = 2,
 } Ark_CrownAction;
