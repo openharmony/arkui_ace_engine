@@ -1091,4 +1091,138 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTestHitHostNull001, TestS
     TouchTestResult result;
     EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, result));
 }
+
+/**
+ * @tc.name: ProcessPenHoverTestHit001
+ * @tc.desc: Test ProcessPenHoverTestHit when host is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, ProcessPenHoverTestHit001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+    TouchTestResult result;
+    EXPECT_FALSE(inputEventHub->ProcessPenHoverTestHit(COORDINATE_OFFSET, result));
+}
+
+/**
+ * @tc.name: ProcessPenHoverTestHit002
+ * @tc.desc: Test ProcessPenHoverTestHit with hoverEventActuator_ and hoverMoveEventActuator_
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, ProcessPenHoverTestHit002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    inputEventHub->hoverMoveEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    TouchTestResult result;
+    EXPECT_FALSE(inputEventHub->ProcessPenHoverTestHit(COORDINATE_OFFSET, result));
+}
+
+/**
+ * @tc.name: SetHoverEffect001
+ * @tc.desc: Test SetHoverEffect when hoverEffectActuator_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, SetHoverEffect001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    EXPECT_EQ(inputEventHub->hoverEffectActuator_, nullptr);
+    inputEventHub->SetHoverEffect(HoverEffectType::SCALE);
+    EXPECT_NE(inputEventHub->hoverEffectActuator_, nullptr);
+    EXPECT_EQ(inputEventHub->GetHoverEffect(), HoverEffectType::SCALE);
+}
+
+/**
+ * @tc.name: SetHoverEffect002
+ * @tc.desc: Test SetHoverEffect when frameNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, SetHoverEffect002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    inputEventHub->hoverEffectType_ = HoverEffectType::AUTO;
+    inputEventHub->SetHoverEffect(HoverEffectType::SCALE);
+    EXPECT_EQ(inputEventHub->GetHoverEffect(), HoverEffectType::SCALE);
+}
+
+/**
+ * @tc.name: SetHoverEffect003
+ * @tc.desc: Test SetHoverEffect when type is the same
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, SetHoverEffect003, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    inputEventHub->hoverEffectType_ = HoverEffectType::BOARD;
+    inputEventHub->SetHoverEffect(HoverEffectType::BOARD);
+    EXPECT_EQ(inputEventHub->GetHoverEffect(), HoverEffectType::BOARD);
+}
+
+/**
+ * @tc.name: SetHoverEffectAuto001
+ * @tc.desc: Test SetHoverEffectAuto
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, SetHoverEffectAuto001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    EXPECT_EQ(inputEventHub->hoverEffectActuator_, nullptr);
+    inputEventHub->SetHoverEffectAuto(HoverEffectType::SCALE);
+    EXPECT_NE(inputEventHub->hoverEffectActuator_, nullptr);
+    EXPECT_EQ(inputEventHub->GetHoverEffectAuto(), HoverEffectType::SCALE);
+}
+
+/**
+ * @tc.name: GetFrameNode001
+ * @tc.desc: Test GetFrameNode when eventHub is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, GetFrameNode001, TestSize.Level1)
+{
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(nullptr);
+    EXPECT_EQ(inputEventHub->GetFrameNode(), nullptr);
+}
+
+/**
+ * @tc.name: GetFrameNode002
+ * @tc.desc: Test GetFrameNode when eventHub is valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, GetFrameNode002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub->GetFrameNode(), nullptr);
+    EXPECT_EQ(inputEventHub->GetFrameNode()->GetTag(), V2::TEXT_ETS_TAG);
+}
 } // namespace OHOS::Ace::NG

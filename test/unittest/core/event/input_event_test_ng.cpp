@@ -1471,4 +1471,47 @@ HWTEST_F(InputEventTestNg, OnCollectAccessibilityHoverEventCallback001, TestSize
     hoverEventActuator->accessibilityHoverEventTarget_->onAccessibilityHoverCallback_(true, accessibilityHoverInfo);
     EXPECT_EQ(callCount, 1);
 }
+
+/**
+ * @tc.name: OnCollectHoverEffect001
+ * @tc.desc: Test OnCollectHoverEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectHoverEffect001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->hoverEventActuator_->OnCollectHoverEffect(COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_NE(inputEventHub->hoverEventActuator_->hoverEffectTarget_, nullptr);
+}
+
+/**
+ * @tc.name: OnCollectHoverEffect002
+ * @tc.desc: Test OnCollectHoverEffect when hoverEffectTarget already exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectHoverEffect002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto hoverEventActuator =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    hoverEventActuator->OnCollectHoverEffect(COORDINATE_OFFSET, getEventTargetImpl, result);
+    auto firstTarget = hoverEventActuator->hoverEffectTarget_;
+    hoverEventActuator->OnCollectHoverEffect(COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(hoverEventActuator->hoverEffectTarget_, firstTarget);
+}
 } // namespace OHOS::Ace::NG
