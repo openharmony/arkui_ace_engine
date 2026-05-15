@@ -1011,6 +1011,9 @@ void JSImage::DestructorCallback(ImageColorFilter* obj)
 
 void JSImage::SetColorFilterMatrix(const JSRef<JSVal>& jsArray)
 {
+    if (!jsArray->IsArray()) {
+        return;
+    }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsArray);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
         ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
