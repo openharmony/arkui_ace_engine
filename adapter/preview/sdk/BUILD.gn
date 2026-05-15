@@ -102,6 +102,35 @@ if (is_ohos_standard_system) {
     }
   }
 
+  ohos_copy("copy_advanced_ui_component_abc_library") {
+    deps = [
+      "$ace_root/advanced_ui_component/counterv2:counterv2",
+    ]
+    if (!ace_engine_feature_wearable) {
+      deps += [
+        "$ace_root/advanced_ui_component/chipv2:chipv2",
+        "$ace_root/advanced_ui_component/chipgroupv2:chipgroupv2",
+      ]
+    }
+    out_path = get_label_info(
+            "$ace_root/frameworks/bridge/declarative_frontend/ark_modifier:modifier",
+            "root_out_dir")
+    sources = [
+      "${out_path}/arkui/ace_engine/counterv2.abc",
+    ]
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "${out_path}/arkui/ace_engine/chipv2.abc",
+        "${out_path}/arkui/ace_engine/chipgroupv2.abc",
+      ]
+    }
+
+    outputs = [ target_out_dir +
+                "/previewer/common/bin/module/arkui/advanced/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/module/arkui/advanced"
+    module_install_name = ""
+  }
+
   ohos_copy("copy_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_layoutalgorithm:layoutalgorithm",
@@ -116,6 +145,7 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/engine/jsi:gen_jsEnumStyle_abc",
       "$ace_root/frameworks/bridge/declarative_frontend/engine/jsi:gen_arkComponent_abc",
       ":copy_component_model_abc_library",
+      ":copy_advanced_ui_component_abc_library",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend/ark_modifier:modifier",
