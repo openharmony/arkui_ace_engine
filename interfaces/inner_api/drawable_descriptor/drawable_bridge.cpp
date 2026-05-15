@@ -23,6 +23,8 @@
 #include <dlfcn.h>
 #endif
 
+#include "drawable_log.h"
+
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "application_context.h"
 #endif
