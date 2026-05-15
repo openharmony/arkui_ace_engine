@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 import { SymbolGlyphModifier } from '@kit.ArkUI';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 const WITHOUT_BUILDER = -2
 const MAX_FONT_STANDARD = 1.0
@@ -47,6 +48,7 @@ export interface SelectionMenuOptions {
   onCopy?: (event?: EditorEventInfo) => void
   onCut?: (event?: EditorEventInfo) => void;
   onSelectAll?: (event?: EditorEventInfo) => void;
+  backgroundSystemMaterial?: uiMaterial.Material;
 }
 
 interface SelectionMenuSymbolTheme {
@@ -136,6 +138,7 @@ struct SelectionMenuComponent {
   onCopy?: (event?: EditorEventInfo) => void
   onCut?: (event?: EditorEventInfo) => void;
   onSelectAll?: (event?: EditorEventInfo) => void;
+  backgroundSystemMaterial?: uiMaterial.Material;
   private theme: SelectionMenuTheme = defaultTheme;
 
   @Builder
@@ -202,7 +205,7 @@ struct SelectionMenuComponent {
       Scroll() {
         this.SystemMenu()
       }
-      .backgroundColor(this.theme.backGroundColor)
+      .backgroundColor(this.backgroundSystemMaterial ? undefined : this.theme.backGroundColor)
       .shadow(this.theme.iconPanelShadowStyle)
       .borderRadius(this.theme.containerBorderRadius)
       .outline(this.hasSystemMenu() ? { width: this.theme.outlineWidth, color: this.theme.outlineColor,
@@ -211,6 +214,7 @@ struct SelectionMenuComponent {
         maxHeight: `calc(100% - ${this.horizontalMenuHeight > 0 ? this.horizontalMenuHeight + this.theme.menuSpacing : 0}vp)`,
         minWidth: this.theme.defaultMenuWidth
       })
+      .systemMaterial(this.backgroundSystemMaterial)
     }
     .useShadowBatching(true)
     .constraintSize({
@@ -417,7 +421,7 @@ struct SelectionMenuComponent {
           }
           .enabled(!(!item.action && !item.builder))
           .type(ButtonType.Normal)
-          .backgroundColor(this.theme.backGroundColor)
+          .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : this.theme.backGroundColor)
           .onClick(() => {
             if (item.builder) {
               this.builder = item.builder
@@ -452,12 +456,16 @@ struct SelectionMenuComponent {
       left: this.measureFlexPadding() - 0.1, right: this.measureFlexPadding() - 0.1 })
     .borderRadius(this.theme.containerBorderRadius)
     .margin({ bottom: this.theme.menuSpacing })
-    .backgroundColor(this.theme.backGroundColor)
+    .backgroundColor(this.backgroundSystemMaterial ? undefined : this.theme.backGroundColor)
     .shadow(this.theme.iconPanelShadowStyle)
-    .border({ width: this.theme.borderWidth, color: this.theme.borderColor,
-      radius: this.theme.containerBorderRadius })
+    .border({
+      width: this.theme.borderWidth,
+      color: this.theme.borderColor,
+      radius: this.theme.containerBorderRadius
+    })
     .outline({ width: this.theme.outlineWidth, color: this.theme.outlineColor,
       radius: this.theme.containerBorderRadius })
+    .systemMaterial(this.backgroundSystemMaterial)
   }
 
   @Builder
@@ -476,6 +484,7 @@ struct SelectionMenuComponent {
               })
                 .enabled(this.cutAndCopyEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
+                .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
                 .borderRadius(this.theme.iconBorderRadius)
                 .onClick(() => {
                   if (!this.controller) {
@@ -500,6 +509,7 @@ struct SelectionMenuComponent {
               })
                 .enabled(this.cutAndCopyEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
+                .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
                 .borderRadius(this.theme.iconBorderRadius)
                 .margin({ top: this.theme.menuItemPadding })
                 .onClick(() => {
@@ -522,6 +532,7 @@ struct SelectionMenuComponent {
               })
                 .enabled(this.pasteEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
+                .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
                 .borderRadius(this.theme.iconBorderRadius)
                 .margin({ top: this.theme.menuItemPadding })
                 .onClick(() => {
@@ -544,6 +555,7 @@ struct SelectionMenuComponent {
               })
                 .visibility(this.visibilityValue)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
+                .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
                 .borderRadius(this.theme.iconBorderRadius)
                 .margin({ top: this.theme.menuItemPadding })
                 .onClick(() => {
@@ -560,6 +572,7 @@ struct SelectionMenuComponent {
                   this.controller.closeSelectionMenu()
                 })
             }
+            .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
           }
           if (this.controller && !this.showExpandedMenuOptions &&
           this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
@@ -569,6 +582,7 @@ struct SelectionMenuComponent {
               symbolEndIcon: this.theme.defaultSymbolTheme.symbolArrowDownIcon
             })
               .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
+              .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
               .borderRadius(this.theme.iconBorderRadius)
               .margin({ top: this.theme.menuItemPadding })
               .onClick(() => {
@@ -586,6 +600,7 @@ struct SelectionMenuComponent {
                 builder: expandedMenuOptionItem.builder
               })
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
+                .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
                 .borderRadius(this.theme.iconBorderRadius)
                 .margin({ top: this.theme.menuItemPadding })
                 .onClick(() => {
@@ -598,6 +613,7 @@ struct SelectionMenuComponent {
         }
         .radius(this.theme.containerBorderRadius)
         .clip(true)
+        .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
         .width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth)
         .constraintSize({
           minWidth: this.theme.defaultMenuWidth
@@ -620,13 +636,18 @@ struct SelectionMenuComponent {
             this.builder()
           }
         }
+        .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
         .width(this.horizontalMenuWidth)
       }
     }
     .width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth)
     .shadow(this.theme.iconPanelShadowStyle)
-    .border({ width: this.theme.borderWidth, color: this.theme.borderColor,
-      radius: this.theme.containerBorderRadius })
+    .backgroundColor(this.backgroundSystemMaterial ? Color.Transparent : undefined)
+    .border({
+      width: this.theme.borderWidth,
+      color: this.theme.borderColor,
+      radius: this.theme.containerBorderRadius
+    })
     .constraintSize({
       minWidth: this.theme.defaultMenuWidth
     })
@@ -642,7 +663,8 @@ export function SelectionMenu(options: SelectionMenuOptions) {
     onPaste: options.onPaste,
     onCopy: options.onCopy,
     onCut: options.onCut,
-    onSelectAll: options.onSelectAll
+    onSelectAll: options.onSelectAll,
+    backgroundSystemMaterial: options.backgroundSystemMaterial
   })
 }
 
