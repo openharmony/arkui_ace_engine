@@ -1775,6 +1775,7 @@ RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 }
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
+
 NG::ScopedLayout::~ScopedLayout() {}
 
 void NG::PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
