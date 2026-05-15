@@ -5413,7 +5413,7 @@ let StrokeJoinStyle;
 (function (StrokeJoinStyle) {
   StrokeJoinStyle [StrokeJoinStyle.MITER_JOIN = 0] = 'MITER_JOIN';
   StrokeJoinStyle [StrokeJoinStyle.ROUND_JOIN = 1] = 'ROUND_JOIN';
-  StrokeJoinStyle [StrokeJoinStyle.BEVEL_JOIN = 1] = 'BEVEL_JOIN';
+  StrokeJoinStyle [StrokeJoinStyle.BEVEL_JOIN = 2] = 'BEVEL_JOIN';
 })(StrokeJoinStyle || (StrokeJoinStyle = {}));
 
 let EdgeLightPosition;
