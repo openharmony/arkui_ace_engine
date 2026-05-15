@@ -1327,9 +1327,11 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg078, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    menuNode->SetNeedCallChildrenUpdate(false);
     menuPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(menuNode->needCallChildrenUpdate_, SystemProperties::ConfigChangePerform());
     menuPattern->isDisableMenuBgColorByUser_ = true;
+    menuNode->SetNeedCallChildrenUpdate(false);
     menuPattern->OnColorConfigurationUpdate();
 }
 
