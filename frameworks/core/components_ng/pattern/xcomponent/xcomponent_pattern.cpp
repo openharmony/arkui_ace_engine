@@ -732,6 +732,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     UnregisterNode();
     CHECK_NULL_VOID(frameNode);
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromFrameNode", GetId().c_str());
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
@@ -2192,12 +2193,12 @@ void XComponentPattern::HandleSurfaceCreated()
 
 void XComponentPattern::HandleSurfaceDestroyed(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(renderSurface_);
-    renderSurface_->ReleaseSurfaceBuffers();
-    renderSurface_->UnregisterSurface();
     CHECK_NULL_VOID(xcomponentController_);
     OnSurfaceDestroyed(frameNode);
     xcomponentController_->SetSurfaceId("");
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->ReleaseSurfaceBuffers();
+    renderSurface_->UnregisterSurface();
 }
 
 void XComponentPattern::NativeSurfaceShow()
