@@ -183,6 +183,7 @@ public:
         dialogProperties_ = param;
         InitHostWindowRect();
         InitParentWindowRect();
+        InitDefaultSystemMaterial();
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
@@ -319,6 +320,7 @@ public:
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
     void InitParentWindowRect();
+    void InitDefaultSystemMaterial();
     void UpdateHostWindowRect();
     void UpdateFontScale();
 
@@ -454,6 +456,9 @@ private:
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props,
+        bool isCustomBorder, RefPtr<DialogTheme> dialogTheme);
+    void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode);
     void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
