@@ -964,6 +964,205 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest035, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GestureEventHubTest036
+ * @tc.desc: Test IsPixelMapNeedScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest036, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 103, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto eventHub = gestureEventHub->eventHub_.Upgrade();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(gestureEventHub->IsPixelMapNeedScale());
+}
+
+/**
+ * @tc.name: GestureEventHubTest037
+ * @tc.desc: Test IsDragNewFwk
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest037, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 104, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->isDragNewFwk_ = false;
+    EXPECT_FALSE(gestureEventHub->IsDragNewFwk());
+    gestureEventHub->isDragNewFwk_ = true;
+    EXPECT_TRUE(gestureEventHub->IsDragNewFwk());
+}
+
+/**
+ * @tc.name: GestureEventHubTest038
+ * @tc.desc: Test SetDragForbiddenForcely and IsDragForbidden
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest038, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 105, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_FALSE(gestureEventHub->IsDragForbidden());
+    gestureEventHub->SetDragForbiddenForcely(true);
+    EXPECT_TRUE(gestureEventHub->IsDragForbidden());
+    gestureEventHub->SetDragForbiddenForcely(false);
+    EXPECT_FALSE(gestureEventHub->IsDragForbidden());
+}
+
+/**
+ * @tc.name: GestureEventHubTest039
+ * @tc.desc: Test SetTextDraggable and GetTextDraggable
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest039, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 106, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_FALSE(gestureEventHub->GetTextDraggable());
+    gestureEventHub->SetTextDraggable(true);
+    EXPECT_TRUE(gestureEventHub->GetTextDraggable());
+    gestureEventHub->SetTextDraggable(false);
+    EXPECT_FALSE(gestureEventHub->GetTextDraggable());
+    gestureEventHub->SetIsTextDraggable(true);
+    EXPECT_TRUE(gestureEventHub->GetIsTextDraggable());
+}
+
+/**
+ * @tc.name: GestureEventHubTest040
+ * @tc.desc: Test SetPixelMap and GetPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest040, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 107, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_EQ(gestureEventHub->GetPixelMap(), nullptr);
+}
+
+/**
+ * @tc.name: GestureEventHubTest041
+ * @tc.desc: Test SetDragPreviewPixelMap and GetDragPreviewPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest041, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 108, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_EQ(gestureEventHub->GetDragPreviewPixelMap(), nullptr);
+}
+
+/**
+ * @tc.name: GestureEventHubTest042
+ * @tc.desc: Test SetPreviewMode and GetPreviewMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest042, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 110, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_EQ(gestureEventHub->GetPreviewMode(), MenuPreviewMode::NONE);
+    gestureEventHub->SetPreviewMode(MenuPreviewMode::IMAGE);
+    EXPECT_EQ(gestureEventHub->GetPreviewMode(), MenuPreviewMode::IMAGE);
+    gestureEventHub->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    EXPECT_EQ(gestureEventHub->GetPreviewMode(), MenuPreviewMode::CUSTOM);
+}
+
+/**
+ * @tc.name: GestureEventHubTest043
+ * @tc.desc: Test SetContextMenuShowStatus and GetContextMenuShowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest043, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 111, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_FALSE(gestureEventHub->GetContextMenuShowStatus());
+    gestureEventHub->SetContextMenuShowStatus(true);
+    EXPECT_TRUE(gestureEventHub->GetContextMenuShowStatus());
+}
+
+/**
+ * @tc.name: GestureEventHubTest044
+ * @tc.desc: Test SetMenuBindingType and GetMenuBindingType
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest044, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 112, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_EQ(gestureEventHub->GetMenuBindingType(), MenuBindingType::LONG_PRESS);
+    gestureEventHub->SetMenuBindingType(MenuBindingType::LONG_PRESS);
+    EXPECT_EQ(gestureEventHub->GetMenuBindingType(), MenuBindingType::LONG_PRESS);
+    gestureEventHub->SetMenuBindingType(MenuBindingType::RIGHT_CLICK);
+    EXPECT_EQ(gestureEventHub->GetMenuBindingType(), MenuBindingType::RIGHT_CLICK);
+}
+
+/**
+ * @tc.name: GestureEventHubTest045
+ * @tc.desc: Test ResetAutoHideDragInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest045, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 115, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->dragframeNodeInfo_.autoHideExecuted = true;
+    EXPECT_TRUE(gestureEventHub->dragframeNodeInfo_.autoHideExecuted);
+    gestureEventHub->ResetAutoHideDragInfo();
+    EXPECT_FALSE(gestureEventHub->dragframeNodeInfo_.autoHideExecuted);
+}
+
+/**
+ * @tc.name: GestureEventHubTest046
+ * @tc.desc: Test HasDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest046, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 116, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_FALSE(gestureEventHub->HasDragEvent());
+}
+
+/**
+ * @tc.name: GestureEventHubTest047
+ * @tc.desc: Test RemoveDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest047, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 117, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->RemoveDragEvent();
+    EXPECT_EQ(gestureEventHub->dragEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: GestureEventHubTest048
+ * @tc.desc: Test GetBindMenuStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest048, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 119, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto status = gestureEventHub->GetBindMenuStatus();
+    EXPECT_FALSE(status.isBindCustomMenu);
+}
+
+/**
  * @tc.name: SetResponseRegionMap001
  * @tc.desc: Test SetResponseRegionMap and GetResponseRegionMap
  * @tc.type: FUNC
