@@ -1446,6 +1446,9 @@ void ListLayoutAlgorithm::CalculateFixOffset(const ScaleProperty& scaleProperty)
     if (LessNotEqual(clipStart, contentStart)) {
         startFixOffset_ = (contentStart - clipStart);
     }
+    if (isStackFromEnd_) {
+        std::swap(startFixOffset_, endFixOffset_);
+    }
 }
 
 void ListLayoutAlgorithm::PostClipContentSafeAreaBundle(LayoutWrapper* layoutWrapper)
@@ -1919,12 +1922,14 @@ void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
         if (!items.empty()) {
-            ListMainSizeValues value = { startMainPos_, endMainPos_, jumpIndexInGroup_, prevContentMainSize_,
-                scrollAlign_, layoutStartMainPos_, layoutEndMainPos_ };
+            ListMainSizeValues value = { startMainPos_ - startFixOffset_, endMainPos_ + endFixOffset_,
+                jumpIndexInGroup_, prevContentMainSize_, scrollAlign_, layoutStartMainPos_, layoutEndMainPos_ };
             if (scrollSnapAlign_ != ScrollSnapAlign::CENTER) {
                 value.contentStartOffset = contentStartOffset_;
                 value.contentEndOffset = contentEndOffset_;
             }
+            value.startFixOffset = startFixOffset_;
+            value.endFixOffset = endFixOffset_;
             PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint() }, value, show);
         } else {
             auto pattern = host->GetPattern<ListPattern>();
@@ -2832,6 +2837,8 @@ bool ListLayoutAlgorithm::PredictBuildGroup(RefPtr<LayoutWrapper> wrapper, const
     values.backward = listMainSizeValues.backward;
     values.contentStartOffset = listMainSizeValues.contentStartOffset;
     values.contentEndOffset = listMainSizeValues.contentEndOffset;
+    values.startFixOffset = listMainSizeValues.startFixOffset;
+    values.endFixOffset = listMainSizeValues.endFixOffset;
     groupPattern->LayoutCache(constraint, deadline, forwardCached, backwardCached, values);
     return true;
 }
@@ -2851,6 +2858,8 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyVGrid(
     ViewPosReference ref {
         .viewPosStart = listMainSizeValues.startPos,
         .viewPosEnd = listMainSizeValues.endPos,
+        .viewExtStart = listMainSizeValues.startFixOffset,
+        .viewExtEnd = listMainSizeValues.endFixOffset,
         .referencePos = index > pattern->GetEndIndex() ?
                          listMainSizeValues.endPos : listMainSizeValues.startPos,
         .referenceEdge = index > pattern->GetEndIndex() ?
@@ -2861,6 +2870,8 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyVGrid(
     if (pattern->IsStackFromEnd()) {
         ref.viewPosStart = -listMainSizeValues.startPos;
         ref.viewPosEnd = listMainSizeValues.endPos - listMainSizeValues.startPos - listMainSizeValues.startPos;
+        ref.viewExtStart = listMainSizeValues.endFixOffset;
+        ref.viewExtEnd = listMainSizeValues.startFixOffset;
         ref.referencePos = index > pattern->GetEndIndex() ? ref.viewPosEnd : ref.viewPosStart;
     }
 
