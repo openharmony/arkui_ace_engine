@@ -25507,11 +25507,11 @@ typedef struct GENERATED_ArkUINavigationModifier {
     void (*setNavigationOptions0)(Ark_VMContext vmContext,
                                   Ark_NativePointer node,
                                   const Opt_NavPathStack* pathInfos,
-                                  const Opt_HomePathInfo* homeDestination,
                                   const Opt_NavigationModuleInfo* moduleInfo);
     void (*setNavigationOptions1)(Ark_VMContext vmContext,
                                   Ark_NativePointer node,
                                   const Opt_NavPathStack* pathInfos,
+                                  const Opt_HomePathInfo* homeDestination,
                                   const Opt_NavigationModuleInfo* moduleInfo);
     void (*setNavBarWidth)(Ark_NativePointer node,
                            const Opt_Union_Length_Bindable_Length* value);
