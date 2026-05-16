@@ -1877,6 +1877,12 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
     } else {
         ResourceParseUtils::SetNeedReload(true);
     }
+    if (configurationUpdateCallback_) {
+        auto cb = configurationUpdateCallback_;
+        ConfigurationChange configurationChange;
+        configurationChange.colorModeUpdate = true;
+        cb(configurationChange);
+    }
     if (pattern_) {
         pattern_->OnThemeScopeUpdate(GetThemeScopeId());
         pattern_->OnColorConfigurationUpdate();

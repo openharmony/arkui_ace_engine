@@ -499,12 +499,12 @@ void TabsPattern::OnModifyDone()
     InitAccessibilityZIndex();
 
     InitFloatingBar();
+    OnUpdateShowDivider();
 
     if (onChangeEvent_) {
         return;
     }
     SetOnChangeEvent(nullptr);
-    OnUpdateShowDivider();
 }
 
 void TabsPattern::OnAfterModifyDone()
