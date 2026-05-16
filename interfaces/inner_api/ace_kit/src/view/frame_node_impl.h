@@ -89,6 +89,7 @@ public:
     void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper) override;
 
     ColorMode GetLocalColorMode() const override;
+    void MarkModifyDone() override;
 
 private:
     void PushAceNode(const RefPtr<AceNode>& node);

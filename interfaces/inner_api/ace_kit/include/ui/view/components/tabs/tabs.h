@@ -62,6 +62,7 @@ public:
     void SetTabBarHeight(const Dimension& tabBarHeight);
     Dimension GetTabBarHeight() const;
     void SetDivider(const TabsItemDivider& divider);
+    void SetDividerColorByUser(bool isByUser);
     void SetEffectNodeOption(const TabsEffectNodeOption& option);
     void SetTabBarMode(const TabBarMode& barMode);
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option);

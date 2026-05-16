@@ -234,6 +234,13 @@ void Tabs::SetDivider(const TabsItemDivider& divider)
     NG::TabsModelNG::SetDivider(Referenced::RawPtr(tabsNode), aceDivider);
 }
 
+void Tabs::SetDividerColorByUser(bool isByUser)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetDividerColorByUser(Referenced::RawPtr(tabsNode), isByUser);
+}
+
 void Tabs::SetEffectNodeOption(const TabsEffectNodeOption& option)
 {
     auto tabsNode = GetTabsNode(node_);

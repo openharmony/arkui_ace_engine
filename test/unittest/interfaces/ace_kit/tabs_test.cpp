@@ -379,4 +379,13 @@ HWTEST_F(TabsResObjTest, SetBarBackgroundEffectResObj_NullResObj, TestSize.Level
     EXPECT_EQ(pattern->resourceMgr_, nullptr);
 }
 
+HWTEST_F(TabsResObjTest, SetDividerColorByUser, TestSize.Level1)
+{
+    tabs_->SetDividerColorByUser(true);
+    auto tabsNode = GetAceTabsNode();
+    ASSERT_NE(tabsNode, nullptr);
+    auto layoutProp = tabsNode->GetLayoutProperty<NG::TabsLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    EXPECT_EQ(layoutProp->GetDividerColorSetByUserValue(), true);
+}
 } // namespace OHOS::Ace::Kit
