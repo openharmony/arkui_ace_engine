@@ -262,11 +262,11 @@ struct RationNum {
     {
         return RationNum(std::abs(this->n), this->m);
     }
-    int64_t ToInt()
+    int64_t ToInt() const
     {
         return (this->n / this->m);
     }
-    double ToDouble()
+    double ToDouble() const
     {
         return static_cast<double>(this->n) / static_cast<double>(this->m);
     }
@@ -315,7 +315,7 @@ struct RationNum {
         return RationNum(h1, k1);
     }
 
-    RationNum Pow(int exp)
+    RationNum Pow(int exp) const
     {
         return RationNum(std::pow(this->n, exp), std::pow(this->m, exp));
     }
@@ -332,14 +332,14 @@ struct RationNum {
     }
 
     // if it is an integer, then +/- 1, else round to the closest integer
-    RationNum UpperRound()
+    RationNum UpperRound() const
     {
         int64_t n1 = (this->m == 1)
                          ? (this->n + 1)
                          : static_cast<int64_t>(std::ceil(static_cast<double>(this->n) / static_cast<double>(this->m)));
         return RationNum(n1);
     }
-    RationNum LowerRound()
+    RationNum LowerRound() const
     {
         int64_t n1 = (this->m == 1) ? (this->n - 1)
                                     : static_cast<int64_t>(
