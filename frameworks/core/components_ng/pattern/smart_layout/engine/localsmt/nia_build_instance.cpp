@@ -43,7 +43,7 @@ int FindBoolLiteralIndexForVar(const Clause& currentClause, const std::vector<Li
 void RemoveClauseIdxFromVar(Variable& currentVar, uint64_t clauseIdx)
 {
     for (uint64_t deleteIdx = 0; deleteIdx < currentVar.clauseIdxs.size(); deleteIdx++) {
-        if (currentVar.clauseIdxs[deleteIdx] != clauseIdx) {
+        if (static_cast<uint64_t>(currentVar.clauseIdxs[deleteIdx]) != clauseIdx) {
             continue;
         }
         currentVar.clauseIdxs[deleteIdx] = currentVar.clauseIdxs.back();
@@ -200,7 +200,7 @@ bool ClauseContainsUnitLiteral(const std::vector<int>& clauseLits, const std::ve
         return false;
     }
     for (int litIdx : clauseLits) {
-        if (unitLit[litIdx + numLits]) {
+        if (unitLit[litIdx + static_cast<int>(numLits)]) {
             return true;
         }
     }
@@ -214,7 +214,7 @@ bool ClauseContainsUnitLiteralDirect(const std::vector<int>& clauseLits,
         return false;
     }
     for (int litIdx : clauseLits) {
-        if (unitLit[litIdx + numLits]) {
+        if (unitLit[litIdx + static_cast<int>(numLits)]) {
             return true;
         }
     }
@@ -269,7 +269,7 @@ void FilterClausesSatisfiedByUnitLiteralsDirect(
 } // namespace
 
 // input transformation
-void LsSolver::SplitString(std::string& inString, std::vector<std::string>& strVec, std::string pattern = " ")
+void LsSolver::SplitString(std::string& inString, std::vector<std::string>& strVec, std::string pattern = " ") const
 {
     std::string::size_type pos;
     inString += pattern;
@@ -290,7 +290,7 @@ bool IsSameCls(const std::vector<int>& cl1, const std::vector<int>& cl2)
     if (cl1.size() != cl2.size()) {
         return false;
     } else {
-        for (int lIdx = 0; lIdx < cl1.size(); lIdx++) {
+        for (size_t lIdx = 0; lIdx < cl1.size(); lIdx++) {
             if (cl1[lIdx] != cl2[lIdx]) {
                 return false;
             }
@@ -318,6 +318,9 @@ void LsSolver::ReadFromFile(const std::string& fileName, const std::vector<std::
     }
     int size;
     ifs >> size;
+    if (size < 0) {
+        return;
+    }
     originalVec.resize(size);
     int sizeNow = 0;
     while (sizeNow < size) {
@@ -353,7 +356,7 @@ void LsSolver::RecordInfoAfterReadFile()
 // restore the vars/lits/clauses
 void LsSolver::RestoreInforBeforeBuildOrigin()
 {
-    for (int idx = 0; idx < numLits; idx++) {
+    for (int idx = 0; idx < static_cast<int>(numLits); idx++) {
         litsInCls->InsertElement(idx);
     }
     std::fill(litAppear.begin(), litAppear.end(), true);
@@ -361,7 +364,7 @@ void LsSolver::RestoreInforBeforeBuildOrigin()
     clauses.clear();
 }
 
-void LsSolver::AddUnitClause(std::vector<std::vector<int>>& vec, const std::vector<int>& unitLits)
+void LsSolver::AddUnitClause(std::vector<std::vector<int>>& vec, const std::vector<int>& unitLits) const
 {
     size_t oriVecNum = vec.size();
     vec.resize(oriVecNum + unitLits.size());
@@ -597,7 +600,8 @@ void LsSolver::ConvertSingleAppearIneqToEq(const std::vector<int>& appearCount,
     std::vector<int> inequals;
     inequals.reserve(litsInCls->arraySize);
 
-    for (size_t idx = 0; idx < litsInCls->arraySize; ++idx) {
+    size_t arraySize = static_cast<size_t>(litsInCls->arraySize);
+    for (size_t idx = 0; idx < arraySize; ++idx) {
         int litIdx = litsInCls->array[idx];
 
         if (litIdx == 0 || hasNegativeAppear[litIdx]) {
@@ -661,7 +665,7 @@ void LsSolver::ConvertInequalToEqual(bool& modified)
 void LsSolver::FindUnitEqualLits(std::vector<int>& unitEqualLitsAll)
 {
     // find out all unit equal lits
-    for (int clauseIdx = 0; clauseIdx < clauses.size(); clauseIdx++) {
+    for (size_t clauseIdx = 0; clauseIdx < clauses.size(); clauseIdx++) {
         if (clauses[clauseIdx].literals.size() == 1 && clauses[clauseIdx].literals[0] > 0) {
             int litIdx = clauses[clauseIdx].literals[0];
             if (lits[litIdx].isEqual) { // t1+t2+..+tn=0
@@ -717,7 +721,7 @@ void LsSolver::PreprocessOnSize(RationNum bcWidth, RationNum bcHeight, RationNum
 void LsSolver::PrepareFaCoffs()
 {
     fa.resize(vars.size());
-    for (int varIdx = 0; varIdx < vars.size(); varIdx++) {
+    for (int varIdx = 0; varIdx < static_cast<int>(vars.size()); varIdx++) {
         fa[varIdx] = varIdx;
     }
     faCoff.resize(vars.size());
@@ -733,7 +737,7 @@ void LsSolver::PrepareFaCoffs()
 void LsSolver::ProcessUnitEqualLitsMerge(std::vector<int>& unitEqualLitsAll, bool& findNewMerge, bool& modified)
 {
     findNewMerge = false;
-    for (int i = 0; i < unitEqualLitsAll.size(); i++) {
+    for (size_t i = 0; i < unitEqualLitsAll.size(); i++) {
         Lit* l = &(lits[unitEqualLitsAll[i]]);
         if (l->litsIndex != 0 && l->coffVars.size() == 1) {
             int var1 = l->coffVars[0].varIdx;
@@ -750,11 +754,11 @@ void LsSolver::ProcessUnitEqualLitsMerge(std::vector<int>& unitEqualLitsAll, boo
             l->litsIndex = 0;
         }
     }
-    for (int i = 0; i < unitEqualLitsAll.size(); i++) {
+    for (size_t i = 0; i < unitEqualLitsAll.size(); i++) {
         int lIdx = unitEqualLitsAll[i];
         UpdateLitPresetVar(lIdx);
     }
-    for (int i = 0; i < unitEqualLitsAll.size(); i++) {
+    for (size_t i = 0; i < unitEqualLitsAll.size(); i++) {
         Lit* l = &(lits[unitEqualLitsAll[i]]);
         if (l->litsIndex <= 0) {
             continue;
@@ -765,7 +769,7 @@ void LsSolver::ProcessUnitEqualLitsMerge(std::vector<int>& unitEqualLitsAll, boo
             modified = true;
         }
     }
-    for (int i = 0; i < unitEqualLitsAll.size(); i++) {
+    for (size_t i = 0; i < unitEqualLitsAll.size(); i++) {
         UpdateLitEqual(unitEqualLitsAll[i]);
     }
     if (!modified) {
@@ -855,7 +859,7 @@ void LsSolver::UpdateLitEqual(int litIdx)
         int currVarIdx = l->coffVars[0].varIdx;
         RationNum currCoff = RationNum(0);
         int litCoffVarIdx = 0;
-        for (int cvIdx = 0; cvIdx < l->coffVars.size(); cvIdx++) {
+        for (size_t cvIdx = 0; cvIdx < l->coffVars.size(); cvIdx++) {
             if (l->coffVars[cvIdx].varIdx != currVarIdx) {
                 currVarIdx = l->coffVars[cvIdx].varIdx;
                 currCoff = 0;
@@ -893,7 +897,7 @@ void PrintVec(const std::vector<std::vector<int>>& cl)
 
 // delete the duplicate clauses and clause containing unit lits
 // 删除完全一样的子句（删除子句中重复的文字），以及包含单元文字的子句（因为以及包含单元文字，则该子句必定为满足）
-void LsSolver::DeleteRedundantClauses(std::vector<std::vector<int>>& clauseVec)
+void LsSolver::DeleteRedundantClauses(std::vector<std::vector<int>>& clauseVec) const
 {
 #ifdef LS_DEBUG
     std::cout << "start build\n";
@@ -992,7 +996,7 @@ void LsSolver::FindMaxVarLit(std::vector<int>& litIdxs)
     }
     int maxCount = -1;
     int maxVarIdx = -1;
-    for (int vIdx = 0; vIdx < numVars; vIdx++) {
+    for (int vIdx = 0; vIdx < static_cast<int>(numVars); vIdx++) {
         if (varCount[vIdx] > maxCount) {
             maxCount = varCount[vIdx];
             maxVarIdx = vIdx;
@@ -1067,7 +1071,7 @@ void LsSolver::PrepareUpValueVars()
     }
 }
 
-bool LsSolver::HasSameCoffVars(const Lit* l1, const Lit* l2)
+bool LsSolver::HasSameCoffVars(const Lit* l1, const Lit* l2) const
 {
     if (l1->coffVars.size() != l2->coffVars.size()) {
         return false;
@@ -1127,7 +1131,7 @@ void LsSolver::EliminateMultipleInequalities(bool& modified)
 // 找到所有单元子句，并根据单元子句更新变量的上下界，会去除原来的单元子句
 void LsSolver::FindBound(bool& modified)
 {
-    for (int clauseIdx = 0; clauseIdx < clauses.size(); clauseIdx++) {
+    for (size_t clauseIdx = 0; clauseIdx < clauses.size(); clauseIdx++) {
         if (clauses[clauseIdx].literals.size() != 1) {
             continue;
         }
@@ -1253,10 +1257,10 @@ void LsSolver::UnitProp()
         }
         const int unitLitIdx = clauses[unitClauseIdx].literals[0];
         const int isPosLit = (unitLitIdx > 0) ? 1 : -1;
-        const uint64_t unitVar = lits[std::abs(unitLitIdx)].delta.ToInt();
+        const uint64_t unitVar = static_cast<uint64_t>(lits[std::abs(unitLitIdx)].delta.ToInt());
         vars[unitVar].isDelete = true;
         vars[unitVar].upBool = isPosLit; // set the solution of a boolean var as its unit propogation value
-        for (uint64_t clIdx : vars[unitVar].clauseIdxs) {
+        for (int clIdx : vars[unitVar].clauseIdxs) {
             Clause& currentClause = clauses[clIdx];
             if (currentClause.isDelete) {
                 continue;
@@ -1267,15 +1271,15 @@ void LsSolver::UnitProp()
             }
             const int litIdInClause = currentClause.literals[literalIdx];
             if ((isPosLit > 0 && litIdInClause > 0) || (isPosLit < 0 && litIdInClause < 0)) {
-                DeleteSatisfiedClause(*this, currentClause, clIdx, unitVar);
+                DeleteSatisfiedClause(*this, currentClause, static_cast<uint64_t>(clIdx), unitVar);
                 continue;
             }
-            RemoveUnsatisfiedLiteral(*this, currentClause, literalIdx, clIdx, unitClause);
+            RemoveUnsatisfiedLiteral(*this, currentClause, literalIdx, static_cast<uint64_t>(clIdx), unitClause);
         }
     }
 }
 
-uint64_t LsSolver::HashLitsToNum(const std::vector<int>& litIndices)
+uint64_t LsSolver::HashLitsToNum(const std::vector<int>& litIndices) const
 {
     if (litIndices.empty()) {
         return 0;
@@ -1290,14 +1294,14 @@ uint64_t LsSolver::HashLitsToNum(const std::vector<int>& litIndices)
     return hash;
 }
 
-bool LsSolver::IsSameLits(std::vector<int>& lits1, std::vector<int>& lits2)
+bool LsSolver::IsSameLits(std::vector<int>& lits1, std::vector<int>& lits2) const
 {
     if (lits1.size() != lits2.size()) {
         return false;
     }
     std::sort(lits1.begin(), lits1.end());
     std::sort(lits2.begin(), lits2.end());
-    for (int lIdx = 0; lIdx < lits1.size(); lIdx++) {
+    for (size_t lIdx = 0; lIdx < lits1.size(); lIdx++) {
         if (lits1[lIdx] != lits2[lIdx]) {
             return false;
         }
@@ -1310,11 +1314,12 @@ void LsSolver::Resolution()
     ResolveContext ctx;
     ctx.posClauses.resize(K_RES_CLAUSE_MULTIPLIER * numClauses);
     ctx.negClauses.resize(K_RES_CLAUSE_MULTIPLIER * numClauses);
-    std::unordered_map<uint64_t, int>
-        clauselitMap; // for the clause with literal {a,b,c}, sort the lit by its order, and hash the literals to a
-                      // number, then map it to the clauseIdx, if deleted, set it to -1
+    std::unordered_map<uint64_t, int> clauselitMap;
+    // for the clause with literal {a,b,c}, sort the lit by its order, and hash the literals to a
+    // number, then map it to the clauseIdx, if deleted, set it to -1
     std::vector<uint64_t> clauselit(clauses.size()); // hash the lits of clause to a number
-    for (int clsIdx = 0; clsIdx < clauses.size(); clsIdx++) {
+    int clauseSize = static_cast<int>(clauses.size());
+    for (int clsIdx = 0; clsIdx < clauseSize; clsIdx++) {
         std::sort(clauses[clsIdx].literals.begin(), clauses[clsIdx].literals.end());
         clauselit[clsIdx] = HashLitsToNum(clauses[clsIdx].literals);
         clauselitMap[clauselit[clsIdx]] = clsIdx;
@@ -1332,8 +1337,8 @@ void LsSolver::Resolution()
             if ((ctx.posClauseSize * ctx.negClauseSize - tautologyNum) > (ctx.posClauseSize + ctx.negClauseSize)) {
                 continue;
             }
-            for (uint64_t clauseIdx : vars[boolVarIdx].clauseIdxs) {
-                DeleteClausesOfVar(clauseIdx, boolVarIdx); // delete the clauses of boolVar
+            for (int clauseIdx : vars[boolVarIdx].clauseIdxs) {
+                DeleteClausesOfVar(static_cast<uint64_t>(clauseIdx), boolVarIdx); // delete the clauses of boolVar
             }
             isImprove = true;
             vars[boolVarIdx].isDelete = true;
@@ -1356,8 +1361,8 @@ void LsSolver::DeterminePosAndNegClauses(uint64_t boolVarIdx, ResolveContext& ct
 {
     ctx.posClauseSize = 0;
     ctx.negClauseSize = 0;
-    for (int i = 0; i < vars[boolVarIdx].clauseIdxs.size(); i++) {
-        uint64_t clauseIdx = vars[boolVarIdx].clauseIdxs[i];
+    for (size_t i = 0; i < vars[boolVarIdx].clauseIdxs.size(); i++) {
+        uint64_t clauseIdx = static_cast<uint64_t>(vars[boolVarIdx].clauseIdxs[i]);
         if (clauses[clauseIdx].isDelete) {
             continue;
         }
@@ -1378,7 +1383,7 @@ void LsSolver::DeterminePosAndNegClauses(uint64_t boolVarIdx, ResolveContext& ct
 
 int LsSolver::CountNegClauseTautology(uint64_t posClauseIdx, uint64_t negClauseIdx, uint64_t boolVarIdx)
 {
-    for (int k = 0; k < clauses[negClauseIdx].literals.size(); k++) {
+    for (size_t k = 0; k < clauses[negClauseIdx].literals.size(); k++) {
         int lNegLit = clauses[negClauseIdx].literals[k];
         if (lits[std::abs(lNegLit)].delta == boolVarIdx && !lits[std::abs(lNegLit)].isNiaLit) {
             // the bool_var for resolution is not considered
@@ -1416,7 +1421,7 @@ void LsSolver::DeleteClausesOfVar(uint64_t clauseIdx, uint64_t boolVarIdx)
         }
         Variable* varInner = &(vars[l->delta.ToInt()]);
         for (uint64_t deleteIdx = 0; deleteIdx < varInner->clauseIdxs.size(); deleteIdx++) {
-            if (varInner->clauseIdxs[deleteIdx] == clauseIdx) {
+            if (static_cast<uint64_t>(varInner->clauseIdxs[deleteIdx]) == clauseIdx) {
                 varInner->clauseIdxs[deleteIdx] = varInner->clauseIdxs.back();
                 varInner->clauseIdxs.pop_back();
                 break;
@@ -1506,7 +1511,7 @@ void LsSolver::PushClausesToReconstructStack(uint64_t boolVarIdx, const ResolveC
 {
     for (int i = 0; i < ctx.posClauseSize; i++) {
         Clause posCl = clauses[ctx.posClauses[i]];
-        for (int j = 0; j < posCl.literals.size(); j++) {
+        for (size_t j = 0; j < posCl.literals.size(); j++) {
             int lIdx = posCl.literals[j];
             Lit* l = &(lits[std::abs(lIdx)]);
             if (!l->isNiaLit && l->delta == boolVarIdx) {
@@ -1519,7 +1524,7 @@ void LsSolver::PushClausesToReconstructStack(uint64_t boolVarIdx, const ResolveC
     }
     for (int i = 0; i < ctx.negClauseSize; i++) {
         Clause negCl = clauses[ctx.negClauses[i]];
-        for (int j = 0; j < negCl.literals.size(); j++) {
+        for (size_t j = 0; j < negCl.literals.size(); j++) {
             int lIdx = negCl.literals[j];
             Lit* l = &(lits[std::abs(lIdx)]);
             if (!l->isNiaLit && l->delta == boolVarIdx) {
@@ -1544,14 +1549,15 @@ bool CmpVlByLit(const VarLit& vl1, const VarLit& vl2)
 // prepare coff var, determine all faCoffs
 void LsSolver::PrepareCoffVar()
 {
-    for (int idx = 0; idx < vars.size(); idx++) {
+    int varSize = static_cast<int>(vars.size());
+    for (int idx = 0; idx < varSize; idx++) {
         if (vars[idx].isNia) {
             Find(idx);
         }
     }
 }
 // turn the coffs and key of the lit to integer value
-void LsSolver::GcdForLit(Lit& l)
+void LsSolver::GcdForLit(Lit& l) const
 {
     if (l.litsIndex <= 0 || !l.isNiaLit || l.coffVars.size() <= 1) {
         return;
@@ -1612,7 +1618,7 @@ void LsSolver::DetermineLitAppear()
 }
 
 
-bool LsSolver::CompareLitByCoffVars(const Lit& x, const Lit& y)
+bool LsSolver::CompareLitByCoffVars(const Lit& x, const Lit& y) const
 {
     if (x.coffVars.size() != y.coffVars.size()) {
         return x.coffVars.size() < y.coffVars.size();
@@ -1676,7 +1682,6 @@ bool LsSolver::CompareLit(const Lit& x, const Lit& y, bool isQuick)
         if (xv.varIdx != yv.varIdx) {
             return xv.varIdx < yv.varIdx;
         }
-
         if (isQuick && xv.coff != yv.coff) {
             return xv.coff < yv.coff;
         }
@@ -1685,7 +1690,6 @@ bool LsSolver::CompareLit(const Lit& x, const Lit& y, bool isQuick)
     if (isQuick) {
         return x.key < y.key;
     }
-
     return CompareLitByCoffVars(x, y);
 }
 
@@ -1709,7 +1713,6 @@ void LsSolver::ReduceDuplicatedLits(bool& modified)
     if (litsInCls->array.empty()) {
         return;
     }
-
     int lIdxPrev = litsInCls->array[0];
     for (int currIdx = 1; currIdx < litsInCls->arraySize; currIdx++) {
         int lIdxCurr = litsInCls->array[currIdx];
@@ -1834,7 +1837,8 @@ RationNum LsSolver::CalculateLitLowBound(const Lit& l)
 }
 
 // 处理非等式情况
-void LsSolver::HandleNonEqualCase(Lit& l, const RationNum& litUpBound, const RationNum& litLowBound, bool& modified)
+void LsSolver::HandleNonEqualCase(Lit& l, const RationNum& litUpBound, const RationNum& litLowBound,
+    bool& modified) const
 {
     if (litUpBound < litLowBound || litLowBound > 0) {
         l.litsIndex = -1;
@@ -1847,7 +1851,8 @@ void LsSolver::HandleNonEqualCase(Lit& l, const RationNum& litUpBound, const Rat
 }
 
 // 处理等式情况
-void LsSolver::HandleEqualCase(Lit& l, const RationNum& litUpBound, const RationNum& litLowBound, bool& modified)
+void LsSolver::HandleEqualCase(Lit& l, const RationNum& litUpBound, const RationNum& litLowBound,
+    bool& modified) const
 {
     if (litUpBound == litLowBound) {
         if (litUpBound != 0) {
@@ -1933,7 +1938,7 @@ void LsSolver::ReduceClause(bool& modified)
     DetermineLitsByBound(modified); // 根据var的bound确定文字是否已经为true或false
     int reducedClauseNum = 0;
     uint64_t originalClauseNum = numClauses;
-    for (int i = 0; i < numClauses; i++) {
+    for (int i = 0; i < static_cast<int>(numClauses); i++) {
         if (!clauses[i].isDelete && !IsClauseTautology(clauses[i])) {
             if (reducedClauseNum != i) {
                 clauses[reducedClauseNum] = std::move(clauses[i]);
@@ -1996,7 +2001,7 @@ void LsSolver::RecordNiaLiteralInClause(int clauseIdx, int litSignIdx, Lit& curr
 
 void LsSolver::RecordBoolLiteralInClause(int clauseIdx, int litSignIdx, Lit& currentLit)
 {
-    const uint64_t varIdx = currentLit.delta.ToInt();
+    const uint64_t varIdx = static_cast<uint64_t>(currentLit.delta.ToInt());
     if (!litAppear[std::abs(litSignIdx)]) {
         vars[varIdx].literalIdxs.push_back(std::abs(litSignIdx));
     }
@@ -2027,7 +2032,7 @@ void LsSolver::RecordClauseLiteralRelations()
     }
 }
 
-void LsSolver::DeduplicateClauseIdxs(Variable& currentVar)
+void LsSolver::DeduplicateClauseIdxs(Variable& currentVar) const
 {
     uint64_t previousClauseIdx = INT64_MAX;
     int varClauseNum = 0;
@@ -2035,7 +2040,7 @@ void LsSolver::DeduplicateClauseIdxs(Variable& currentVar)
         if (previousClauseIdx == static_cast<uint64_t>(clauseIdx)) {
             continue;
         }
-        previousClauseIdx = clauseIdx;
+        previousClauseIdx = static_cast<uint64_t>(clauseIdx);
         currentVar.clauseIdxs[varClauseNum++] = clauseIdx;
     }
     currentVar.clauseIdxs.resize(varClauseNum);
@@ -2057,11 +2062,11 @@ void LsSolver::BuildPreparedVarLitRelations()
     }
 }
 
-void LsSolver::CollectUniqueLiteralIdxs(Variable& currentVar)
+void LsSolver::CollectUniqueLiteralIdxs(Variable& currentVar) const
 {
     uint64_t previousLitIdx = INT64_MAX;
     int varLitNum = 0;
-    for (int idx = 0; idx < currentVar.varLits.size(); idx++) {
+    for (size_t idx = 0; idx < currentVar.varLits.size(); idx++) {
         const uint64_t currentLitIdx = currentVar.varLits[idx].litIdx;
         if (previousLitIdx == currentLitIdx) {
             continue;
@@ -2073,7 +2078,7 @@ void LsSolver::CollectUniqueLiteralIdxs(Variable& currentVar)
     currentVar.literalIdxs.resize(varLitNum);
 }
 
-bool LsSolver::IsSameLit(const Lit& l1, const Lit& l2)
+bool LsSolver::IsSameLit(const Lit& l1, const Lit& l2) const
 {
     if ((!l1.isNiaLit) || (!l2.isNiaLit) || (l1.isEqual != l2.isEqual) || (l1.key != l2.key) ||
         (l1.coffVars.size() != l2.coffVars.size())) {
@@ -2088,7 +2093,7 @@ bool LsSolver::IsSameLit(const Lit& l1, const Lit& l2)
     return true;
 }
 
-bool LsSolver::IsNegLit(const Lit& l1, const Lit& l2)
+bool LsSolver::IsNegLit(const Lit& l1, const Lit& l2) const
 {
     if (l1.isEqual || l2.isEqual) {
         return false;
