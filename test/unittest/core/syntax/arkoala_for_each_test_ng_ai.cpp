@@ -23,10 +23,15 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/syntax/arkoala_for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
+#include <string>
 
 using namespace testing;
 using namespace testing::ext;
@@ -77,7 +82,10 @@ public:
 
     RefPtr<FrameNode> CreateListItemNode()
     {
-        return CreateFrameNode(V2::LIST_ITEM_ETS_TAG);
+        auto pattern = AceType::MakeRefPtr<NG::ListItemPattern>(nullptr);
+        auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ITEM_ETS_TAG, -1, pattern);
+        pattern->AttachToFrameNode(frameNode);
+        return frameNode;
     }
 };
 
@@ -392,6 +400,448 @@ HWTEST_F(ArkoalaForEachTestNgAI, DumpInfo_ForEachNodeTest, TestSize.Level1)
     node->DumpInfo();
 
     SUCCEED();
+}
+
+/**
+ * @tc.name: SetOnMove_WithParentNodeTest
+ * @tc.desc: Test SetOnMove when parent node exists and init drag manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, SetOnMove_WithParentNodeTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::LIST_ETS_TAG);
+    ASSERT_NE(parentNode, nullptr);
+    forEachNode->SetParent(parentNode);
+    forEachNode->onMainTree_ = true;
+
+    auto listItem = CreateListItemNode();
+    ASSERT_NE(listItem, nullptr);
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+
+    auto listItemWrapper = CreateFrameNode("wrapper");
+    listItemWrapper->AddChild(listItem);
+    parentNode->AddChild(forEachNode);
+    forEachNode->AddChild(listItemWrapper);
+
+    auto setOnMoveCbFunc = [](int32_t from, int32_t to) {};
+    forEachNode->SetOnMove(setOnMoveCbFunc);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SetOnMove_WithoutParentNodeTest
+ * @tc.desc: Test SetOnMove when parent node does not exist, should post task
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, SetOnMove_WithoutParentNodeTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    forEachNode->onMainTree_ = false;
+
+    auto setOnMoveCbFunc = [](int32_t from, int32_t to) {};
+    forEachNode->SetOnMove(setOnMoveCbFunc);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SetOnMove_ClearOnMoveWithExistingEventTest
+ * @tc.desc: Test SetOnMove clears onMoveEvent_ when onMove is nullptr and onMoveEvent_ exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, SetOnMove_ClearOnMoveWithExistingEventTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::LIST_ETS_TAG);
+    forEachNode->SetParent(parentNode);
+    forEachNode->onMainTree_ = true;
+
+    forEachNode->SetOnMove([](int32_t, int32_t) {});
+
+    forEachNode->SetOnMove(nullptr);
+
+    EXPECT_EQ(forEachNode->onMoveEvent_, nullptr);
+}
+
+/**
+ * @tc.name: InitDragManager_WithListParentTest
+ * @tc.desc: Test InitDragManager with List parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitDragManager_WithListParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::LIST_ETS_TAG);
+    forEachNode->SetParent(parentNode);
+
+    auto listItem = CreateListItemNode();
+    ASSERT_NE(listItem, nullptr);
+
+    forEachNode->InitDragManager(listItem);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitDragManager_WithGridParentTest
+ * @tc.desc: Test InitDragManager with Grid parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitDragManager_WithGridParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto gridNode = CreateFrameNode(V2::GRID_ETS_TAG);
+    forEachNode->SetParent(gridNode);
+
+    auto gridItem = CreateFrameNode(V2::GRID_ITEM_ETS_TAG);
+    ASSERT_NE(gridItem, nullptr);
+
+    forEachNode->InitDragManager(gridItem);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitDragManager_WithNonListGridParentTest
+ * @tc.desc: Test InitDragManager with non-List/Grid parent returns early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitDragManager_WithNonListGridParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto columnNode = CreateFrameNode(V2::COLUMN_ETS_TAG);
+    forEachNode->SetParent(columnNode);
+
+    auto listItem = CreateListItemNode();
+    ASSERT_NE(listItem, nullptr);
+
+    forEachNode->InitDragManager(listItem);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitDragManager_NullChildTest
+ * @tc.desc: Test InitDragManager with null child returns early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitDragManager_NullChildTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::LIST_ETS_TAG);
+    forEachNode->SetParent(parentNode);
+
+    forEachNode->InitDragManager(nullptr);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitAllChildrenDragManager_InitWithListParentTest
+ * @tc.desc: Test InitAllChildrenDragManager init=true with List parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitAllChildrenDragManager_InitWithListParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto listParent = CreateFrameNode(V2::LIST_ETS_TAG);
+    forEachNode->SetParent(listParent);
+
+    auto listItem = CreateListItemNode();
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+
+    auto wrapperNode = AceType::MakeRefPtr<FrameNode>("wrapper", -1, AceType::MakeRefPtr<Pattern>());
+    wrapperNode->AddChild(listItem);
+    forEachNode->AddChild(wrapperNode);
+
+    forEachNode->InitAllChildrenDragManager(true);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitAllChildrenDragManager_InitWithGridParentTest
+ * @tc.desc: Test InitAllChildrenDragManager init=true with Grid parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitAllChildrenDragManager_InitWithGridParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto gridParent = CreateFrameNode(V2::GRID_ETS_TAG);
+    forEachNode->SetParent(gridParent);
+
+    auto gridItem = CreateFrameNode(V2::GRID_ITEM_ETS_TAG);
+
+    auto wrapperNode = AceType::MakeRefPtr<FrameNode>("wrapper", -1, AceType::MakeRefPtr<Pattern>());
+    wrapperNode->AddChild(gridItem);
+    forEachNode->AddChild(wrapperNode);
+
+    forEachNode->InitAllChildrenDragManager(true);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitAllChildrenDragManager_DeInitWithListParentTest
+ * @tc.desc: Test InitAllChildrenDragManager init=false with List parent calls DeInitDragManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitAllChildrenDragManager_DeInitWithListParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto listParent = CreateFrameNode(V2::LIST_ETS_TAG);
+    forEachNode->SetParent(listParent);
+
+    auto listItem = CreateListItemNode();
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(listItemPattern, nullptr);
+
+    auto wrapperNode = AceType::MakeRefPtr<FrameNode>("wrapper", -1, AceType::MakeRefPtr<Pattern>());
+    wrapperNode->AddChild(listItem);
+    forEachNode->AddChild(wrapperNode);
+
+    forEachNode->InitAllChildrenDragManager(false);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitAllChildrenDragManager_DeInitWithGridParentTest
+ * @tc.desc: Test InitAllChildrenDragManager init=false with Grid parent calls DeInitDragManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitAllChildrenDragManager_DeInitWithGridParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto gridParent = CreateFrameNode(V2::GRID_ETS_TAG);
+    forEachNode->SetParent(gridParent);
+
+    auto gridItem = CreateFrameNode(V2::GRID_ITEM_ETS_TAG);
+
+    auto wrapperNode = AceType::MakeRefPtr<FrameNode>("wrapper", -1, AceType::MakeRefPtr<Pattern>());
+    wrapperNode->AddChild(gridItem);
+    forEachNode->AddChild(wrapperNode);
+
+    forEachNode->InitAllChildrenDragManager(false);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitAllChildrenDragManager_WithNonListGridParentTest
+ * @tc.desc: Test InitAllChildrenDragManager with non-List/Grid parent clears onMoveEvent_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitAllChildrenDragManager_WithNonListGridParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto columnParent = CreateFrameNode(V2::COLUMN_ETS_TAG);
+    forEachNode->SetParent(columnParent);
+
+    forEachNode->onMoveEvent_ = [](int32_t, int32_t) {};
+
+    forEachNode->InitAllChildrenDragManager(true);
+
+    EXPECT_EQ(forEachNode->onMoveEvent_, nullptr);
+}
+
+/**
+ * @tc.name: InitAllChildrenDragManager_ChildWithZeroChildrenTest
+ * @tc.desc: Test InitAllChildrenDragManager skips child with zero children
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitAllChildrenDragManager_ChildWithZeroChildrenTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto listParent = CreateFrameNode(V2::LIST_ETS_TAG);
+    forEachNode->SetParent(listParent);
+
+    auto emptyWrapper = AceType::MakeRefPtr<FrameNode>("wrapper", -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->AddChild(emptyWrapper);
+
+    forEachNode->InitAllChildrenDragManager(true);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitAllChildrenDragManager_ChildWithMultipleChildrenTest
+ * @tc.desc: Test InitAllChildrenDragManager skips child with multiple children
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitAllChildrenDragManager_ChildWithMultipleChildrenTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto listParent = CreateFrameNode(V2::LIST_ETS_TAG);
+    forEachNode->SetParent(listParent);
+
+    auto listItem1 = CreateListItemNode();
+    auto listItem2 = CreateListItemNode();
+    auto wrapperNode = AceType::MakeRefPtr<FrameNode>("wrapper", -1, AceType::MakeRefPtr<Pattern>());
+    wrapperNode->AddChild(listItem1);
+    wrapperNode->AddChild(listItem2);
+    forEachNode->AddChild(wrapperNode);
+
+    forEachNode->InitAllChildrenDragManager(true);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitAllChildrenDragManager_NullChildInListTest
+ * @tc.desc: Test InitAllChildrenDragManager handles null child in List parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, InitAllChildrenDragManager_NullChildInListTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto listParent = CreateFrameNode(V2::LIST_ETS_TAG);
+    forEachNode->SetParent(listParent);
+
+    auto emptyWrapper = AceType::MakeRefPtr<FrameNode>("wrapper", -1, AceType::MakeRefPtr<Pattern>());
+    auto listItem = CreateListItemNode();
+    emptyWrapper->AddChild(listItem);
+    forEachNode->AddChild(emptyWrapper);
+
+    forEachNode->InitAllChildrenDragManager(true);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: MoveData_IsNeedUpdateTrueWithParentTest
+ * @tc.desc: Test MoveData when isNeedUpdate=true and parent frame node exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, MoveData_IsNeedUpdateTrueWithParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::COLUMN_ETS_TAG);
+    forEachNode->SetParent(parentNode);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child1 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child2 = CreateFrameNode(V2::TEXT_ETS_TAG);
+
+    forEachNode->AddChild(child0);
+    forEachNode->AddChild(child1);
+    forEachNode->AddChild(child2);
+
+    forEachNode->MoveData(INDEX_0, INDEX_2, true);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: MoveData_IsNeedUpdateFalseTest
+ * @tc.desc: Test MoveData when isNeedUpdate=false skips ChildrenUpdatedFrom
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, MoveData_IsNeedUpdateFalseTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::COLUMN_ETS_TAG);
+    forEachNode->SetParent(parentNode);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child1 = CreateFrameNode(V2::TEXT_ETS_TAG);
+
+    forEachNode->AddChild(child0);
+    forEachNode->AddChild(child1);
+
+    forEachNode->MoveData(INDEX_0, INDEX_1, false);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: MoveData_IsNeedUpdateTrueWithoutParentTest
+ * @tc.desc: Test MoveData when isNeedUpdate=true but no parent frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, MoveData_IsNeedUpdateTrueWithoutParentTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child1 = CreateFrameNode(V2::TEXT_ETS_TAG);
+
+    forEachNode->AddChild(child0);
+    forEachNode->AddChild(child1);
+
+    forEachNode->MoveData(INDEX_0, INDEX_1, true);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GetFrameNode_ReturnsFrameNodeTest
+ * @tc.desc: Test GetFrameNode returns FrameNode by index
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, GetFrameNode_ReturnsFrameNodeTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    forEachNode->AddChild(child0);
+
+    auto frameNode = forEachNode->GetFrameNode(INDEX_0);
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameNode_InvalidIndexTest
+ * @tc.desc: Test GetFrameNode with invalid index returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaForEachTestNgAI, GetFrameNode_InvalidIndexTest, TestSize.Level1)
+{
+    auto forEachNode = CreateForEachNode();
+    ASSERT_NE(forEachNode, nullptr);
+
+    auto frameNode = forEachNode->GetFrameNode(INVALID_INDEX);
+    EXPECT_EQ(frameNode, nullptr);
 }
 
 } // namespace OHOS::Ace::NG
