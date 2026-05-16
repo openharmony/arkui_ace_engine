@@ -104,8 +104,9 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
         auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
         auto enableOpenSubwindowInSubwindow = expandDisplay || container->IsPcOrFreeMultiWindowCapability();
         if (!enableOpenSubwindowInSubwindow && isSubContainer && dialogProperties.isShowInSubWindow) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not open dialog in subwindow");
-            return;
+            enableOpenSubwindowInSubwindow = true;
+            TAG_LOGD(AceLogTag::ACE_DIALOG,
+                "reuse parent container for nested dialog, containerId:%{public}d", currentId);
         }
         if (isSubContainer && (!dialogProperties.isShowInSubWindow || enableOpenSubwindowInSubwindow)) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
