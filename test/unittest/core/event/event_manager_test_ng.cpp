@@ -19,6 +19,24 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace OHOS::Ace {
+
+// Define RectCallback and RectCallbackListImpl for test access
+// These structures are defined in event_manager.cpp and are not exposed in the header
+struct RectCallback {
+    ~RectCallback() = default;
+    std::function<void(std::vector<Rect>&)> rectGetCallback;
+    std::function<void()> touchCallback;
+    std::function<void()> mouseCallback;
+};
+
+struct RectCallbackListImpl {
+    std::vector<RectCallback> callbacks;
+};
+
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 void EventManagerTestNg::SetUpTestSuite()
 {
@@ -384,12 +402,14 @@ HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
     eventManager->AddRectCallback(
         [rectGetCallback2](std::vector<Rect>& rectList) -> void { rectGetCallback2(rectList); },
         touchCallback, mouseCallback);
+    ASSERT_NE(eventManager->rectCallbackListImpl_, nullptr);
 
     /**
      * @tc.steps: step3. Call HandleOutOfRectCallbacks with SourceType::TOUCH
      * @tc.expected: callbacks size is 1 after out-of-rect handling
      */
     eventManager->HandleOutOfRectCallbacks(point);
+    EXPECT_EQ(eventManager->rectCallbackListImpl_->callbacks.size(), 1);
 
     point.SetSourceType(SourceType::MOUSE);
     eventManager->ClearRectCallbacks();
@@ -401,6 +421,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
      * @tc.expected: callbacks are cleared
      */
     eventManager->HandleOutOfRectCallbacks(point);
+    EXPECT_EQ(eventManager->rectCallbackListImpl_->callbacks.size(), 0);
 }
 
 /**
