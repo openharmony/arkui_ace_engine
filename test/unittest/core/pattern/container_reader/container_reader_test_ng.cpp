@@ -1560,7 +1560,6 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent002, TestSize.Level1)
     const float flexHeight = 200.0f;
     const float textWidth1 = 120.0f;
     const float textWidth2 = 80.0f;
-    const float textHeight = 60.0f;
     const float expectedReaderWidth = flexWidth - textWidth1 - textWidth2;
 
     RefPtr<FrameNode> text1;
@@ -1615,8 +1614,6 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent003, TestSize.Level1)
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     const float flexWidth = 400.0f;
-    const float flexHeight = 300.0f;
-    const float textWidth = 100.0f;
     const float textHeight = 100.0f;
 
     RefPtr<FrameNode> text;
@@ -1668,7 +1665,6 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent004, TestSize.Level1)
     const float columnWidth = 300.0f;
     const float columnHeight = 400.0f;
     const float textHeight = 100.0f;
-    const float textWidth = 100.0f;
     // In Column: main axis = vertical, cross axis = horizontal
     // ContainerReader with cross-axis matchParent → width = parent width (300)
     // ContainerReader main axis (height) = remaining space = 400 - 100 = 300
