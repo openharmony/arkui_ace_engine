@@ -68,6 +68,8 @@ struct ListMainSizeValues {
     float referencePos = 0.0f;
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
+    float startFixOffset = 0.0f;
+    float endFixOffset = 0.0f;
     bool forward = true;
     bool backward = false;
 };
