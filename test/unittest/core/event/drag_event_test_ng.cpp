@@ -2523,4 +2523,40 @@ HWTEST_F(DragEventTestNg, DragEventHandleTextDragCallbackTest001, TestSize.Level
     EXPECT_NE(dragEventActuator, nullptr);
 }
 
+/**
+ * @tc.name: DragEventFollowHandMorphDropAnimation001
+ * @tc.desc: Test drag animation type and follow-hand morph drop animation callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventFollowHandMorphDropAnimation001, TestSize.Level1)
+{
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    EXPECT_EQ(dragEvent->GetDragAnimationType(), DragAnimationType::DEFAULT);
+    EXPECT_EQ(dragEvent->GetDragAnimationTypeValue(), static_cast<int32_t>(DragAnimationType::DEFAULT));
+
+    dragEvent->SetDragAnimationType(DragAnimationType::FOLLOW_HAND_MORPH);
+    EXPECT_EQ(dragEvent->GetDragAnimationType(), DragAnimationType::FOLLOW_HAND_MORPH);
+    EXPECT_EQ(dragEvent->GetDragAnimationTypeValue(), static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH));
+
+    dragEvent->SetDragAnimationType(static_cast<int32_t>(DragAnimationType::DEFAULT));
+    EXPECT_EQ(dragEvent->GetDragAnimationType(), DragAnimationType::DEFAULT);
+    EXPECT_EQ(dragEvent->GetDragAnimationTypeValue(), static_cast<int32_t>(DragAnimationType::DEFAULT));
+
+    int32_t callbackCount = 0;
+    EXPECT_FALSE(dragEvent->HasFollowHandMorphDropAnimation());
+    dragEvent->ExecuteFollowHandMorphDropAnimation();
+    EXPECT_EQ(callbackCount, 0);
+
+    dragEvent->SetFollowHandMorphDropAnimation([&callbackCount]() { callbackCount++; });
+    EXPECT_TRUE(dragEvent->HasFollowHandMorphDropAnimation());
+    dragEvent->SetFollowHandMorphAnimationOption("follow_hand_option");
+    EXPECT_EQ(dragEvent->GetFollowHandMorphAnimationOption(), "follow_hand_option");
+
+    dragEvent->ExecuteFollowHandMorphDropAnimation();
+    dragEvent->ExecuteFollowHandMorphDropAnimation();
+    EXPECT_EQ(callbackCount, 2);
+}
+
 } // namespace OHOS::Ace::NG
