@@ -3216,13 +3216,7 @@ bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& nod
         CHECK_NULL_VOID(pattern);
         pattern->OnStartOneTransitionAnimation();
     };
-    auto onFinish = [weakPattern = WeakClaim(this)]() {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnFinishOneTransitionAnimation();
-    };
     navDestinationNode->SetOnStartTransitionAnimationCallback(std::move(onStart));
-    navDestinationNode->SetOnFinishTransitionAnimationCallback(std::move(onFinish));
     // set navigation id
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationNode->GetPattern());
