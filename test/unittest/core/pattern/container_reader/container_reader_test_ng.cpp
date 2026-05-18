@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/container_reader/container_reader_layout_property.h"
 #include "core/components_ng/pattern/container_reader/container_reader_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1476,5 +1477,235 @@ HWTEST_F(ContainerReaderTestNg, LayoutMeasure004, TestSize.Level1)
     auto reader2Geometry = reader2->GetGeometryNode();
     ASSERT_NE(reader2Geometry, nullptr);
     EXPECT_EQ(reader2Geometry->GetFrameSize(), SizeF(TEST_READER_MAX_WIDTH, TEST_FLEX_HEIGHT));
+}
+
+// ==================== Cross-axis matchParent layout ====================
+
+/**
+ * @tc.name: CrossAxisMatchParent001
+ * @tc.desc: ContainerReader with only cross-axis matchParent should use remaining main axis space
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent001, TestSize.Level1)
+{
+    int32_t savedVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    const float flexWidth = 400.0f;
+    const float flexHeight = 300.0f;
+    const float textWidth = 100.0f;
+    const float textHeight = 100.0f;
+    const float expectedReaderWidth = flexWidth - textWidth;
+
+    RefPtr<FrameNode> text;
+    RefPtr<FrameNode> reader;
+    auto flex = CreateFlexRow([this, &text, &reader, flexWidth, flexHeight, textWidth, textHeight](
+        FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(flexWidth));
+        ViewAbstract::SetHeight(CalcLength(flexHeight));
+        text = CreateText(u"txt", [textWidth, textHeight](TextModelNG textModel) {
+            ViewAbstract::SetWidth(CalcLength(textWidth));
+            ViewAbstract::SetHeight(CalcLength(textHeight));
+        });
+        reader = CreateContainerReader([](ContainerReaderModelNG readerModel) {
+            ViewAbstractModelNG policyModel;
+            policyModel.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_NE(text, nullptr);
+    ASSERT_NE(reader, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 2);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Text("txt")
+            .width("100vp")
+            .height("100vp")
+          ContainerReader()
+            .height(LayoutPolicy.matchParent)
+        }
+        .width("400vp")
+        .height("300vp")
+    */
+
+    auto flexGeometry = flex->GetGeometryNode();
+    ASSERT_NE(flexGeometry, nullptr);
+    EXPECT_EQ(flexGeometry->GetFrameSize(), SizeF(flexWidth, flexHeight));
+
+    auto textGeometry = text->GetGeometryNode();
+    ASSERT_NE(textGeometry, nullptr);
+    EXPECT_EQ(textGeometry->GetFrameSize(), SizeF(textWidth, textHeight));
+
+    // ContainerReader: main axis = remaining space (400-100=300), cross axis = parent height (300)
+    auto readerGeometry = reader->GetGeometryNode();
+    ASSERT_NE(readerGeometry, nullptr);
+    EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(expectedReaderWidth, flexHeight));
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(savedVersion);
+}
+
+/**
+ * @tc.name: CrossAxisMatchParent002
+ * @tc.desc: ContainerReader with cross-axis matchParent between two Text siblings uses remaining space
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent002, TestSize.Level1)
+{
+    int32_t savedVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    const float flexWidth = 500.0f;
+    const float flexHeight = 200.0f;
+    const float textWidth1 = 120.0f;
+    const float textWidth2 = 80.0f;
+    const float textHeight = 60.0f;
+    const float expectedReaderWidth = flexWidth - textWidth1 - textWidth2;
+
+    RefPtr<FrameNode> text1;
+    RefPtr<FrameNode> reader;
+    RefPtr<FrameNode> text2;
+    auto flex = CreateFlexRow([this, &text1, &reader, &text2](
+        FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500.0f));
+        ViewAbstract::SetHeight(CalcLength(200.0f));
+        text1 = CreateText(u"A", [](TextModelNG textModel) {
+            ViewAbstract::SetWidth(CalcLength(120.0f));
+            ViewAbstract::SetHeight(CalcLength(60.0f));
+        });
+        reader = CreateContainerReader([](ContainerReaderModelNG readerModel) {
+            ViewAbstractModelNG policyModel;
+            policyModel.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+        text2 = CreateText(u"B", [](TextModelNG textModel) {
+            ViewAbstract::SetWidth(CalcLength(80.0f));
+            ViewAbstract::SetHeight(CalcLength(60.0f));
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Text("A").width("120vp").height("60vp")
+          ContainerReader().height(LayoutPolicy.matchParent)
+          Text("B").width("80vp").height("60vp")
+        }
+        .width("500vp")
+        .height("200vp")
+    */
+
+    // ContainerReader main axis = 500 - 120 - 80 = 300, cross axis = 200
+    auto readerGeometry = reader->GetGeometryNode();
+    ASSERT_NE(readerGeometry, nullptr);
+    EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(expectedReaderWidth, flexHeight));
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(savedVersion);
+}
+
+/**
+ * @tc.name: CrossAxisMatchParent003
+ * @tc.desc: ContainerReader with only main-axis matchParent should NOT use remaining-space logic
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent003, TestSize.Level1)
+{
+    int32_t savedVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    const float flexWidth = 400.0f;
+    const float flexHeight = 300.0f;
+    const float textWidth = 100.0f;
+    const float textHeight = 100.0f;
+
+    RefPtr<FrameNode> text;
+    RefPtr<FrameNode> reader;
+    auto flex = CreateFlexRow([this, &text, &reader](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+        text = CreateText(u"txt", [](TextModelNG textModel) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(100.0f));
+        });
+        reader = CreateContainerReader([](ContainerReaderModelNG readerModel) {
+            ViewAbstractModelNG policyModel;
+            policyModel.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_NE(text, nullptr);
+    ASSERT_NE(reader, nullptr);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Text("txt").width("100vp").height("100vp")
+          ContainerReader().width(LayoutPolicy.matchParent)
+        }
+        .width("400vp")
+        .height("300vp")
+    */
+
+    // main-axis matchParent: ContainerReader width = parent width (400), not remaining
+    auto readerGeometry = reader->GetGeometryNode();
+    ASSERT_NE(readerGeometry, nullptr);
+    EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(flexWidth, textHeight));
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(savedVersion);
+}
+
+/**
+ * @tc.name: CrossAxisMatchParent004
+ * @tc.desc: Multiple ContainerReaders with cross-axis matchParent in Column layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent004, TestSize.Level1)
+{
+    int32_t savedVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    const float columnWidth = 300.0f;
+    const float columnHeight = 400.0f;
+    const float textHeight = 100.0f;
+    const float textWidth = 100.0f;
+    // In Column: main axis = vertical, cross axis = horizontal
+    // ContainerReader with cross-axis matchParent → width = parent width (300)
+    // ContainerReader main axis (height) = remaining space = 400 - 100 = 300
+    const float expectedReaderHeight = columnHeight - textHeight;
+
+    RefPtr<FrameNode> text;
+    RefPtr<FrameNode> reader;
+    auto column = CreateColumn([this, &text, &reader](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(400.0f));
+        text = CreateText(u"txt", [](TextModelNG textModel) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(100.0f));
+        });
+        reader = CreateContainerReader([](ContainerReaderModelNG readerModel) {
+            ViewAbstractModelNG policyModel;
+            policyModel.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        });
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_NE(text, nullptr);
+    ASSERT_NE(reader, nullptr);
+    CreateLayoutTask(column);
+
+    /* corresponding ets code:
+        Column() {
+          Text("txt").width("100vp").height("100vp")
+          ContainerReader().width(LayoutPolicy.matchParent)
+        }
+        .width("300vp")
+        .height("400vp")
+    */
+
+    auto readerGeometry = reader->GetGeometryNode();
+    ASSERT_NE(readerGeometry, nullptr);
+    EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(columnWidth, expectedReaderHeight));
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(savedVersion);
 }
 } // namespace OHOS::Ace::NG
