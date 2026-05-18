@@ -1182,7 +1182,8 @@ std::optional<ScrollingConfig> ListPattern::GetDefaultScrollingConfig(SmartGestu
         auto targetIndex = GetDefaultScrollTargetIndex(direction, align, anchorIndex);
         if (targetIndex.has_value()) {
             float targetPos = 0.0f;
-            if (CalculateScrollingDistanceToIndex(targetIndex.value(), align, targetPos) && !NearZero(targetPos)) {
+            if (CalculateScrollingDistanceToIndex(targetIndex.value(), align, targetPos, true) &&
+                !NearZero(targetPos)) {
                 return CreateScrollingConfig(direction, std::abs(targetPos));
             }
         }
@@ -2423,11 +2424,24 @@ std::optional<ScrollingConfig> ListPattern::CreateScrollingConfig(
     return ScrollingConfig { .distance = distance, .direction = direction };
 }
 
-bool ListPattern::CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const
+bool ListPattern::CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos,
+    bool isForceLayoutTarget) const
 {
     auto iter = itemPosition_.find(index);
     if (iter == itemPosition_.end()) {
-        return false;
+        CHECK_NULL_RETURN(isForceLayoutTarget, false);
+        targetIndex_ = index;
+        isLayoutListForFocus_ = true;
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto pipeline = GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        pipeline->FlushUITasks();
+        iter = itemPosition_.find(index);
+        if (iter == itemPosition_.end()) {
+            return false;
+        }
     }
     if (iter->second.isGroup) {
         return GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos, iter->second.endPos,
