@@ -320,6 +320,7 @@ void DepthComponentPattern::OnPaint3D()
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     if (IsGltfBackground() && mrtDepthAdapter_) {
         mrtDepthAdapter_->RenderFrame();
+        MarkRender3D();
     }
 #endif
 }
