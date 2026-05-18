@@ -42,6 +42,7 @@ common_sources = [
   "utility/callback_helper.cpp",
   "utility/converter_enums.cpp",
   "utility/peer_utils.cpp",
+  "utility/preview_placeholder.cpp",
   "utility/reverse_converter.cpp",
   "utility/reverse_converter_enums.cpp",
   "utility/validators.cpp",
