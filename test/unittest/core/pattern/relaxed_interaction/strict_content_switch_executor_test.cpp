@@ -19,12 +19,33 @@
 
 #include "base/memory/ace_type.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/relaxed_interaction/executors/strict_content_switch_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr int32_t TEST_NODE_ID = 100;
+const PointF TEST_COORDINATES(100.0f, 200.0f);
+}
+
+class TestableStrictContentSwitchExecutor : public StrictContentSwitchExecutor {
+public:
+    TestableStrictContentSwitchExecutor(WeakPtr<PipelineContext> context, const std::string mode,
+        const std::string direction, const uint32_t count, const PointF& coordinates)
+        : StrictContentSwitchExecutor(context, mode, direction, count, coordinates) {}
+
+    ExecutorResult TestTriggerContentSwitch(const RefPtr<FrameNode> frameNode)
+    {
+        return TriggerContentSwitch(frameNode);
+    }
+};
 
 class StrictContentSwitchExecutorTest : public testing::Test {
 public:
@@ -263,6 +284,50 @@ HWTEST_F(StrictContentSwitchExecutorIsSingleStepTest, IsSingleStep_DifferentDire
 
     EXPECT_TRUE(executor1.IsSingleStep());
     EXPECT_TRUE(executor2.IsSingleStep());
+}
+
+HWTEST_F(StrictContentSwitchExecutorExecuteStepTest, ExecuteStep_NonScrollablePattern_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "test", TEST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    TestableStrictContentSwitchExecutor executor(context, "target", "forward", 1, TEST_COORDINATES);
+    auto result = executor.TestTriggerContentSwitch(frameNode);
+    EXPECT_EQ(result, ExecutorResult::FAILED);
+}
+
+HWTEST_F(StrictContentSwitchExecutorExecuteStepTest, ExecuteStep_ScrollablePattern_ReturnsFailed, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        "scroll", TEST_NODE_ID, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+
+    TestableStrictContentSwitchExecutor executor(context, "target", "forward", 1, TEST_COORDINATES);
+    auto result = executor.TestTriggerContentSwitch(frameNode);
+    EXPECT_EQ(result, ExecutorResult::FAILED);
+}
+
+HWTEST_F(StrictContentSwitchExecutorExecuteStepTest, ExecuteStep_ScrollablePattern_BackwardDirection_ReturnsFailed,
+    TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        "scroll", TEST_NODE_ID, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+
+    TestableStrictContentSwitchExecutor executor(context, "target", "backward", 1, TEST_COORDINATES);
+    auto result = executor.TestTriggerContentSwitch(frameNode);
+    EXPECT_EQ(result, ExecutorResult::FAILED);
 }
 
 } // namespace OHOS::Ace::NG
