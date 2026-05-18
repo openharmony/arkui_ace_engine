@@ -1383,7 +1383,7 @@ void TabsPattern::ResetTabBarFollowHandPosition()
     auto renderContext = tabBar->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     floatingBarPosition_ = FloatingBarPosition::CENTER;
-    renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
 }
 
@@ -1424,7 +1424,7 @@ void TabsPattern::HandleOnTouchScaleAnimation()
     auto translateX = GetTranslateX();
     auto tabBarRenderContext = tabBar->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
-    tabBarRenderContext->UpdateTransformScale({ 1.15f, 0.85f });
+    tabBarRenderContext->UpdateTransformScale({ baseFloatingScale_ * 1.15f, baseFloatingScale_ * 0.85f });
     tabBarRenderContext->UpdateTransformTranslate({ translateX, 0.0f, 0.0f });
 }
 
@@ -1436,7 +1436,7 @@ void TabsPattern::HandleOnTouchDelayScaleAnimation()
     CHECK_NULL_VOID(tabBar);
     auto tabBarRenderContext = tabBar->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
-    tabBarRenderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    tabBarRenderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
 }
 
 void TabsPattern::OnFollowHandAnimationFinish()
@@ -1458,7 +1458,7 @@ void TabsPattern::InitTabBarTransformAttributeIfNeeded()
     auto renderContext = tabBar->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (!renderContext->HasTransformScale()) {
-        renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+        renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
     }
     if (!renderContext->HasTransformTranslate()) {
         renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
@@ -1550,5 +1550,21 @@ void TabsPattern::ResetSystemMaterial()
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetUseNewMaterial(false);
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), nullptr);
+}
+
+void TabsPattern::SetFloatingScaleEnabled(bool isFloatingScaleEnabled)
+{
+    baseFloatingScale_ = isFloatingScaleEnabled ? FLOATING_BAR_SCALE_ENLARGED : FLOATING_BAR_SCALE;
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto renderContext = tabBar->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasTransformScale() && !isFloatingScaleEnabled) {
+        return;
+    }
+    renderContext->UpdateTransformScale({ baseFloatingScale_, baseFloatingScale_ });
 }
 } // namespace OHOS::Ace::NG

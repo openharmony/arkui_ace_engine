@@ -825,6 +825,8 @@ private:
     void NotifyTabBarItemsChange();
     int32_t GetSelectChildIndex(const Offset& offset);
 
+    void CheckFloatingStyle(int32_t index);
+
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;
     CancelableCallback<void()> showTabBarTask_;
     bool isTabBarShowing_ = false;
