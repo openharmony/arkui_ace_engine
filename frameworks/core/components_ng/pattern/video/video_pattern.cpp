@@ -2259,6 +2259,11 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
 
     fullScreenNodeId_.reset();
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
+#if defined(ANDROID_PLATFORM)
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        RegisterRenderContextCallBack();
+    }
+#endif
     auto videoNode = GetHost();
     CHECK_NULL_VOID(videoNode);
     // change event hub to the origin video node
