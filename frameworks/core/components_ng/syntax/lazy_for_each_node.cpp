@@ -596,6 +596,8 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
             children_.push_back(item.second);
         }
     }
+    CHECK_NULL_VOID(builder_);
+    builder_->ProcessSyncLoadTempChildren(children_);
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
@@ -999,5 +1001,17 @@ void LazyForEachNode::UpdateThemeScopeUpdate(int32_t themeScopeId)
     if (builder_) {
         builder_->UpdateThemeScopeUpdate(themeScopeId);
     }
+}
+
+void LazyForEachNode::SetEnableSyncLoad(bool value)
+{
+    CHECK_NULL_VOID(builder_);
+    builder_->SetEnableSyncLoad(value);
+}
+
+void LazyForEachNode::SetIsSyncLoad(bool value)
+{
+    CHECK_NULL_VOID(builder_);
+    builder_->SetIsSyncLoad(value);
 }
 } // namespace OHOS::Ace::NG

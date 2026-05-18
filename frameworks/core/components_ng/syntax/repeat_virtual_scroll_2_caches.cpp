@@ -542,4 +542,49 @@ void RepeatVirtualScroll2Caches::UpdateIsL1(const CacheItem& cacheItem, bool isL
     }
 }
 
+void RepeatVirtualScroll2Caches::SetEnableSyncLoad(bool value)
+{
+    enableSyncLoad_ = value;
+}
+
+void RepeatVirtualScroll2Caches::SetIsSyncLoad(bool value)
+{
+    isSyncLoad_ = value;
+    if (isSyncLoad_) {
+        syncLoadCache_.clear();
+    }
+}
+
+void RepeatVirtualScroll2Caches::ProcessSyncLoadTempChildren(std::list<RefPtr<UINode>>& children,
+    int32_t start, int32_t end)
+{
+    if (enableSyncLoad_ || isSyncLoad_) {
+        return;
+    }
+    for (auto index = start + static_cast<int32_t>(children.size()); index <= end; index++) {
+        auto it = syncLoadCache_.find(index);
+        if (it != syncLoadCache_.end()) {
+            auto node = it->second.Upgrade();
+            CHECK_NULL_VOID(node);
+            children.push_back(node);
+        } else {
+            return;
+        }
+    }
+}
+
+void RepeatVirtualScroll2Caches::OrganizeSyncLoadCache()
+{
+    CHECK_EQUAL_VOID(enableSyncLoad_, true);
+    syncLoadCache_.clear();
+    ForEachL1Node([&](IndexType index, RIDType rid, const RefPtr<UINode>& node) -> void {
+        syncLoadCache_.try_emplace(index, AceType::WeakClaim(AceType::RawPtr(node)));
+    });
+}
+
+bool RepeatVirtualScroll2Caches::CheckIsSyncLoad()
+{
+    return enableSyncLoad_ || isSyncLoad_;
+}
+
 } // namespace OHOS::Ace::NG

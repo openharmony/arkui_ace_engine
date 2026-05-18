@@ -286,6 +286,8 @@ public:
     bool GetParentVisibility();
     void PostMemOptTask();
     void DisableChildrenAndCachesRecycle() override;
+    void SetEnableSyncLoad(bool value) override;
+    void SetIsSyncLoad(bool value) override;
 
     void DumpInfo() override;
     

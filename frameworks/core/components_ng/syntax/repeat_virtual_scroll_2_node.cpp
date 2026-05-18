@@ -419,6 +419,7 @@ void RepeatVirtualScroll2Node::DoSetActiveChildRange(
 // must do a full run even if range is unchanged (which is typically the case).
 void RepeatVirtualScroll2Node::UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1Rd4Index)
 {
+    caches_.OrganizeSyncLoadCache();
     caches_.UpdateL1Rid4Index(l1Rd4Index);
 
     // run next DoSetActiveChild range even if range unchanged
@@ -618,6 +619,8 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildren(bool /*no
         });
     }
 
+    caches_.ProcessSyncLoadTempChildren(children_, prevVisibleRangeStart_, prevVisibleRangeEnd_);
+
     return children_;
 }
 
@@ -781,8 +784,11 @@ void RepeatVirtualScroll2Node::PostIdleTask()
         TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).PostIdleTask idle task calls GetChildren",
             static_cast<int32_t>(node->GetId()));
         node->GetChildren();
+        if (!node->caches_.CheckIsSyncLoad()) {
+            node->PostIdleTask();
+            return;
+        }
         node->RestoreCache(deadline, canUseLongPredictTask);
-
         TAG_LOGD(AceLogTag::ACE_REPEAT, "idle task calls Purge");
         node->Purge();
         if (node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -1008,6 +1014,16 @@ bool RepeatVirtualScroll2Node::IsChildInAnimation(uint32_t rid)
 #ifndef ENABLE_ROSEN_BACKEND
     return false;
 #endif
+}
+
+void RepeatVirtualScroll2Node::SetEnableSyncLoad(bool value)
+{
+    caches_.SetEnableSyncLoad(value);
+}
+
+void RepeatVirtualScroll2Node::SetIsSyncLoad(bool value)
+{
+    caches_.SetIsSyncLoad(value);
 }
 
 bool RepeatVirtualScroll2Node::IsChildOnMainTree(uint32_t rid)
