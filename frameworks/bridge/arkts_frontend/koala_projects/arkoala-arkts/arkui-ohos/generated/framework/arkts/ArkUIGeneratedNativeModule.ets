@@ -5389,6 +5389,18 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyForEachOps_SetOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_lazyVWaterFlowLayoutConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_setLazyVWaterFlowLayoutOptions(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_rowsGap(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_columnsGap(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_columnsTemplate(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_onVisibleIndexesChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _LeadingMarginSpan_construct(): KPointer
     @ani.unsafe.Direct
     native static _LeadingMarginSpan_getFinalizer(): KPointer

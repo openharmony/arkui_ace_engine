@@ -128,8 +128,7 @@ RefPtr<LazyForEachNode> GetLazyForEachChild(const RefPtr<FrameNode>& host, int32
  *               parent put and reports adjustOffset_.{start,end} == 0.
  *           No claim about which referenceEdge branch ran — the white-box
  *           proof of the END/START anchor algorithm lives in the single-test
- *           layer (EndAnchorAdjustOffset_*). Covers audit B4 ① / RFC Phase 0
- *           B4.
+ *           layer (EndAnchorAdjustOffset_*).
  * @tc.type: FUNC
  */
 HWTEST_F(LazyVWaterFlowParentIntegrationTest, ListParentBottomFillSettles_001, TestSize.Level1)
@@ -182,7 +181,7 @@ HWTEST_F(LazyVWaterFlowParentIntegrationTest, ListParentBottomFillSettles_001, T
  *             2. Shrink its reported totalMainSize_ by exactly one item's
  *                main size — this is the value the parent consumes for its
  *                scroll math, and was historically frozen by a stale
- *                maxHeight_ in CheckReset's past-window branch (audit A7).
+ *                maxHeight_ in CheckReset's past-window branch.
  *           Single-lane lazy child (1fr) makes the body shrink observable;
  *           a 2-lane uniform-height layout would have the OTHER lane still
  *           pinning total height after the delete, hiding the signal.
@@ -193,8 +192,6 @@ HWTEST_F(LazyVWaterFlowParentIntegrationTest, ListParentBottomFillSettles_001, T
  *           the parent's offset assertion is intentionally weak — only
  *           bounded — while the lazy child's totalMainSize_ shrink is the
  *           strong cross-component contract.
- *
- *           Covers audit B4 ② / RFC Phase 0 B4.
  * @tc.type: FUNC
  */
 HWTEST_F(LazyVWaterFlowParentIntegrationTest, ListParentTailDeleteShrinksBottom_001, TestSize.Level1)
@@ -229,7 +226,7 @@ HWTEST_F(LazyVWaterFlowParentIntegrationTest, ListParentTailDeleteShrinksBottom_
     /**
      * @tc.expected: Three contract checks, ordered by signal strength:
      *   1. Lazy child's totalMainSize_ shrank by exactly one itemHeight —
-     *      the strong contract A7 fixed. Failing this means a stale
+     *      the strong contract this test guards. Failing this means a stale
      *      maxHeight_ regressed somewhere upstream.
      *   2. Visible window tracks the new tail (endIndex_ = N-2).
      *   3. Parent offset stays in a sane bounded range — no spurious jump
@@ -253,8 +250,7 @@ HWTEST_F(LazyVWaterFlowParentIntegrationTest, ListParentTailDeleteShrinksBottom_
  * @tc.desc: WaterFlow (sliding-window mode, single column) parent counterpart
  *           to the List bottom-fill case. Externally observable contract:
  *           tail reaches, parent stable on repeat SCROLL_BOTTOM, steady-state
- *           adjustOffset == 0. Covers audit B4 ③ (bottom-fill) / RFC Phase 0
- *           B4.
+ *           adjustOffset == 0.
  * @tc.type: FUNC
  */
 HWTEST_F(LazyVWaterFlowParentIntegrationTest, WaterFlowParentBottomFillSettles_001, TestSize.Level1)
@@ -291,9 +287,8 @@ HWTEST_F(LazyVWaterFlowParentIntegrationTest, WaterFlowParentBottomFillSettles_0
  * @tc.name: WaterFlowParentTailDeleteShrinksBottom_001
  * @tc.desc: WaterFlow (sliding-window, single column) parent counterpart to
  *           the List tail-delete case. Same three contract checks: lazy
- *           child's totalMainSize_ shrank by itemHeight (audit A7), visible
- *           window tracks new tail, parent offset stayed sane. Covers audit
- *           B4 ③ (tail-shrink) / RFC Phase 0 B4.
+ *           child's totalMainSize_ shrank by itemHeight, visible window
+ *           tracks new tail, parent offset stayed sane.
  * @tc.type: FUNC
  */
 HWTEST_F(LazyVWaterFlowParentIntegrationTest, WaterFlowParentTailDeleteShrinksBottom_001, TestSize.Level1)

@@ -93,6 +93,8 @@ import { BaseSpan } from "./../../component/span"
 import { ImageSpanModifier } from "./../../ImageSpanModifier"
 import { ArkLazyVGridLayoutComponent, LazyVGridLayoutAttribute, LazyGridLayoutAttribute } from "./../../component/lazyGridLayout"
 import { LazyVGridLayoutModifier } from "./../../LazyVGridLayoutModifier"
+import { ArkLazyWaterFlowLayoutAttributeComponent, ArkLazyVWaterFlowLayoutComponent, LazyWaterFlowLayoutAttribute, LazyVWaterFlowLayoutAttribute } from '@ohos.arkui.components.ArkLazyWaterFlowLayout'
+import { LazyVWaterFlowLayoutModifier } from './../../LazyVWaterFlowLayoutModifier'
 import { ArkIndicatorComponentComponent, IndicatorComponentAttribute } from "./../../component/indicatorcomponent"
 import { IndicatorComponentModifier } from "./../../IndicatorComponentModifier"
 import { ArkLineComponent, LineAttribute,ArkLinePeer,LineOptions} from './../../component/line';
@@ -2688,6 +2690,44 @@ export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayo
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<LazyVGridLayoutAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookLazyWaterFlowLayoutAttributeAttributeModifier(component: ArkLazyWaterFlowLayoutAttributeComponent,
+    modifier: AttributeModifier<LazyWaterFlowLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+
+}
+
+export function hookLazyVWaterFlowLayoutAttributeModifier(component: ArkLazyVWaterFlowLayoutComponent,
+    modifier: AttributeModifier<LazyVWaterFlowLayoutAttribute> | AttributeModifier<LazyWaterFlowLayoutAttribute> |
+        AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return
+    }
+    const isCommonModifier: boolean = modifier instanceof CommonModifier
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>)
+        return
+    }
+    const attributeSet = (): LazyVWaterFlowLayoutModifier => {
+        const isLazyVWaterFlowLayoutModifier: boolean = modifier instanceof LazyVWaterFlowLayoutModifier
+        const initModifier = component.getPeer().lazyVWaterFlowLayoutAttributeSet ?
+            component.getPeer().lazyVWaterFlowLayoutAttributeSet! : new LazyVWaterFlowLayoutModifier()
+        if (isLazyVWaterFlowLayoutModifier) {
+            const lazyVWaterFlowLayoutModifier = modifier as object as LazyVWaterFlowLayoutModifier
+            initModifier.mergeModifier(lazyVWaterFlowLayoutModifier)
+        }
+        component.getPeer().lazyVWaterFlowLayoutAttributeSet = initModifier
+        return initModifier
+    }
+    const constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    }
+    const updaterReceiver = (): ArkLazyVWaterFlowLayoutComponent => {
+        const componentNew: ArkLazyVWaterFlowLayoutComponent = new ArkLazyVWaterFlowLayoutComponent()
+        componentNew.setPeer(component.getPeer())
+        return componentNew
+    }
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<LazyVWaterFlowLayoutAttribute>,
+        attributeSet, constructParam, updaterReceiver, component.getPeer())
 }
 
 export function hookUnionEffectContainerAttributeModifier(component: ArkUnionEffectContainerComponent,

@@ -163,6 +163,7 @@ generated_sources = [
   "implementation/lazy_build_accessor.cpp",
   "implementation/lazy_for_each_ops_accessor.cpp",
   "implementation/lazy_grid_layout_attribute_modifier.cpp",
+  "implementation/lazy_water_flow_layout_extender_accessor.cpp",
   "implementation/lazyv_grid_layout_modifier.cpp",
   "implementation/leading_margin_span_accessor.cpp",
   "implementation/letter_spacing_style_accessor.cpp",
