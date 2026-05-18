@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_richeditor_binding.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_feature.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/animation/animation_pub.h"
@@ -1429,6 +1430,8 @@ void JSViewContext::JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info)
         JSTextField::SetKeyboardAppearanceConfig(info);
     } else if (nodeTag == V2::SEARCH_ETS_TAG) {
         JSTextField::SetSearchKeyboardAppearanceConfig(info);
+    } else if (nodeTag == V2::RICH_EDITOR_ETS_TAG) {
+        JSRichEditor::SetRichEditorKeyboardAppearanceConfig(info);
     }
 }
 
