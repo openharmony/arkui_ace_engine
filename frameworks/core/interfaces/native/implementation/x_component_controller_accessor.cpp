@@ -20,7 +20,6 @@
 #include "arkoala_api_generated.h"
 
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -224,7 +223,7 @@ Opt_drawing_Canvas LockCanvasImpl(Ark_XComponentController peer)
     CHECK_NULL_RETURN(peerImpl, invalid);
     auto canvas = peerImpl->GetCanvas();
     CHECK_NULL_RETURN(canvas, invalid);
-    return Converter::ArkValue<Opt_drawing_Canvas>(canvas.get());
+    return Converter::ArkValue<Opt_drawing_Canvas>(canvas);
 #else
     return invalid;
 #endif // XCOMPONENT_SUPPORTED
@@ -238,7 +237,7 @@ void UnlockCanvasAndPostImpl(Ark_XComponentController peer, Ark_drawing_Canvas c
     auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->controller);
-    peerImpl->controller->UnlockCanvasAndPost(canvas->GetCanvas());
+    peerImpl->controller->UnlockCanvasAndPost(reinterpret_cast<RSCanvas*>(canvas));
 #endif // XCOMPONENT_SUPPORTED
 }
 
