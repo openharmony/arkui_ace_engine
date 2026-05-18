@@ -2232,7 +2232,7 @@ HWTEST_F(ParallelStageTestThreeNg, VirtualStackPushPopCleanMoveTest001, TestSize
 
     auto detailC = CreateRouterPage("detailC", RouterPageType::DETAIL_PAGE);
     stageManager->touchedSecondaryColumnPage_ = detailB;
-    EXPECT_TRUE(stageManager->PushPageInVirtualStackBasedSplit(detailC, true, true, false));
+    EXPECT_TRUE(stageManager->PushPageInVirtualStackBasedSplit(detailC, true, false));
     EXPECT_EQ(stageManager->GetLastPageInStack(), detailC);
 
     EXPECT_TRUE(stageManager->MovePageToFrontInVirtualStackBasedSplit(detailB, true, false));
@@ -2242,14 +2242,14 @@ HWTEST_F(ParallelStageTestThreeNg, VirtualStackPushPopCleanMoveTest001, TestSize
     EXPECT_EQ(stageManager->GetLastPageInStack(), detailA);
 
     auto detailD = CreateRouterPage("detailD", RouterPageType::DETAIL_PAGE);
-    EXPECT_TRUE(stageManager->PushPageInVirtualStackBasedSplit(detailD, true, false, false));
+    EXPECT_TRUE(stageManager->PushPageInVirtualStackBasedSplit(detailD, false, false));
     EXPECT_TRUE(stageManager->PopPageInVirtualStackBasedSplit(true, false));
     EXPECT_EQ(stageManager->GetLastPageInStack(), detailA);
 
     auto detailE = CreateRouterPage("detailE", RouterPageType::DETAIL_PAGE);
     auto detailF = CreateRouterPage("detailF", RouterPageType::DETAIL_PAGE);
-    EXPECT_TRUE(stageManager->PushPageInVirtualStackBasedSplit(detailE, true, false, false));
-    EXPECT_TRUE(stageManager->PushPageInVirtualStackBasedSplit(detailF, true, false, false));
+    EXPECT_TRUE(stageManager->PushPageInVirtualStackBasedSplit(detailE, false, false));
+    EXPECT_TRUE(stageManager->PushPageInVirtualStackBasedSplit(detailF, false, false));
     EXPECT_TRUE(stageManager->CleanPageStackInVirtualStackBasedSplit(stagePattern));
     EXPECT_EQ(stageManager->CollectRouterStackPages().size(), 1U);
 }
