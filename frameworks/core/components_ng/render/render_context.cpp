@@ -45,12 +45,28 @@ std::string UseEffectTypeToString(EffectType effectType)
 
 std::string MaterialTypeToString(int32_t type)
 {
-    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT" };
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
     if (type >= static_cast<int32_t>(MaterialType::NONE) &&
-        type <= static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT)) {
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
         return MaterialTypeStyles[type];
     }
     return MaterialTypeStyles[0];
+}
+
+std::string ImmersiveStyleToString(UiMaterialStyle style)
+{
+    static const std::string ImmersiveStyles[] = { "ImmersiveStyle.ULTRA_THIN",
+        "ImmersiveStyle.THIN",
+        "ImmersiveStyle.REGULAR",
+        "ImmersiveStyle.THICK",
+        "ImmersiveStyle.ULTRA_THICK" };
+    auto index = static_cast<int32_t>(style);
+    if (index >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        index <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return ImmersiveStyles[index];
+    }
+    return ImmersiveStyles[static_cast<int32_t>(UiMaterialStyle::REGULAR)];
 }
 
 } // namespace
@@ -192,6 +208,17 @@ void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const Ins
         auto& material = uiMaterial_->material;
         auto optJsonValue = JsonUtil::Create(true);
         optJsonValue->Put("type", MaterialTypeToString(material->GetType()).c_str());
+        if (material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+            auto immersiveOptionsValue = JsonUtil::Create(true);
+            auto immersiveOptions = material->GetImmersiveOptions();
+            if (immersiveOptions) {
+                immersiveOptionsValue->Put("style", ImmersiveStyleToString(immersiveOptions->style).c_str());
+                immersiveOptionsValue->Put("materialColor", immersiveOptions->materialColor.ColorToString().c_str());
+                immersiveOptionsValue->Put("colorInvert", immersiveOptions->colorInvert ? "true" : "false");
+                immersiveOptionsValue->Put("applyShadow", immersiveOptions->applyShadow ? "true" : "false");
+                optJsonValue->Put("immersiveOptions", immersiveOptionsValue);
+            }
+        }
         auto materialJsonValue = JsonUtil::Create(true);
         materialJsonValue->Put("material", optJsonValue);
         json->PutExtAttr("systemMaterial", materialJsonValue, filter);

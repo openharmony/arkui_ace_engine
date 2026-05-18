@@ -509,6 +509,46 @@ HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RenderContextTest014
+ * @tc.desc: Test ToJsonValuePart1 with MaterialType::IMMERSIVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RenderContextTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext and set IMMERSIVE material.
+     */
+    NG::RenderContext renderContext;
+    auto json = JsonUtil::Create(true);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.style = UiMaterialStyle::THICK;
+    options.materialColor = Color::RED;
+    options.colorInvert = true;
+    options.applyShadow = false;
+    material->SetImmersiveOptions(options);
+    renderContext.SetSystemMaterial(material);
+
+    /**
+     * @tc.steps: step2. callback ToJsonValue with material type IMMERSIVE.
+     */
+    renderContext.ToJsonValue(json, filter);
+
+    /**
+     * @tc.expected: Return expected results - material type is IMMERSIVE and options match.
+     */
+    auto materialJson = json->GetValue("systemMaterial")->GetValue("material");
+    EXPECT_EQ(materialJson->GetString("type"), "MaterialType.IMMERSIVE");
+    auto optionsJson = materialJson->GetValue("immersiveOptions");
+    EXPECT_EQ(optionsJson->GetString("style"), "ImmersiveStyle.THICK");
+    EXPECT_EQ(optionsJson->GetString("materialColor"), "#FFFF0000");
+    EXPECT_EQ(optionsJson->GetString("colorInvert"), "true");
+    EXPECT_EQ(optionsJson->GetString("applyShadow"), "false");
+}
+
+/**
  * @tc.name: RequestNextFrameMultiThread001
  * @tc.desc: Test cast to RequestNextFrameMultiThread
  * @tc.type: FUNC
