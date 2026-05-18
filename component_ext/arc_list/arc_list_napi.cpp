@@ -442,7 +442,7 @@ static napi_module arcListModule = {
     .nm_filename = nullptr,
     .nm_register_func = OHOS::Ace::ArcList::ExportArcList,
     .nm_modname = "arkui.ArcList",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = { 0 },
 };
 
