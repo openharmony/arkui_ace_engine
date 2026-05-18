@@ -202,7 +202,7 @@ int WebCommandWrapper::ValidateInputInsertParameters(
     // Validate outContent (required for InputInsert)
     auto contentValue = comJson->GetValue(CONTENT_KEY);
     if (!contentValue || !contentValue->IsString()) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: content is missing or not string type");
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: content is missing");
         return static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT);
     }
     outContent = contentValue->GetString();
@@ -210,7 +210,12 @@ int WebCommandWrapper::ValidateInputInsertParameters(
     // Validate outIndex (required for InputInsert)
     auto indexValue = comJson->GetValue(INDEX_KEY);
     if (!indexValue || !indexValue->IsNumber()) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: index is missing or not integer type");
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: index is missing");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
+    }
+    double indexDouble = comJson->GetDouble(INDEX_KEY, 0);
+    if (indexDouble != static_cast<int>(indexDouble)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: index is not integer");
         return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
     }
     outIndex = comJson->GetInt(INDEX_KEY, 0);
@@ -243,17 +248,29 @@ int WebCommandWrapper::ValidateInputSelectParameters(
     // Validate outStartIndex (required for InputSelect)
     auto startIndexValue = comJson->GetValue(START_INDEX_KEY);
     if (!startIndexValue || !startIndexValue->IsNumber()) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: start index is missing or not integer type");
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: start index is missing");
         return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
     }
     outStartIndex = comJson->GetInt(START_INDEX_KEY, 0);
     // Validate outFinishIndex (required for InputSelect)
     auto finishIndexValue = comJson->GetValue(FINISH_INDEX_KEY);
     if (!finishIndexValue || !finishIndexValue->IsNumber()) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: finish index is missing or not integer type");
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: finish index is missing");
         return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
     }
     outFinishIndex = comJson->GetInt(FINISH_INDEX_KEY, 0);
+
+    double indexDouble = comJson->GetDouble(START_INDEX_KEY, 0);
+    if (indexDouble != static_cast<int>(indexDouble)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: start index is not integer");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
+    }
+    indexDouble = comJson->GetDouble(FINISH_INDEX_KEY, 0);
+    if (indexDouble != static_cast<int>(indexDouble)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: finish index is not integer");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
+    }
+    
     if (outStartIndex < 0 || outFinishIndex < 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: index is invalid value");
         return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
@@ -278,6 +295,12 @@ int WebCommandWrapper::ValidateInputFocusParameters(
     }
     outXPath = xpathValue->GetString();
 
+    double indexDouble = comJson->GetDouble(NO_NEED_KEYBOARD_KEY, 0);
+    if (indexDouble != static_cast<int>(indexDouble)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: is need keyboard is invalid");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_NO_NEED_KEYBOARD);
+    }
+
     auto noNeedKeyboardValue = comJson->GetValue(NO_NEED_KEYBOARD_KEY);
     if (noNeedKeyboardValue && noNeedKeyboardValue->GetInt() != 0 && noNeedKeyboardValue->GetInt() != 1) {
         TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: is need keyboard is invalid");
@@ -295,7 +318,12 @@ int WebCommandWrapper::ValidateInputSetCursorParameters(
     // Validate outIndex (required for InputSetCursor)
     auto indexValue = comJson->GetValue(INDEX_KEY);
     if (!indexValue || !indexValue->IsNumber()) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: index is missing or not integer type");
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: index is missing");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
+    }
+    double indexDouble = comJson->GetDouble(INDEX_KEY, 0);
+    if (indexDouble != static_cast<int>(indexDouble)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: start index is not integer");
         return static_cast<int>(WebCommandResult::JSON_INVALID_INDEX);
     }
     outIndex = comJson->GetInt(INDEX_KEY, 0);
