@@ -71,7 +71,13 @@ const std::string PNG_FILE_EXTENSION = "png";
 constexpr int32_t MEDIA_TYPE_AUD = 0;
 constexpr float VOLUME_STEP = 0.05f;
 constexpr float SPEED_0_125_X = 0.125;
-constexpr float SPEED_3_00_X = 3.00;
+constexpr float SPEED_8_00_X = 8.00;
+constexpr float DEFAULT_PROGRESS_RATE = 1.0;
+enum class PlayBackRate {
+    SUCCESS = 0,
+    MSERR_INVALID_VAL = 401,
+    MSERR_INVALID_OPERATION = 5400102,
+};
 
 const std::unordered_set<ImageFit> EXPORT_IMAGEFIT_SUPPORT_TYPES = {
     ImageFit::FILL,
@@ -410,12 +416,6 @@ void SendStatisticEvent(StatisticEventType type)
     auto statisticEventReporter = context->GetStatisticEventReporter();
     CHECK_NULL_VOID(statisticEventReporter);
     statisticEventReporter->SendEvent(type);
-}
-
-bool IsValidProgressRate(double rate)
-{
-    static const std::unordered_set<double> validRates = { 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 3.0 };
-    return validRates.find(rate) != validRates.end();
 }
 } // namespace
 
@@ -928,15 +928,16 @@ void VideoPattern::UpdateSpeed()
             progress = progressRate_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            int32_t ret = mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
-            if (GreatNotEqual(progress, SPEED_3_00_X) || LessNotEqual(progress, SPEED_0_125_X)) {
+            int32_t errorCode = 0;
+            std::string errorMsg = "";
+            int32_t ret = mediaPlayer->SetPlaybackRate(static_cast<float>(progress), errorCode, errorMsg);
+            if (LessNotEqual(progress, SPEED_0_125_X) || GreatNotEqual(progress, SPEED_8_00_X)) {
                 SendStatisticEvent(StatisticEventType::VIDEO_EXCEED_PROGRESS_RATE);
-            } else if (!IsValidProgressRate(progress)) {
-                SendStatisticEvent(StatisticEventType::VIDEO_INVALID_PROGRESS_RATE);
             }
 
             auto pattern = weakThis.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->HandleSetPlaybackRateResult(progress, errorCode, errorMsg);
             double lastSpeed = pattern->GetLastProgressRate();
             double lastSetSpeed = pattern->GetLastSetProgressRate();
 
@@ -960,6 +961,35 @@ void VideoPattern::UpdateSpeed()
             pattern->ReportChangeEventOnUIThread(
                 pattern->GetCurrentPlaybackStatus(), reportProgressRate, pattern->GetCurrentPos());
             }, "ArkUIVideoUpdateSpeed");
+    }
+}
+
+void VideoPattern::HandleSetPlaybackRateResult(double progress, int32_t errorCode, std::string& errorMsg)
+{
+    int32_t newCode = 0;
+    std::string newMsg = "";
+    switch (static_cast<PlayBackRate>(errorCode)) {
+        case PlayBackRate::SUCCESS:
+            TAG_LOGI(
+                AceLogTag::ACE_VIDEO, "Video[%{public}d] currentProgressRate is set as %{public}f", hostId_, progress);
+            break;
+        case PlayBackRate::MSERR_INVALID_VAL:
+            CHECK_NULL_VOID(mediaPlayer_);
+            mediaPlayer_->SetPlaybackRate(DEFAULT_PROGRESS_RATE, newCode, newMsg);
+            errorMsg.append("The parameter check failed, parameter value out of range.");
+            TAG_LOGW(AceLogTag::ACE_VIDEO,
+                "Video[%{public}d] Failed to set currentProgressRate %{public}f, code is %{public}d, message is "
+                "%{public}s",
+                hostId_, progress, errorCode, errorMsg.c_str());
+            break;
+        case PlayBackRate::MSERR_INVALID_OPERATION:
+            break;
+        default:
+            CHECK_NULL_VOID(mediaPlayer_);
+            mediaPlayer_->SetPlaybackRate(DEFAULT_PROGRESS_RATE, newCode, newMsg);
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Failed to set currentProgressRate %{public}f", hostId_,
+                progress);
+            break;
     }
 }
 
@@ -2579,7 +2609,7 @@ int32_t VideoPattern::ParseCommand(const std::string& command, PlaybackStatus& s
     } else if (cmdType == "setVideoPlaybackSpeed") {
         if (valueObj->IsNumber()) {
             double newSpeed = json->GetDouble("value", 0.0);
-            if (IsValidProgressRate(newSpeed)) {
+            if (GreatOrEqual(newSpeed, SPEED_0_125_X) && LessOrEqual(newSpeed, SPEED_8_00_X)) {
                 speed = newSpeed;
                 return RET_SUCCESS;
             } else {
@@ -2763,5 +2793,38 @@ void VideoPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& host)
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
+}
+
+std::string VideoPattern::GetDumpInfo()
+{
+    std::string dumpInfo = "Video[" + std::to_string(hostId_) + "] duration: " + std::to_string(duration_) +
+                           ", loop: " + std::to_string(loop_) + ", muted: " + std::to_string(muted_) +
+                           ", Speed: " + std::to_string(progressRate_);
+    return dumpInfo;
+}
+
+void VideoPattern::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    std::string dumpInfo = "Video[" + std::to_string(hostId_) + "] duration: " + std::to_string(duration_) +
+                           ", loop: " + std::to_string(loop_) + ", muted: " + std::to_string(muted_) +
+                           ", Speed: " + std::to_string(progressRate_);
+    json->Put("VideoPattern", dumpInfo.c_str());
+}
+
+void VideoPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(GetDumpInfo());
+}
+
+void VideoPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("VideoPattern", GetDumpInfo().c_str());
+}
+
+void VideoPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    auto videoPatternJson = JsonUtil::Create();
+    GetSimplifyDumpInfo(videoPatternJson);
+    json->PutRef("CanvasPattern", std::move(videoPatternJson));
 }
 } // namespace OHOS::Ace::NG

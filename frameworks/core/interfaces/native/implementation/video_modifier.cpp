@@ -41,6 +41,12 @@ struct VideoOptions {
 } // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
+constexpr float VALID_SPEEDS[] = { 0.125, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 3.00 };
+bool IsValidSpeed(float speed)
+{
+    return std::find(std::begin(VALID_SPEEDS), std::end(VALID_SPEEDS), speed) != std::end(VALID_SPEEDS);
+}
+
 template<>
 void AssignCast(std::optional<float>& dst, const Ark_PlaybackSpeed& src)
 {
@@ -74,8 +80,11 @@ VideoOptions Convert(const Ark_VideoOptions& src)
 
     options.currentProgressRate = 1.0;
     // currentProgressRate
-    options.currentProgressRate =
+    auto currentProgressRate =
         Converter::OptConvert<float>(src.currentProgressRate).value_or(options.currentProgressRate);
+    if ((src.currentProgressRate.value.selector == SELECTOR_ID_0) || IsValidSpeed(currentProgressRate)) {
+        options.currentProgressRate = currentProgressRate;
+    }
 
     // previewUri
     options.previewSourceInfo = Converter::OptConvert<ImageSourceInfo>(src.previewUri)

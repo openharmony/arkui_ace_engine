@@ -121,6 +121,14 @@ const SizeF VIDEO_SIZE(VIDEO_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_GREATER_THAN_1(MAX_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
 const SizeF INVALID_SIZE(MAX_WIDTH, 0.0f);
+constexpr int32_t PLAYBACK_RATE_SUCCESS = 0;
+constexpr int32_t PLAYBACK_RATE_INVALID_VAL = 401;
+constexpr int32_t PLAYBACK_RATE_INVALID_OPERATION = 5400102;
+constexpr int32_t PLAYBACK_RATE_UNKNOWN_ERROR = 999;
+constexpr float TEST_PROGRESS_RATE = 2.0;
+constexpr int32_t TEST_HOST_ID = 12345;
+const std::string EMPTY_ERROR_MSG = "";
+const std::string EXPECTED_INVALID_VAL_MSG = "The parameter check failed, parameter value out of range.";
 TestProperty g_testProperty;
 } // namespace
 
@@ -132,7 +140,7 @@ public:
     void TearDown() {}
 
 protected:
-    static RefPtr<FrameNode> CreateVideoNode(TestProperty& g_testProperty);
+    static RefPtr<FrameNode> CreateVideoNode(TestProperty& testProperty);
 };
 
 void VideoTestExtraAddNg::SetUpTestSuite()
@@ -162,10 +170,10 @@ void VideoTestExtraAddNg::SetUp()
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
-RefPtr<FrameNode> VideoTestExtraAddNg::CreateVideoNode(TestProperty& g_testProperty)
+RefPtr<FrameNode> VideoTestExtraAddNg::CreateVideoNode(TestProperty& testProperty)
 {
-    if (g_testProperty.videoController.has_value()) {
-        VideoModelNG().Create(g_testProperty.videoController.value());
+    if (testProperty.videoController.has_value()) {
+        VideoModelNG().Create(testProperty.videoController.value());
     } else {
         auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
         VideoModelNG().Create(videoController);
@@ -177,32 +185,32 @@ RefPtr<FrameNode> VideoTestExtraAddNg::CreateVideoNode(TestProperty& g_testPrope
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(true));
 
-    if (g_testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(g_testProperty.src.value(), "", "");
+    if (testProperty.src.has_value()) {
+        VideoModelNG().SetSrc(testProperty.src.value(), "", "");
     }
-    if (g_testProperty.progressRate.has_value()) {
-        VideoModelNG().SetProgressRate(g_testProperty.progressRate.value());
+    if (testProperty.progressRate.has_value()) {
+        VideoModelNG().SetProgressRate(testProperty.progressRate.value());
     }
-    if (g_testProperty.posterUrl.has_value()) {
-        VideoModelNG().SetPosterSourceInfo(g_testProperty.posterUrl.value(), "", "");
+    if (testProperty.posterUrl.has_value()) {
+        VideoModelNG().SetPosterSourceInfo(testProperty.posterUrl.value(), "", "");
     }
-    if (g_testProperty.muted.has_value()) {
-        VideoModelNG().SetMuted(g_testProperty.muted.value());
+    if (testProperty.muted.has_value()) {
+        VideoModelNG().SetMuted(testProperty.muted.value());
     }
-    if (g_testProperty.autoPlay.has_value()) {
-        VideoModelNG().SetAutoPlay(g_testProperty.autoPlay.value());
+    if (testProperty.autoPlay.has_value()) {
+        VideoModelNG().SetAutoPlay(testProperty.autoPlay.value());
     }
-    if (g_testProperty.controls.has_value()) {
-        VideoModelNG().SetControls(g_testProperty.controls.value());
+    if (testProperty.controls.has_value()) {
+        VideoModelNG().SetControls(testProperty.controls.value());
     }
-    if (g_testProperty.loop.has_value()) {
-        VideoModelNG().SetLoop(g_testProperty.loop.value());
+    if (testProperty.loop.has_value()) {
+        VideoModelNG().SetLoop(testProperty.loop.value());
     }
-    if (g_testProperty.objectFit.has_value()) {
-        VideoModelNG().SetObjectFit(g_testProperty.objectFit.value());
+    if (testProperty.objectFit.has_value()) {
+        VideoModelNG().SetObjectFit(testProperty.objectFit.value());
     }
-    if (g_testProperty.showFirstFrame.has_value()) {
-        VideoModelNG().SetShowFirstFrame(g_testProperty.showFirstFrame.value());
+    if (testProperty.showFirstFrame.has_value()) {
+        VideoModelNG().SetShowFirstFrame(testProperty.showFirstFrame.value());
     }
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1665,5 +1673,76 @@ HWTEST_F(VideoTestExtraAddNg, VideoPatternUINodeTraceTest004, TestSize.Level1)
     videoPattern->SetImageAIOptions(nullptr);
     uint64_t traceId = GetLastTraceId();
     EXPECT_EQ(traceId, static_cast<uint64_t>(frameNode->GetId()));
+}
+
+/**
+ * @tc.name: HandleSetPlaybackRateResult001
+ * @tc.desc: Test VideoPattern::HandleSetPlaybackRateResult with all error code branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, HandleSetPlaybackRateResult001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video pattern and setup mock mediaPlayer.
+     * @tc.expected: Video pattern created successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+
+    auto mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
+    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    videoPattern->mediaPlayer_ = mockMediaPlayer;
+    videoPattern->hostId_ = TEST_HOST_ID;
+    videoPattern->progressRate_ = TEST_PROGRESS_RATE;
+
+    /**
+     * @tc.steps: step2. Test SUCCESS branch.
+     * @tc.expected: SetPlaybackRate is not called, errorMsg remains empty.
+     */
+    EXPECT_CALL(*mockMediaPlayer, SetPlaybackRate(_, _, _)).Times(0);
+    std::string errorMsg = EMPTY_ERROR_MSG;
+    videoPattern->HandleSetPlaybackRateResult(TEST_PROGRESS_RATE, PLAYBACK_RATE_SUCCESS, errorMsg);
+    EXPECT_EQ(errorMsg, EMPTY_ERROR_MSG);
+
+    /**
+     * @tc.steps: step3. Test MSERR_INVALID_VAL branch.
+     * @tc.expected: SetPlaybackRate is called with DEFAULT_PROGRESS_RATE, errorMsg contains expected message.
+     */
+    mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
+    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockMediaPlayer, SetPlaybackRate(VIDEO_PROGRESS_RATE, _, _)).Times(1).WillOnce(Return(0));
+    videoPattern->mediaPlayer_ = mockMediaPlayer;
+    errorMsg = EMPTY_ERROR_MSG;
+    videoPattern->HandleSetPlaybackRateResult(TEST_PROGRESS_RATE, PLAYBACK_RATE_INVALID_VAL, errorMsg);
+    EXPECT_TRUE(errorMsg.find(EXPECTED_INVALID_VAL_MSG) != std::string::npos);
+
+    /**
+     * @tc.steps: step4. Test MSERR_INVALID_OPERATION branch.
+     * @tc.expected: SetPlaybackRate is not called, errorMsg remains empty.
+     */
+    mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
+    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockMediaPlayer, SetPlaybackRate(VIDEO_PROGRESS_RATE, _, _)).Times(0);
+    videoPattern->mediaPlayer_ = mockMediaPlayer;
+    errorMsg = EMPTY_ERROR_MSG;
+    videoPattern->HandleSetPlaybackRateResult(TEST_PROGRESS_RATE, PLAYBACK_RATE_INVALID_OPERATION, errorMsg);
+    EXPECT_EQ(errorMsg, EMPTY_ERROR_MSG);
+
+    /**
+     * @tc.steps: step5. Test default branch with unknown error code.
+     * @tc.expected: SetPlaybackRate is called with DEFAULT_PROGRESS_RATE, errorMsg remains empty.
+     */
+    mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
+    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockMediaPlayer, SetPlaybackRate(VIDEO_PROGRESS_RATE, _, _)).Times(1).WillOnce(Return(0));
+    videoPattern->mediaPlayer_ = mockMediaPlayer;
+    errorMsg = EMPTY_ERROR_MSG;
+    videoPattern->HandleSetPlaybackRateResult(TEST_PROGRESS_RATE, PLAYBACK_RATE_UNKNOWN_ERROR, errorMsg);
+    EXPECT_EQ(errorMsg, EMPTY_ERROR_MSG);
 }
 } // namespace OHOS::Ace::NG
