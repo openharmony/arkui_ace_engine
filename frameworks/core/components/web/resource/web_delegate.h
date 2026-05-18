@@ -747,18 +747,6 @@ private:
     WeakPtr<PipelineBase> context_ = nullptr;
 };
 
-class LtpoDisplayInfoListener : public OHOS::Rosen::DisplayManager::IDisplayAttributeListener {
-public:
-    LtpoDisplayInfoListener(const WeakPtr<WebDelegate>& delegate, const WeakPtr<PipelineBase>& context)
-        : delegate_(delegate), context_(context) {}
-    ~LtpoDisplayInfoListener() override = default;
-    void OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes) override;
-
-private:
-    WeakPtr<WebDelegate> delegate_;
-    WeakPtr<PipelineBase> context_;
-};
-
 class WebDelegateObserver : public virtual AceType {
 DECLARE_ACE_TYPE(WebDelegateObserver, AceType);
 public:
@@ -2031,6 +2019,42 @@ private:
 #endif
 };
 
+class LtpoDisplayInfoListener : public OHOS::Rosen::DisplayManager::IDisplayAttributeListener {
+public:
+    LtpoDisplayInfoListener(const WeakPtr<WebDelegate>& delegate, const WeakPtr<PipelineBase>& context)
+        : delegate_(delegate), context_(context) {}
+    ~LtpoDisplayInfoListener() override = default;
+    void OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes) override
+    {
+        auto context = context_.Upgrade();
+        if (!context) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "LtpoDisplayInfoListener context is null.");
+            return;
+        }
+        std::string changedAttributes;
+        for (const auto &s : attributes) {
+            changedAttributes += s + ";";
+        }
+        TAG_LOGI(AceLogTag::ACE_WEB, "Ltpo info changed, changedAttributes:%{public}s", changedAttributes.c_str());
+        auto taskExecutor = context->GetTaskExecutor();
+        if (!taskExecutor) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "LtpoDisplayInfoListener taskExecutor is null.");
+            return;
+        }
+        taskExecutor->PostTask(
+            [weak = delegate_]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->UpdateWebLtpoInfo();
+                }
+            },
+            TaskExecutor::TaskType::UI, "LtpoDisplayInfoListenerOnAttributeChange");
+    }
+
+private:
+    WeakPtr<WebDelegate> delegate_;
+    WeakPtr<PipelineBase> context_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEB_DELEGATE_H
