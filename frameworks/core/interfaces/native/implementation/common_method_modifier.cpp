@@ -6341,15 +6341,14 @@ void SetBindPopupImpl(Ark_NativePointer node,
 void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
 {
     CHECK_NULL_VOID(uiNode);
-    auto child = uiNode->GetFirstChild();
-    CHECK_NULL_VOID(child);
-    auto menuNode = child->GetFirstChild();
-    if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
-        auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
-        CHECK_NULL_VOID(menuFrameNode);
-        auto menuModifier = NG::NodeModifier::GetMenuInnerModifier();
-        CHECK_NULL_VOID(menuModifier);
-        menuModifier->menuOnModifyDone(menuFrameNode);
+    
+    for (const auto& child : uiNode->GetChildren()) {
+        CallMenuOnModifyDone(child);
+    }
+    
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (frameNode) {
+        frameNode->MarkModifyDone();
     }
 }
 void BindMenuBase(Ark_NativePointer node,
