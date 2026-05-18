@@ -23,7 +23,9 @@
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
+#define private public
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#undef private
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -1020,5 +1022,17 @@ HWTEST_F(GridScrollLayoutTestNg, IsAtBottom, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtBottom());
     FlushUITasks();
     EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: GridScrollLayoutAlgorithmWrapperInitTest
+ * @tc.desc: Test wrapper_ is nullptr after default construction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutAlgorithmWrapperInitTest, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    GridScrollLayoutAlgorithm algorithm(info);
+    EXPECT_EQ(algorithm.wrapper_, nullptr);
 }
 } // namespace OHOS::Ace::NG

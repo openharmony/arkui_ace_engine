@@ -246,6 +246,7 @@ void RenderGridScroll::OnTouchTestHit(
 
 bool RenderGridScroll::IsChildrenTouchEnable()
 {
+    CHECK_NULL_RETURN(scrollable_, true);
     return scrollable_->IsMotionStop();
 }
 
