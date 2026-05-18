@@ -112,7 +112,7 @@ public:
         return animationOption;
     }
 
-    std::shared_ptr<UIContent> GetUIContent() const
+    std::shared_ptr<UIContent> GetUIContent() const override
     {
         return uiContent_;
     }

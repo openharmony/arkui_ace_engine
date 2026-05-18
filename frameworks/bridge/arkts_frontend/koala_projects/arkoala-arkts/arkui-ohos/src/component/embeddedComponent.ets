@@ -17,6 +17,9 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
+import { ArkUIAniUIExtensionOptions } from "arkui.ani"
+import { ComponentContent } from "arkui.ComponentContent"
+import { KLong } from "@koalaui/interop"
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -31,8 +34,60 @@ import { EmbeddedComponentModifier } from "./../EmbeddedComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkUIExtensionComponentPeerBase } from "./uiExtensionComponent"
 import { ArkUIAniUiextensionModal, UiextensionType } from "arkui.ani"
+
+export enum EmbeddedDpiFollowStrategy {
+    FOLLOW_HOST_DPI = 0,
+    FOLLOW_UI_EXTENSION_ABILITY_DPI = 1
+}
+
+export enum EmbeddedWindowModeFollowStrategy {
+    FOLLOW_HOST_WINDOW_MODE = 0,
+    FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1
+}
+
+export interface EmbeddedOptions {
+    placeholder?: ComponentContent;
+    dpiFollowStrategy?: EmbeddedDpiFollowStrategy;
+    windowModeFollowStrategy?: EmbeddedWindowModeFollowStrategy;
+    areaChangePlaceholder?: Array<[string, ComponentContent]>;
+}
+
 export class ArkEmbeddedComponentPeer extends ArkUIExtensionComponentPeerBase {
     embeddedComponentAttributeSet?: EmbeddedComponentModifier;
+    public setEmbeddedComponentOptionsAttribute(loader: Want, type?: EmbeddedType, options?: EmbeddedOptions): void {
+    InteropNativeModule._NativeLog("[AceEmbeddedComponent] setEmbeddedComponentOptionsAttribute entry");
+    if (options !== undefined) {
+        let innerOption : ArkUIAniUIExtensionOptions = new ArkUIAniUIExtensionOptions()
+        if (options.dpiFollowStrategy !== undefined) {
+            innerOption.dpiFollowStrategy = (options.dpiFollowStrategy as EmbeddedDpiFollowStrategy).valueOf();
+        }
+        if (options.windowModeFollowStrategy !== undefined) {
+            innerOption.isWindowModeFollowHost =
+                options.windowModeFollowStrategy === EmbeddedWindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE;
+        }
+        if (options.placeholder !== undefined) {
+            if (options.placeholder!.getNodePtr() !== null && options.placeholder!.getNodePtr() !== undefined) {
+                innerOption.initPlaceholder = options.placeholder!.getNodePtr() as KLong;
+            }
+        }
+        if (options?.areaChangePlaceholder) {
+            const value_areaChangePlaceholder_value = options.areaChangePlaceholder!
+            for (const pairValue of value_areaChangePlaceholder_value) {
+                const placeholderNode = pairValue[1]!
+                if (pairValue[0] === 'ROTATION') {
+                    innerOption.rotationPlaceholder = (placeholderNode!.getNodePtr()) as KLong;
+                } else if (pairValue[0] === 'FOLD_TO_EXPAND') {
+                    innerOption.flodPlaceholder = (placeholderNode!.getNodePtr()) as KLong;
+                } else if (pairValue[0] === 'UNDEFINED') {
+                    innerOption.undefinedPlaceholder = (placeholderNode!.getNodePtr()) as KLong;
+                }
+            }
+        }
+        ArkUIAniUiextensionModal._Uiextension_Set_Option(this.peer.ptr, innerOption); 
+        } 
+        ArkUIAniUiextensionModal._Uiextension_Set_Want(this.peer.ptr, loader); 
+    }
+
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -46,7 +101,7 @@ export class ArkEmbeddedComponentPeer extends ArkUIExtensionComponentPeerBase {
     }
 }
 export interface EmbeddedComponentAttribute extends CommonMethod {
-    setEmbeddedComponentOptions(loader: Want, type?: EmbeddedType): this {
+    setEmbeddedComponentOptions(loader: Want, type?: EmbeddedType, options?: EmbeddedOptions): this {
         throw new Error("Unimplemented method setEmbeddedComponentOptions")
     }
     onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
@@ -58,6 +113,9 @@ export interface EmbeddedComponentAttribute extends CommonMethod {
     attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
+    onDrawReady(value: (() => void) | undefined): this { 
+        throw new Error("Unimplemented method onDrawReady") 
+    }
 }
 export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent implements EmbeddedComponentAttribute {
     getPeer(): ArkEmbeddedComponentPeer {
@@ -66,11 +124,12 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
         }
         return (this.peer as ArkEmbeddedComponentPeer)
     }
-    public setEmbeddedComponentOptions(loader: Want, type?: EmbeddedType): this {
+    public setEmbeddedComponentOptions(loader: Want, type?: EmbeddedType, options?: EmbeddedOptions): this {
         if (this.checkPriority("setEmbeddedComponentOptions")) {
             const loader_casted = loader as (Want)
             const type_casted = type as (EmbeddedType | undefined)
-            this.getPeer()?.setEmbeddedComponentOptionsAttribute(loader_casted, type_casted)
+            const options_casted = options as (EmbeddedOptions | undefined)
+            this.getPeer()?.setEmbeddedComponentOptionsAttribute(loader_casted, type_casted, options_casted)
             this.applyOptionsFinish('EmbeddedComponentAttribute');
             return this
         }
@@ -94,6 +153,14 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
     }
     public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         hookEmbeddedComponentAttributeModifier(this, value);
+        return this
+    }
+    public onDrawReady(value: (() => void) | undefined): this {
+        if (this.checkPriority("onDrawReady")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.setOnDrawReadyAttribute(value_casted)
+            return this
+        } 
         return this
     }
     public applyAttributesFinish(): void {

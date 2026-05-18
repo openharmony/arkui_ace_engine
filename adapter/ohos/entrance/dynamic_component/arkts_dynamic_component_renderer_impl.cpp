@@ -35,6 +35,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/arkts_dynamic_pattern.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
@@ -756,7 +757,18 @@ void ArktsDynamicComponentRendererImpl::UpdateDynamicViewportConfig(
             " subRSTransaction[%{public}d]", subRSUIContext != nullptr, subRSTransaction != nullptr);
         }
     }
-
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> avoidAreaMap;
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> occupiedAreaChangeInfo = nullptr;
+    auto pipeline = hostContainer->GetPipelineContext();
+    if (pipeline) {
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        if (ngPipeline) {
+            auto dynamicComponentSafeManager = ngPipeline->GetDynamicComponentSafeManager();
+            avoidAreaMap = dynamicComponentSafeManager->GetAvoidAreaIntersection(
+                dynamicComponentSafeManager->GetAvoidArea(), vpConfig);
+            occupiedAreaChangeInfo = dynamicComponentSafeManager->GetOccupiedAreaChangeInfo();
+        }
+    }
     bool optionIsValid = option && option->IsValid();
     TAG_LOGI(aceLogTag_, "Update DC[%{public}d] Size: %{public}s -> [%{public}d x %{public}d], "
         "reason:[%{public}d], hasSyncTransaction:[%{public}d], orientation:[%{public}d], "
@@ -769,7 +781,7 @@ void ArktsDynamicComponentRendererImpl::UpdateDynamicViewportConfig(
         static_cast<int32_t>(reason), hostRSTransaction != nullptr, orientation,
         std::to_string(syncId).c_str(), optionIsValid);
     auto task = [weak = WeakClaim(this), vpConfig, option, aceLogTag = aceLogTag_,
-        offset, reason, hostRSTransaction, syncId]() {
+        offset, reason, hostRSTransaction, syncId, avoidAreaMap, occupiedAreaChangeInfo]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
         auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
@@ -825,7 +837,8 @@ void ArktsDynamicComponentRendererImpl::UpdateDynamicViewportConfig(
             return;
         }
         uiContent->UpdateViewportConfigWithAnimation(
-            config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction);
+            config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction,
+            avoidAreaMap, occupiedAreaChangeInfo);
         removeTransaction();
     };
     bool contentReady = false;
