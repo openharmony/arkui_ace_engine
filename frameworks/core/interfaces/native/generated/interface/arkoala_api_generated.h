@@ -29776,6 +29776,17 @@ typedef struct GENERATED_ArkUILazyBuildAccessor {
                                      const CustomNodeBuilder* builder);
 } GENERATED_ArkUILazyBuildAccessor;
 
+typedef struct GENERATED_ArkUILazyColumnLayoutExtenderAccessor {
+    Ark_NativePointer (*lazyColumnLayoutConstructor)(Ark_Int32 id);
+    void (*setLazyColumnLayoutOptions)(Ark_NativePointer node);
+    void (*space)(Ark_NativePointer node,
+                  const Opt_LengthMetrics* space);
+    void (*alignItems)(Ark_NativePointer node,
+                       const Opt_HorizontalAlign* value);
+    void (*onVisibleIndexesChange)(Ark_NativePointer node,
+                                   const Opt_OnVisibleIndexesChangeCallback* callback_);
+} GENERATED_ArkUILazyColumnLayoutExtenderAccessor;
+
 typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
     void (*NotifyChange)(Ark_VMContext vmContext,
                          Ark_NativePointer node,
@@ -32223,6 +32234,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILayoutManagerAccessor* (*getLayoutManagerAccessor)();
     const GENERATED_ArkUILayoutPolicyAccessor* (*getLayoutPolicyAccessor)();
     const GENERATED_ArkUILazyBuildAccessor* (*getLazyBuildAccessor)();
+    const GENERATED_ArkUILazyColumnLayoutExtenderAccessor* (*getLazyColumnLayoutExtenderAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUILeadingMarginSpanAccessor* (*getLeadingMarginSpanAccessor)();
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
