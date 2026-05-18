@@ -106,6 +106,13 @@ constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.20f, 0.00f, 0.83f, 0.83f);
+const DistortionParam TERMINAL_DISTORTION_PARAM {
+    .luCorner = { 0, 0 },
+    .ruCorner = { 1, 0 },
+    .lbCorner = { 0, 1 },
+    .rbCorner = { 1, 1 },
+    .barrelDistortion = { 0, 0, 0, 0 },
+};
 
 std::string GetBoolStr(bool isTure)
 {
@@ -2247,10 +2254,7 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto renderContext = contentNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     if (NeedDistortion() && !isDialogShow_) {
-#if defined(ENABLE_ROSEN_BACKEND)
-        UpdateSDFRRectShape(DynamicCast<FrameNode>(host->GetFirstChild()));
-        lastPaintRect_ = renderContext->GetPaintRectWithoutTransform();
-#endif
+        renderContext->UpdateDistortionParam(TERMINAL_DISTORTION_PARAM);
     }
     CHECK_EQUAL_RETURN(isDialogShow_, false, false);
 
@@ -2259,7 +2263,6 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     if (NeedEdgeLight()) {
         PlayFlowLight();
-        lastPaintRect_ = renderContext->GetPaintRectWithoutTransform();
     }
     isDialogShow_ = false;
     return true;
@@ -3426,13 +3429,7 @@ void DialogPattern::PlayDistortion()
      * Remove all distortion, restore to normal state
      * Set delay time 120ms, use default curve
      */
-    DistortionParam param4 {
-        .luCorner = { 0, 0 },
-        .ruCorner = { 1, 0 },
-        .lbCorner = { 0, 1 },
-        .rbCorner = { 1, 1 },
-        .barrelDistortion = { 0, 0, 0, 0 },  // Remove barrel distortion
-    };
+    DistortionParam param4 = TERMINAL_DISTORTION_PARAM;
     option.SetDelay(120);  // Set delay
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
     AnimationUtils::Animate(option, [renderContext, param4, childContexts]() {
@@ -3443,45 +3440,4 @@ void DialogPattern::PlayDistortion()
     }, onFinishEvent_);
     TAG_LOGI(AceLogTag::ACE_DIALOG, "Distortion animation applied successfully");
 }
-
-#if defined(ENABLE_ROSEN_BACKEND)
-void DialogPattern::UpdateSDFRRectShape(const RefPtr<FrameNode>& contentNode)
-{
-    CHECK_NULL_VOID(contentNode);
-    auto shape0 = OHOS::Rosen::RSNGShapeBase::Create(
-        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
-    auto shape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(shape0);
-    CHECK_NULL_VOID(shape);
-
-    auto renderContext = contentNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto borderRadius = renderContext->GetBorderRadius();
-    float radiusTopLeftPx =
-        borderRadius ? (borderRadius->radiusTopLeft ? borderRadius->radiusTopLeft.value().ConvertToPx() : 0) : 0;
-    float radiusTopRightPx =
-        borderRadius ? (borderRadius->radiusTopRight ? borderRadius->radiusTopRight.value().ConvertToPx() : 0) : 0;
-    float radiusBottomLeftPx =
-        borderRadius ? (borderRadius->radiusBottomLeft ? borderRadius->radiusBottomLeft.value().ConvertToPx() : 0) : 0;
-    float radiusBottomRightPx =
-        borderRadius ? (borderRadius->radiusBottomRight ? borderRadius->radiusBottomRight.value().ConvertToPx() : 0)
-                     : 0;
-
-    auto paintRect = renderContext->GetPaintRectWithoutTransform();
-    if (lastPaintRect_.Width() == paintRect.Width() && paintRect.Height() == paintRect.Height()) {
-        return;
-    }
-    OHOS::Rosen::RRect rrect(
-        OHOS::Rosen::RectF(
-            0,
-            0,
-            paintRect.Width(),
-            paintRect.Height()
-        ),
-        OHOS::Rosen::Vector4(radiusTopLeftPx, radiusTopRightPx, radiusBottomLeftPx, radiusBottomRightPx)
-    );
-    shape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
-    
-    renderContext->SetSDFShape(shape);
-}
-#endif
 } // namespace OHOS::Ace::NG

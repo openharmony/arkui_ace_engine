@@ -532,9 +532,6 @@ private:
     void OnWindowShow() override;
     void PlayFlowLight();
     void PlayDistortion();
-#if defined(ENABLE_ROSEN_BACKEND)
-    void UpdateSDFRRectShape(const RefPtr<FrameNode>& contentNode);
-#endif
     void ReportActionSheetOnInjectionEvent(bool result,
         std::string reason, int32_t sheetIndex = -1, int32_t buttonIndex = -1);
     int32_t OnInjectionEvent(const std::string& command) override;
@@ -605,7 +602,6 @@ private:
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
     RectF parentWindowRect_;
-    RectF lastPaintRect_;
     bool isDialogShow_ = true;
     bool hasExtraNodeForDistortion_ = false;
     std::function<void()> onFinishEvent_ = nullptr;
