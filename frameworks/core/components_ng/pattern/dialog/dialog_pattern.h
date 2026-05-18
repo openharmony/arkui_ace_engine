@@ -194,6 +194,7 @@ public:
     }
 
     void OnColorConfigurationUpdate() override;
+    void UpdateResourceColors();
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -481,6 +482,7 @@ private:
         const Dimension& dividerLength, const Dimension& dividerWidth, const Color& color, const Dimension& space);
     RefPtr<FrameNode> CreateButton(
         const ButtonInfo& params, int32_t index, bool isCancel = false, bool isVertical = false, int32_t length = 0);
+    void AddButtonColorCallback(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode);
     RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);

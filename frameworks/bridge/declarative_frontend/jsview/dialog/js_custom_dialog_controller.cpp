@@ -298,6 +298,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
                 instance->dialogProperties_.hasInvertColor.hasMaskColor = true;
             }
             instance->dialogProperties_.maskColor = maskColor;
+            instance->dialogProperties_.maskColorResObj = maskColorResObj;
         }
 
         // Parse maskRect.
@@ -316,6 +317,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
                 instance->dialogProperties_.hasInvertColor.hasBackgroundColor = true;
             }
             instance->dialogProperties_.backgroundColor = backgroundColor;
+            instance->dialogProperties_.backgroundColorResObj = backgroundColorResObj;
         }
 
         // Parse backgroundBlurStyle.
