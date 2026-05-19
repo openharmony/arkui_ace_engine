@@ -3551,7 +3551,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     }
     auto gradient = style.GetGradient();
     if (gradient.has_value()) {
-        spanNode->UpdateGradient(GradientConvert::ToNGGradient(gradient));
+        spanNode->UpdateGradient(gradient);
     } else {
         spanNode->ResetGradient();
     }
@@ -5541,7 +5541,7 @@ struct UpdateParagraphStyle RichEditorPattern::GetParagraphStyle(const RefPtr<Sp
     paraStyle.textDirection = spanItem->textLineStyle->GetTextDirection();
     auto gradient = spanItem->textLineStyle->GetGradient();
     if (gradient.has_value()) {
-        paraStyle.SetOptGradient(GradientConvert::ToGradient(gradient));
+        paraStyle.SetOptGradient(gradient);
     }
     paraStyle.colorShaderStyle = spanItem->textLineStyle->GetColorShaderStyle();
     return paraStyle;
@@ -12256,7 +12256,7 @@ void ParsespanParaStyle(std::optional<TextStyle>& spanTextStyle,
     paraStyle.paragraphSpacing = spanNode->GetParagraphSpacing();
     paraStyle.textVerticalAlign = spanNode->GetTextVerticalAlign();
     paraStyle.textDirection = spanNode->GetTextDirection();
-    paraStyle.SetOptGradient(GradientConvert::ToGradient(spanNode->GetGradient()));
+    paraStyle.SetOptGradient(spanNode->GetGradient());
     paraStyle.colorShaderStyle = spanNode->GetColorShaderStyle();
     spanParaStyle = paraStyle;
 }
@@ -12298,7 +12298,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
             paraStyle.textDirection = (*it)->textLineStyle->GetTextDirection();
           auto gradient = (*it)->textLineStyle->GetGradient();
             if (gradient.has_value()) {
-                paraStyle.SetOptGradient(GradientConvert::ToGradient(gradient));
+                paraStyle.SetOptGradient(gradient);
             }
             paraStyle.colorShaderStyle = (*it)->textLineStyle->GetColorShaderStyle();
             spanParaStyle = paraStyle;
@@ -12538,7 +12538,7 @@ void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
         static_cast<int32_t>(paraStyle->textVerticalAlign.value()));
     IF_TRUE(paraStyle->textDirection.has_value(), textStyleResult.textDirection =
         static_cast<int32_t>(paraStyle->textDirection.value()));
-    textStyleResult.SetOptGradient(paraStyle->GetGradient());
+    textStyleResult.SetOptGradient(GradientConvert::ToGradient(paraStyle->GetGradient()));
     textStyleResult.colorShaderStyle = paraStyle->colorShaderStyle;
     retInfo.SetTextStyle(textStyleResult);
 }

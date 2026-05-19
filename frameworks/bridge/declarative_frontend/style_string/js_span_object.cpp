@@ -2408,7 +2408,7 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
     JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
     paragraphStyle.colorShaderStyle = colorShaderStyle;
     if (gradientShaderStyle.has_value()) {
-        paragraphStyle.SetGradient(gradientShaderStyle.value());
+        paragraphStyle.SetOptGradient(gradientShaderStyle);
     } else {
         paragraphStyle.ResetGradient();
     }

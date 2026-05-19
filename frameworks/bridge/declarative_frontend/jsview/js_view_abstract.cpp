@@ -8603,7 +8603,7 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
     NewLinearGradient(jsObj, newGradient);
 }
 
-void JSViewAbstract::NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient)
+void JSViewAbstract::NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient, bool loadRes)
 {
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
@@ -8623,7 +8623,7 @@ void JSViewAbstract::NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradien
     SetGradientDirection(newGradient, direction);
     auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
-    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)), NUM_0);
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)), NUM_0, loadRes);
 }
 
 void JSViewAbstract::SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction)
@@ -8674,11 +8674,11 @@ void JSViewAbstract::ParseJsTextShaderStyle(std::optional<NG::Gradient>& gradien
     }
     if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NG::Gradient gradient;
-        NewRadialGradient(shaderStyleObj, gradient);
+        NewRadialGradient(shaderStyleObj, gradient, true);
         gradientShaderStyle = gradient;
     } else if (shaderStyleObj->HasProperty("colors")) {
         NG::Gradient gradient;
-        NewLinearGradient(shaderStyleObj, gradient);
+        NewLinearGradient(shaderStyleObj, gradient, true);
         gradientShaderStyle = gradient;
     } else if (shaderStyleObj->HasProperty("color")) {
         Color textColor;
@@ -8807,7 +8807,7 @@ void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradien
     NewRadialGradient(jsObj, newGradient);
 }
 
-void JSViewAbstract::NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient)
+void JSViewAbstract::NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient, bool loadRes)
 {
     newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
     // center
@@ -8838,7 +8838,7 @@ void JSViewAbstract::NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradien
     auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
     // color stops
-    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)), NUM_2);
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)), NUM_2, loadRes);
 }
 
 void JSViewAbstract::ParseRadialGradientCenter(NG::Gradient& newGradient, JSRef<JSArray> centerArray)
@@ -11448,7 +11448,7 @@ void JSViewAbstract::NewParseGradientColor(NG::Gradient& gradient, RefPtr<Resour
 }
 
 void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops,
-    const int32_t mapIdx)
+    const int32_t mapIdx, bool loadRes)
 {
     if (!colorStops->IsArray()) {
         return;
@@ -11469,9 +11469,15 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         // color
         Color color;
         RefPtr<ResourceObject> resObj;
-        if (!ParseJsColor(subArray->GetValueAt(0), color, resObj)) {
+        auto colorObj = subArray->GetValueAt(0);
+        if (!ParseJsColor(colorObj, color, resObj)) {
             nullNum++;
             continue;
+        }
+        if (colorObj->IsObject() && loadRes) {
+            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
+            CompleteResourceObject(jsObj);
+            resObj = GetResourceObject(jsObj);
         }
         gradientColor.SetColor(color);
         gradientColor.SetHasValue(false);
@@ -11484,7 +11490,7 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         //  [0, 1] -> [0, 100.0];
         gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         gradient.AddColor(gradientColor);
-        if (SystemProperties::ConfigChangePerform() && resObj) {
+        if (SystemProperties::ConfigChangePerform() || loadRes) && resObj) {
             int32_t indx = static_cast<int32_t>(i) - nullNum;
             if (mapIdx == NUM_1) {
                 NewParseSweepGradientColor(gradient, resObj, gradientColor, indx);
