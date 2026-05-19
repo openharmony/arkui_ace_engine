@@ -41,6 +41,7 @@
       "OHOS::Ace::AccessibilityNode::SetLeft(double)";
       "OHOS::Ace::AccessibilityNode::SetLongClickableState(bool)";
       "OHOS::Ace::AccessibilityNode::SetMaxTextLength(unsigned int)";
+      "OHOS::Ace::AccessibilityNode::SetMaxTextLength(unsigned long)";
       "OHOS::Ace::AccessibilityNode::SetScrollableState(bool)";
       "OHOS::Ace::AccessibilityNode::SetText(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::AccessibilityNode::SetTextInputType(OHOS::Ace::AceTextCategory)";
@@ -299,6 +300,7 @@
       "OHOS::Ace::DataDetectorAdapter::ResponseBestMatchItem(OHOS::Ace::AISpan const&)";
       "OHOS::Ace::DataDetectorAdapter::StartAITask(bool, bool)";
       "OHOS::Ace::DataDetectorMgr::AdjustCursorPosition(int&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1ll, 1000000000ll>>>&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1ll, 1000000000ll>>> const&)";
+      "OHOS::Ace::DataDetectorMgr::AdjustCursorPosition(int&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1l, 1000000000l>>>&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1l, 1000000000l>>> const&)";
       "OHOS::Ace::DataDetectorMgr::AdjustWordSelection(int&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int&, int&)";
       "OHOS::Ace::DataDetectorMgr::GetInstance()";
       "OHOS::Ace::Date::CalculateWeekDay(int, int, int)";
@@ -391,7 +393,9 @@
       "OHOS::Ace::DragRecognizer::HandleTouchMoveEvent(OHOS::Ace::TouchEvent const&)";
       "OHOS::Ace::DragRecognizer::HandleTouchUpEvent(OHOS::Ace::TouchEvent const&)";
       "OHOS::Ace::DragRecognizer::OnAccepted(unsigned int)";
+      "OHOS::Ace::DragRecognizer::OnAccepted(unsigned long)";
       "OHOS::Ace::DragRecognizer::OnRejected(unsigned int)";
+      "OHOS::Ace::DragRecognizer::OnRejected(unsigned long)";
       "OHOS::Ace::DumpLog::Print(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::Ace::DynamicModuleHelper::GetInstance()";
       "OHOS::Ace::DynamicModuleHelper::GetLoaderByName(char const*)";
@@ -582,8 +586,11 @@
       "OHOS::Ace::Framework::ViewStackProcessor::Push(OHOS::Ace::RefPtr<OHOS::Ace::Component> const&, bool)";
       "OHOS::Ace::g_DOMAIN_CONTENTS_MAP";
       "OHOS::Ace::GestureRecognizer::AddToReferee(unsigned int, OHOS::Ace::RefPtr<OHOS::Ace::GestureRecognizer> const&)";
+      "OHOS::Ace::GestureRecognizer::AddToReferee(unsigned long, OHOS::Ace::RefPtr<OHOS::Ace::GestureRecognizer> const&)";
       "OHOS::Ace::GestureRecognizer::BatchAdjudicate(std::__h::set<unsigned int, std::__h::less<unsigned int>, std::__h::allocator<unsigned int>> const&, OHOS::Ace::RefPtr<OHOS::Ace::GestureRecognizer> const&, OHOS::Ace::GestureDisposal)";
+      "OHOS::Ace::GestureRecognizer::BatchAdjudicate(std::__h::set<unsigned long, std::__h::less<unsigned long>, std::__h::allocator<unsigned long>> const&, OHOS::Ace::RefPtr<OHOS::Ace::GestureRecognizer> const&, OHOS::Ace::GestureDisposal)";
       "OHOS::Ace::GestureRecognizer::DelFromReferee(unsigned int, OHOS::Ace::RefPtr<OHOS::Ace::GestureRecognizer> const&)";
+      "OHOS::Ace::GestureRecognizer::DelFromReferee(unsigned long, OHOS::Ace::RefPtr<OHOS::Ace::GestureRecognizer> const&)";
       "OHOS::Ace::GestureRecognizer::HandleEvent(OHOS::Ace::AxisEvent const&)";
       "OHOS::Ace::GestureRecognizer::HandleEvent(OHOS::Ace::TouchEvent const&)";
       "OHOS::Ace::GetCurrentTimestampMicroSecond()";
@@ -657,6 +664,7 @@
       "OHOS::Ace::InputAIChecker::IsMultiClickAtBoundary(OHOS::Ace::NG::OffsetT<float> const&, OHOS::Ace::NG::RectT<float> const&)";
       "OHOS::Ace::InputAIChecker::IsSingleClickAtBoundary(int, int)";
       "OHOS::Ace::InputAIChecker::NeedAIAnalysis(bool, OHOS::Ace::NG::CaretUpdateType, std::__h::chrono::duration<float, std::__h::ratio<1ll, 1000ll>>)";
+      "OHOS::Ace::InputAIChecker::NeedAIAnalysis(bool, OHOS::Ace::NG::CaretUpdateType, std::__h::chrono::duration<float, std::__h::ratio<1l, 1000l>>)";
       "OHOS::Ace::IsDayTime(OHOS::Ace::TimeOfNow const&)";
       "OHOS::Ace::JankFrameReport::ClearFrameJankFlag(unsigned int)";
       "OHOS::Ace::JankFrameReport::GetInstance()";
@@ -1008,11 +1016,15 @@
       "OHOS::Ace::NG::Converter::AssignArkValue(double&, double const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(double&, OHOS::Ace::Dimension const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(InteropString&, std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, OHOS::Ace::NG::Converter::ConvContext*)";
+      "OHOS::Ace::NG::Converter::AssignArkValue(long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerDate, long>(std::__h::optional<OHOS::Ace::PickerDate>&, long const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerDate, long>(std::__h::optional<OHOS::Ace::PickerDate>&, long const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(long long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Converter::AssignGradientColors(OHOS::Ace::NG::Gradient*, Array_Tuple_ResourceColor_F64 const*)";
       "OHOS::Ace::NG::Converter::AssignLinearGradientDirection(std::__h::shared_ptr<OHOS::Ace::NG::LinearGradient>&, OHOS::Ace::NG::GradientDirection const&)";
       "OHOS::Ace::NG::Converter::CaretStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::CaretStyle, Ark_CaretStyle>(Ark_CaretStyle const&)";
       "OHOS::Ace::NG::Converter::ConvContext::Allocate(unsigned int)";
+      "OHOS::Ace::NG::Converter::ConvContext::Allocate(unsigned long)";
       "OHOS::Ace::NG::Converter::ConvContext::Store(std::__h::basic_string_view<char, std::__h::char_traits<char>> const&)";
       "OHOS::Ace::NG::Converter::ConvertAngleWithDefault(Opt_Union_F64_String const&, std::__h::optional<float>&, float)";
       "OHOS::Ace::NG::Converter::FontFamilies OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontFamilies, InteropString>(InteropString const&)";
@@ -1442,6 +1454,7 @@
       "OHOS::Ace::NG::MagnifierController::ResetTouchInfo()";
       "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";
       "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1ll, 1000000000ll>>> const&, OHOS::Ace::TouchType, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";
+      "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1l, 1000000000l>>> const&, OHOS::Ace::TouchType, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";
       "OHOS::Ace::NG::MeasureProperty::UpdateMaxSizeWithCheck(OHOS::Ace::NG::CalcSize const&)";
       "OHOS::Ace::NG::MeasureProperty::UpdateMinSizeWithCheck(OHOS::Ace::NG::CalcSize const&)";
       "OHOS::Ace::NG::MenuOptionsParam OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::MenuOptionsParam, Ark_TextMenuItem>(Ark_TextMenuItem const&)";
@@ -1926,6 +1939,7 @@
       "OHOS::Ace::NG::TextBase::GetLayoutCalPolicy(OHOS::Ace::NG::LayoutWrapper*, bool)";
       "OHOS::Ace::NG::TextBase::GetSelectedBlankLineWidth()";
       "OHOS::Ace::NG::TextBase::TruncateText(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, unsigned int const&) const";
+      "OHOS::Ace::NG::TextBase::TruncateText(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, unsigned long const&) const";
       "OHOS::Ace::NG::TextBase::UpdateSelectedBlankLineRect(OHOS::Ace::NG::RectT<float>&, float, OHOS::Ace::TextAlign, float)";
       "OHOS::Ace::NG::TextContentModifier::ContentChange()";
       "OHOS::Ace::NG::TextContentModifier::onDraw(OHOS::Ace::NG::DrawingContext&)";
@@ -2488,6 +2502,7 @@
       "OHOS::Ace::Player::AddPreparedListener(std::__h::function<void (unsigned int, unsigned int, bool, unsigned int, unsigned int, bool)>&&)";
       "OHOS::Ace::Player::AddRefreshRenderListener(std::__h::function<void ()>&&)";
       "OHOS::Ace::Player::Create(std::__h::function<void (long long)> const&)";
+      "OHOS::Ace::Player::Create(std::__h::function<void (long)> const&)";
       "OHOS::Ace::Player::PopListener()";
       "OHOS::Ace::PresetFillType OHOS::Ace::NG::Converter::Convert<OHOS::Ace::PresetFillType, Ark_ItemFillPolicy>(Ark_ItemFillPolicy const&)";
       "OHOS::Ace::ProgressComponent::InitStyle(OHOS::Ace::RefPtr<OHOS::Ace::ProgressTheme> const&)";
@@ -2723,6 +2738,7 @@
       "OHOS::Ace::ResourceParseUtilsBase::ParseResourceToDouble(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, double&)";
       "OHOS::Ace::ResSchedReport::GetInstance()";
       "OHOS::Ace::ResSchedReport::ResSchedDataReport(char const*, std::__h::unordered_map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::hash<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::equal_to<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> const&, long long)";
+      "OHOS::Ace::ResSchedReport::ResSchedDataReport(char const*, std::__h::unordered_map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::hash<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::equal_to<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> const&, long)";
       "OHOS::Ace::ResTracer::~ResTracer()";
       "OHOS::Ace::ResTracer::ResTracer(char const*, unsigned int, unsigned long long)";
       "OHOS::Ace::ResTracer::ResTracer(char const*, unsigned int, unsigned long)";
@@ -2832,6 +2848,7 @@
       "OHOS::Ace::ScrollPositionController::ScrollArrow(double, bool, bool)";
       "OHOS::Ace::SelectPopupComponent::AppendSelectOption(OHOS::Ace::RefPtr<OHOS::Ace::OptionComponent> const&)";
       "OHOS::Ace::SelectPopupComponent::GetSelectOption(unsigned int) const";
+      "OHOS::Ace::SelectPopupComponent::GetSelectOption(unsigned long) const";
       "OHOS::Ace::SelectPopupComponent::InitTheme(OHOS::Ace::RefPtr<OHOS::Ace::ThemeManager> const&)";
       "OHOS::Ace::SelectPopupComponent::SelectPopupComponent()";
       "OHOS::Ace::SelectPopupComponent::ShowDialog(OHOS::Ace::RefPtr<OHOS::Ace::StackElement> const&, OHOS::Ace::Offset const&, OHOS::Ace::Offset const&, bool)";
@@ -3078,6 +3095,7 @@
       "OHOS::Ace::TextStyle::SetAdaptTextSize(OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&)";
       "OHOS::Ace::TextStyle::ToString() const";
       "OHOS::Ace::Texture::Create(std::__h::function<void (long long)> const&)";
+      "OHOS::Ace::Texture::Create(std::__h::function<void (long)> const&)";
       "OHOS::Ace::ThemeConstants::GetMediaById(int const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&) const";
       "OHOS::Ace::ThemeManagerImpl::ThemeManagerImpl()";
       "OHOS::Ace::TimeEventProxy::GetInstance()";
@@ -3115,9 +3133,12 @@
       "OHOS::Ace::V2::ColumnComposedElement::ToJsonObject() const";
       "OHOS::Ace::V2::DIVIDER_ETS_TAG";
       "OHOS::Ace::V2::ElementProxyHost::GetComponentByIndex(unsigned int)";
+      "OHOS::Ace::V2::ElementProxyHost::GetComponentByIndex(unsigned long)";
       "OHOS::Ace::V2::ElementProxyHost::GetElementByIndex(unsigned int)";
+      "OHOS::Ace::V2::ElementProxyHost::GetElementByIndex(unsigned long)";
       "OHOS::Ace::V2::ElementProxyHost::GetReloadedCheckNum()";
       "OHOS::Ace::V2::ElementProxyHost::ReleaseElementByIndex(unsigned int)";
+      "OHOS::Ace::V2::ElementProxyHost::ReleaseElementByIndex(unsigned long)";
       "OHOS::Ace::V2::ElementProxyHost::ReleaseRedundantComposeIds()";
       "OHOS::Ace::V2::ElementProxyHost::TotalCount() const";
       "OHOS::Ace::V2::ElementProxyHost::UpdateChildren(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&)";
@@ -3179,6 +3200,7 @@
       "OHOS::Ace::V2::InspectorComposedElement::GetHueRotate() const";
       "OHOS::Ace::V2::InspectorComposedElement::GetInspectorComposedElementParent(OHOS::Ace::RefPtr<OHOS::Ace::Element> const&) const";
       "OHOS::Ace::V2::InspectorComposedElement::GetInspectorNode(unsigned int, bool) const";
+      "OHOS::Ace::V2::InspectorComposedElement::GetInspectorNode(unsigned long, bool) const";
       "OHOS::Ace::V2::InspectorComposedElement::GetInvert() const";
       "OHOS::Ace::V2::InspectorComposedElement::GetLayoutPriority() const";
       "OHOS::Ace::V2::InspectorComposedElement::GetLayoutWeight() const";
@@ -4029,6 +4051,9 @@
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??NG??TextResponseType??Ark?RichEditorResponseType??std????h??optional?OHOS??Ace??NG??TextResponseType????Ark?RichEditorResponseType?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??NG??TextSpanType??Ark?RichEditorSpanType??std????h??optional?OHOS??Ace??NG??TextSpanType????Ark?RichEditorSpanType?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??PickerDate??long?long??std????h??optional?OHOS??Ace??PickerDate????long?long?const??;
+      "OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerTime, long>(...)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerTime, long>(...)";
+      void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??PickerTime??long??std????h??optional?OHOS??Ace??PickerTime????long?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??PickerTime??long?long??std????h??optional?OHOS??Ace??PickerTime????long?long?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??Shadow??Ark?ShadowStyle??std????h??optional?OHOS??Ace??Shadow????Ark?ShadowStyle?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??SliderModel??BlockStyleType??Ark?SliderBlockType??std????h??optional?OHOS??Ace??SliderModel??BlockStyleType????Ark?SliderBlockType?const??;
