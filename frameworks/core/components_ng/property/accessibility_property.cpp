@@ -1544,7 +1544,22 @@ void AccessibilityProperty::ResetAccessibilityActionOptions()
 void AccessibilityProperty::SetAccessibilityCustomActions(
     const std::vector<AccessibilityCustomAction>& accessibilityCustomActions)
 {
-    accessibilityCustomActions_ = accessibilityCustomActions;
+    std::vector<AccessibilityCustomAction> actions = accessibilityCustomActions;
+    if (actions.size() > ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "Custom actions size %{public}zu exceeds max count %{public}zu, truncating list",
+            actions.size(), ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT);
+        actions.resize(ACCESSIBILITY_CUSTOM_ACTION_MAX_COUNT);
+    }
+    for (auto& action : actions) {
+        if (action.actionName.size() > ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES) {
+            TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+                "Custom action name exceeds %{public}zu bytes, truncating",
+                ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES);
+            action.actionName.resize(ACCESSIBILITY_CUSTOM_ACTION_NAME_MAX_BYTES);
+        }
+    }
+    accessibilityCustomActions_ = std::move(actions);
 }
 
 std::vector<AccessibilityCustomAction> AccessibilityProperty::GetAccessibilityCustomActions()

@@ -5603,6 +5603,37 @@ void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityActionOptions(frameNode, actions);
 }
+void SetAccessibilityCustomActionsImpl(Ark_NativePointer node,
+                                       const Opt_Array_AccessibilityCustomAction* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstractModelNG::ResetAccessibilityCustomActions(frameNode);
+        return;
+    }
+    auto& arr = *optValue;
+    std::vector<NG::AccessibilityCustomAction> actions;
+    for (int32_t i = 0; i < arr.length; i++) {
+        auto& item = arr.array[i];
+        NG::AccessibilityCustomAction action;
+        action.actionName = Converter::OptConvert<std::string>(item.name).value_or("");
+        if (item.onAction.callSync) {
+            auto weakNode = AceType::WeakClaim(frameNode);
+            auto cb = item.onAction;
+            action.customActionCallback =
+                [cbHolder = CallbackHelper(cb), node = weakNode]() {
+                    PipelineContext::SetCallBackNode(node);
+                    cbHolder.InvokeSync();
+                };
+        }
+        if (!action.actionName.empty() && action.customActionCallback) {
+            actions.push_back(std::move(action));
+        }
+    }
+    ViewAbstractModelNG::SetAccessibilityCustomActions(frameNode, actions);
+}
 void SetSmartGestureShortcutImpl(Ark_NativePointer node,
                                  const Ark_SmartGestureShortcutOptions* value)
 {
@@ -7228,6 +7259,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
+        CommonMethodModifier::SetAccessibilityCustomActionsImpl,
         CommonMethodModifier::SetSmartGestureShortcutImpl,
         CommonMethodModifier::SetInspectorLabelImpl,
         CommonMethodModifier::SetDoubleSidedImpl,

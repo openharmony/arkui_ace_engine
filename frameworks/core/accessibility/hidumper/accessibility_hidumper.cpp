@@ -99,7 +99,7 @@ bool AccessibilityHidumper::DumpProcessCustomActionParameters(
             listActions = true;
         }
     }
-    return false;
+    return result;
 }
 
 bool AccessibilityHidumper::DumpProcessExecuteActionParameters(
