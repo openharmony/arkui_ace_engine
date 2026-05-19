@@ -281,6 +281,7 @@ public:
     }
 
     MouseEvent ConvertToMouseEvent() const;
+    MouseEvent ConvertToMouseEventForStatic() const;
     void SetIsRightButtonEventFromDoulbeTap(bool isRightButtonEventFromDoulbeTap)
     {
         isRightButtonEventFromDoulbeTap_ = isRightButtonEventFromDoulbeTap;
