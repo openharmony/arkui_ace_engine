@@ -14,7 +14,6 @@
  */
 
 #include "core/animation/animator.h"
-#include "core/animation/friction_motion.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/scroll_bar/scroll_bar_component.h"
 #include "core/gestures/drag_recognizer.h"

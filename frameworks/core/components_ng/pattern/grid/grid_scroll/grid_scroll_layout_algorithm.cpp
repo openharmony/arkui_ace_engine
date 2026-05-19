@@ -18,6 +18,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/feature_param.h"
+#include "core/common/frontend.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
@@ -407,6 +408,16 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             cacheEnd = cache.second; // only use counting method when last line not completely filled
         }
         LostChildFocusToSelf(layoutWrapper, startIndex - cacheStart, endIndex + cacheEnd);
+        if (info_.isOnMoveDragUpdate_ && !info_.isOnMoveGridChange_) {
+            if (info_.fromDragIndex_ >= 0) {
+                startIndex = std::min(startIndex, info_.fromDragIndex_);
+                endIndex = std::max(endIndex, info_.fromDragIndex_);
+            }
+            if (info_.toDragIndex_ >= 0) {
+                startIndex = std::min(startIndex, info_.toDragIndex_);
+                endIndex = std::max(endIndex, info_.toDragIndex_);
+            }
+        }
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
         info_.times_ = (info_.times_ + 1) % GRID_CHECK_INTERVAL;
         if (info_.times_ == 0) {

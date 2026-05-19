@@ -11,6 +11,7 @@
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/event/focus_axis_event.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -78,6 +79,8 @@ struct RectCallbackListImpl {};
 EventManager::EventManager()
 {
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
+    refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
+    postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
 }
 
 EventManager::~EventManager() = default;
@@ -452,12 +455,19 @@ void EventManager::ClearHitTestInfoRecord(const TouchEvent& touchPoint)
 
 const RefPtr<NG::SmartGestureManager>& EventManager::GetOrCreateSmartGestureManager()
 {
-    return nullptr;
+#ifdef SMART_GESTURE_SUPPORTED
+    if (!smartGestureManager_) {
+        auto pipeline = NG::MockPipelineContext::GetCurrent();
+        CHECK_NULL_RETURN(pipeline, smartGestureManager_);
+        smartGestureManager_ = AceType::MakeRefPtr<NG::SmartGestureManager>(WeakPtr<NG::PipelineContext>(pipeline));
+    }
+#endif
+    return smartGestureManager_;
 }
 
 const RefPtr<NG::SmartGestureManager>& EventManager::GetSmartGestureManager() const
 {
-    return nullptr;
+    return smartGestureManager_;
 }
 
 void EventManager::ClearSmartGestureSelected()
@@ -465,7 +475,7 @@ void EventManager::ClearSmartGestureSelected()
 
 void EventManager::ResetSmartGestureManager()
 {
-    return;
+    smartGestureManager_.Reset();
 }
 
 void EventManager::FlushCursorStyleRequests()

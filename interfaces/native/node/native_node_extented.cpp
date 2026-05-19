@@ -14,12 +14,13 @@
  */
 
 #include <cstdint>
-
+#include <new>
 #include "native_styled_string.h"
 #include "node_extened.h"
 #include "node_model.h"
 #include "styled_string.h"
 
+#include "base/error/error_code.h"
 #include "base/utils/utils.h"
 #include "interfaces/native/native_error_message_macros.h"
 
@@ -961,8 +962,8 @@ void OH_ArkUI_StyledString_PopTextStyle(ArkUI_StyledString* storage)
 
 OH_Drawing_Typography* OH_ArkUI_StyledString_CreateTypography(ArkUI_StyledString* storage)
 {
-    OH_Drawing_Typography* paragraph =
-        OH_Drawing_CreateTypography(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
+    OH_Drawing_Typography* paragraph = OH_Drawing_CreateTypography(
+        reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder));
     storage->paragraph = paragraph;
     return reinterpret_cast<OH_Drawing_Typography*>(paragraph);
 }
@@ -983,7 +984,12 @@ void OH_ArkUI_StyledString_AddPlaceholder(ArkUI_StyledString* storage, OH_Drawin
 
 ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create()
 {
-    ArkUI_AccessibilityState* state = new ArkUI_AccessibilityState;
+    ArkUI_AccessibilityState* state = new (std::nothrow) ArkUI_AccessibilityState;
+    if (state == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, __FUNCTION__,
+            "Failed to create accessibility state");
+        return nullptr;
+    }
     state->isDisabled = ArkUI_OptionalInt { 0, 0 };
     state->isSelected = ArkUI_OptionalInt { 0, 0 };
     state->checkedType = ArkUI_OptionalInt { 0, 0 };
@@ -992,51 +998,78 @@ ArkUI_AccessibilityState* OH_ArkUI_AccessibilityState_Create()
 
 void OH_ArkUI_AccessibilityState_Dispose(ArkUI_AccessibilityState* state)
 {
+    if (state == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
+        return;
+    }
     delete state;
 }
 
 void OH_ArkUI_AccessibilityState_SetDisabled(ArkUI_AccessibilityState* state, int32_t isDisabled)
 {
-    CHECK_NULL_VOID(state);
+    if (state == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
+        return;
+    }
     state->isDisabled.isSet = 1;
     state->isDisabled.value = isDisabled;
 }
 
 int32_t OH_ArkUI_AccessibilityState_IsDisabled(ArkUI_AccessibilityState* state)
 {
-    CHECK_NULL_RETURN(state, 0);
+    if (state == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
+        return 0;
+    }
     return state->isDisabled.value;
 }
 
 void OH_ArkUI_AccessibilityState_SetSelected(ArkUI_AccessibilityState* state, int32_t isSelected)
 {
-    CHECK_NULL_VOID(state);
+    if (state == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
+        return;
+    }
     state->isSelected.isSet = 1;
     state->isSelected.value = isSelected;
 }
 
 int32_t OH_ArkUI_AccessibilityState_IsSelected(ArkUI_AccessibilityState* state)
 {
-    CHECK_NULL_RETURN(state, 0);
+    if (state == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
+        return 0;
+    }
     return state->isSelected.value;
 }
 
 void OH_ArkUI_AccessibilityState_SetCheckedState(ArkUI_AccessibilityState* state, int32_t checkedState)
 {
-    CHECK_NULL_VOID(state);
+    if (state == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
+        return;
+    }
     state->checkedType.isSet = 1;
     state->checkedType.value = checkedState;
 }
 
 int32_t OH_ArkUI_AccessibilityState_GetCheckedState(ArkUI_AccessibilityState* state)
 {
-    CHECK_NULL_RETURN(state, 0);
+    if (state == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
+        return 0;
+    }
     return state->checkedType.value;
 }
 
 ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create()
 {
-    ArkUI_AccessibilityValue* value = new ArkUI_AccessibilityValue;
+    ArkUI_AccessibilityValue* value = new (std::nothrow) ArkUI_AccessibilityValue;
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, __FUNCTION__,
+            "Failed to create accessibility value");
+        return nullptr;
+    }
     value->min = ArkUI_OptionalInt { 0, -1 };
     value->max = ArkUI_OptionalInt { 0, -1 };
     value->current = ArkUI_OptionalInt { 0, -1 };
@@ -1049,97 +1082,147 @@ ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create()
 
 void OH_ArkUI_AccessibilityValue_Dispose(ArkUI_AccessibilityValue* value)
 {
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return;
+    }
     delete value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetMin(ArkUI_AccessibilityValue* value, int32_t min)
 {
-    CHECK_NULL_VOID(value);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return;
+    }
     value->min.isSet = 1;
     value->min.value = min;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetMin(ArkUI_AccessibilityValue* value)
 {
-    CHECK_NULL_RETURN(value, -1);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return -1;
+    }
     return value->min.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetMax(ArkUI_AccessibilityValue* value, int32_t max)
 {
-    CHECK_NULL_VOID(value);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return;
+    }
     value->max.isSet = 1;
     value->max.value = max;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value)
 {
-    CHECK_NULL_RETURN(value, -1);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return -1;
+    }
     return value->max.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetCurrent(ArkUI_AccessibilityValue* value, int32_t current)
 {
-    CHECK_NULL_VOID(value);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return;
+    }
     value->current.isSet = 1;
     value->current.value = current;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value)
 {
-    CHECK_NULL_RETURN(value, -1);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return -1;
+    }
     return value->current.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetRangeMin(ArkUI_AccessibilityValue* value, int32_t rangeMin)
 {
-    CHECK_NULL_VOID(value);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return;
+    }
     value->rangeMin.isSet = 1;
     value->rangeMin.value = rangeMin;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetRangeMin(ArkUI_AccessibilityValue* value)
 {
-    CHECK_NULL_RETURN(value, -1);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return -1;
+    }
     return value->rangeMin.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetRangeMax(ArkUI_AccessibilityValue* value, int32_t rangeMax)
 {
-    CHECK_NULL_VOID(value);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return;
+    }
     value->rangeMax.isSet = 1;
     value->rangeMax.value = rangeMax;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetRangeMax(ArkUI_AccessibilityValue* value)
 {
-    CHECK_NULL_RETURN(value, -1);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return -1;
+    }
     return value->rangeMax.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetRangeCurrent(ArkUI_AccessibilityValue* value, int32_t rangeCurrent)
 {
-    CHECK_NULL_VOID(value);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return;
+    }
     value->rangeCurrent.isSet = 1;
     value->rangeCurrent.value = rangeCurrent;
 }
 
 int32_t OH_ArkUI_AccessibilityValue_GetRangeCurrent(ArkUI_AccessibilityValue* value)
 {
-    CHECK_NULL_RETURN(value, -1);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return -1;
+    }
     return value->rangeCurrent.value;
 }
 
 void OH_ArkUI_AccessibilityValue_SetText(ArkUI_AccessibilityValue* value, const char* text)
 {
-    CHECK_NULL_VOID(value);
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return;
+    }
+    if (text == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "text is null");
+        return;
+    }
     value->text.isSet = 1;
     value->text.value = text;
 }
 
 const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value)
 {
-    CHECK_NULL_RETURN(value, "");
+    if (value == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+        return "";
+    }
     return value->text.value;
 }
 
@@ -1331,9 +1414,12 @@ int32_t OH_ArkUI_PositionEdges_GetRight(ArkUI_PositionEdges* edges, float* value
 
 ArkUI_PixelRoundPolicy* OH_ArkUI_PixelRoundPolicy_Create()
 {
-    ArkUI_PixelRoundPolicy* policy = new ArkUI_PixelRoundPolicy { { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
-        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND }, { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
-        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND } };
+    ArkUI_PixelRoundPolicy* policy = new ArkUI_PixelRoundPolicy {
+        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
+        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
+        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND },
+        { 0, ARKUI_PIXELROUNDCALCPOLICY_NOFORCEROUND }
+    };
     return policy;
 }
 
@@ -1400,7 +1486,8 @@ void OH_ArkUI_PixelRoundPolicy_SetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_Pixe
 int32_t OH_ArkUI_PixelRoundPolicy_GetEnd(ArkUI_PixelRoundPolicy* policy, ArkUI_PixelRoundCalcPolicy* value)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(
-        policy, ARKUI_ERROR_CODE_PARAM_INVALID, "OH_ArkUI_PixelRoundPolicy_GetEnd", "Parameter policy is null");
+        policy, ARKUI_ERROR_CODE_PARAM_INVALID,
+        "OH_ArkUI_PixelRoundPolicy_GetEnd", "Parameter policy is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(policy->end.isSet, ARKUI_ERROR_CODE_PARAM_INVALID,
         "OH_ArkUI_PixelRoundPolicy_GetEnd", "End PixelRoundPolicy is not set");
     *value = policy->end.value;
@@ -1971,8 +2058,8 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
-            fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorCharacterPositionAtCoordinate(
-                node->uiNodeHandle, dx, dy));
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->
+                getRichEditorCharacterPositionAtCoordinate(node->uiNodeHandle, dx, dy));
     } else {
         *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
             fullImpl->getNodeModifiers()->getTextModifier()->getCharacterPositionAtCoordinate(
@@ -2051,6 +2138,211 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+OH_ArkUI_LinearGradientOptions* OH_ArkUI_LinearGradientOptions_Create()
+{
+    auto* options = new OH_ArkUI_LinearGradientOptions();
+    options->angle = ArkUI_OptionalFloat { 0, 0.0f };
+    options->direction = ArkUI_LinearGradientDirection::ARKUI_LINEAR_GRADIENT_DIRECTION_NONE;
+    options->repeating = false;
+    options->colorStop.clear();
+    return options;
+}
+ 
+void OH_ArkUI_LinearGradientOptions_Destroy(OH_ArkUI_LinearGradientOptions* options)
+{
+    CHECK_NULL_VOID(options);
+    delete options;
+    options = nullptr;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetAngle(OH_ArkUI_LinearGradientOptions* options, float angle)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->angle.isSet = 1;
+    options->angle.value = angle;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetAngle(const OH_ArkUI_LinearGradientOptions* options, float* angle)
+{
+    CHECK_NULL_RETURN(options && angle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *angle = options->angle.value;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetDirection(OH_ArkUI_LinearGradientOptions* options,
+    ArkUI_LinearGradientDirection direction)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->direction = direction;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetDirection(const OH_ArkUI_LinearGradientOptions* options,
+    ArkUI_LinearGradientDirection* direction)
+{
+    CHECK_NULL_RETURN(options && direction, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *direction = options->direction;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetRepeating(OH_ArkUI_LinearGradientOptions* options, bool repeating)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->repeating = repeating;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetRepeating(
+    const OH_ArkUI_LinearGradientOptions* options, bool* repeating)
+{
+    CHECK_NULL_RETURN(options && repeating, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *repeating = options->repeating;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetColorStop(
+    OH_ArkUI_LinearGradientOptions* options, const uint32_t* colors, const float* stops, int32_t colorsAndStopsSize)
+{
+    CHECK_NULL_RETURN(options && colors && stops, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    for (int32_t i = 0; i < colorsAndStopsSize; i++) {
+        options->colorStop.emplace_back(
+            std::pair<uint32_t, float>(colors[i], stops[i]));
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetColorStop(
+    const OH_ArkUI_LinearGradientOptions* options, uint32_t* colors, float* stops, int32_t colorsAndStopsSize,
+    int32_t* writeLength)
+{
+    CHECK_NULL_RETURN(options && colors && stops && colorsAndStopsSize >= 0,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto size = static_cast<int32_t>(options->colorStop.size());
+    *writeLength = size;
+    CHECK_NULL_RETURN(colorsAndStopsSize >= size, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (size == 0) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+    }
+    for (int32_t i = 0; i < size; i++) {
+        auto temp = options->colorStop[i];
+        colors[i] = temp.first;
+        stops[i] = temp.second;
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+OH_ArkUI_RadialGradientOptions* OH_ArkUI_RadialGradientOptions_Create()
+{
+    auto* options = new OH_ArkUI_RadialGradientOptions();
+    options->centerX = ArkUI_OptionalFloat { 0, 0.0f };
+    options->centerY = ArkUI_OptionalFloat { 0, 0.0f };
+    options->radius = ArkUI_OptionalFloat { 0, 0.0f };
+    options->repeating = false;
+    options->colorStop.clear();
+    return options;
+}
+ 
+void OH_ArkUI_RadialGradientOptions_Destroy(OH_ArkUI_RadialGradientOptions* options)
+{
+    CHECK_NULL_VOID(options);
+    delete options;
+    options = nullptr;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetCenterX(OH_ArkUI_RadialGradientOptions* options, float centerX)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->centerX.isSet = 1;
+    options->centerX.value = centerX;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetCenterX(
+    const OH_ArkUI_RadialGradientOptions* options, float* centerX)
+{
+    CHECK_NULL_RETURN(options && centerX, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *centerX = options->centerX.value;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetCenterY(OH_ArkUI_RadialGradientOptions* options, float centerY)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->centerY.isSet = 1;
+    options->centerY.value = centerY;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetCenterY(
+    const OH_ArkUI_RadialGradientOptions* options, float* centerY)
+{
+    CHECK_NULL_RETURN(options && centerY, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *centerY = options->centerY.value;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetRadius(OH_ArkUI_RadialGradientOptions* options, float radius)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->radius.isSet = 1;
+    options->radius.value = radius;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetRadius(
+    const OH_ArkUI_RadialGradientOptions* options, float* radius)
+{
+    CHECK_NULL_RETURN(options && radius, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *radius = options->radius.value;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetRepeating(OH_ArkUI_RadialGradientOptions* options, bool repeating)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->repeating = repeating;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetRepeating(
+    const OH_ArkUI_RadialGradientOptions* options, bool* repeating)
+{
+    CHECK_NULL_RETURN(options && repeating, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *repeating = options->repeating;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetColorStop(
+    OH_ArkUI_RadialGradientOptions* options, const uint32_t* colors, const float* stops, int32_t colorsAndStopsSize)
+{
+    CHECK_NULL_RETURN(options && colors && stops, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    for (int32_t i = 0; i < colorsAndStopsSize; i++) {
+        options->colorStop.emplace_back(
+            std::pair<uint32_t, float>(colors[i], stops[i]));
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetColorStop(
+    const OH_ArkUI_RadialGradientOptions* options, uint32_t* colors, float* stops, int32_t colorsAndStopsSize,
+    int32_t* writeLength)
+{
+    CHECK_NULL_RETURN(options && colors && stops && colorsAndStopsSize >= 0,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto size = static_cast<int32_t>(options->colorStop.size());
+    *writeLength = size;
+    CHECK_NULL_RETURN(colorsAndStopsSize >= size, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (size == 0) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+    }
+    for (int32_t i = 0; i < size; i++) {
+        auto temp = options->colorStop[i];
+        colors[i] = temp.first;
+        stops[i] = temp.second;
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
 #ifdef __cplusplus
 };
 #endif

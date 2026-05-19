@@ -4265,6 +4265,85 @@ typedef enum {
     NODE_TEXT_INPUT_TEXT_OVERFLOW = 7049,
 
     /**
+     * @brief Defines the text decoration style and color for single-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * ?.object: Optional. The decoration style options. The parameter type is {@link OH_ArkUI_DecorationStyleOptions}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The decoration style options. The parameter type is {@link OH_ArkUI_DecorationStyleOptions}.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_DECORATION = 7050,
+
+    /**
+     * @brief Sets a linear gradient effect for text in the single-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * The setting takes effect only when <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>.
+     * A positive value indicates a clockwise rotation from the origin, (0, 0). The default value is <b>180</b>. \n
+     * .value[1].i32: direction of the linear gradient. When a direction other than
+     * <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b> is set, the <b>angle</b> property is ignored.
+     * The parameter type is {@link ArkUI_LinearGradientDirection}. \n
+     * .value[2].i32: whether the colors are repeated. The default value is <b>false</b>.
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * When <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>, <b>angle</b> at the set value;
+     * otherwise, it is at default value. \n
+     * .value[1].i32: direction of the linear gradient. \n
+     * .value[2].i32: whether the colors are repeated. \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_LINEAR_GRADIENT = 7051,
+
+    /**
+     * @brief Sets a radial gradient effect for text in the single-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0]?.f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1]?.f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2]?.f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3]?.i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.\n \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1].f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2].f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3].i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.  \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_INPUT_RADIAL_GRADIENT = 7052,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4871,6 +4950,85 @@ typedef enum {
      *  @since 24
      */
     NODE_TEXT_AREA_TEXT_OVERFLOW = 8046,
+
+    /**
+     * @brief Defines the text decoration style and color for multi-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * ?.object: Optional. The decoration style options. The parameter type is {@link OH_ArkUI_DecorationStyleOptions}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: The decoration style options. The parameter type is {@link OH_ArkUI_DecorationStyleOptions}.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_DECORATION = 8047,
+
+    /**
+     * @brief Sets a linear gradient effect for text in the multi-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * The setting takes effect only when <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>.
+     * A positive value indicates a clockwise rotation from the origin, (0, 0). The default value is <b>180</b>. \n
+     * .value[1].i32: direction of the linear gradient. When a direction other than
+     * <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b> is set, the <b>angle</b> property is ignored.
+     * The parameter type is {@link ArkUI_LinearGradientDirection}. \n
+     * .value[2].i32: whether the colors are repeated. The default value is <b>false</b>.
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: start angle of the linear gradient.
+     * When <b>direction</b> is set to <b>ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM</b>, <b>angle</b> at the set value;
+     * otherwise, it is at default value. \n
+     * .value[1].i32: direction of the linear gradient. \n
+     * .value[2].i32: whether the colors are repeated. \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_LINEAR_GRADIENT = 8048,
+ 
+    /**
+     * @brief Sets a radial gradient effect for text in the multi-line text box.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0]?.f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1]?.f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2]?.f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3]?.i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.\n \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: X-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[1].f32: Y-coordinate of the radial gradient center relative to the upper left corner of the text. \n
+     * .value[2].f32: radius of the radial gradient. The default value is <b>0</b>. \n
+     * .value[3].i32: whether the colors are repeated.
+     * The value <b>1</b> means that the colors are repeated, and <b>0</b> means the opposite.  \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_AREA_RADIAL_GRADIENT = 8049,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -6613,6 +6771,20 @@ typedef enum {
     NODE_TEXT_EDITOR_HORIZONTAL_SCROLLING,
 
     /**
+     * @brief Sets whether to enable punctuation overflow at the end of a line.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable punctuation overflow, the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable punctuation overflow.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_EDITOR_PUNCTUATION_OVERFLOW,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -7354,6 +7526,43 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_LIST_BACK_PRESS_BEHAVIOR = 1003020,
+
+    /**
+     * @brief Defines whether the <b>List</b> component enables edit mode. After entering edit mode,
+     * checkboxes are displayed by default, and finger sliding multi-selection is supported.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether the <b>List</b> component enables edit mode.
+     * <b>0</b>: Not editable. <b>1</b>: Editable. Default value: <b>0</b>.\n
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether the <b>List</b> component enables edit mode.
+     * <b>0</b>: Not editable. <b>1</b>: Editable.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_LIST_ENABLE_EDIT_MODE = 1003021,
+
+    /**
+     * @brief Defines the edit mode options for the <b>List</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether the <b>List</b> component uses the default multi-selection style.
+     * <b>0</b>: Do not use the default style. <b>1</b>: Use the default style. Default value: <b>1</b>.\n
+     * .value[1].i32: Whether the <b>List</b> component enables two-finger sliding multi-selection.
+     * <b>0</b>: Disabled. <b>1</b>: Enabled. Default value: <b>1</b>.\n
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether the <b>List</b> component uses the default multi-selection style.
+     * <b>0</b>: Do not use the default style. <b>1</b>: Use the default style.\n
+     * .value[1].i32: Whether the <b>List</b> component enables two-finger sliding multi-selection.
+     * <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_LIST_EDIT_MODE_OPTIONS = 1003022,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -8526,6 +8735,43 @@ typedef enum {
     NODE_GRID_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1013015,
 
     /**
+     * @brief Defines whether the <b>Grid</b> component enables edit mode. After entering edit mode,
+     * checkboxes are displayed by default, and finger sliding multi-selection is supported.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether the <b>Grid</b> component enables edit mode.
+     * <b>0</b>: Not editable. <b>1</b>: Editable. Default value: <b>0</b>.\n
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether the <b>Grid</b> component enables edit mode.
+     * <b>0</b>: Not editable. <b>1</b>: Editable.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_GRID_ENABLE_EDIT_MODE = 1013016,
+
+    /**
+     * @brief Defines the edit mode options for the <b>Grid</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether the <b>Grid</b> component uses the default multi-selection style.
+     * <b>0</b>: Do not use the default style. <b>1</b>: Use the default style. Default value: <b>1</b>.\n
+     * .value[1].i32: Whether the <b>Grid</b> component enables two-finger sliding multi-selection.
+     * <b>0</b>: Disabled. <b>1</b>: Enabled. Default value: <b>1</b>.\n
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether the <b>Grid</b> component uses the default multi-selection style.
+     * <b>0</b>: Do not use the default style. <b>1</b>: Use the default style.\n
+     * .value[1].i32: Whether the <b>Grid</b> component enables two-finger sliding multi-selection.
+     * <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_GRID_EDIT_MODE_OPTIONS = 1013017,
+
+    /**
      * @brief Sets the style of the <b>GridItem</b> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -8886,6 +9132,34 @@ typedef enum {
      * @since 23
      */
     NODE_PICKER_SELECTION_INDICATOR = 1018003,
+
+    /**
+     * @brief Sets the total number of visible items.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: number of visible items. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of visible items. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_PICKER_DISPLAYED_ITEM_COUNT = 1018004,
+
+    /**
+     * @brief Sets the height of each item.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the height of each item, in vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the height of each item, in vp. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_PICKER_ITEM_HEIGHT = 1018005,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -10640,7 +10914,27 @@ typedef enum {
      * @since 15
      */
     NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE,
-    
+
+    /**
+     * @brief Defines the edit mode state change event of the <b>List</b> component.
+     *
+     * This event is triggered when the edit mode state changes, which occurs in the following cases:
+     * 1. The {@link NODE_LIST_ENABLE_EDIT_MODE} attribute is set to change the edit mode state.
+     * 2. When {@link NODE_LIST_EDIT_MODE_OPTIONS} has two-finger sliding multi-selection enabled,
+     * a two-finger sliding gesture triggers the change to multi-selection state.
+     * Registering this event callback is a prerequisite for entering multi-selection state via
+     * two-finger sliding. If this callback is not registered, two-finger sliding will not enter
+     * multi-selection state.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: edit mode state. <b>0</b>: not in edit mode. <b>1</b>: in edit mode. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_LIST_ON_EDIT_MODE_CHANGE,
+
     /**
      * @brief Defines the event triggered when the refresh state of the <b>ARKUI_NODE_REFRESH</b> object changes.
      *
@@ -10950,6 +11244,26 @@ typedef enum {
      * @since 23
      */
     NODE_GRID_ON_ITEM_DROP = 1013008,
+
+    /**
+     * @brief Defines the edit mode state change event of the <b>Grid</b> component.
+     *
+     * This event is triggered when the edit mode state changes, which occurs in the following cases:
+     * 1. The {@link NODE_GRID_ENABLE_EDIT_MODE} attribute is set to change the edit mode state.
+     * 2. When {@link NODE_GRID_EDIT_MODE_OPTIONS} has two-finger sliding multi-selection enabled,
+     * a two-finger sliding gesture triggers the change to multi-selection state.
+     * Registering this event callback is a prerequisite for entering multi-selection state via
+     * two-finger sliding. If this callback is not registered, two-finger sliding will not enter
+     * multi-selection state.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: edit mode state. <b>0</b>: not in edit mode. <b>1</b>: in edit mode. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_GRID_ON_EDIT_MODE_CHANGE = 1013009,
 
     /**
      * @brief Defines the selected state change event of the <b>GridItem</b> component.

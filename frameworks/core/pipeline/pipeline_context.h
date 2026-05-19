@@ -25,12 +25,10 @@
 #include <utility>
 #include <thread>
 
-#include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
-#include "base/resource/data_provider_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -43,7 +41,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/visible_ratio_callback.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"

@@ -15,11 +15,11 @@
 
 import { IObserve, OBSERVE } from '../decorator';
 import { IObservedObject, RenderIdType } from '../decorator';
-import { IBindingSource, ITrackedDecoratorRef } from './mutableStateMeta';
+import { IBindingSource, ITrackedDecoratorRef, MonitorTarget } from './mutableStateMeta';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
 import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
-import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
+import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { PersistenceV2Impl } from '../storage/persistenceV2';
 import { GlobalStateManager } from '@koalaui/runtime';
 
@@ -46,13 +46,15 @@ export class ObserveSingleton implements IObserve {
     public _renderingComponent: int = ObserveSingleton.RenderingComponent;
     private mutateMutableStateMode_: NotifyMutableStateMode = NotifyMutableStateMode.normal;
     public renderingComponentRef?: ITrackedDecoratorRef;
-    private monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private monitorPathRefsChanged_ =
+        new Map<WeakRef<ITrackedDecoratorRef>, Array<MonitorTarget>>();
     private computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private monitorPathRefsDelayed_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private computedPropRefsDelayed_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private queuedMutableStateChanges_ = new Set<WeakRef<IBindingSource>>();
     private persistencePropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
-    private syncMonitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private syncMonitorsPropRefsChanged_ =
+        new Map<WeakRef<ITrackedDecoratorRef>, Array<MonitorTarget>>();
     private finalizationRegistry = new FinalizationRegistry<WeakRef<ITrackedDecoratorRef>>(
         this.finalizeComputedAndMonitorPath
     );
@@ -120,15 +122,82 @@ export class ObserveSingleton implements IObserve {
         );
     }
 
-    public addDirtyRef(trackedRef: ITrackedDecoratorRef): void {
+    /*
+        ID range layout used by addDirtyRef routing. Each tracked-ref class
+        owns a contiguous slice; the ranges are pairwise disjoint and
+        ordered, so a single greater-than-or-equal cascade picks the
+        correct bucket. Defined in their owning files:
+
+        ComputedDecoratedVariable.MIN_COMPUTED_ID         = 0x10000000  (decoratorComputed.ts)
+        MonitorFunctionDecorator.MIN_MONITOR_ID           = 0x20000000  (decoratorMonitor.ts)
+        MonitorFunctionDecorator.MIN_SYNC_MONITOR_ID      = 0x25000000  (decoratorMonitor.ts)
+        PersistenceV2Impl.MIN_PERSISTENCE_ID              = 0x30000000  (persistenceV2.ts)
+    */
+
+    public addDirtyRef(trackedRef: ITrackedDecoratorRef, triggeredBy?: MonitorTarget): void {
         if (trackedRef.id >= PersistenceV2Impl.MIN_PERSISTENCE_ID) {
             this.persistencePropRefsChanged_.add(trackedRef.weakThis);
         } else if (trackedRef.id >= MonitorFunctionDecorator.MIN_SYNC_MONITOR_ID) {
-            this.syncMonitorPathRefsChanged_.add(trackedRef.weakThis);
+            this.recordMonitorSource(
+                this.syncMonitorsPropRefsChanged_, trackedRef.weakThis, triggeredBy);
         } else if (trackedRef.id >= MonitorFunctionDecorator.MIN_MONITOR_ID) {
-            this.monitorPathRefsChanged_.add(trackedRef.weakThis);
+            this.recordMonitorSource(
+                this.monitorPathRefsChanged_, trackedRef.weakThis, triggeredBy);
         } else if (trackedRef.id >= ComputedDecoratedVariable.MIN_COMPUTED_ID) {
             this.computedPropRefsChanged_.add(trackedRef.weakThis);
+        }
+    }
+
+    // Coalesce repeat addDirtyRef for the same monitor into one drain entry
+    // keyed by weakThis identity, while preserving every triggering source so
+    // the wildcard LSV check (`sources.includes(this.before)`) can detect a
+    // transit-dep change even when several different metas of the same monitor
+    // batched into one drain pass with non-shared targets.
+    //
+    // Storage is Array rather than Set to avoid the per-monitor Set header
+    // allocation in the common single-source case (typical N is 1–3 per
+    // drain). Manual dedup via includes() before push keeps the array small
+    // — bounded by the number of distinct target objects that triggered the
+    // monitor in the current drain pass.
+    private recordMonitorSource(
+        map: Map<WeakRef<ITrackedDecoratorRef>, Array<MonitorTarget>>,
+        weakThis: WeakRef<ITrackedDecoratorRef>,
+        triggeredBy: MonitorTarget,
+    ): void {
+        let sources = map.get(weakThis);
+        if (!sources) {
+            sources = new Array<MonitorTarget>();
+            map.set(weakThis, sources);
+        }
+        // Skip pushing `undefined` — legacy no-arg fireChange() callers route
+        // here with triggeredBy=undefined, and admitting undefined would let
+        // the wildcard LSV check (`sources.includes(this.before)`) trip
+        // whenever this.before is undefined (uninitialized field, broken
+        // path), causing phantom callbacks. Same rationale as the empty-Array
+        // injection in unFreezeDelayedMonitorPaths below: keep the monitor
+        // queued for re-eval but force the dirty check to fall through to
+        // the regular `before !== now` branch.
+        if (triggeredBy !== undefined && !sources.includes(triggeredBy)) {
+            sources.push(triggeredBy);
+        }
+    }
+
+    /**
+     * Sync-monitor batch nesting depth. While > 0, calls to
+     * updateDirtySyncMonitorPaths() defer the drain so a logically-single
+     * mutation (e.g. WrappedArray.push, which fires both OB_LENGTH and
+     * OB_ARRAY_ANY_KEY) coalesces into ONE sync callback per monitor instead
+     * of one per fireChange. The drain runs when the outermost batch ends.
+     */
+    private syncMonitorBatchDepth_: int = 0;
+
+    public beginSyncMonitorBatch(): void {
+        this.syncMonitorBatchDepth_++;
+    }
+
+    public endSyncMonitorBatch(): void {
+        if (--this.syncMonitorBatchDepth_ === 0) {
+            this.drainSyncMonitorPaths();
         }
     }
 
@@ -140,12 +209,23 @@ export class ObserveSingleton implements IObserve {
      * which are processed during the next updateDirty() cycle.
      *
      * Called from MutableStateMeta.fireChange() to ensure real-time tracking
-     * for synchronous monitors.
+     * for synchronous monitors. Defers while inside a sync-monitor batch.
      */
     public updateDirtySyncMonitorPaths(): void {
-        const monitors = this.syncMonitorPathRefsChanged_;
-        this.syncMonitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
-        const monitorsToRun = this.notifyDirtyMonitorPaths(monitors);
+        if (this.syncMonitorBatchDepth_ > 0) {
+            return;
+        }
+        this.drainSyncMonitorPaths();
+    }
+
+    private drainSyncMonitorPaths(): void {
+        // Swap-before-drain: re-entrant fires from within a sync monitor
+        // callback land in a fresh map, so the in-flight drain doesn't
+        // double-visit refs from the current pass.
+        const pending = this.syncMonitorsPropRefsChanged_;
+        this.syncMonitorsPropRefsChanged_ =
+            new Map<WeakRef<ITrackedDecoratorRef>, Array<MonitorTarget>>();
+        const monitorsToRun = this.notifyDirtyMonitorPaths(pending);
         if (monitorsToRun && monitorsToRun.size > 0) {
             monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => {
                 monitor.runMonitorFunction();
@@ -182,7 +262,8 @@ export class ObserveSingleton implements IObserve {
             }
             if (this.monitorPathRefsChanged_.size > 0) {
                 const monitors = this.monitorPathRefsChanged_;
-                this.monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                this.monitorPathRefsChanged_ =
+                    new Map<WeakRef<ITrackedDecoratorRef>, Array<MonitorTarget>>();
                 let monitorsToRun: Set<MonitorFunctionDecorator> = this.notifyDirtyMonitorPaths(monitors);
                 if (monitorsToRun && monitorsToRun.size > 0) {
                     monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => {
@@ -207,7 +288,8 @@ export class ObserveSingleton implements IObserve {
             }
             if (this.monitorPathRefsChanged_.size > 0) {
                 const monitors = this.monitorPathRefsChanged_;
-                this.monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                this.monitorPathRefsChanged_ =
+                    new Map<WeakRef<ITrackedDecoratorRef>, Array<MonitorTarget>>();
                 let monitorsToRun: Set<MonitorFunctionDecorator> = this.notifyDirtyMonitorPaths(monitors);
                 if (monitorsToRun && monitorsToRun.size > 0) {
                     monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => {
@@ -226,7 +308,11 @@ export class ObserveSingleton implements IObserve {
             if (!computedPropRef) {
                 return;
             }
-            const computed = computedPropRef as IComputedDecoratorRef;
+            // Cast to the concrete @Computed class (mirrors how the monitor
+            // drain casts to MonitorFunctionDecorator) — this is the only
+            // call site that needs isFreeze/fireChange on a tracked ref, so
+            // a one-purpose interface earns its keep less than the symmetry.
+            const computed = computedPropRef as ComputedDecoratedVariable<Any>;
             if (computed.isFreeze()) {
                 this.computedPropRefsDelayed_.add(computedPropWeak);
             } else {
@@ -236,15 +322,20 @@ export class ObserveSingleton implements IObserve {
         });
     }
 
-    private notifyDirtyMonitorPaths(monitorPaths: Set<WeakRef<ITrackedDecoratorRef>>): Set<MonitorFunctionDecorator> {
+    private notifyDirtyMonitorPaths(
+        monitorPaths: Map<WeakRef<ITrackedDecoratorRef>, Array<MonitorTarget>>
+    ): Set<MonitorFunctionDecorator> {
         let monitors: Set<MonitorFunctionDecorator> = new Set<MonitorFunctionDecorator>();
-        monitorPaths.forEach((monitorPathRef: WeakRef<ITrackedDecoratorRef>) => {
+        monitorPaths.forEach((
+            sources: Array<MonitorTarget>,
+            monitorPathRef: WeakRef<ITrackedDecoratorRef>
+        ) => {
             let monitorPath = monitorPathRef.deref();
             if (monitorPath) {
                 let monitor: MonitorFunctionDecorator = (monitorPath as MonitorValueInternal).monitor;
                 if (monitor.isFreeze()) {
                     this.monitorPathRefsDelayed_.add(monitorPathRef);
-                } else if (monitor.notifyChangesForPath(monitorPath)) {
+                } else if (monitor.notifyChangesForPath(monitorPath, sources)) {
                     monitors.add(monitor);
                 }
             }
@@ -269,7 +360,15 @@ export class ObserveSingleton implements IObserve {
 
     public unFreezeDelayedMonitorPaths(): void {
         this.monitorPathRefsDelayed_.forEach((weak) => {
-            this.monitorPathRefsChanged_.add(weak);
+            // No source info is preserved across freeze, so the wildcard
+            // transit-dep check (`sources.includes(this.before)` in
+            // MonitorValueInternal.readValue) has no input to make a decision.
+            // Inject an EMPTY source array so the check inevitably falls
+            // through to the regular `before !== now` branch. Adding a
+            // placeholder value (e.g. undefined) would spuriously trip the
+            // transit-dep branch when a wildcard monitor's LSV happens to
+            // equal the placeholder.
+            this.monitorPathRefsChanged_.set(weak, new Array<MonitorTarget>());
         });
         this.monitorPathRefsDelayed_.clear();
     }

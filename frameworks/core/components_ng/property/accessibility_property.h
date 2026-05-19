@@ -56,6 +56,11 @@ struct AccessibilityGroupOptions {
     std::string actionControllerByInspector;
 };
 
+struct AccessibilityNextFocusParams {
+    std::string nextFocusInspectorKey;
+    bool descendantMode = false;
+};
+
 struct AccessibilityActionOptions {
     int32_t scrollStep = 1;
 };
@@ -518,8 +523,14 @@ public:
 
     virtual std::string GetAccessibilityNextFocusInspectorKey() const
     {
-        return accessibilityNextFocusInspectorKey_.value_or("");
+        return accessibilityNextFocusParams_.has_value()
+            ? accessibilityNextFocusParams_->nextFocusInspectorKey : "";
     }
+
+    void SetAccessibilityNextFocusParams(const AccessibilityNextFocusParams& params);
+    AccessibilityNextFocusParams GetAccessibilityNextFocusParams() const;
+    bool HasAccessibilityNextFocusParams() const;
+    void ResetAccessibilityNextFocusParams();
 
     std::string GetAccessibilityDescription() const;
 
@@ -766,6 +777,7 @@ private:
     void NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType);
 
     // the interface supports multithreading
+    void SetAccessibilityNextFocusParamsMultiThread(const AccessibilityNextFocusParams& params);
     void SetAccessibilityNextFocusInspectorKeyMultiThread(const std::string& accessibilityNextFocusInspectorKey);
 
 protected:
@@ -808,7 +820,7 @@ protected:
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
     std::optional<std::string> textTypeHint_;
-    std::optional<std::string> accessibilityNextFocusInspectorKey_;
+    std::optional<AccessibilityNextFocusParams> accessibilityNextFocusParams_;
     std::optional<uint32_t> accessibilityActions_;
     std::optional<std::string> accessibilityRole_;
     std::optional<std::string> accessibilityCustomRole_;

@@ -79,6 +79,8 @@ public:
     static void SetStackFromEnd(const JSCallbackInfo& args);
     static void SetSyncLoad(const JSCallbackInfo& args);
     static void SetEditModeOptions(const JSCallbackInfo& info);
+    static void SetEnableEditMode(const JSCallbackInfo& info);
+    static void SetOnEditModeChange(const JSCallbackInfo& info);
     static void SetScrollSnapAnimationSpeed(const JSCallbackInfo& args);
     static void SetSupportEmptyBranchInLazyLoading(const JSCallbackInfo& args);
     static void SetBackPressBehavior(const JSCallbackInfo& args);

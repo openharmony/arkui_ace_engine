@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
+#include "core/common/container.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/flex_property.h"
 
@@ -1378,9 +1379,21 @@ void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
 }
 
+TextDirection LayoutProperty::GetLayoutDirection() const
+{
+    if (layoutDirection_.has_value()) {
+        return layoutDirection_.value();
+    }
+    auto host = GetHost();
+    auto pipeline = host ? host->GetContext() : nullptr;
+    return (host && pipeline && pipeline->GetUseEnvManager())
+            ? pipeline->ResolveDirectionFromEnv(host).value_or(TextDirection::AUTO)
+            : TextDirection::AUTO;
+}
+
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
 {
-    auto direction = layoutDirection_.value_or(TextDirection::AUTO);
+    auto direction = GetLayoutDirection();
     return direction != TextDirection::AUTO
                ? direction
                : (AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);

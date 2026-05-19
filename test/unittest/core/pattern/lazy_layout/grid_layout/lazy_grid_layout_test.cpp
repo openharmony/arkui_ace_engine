@@ -24,6 +24,7 @@
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
@@ -1267,42 +1268,42 @@ HWTEST_F(LazyGridLayoutTest, OnVisibleIndexesChangeTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsVerticalContainer001
- * @tc.desc: Verify IsVerticalContainer returns false for null node
+ * @tc.name: IsVerticalScrollableParent001
+ * @tc.desc: Verify IsVerticalScrollableParent returns false for null node
  * @tc.type: FUNC
  */
-HWTEST_F(LazyGridLayoutTest, IsVerticalContainer001, TestSize.Level1)
+HWTEST_F(LazyGridLayoutTest, IsVerticalScrollableParent001, TestSize.Level1)
 {
     CreateWaterFlow();
     CreateLazyGridLayout();
     CreateDone();
     EXPECT_NE(pattern_, nullptr);
     RefPtr<UINode> nullNode = nullptr;
-    bool result = pattern_->IsVerticalContainer(nullNode);
+    bool result = LazyLayoutUtils::IsVerticalScrollableParent(nullNode);
     EXPECT_FALSE(result);
 }
 
 /**
- * @tc.name: IsVerticalContainer002
- * @tc.desc: Verify IsVerticalContainer returns false for WaterFlow (not LIST/SCROLL tag)
+ * @tc.name: IsVerticalScrollableParent002
+ * @tc.desc: Verify IsVerticalScrollableParent returns true for vertical WaterFlow
  * @tc.type: FUNC
  */
-HWTEST_F(LazyGridLayoutTest, IsVerticalContainer002, TestSize.Level1)
+HWTEST_F(LazyGridLayoutTest, IsVerticalScrollableParent002, TestSize.Level1)
 {
     CreateWaterFlow();
     CreateLazyGridLayout(Axis::VERTICAL);
     CreateDone();
     EXPECT_NE(pattern_, nullptr);
-    bool result = pattern_->IsVerticalContainer(scrollableFrameNode_);
-    EXPECT_FALSE(result);
+    bool result = LazyLayoutUtils::IsVerticalScrollableParent(scrollableFrameNode_);
+    EXPECT_TRUE(result);
 }
 
 /**
- * @tc.name: IsVerticalContainer003
- * @tc.desc: Verify IsVerticalContainer returns true for vertical List
+ * @tc.name: IsVerticalScrollableParent003
+ * @tc.desc: Verify IsVerticalScrollableParent returns true for vertical List
  * @tc.type: FUNC
  */
-HWTEST_F(LazyGridLayoutTest, IsVerticalContainer003, TestSize.Level1)
+HWTEST_F(LazyGridLayoutTest, IsVerticalScrollableParent003, TestSize.Level1)
 {
     ListModelNG listModel;
     listModel.Create();
@@ -1317,16 +1318,16 @@ HWTEST_F(LazyGridLayoutTest, IsVerticalContainer003, TestSize.Level1)
     EXPECT_NE(pattern_, nullptr);
     CreateDone();
 
-    bool result = pattern_->IsVerticalContainer(listNode);
+    bool result = LazyLayoutUtils::IsVerticalScrollableParent(listNode);
     EXPECT_TRUE(result);
 }
 
 /**
- * @tc.name: IsVerticalContainer004
- * @tc.desc: Verify IsVerticalContainer returns true for vertical Scroll
+ * @tc.name: IsVerticalScrollableParent004
+ * @tc.desc: Verify IsVerticalScrollableParent returns true for vertical Scroll
  * @tc.type: FUNC
  */
-HWTEST_F(LazyGridLayoutTest, IsVerticalContainer004, TestSize.Level1)
+HWTEST_F(LazyGridLayoutTest, IsVerticalScrollableParent004, TestSize.Level1)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -1341,16 +1342,16 @@ HWTEST_F(LazyGridLayoutTest, IsVerticalContainer004, TestSize.Level1)
     EXPECT_NE(pattern_, nullptr);
     CreateDone();
 
-    bool result = pattern_->IsVerticalContainer(scrollNode);
+    bool result = LazyLayoutUtils::IsVerticalScrollableParent(scrollNode);
     EXPECT_TRUE(result);
 }
 
 /**
- * @tc.name: IsVerticalContainer005
- * @tc.desc: Verify IsVerticalContainer returns false for non-scrollable container
+ * @tc.name: IsVerticalScrollableParent005
+ * @tc.desc: Verify IsVerticalScrollableParent returns false for non-scrollable container
  * @tc.type: FUNC
  */
-HWTEST_F(LazyGridLayoutTest, IsVerticalContainer005, TestSize.Level1)
+HWTEST_F(LazyGridLayoutTest, IsVerticalScrollableParent005, TestSize.Level1)
 {
     ScrollModelNG scrollModel;
     scrollModel.Create();
@@ -1371,7 +1372,7 @@ HWTEST_F(LazyGridLayoutTest, IsVerticalContainer005, TestSize.Level1)
     EXPECT_NE(stackNode, nullptr);
     CreateDone();
 
-    bool result = pattern_->IsVerticalContainer(stackNode);
+    bool result = LazyLayoutUtils::IsVerticalScrollableParent(stackNode);
     EXPECT_FALSE(result);
 }
 

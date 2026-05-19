@@ -49,9 +49,18 @@ public:
     {
         return AceAutoFillType::ACE_UNSPECIFIED;
     }
+    
+    virtual void SetUserAutoFillType(bool userType) {}
+    virtual bool GetUserAutoFillType() const
+    {
+        return false;
+    }
 
     virtual void SetTag(const std::string& tag) {}
     virtual const std::string& GetTag() const = 0;
+
+    virtual void SetKeyAttribute(const std::string& keyAttribute) {}
+    virtual const std::string& GetKeyAttribute() const = 0;
 
     virtual void SetValue(const std::string& value) {}
     virtual const std::string& GetValue() const = 0;

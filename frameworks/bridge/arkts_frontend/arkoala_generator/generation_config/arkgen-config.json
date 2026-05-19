@@ -27,7 +27,22 @@
         "ColorMetrics",
         "CustomSpan",
         "TouchEvent",
-        "PanGestureOptions"
+        "PanGestureOptions",
+        "ShaderStyle"
+    ],
+    "extendableComponents": [
+        "arkui.component.button.ExtendableButton",
+        "arkui.component.column.ExtendableColumn",
+        "arkui.component.grid.ExtendableGrid",
+        "arkui.component.gridItem.ExtendableGridItem",
+        "arkui.component.image.ExtendableImage",
+        "arkui.component.list.ExtendableList",
+        "arkui.component.listItem.ExtendableListItem",
+        "arkui.component.relativeContainer.ExtendableRelativeContainer",
+        "arkui.component.row.ExtendableRow",
+        "arkui.component.stack.ExtendableStack",
+        "arkui.component.text.ExtendableText",
+        "arkui.component.toggle.ExtendableToggle"
     ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
@@ -74,6 +89,10 @@
         {
             "from": "arkui.component.gesture.PanGestureOptions",
             "to": "arkui.component.idlize.PanGestureOptionsProxy"
+        },
+        {
+            "from": "arkui.component.textCommon.ShaderStyle",
+            "to": "arkui.component.idlize.ShaderStyleProxy"
         }
     ],
     "forceMaterialized": [
@@ -712,7 +731,8 @@
             "ContentSlot",
             "ContentSlotAttribute",
             "ContentSlotInterface",
-            "PanGestureOptions"
+            "PanGestureOptions",
+            "ShaderStyle"
         ],
         "ignoreEntry": [
             "Optional",
@@ -767,7 +787,8 @@
             "If"
         ],
         "ignorePeerMethod": [
-            "attributeModifier"
+            "attributeModifier",
+            "applyAttributesFinish"
         ],
         "ignoreMethodArkts": [
             "testTupleNumberStringEnum",
@@ -925,10 +946,6 @@
         "ListItemGroupAttribute": {
             "childrenMainSize": {
                 "hookName": "hookListItemGroupChildrenMainSizeImpl",
-                "replaceImplementation": true
-            },
-            "setListItemGroupOptions": {
-                "hookName": "hookListItemGroupOptionsImpl",
                 "replaceImplementation": true
             }
         },

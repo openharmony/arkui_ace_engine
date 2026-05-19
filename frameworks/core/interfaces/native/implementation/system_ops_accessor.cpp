@@ -16,6 +16,7 @@
 
 #include "arkoala_api_generated.h"
 
+#include "base/log/container_scope_wrapper.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
@@ -26,6 +27,9 @@
 #include "ui/resource/resource_object.h"
 
 static thread_local std::vector<int32_t> restoreInstanceIds_;
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+static thread_local std::vector<uint64_t> pushedUids_;
+#endif
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
@@ -45,15 +49,32 @@ void EndFrameImpl(Ark_NativePointer root)
 void SyncInstanceIdImpl(Ark_Int32 instanceId)
 {
     restoreInstanceIds_.emplace_back(Container::CurrentId());
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+    pushedUids_.emplace_back(CURRENT_ID_PUSH(instanceId, CurrentIdSourceType::NATIVE_INTERFACE));
+#else
     ContainerScope::UpdateCurrent(instanceId);
+#endif
 }
 void RestoreInstanceIdImpl()
 {
     if (restoreInstanceIds_.empty()) {
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+        CURRENT_ID_POP(0, INSTANCE_ID_UNDEFINED, CurrentIdSourceType::NATIVE_INTERFACE);
+#else
         ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+#endif
         return;
     }
+#ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+    uint64_t uid = 0;
+    if (!pushedUids_.empty()) {
+        uid = pushedUids_.back();
+        pushedUids_.pop_back();
+    }
+    CURRENT_ID_POP(uid, restoreInstanceIds_.back(), CurrentIdSourceType::NATIVE_INTERFACE);
+#else
     ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
+#endif
     restoreInstanceIds_.pop_back();
 }
 Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,

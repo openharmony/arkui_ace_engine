@@ -458,4 +458,80 @@ HWTEST_F(MenuModelStaticTestNg, ResetBorderRadius001, TestSize.Level1)
      */
     EXPECT_EQ(menuProperty->GetBorderRadius(), std::nullopt);
 }
+
+/**
+ * @tc.name: SetFontSizeLpx001
+ * @tc.desc: Test SetFontSize registers LPX attribute when dimension unit is LPX
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModelStaticTestNg, SetFontSizeLpx001, TestSize.Level1)
+{
+    auto frameNode = MenuModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    MenuModelStatic::SetFontSize(node, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+
+    MenuModelStatic::SetFontSize(node, Dimension(16.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetFontSizeLpx002
+ * @tc.desc: Test SetFontSize unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModelStaticTestNg, SetFontSizeLpx002, TestSize.Level1)
+{
+    auto frameNode = MenuModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    MenuModelStatic::SetFontSize(node, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+
+    MenuModelStatic::SetFontSize(node, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetBorderRadiusLpx001
+ * @tc.desc: Test SetBorderRadius registers LPX attribute when dimension unit is LPX
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModelStaticTestNg, SetBorderRadiusLpx001, TestSize.Level1)
+{
+    auto frameNode = MenuModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    MenuModelStatic::SetBorderRadius(node, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_RADIUS), 0);
+
+    MenuModelStatic::SetBorderRadius(node, Dimension(16.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_RADIUS), 0);
+}
+
+/**
+ * @tc.name: SetBorderRadiusLpx002
+ * @tc.desc: Test SetBorderRadius unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModelStaticTestNg, SetBorderRadiusLpx002, TestSize.Level1)
+{
+    auto frameNode = MenuModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    MenuModelStatic::SetBorderRadius(node, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_RADIUS), 0);
+
+    MenuModelStatic::SetBorderRadius(node, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_RADIUS), 0);
+}
 }

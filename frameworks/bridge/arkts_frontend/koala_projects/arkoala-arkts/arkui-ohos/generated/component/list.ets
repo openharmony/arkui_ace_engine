@@ -19,7 +19,7 @@
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister, Finalizable, MaterializedBaseTag } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { EditModeOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { EditModeOptions_serializer, Bindable_Boolean_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, EditModeOptions, Bindable, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ExtendableCommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
 import { LengthConstrain_serializer, ItemFillPolicy_serializer, CacheCountInfo_serializer, Resource as arkui_component_units_Resource, LengthConstrain, ItemFillPolicy, Dimension, CacheCountInfo, Length, ResponsiveFillType, ResourceColor } from './units'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
@@ -29,7 +29,7 @@ import { Axis, FocusWrapMode, ScrollSource, PresetFillType, Color as arkui_compo
 import { Resource as global_resource_Resource } from 'global.resource'
 import { ChildrenMainSize, AttributeModifier, hookListChildrenMainSizeImpl, hookListAttributeModifier, AttributeUpdater } from '#handwritten'
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer, ScrollerInternal, ScrollAlign } from './scroll'
-import { CustomBuilder } from './builder'
+import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -250,6 +250,38 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         EditModeOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._ListAttribute_setEditModeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableEditModeAttribute(value: boolean | Bindable<boolean> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as boolean
+                thisSerializer.writeBoolean(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Bindable) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setEnableEditMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnEditModeChangeAttribute(value: arkui_component_common_Callback<boolean, void> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setOnEditModeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFocusWrapModeAttribute(value: FocusWrapMode | undefined): void {
@@ -575,105 +607,462 @@ export interface ListDividerOptions {
 }
 export interface ListAttribute extends ScrollableCommonMethod {
     setListOptions(options?: ListOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).setListOptions(options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute setListOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setListOptions')
     }
     alignListItem(value: ListItemAlign | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).alignListItem(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute alignListItem can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method alignListItem')
     }
     listDirection(value: Axis | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).listDirection(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute listDirection can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method listDirection')
     }
     contentStartOffset(value: double | arkui_component_units_Resource | undefined): this
     contentEndOffset(value: double | arkui_component_units_Resource | undefined): this
     divider(value: ListDividerOptions | null | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).divider(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute divider can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method divider')
     }
     multiSelectable(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).multiSelectable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute multiSelectable can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method multiSelectable')
     }
     cachedCount(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).cachedCount(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute cachedCount can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method cachedCount')
     }
     chainAnimation(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).chainAnimation(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute chainAnimation can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method chainAnimation')
     }
     chainAnimationOptions(value: ChainAnimationOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).chainAnimationOptions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute chainAnimationOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method chainAnimationOptions')
     }
     sticky(value: StickyStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).sticky(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute sticky can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method sticky')
     }
     scrollSnapAlign(value: ScrollSnapAlign | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).scrollSnapAlign(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute scrollSnapAlign can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method scrollSnapAlign')
     }
     childrenMainSize(value: ChildrenMainSize | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).childrenMainSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute childrenMainSize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method childrenMainSize')
     }
     maintainVisibleContentPosition(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).maintainVisibleContentPosition(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute maintainVisibleContentPosition can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method maintainVisibleContentPosition')
     }
     supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).supportEmptyBranchInLazyLoading(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute supportEmptyBranchInLazyLoading can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method supportEmptyBranchInLazyLoading')
     }
     stackFromEnd(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).stackFromEnd(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute stackFromEnd can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method stackFromEnd')
     }
     editModeOptions(value: EditModeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).editModeOptions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute editModeOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method editModeOptions')
     }
+    enableEditMode(value: boolean | Bindable<boolean> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).enableEditMode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute enableEditMode can only be set when creating an extendable component.')
+            }
+        }
+        throw new Error('Unimplemented method enableEditMode')
+    }
     focusWrapMode(value: FocusWrapMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).focusWrapMode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute focusWrapMode can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method focusWrapMode')
     }
     syncLoad(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).syncLoad(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute syncLoad can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method syncLoad')
     }
     scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).scrollSnapAnimationSpeed(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute scrollSnapAnimationSpeed can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method scrollSnapAnimationSpeed')
     }
     backPressBehavior(value: ListBackPressBehavior | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).backPressBehavior(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute backPressBehavior can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method backPressBehavior')
     }
     onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onScrollIndex(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onScrollIndex can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onScrollIndex')
     }
     onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onScrollVisibleContentChange(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onScrollVisibleContentChange can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onScrollVisibleContentChange')
     }
     onItemMove(value: ((from: int32,to: int32) => boolean) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onItemMove(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onItemMove can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemMove')
     }
     onItemDragStart(value: OnItemDragStartCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onItemDragStart(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onItemDragStart can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDragStart')
     }
     onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onItemDragEnter(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onItemDragEnter can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDragEnter')
     }
     onItemDragMove(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onItemDragMove(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onItemDragMove can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDragMove')
     }
     onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onItemDragLeave(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onItemDragLeave can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDragLeave')
     }
     onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onItemDrop(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onItemDrop can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onItemDrop')
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onScrollFrameBegin(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onScrollFrameBegin can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onScrollFrameBegin')
     }
     onWillScroll(value: OnWillScrollCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onWillScroll(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onWillScroll can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onWillScroll')
     }
     onDidScroll(value: OnScrollCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onDidScroll(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onDidScroll can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onDidScroll')
     }
     lanes(value: int32 | LengthConstrain | ItemFillPolicy | undefined, gutter?: Dimension): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).lanes(value, gutter));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute lanes can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method lanes')
     }
     cachedCount(count: int32 | CacheCountInfo | undefined, show: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).cachedCount(count, show));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute cachedCount can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method cachedCount')
     }
     attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableList extends ExtendableCommonMethod implements ListAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableList>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T,
+        @memo @memo_skip
+        _content: CustomBuilder): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: ListAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        ListImpl(
+            cb,
+            _content
+        );
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableList>(factory: () => T, options?: ListOptions, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setListOptions(options?: ListOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ListAttribute).setListOptions(options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("List attribute 'setListOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setListOptions')
     }
 }
 
@@ -764,6 +1153,16 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     public editModeOptions(value: EditModeOptions): this {
         const value_casted = value as (EditModeOptions)
         this.getPeer()?.setEditModeOptionsAttribute(value_casted)
+        return this
+    }
+    public enableEditMode(value: boolean | Bindable<boolean> | undefined): this {
+        const value_casted = value as (boolean | Bindable<boolean> | undefined)
+        this.getPeer()?.setEnableEditModeAttribute(value_casted)
+        return this
+    }
+    public onEditModeChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<boolean, void> | undefined)
+        this.getPeer()?.setOnEditModeChangeAttribute(value_casted)
         return this
     }
     public focusWrapMode(value: FocusWrapMode | undefined): this {
@@ -884,6 +1283,21 @@ export function ListImpl(
     })
 }
 
+@memo
+export function List(
+    @memo @memo_skip
+    style: ((attributes: ListAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkListComponent>((): ArkListComponent => {
+        return new ArkListComponent()
+    })
+    NodeAttach<ArkListPeer>((): ArkListPeer => ArkListPeer.create(receiver), (_: ArkListPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ListScroller_serializer {
     public static write(buffer: SerializerBase, value: ListScroller): void {
         let valueSerializer: SerializerBase = buffer

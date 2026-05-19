@@ -37,46 +37,46 @@ void releaseManagedCallbackResource(InteropInt32);
 
 inline const char *tagName(InteropTag tag)
 {
-  switch (tag)
-  {
-  case InteropTag::INTEROP_TAG_UNDEFINED:
-    return "UNDEFINED";
-  case InteropTag::INTEROP_TAG_INT32:
-    return "INT32";
-  case InteropTag::INTEROP_TAG_FLOAT32:
-    return "FLOAT32";
-  case InteropTag::INTEROP_TAG_LENGTH:
-    return "LENGTH";
-  case InteropTag::INTEROP_TAG_RESOURCE:
-    return "RESOURCE";
-  case InteropTag::INTEROP_TAG_STRING:
-    return "STRING";
-  case InteropTag::INTEROP_TAG_OBJECT:
-    return "OBJECT";
-  }
-  INTEROP_FATAL("Fatal error");
+    switch (tag) {
+        case InteropTag::INTEROP_TAG_UNDEFINED:
+            return "UNDEFINED";
+        case InteropTag::INTEROP_TAG_INT32:
+            return "INT32";
+        case InteropTag::INTEROP_TAG_FLOAT32:
+            return "FLOAT32";
+        case InteropTag::INTEROP_TAG_LENGTH:
+            return "LENGTH";
+        case InteropTag::INTEROP_TAG_RESOURCE:
+            return "RESOURCE";
+        case InteropTag::INTEROP_TAG_STRING:
+            return "STRING";
+        case InteropTag::INTEROP_TAG_OBJECT:
+            return "OBJECT";
+        default:
+            INTEROP_FATAL("Fatal error");
+    }
 }
 
 inline const char *tagNameExact(InteropTag tag)
 {
-  switch (tag)
-  {
-  case InteropTag::INTEROP_TAG_UNDEFINED:
-    return "INTEROP_TAG_UNDEFINED";
-  case InteropTag::INTEROP_TAG_INT32:
-    return "INTEROP_TAG_INT32";
-  case InteropTag::INTEROP_TAG_FLOAT32:
-    return "INTEROP_TAG_FLOAT32";
-  case InteropTag::INTEROP_TAG_LENGTH:
-    return "INTEROP_TAG_LENGTH";
-  case InteropTag::INTEROP_TAG_RESOURCE:
-    return "INTEROP_TAG_RESOURCE";
-  case InteropTag::INTEROP_TAG_STRING:
-    return "INTEROP_TAG_STRING";
-  case InteropTag::INTEROP_TAG_OBJECT:
-    return "INTEROP_TAG_OBJECT";
-  }
-  INTEROP_FATAL("Fatal error");
+    switch (tag) {
+        case InteropTag::INTEROP_TAG_UNDEFINED:
+            return "INTEROP_TAG_UNDEFINED";
+        case InteropTag::INTEROP_TAG_INT32:
+            return "INTEROP_TAG_INT32";
+        case InteropTag::INTEROP_TAG_FLOAT32:
+            return "INTEROP_TAG_FLOAT32";
+        case InteropTag::INTEROP_TAG_LENGTH:
+            return "INTEROP_TAG_LENGTH";
+        case InteropTag::INTEROP_TAG_RESOURCE:
+            return "INTEROP_TAG_RESOURCE";
+        case InteropTag::INTEROP_TAG_STRING:
+            return "INTEROP_TAG_STRING";
+        case InteropTag::INTEROP_TAG_OBJECT:
+            return "INTEROP_TAG_OBJECT";
+        default:
+            INTEROP_FATAL("Fatal error");
+    }
 }
 
 inline InteropFunction makeArkFunctionFromId(InteropInt32 id) {

@@ -1312,4 +1312,256 @@ HWTEST_F(TextPickerModelTestNg, SetDefaultAttributes001, TestSize.Level1)
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
 }
+
+/**
+ * @tc.name: SetColumnWidthsLpx001
+ * @tc.desc: Test SetColumnWidths with LPX units
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnWidthsLpx001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double lpxValue = 100.0;
+    std::vector<Dimension> widths = {
+        Dimension(lpxValue, DimensionUnit::LPX),
+        Dimension(lpxValue, DimensionUnit::LPX)
+    };
+
+    TextPickerModelNG::GetInstance()->SetColumnWidths(widths);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_COLUMN_WIDTH) !=
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetColumnWidthsLpx002
+ * @tc.desc: Test SetColumnWidths with VP units (non-LPX)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnWidthsLpx002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double vpValue = 100.0;
+    std::vector<Dimension> widths = {
+        Dimension(vpValue, DimensionUnit::VP),
+        Dimension(vpValue, DimensionUnit::VP)
+    };
+
+    TextPickerModelNG::GetInstance()->SetColumnWidths(widths);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_COLUMN_WIDTH) ==
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetDefaultPickerItemHeightLpx001
+ * @tc.desc: Test SetDefaultPickerItemHeight with LPX unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDefaultPickerItemHeightLpx001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double lpxValue = 50.0;
+    Dimension height(lpxValue, DimensionUnit::LPX);
+
+    TextPickerModelNG::GetInstance()->SetDefaultPickerItemHeight(height);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_ITEM_HEIGHT) !=
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetDefaultPickerItemHeightLpx002
+ * @tc.desc: Test SetDefaultPickerItemHeight with VP unit (non-LPX)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDefaultPickerItemHeightLpx002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double vpValue = 50.0;
+    Dimension height(vpValue, DimensionUnit::VP);
+
+    TextPickerModelNG::GetInstance()->SetDefaultPickerItemHeight(height);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_ITEM_HEIGHT) ==
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetGradientHeightLpx001
+ * @tc.desc: Test SetGradientHeight with LPX unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetGradientHeightLpx001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double lpxValue = 30.0;
+    Dimension height(lpxValue, DimensionUnit::LPX);
+
+    TextPickerModelNG::GetInstance()->SetGradientHeight(height);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_GRADIENT_HEIGHT) !=
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetGradientHeightLpx002
+ * @tc.desc: Test SetGradientHeight with VP unit (non-LPX)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetGradientHeightLpx002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double vpValue = 30.0;
+    Dimension height(vpValue, DimensionUnit::VP);
+
+    TextPickerModelNG::GetInstance()->SetGradientHeight(height);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_GRADIENT_HEIGHT) ==
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetColumnWidthsFrameNodeLpx001
+ * @tc.desc: Test SetColumnWidths with FrameNode and LPX units
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnWidthsFrameNodeLpx001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double lpxValue = 100.0;
+    std::vector<Dimension> widths = {
+        Dimension(lpxValue, DimensionUnit::LPX),
+        Dimension(lpxValue, DimensionUnit::LPX)
+    };
+
+    TextPickerModelNG::SetColumnWidths(frameNode, widths);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_COLUMN_WIDTH) !=
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetColumnWidthsFrameNodeLpx002
+ * @tc.desc: Test SetColumnWidths with FrameNode and VP units (non-LPX)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnWidthsFrameNodeLpx002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double vpValue = 100.0;
+    std::vector<Dimension> widths = {
+        Dimension(vpValue, DimensionUnit::VP),
+        Dimension(vpValue, DimensionUnit::VP)
+    };
+
+    TextPickerModelNG::SetColumnWidths(frameNode, widths);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_COLUMN_WIDTH) ==
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetDefaultPickerItemHeightFrameNodeLpx001
+ * @tc.desc: Test SetDefaultPickerItemHeight with FrameNode and LPX unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDefaultPickerItemHeightFrameNodeLpx001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double lpxValue = 50.0;
+    Dimension height(lpxValue, DimensionUnit::LPX);
+
+    TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, height);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_ITEM_HEIGHT) !=
+        frameNode->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetDefaultPickerItemHeightFrameNodeLpx002
+ * @tc.desc: Test SetDefaultPickerItemHeight with FrameNode and VP unit (non-LPX)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDefaultPickerItemHeightFrameNodeLpx002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    constexpr double vpValue = 50.0;
+    Dimension height(vpValue, DimensionUnit::VP);
+
+    TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, height);
+
+    EXPECT_TRUE(
+        frameNode->lpxAttributes_.find(LpxAttribute::LPX_PICKER_ITEM_HEIGHT) ==
+        frameNode->lpxAttributes_.end());
+}
 } // namespace OHOS::Ace::NG

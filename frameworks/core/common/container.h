@@ -19,6 +19,7 @@
 #include <atomic>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 
 #include "interfaces/inner_api/ace/constants.h"
@@ -26,11 +27,9 @@
 
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
-#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/view_data/ace_auto_fill_error.h"
 #include "base/view_data/hint_to_type_wrap.h"
@@ -47,7 +46,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
-#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 
@@ -87,6 +85,7 @@ using AbilityRuntimeContextCallback = std::function<void(int32_t)>;
 
 class PipelineBase;
 class ContainerHandler;
+class Frontend;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -116,7 +115,8 @@ public:
         return false;
     }
 
-    virtual HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder)
+    virtual HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder,
+        const std::optional<std::string>& msdpType = std::nullopt)
     {
         HintToTypeWrap hintToTypeWrap;
         return hintToTypeWrap;
@@ -333,7 +333,7 @@ public:
         return cardHapPath_;
     }
 
-    bool UpdateState(const Frontend::State& state);
+    bool UpdateState(const FrontendState& state);
 
     Settings& GetSettings()
     {
@@ -605,6 +605,7 @@ public:
      * @param: Target version to be isolated.
      * @return: return the compare result.
      */
+    [[deprecated("using GreatOrEqualAPITargetVersion. Note: Logic is inverted")]]
     static bool LessThanAPIVersion(PlatformVersion version);
 
     /**
@@ -614,7 +615,7 @@ public:
      * @param: Target version to be isolated.
      * @return: return the compare result.
      */
-    static bool GreatOrEqualAPIVersion(PlatformVersion version);
+    [[deprecated("using GreatOrEqualAPITargetVersion")]] static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
     /**
      * @description: Compare whether the min compatible api version of the application is less than the incoming target
@@ -634,11 +635,13 @@ public:
     static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
     /**
-     * @description: Compare whether the target api version of the application is less than the incoming target
-     * version.
+     * @description: [Deprecated]. Compare whether the target api version of the application is less than the incoming
+     * target version. Unexpected results may be returned in multiple instance scenarios. It is recommended to use the
+     * GreatOrEqualAPITargetVersion method.
      * @param: Target version to be isolated.
      * @return: return the compare result.
      */
+    [[deprecated("using GreatOrEqualAPITargetVersion. Note: Logic is inverted")]]
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -805,7 +808,7 @@ public:
     // Get the subFrontend of container
     virtual RefPtr<Frontend> GetSubFrontend() const { return nullptr; }
 
-    virtual FrontendType GetFrontendType() const { return FrontendType::JS; }
+    virtual FrontendType GetFrontendType() const;
 
     virtual bool IsArkTsFrontEnd() const { return false; }
 
@@ -848,7 +851,7 @@ protected:
     std::string cardHapPath_;
     bool useNewPipeline_ = false;
     std::mutex stateMutex_;
-    Frontend::State state_ = Frontend::State::UNDEFINE;
+    FrontendState state_;
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
     // for common handler

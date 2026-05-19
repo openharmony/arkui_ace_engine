@@ -35,15 +35,16 @@ build_component("common") {
     "properties/decoration.cpp",
     "properties/edge.cpp",
     "properties/motion_path_evaluator.cpp",
+    "properties/os_content.cpp",
     "properties/page_transition_option.cpp",
     "properties/scroll_bar.cpp",
     "properties/shadow.cpp",
     "properties/shadow_config.cpp",
     "properties/text_enums.cpp",
     "properties/text_style.cpp",
+    "properties/text_style_gradient.cpp",
     "properties/text_style_parser.cpp",
     "properties/ui_material.cpp",
-    "properties/os_content.cpp",
 
     # layout
     "layout/common_text_constants.cpp",

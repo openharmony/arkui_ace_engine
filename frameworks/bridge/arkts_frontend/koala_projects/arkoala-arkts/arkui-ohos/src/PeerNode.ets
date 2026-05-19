@@ -271,7 +271,7 @@ export class PeerNode extends IncrementalNode {
 
     override dispose(): void {
         let parent = this.parent
-        if (parent != undefined && parent.isKind(PeerNodeType)) {
+        if (parent != undefined && (parent!.isKind(PeerNodeType) || parent!.isKind(BuilderRootNodeType))) {
             const node = parent as PeerNode
             if (!node.disposed) node.peer.removeChild(this.peer.ptr)
         }
@@ -287,7 +287,7 @@ export class PeerNode extends IncrementalNode {
         super.dispose()
     }
 
-    public getOrCreateStateStyleMutable(curState: int32 = 15): MutableState<int32> | undefined {
+    public getOrCreateStateStyleMutable(curState: int32 = 31): MutableState<int32> | undefined {
         if (this._uiStateStyle !== undefined) {
             StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
                 StateUpdateLoop.add(() => {

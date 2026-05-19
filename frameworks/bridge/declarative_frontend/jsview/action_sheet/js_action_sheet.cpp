@@ -64,6 +64,10 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
+const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,
+    DistortionMode::DISTORTION_ENABLED, DistortionMode::DISTORTION_DISABLED };
+const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
+    EdgeLightMode::EDGELIGHT_ENABLED, EdgeLightMode::EDGELIGHT_DISABLED };
 } // namespace
 
 static void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
@@ -373,6 +377,28 @@ void ParseSystemMaterial(DialogProperties& properties, JSRef<JSObject> obj)
     }
 }
 
+void ParseDistortionMode(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto distortionMode = obj->GetProperty("distortionMode");
+    if (distortionMode->IsNumber()) {
+        auto distortionModeVal = distortionMode->ToNumber<int32_t>();
+        if (distortionModeVal >= 0 && distortionModeVal < static_cast<int32_t>(DIALOG_DISTORTION_MODE.size())) {
+            properties.distortionMode = DIALOG_DISTORTION_MODE[distortionModeVal];
+        }
+    }
+}
+
+void ParseEdgeLightMode(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto edgeLightMode = obj->GetProperty("edgeLightMode");
+    if (edgeLightMode->IsNumber()) {
+        auto edgeLightModeVal = edgeLightMode->ToNumber<int32_t>();
+        if (edgeLightModeVal >= 0 && edgeLightModeVal < static_cast<int32_t>(DIALOG_EDGELIGHT_MODE.size())) {
+            properties.edgeLightMode = DIALOG_EDGELIGHT_MODE[edgeLightModeVal];
+        }
+    }
+}
+
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -509,6 +535,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
             properties.hasInvertColor.hasBackgroundColor = true;
         }
         properties.backgroundColor = backgroundColor;
+        properties.backgroundColorResObj = backgroundColorResObj;
     }
 
     auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");
@@ -523,6 +550,8 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     properties.transitionEffect = ParseJsTransitionEffect(args);
     ParseLevelOrder(properties, obj);
     ParseSystemMaterial(properties, obj);
+    ParseDistortionMode(properties, obj);
+    ParseEdgeLightMode(properties, obj);
     JSViewAbstract::SetDialogProperties(obj, properties);
     JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
     JSViewAbstract::SetDialogBlurStyleOption(obj, properties);

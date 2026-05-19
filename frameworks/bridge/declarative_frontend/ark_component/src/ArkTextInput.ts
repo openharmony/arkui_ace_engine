@@ -1675,6 +1675,64 @@ class TextInputDirectionModifier extends ModifierWithKey<TextDirection> {
   }
 }
 
+class TextInputStrokeJoinStyleModifier extends ModifierWithKey<JoinStyle>{
+  constructor(value: JoinStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputStrokeJoinStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetStrokeJoinStyle(node);
+    }
+    else {
+      getUINativeModule().textInput.setStrokeJoinStyle(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ 
+class TextInputShaderStyleModifier extends ModifierWithKey<{
+  center: Array<any>;
+  radius: number | string;
+  angle?: number | string;
+  direction?: GradientDirection;
+  colors: Array<[ ResourceColor, number ]>;
+  repeating?: boolean;
+  color: ResourceColor;
+}> {
+  constructor(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+    color: ResourceColor;
+  }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputShaderStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetShaderStyle(node, this.value);
+    }
+    else {
+      if (this.value.options) {
+        getUINativeModule().textInput.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+          this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+      } else {
+        getUINativeModule().textInput.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+          this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2185,6 +2243,23 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   textDirection(value: TextDirection): this {
     modifierWithKey(this._modifiersWithKeys, TextInputDirectionModifier.identity, TextInputDirectionModifier, value);
+    return this;
+  }
+  strokeJoinStyle(value: JoinStyle): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputStrokeJoinStyleModifier.identity,
+      TextInputStrokeJoinStyleModifier, value);
+    return this;
+  }
+  shaderStyle(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+  }): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputShaderStyleModifier.identity,
+      TextInputShaderStyleModifier, value);
     return this;
   }
 }

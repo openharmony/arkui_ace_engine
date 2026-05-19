@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "ui/base/geometry/calc_dimension.h"
+#include "core/common/container.h"
 #include "ui/properties/color.h"
 
 #include "base/utils/utf_helper.h"
@@ -37,6 +38,14 @@ const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDir
 }
 
 namespace OHOS::Ace::NG {
+void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    void* colorRawPtr);
+void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    void* colorRawPtr, FrameNode* frameNode);
+void SetLinearGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength);
+void SetLinearGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    void* colorRawPtr, FrameNode* frameNode);
+GradientDirection ConvertToLinearGradientDirection(std::shared_ptr<LinearGradient> linearGradient);
 namespace {
 
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
@@ -48,6 +57,7 @@ constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
@@ -57,6 +67,9 @@ constexpr int32_t DEFAULT_CARET_POSITION = 0;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 constexpr bool DEFAULT_LEADING_PUNCTUATION = false;
 const int32_t ERROR_INT_CODE = -1;
+constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
+constexpr int NUM_10 = 10;
 
 FrameNode* GetFrameNode(ArkUINodeHandle node)
 {
@@ -762,14 +775,15 @@ void ResetSearchDividerColor(ArkUINodeHandle node)
     }
 }
 
-void SetSearchDecoration(
-    ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style, void* resRawPtr)
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+    ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE, void* resRawPtr = nullptr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     SearchModelNG::SetTextDecorationColor(frameNode, Color(color));
     SearchModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+    SearchModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
@@ -780,6 +794,12 @@ void SetSearchDecoration(
     }
 }
 
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color,
+    ArkUI_Int32 style, void* resRawPtr)
+{
+    SetSearchDecoration(node, decoration, color, style, DEFAULT_LINE_THICKNESS_SCALE, resRawPtr);
+}
+
 void ResetSearchDecoration(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
@@ -787,6 +807,7 @@ void ResetSearchDecoration(ArkUINodeHandle node)
     SearchModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     SearchModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     SearchModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    SearchModelNG::SetLineThicknessScale(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -1957,6 +1978,119 @@ void SetBackBorder(ArkUINodeHandle node)
     return;
 }
 
+void SetSearchStrokeJoinStyle(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    StrokeJoinStyle style = StrokeJoinStyle::MITER_JOIN;
+    if (value >= static_cast<int32_t>(StrokeJoinStyle::MITER_JOIN) &&
+        value <= static_cast<int32_t>(StrokeJoinStyle::BEVEL_JOIN)) {
+        style = static_cast<StrokeJoinStyle>(value);
+    }
+    SearchModelNG::SetStrokeJoinStyle(frameNode, style);
+}
+ 
+void ResetSearchStrokeJoinStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStrokeJoinStyle(frameNode, StrokeJoinStyle::MITER_JOIN);
+}
+ 
+/**
+ * @param values value value
+ * values[0], values[1] : angle: hasValue, angle value
+ * values[2] : direction
+ * values[3] : repeating
+ * @param valuesLength values length
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetSearchLinearGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+    SearchModelNG::RemoveResObj(frameNode, "TextFieldGradient.gradient");
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    SetLinearGradientValues(gradient, values, valuesLength);
+    SetLinearGradientColors(gradient, colors, colorsLength, colorRawPtr, frameNode);
+    SearchModelNG::SetGradientStyle(frameNode, gradient);
+}
+ 
+void SetSearchRadialGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_10) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+ 
+    SearchModelNG::RemoveResObj(frameNode, "TextFieldGradient.gradient");
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    SetRadialGradientValues(gradient, values, valuesLength, colorRawPtr);
+    SetRadialGradientColors(gradient, colors, colorsLength, colorRawPtr, frameNode);
+    SearchModelNG::SetGradientStyle(frameNode, gradient);
+}
+ 
+void ResetSearchGradient(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::RemoveResObj(frameNode, "TextFieldGradient.gradient");
+    SearchModelNG::ResetSearchGradient(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("ColorShaderStyle");
+    }
+}
+ 
+void SetSearchColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    SearchModelNG::SetColorShaderStyle(frameNode, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj;
+        if (!colorShaderColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorShaderColorRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("ColorShaderStyle", resObj, result);
+        } else {
+            pattern->UnRegisterResource("ColorShaderStyle");
+        }
+    }
+}
+ 
+void ResetSearchColorShaderColor(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::ResetSearchGradient(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("ColorShaderStyle");
+    }
+}
+
 #ifndef CROSS_PLATFORM
 void SetSearchPlaceholderColorImpl(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* resRawPtr)
 {
@@ -2151,6 +2285,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchInspectorId = nullptr,
             .setSearchDecoration = nullptr,
             .resetSearchDecoration = nullptr,
+            .getSearchDecoration = nullptr,
             .setSearchLetterSpacing = nullptr,
             .resetSearchLetterSpacing = nullptr,
             .setSearchLineHeight = nullptr,
@@ -2270,6 +2405,13 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .setSearchBackgroundColor = nullptr,
             .resetSearchBackgroundColor = nullptr,
             .setBackBorder = SetBackBorderImpl,
+            .setSearchStrokeJoinStyle = nullptr,
+            .resetSearchStrokeJoinStyle = nullptr,
+            .setSearchLinearGradient = nullptr,
+            .setSearchRadialGradient = nullptr,
+            .resetSearchGradient = nullptr,
+            .setSearchColorShaderColor = nullptr,
+            .resetSearchColorShaderColor = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -2318,6 +2460,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchInspectorId = ResetSearchInspectorId,
         .setSearchDecoration = SetSearchDecoration,
         .resetSearchDecoration = ResetSearchDecoration,
+        .getSearchDecoration = nullptr,
         .setSearchLetterSpacing = SetSearchLetterSpacing,
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,
@@ -2437,6 +2580,13 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .setSearchBackgroundColor = SetSearchBackgroundColor,
         .resetSearchBackgroundColor = ResetSearchBackgroundColor,
         .setBackBorder = SetBackBorder,
+        .setSearchStrokeJoinStyle = SetSearchStrokeJoinStyle,
+        .resetSearchStrokeJoinStyle = ResetSearchStrokeJoinStyle,
+        .setSearchLinearGradient = SetSearchLinearGradient,
+        .setSearchRadialGradient = SetSearchRadialGradient,
+        .resetSearchGradient = ResetSearchGradient,
+        .setSearchColorShaderColor = SetSearchColorShaderColor,
+        .resetSearchColorShaderColor = ResetSearchColorShaderColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2481,6 +2631,7 @@ const CJUISearchModifier* GetCJUISearchModifier()
         .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchDecoration = SetSearchDecoration,
         .resetSearchDecoration = ResetSearchDecoration,
+        .getSearchDecoration = nullptr,
         .setSearchLetterSpacing = SetSearchLetterSpacing,
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,

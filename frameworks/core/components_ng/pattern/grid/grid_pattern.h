@@ -114,6 +114,9 @@ public:
 
     void ResetGridLayoutInfo()
     {
+        if (info_.isOnMoveDragUpdate_) {
+            info_.isOnMoveGridChange_ = true;
+        }
         info_.lineHeightMap_.clear();
         info_.gridMatrix_.clear();
         info_.endIndex_ = info_.startIndex_ - 1;
@@ -322,6 +325,8 @@ private:
     bool IsItemSelected(float offsetX, float offsetY) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
+    int32_t GetNearestItemIndex(double x, double y) const;
+    SwipeSelectStateKey GetSwipeSelectStateKeyNearPosition(float offsetX, float offsetY) const override;
     void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);

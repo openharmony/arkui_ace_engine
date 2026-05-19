@@ -17,16 +17,49 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_OPTIONS_H
 
 #include <optional>
+#include <utility>
+#include <vector>
+#include "ui/base/geometry/calc_dimension.h"
+#include "ui/base/geometry/dimension.h"
+#include "ui/properties/color.h"
+#include "ui/properties/gradient_property.h"
 
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace::NG {
+constexpr double DEFAULT_BLUR_RADIUS = 40;
+
+enum class ScrollEffectType {
+    COMMON_BLUR = 0,
+    GRADUAL_BLUR
+};
+
+struct ScrollEffectOptions {
+    ScrollEffectType scrollEffectType = ScrollEffectType::COMMON_BLUR;
+    std::optional<CalcDimension> blurEffectiveStartOffset;
+    std::optional<CalcDimension> blurEffectiveEndOffset;
+
+    bool operator==(const ScrollEffectOptions& other) const
+    {
+        return scrollEffectType == other.scrollEffectType &&
+               blurEffectiveStartOffset == other.blurEffectiveStartOffset &&
+               blurEffectiveEndOffset == other.blurEffectiveEndOffset;
+    }
+
+    bool operator!=(const ScrollEffectOptions& other) const
+    {
+        return !(*this == other);
+    }
+};
+
 struct NavigationBackgroundOptions {
     std::optional<Color> color;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
+    std::optional<ScrollEffectOptions> scrollEffectOptions;
     struct resourceUpdater {
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, NavigationBackgroundOptions&)> updateFunc;
@@ -35,7 +68,8 @@ struct NavigationBackgroundOptions {
 
     bool operator== (const NavigationBackgroundOptions& other) const
     {
-        return color == other.color && blurStyleOption == other.blurStyleOption && effectOption == other.effectOption;
+        return color == other.color && blurStyleOption == other.blurStyleOption &&
+            effectOption == other.effectOption && scrollEffectOptions == other.scrollEffectOptions;
     }
 
     bool operator!= (const NavigationBackgroundOptions& other) const
@@ -224,6 +258,67 @@ struct NavigationMenuOptions {
     }
 };
 
+struct NavigationTitleBarBackgroundStyle {
+    Color backgroundColor;
+    double opacity = 1.0f;
+    Dimension blurRadius;
+    int32_t brightness = 0;
+    CalcDimension offset;
+    std::optional<LinearGradientBlurPara> linearGradientBlur;
+
+    bool operator==(const NavigationTitleBarBackgroundStyle& other) const
+    {
+        return backgroundColor == other.backgroundColor && opacity == other.opacity &&
+            blurRadius == other.blurRadius && brightness == other.brightness && offset == other.offset &&
+            linearGradientBlur == other.linearGradientBlur;
+    }
+
+    bool operator!=(const NavigationTitleBarBackgroundStyle& other) const
+    {
+        return !(*this == other);
+    }
+};
+
+struct NavigationTitleBarDividerStyle {
+    Color color;
+    double opacity = 1.0f;
+
+    bool operator==(const NavigationTitleBarDividerStyle& other) const
+    {
+        return color == other.color && opacity == other.opacity;
+    }
+
+    bool operator!=(const NavigationTitleBarDividerStyle& other) const
+    {
+        return !(*this == other);
+    }
+};
+
+struct NavigationTitleBarStyle {
+    Color titleColor;
+    Color buttonTextColor;
+    Color subTitleColor;
+    Color iconColor;
+    NavigationTitleBarBackgroundStyle iconBackgroundStyle;
+    NavigationTitleBarBackgroundStyle backgroundStyle;
+    NavigationTitleBarDividerStyle dividerStyle;
+    std::optional<std::vector<Shadow>> titleShadow;
+    std::optional<std::vector<Shadow>> subTitleShadow;
+
+    bool operator==(const NavigationTitleBarStyle& other) const
+    {
+        return titleColor == other.titleColor && buttonTextColor == other.buttonTextColor &&
+            subTitleColor == other.subTitleColor && iconColor == other.iconColor &&
+            iconBackgroundStyle == other.iconBackgroundStyle &&
+            backgroundStyle == other.backgroundStyle && dividerStyle == other.dividerStyle &&
+            titleShadow == other.titleShadow && subTitleShadow == other.subTitleShadow;
+    }
+
+    bool operator!=(const NavigationTitleBarStyle& other) const
+    {
+        return !(*this == other);
+    }
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_OPTIONS_H

@@ -103,6 +103,7 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    void SetLineThicknessScale(float value) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void UpdateInspectorId(const std::string& key) override;
     void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
@@ -120,6 +121,10 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetStrokeJoinStyle(StrokeJoinStyle style) override;
+    void SetGradientShaderStyle(NG::Gradient& gradient) override;
+    void SetColorShaderStyle(const Color& value) override;
+    void ResetGradientShaderStyle() override;
     void SetCompressLeadingPunctuation(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
     void SetFallbackLineSpacing(bool enabled) override;
@@ -178,6 +183,7 @@ public:
     static void SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
+    static void SetLineThicknessScale(FrameNode* frameNode, float value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetHalfLeading(FrameNode* frameNode, const bool& value);
@@ -227,6 +233,11 @@ public:
     static void ResetStrokeColor(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
+    static void SetStrokeJoinStyle(FrameNode* frameNode, StrokeJoinStyle style);
+    static void RemoveResObj(FrameNode* frameNode, const std::string& key);
+    static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
+    static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSearchGradient(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);

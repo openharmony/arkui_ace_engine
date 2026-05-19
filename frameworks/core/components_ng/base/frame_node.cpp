@@ -14,7 +14,10 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/modifier.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cinttypes>
@@ -31,11 +34,14 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #endif
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
@@ -71,6 +77,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
+#include "core/common/premake_scope.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -78,6 +85,8 @@
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -252,6 +261,11 @@ void UpdateNeedRenderInfoAfterRequestFrame(const RefPtr<FrameNode>& frameNode)
     }
 }
 } // namespace
+
+bool FrameNode::ShouldDetectAceObjTypeConvertion()
+{
+    return SystemProperties::DetectAceObjTypeConvertion();
+}
 
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
@@ -640,11 +654,15 @@ private:
 
 FrameNode::FrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
-    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
+    : UINode(tag, nodeId, isRoot),
+      LayoutWrapper(WeakClaim(this)),
+      renderContext_(RenderContext::Create()),
+      pattern_(pattern)
 {
     if (isRoot) {
         isPendingState_ = true;
     }
+    hasPreMake_ = PreMakeScope::IsPreMake();
     isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
     if (IsFree()) {
@@ -672,6 +690,41 @@ FrameNode::FrameNode(
 #endif
     }
     uiNodeType_ = UINodeType::FRAME_NODE;
+}
+
+bool FrameNode::ZIndexComparator::operator()(
+    const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
+{
+    auto left = weakLeft.Upgrade();
+    auto right = weakRight.Upgrade();
+    if (left && right) {
+        auto leftContext = left->GetRenderContext();
+        auto rightContext = right->GetRenderContext();
+        CHECK_NULL_RETURN(leftContext, false);
+        CHECK_NULL_RETURN(rightContext, false);
+        return leftContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE) < rightContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+    }
+    return false;
+}
+
+bool FrameNode::HasPositionProp() const
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
+           renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
+}
+
+bool FrameNode::IsOutOfLayout() const
+{
+    CHECK_NULL_RETURN(renderContext_, false);
+    return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
+}
+
+void FrameNode::UpdateOcclusionCullingStatus(bool enable)
+{
+    if (renderContext_) {
+        renderContext_->UpdateOcclusionCullingStatus(enable);
+    }
 }
 
 void FrameNode::OnDelete()
@@ -1844,6 +1897,12 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
         ResourceParseUtils::SetNeedReload(false);
     } else {
         ResourceParseUtils::SetNeedReload(true);
+    }
+    if (configurationUpdateCallback_) {
+        auto cb = configurationUpdateCallback_;
+        ConfigurationChange configurationChange;
+        configurationChange.colorModeUpdate = true;
+        cb(configurationChange);
     }
     if (pattern_) {
         pattern_->OnThemeScopeUpdate(GetThemeScopeId());
@@ -5914,6 +5973,7 @@ bool FrameNode::IsVerticalScrollable() const
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    PreMakeScope preMakeScope(hasPreMake_);
     if (GetIgnoreLayoutProcess() && EnsureDelayedMeasureBeingOnlyOnce()) {
         return;
     }
@@ -5934,6 +5994,17 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
+
+    if (IsPreMakeAndScroll()) {
+        layoutAlgorithm_->SetSkipMeasure();
+        layoutAlgorithm_->SetSkipLayout();
+        isLayoutDirtyMarked_ = true;
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddDirtyLayoutNode(Claim(this));
+        ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d] reason: Node is PreMake", tag_.c_str(), nodeId_);
+        ACE_LAYOUT_TRACE_END()
+        return;
+    }
 
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         layoutAlgorithm_->SetSkipMeasure();
@@ -5996,6 +6067,12 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             ACE_LAYOUT_TRACE_END()
             return;
         }
+        if (CheckIfHasMeasured()) {
+            ACE_SCOPED_TRACE(
+                "SkipMeasure [%s][self:%d] reason:AlreadyMeasuredInCurrentFrame", tag_.c_str(), nodeId_);
+            ACE_LAYOUT_TRACE_END()
+            return;
+        }
     } else {
         contentConstraintChanges_.UpdateFlags(contentConstraint, layoutProperty_->GetContentLayoutConstraint());
         constraintChanges_.UpdateFlags(preConstraint, layoutProperty_->GetLayoutConstraint());
@@ -6049,12 +6126,15 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     PostTaskForIgnore();
 
-    layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    if (!(layoutProperty_->GetPropertyChangeFlag() & PROPERTY_UPDATE_LAYOUT)) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
+    }
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("MeasureFinish[frameRect:%s][contentSize:%s]",
             GetGeometryNode()->GetFrameRect().ToString().c_str(),
             GetGeometryNode()->GetContentSize().ToString().c_str());
     }
+    hasPreMake_ = false;
     ACE_LAYOUT_TRACE_END()
 }
 
@@ -6205,6 +6285,7 @@ void FrameNode::UpdateFocusState()
 
 void FrameNode::UpdateSmartGestureSelectedState()
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto eventManager = context->GetEventManager();
@@ -6212,6 +6293,7 @@ void FrameNode::UpdateSmartGestureSelectedState()
     auto smartGestureManager = eventManager->GetSmartGestureManager();
     CHECK_NULL_VOID(smartGestureManager);
     smartGestureManager->UpdateSelectedNodePaintIfNeeded(AceType::Claim(this));
+#endif
 }
 
 bool FrameNode::SelfOrParentExpansive()
@@ -6265,6 +6347,8 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             context->AddDirtyLayoutNode(Claim(this));
         }
         layoutAlgorithm_.Reset();
+        PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
+        layoutProperty_->UpdatePropertyChangeFlag(flag & ~PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
         return false;
     }
     // update layout size.
@@ -6522,6 +6606,12 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 {
     PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+}
+
+bool FrameNode::CheckIfHasMeasured() const
+{
+    PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
+    return CheckHasMeasured(flag) && !CheckNeedMeasure(flag);
 }
 
 bool FrameNode::ReachResponseDeadline() const
@@ -7237,6 +7327,7 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
         eventHub_->OnAttachContext(context);
     }
     pattern_->OnAttachContext(context);
+#ifdef SMART_GESTURE_SUPPORTED
     if (smartGestureProperty_) {
         auto eventManager = context->GetEventManager();
         CHECK_NULL_VOID(eventManager);
@@ -7245,11 +7336,13 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
             manager->SyncPrimaryActionNode(AceType::Claim(this));
         }
     }
+#endif
 }
 
 void FrameNode::DetachContext(bool recursive)
 {
     CHECK_NULL_VOID(context_);
+#ifdef SMART_GESTURE_SUPPORTED
     if (smartGestureProperty_) {
         auto eventManager = context_->GetEventManager();
         CHECK_NULL_VOID(eventManager);
@@ -7258,6 +7351,7 @@ void FrameNode::DetachContext(bool recursive)
             manager->RemovePrimaryActionNode(GetId());
         }
     }
+#endif
     pattern_->OnDetachContext(context_);
     if (eventHub_) {
         eventHub_->OnDetachContext(context_);
@@ -8664,6 +8758,22 @@ void FrameNode::UnRegisterLpxAttribute(LpxAttribute attribute)
         CHECK_NULL_VOID(context);
         context->UnRegisterLpxDirtyNode(WeakClaim(this));
     }
+}
+
+bool FrameNode::IsPreMakeAndScroll()
+{
+    // IsActive function is make sure active nodes can be draw when scrolling
+    if (IsActive() || !HasPreMake()) {
+        return false;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto contentChangeMgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_RETURN(contentChangeMgr, false);
+    if (contentChangeMgr->IsSwiperScrolling() || contentChangeMgr->IsScrolling()) {
+        return true;
+    }
+    return false;
 }
 
 template<typename T>

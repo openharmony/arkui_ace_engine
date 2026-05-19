@@ -346,6 +346,11 @@
                         "type": "string"
                     }
                 },
+                "extendableComponents": {
+                    "description": "FQNs of Extendable component classes. Enables commonStyle wrapper, generates ExtendableXXX class (ArkTS-only, no native), and auto-adds to ignoreMaterialized.",
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
                 "$schema": {
                     "type": "string",
                     "description": "The schema to verify this document against."

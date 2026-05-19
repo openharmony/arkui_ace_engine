@@ -16,8 +16,10 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 
 #include "transaction/rs_interfaces.h"
+#include "ui/rs_ui_context.h"
 #include "base/log/ace_trace.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/window.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"

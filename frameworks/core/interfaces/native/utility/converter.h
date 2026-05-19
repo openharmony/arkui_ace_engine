@@ -52,7 +52,6 @@
 #include "generated/converter_generated.h"
 
 #include "patch.h"
-#include "core/components_ng/property/particle_property.h"
 
 #define OPT_CONVERT_FIELD(type, src, field) ((src).has_value() ? \
             Converter::OptConvert<type>((src)->field) : std::nullopt)
@@ -70,6 +69,8 @@ enum class CancelButtonStyle;
 enum class ChainEdgeEffect;
 enum class CheckBoxStyle;
 enum class CleanNodeStyle;
+enum class DistortionMode;
+enum class EdgeLightMode;
 enum class EffectLayer;
 enum class GestureFocusMode;
 enum class ImageAnalyzerType;
@@ -85,6 +86,7 @@ enum class TextDeleteDirection;
 enum class TextInputAction;
 enum class TextInputType;
 enum class UndoStyle;
+enum class StrokeJoinStyle;
 struct Font;
 struct PickerIndicatorStyle;
 struct PreviewText;
@@ -100,6 +102,10 @@ namespace NG {
 enum class BindSheetDismissReason;
 enum class ContentClipMode;
 enum class DataPanelType;
+enum DistributionType;
+enum ParticleEmitterShape;
+enum ParticleType;
+enum UpdaterType;
 enum class KeyboardFluidLightMode;
 enum class KeyboardGradientMode;
 enum class LaunchMode;
@@ -440,12 +446,13 @@ namespace Converter {
     }
 
     // Implementation is in cpp
-    void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
+    ACE_FORCE_EXPORT void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
     void AssignGradientMetricsColors(Gradient *gradient, const Opt_Array_Tuple_ColorMetrics_F64 *colorMetrics);
-    void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
+    ACE_FORCE_EXPORT void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> &linear,
         const GradientDirection &direction);
     // if src is not string or number, return directly. If src is invalid string, use defaultValue.
-    void ConvertAngleWithDefault(const Opt_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
+    ACE_FORCE_EXPORT void ConvertAngleWithDefault(const Opt_Union_F64_String& src,
+        std::optional<float>& angle, float defaultValue);
     void ConvertAngleWithDefault(const Ark_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
 
     template<>
@@ -673,6 +680,8 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
     template<> ACE_FORCE_EXPORT DimensionRect Convert(const Ark_Rectangle &src);
+    template<> DistortionMode Convert(const Ark_DistortionMode& options);
+    template<> EdgeLightMode Convert(const Ark_EdgeLightMode& options);
     template<> EdgesParam Convert(const Ark_Edges& src);
     template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
     template<> ACE_FORCE_EXPORT EffectOption Convert(const Ark_BackgroundEffectOptions& src);
@@ -690,7 +699,7 @@ namespace Converter {
     template<> FontWeightInt Convert(const Ark_ResourceStr& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
-    template<> Gradient Convert(const Ark_RadialGradientOptions& value);
+    template<> ACE_FORCE_EXPORT Gradient Convert(const Ark_RadialGradientOptions& value);
     template<> Gradient Convert(const Ark_Union_ResourceColor_LinearGradient& src);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_F64& value);
     template<> Header Convert(const Ark_Header& src);
@@ -756,6 +765,7 @@ namespace Converter {
     template<> RectHeightStyle Convert(const Ark_text_RectHeightStyle& src);
     template<> RectWidthStyle Convert(const Ark_text_RectWidthStyle& src);
     template<> NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src);
+    template<> ACE_FORCE_EXPORT StrokeJoinStyle Convert(const Ark_StrokeJoinStyle& src);
     template<> NG::AccessibilityGroupOptions Convert(const Ark_AccessibilityOptions& src);
     template<> ACE_FORCE_EXPORT RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
     template<> ACE_FORCE_EXPORT RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
@@ -890,6 +900,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src);
     template<> void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src);
+    template<> void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_DialogDisplayMode& src);
     template<> void AssignCast(std::optional<Dimension>& dst, const Ark_ArrowPointPosition& src);
     template<> void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
@@ -927,7 +938,8 @@ namespace Converter {
     template<>
     ACE_FORCE_EXPORT void AssignCast(std::optional<Gradient>& dst, const Ark_ColorMetricsLinearGradient& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Gradient>& dst, const Ark_LinearGradient& src);
-    template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src);
     template<> void AssignCast(std::optional<HdrType>& dst, const Ark_HdrType& src);
     template<> void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src);
@@ -1137,6 +1149,7 @@ namespace Converter {
     class ConverterState {
     public:
         inline static DimensionUnit defDimensionUnit = DimensionUnit::VP;
+        inline static double defShadowBlurRadius = -1.0;
     };
 
     class DefaultDimensionUnit {
@@ -1153,6 +1166,22 @@ namespace Converter {
 
     private:
         DimensionUnit save_;
+    };
+
+    class DefaultShadowBlurRadius {
+    public:
+        explicit DefaultShadowBlurRadius(double radius)
+        {
+            save_ = ConverterState::defShadowBlurRadius;
+            ConverterState::defShadowBlurRadius = radius;
+        }
+        ~DefaultShadowBlurRadius()
+        {
+            ConverterState::defShadowBlurRadius = save_;
+        }
+
+    private:
+        double save_;
     };
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG

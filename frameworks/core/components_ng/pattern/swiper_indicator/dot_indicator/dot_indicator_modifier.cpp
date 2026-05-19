@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 
 #include "base/utils/utils.h"
@@ -161,7 +162,9 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
     SetFocusedAndSelectedColor(contentProperty);
-    PaintBackground(context, contentProperty);
+    if (!useSystemMaterial_) {
+        PaintBackground(context, contentProperty);
+    }
     PaintContent(context, contentProperty);
 }
 
@@ -245,6 +248,9 @@ void DotIndicatorModifier::CalCBackground(ContentProperty& contentProperty)
 
 void DotIndicatorModifier::PaintBackground(DrawingContext& context, ContentProperty& contentProperty)
 {
+    if (useSystemMaterial_) {
+        return;
+    }
     CalCBackground(contentProperty);
     // Paint background
     RSCanvas& canvas = context.canvas;
@@ -467,6 +473,9 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
 
 void DotIndicatorModifier::PaintMask(DrawingContext& context)
 {
+    if (useSystemMaterial_) {
+        return;
+    }
     RSCanvas& canvas = context.canvas;
 
     RSBrush brush;

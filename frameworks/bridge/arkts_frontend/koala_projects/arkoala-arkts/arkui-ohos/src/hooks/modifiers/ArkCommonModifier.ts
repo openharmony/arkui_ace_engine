@@ -30,9 +30,13 @@ const UI_STATE_PRESSED = 1;
 const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
+const UI_STATE_HOVERED = 1 << 4;
 
 export function applyUIAttributes<T, MethodSet extends T>(modifier: AttributeModifier<T>, attributeSet: MethodSet, state: int32 = 0): void {     
     modifier.applyNormalAttribute(attributeSet as T);
+    if (state & UI_STATE_HOVERED) {
+        modifier.applyHoveredAttribute(attributeSet as T);
+    }
     if (state & UI_STATE_PRESSED) {
         modifier.applyPressedAttribute(attributeSet as T);
     }
@@ -50,6 +54,9 @@ export function applyUIAttributes<T, MethodSet extends T>(modifier: AttributeMod
 export function applyUIAttributesUpdate<T, MethodSet extends T>(modifier: AttributeModifier<T>, attributeSet: MethodSet, state: int32 = 0, isInit:boolean = true): void {
     if (state == UI_STATE_NORMAL && !isInit) {
         modifier.applyNormalAttribute(attributeSet as T);
+    }
+    if (state & UI_STATE_HOVERED) {
+        modifier.applyHoveredAttribute(attributeSet as T);
     }
     if (state & UI_STATE_PRESSED) {
         modifier.applyPressedAttribute(attributeSet as T);

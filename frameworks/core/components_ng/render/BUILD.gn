@@ -30,6 +30,7 @@ build_component_ng("render_ng") {
     "adapter/pixelmap_image.cpp",
     "adapter/render_surface_impl.cpp",
     "adapter/rich_editor_paragraph.cpp",
+    "adapter/sheet_popup_shape.cpp",
     "adapter/sk_painter.cpp",
     "adapter/skia_color_filter.cpp",
     "adapter/skia_decoration_painter.cpp",

@@ -248,7 +248,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("textContentAlign", V2::ConvertWrapTextContentAlignToString(
         GetTextContentAlign().value_or(TextContentAlign::TOP)).c_str(), filter);
 
-    auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow(0.0) });
     // Determines if there are multiple textShadows
     auto jsonShadow = (shadow.size() == 1) ? CovertShadowToJson(shadow.front()) : CovertShadowsToJson(shadow);
     json->PutExtAttr("textShadow", jsonShadow, filter);

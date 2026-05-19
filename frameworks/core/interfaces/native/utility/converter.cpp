@@ -783,7 +783,7 @@ SelectionOptions Convert(const Ark_SelectionOptions& options)
 template<>
 Shadow Convert(const Ark_ShadowOptions& src)
 {
-    Shadow shadow;
+    Shadow shadow(ConverterState::defShadowBlurRadius);
 
     auto radius = Converter::OptConvert<float>(src.radius);
     if (radius) {
@@ -1695,6 +1695,7 @@ ACE_FORCE_EXPORT TextDecorationOptions Convert(const Ark_TextDecorationOptions& 
     options.textDecoration = OptConvert<TextDecoration>(src.type);
     options.color = OptConvert<Color>(src.color);
     options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
+    options.lineThicknessScale = OptConvert<float>(src.thicknessScale);
     return options;
 }
 
@@ -4164,6 +4165,22 @@ RectHeightStyle Convert(const Ark_text_RectHeightStyle& src)
             break;
     }
     return RectHeightStyle::TIGHT;
+}
+template<>
+StrokeJoinStyle Convert(const Ark_StrokeJoinStyle& src)
+{
+    switch (src) {
+        case Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_MITER_JOIN:
+            return StrokeJoinStyle::MITER_JOIN;
+        case Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_ROUND_JOIN:
+            return StrokeJoinStyle::ROUND_JOIN;
+        case Ark_StrokeJoinStyle::ARK_STROKE_JOIN_STYLE_BEVEL_JOIN:
+            return StrokeJoinStyle::BEVEL_JOIN;
+        default:
+            LOGE("Unexpected enum value in Ark_StrokeJoinStyle: %{public}d", src);
+            break;
+    }
+    return StrokeJoinStyle::MITER_JOIN;
 }
 template<>
 void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)

@@ -68,7 +68,7 @@ const char THEME_PATTERN_SELECT[] = "select_pattern";
 const char THEME_PATTERN_SLIDER[] = "slider_pattern";
 const char THEME_PATTERN_TEXT[] = "text_pattern";
 const char THEME_PATTERN_TEXTFIELD[] = "textfield_pattern";
-const char THEME_PATTERN_RICH_EDITOR[] = "rich_editor_pattern";
+ACE_FORCE_EXPORT const char THEME_PATTERN_RICH_EDITOR[] = "rich_editor_pattern";
 const char THEME_PATTERN_TEXT_OVERLAY[] = "text_overlay_pattern";
 const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
@@ -94,7 +94,7 @@ const char THEME_PATTERN_CORNER_MARK[] = "corner_mark_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
-const char PATTERN_BG_COLOR[] = "bg_color";
+ACE_FORCE_EXPORT const char PATTERN_BG_COLOR[] = "bg_color";
 const char PATTERN_UNDERLINE_ACTIVED_COLOR[] = "underline_actived_color";
 const char PATTERN_UNDERLINE_TYPING_COLOR[] = "underline_typing_color";
 const char PATTERN_BG_COLOR_HOVERED[] = "bg_color_hovered";

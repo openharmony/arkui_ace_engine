@@ -16,15 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 
-#include <cmath>
+#include <cstdint>
+#include <functional>
+#include <list>
+#include <memory>
+#include <optional>
+#include <queue>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "base/geometry/axis.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
@@ -64,6 +70,7 @@ class ScrollBarProxy;
 class ScrollEdgeEffect;
 class SheetPresentationPattern;
 class TouchEventImpl;
+enum class DragEventType;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
@@ -610,11 +617,7 @@ public:
     static int32_t ScrollToTarget(
         RefPtr<FrameNode>& scrollable, RefPtr<FrameNode>& target, float targetOffset, ScrollAlign targetAlign);
 
-    float CalculateFriction(float gamma)
-    {
-        gamma = std::clamp(gamma, 0.0f, 1.0f);
-        return exp(-ratio_.value_or(1.848f) * gamma);
-    }
+    float CalculateFriction(float gamma);
     virtual float GetMainContentSize() const;
 
     virtual bool SupportScrollToIndex() const
@@ -925,6 +928,11 @@ public:
         useDefaultBackToTop_ = useDefaultBackToTop;
     }
 
+    // Check if all parent components are active and visible
+    bool CheckParentsActive() const;
+    // Start back to top animation with performance optimization
+    void StartBackToTopAnimation();
+
     void OnStatusBarClick() override;
 
     void SetIsAllowMouse(bool enableScrollWithMouse)
@@ -982,10 +990,7 @@ public:
         needFullSafeArea_ = needFullSafeArea;
     }
 
-    RefPtr<ScrollBar> GetScrollBar() const
-    {
-        return scrollBar_;
-    }
+    RefPtr<ScrollBar> GetScrollBar() const;
 
     bool IsInitialized() const
     {
@@ -997,7 +1002,8 @@ public:
 
     void SetCanOverScroll(bool val);
 
-    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
+    void ContentChangeReport(
+        const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
 
     void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
@@ -1041,15 +1047,9 @@ protected:
 
     float FireOnWillScroll(float offset) const;
 
-    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
-    {
-        return scrollBarOverlayModifier_;
-    }
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const;
 
-    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
-    {
-        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
-    }
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier);
     // just for hold ScrollableController
     RefPtr<ScrollableController> positionController_;
 
@@ -1147,6 +1147,9 @@ private:
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void InitOption(AnimationOption& option, float duration, const RefPtr<Curve>& curve);
     float GetScrollDelta(float offset, bool& stopAnimation);
+    // Process spring offset animation callback
+    void ProcessSpringOffsetCallback(float offset);
+    float CalcSpringAdjustOffset(float offset) const;
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterTouchpadInteractionCallback();
@@ -1211,6 +1214,7 @@ private:
     void SetRemainVelocityCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragEndCallback(const RefPtr<Scrollable>& scrollable);
     void SetStartSnapAnimationCallback(const RefPtr<Scrollable>& scrollable);
+    void SetBackToTopCallback(const RefPtr<Scrollable>& scrollable);
     void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
@@ -1338,6 +1342,11 @@ private:
     bool isNeedCollectOffset_ = false;
     bool needFullSafeArea_ = false;
     ScrollToDirection scrollToDirection_ = ScrollToDirection::NONE;
+
+    // Back to top performance optimization
+    // Record the distance to skip during back to top animation
+    // Mark whether the skip distance has been applied
+    std::optional<float> backToTopSkipDistance_;
 };
 } // namespace OHOS::Ace::NG
 

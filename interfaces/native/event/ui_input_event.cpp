@@ -1149,19 +1149,6 @@ float HandleAxisEventCurrentLocalX(const ArkUI_UIInputEvent* event)
 PointerEventResult HandleCTouchEventCurrentLocalXByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-    if (touchEvent) {
-        if (pointerIndex != 0) {
-            return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
-        }
-        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-        if (!fullImpl) {
-            return { ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID };
-        }
-        auto ret = fullImpl->getNodeModifiers()->getCommonModifier()->getCurrentLocation(event->nodeId,
-            { touchEvent->actionTouchPoint.windowX, touchEvent->actionTouchPoint.windowY },
-            { touchEvent->actionTouchPoint.nodeX, touchEvent->actionTouchPoint.nodeY }, event->usePXUnit);
-        return { ret.xComponent, ARKUI_ERROR_CODE_NO_ERROR };
-    }
     if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
         return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
     }
@@ -1346,19 +1333,6 @@ float HandleAxisEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 PointerEventResult HandleCTouchEventCurrentLocalYByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-    if (touchEvent) {
-        if (pointerIndex != 0) {
-            return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
-        }
-        auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-        if (!fullImpl) {
-            return { ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID };
-        }
-        auto ret = fullImpl->getNodeModifiers()->getCommonModifier()->getCurrentLocation(event->nodeId,
-            { touchEvent->actionTouchPoint.windowX, touchEvent->actionTouchPoint.windowY },
-            { touchEvent->actionTouchPoint.nodeX, touchEvent->actionTouchPoint.nodeY }, event->usePXUnit);
-        return { ret.yComponent, ARKUI_ERROR_CODE_NO_ERROR };
-    }
     if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
         return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
     }
@@ -5671,6 +5645,10 @@ int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event,
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
             if (!touchEvent) {
+                RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            if ((touchEvent->touchPointSize > 0 && !touchEvent->touchPointes) ||
+                (touchEvent->historySize > 0 && !touchEvent->historyEvents)) {
                 RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();

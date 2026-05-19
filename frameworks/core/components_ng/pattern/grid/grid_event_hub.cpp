@@ -16,12 +16,17 @@
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
 #include "core/animation/spring_curve.h"
+#include "core/common/container.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_v2/grid/grid_event.h"
+#include "core/gestures/drag_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 #if defined(PIXEL_MAP_SUPPORTED)

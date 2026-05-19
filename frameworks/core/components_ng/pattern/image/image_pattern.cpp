@@ -46,6 +46,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/drawable/animated_drawable_descriptor.h"
+#include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -1234,6 +1235,7 @@ void ImagePattern::UpdateGestureAndDragWhenModify()
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    LoadPixelMapDrawable();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
     CHECK_EQUAL_VOID(CheckImagePrivacyForCopyOption(), true);
@@ -1244,6 +1246,70 @@ void ImagePattern::OnModifyDone()
     if (imageType_ == ImageType::ANIMATED_DRAWABLE) {
         RegisterVisibleAreaChange();
     }
+}
+
+void ImagePattern::LoadPixelMapDrawable()
+{
+    if (imageType_ != ImageType::PIXELMAP_DRAWABLE || !drawable_) {
+        return;
+    }
+    if (syncLoad_) {
+        LoadPixelMapDrawableSync();
+        return;
+    }
+    drawable_->LoadAsync([weak = WeakClaim(this)](DrawableDescriptorLoadResult result) {
+        ImageUtils::PostToUI(
+            [weak, result]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->OnPixelMapDrawableLoaded(result);
+            },
+            "AceImagePixelMapDrawableLoadAsync");
+    });
+}
+
+void ImagePattern::LoadPixelMapDrawableSync()
+{
+    if (imageType_ != ImageType::PIXELMAP_DRAWABLE || !syncLoad_ || !drawable_) {
+        return;
+    }
+    auto result = drawable_->LoadSync();
+    if (result.errorCode != 0) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "sync load pixelmap drawable failed, error code: %d", result.errorCode);
+        return;
+    }
+    auto pixelMap = drawable_->GetPixelMap();
+    auto srcInfo = ImageSourceInfo(pixelMap);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateImageSourceInfo(srcInfo);
+}
+
+void ImagePattern::OnPixelMapDrawableLoaded(DrawableDescriptorLoadResult result)
+{
+    if (result.errorCode != 0 || !drawable_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "async load pixelmap drawable failed, error code: %d", result.errorCode);
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pixelMap = drawable_->GetPixelMap();
+    if (!pixelMap) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "async load pixelmap drawable failed, no pixel map available");
+        return;
+    }
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto srcInfo = ImageSourceInfo(pixelMap);
+    layoutProperty->UpdateImageSourceInfo(srcInfo);
+    host->MarkModifyDone();
+}
+
+void ImagePattern::SetPixelMapDrawable(const RefPtr<DrawableDescriptor>& drawable)
+{
+    drawable_ = drawable;
 }
 
 void ImagePattern::UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& newDrawable)
@@ -1415,8 +1481,10 @@ std::optional<SizeF> ImagePattern::GetImageSizeForMeasure()
 void ImagePattern::FinishMeasureForOnComplete()
 {
     CHECK_NULL_VOID(loadingCtx_);
-    loadingCtx_->FinishMeasure();
-    loadingCtx_->CallbackAfterMeasureIfNeed();
+    // hold an extra ref to keep loadingCtx alive during the callback chain
+    auto loadingCtx = loadingCtx_;
+    loadingCtx->FinishMeasure();
+    loadingCtx->CallbackAfterMeasureIfNeed();
 }
 
 bool ImagePattern::CheckImagePrivacyForCopyOption()

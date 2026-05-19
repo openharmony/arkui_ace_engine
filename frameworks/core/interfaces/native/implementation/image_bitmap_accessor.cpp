@@ -25,8 +25,8 @@ void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ImageBitmap ConstructImpl(const Ark_Union_image_PixelMap_String* src,
-                              const Opt_LengthMetricsUnit* unit)
+Ark_ImageBitmap Construct0Impl(const Ark_Union_image_PixelMap_String* src,
+                               const Opt_LengthMetricsUnit* unit)
 {
     auto peer = PeerUtils::CreatePeer<ImageBitmapPeer>();
     Converter::VisitUnionPtr(src,
@@ -42,6 +42,25 @@ Ark_ImageBitmap ConstructImpl(const Ark_Union_image_PixelMap_String* src,
     if (optUnit) {
         peer->SetUnit(optUnit.value());
     }
+    return peer;
+}
+Ark_ImageBitmap Construct1Impl(const Ark_Union_Resource_image_PixelMap_String* src,
+                               const Opt_LengthMetricsUnit* unit)
+{
+    auto peer = PeerUtils::CreatePeer<ImageBitmapPeer>();
+    Converter::VisitUnionPtr(src,
+        [peer](const Ark_Resource& src) {
+            auto stringSrc = Converter::OptConvert<std::string>(src);
+            peer->SetOptions(stringSrc.value_or(""));
+        },
+        [peer](const Ark_String& src) {
+            auto stringSrc = Converter::Convert<std::string>(src);
+            peer->SetOptions(stringSrc);
+        },
+        [peer](const Ark_image_PixelMap& src) {
+            peer->SetOptions("", src->pixelMap);
+        },
+        []() {});
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -70,7 +89,8 @@ const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
 {
     static const GENERATED_ArkUIImageBitmapAccessor ImageBitmapAccessorImpl {
         ImageBitmapAccessor::DestroyPeerImpl,
-        ImageBitmapAccessor::ConstructImpl,
+        ImageBitmapAccessor::Construct0Impl,
+        ImageBitmapAccessor::Construct1Impl,
         ImageBitmapAccessor::GetFinalizerImpl,
         ImageBitmapAccessor::CloseImpl,
         ImageBitmapAccessor::GetHeightImpl,

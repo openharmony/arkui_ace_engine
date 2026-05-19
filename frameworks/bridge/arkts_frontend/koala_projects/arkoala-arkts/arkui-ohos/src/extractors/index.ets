@@ -113,6 +113,8 @@ import { CustomSpanWrapper } from "#generated";
 import { default as text } from '@ohos.graphics.text'
 import { PanGestureOptions } from '../component/gesture'
 import { PanGestureOptionsProxy } from '../component/idlize'
+import { ShaderStyleProxy } from '../component/idlize'
+import { ShaderStyle, LinearGradientStyle, RadialGradientStyle, ColorShaderStyle } from '../component/textCommon'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -163,6 +165,14 @@ export namespace extractors {
   export function fromLengthMetricsPtr(ptr: KPointer): LengthMetrics {
     const x: Object = {};
     return x as LengthMetrics;
+  }
+
+  export function toDrawingTypefacePtr(ptr: drawing.Typeface): KPointer {
+    return 123;
+  }
+  export function fromDrawingTypefacePtr(ptr: KPointer): drawing.Typeface {
+    const x: Object = {};
+    return x as drawing.Typeface;
   }
 
   export function toNodeControllerPtr(value: NodeController): KPointer {
@@ -859,5 +869,33 @@ export namespace extractors {
     value: PanGestureOptions,
   ): PanGestureOptionsProxy {
     return value.proxy;
+  }
+  export function transform_Ark_ShaderStyle_to_Ark_ShaderStyleProxy(shaderStyle: ShaderStyle): ShaderStyleProxy {
+      const proxy = new ShaderStyleProxy()
+      if (shaderStyle instanceof ColorShaderStyle) {
+        let style = shaderStyle as ColorShaderStyle;
+        proxy.color = style.color
+      }
+      if (shaderStyle instanceof LinearGradientStyle) {
+        let style = shaderStyle as LinearGradientStyle;
+        proxy.linearGradientOptions = style.options
+      }
+      if (shaderStyle instanceof RadialGradientStyle) {
+        let style = shaderStyle as RadialGradientStyle;
+        proxy.radialGradientOptions = style.options
+      }
+      return proxy;
+  }
+  export function transform_Ark_ShaderStyleProxy_to_Ark_ShaderStyle(proxy: ShaderStyleProxy): ShaderStyle {
+      if (proxy.color !== undefined) {
+          return new ColorShaderStyle(proxy.color!!);
+      }
+      if (proxy.linearGradientOptions !== undefined) {
+          return new LinearGradientStyle(proxy.linearGradientOptions!!);
+      }
+      if (proxy.radialGradientOptions !== undefined) {
+          return new RadialGradientStyle(proxy.radialGradientOptions!!);
+      }
+      return new ShaderStyle();
   }
 }

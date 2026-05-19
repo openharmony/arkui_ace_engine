@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <chrono>
+
 #include <memory>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -23,6 +25,7 @@
 #include "core/components_ng/property/property.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -72,7 +75,7 @@ void SelectOverlayPatternTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
-    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>());
     // set SelectTheme to themeManager before using themeManager to get SelectTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -770,6 +773,69 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     safeAreaManager->UpdateNavSafeArea(SafeAreaInsets {});
     rootUINode->RemoveChild(windowNode);
     rootUINode->renderContext_ = rootUINodeRenderContext;
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateTouchVelocity001
+ * @tc.desc: test magnifier touch velocity tracker with down move and reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateTouchVelocity001, TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    MagnifierController controller { WeakPtr<Pattern>(pattern) };
+
+    auto time0 = TimeStamp(std::chrono::milliseconds(0));
+    auto time1 = TimeStamp(std::chrono::milliseconds(10));
+    auto time2 = TimeStamp(std::chrono::milliseconds(20));
+
+    controller.UpdateTouchVelocity(OffsetF(10.0f, 10.0f), time0, TouchType::DOWN);
+    EXPECT_EQ(controller.touchVelocityX_, 0.0f);
+
+    controller.UpdateTouchVelocity(OffsetF(30.0f, 10.0f), time1, TouchType::MOVE);
+    controller.UpdateTouchVelocity(OffsetF(60.0f, 10.0f), time2, TouchType::MOVE);
+    EXPECT_GT(controller.touchVelocityX_, 0.0f);
+
+    controller.ResetTouchVelocity();
+    EXPECT_EQ(controller.touchVelocityX_, 0.0f);
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateTouchVelocity002
+ * @tc.desc: test magnifier touch velocity tracker can start from move after reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateTouchVelocity002, TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    MagnifierController controller { WeakPtr<Pattern>(pattern) };
+
+    auto time1 = TimeStamp(std::chrono::milliseconds(10));
+    auto time2 = TimeStamp(std::chrono::milliseconds(20));
+
+    controller.ResetTouchInfo();
+    controller.UpdateTouchVelocity(OffsetF(10.0f, 10.0f), time1, TouchType::MOVE);
+    EXPECT_EQ(controller.touchVelocityX_, 0.0f);
+
+    controller.UpdateTouchVelocity(OffsetF(50.0f, 10.0f), time2, TouchType::MOVE);
+    EXPECT_GT(controller.touchVelocityX_, 0.0f);
+
+    controller.ResetTouchInfo();
+    EXPECT_EQ(controller.touchVelocityX_, 0.0f);
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
 }
 
 /**

@@ -21,53 +21,14 @@
 
 namespace OHOS::Ace::NG {
 
-class DepthComponentContentModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(DepthComponentContentModifier, ContentModifier);
+DepthComponentPaintMethod::DepthComponentPaintMethod(const WeakPtr<DepthComponentPattern>& pattern)
+    : pattern_(pattern)
+{}
 
-public:
-    explicit DepthComponentContentModifier(const WeakPtr<DepthComponentPaintMethod>& paintMethod)
-        : paintMethod_(paintMethod)
-    {}
-
-    ~DepthComponentContentModifier() override = default;
-
-    void onDraw(DrawingContext& /*context*/) override
-    {
-        auto paintMethod = paintMethod_.Upgrade();
-        CHECK_NULL_VOID(paintMethod);
-        paintMethod->PerformPaint(paintWrapper_);
-    }
-
-    void UpdatePaintWrapper(PaintWrapper* paintWrapper)
-    {
-        paintWrapper_ = paintWrapper;
-        SetContentChange();
-    }
-
-private:
-    WeakPtr<DepthComponentPaintMethod> paintMethod_;
-    PaintWrapper* paintWrapper_ = nullptr;
-};
-
-DepthComponentPaintMethod::DepthComponentPaintMethod(const WeakPtr<DepthComponentPattern>& pattern) : pattern_(pattern)
+CanvasDrawFunction DepthComponentPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    contentModifier_ = MakeRefPtr<DepthComponentContentModifier>(WeakClaim(this));
-
-    canvasRenderContext_ = MakeRefPtr<RosenRenderContext>();
-    CHECK_NULL_VOID(canvasRenderContext_);
-    RenderContext::ContextParam param = { RenderContext::ContextType::CANVAS };
-    canvasRenderContext_->InitContext(false, param);
-}
-
-RefPtr<Modifier> DepthComponentPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
-{
-    return contentModifier_;
-}
-
-void DepthComponentPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
-{
-    CHECK_NULL_VOID(contentModifier_);
-    canvasRenderContext_->FlushContentModifier(contentModifier_);
+    PerformPaint(paintWrapper);
+    return nullptr;
 }
 
 void DepthComponentPaintMethod::PerformPaint(PaintWrapper* paintWrapper)

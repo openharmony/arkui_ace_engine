@@ -722,15 +722,15 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme);
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
+    UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme, buttonConfirmLayoutProperty);
     auto columnPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     columnPattern->SetConfirmNode(buttonConfirmNode);
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
 
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
@@ -804,16 +804,20 @@ void TimePickerDialogView::UpdateConfirmButtonMargin(
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
 
-void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
-    const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty> &textLayoutProperty,
+    const RefPtr<PickerTheme> &pickerTheme, const RefPtr<ButtonLayoutProperty> &buttonConfirmLayoutProperty)
 {
     CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
     if (useButtonFocusArea_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+        buttonConfirmLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        buttonConfirmLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
+    buttonConfirmLayoutProperty->UpdateFontColorFlagByUser(true);
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -857,7 +861,9 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
-    UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme);
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonCancelLayoutProperty, nullptr);
+    UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme, buttonCancelLayoutProperty);
     auto columnPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     columnPattern->SetCancelNode(buttonCancelNode);
     textCancelNode->MountToParent(buttonCancelNode);
@@ -869,7 +875,6 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -903,15 +908,20 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
 }
 
 void TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(
-    const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+    const RefPtr<TextLayoutProperty> &textCancelLayoutProperty, const RefPtr<PickerTheme> &pickerTheme,
+    const RefPtr<ButtonLayoutProperty> &buttonCancelLayoutProperty)
 {
     CHECK_NULL_VOID(textCancelLayoutProperty);
+    CHECK_NULL_VOID(buttonCancelLayoutProperty);
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
     if (useButtonFocusArea_) {
         textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+        buttonCancelLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        buttonCancelLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
+    buttonCancelLayoutProperty->UpdateFontColorFlagByUser(true);
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }

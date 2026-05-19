@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT LoadingProgressPaintMethod : public NodePaintMethod {
@@ -61,8 +63,8 @@ public:
         }
         if (!loadingProgressModifier_->GetForegroundColorParseFailed() || themeScopeId) {
             color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
-            loadingProgressModifier_->SetColor(LinearColor(color_));
         }
+        loadingProgressModifier_->SetColor(LinearColor(color_));
         if (loadingProgressModifier_->GetOwner() == LoadingProgressOwner::SELF) {
             loadingProgressModifier_->ChangeSizeScaleData(1.0f);
             loadingProgressModifier_->StartRecycle();

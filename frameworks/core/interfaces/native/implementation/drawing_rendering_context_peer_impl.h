@@ -32,8 +32,8 @@ public:
     void SetOptions(const std::optional<CanvasUnit>& unit);
     void SetInvalidate();
     SizeF GetSize();
-    std::shared_ptr<drawing_CanvasPeer> GetCanvas() const;
-    void SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern);
+    drawing_CanvasPeer* GetCanvas() const;
+    void SetRSCanvasCallback(const WeakPtr<AceType>& canvasPattern);
     CanvasRenderingContext2DPeer* GetOrCreateContext2D();
     void SetCanvasPattern(const RefPtr<AceType>& canvas);
     void SetUnit(CanvasUnit unit);
@@ -67,7 +67,7 @@ protected:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
-    std::shared_ptr<drawing_CanvasPeer> rsCanvas_;
+    drawing_CanvasPeer* rsCanvas_ = nullptr;
     NG::OptionalSizeF size_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     CanvasRenderingContext2DPeer* context2d_ = nullptr;

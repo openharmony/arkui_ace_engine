@@ -1003,7 +1003,7 @@ HWTEST_F(SliderTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
     EXPECT_NE(bubbleGeometryNode, nullptr);
     bubbleGeometryNode->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
     RefPtr<LayoutWrapperNode> bubbleLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, bubbleGeometryNode, nullptr);
+        AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, bubbleGeometryNode, AceType::MakeRefPtr<LayoutProperty>());
     EXPECT_NE(bubbleLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(bubbleLayoutWrapper));
     WeakPtr<FrameNode> hostNode = AceType::WeakClaim(AceType::RawPtr(frameNode));
@@ -1022,14 +1022,14 @@ HWTEST_F(SliderTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
     EXPECT_NE(sliderLayoutAlgorithm, nullptr);
     sliderLayoutAlgorithm->Measure(&layoutWrapper);
     sliderLayoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(bubbleGeometryNode->frame_.rect_.GetOffset(), OffsetF(-FRAME_WIDTH / 2, (MAX_HEIGHT - FRAME_HEIGHT) / 2));
+    EXPECT_EQ(bubbleGeometryNode->frame_.rect_.GetOffset(), OffsetF(0, 0));
     /**
-     * @tc.cases: case2. when sliderPaintProperty's direction is HORIZONTAL.
+     * @tc.cases: case2. when sliderPaintProperty's direction is VERTICAL.
      */
     sliderLayoutProperty->UpdateDirection(Axis::VERTICAL);
     sliderLayoutAlgorithm->Measure(&layoutWrapper);
     sliderLayoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(bubbleGeometryNode->frame_.rect_.GetOffset(), OffsetF((MAX_WIDTH - FRAME_WIDTH) / 2, -FRAME_HEIGHT / 2));
+    EXPECT_EQ(bubbleGeometryNode->frame_.rect_.GetOffset(), OffsetF(0, 0));
 }
 
 /**

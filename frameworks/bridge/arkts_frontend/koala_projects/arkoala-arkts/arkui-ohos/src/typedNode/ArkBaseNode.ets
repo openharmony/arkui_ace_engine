@@ -21,11 +21,11 @@ import { ContextMenuOptions, CustomPopupOptions, DragEvent, DragInteractionOptio
 import { CustomBuilder } from '../framework';
 import { DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions } from '../component/common';
 import { GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent } from '../component/common';
-import { LinearGradientBlurOptions, BackgroundOptions } from '../component/common';
+import { LinearGradientBlurOptions, BackgroundOptions, SmartGestureShortcutOptions } from '../component/common';
 import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions } from '../component/common';
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../component/common';
 import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, RotateAngleOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
-import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult } from '../component/common';
+import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult } from '../component/common';
 import { TouchTestInfo, TouchTestDoneCallback, GestureCollectInterceptCallback, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
 import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer } from '../component/common';
 import { SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions } from '../component/common';
@@ -627,6 +627,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setOnGestureRecognizerJudgeBegin0Attribute(callback_);
         return this
     }
+    public shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback | undefined): this {
+        this.getPeer().setShouldRecognizerParallelWithAttribute(value);
+        return this
+    }
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
         this.getPeer().setShouldBuiltInRecognizerParallelWithAttribute(value);
         return this
@@ -792,5 +796,9 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     size(value: SizeOptions | undefined): this {
         this.getPeer().setSizeAttribute(value);
         return this;
+    }
+    smartGestureShortcut(value: SmartGestureShortcutOptions): this {
+        this.getPeer()?.setSmartGestureShortcutAttribute(value as SmartGestureShortcutOptions)
+        return this
     }
 }

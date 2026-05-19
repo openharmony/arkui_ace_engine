@@ -115,6 +115,10 @@ public:
     {
         return rect;
     }
+    const std::string& GetKeyAttribute() const
+    {
+        return str;
+    }
 
 protected:
     std::string str;

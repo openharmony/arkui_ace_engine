@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+#include "base/error/error_code.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "drawing_rendering_context_peer_impl.h"
 #include "canvas_rendering_context2d_peer_impl.h"
+#ifdef ACE_UNITTEST
+#include "test/mock/frameworks/core/components_ng/pattern/mock_canvas_pattern.h"
+#endif // ACE_UNITTEST
 #ifdef WINDOWS_PLATFORM
 #include <windows.h>
 inline void* LoadLibrary()
@@ -72,11 +75,11 @@ SizeF DrawingRenderingContextPeerImpl::GetSize()
     auto height = size_.Height().value_or(0.0);
     return SizeF(width, height);
 }
-std::shared_ptr<drawing_CanvasPeer> DrawingRenderingContextPeerImpl::GetCanvas() const
+drawing_CanvasPeer* DrawingRenderingContextPeerImpl::GetCanvas() const
 {
     return rsCanvas_;
 }
-void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern)
+void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(const WeakPtr<AceType>& canvasPattern)
 {
     std::function<void(std::shared_ptr<RSCanvas>, double, double)> callback =
         [wp = WeakClaim(this)](std::shared_ptr<RSCanvas> canvas, double width, double height) {
@@ -90,14 +93,19 @@ void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(WeakPtr<AceType>& canv
         width /= density;
         context->size_.SetHeight(height);
         context->size_.SetWidth(width);
-#ifndef ACE_UNITTEST
-        context->rsCanvas_ = std::make_shared<drawing_CanvasPeer>(canvas.get());
-#endif
+        context->rsCanvas_ = reinterpret_cast<drawing_CanvasPeer*>(canvas.get());
     };
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern.Upgrade());
     if (customPaintPattern) {
         customPaintPattern->SetRSCanvasCallback(callback);
     }
+#ifdef ACE_UNITTEST
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->rsCallback = std::move(callback);
+    }
+#endif // ACE_UNITTEST
 }
 void DrawingRenderingContextPeerImpl::ThrowError(int32_t errCode, const std::string& errorMsg)
 {

@@ -99,6 +99,7 @@ const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = {
     TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::MARQUEE, TextOverflow::DEFAULT};
 
@@ -2133,12 +2134,14 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
         TextFieldModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
         TextFieldModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
+        TextFieldModel::GetInstance()->SetLineThicknessScale(DEFAULT_LINE_THICKNESS_SCALE);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
     JSRef<JSVal> typeValue = obj->GetProperty("type");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     JSRef<JSVal> styleValue = obj->GetProperty("style");
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
 
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
@@ -2160,11 +2163,17 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
     } else {
         textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
+    float lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : lineThicknessScale;
     TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
     TextFieldModel::GetInstance()->SetTextDecorationColor(result);
     if (textDecorationStyle) {
         TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     }
+    TextFieldModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
 }
  
 void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
@@ -2515,6 +2524,65 @@ void JSTextField::SetEnableAutoSpacing(const JSCallbackInfo& info)
         enabled = info[0]->ToBoolean();
     }
     TextFieldModel::GetInstance()->SetEnableAutoSpacing(enabled);
+}
+
+void JSTextField::SetShaderStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TextFieldModel::GetInstance()->ResetGradientShaderStyle();
+        return;
+    }
+    NG::Gradient gradient;
+    CalcDimension value;
+    if (info.Length() < 1 || (info.Length() > 0 && !info[0]->IsObject())) {
+        TextFieldModel::GetInstance()->ResetGradientShaderStyle();
+        return;
+    }
+    auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
+    UnRegisterResource("ColorShaderStyle");
+    if (shaderStyleObj->HasProperty("options")) {
+        auto optionsValue = shaderStyleObj->GetProperty("options");
+        if (optionsValue->IsObject()) {
+            shaderStyleObj = JSRef<JSObject>::Cast(optionsValue);
+        }
+    }
+    if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
+        NewRadialGradient(shaderStyleObj, gradient);
+        TextFieldModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else if (shaderStyleObj->HasProperty("colors")) {
+        NewLinearGradient(shaderStyleObj, gradient);
+        TextFieldModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else if (shaderStyleObj->HasProperty("color")) {
+        Color textColor;
+        RefPtr<ResourceObject> resObj;
+        auto infoColor = shaderStyleObj->GetProperty("color");
+        if (!ParseJsColor(infoColor, textColor, resObj)) {
+            TextFieldModel::GetInstance()->ResetGradientShaderStyle();
+            return;
+        }
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<Color>("ColorShaderStyle", resObj, textColor);
+        }
+        TextFieldModel::GetInstance()->SetColorShaderStyle(textColor);
+    } else {
+        TextFieldModel::GetInstance()->ResetGradientShaderStyle();
+    }
+}
+ 
+void JSTextField::SetStrokeJoinStyle(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextFieldModel::GetInstance()->SetStrokeJoinStyle(StrokeJoinStyle::MITER_JOIN);
+        return;
+    }
+    int32_t index = args->ToNumber<int32_t>();
+    auto isNormalValue = index >= 0 && index < static_cast<int32_t>(STROKE_JOIN_STYLES.size());
+    if (!isNormalValue) {
+        TextFieldModel::GetInstance()->SetStrokeJoinStyle(StrokeJoinStyle::MITER_JOIN);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetStrokeJoinStyle(STROKE_JOIN_STYLES[index]);
 }
 
 void JSTextField::SetOrphanCharOptimization(const JSCallbackInfo& info)

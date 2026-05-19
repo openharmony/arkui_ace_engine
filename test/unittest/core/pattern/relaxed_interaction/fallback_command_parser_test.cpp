@@ -108,6 +108,36 @@ const std::string INVALID_BODY_OBJECT_JSON = R"({
 })";
 
 const std::string INVALID_ONLY_CMD_JSON = R"({})";
+
+const std::string INVALID_BODY_VALUE_NULL_JSON = R"({
+    "identity": 69,
+    "body": null
+})";
+
+const std::string INVALID_IDENTITY_VALUE_NULL_JSON = R"({
+    "identity": null,
+    "body": {
+        "cmd": "checked",
+        "params": {
+            "value": true
+        }
+    }
+})";
+
+const std::string INVALID_IDENTITY_ARRAY_JSON = R"({
+    "identity": [1, 2, 3],
+    "body": {
+        "cmd": "checked",
+        "params": {
+            "value": true
+        }
+    }
+})";
+
+const std::string INVALID_BODY_NOT_OBJECT_JSON = R"({
+    "identity": 69,
+    "body": "not_an_object"
+})";
 }
 
 class FallbackCommandParserTest : public testing::Test {
@@ -304,6 +334,50 @@ HWTEST_F(FallbackCommandParserParseTest, Parse_InvalidIdentityString_ReturnsEmpt
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
     FallbackCommandParser parser(context);
     auto json = JsonUtil::ParseJsonString(INVALID_IDENTITY_STRING_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(FallbackCommandParserParseTest, Parse_InvalidBodyValueNull_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    FallbackCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(INVALID_BODY_VALUE_NULL_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(FallbackCommandParserParseTest, Parse_InvalidIdentityValueNull_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    FallbackCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(INVALID_IDENTITY_VALUE_NULL_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(FallbackCommandParserParseTest, Parse_InvalidIdentityArray_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    FallbackCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(INVALID_IDENTITY_ARRAY_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(FallbackCommandParserParseTest, Parse_InvalidBodyNotObject_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    FallbackCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(INVALID_BODY_NOT_OBJECT_JSON);
     ASSERT_NE(json, nullptr);
 
     auto executors = parser.Parse(json);

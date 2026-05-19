@@ -83,16 +83,19 @@ void CanvasModifier::ResetSurface()
     needResetSurface_ = false;
 }
 
-std::string CanvasModifier::GetDumpInfo()
+std::deque<std::string> CanvasModifier::GetDumpInfo()
 {
-    std::string ret;
+    std::deque<std::string> result;
+    result.emplace_back("DrawCmdInfo:");
     for (CanvasModifierDump& dumpInfo : dumpInfos_) {
-        ret.append(ConvertTimestampToStr(dumpInfo.timestamp));
-        ret.append(" Canvas Size: [" + std::to_string(dumpInfo.width) + ", " + std::to_string(dumpInfo.height) +
-                   "], Command Size: " + std::to_string(dumpInfo.opItemSize) + "; ");
+        std::string info;
+        info.append(ConvertTimestampToStr(dumpInfo.timestamp));
+        info.append(" Canvas Size: [" + std::to_string(dumpInfo.width) + ", " + std::to_string(dumpInfo.height) +
+                    "], Command Size: " + std::to_string(dumpInfo.opItemSize) + ";");
+        result.emplace_back(std::move(info));
     }
     dumpInfos_.clear();
-    return ret;
+    return result;
 }
 
 void CanvasModifier::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& array)

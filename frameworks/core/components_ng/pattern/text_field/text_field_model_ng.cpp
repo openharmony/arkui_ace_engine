@@ -26,6 +26,7 @@
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -413,6 +414,7 @@ void TextFieldModelNG::SetPlaceholderFont(const Font& value)
     if (value.fontSize.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value());
     }
+    ACE_CHECK_LPX_ATTRIBUTE(value.fontSize.value_or(Dimension()), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE);
     if (value.fontStyle) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderItalicFontStyle, value.fontStyle.value());
     }
@@ -459,6 +461,7 @@ void TextFieldModelNG::SetCaretStyle(const CaretStyle& value)
     if (value.caretWidth.has_value()) {
         ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value());
     }
+    ACE_CHECK_LPX_ATTRIBUTE(value.caretWidth.value_or(Dimension()), LpxAttribute::LPX_CARET_WIDTH);
 }
 
 void TextFieldModelNG::SetCaretPosition(const int32_t& value)
@@ -538,6 +541,7 @@ void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE);
 }
 void TextFieldModelNG::SetFontWeight(FontWeight value)
 {
@@ -1009,11 +1013,13 @@ void TextFieldModelNG::SetEnableAutoFillAnimation(bool enableAutoFillAnimation)
 void TextFieldModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE);
 }
 
 void TextFieldModelNG::SetAdaptMaxFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE);
 }
 
 void TextFieldModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
@@ -1029,15 +1035,18 @@ void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
 void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize);
+    ACE_CHECK_LPX_ATTRIBUTE(iconSize, LpxAttribute::LPX_CANCEL_ICON_SIZE);
 }
 void TextFieldModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, frameNode);
 }
 
 void TextFieldModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, frameNode);
 }
 
 void TextFieldModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value)
@@ -1099,6 +1108,7 @@ void TextFieldModelNG::SetKeyboardAppearance(KeyboardAppearance value)
 void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LETTER_SPACING);
 }
 
 Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
@@ -1112,6 +1122,7 @@ Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
 void TextFieldModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_HEIGHT);
 }
 
 void TextFieldModelNG::SetHalfLeading(bool value)
@@ -1131,6 +1142,7 @@ void TextFieldModelNG::SetHorizontalScrolling(bool value)
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_SPACING);
 }
 
 void TextFieldModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
@@ -1151,6 +1163,11 @@ void TextFieldModelNG::SetTextDecorationColor(const Color& value)
 void TextFieldModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value);
+}
+
+void TextFieldModelNG::SetLineThicknessScale(float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineThicknessScale, value);
 }
 
 void TextFieldModelNG::SetCounterTextColor(const Color& value)
@@ -1221,6 +1238,7 @@ void TextFieldModelNG::SetTextOverflow(Ace::TextOverflow value)
 void TextFieldModelNG::SetTextIndent(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_INDENT);
 }
 
 void TextFieldModelNG::SetTextDirection(TextDirection value)
@@ -1272,6 +1290,7 @@ TextOverflow TextFieldModelNG::GetTextOverflow(FrameNode* frameNode)
 void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_INDENT, frameNode);
 }
 
 void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
@@ -1561,6 +1580,7 @@ void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& val
     if (value.caretWidth.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value(), frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.caretWidth.value_or(Dimension()), LpxAttribute::LPX_CARET_WIDTH, frameNode);
 }
 
 void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& value)
@@ -1639,6 +1659,8 @@ void TextFieldModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& valu
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value(), frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        value.fontSize.value_or(Dimension()), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE, frameNode);
     if (value.fontStyle) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             TextFieldLayoutProperty, PlaceholderItalicFontStyle, value.fontStyle.value(), frameNode);
@@ -1658,6 +1680,7 @@ void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, frameNode);
 }
 
 void TextFieldModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
@@ -1855,6 +1878,7 @@ void TextFieldModelNG::SetIsShowVoiceButton(FrameNode* frameNode, bool isShowBut
 void TextFieldModelNG::SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(iconSize, LpxAttribute::LPX_CANCEL_ICON_SIZE, frameNode);
 }
 
 void TextFieldModelNG::SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc)
@@ -2180,14 +2204,53 @@ void TextFieldModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorati
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value, frameNode);
 }
 
+void TextFieldModelNG::SetLineThicknessScale(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineThicknessScale, value, frameNode);
+}
+
+TextDecoration TextFieldModelNG::GetDecoration(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecoration::NONE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecoration::NONE);
+    return layoutProperty->GetTextDecorationFirst();
+}
+
+Color TextFieldModelNG::GetTextDecorationColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Color::BLACK);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::BLACK);
+    return layoutProperty->GetTextDecorationColor().value_or(Color::BLACK);
+}
+
+TextDecorationStyle TextFieldModelNG::GetTextDecorationStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecorationStyle::SOLID);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecorationStyle::SOLID);
+    return layoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
+}
+
+float TextFieldModelNG::GetLineThicknessScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, DEFAULT_LINE_THICKNESS_SCALE);
+    return layoutProperty->GetLineThicknessScale().value_or(DEFAULT_LINE_THICKNESS_SCALE);
+}
+
 void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LETTER_SPACING, frameNode);
 }
 
 void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_HEIGHT, frameNode);
 }
 
 void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
@@ -2200,6 +2263,7 @@ void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_SPACING, frameNode);
 }
 
 float TextFieldModelNG::GetLineSpacing(FrameNode* frameNode)
@@ -2796,6 +2860,7 @@ void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPre
 void TextFieldModelNG::SetStrokeWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STROKE_WIDTH);
 }
 
 Dimension TextFieldModelNG::GetStrokeWidth(FrameNode* frameNode)
@@ -2825,6 +2890,7 @@ void TextFieldModelNG::ResetStrokeColor()
 void TextFieldModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void TextFieldModelNG::SetStrokeColor(FrameNode* frameNode, const Color& value)
@@ -2846,6 +2912,108 @@ void TextFieldModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled, frameNode);
+}
+
+void TextFieldModelNG::SetStrokeJoinStyle(StrokeJoinStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeJoinStyle, style);
+}
+ 
+void TextFieldModelNG::SetStrokeJoinStyle(FrameNode* frameNode, StrokeJoinStyle style)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeJoinStyle, style, frameNode);
+}
+ 
+void TextFieldModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        pattern->AddResObj("TextFieldGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradient, frameNode);
+}
+ 
+void TextFieldModelNG::SetColorShaderStyle(const Color& value)
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, value);
+}
+ 
+void TextFieldModelNG::ResetGradientShaderStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
+}
+ 
+void TextFieldModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        pattern->AddResObj("TextFieldGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradient, frameNode);
+}
+ 
+void TextFieldModelNG::SetColorShaderStyle(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, value, frameNode);
+}
+ 
+NG::Gradient TextFieldModelNG::GetGradientStyle(FrameNode* frameNode)
+{
+    NG::Gradient value;
+    value.CreateGradientWithType(NG::GradientType::LINEAR);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    return layoutProperty->GetGradientShaderStyle().value_or(value);
+}
+ 
+void TextFieldModelNG::ResetGradient(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)

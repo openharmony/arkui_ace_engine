@@ -674,6 +674,7 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
     NodeModifier::SetOnListScrollVisibleContentChange,
+    NodeModifier::SetOnListEditModeChange,
 };
 
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -694,6 +695,7 @@ const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetGridOnItemDragMove,
     NodeModifier::SetGridOnItemDragLeave,
     NodeModifier::SetGridOnItemDrop,
+    NodeModifier::SetOnGridEditModeChange,
 };
 
 const ComponentAsyncEventHandler GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -919,6 +921,7 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnListReachStart,
     NodeModifier::ResetOnListReachEnd,
     NodeModifier::ResetOnScrollVisibleContentChange,
+    NodeModifier::ResetOnListEditModeChange,
 };
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -939,6 +942,7 @@ const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnGridItemDragMove,
     NodeModifier::ResetOnGridItemDragStart,
     NodeModifier::ResetOnGridItemDrop,
+    NodeModifier::ResetOnGridEditModeChange,
 };
 
 const ResetComponentAsyncEventHandler GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -2471,6 +2475,11 @@ ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSu
     return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
 }
 
+ArkUI_Int32 SetDialogDisplayModeInSubWindow(ArkUIDialogHandle handle, ArkUI_Int32 displayModeInSubWindow)
+{
+    return CustomDialog::SetDialogDisplayModeInSubWindow(handle, displayModeInSubWindow);
+}
+
 ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
     ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
 {
@@ -2532,6 +2541,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .updateCustomDialog = UpdateCustomDialog,
         .closeCustomDialog = CloseCustomDialog,
         .setSubwindowMode = SetDialogSubwindowMode,
+        .setDisplayModeInSubWindow = SetDialogDisplayModeInSubWindow,
         .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
         .setBackgroundEffect = SetBackgroundEffect
     };

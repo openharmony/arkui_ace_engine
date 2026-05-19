@@ -25,27 +25,23 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 
 #include "base/geometry/dimension.h"
-#include "base/log/ace_performance_monitor.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
-#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
-#include "core/animation/schedule_task.h"
 #include "core/common/display_info.h"
-#include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
-#include "core/common/statistic_event_reporter.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -53,10 +49,8 @@
 #include "core/event/mouse_event.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -65,8 +59,13 @@ enum class AvoidAreaType : uint32_t;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+class ArkUIPerfMonitor;
+class ScheduleTask;
+class SharedImageManager;
+struct RotationEvent;
 namespace NG {
 class FrameNode;
+class THPExtraManager;
 struct UIExtCallbackEvent;
 enum class UIExtCallbackEventId : uint32_t;
 } // namespace NG
@@ -100,10 +99,13 @@ class Frontend;
 class ImageCache;
 class OffscreenCanvas;
 class Window;
+class WindowManager;
 class FontManager;
 class ManagerInterface;
 class NavigationController;
 class StatisticEventReporter;
+class DrawDelegate;
+class ResourceAdapter;
 class EventManager;
 class AccessibilityManager;
 enum class FrontendType;
@@ -634,14 +636,7 @@ public:
 
     RefPtr<ImageCache> GetImageCache() const;
 
-    const RefPtr<SharedImageManager>& GetOrCreateSharedImageManager()
-    {
-        std::scoped_lock<std::shared_mutex> lock(imageMtx_);
-        if (!sharedImageManager_) {
-            sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
-        }
-        return sharedImageManager_;
-    }
+    const RefPtr<SharedImageManager>& GetOrCreateSharedImageManager();
 
     const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager()
     {
@@ -710,14 +705,7 @@ public:
         themeManager_ = std::move(theme);
     }
 
-    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter)
-    {
-        std::unique_lock<std::shared_mutex> lock(themeMtx_);
-        CHECK_NULL_VOID(themeManager_);
-        auto themeConstants = themeManager_->GetThemeConstants();
-        CHECK_NULL_VOID(themeConstants);
-        themeConstants->UpdateResourceAdapter(adapter);
-    }
+    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter);
 
     template<typename T>
     RefPtr<T> GetTheme() const
@@ -796,10 +784,7 @@ public:
         isJsPlugin_ = isJsPlugin;
     }
 
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-    {
-        drawDelegate_ = std::move(delegate);
-    }
+    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate);
 
     bool IsJsCard() const
     {
@@ -1516,15 +1501,8 @@ public:
         return thpNotifyState_;
     }
 
-    void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
-    {
-        thpExtraMgr_ = thpExtraMgr;
-    }
-
-    const RefPtr<NG::THPExtraManager>& GetTHPExtraManager() const
-    {
-        return thpExtraMgr_;
-    }
+    void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr);
+    const RefPtr<NG::THPExtraManager>& GetTHPExtraManager() const;
 
     void SetUiDvsyncSwitch(bool on);
     virtual bool GetOnShow() const = 0;

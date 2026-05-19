@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/common/container.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/event/event_info_convertor.h"

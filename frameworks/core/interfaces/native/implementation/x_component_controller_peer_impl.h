@@ -22,7 +22,6 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #endif // XCOMPONENT_SUPPORTED
 
@@ -35,7 +34,7 @@ struct XComponentControllerPeerImpl : public Referenced {
     void SetOnSurfaceCreatedEvent(const synthetic_Callback_String_Void& callback);
     void SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback);
     void SetOnSurfaceDestroyedEvent(const synthetic_Callback_String_Void& callback);
-    std::shared_ptr<drawing_CanvasPeer> GetCanvas();
+    drawing_CanvasPeer* GetCanvas();
     synthetic_Callback_String_Void arkOnSurfaceCreated = {};
     Callback_String_SurfaceRect_Void arkOnSurfaceChanged = {};
     synthetic_Callback_String_Void arkOnSurfaceDestroyed = {};
@@ -45,7 +44,7 @@ struct XComponentControllerPeerImpl : public Referenced {
     bool isImageAnalyzing = false;
     ImageAnalyzerConfig analyzerConfig;
     std::function<void*()> wrapAnalyzerConfigImpl = nullptr;
-    std::shared_ptr<drawing_CanvasPeer> rsCanvas_ = nullptr;
+    drawing_CanvasPeer* rsCanvas_ = nullptr;
 #endif // XCOMPONENT_SUPPORTED
 };
 

@@ -142,11 +142,11 @@ public:
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateBackgroundColor(const Color& backgroundColor);
 
-    void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
+    virtual void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateHoverPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
-    void UpdatePressPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
+    virtual void UpdatePressPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     // Update
     void UpdateNormalToHoverPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
@@ -235,6 +235,16 @@ public:
     void SetIndicatorMask(bool indicatorMask)
     {
         indicatorMask_ = indicatorMask;
+    }
+
+    void SetUseSystemMaterial(bool useSystemMaterial)
+    {
+        useSystemMaterial_ = useSystemMaterial;
+    }
+
+    bool GetUseSystemMaterial() const
+    {
+        return useSystemMaterial_;
     }
 
     void SetOffset(const OffsetF& offset)
@@ -432,6 +442,7 @@ protected:
     bool isHover_ = false;
     bool isPressed_ = false;
     bool isLongPressed_ = false;
+    bool useSystemMaterial_ = false;
     bool longPointLeftAnimEnd_ = true;
     bool longPointRightAnimEnd_ = true;
 

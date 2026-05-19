@@ -220,6 +220,8 @@ public:
 
     bool hasRegisterLazyForEachToCustomNode = false;
 
+    void UpdateThemeScopeUpdate(int32_t themeScopeId) override;
+
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
     void DumpInfo() override;

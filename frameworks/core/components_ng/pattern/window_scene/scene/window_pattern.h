@@ -49,7 +49,7 @@ public:
 
     bool BorderUnoccupied() const override;
     std::vector<Rosen::Rect> GetHotAreas();
-    bool GetSessionTouchable();
+    bool GetSessionTouchable() const;
     sptr<Rosen::Session> GetSession();
     void CheckAndMeasureStartingWindow(const SizeF& currentParentSize);
 

@@ -83,12 +83,15 @@ private:
     void RefreshSelectedNodeState();
     std::vector<RefPtr<FrameNode>> BuildCenterHitPath() const;
     std::vector<RefPtr<FrameNode>> BuildSelectedAncestorPath(const RefPtr<FrameNode>& selectedNode) const;
-    std::optional<SmartGestureProposal> BuildSlideForwardProposal(
+    SmartGestureProposal BuildSlideForwardProposal(
         const std::vector<RefPtr<FrameNode>>& visiblePrimaryNodes, const RefPtr<FrameNode>& selectedNode,
         const std::vector<RefPtr<FrameNode>>& centerHitPath) const;
     void RevealSelectedNodeIfNeeded(const RefPtr<FrameNode>& node);
     bool IsSelectedNodeValid(const RefPtr<FrameNode>& node) const;
     std::optional<SmartGestureProposal> ResolveProposal(const SmartGestureProposal& defaultProposal) const;
+    void RecordExecutionSnapshot(SmartGestureTrigger trigger, bool hasMonitor,
+        const SmartGestureProposal& defaultProposal, const std::optional<SmartGestureProposal>& resolvedProposal,
+        bool executeResult) const;
     bool ValidateProposal(const SmartGestureProposal& proposal) const;
     bool ValidateTargetNode(const RefPtr<FrameNode>& node) const;
     bool ValidateClickProposal(const SmartGestureProposal& proposal) const;

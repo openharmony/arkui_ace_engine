@@ -371,6 +371,11 @@ public:
         return needToRequestKeyboardOnFocus_;
     }
 
+    bool NeedReadFontScaleFromEnv() override
+    {
+        return true;
+    }
+
     bool CheckBlurReason();
 
     bool NeedSetScrollRect();
@@ -614,6 +619,8 @@ public:
     }
 
     void SetMagnifierLocalOffsetToFloatingCaretPos();
+    void UpdateMagnifierTouchInfo(const TimeStamp& time, TouchType touchType);
+    void ResetMagnifierTouchInfo();
 
     bool GetShowOriginCursor() const
     {
@@ -1035,6 +1042,8 @@ public:
     // xts
     std::string GetStrokeWidth() const;
     std::string GetStrokeColor() const;
+    std::string GetStrokeJoinStyle() const;
+    std::unique_ptr<JsonValue> GetShaderStyleInJson() const;
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;
@@ -1096,6 +1105,7 @@ public:
     void HandleSetTextCommand(const std::unique_ptr<JsonValue>& params);
     void HandleAddTextCommand(const std::unique_ptr<JsonValue>& params);
     std::pair<std::unique_ptr<JsonValue>, std::string> ParseBaseJson(const std::string& command);
+    bool HandleMSDPAutoFillCommand(const std::unique_ptr<JsonValue>& json);
     bool HandleTextModifyCommand(int32_t nodeId, const std::unique_ptr<JsonValue>& params, const std::string& cmd);
     bool CheckAndGetSelectParams(const std::unique_ptr<JsonValue>& json, int32_t* start, int32_t* end);
     void HandleCopyOrCutCommand(const std::string& cmd, const RefPtr<FrameNode>& frameNode);
@@ -1707,7 +1717,8 @@ public:
 
     bool IsShowPasswordSymbol() const
     {
-        return isPasswordSymbol_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
+        return isPasswordSymbol_ &&
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
     }
 
     bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
@@ -2333,6 +2344,7 @@ private:
     void HandleOnPasteCommon(const std::string& data);
     void HandleOnAutoFillSecurePaste(const std::string& data);
     void RemoveFillContentMap();
+    void RemoveMSDPAutoFillType();
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
@@ -2576,6 +2588,8 @@ private:
     WeakPtr<AIWriteAdapter> aiWriteAdapter_;
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> lastCaretPos_ = std::nullopt;

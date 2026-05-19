@@ -93,6 +93,9 @@ export class InteropStorageBase extends StorageBase {
     public BindDynamicStorage(dynamicLocalStorage: ESValue): void {
         // call ArkTS1.1 Storage to bind static Storage.
         const global = ESValue.getGlobal();
+        if (!global) {
+ 	        StateMgmtConsole.log('BindDynamicStorage: fail to get global ESValue');
+ 	    }
         const bindFunc = global.getProperty('bindStaticLocalStorage');
         if (bindFunc.isNull() || bindFunc.isUndefined()) {
             StateMgmtConsole.log('fail to find bindStaticLocalStorage');
@@ -193,7 +196,7 @@ export class InteropStorageBase extends StorageBase {
         }
         let dynamicState: ESValue = ESValue.wrap(result);
         let originValue: T = dynamicState.invokeMethod('getUnmonitored').unwrap() as T;
-        let storageProperty = new StorageProperty<T>(key, uiUtils.makeObserved(originValue));
+        let storageProperty = new StorageProperty<T>(key, uiUtils.makeV1Observed(originValue));
 
         const setSource = ((value: T): void => {
             storageProperty.set(value);

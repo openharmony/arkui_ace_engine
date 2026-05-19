@@ -152,6 +152,8 @@ void JSFontSpan::JSBind(BindingTarget globalObj)
     JSClass<JSFontSpan>::CustomProperty("strokeColor", &JSFontSpan::GetStrokeColor, &JSFontSpan::SetStrokeColor);
     JSClass<JSFontSpan>::CustomProperty("superscript", &JSFontSpan::GetSuperscript, &JSFontSpan::SetSuperscript);
     JSClass<JSFontSpan>::CustomProperty("fontConfigs", &JSFontSpan::GetFontConfigs, &JSFontSpan::SetFontConfigs);
+    JSClass<JSFontSpan>::CustomProperty("strokeJoinStyle", &JSFontSpan::GetStrokeJoinStyle,
+        &JSFontSpan::SetStrokeJoinStyle);
     JSClass<JSFontSpan>::CustomProperty(
         "fontVariations", &JSFontSpan::GetFontVariations, &JSFontSpan::SetFontVariations);
     JSClass<JSFontSpan>::Bind(globalObj, JSFontSpan::Constructor, JSFontSpan::Destructor);
@@ -196,6 +198,7 @@ RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(const JSRef<JSObject>& obj)
     ParseJsSuperscript(obj, font);
     ParseJsFontConfigs(obj, font);
     ParseJsFontVariations(obj, font);
+    ParseJsStrokeJoinStyle(obj, font);
     return AceType::MakeRefPtr<FontSpan>(font);
 }
 
@@ -470,6 +473,21 @@ void JSFontSpan::ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font)
     ParseFontWeightConfigs(fontConfigsObj, font);
 }
 
+void JSFontSpan::ParseJsStrokeJoinStyle(const JSRef<JSObject>& obj, Font& font)
+{
+    if (obj->HasProperty("strokeJoinStyle")) {
+        auto style = obj->GetProperty("strokeJoinStyle");
+        StrokeJoinStyle strokeJoinStyle = StrokeJoinStyle::MITER_JOIN;
+        if (!style->IsNull() && style->IsNumber()) {
+            auto value = style->ToNumber<int32_t>();
+            if (value >= 0 && value < static_cast<int32_t>(STROKE_JOIN_STYLES.size())) {
+                strokeJoinStyle = static_cast<StrokeJoinStyle>(value);
+            }
+        }
+        font.strokeJoinStyle = strokeJoinStyle;
+    }
+}
+
 void JSFontSpan::ParseJsFontVariations(const JSRef<JSObject>& obj, Font& font)
 {
     if (!obj->HasProperty("fontVariations")) {
@@ -499,9 +517,7 @@ void JSFontSpan::ParseJsFontVariations(const JSRef<JSObject>& obj, Font& font)
         }
         fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
     }
-    if (!fontVariations.empty()) {
-        font.fontVariations = fontVariations;
-    }
+    font.fontVariations = fontVariations;
 }
 
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
@@ -627,6 +643,19 @@ void JSFontSpan::GetFontConfigs(const JSCallbackInfo& info)
 }
 
 void JSFontSpan::SetFontConfigs(const JSCallbackInfo& info) {}
+ 
+void JSFontSpan::SetStrokeJoinStyle(const JSCallbackInfo& info) {}
+ 
+void JSFontSpan::GetStrokeJoinStyle(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(fontSpan_);
+    if (!fontSpan_->GetFont().strokeJoinStyle.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().strokeJoinStyle.value())))));
+    info.SetReturnValue(ret);
+}
 
 void JSFontSpan::GetFontVariations(const JSCallbackInfo& info)
 {
@@ -1972,6 +2001,8 @@ void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
         "paragraphSpacing", &JSParagraphStyleSpan::GetParagraphSpacing, &JSParagraphStyleSpan::SetParagraphSpacing);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "textDirection", &JSParagraphStyleSpan::GetTextDirection, &JSParagraphStyleSpan::SetTextDirection);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "shaderStyle", &JSParagraphStyleSpan::GetShaderStyle, &JSParagraphStyleSpan::SetShaderStyle);
     JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
 }
 
@@ -2039,9 +2070,9 @@ SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(
     ParseJsLeadingMargin(obj, paragraphStyle);
     ParseParagraphSpacing(obj, paragraphStyle);
     ParseJsTextDirection(obj, paragraphStyle);
+    ParseJsShaderStyle(obj, paragraphStyle);
     return paragraphStyle;
 }
-
 void JSParagraphStyleSpan::ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
 {
     if (!obj->HasProperty("textAlign")) {
@@ -2362,6 +2393,32 @@ void JSParagraphStyleSpan::ParseJsTextDirection(const JSRef<JSObject>& obj, Span
     paragraphStyle.textDirection = textDirection;
 }
 
+void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("shaderStyle")) {
+        return;
+    }
+    auto shaderStyleObj = obj->GetProperty("shaderStyle");
+    std::optional<NG::Gradient> gradientShaderStyle;
+    std::optional<Color> colorShaderStyle;
+    RefPtr<ResourceObject> resObj;
+    auto jsObject = JSRef<JSObject>::Cast(shaderStyleObj);
+    JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
+    paragraphStyle.colorShaderStyle = colorShaderStyle;
+    if (gradientShaderStyle.has_value()) {
+        paragraphStyle.SetGradient(gradientShaderStyle.value());
+    } else {
+        paragraphStyle.ResetGradient();
+    }
+    if (resObj && colorShaderStyle.has_value()) {
+        JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(jsObject->GetProperty("color"));
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
+        JSViewAbstract::CompleteResourceObject(jsObj);
+        resObj = JSViewAbstract::GetResourceObject(jsObj);
+        paragraphStyle.colorShaderStyleResObj = resObj;
+    }
+}
+
 void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
     std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin)
 {
@@ -2518,6 +2575,16 @@ void JSParagraphStyleSpan::GetTextDirection(const JSCallbackInfo& info)
 }
 
 void JSParagraphStyleSpan::SetTextDirection(const JSCallbackInfo& info) {}
+ 
+void JSParagraphStyleSpan::GetShaderStyle(const JSCallbackInfo& info)
+{
+    auto finalObj = JSRef<JSObject>::New();
+    JSViewAbstract::ConvertJsTextShaderStyle(GetParagraphStyle().GetGradient(),
+        GetParagraphStyle().colorShaderStyle, finalObj);
+    info.SetReturnValue(finalObj);
+}
+ 
+void JSParagraphStyleSpan::SetShaderStyle(const JSCallbackInfo& info) {}
 
 JSRef<JSObject>& JSParagraphStyleSpan::GetJsLeadingMarginSpanObject()
 {

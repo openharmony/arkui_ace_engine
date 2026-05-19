@@ -23,8 +23,8 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { extractors } from '#handwritten'
 import { common2D_Color_serializer, common2D_Rect_serializer, common2D_Point_serializer } from './ohos.graphics.common2D'
 import { default as common2D } from '@ohos.graphics.common2D'
+import { drawing_Typeface_serializer, drawing_FontMetrics_serializer } from './ohos.graphics.drawing'
 import { default as drawing } from '@ohos.graphics.drawing'
-import { drawing_FontMetrics_serializer } from './ohos.graphics.drawing'
 export class text_FontFeature_serializer {
     public static write(buffer: SerializerBase, value: text.FontFeature): void {
         let valueSerializer: SerializerBase = buffer
@@ -525,6 +525,18 @@ export class text_TextStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForFontTypefaces = value.fontTypefaces
+        if (valueHolderForFontTypefaces !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontTypefacesTmpValue = valueHolderForFontTypefaces!
+            valueSerializer.writeInt32((valueHolderForFontTypefacesTmpValue.length).toInt())
+            for (let valueHolderForFontTypefacesTmpValueCounterI = 0; valueHolderForFontTypefacesTmpValueCounterI < valueHolderForFontTypefacesTmpValue.length; valueHolderForFontTypefacesTmpValueCounterI++) {
+                const valueHolderForFontTypefacesTmpValueTmpElement: drawing.Typeface = valueHolderForFontTypefacesTmpValue[valueHolderForFontTypefacesTmpValueCounterI]
+                drawing_Typeface_serializer.write(valueSerializer, valueHolderForFontTypefacesTmpValueTmpElement)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): text.TextStyle {
         let valueDeserializer: DeserializerBase = buffer
@@ -700,7 +712,17 @@ export class text_TextStyle_serializer {
             fontEdgingTmpBuf = drawing.FontEdging.fromValue(valueDeserializer.readInt32())
         }
         const fontEdgingTmpResult: drawing.FontEdging | undefined = fontEdgingTmpBuf
-        let value: text.TextStyle = ({decoration: decorationTmpResult, color: colorTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, baseline: baselineTmpResult, fontFamilies: fontFamiliesTmpResult, fontSize: fontSizeTmpResult, letterSpacing: letterSpacingTmpResult, wordSpacing: wordSpacingTmpResult, lineHeightMaximum: lineHeightMaximumTmpResult, lineHeightMinimum: lineHeightMinimumTmpResult, lineHeightStyle: lineHeightStyleTmpResult, heightScale: heightScaleTmpResult, halfLeading: halfLeadingTmpResult, heightOnly: heightOnlyTmpResult, ellipsis: ellipsisTmpResult, ellipsisMode: ellipsisModeTmpResult, locale: localeTmpResult, baselineShift: baselineShiftTmpResult, fontFeatures: fontFeaturesTmpResult, textShadows: textShadowsTmpResult, backgroundRect: backgroundRectTmpResult, fontVariations: fontVariationsTmpResult, badgeType: badgeTypeTmpResult, fontWidth: fontWidthTmpResult, fontEdging: fontEdgingTmpResult} as text.TextStyle)
+        const fontTypefacesTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let fontTypefacesTmpBuf: Array<drawing.Typeface> | undefined = undefined
+        if ((fontTypefacesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fontTypefacesTmpBufOptLength: int32 = valueDeserializer.readInt32()
+            const fontTypefacesTmpBufOpt: Array<drawing.Typeface> = new Array<drawing.Typeface>(fontTypefacesTmpBufOptLength, (arg0: int32):drawing.Typeface => {
+            return (drawing_Typeface_serializer.read(valueDeserializer) as drawing.Typeface);
+        })
+            fontTypefacesTmpBuf = fontTypefacesTmpBufOpt
+        }
+        const fontTypefacesTmpResult: Array<drawing.Typeface> | undefined = fontTypefacesTmpBuf
+        let value: text.TextStyle = ({decoration: decorationTmpResult, color: colorTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, baseline: baselineTmpResult, fontFamilies: fontFamiliesTmpResult, fontSize: fontSizeTmpResult, letterSpacing: letterSpacingTmpResult, wordSpacing: wordSpacingTmpResult, lineHeightMaximum: lineHeightMaximumTmpResult, lineHeightMinimum: lineHeightMinimumTmpResult, lineHeightStyle: lineHeightStyleTmpResult, heightScale: heightScaleTmpResult, halfLeading: halfLeadingTmpResult, heightOnly: heightOnlyTmpResult, ellipsis: ellipsisTmpResult, ellipsisMode: ellipsisModeTmpResult, locale: localeTmpResult, baselineShift: baselineShiftTmpResult, fontFeatures: fontFeaturesTmpResult, textShadows: textShadowsTmpResult, backgroundRect: backgroundRectTmpResult, fontVariations: fontVariationsTmpResult, badgeType: badgeTypeTmpResult, fontWidth: fontWidthTmpResult, fontEdging: fontEdgingTmpResult, fontTypefaces: fontTypefacesTmpResult} as text.TextStyle)
         return value
     }
 }

@@ -647,4 +647,120 @@ HWTEST_F(SwiperHelperTestNg, DumpInfoAddAnimationDesc005, TestSize.Level1)
     helper.DumpInfoAddAnimationDesc(swiper);
     EXPECT_NE(DumpLog::GetInstance().description_[9], "curve:null\n");
 }
+
+/**
+ * @tc.name: SwiperHelperInitSwiperControllerPreMakeItems001
+ * @tc.desc: Test InitSwiperController sets PreMakeItemsImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperHelperTestNg, SwiperHelperInitSwiperControllerPreMakeItems001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    ASSERT_NE(controller, nullptr);
+
+    SwiperHelper::InitSwiperController(controller, pattern_);
+
+    controller->PreMakeItems({0, 1});
+    EXPECT_NE(controller->preloadItemsImpl_, nullptr);
+}
+
+/**
+ * @tc.name: SwiperHelperInitSwiperControllerPreMakeItems002
+ * @tc.desc: Test InitSwiperController PreMakeItemsImpl with empty set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperHelperTestNg, SwiperHelperInitSwiperControllerPreMakeItems002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    ASSERT_NE(controller, nullptr);
+
+    SwiperHelper::InitSwiperController(controller, pattern_);
+
+    std::set<int32_t> emptySet;
+    controller->PreMakeItems(emptySet);
+    EXPECT_NE(controller->preloadItemsImpl_, nullptr);
+}
+
+/**
+ * @tc.name: SwiperHelperInitSwiperControllerPreMakeItems003
+ * @tc.desc: Test InitSwiperController PreMakeItemsImpl with invalid index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperHelperTestNg, SwiperHelperInitSwiperControllerPreMakeItems003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    ASSERT_NE(controller, nullptr);
+
+    SwiperHelper::InitSwiperController(controller, pattern_);
+
+    controller->PreMakeItems({-1, 100});
+    EXPECT_NE(controller->preloadItemsImpl_, nullptr);
+}
+
+/**
+ * @tc.name: SwiperHelperSetPreMakeItemsImpl001
+ * @tc.desc: Test SetPreMakeItemsImpl directly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperHelperTestNg, SwiperHelperSetPreMakeItemsImpl001, TestSize.Level1)
+{
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    ASSERT_NE(controller, nullptr);
+
+    bool callbackCalled = false;
+    controller->SetPreMakeItemsImpl([&callbackCalled](const std::set<int32_t>& indexSet) {
+        callbackCalled = true;
+    });
+
+    controller->PreMakeItems({0});
+    EXPECT_TRUE(callbackCalled);
+}
+
+/**
+ * @tc.name: SwiperHelperSetPreMakeItemsImpl002
+ * @tc.desc: Test SetPreMakeItemsImpl with nullptr callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperHelperTestNg, SwiperHelperSetPreMakeItemsImpl002, TestSize.Level1)
+{
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    ASSERT_NE(controller, nullptr);
+
+    controller->SetPreMakeItemsImpl(nullptr);
+
+    controller->PreMakeItems({0});
+    EXPECT_EQ(controller->preloadItemsImpl_, nullptr);
+}
+
+/**
+ * @tc.name: SwiperHelperSetPreMakeItemsImpl003
+ * @tc.desc: Test SetPreMakeItemsImpl multiple calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperHelperTestNg, SwiperHelperSetPreMakeItemsImpl003, TestSize.Level1)
+{
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    ASSERT_NE(controller, nullptr);
+
+    int callCount = 0;
+    controller->SetPreMakeItemsImpl([&callCount](const std::set<int32_t>& indexSet) {
+        callCount++;
+    });
+
+    controller->PreMakeItems({0});
+    controller->PreMakeItems({1, 2});
+    EXPECT_EQ(callCount, 2);
+}
 } // namespace OHOS::Ace::NG

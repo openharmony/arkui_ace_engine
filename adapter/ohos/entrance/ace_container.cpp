@@ -34,6 +34,7 @@
 #include "form_ashmem.h"
 #include "pointer_event.h"
 
+#include "base/resource/shared_image_manager.h"
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "core/image/image_cache.h"
@@ -72,8 +73,10 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/common/transform/input_compatible_manager.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -2066,7 +2069,8 @@ bool AceContainer::ClosePopupUIExtension(uint32_t autoFillSessionId)
     return true;
 }
 
-HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
+HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
 {
     HintToTypeWrap hintToTypeWrap;
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
@@ -2077,7 +2081,13 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     std::vector<int> intType;
     std::vector<std::string> metadata;
     placeHolder.push_back(onePlaceHolder);
-    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metadata);
+    bool isSuccess = false;
+    if (msdpType.has_value()) {
+        std::vector<std::string> msdpTypeVector = { msdpType.value() };
+        isSuccess = viewDataWrapOhos->LoadMergeHint2TypeAndMsdpType(placeHolder, msdpTypeVector, intType, metadata);
+    } else {
+        isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType, metadata);
+    }
     if (!isSuccess) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "Load Hint2Type Failed !");
         return hintToTypeWrap;

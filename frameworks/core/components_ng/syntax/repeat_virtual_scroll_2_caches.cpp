@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"

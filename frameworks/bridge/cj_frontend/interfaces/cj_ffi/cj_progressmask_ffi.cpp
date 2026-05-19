@@ -15,35 +15,94 @@
 
 #include "cj_progressmask_ffi.h"
 
+#include "base/utils/utils.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/property/progress_mask_property.h"
+
 using namespace OHOS::FFI;
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+RefPtr<NG::ProgressMaskProperty> CloneProgressMask(const RefPtr<NG::ProgressMaskProperty>& src)
+{
+    if (!src) {
+        return nullptr;
+    }
+    auto dst = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+    dst->SetValue(src->GetValue());
+    dst->SetMaxValue(src->GetMaxValue());
+    dst->SetColor(src->GetColor());
+    dst->SetEnableBreathe(src->GetEnableBreathe());
+    return dst;
+}
+} // namespace
 
 NativeProgressMask::NativeProgressMask(float value, float total, uint32_t color) : FFIData()
 {
     LOGI("Native NativeProgressMask constructed");
 }
 
+void NativeProgressMask::AddHostFrameNode(const WeakPtr<NG::FrameNode>& host)
+{
+    auto hostNode = host.Upgrade();
+    for (const auto& existing : hosts_) {
+        if (existing.Upgrade() == hostNode) {
+            return;
+        }
+    }
+    hosts_.push_back(host);
+}
+
+void NativeProgressMask::CommitNewMaskToHost(const RefPtr<NG::ProgressMaskProperty>& next)
+{
+    if (!next) {
+        return;
+    }
+    progress_mask_ = next;
+    for (const auto& hostWeak : hosts_) {
+        auto frameNode = hostWeak.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+        frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+        OHOS::Ace::NG::ViewAbstract::SetProgressMask(AceType::RawPtr(frameNode), progress_mask_);
+    }
+}
+
 void NativeProgressMask::UpdateProgress(float number)
 {
-    if (progress_mask_) {
-        progress_mask_->SetValue(number);
+    if (!progress_mask_) {
+        return;
     }
+    if (number < 0.0f) {
+        number = 0.0f;
+    }
+    auto next = CloneProgressMask(progress_mask_);
+    next->SetValue(number);
+    CommitNewMaskToHost(next);
 }
 
 void NativeProgressMask::UpdateColor(uint32_t color)
 {
-    if (progress_mask_) {
-        progress_mask_->SetColor(Color(color));
+    if (!progress_mask_) {
+        return;
     }
+    auto next = CloneProgressMask(progress_mask_);
+    next->SetColor(Color(color));
+    CommitNewMaskToHost(next);
 }
 
 void NativeProgressMask::EnableBreathingAnimation(bool value)
 {
-    if (progress_mask_) {
-        progress_mask_->SetEnableBreathe(value);
+    if (!progress_mask_) {
+        return;
     }
+    auto next = CloneProgressMask(progress_mask_);
+    next->SetEnableBreathe(value);
+    CommitNewMaskToHost(next);
 }
+
 extern "C" {
 int64_t FfiOHOSAceFrameworkProgressMaskCreate(float value, float total, uint32_t color)
 {

@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
+#include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 void GridPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)

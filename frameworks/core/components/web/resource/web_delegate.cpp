@@ -14,6 +14,7 @@
  */
 
 #include "core/components/web/resource/web_delegate.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include <cctype>
 #include <cfloat>
@@ -3397,25 +3398,32 @@ void WebDelegate::UpdateWebLtpoInfo()
     }
 }
 
-class LtpoDisplayInfoListener : public OHOS::Rosen::DisplayManager::IDisplayAttributeListener {
-public:
-    explicit LtpoDisplayInfoListener(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
-    ~LtpoDisplayInfoListener() = default;
-    void OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes) override
-    {
-        std::string changedAttributes;
-        for (const auto &s : attributes) {
-            changedAttributes += s + ";";
-        }
-        auto delegate = delegate_.Upgrade();
-        TAG_LOGI(AceLogTag::ACE_WEB, "Ltpo info changed, changedAttributes:%{public}s", changedAttributes.c_str());
-        if (delegate) {
-            delegate->UpdateWebLtpoInfo();
-        }
+void LtpoDisplayInfoListener::OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "LtpoDisplayInfoListener context is null.");
+        return;
     }
-private:
-    WeakPtr<WebDelegate> delegate_;
-};
+    std::string changedAttributes;
+    for (const auto &s : attributes) {
+        changedAttributes += s + ";";
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "Ltpo info changed, changedAttributes:%{public}s", changedAttributes.c_str());
+    auto taskExecutor = context->GetTaskExecutor();
+    if (!taskExecutor) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "LtpoDisplayInfoListener taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask(
+        [weak = delegate_]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->UpdateWebLtpoInfo();
+            }
+        },
+        TaskExecutor::TaskType::UI, "LtpoDisplayInfoListenerOnAttributeChange");
+}
 
 void WebDelegate::RegisterDisplayInfoChange()
 {
@@ -3423,7 +3431,7 @@ void WebDelegate::RegisterDisplayInfoChange()
         TAG_LOGI(AceLogTag::ACE_WEB, "DisplayInfoChange is already registed.");
         return;
     }
-    displayListener_ = sptr<LtpoDisplayInfoListener>::MakeSptr(WeakClaim(this));
+    displayListener_ = sptr<LtpoDisplayInfoListener>::MakeSptr(WeakClaim(this), context_);
     if (!displayListener_) {
         TAG_LOGW(AceLogTag::ACE_WEB, "displayListener_ is null.");
         return;

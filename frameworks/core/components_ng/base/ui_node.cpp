@@ -21,6 +21,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
+#include "core/common/premake_scope.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -44,6 +45,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
     ++count_;
+    isPreMake_ = PreMakeScope::IsPreMake();
     if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
         isThreadSafeNode_ = true;
         SetIsFree(true);
@@ -2843,5 +2845,39 @@ void UINode::HandleColorModeChange()
         SetShouldClearCache(true);
         NotifyColorModeChange(colorMode, false);
     }
+}
+
+
+void UINode::DetachFromMainTreeByPreMakeFlag()
+{
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
+        if (child->IsPreMake()) {
+            ResetNode();
+        } else {
+            child->DetachFromMainTreeByPreMakeFlag();
+        }
+    }
+}
+
+std::string UINode::GetPath()
+{
+    std::vector<std::string> pathSegments;
+    auto current = AceType::Claim(this);
+    while (current) {
+        auto parent = current->GetParent();
+        std::string segment = current->GetTag();
+        if (parent) {
+            int32_t index = parent->GetChildIndex(current);
+            segment += "[" + std::to_string(index) + "]";
+        }
+        pathSegments.push_back(segment);
+        current = parent;
+    }
+    std::ostringstream result;
+    for (auto it = pathSegments.rbegin(); it != pathSegments.rend(); ++it) {
+        result << "/" << *it;
+    }
+    return result.str();
 }
 } // namespace OHOS::Ace::NG

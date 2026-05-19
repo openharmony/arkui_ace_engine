@@ -23,6 +23,7 @@ export declare class CommonModifier extends CommonMethodModifier implements Comm
     applyFocusedAttribute(instance: CommonAttribute): void;
     applyDisabledAttribute(instance: CommonAttribute): void;
     applySelectedAttribute(instance: CommonAttribute): void;
+    applyHoveredAttribute(instance: CommonAttribute): void;
 }
 
 export declare class ModifierStateManager {

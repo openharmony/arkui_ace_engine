@@ -55,7 +55,10 @@ void AddNodeContainerRootNodeImpl(Ark_NativePointer self, Ark_NativePointer chil
         pattern->AddBaseNode(nullptr);
         return;
     }
-    auto child = FrameNodePeer::GetFrameNodeByPeer(childPeer);
+    auto child = FrameNodePeer::GetMockFrameNodeByPeer(childPeer);
+    if (!child) {
+        child = FrameNodePeer::GetFrameNodeByPeer(childPeer);
+    }
     pattern->AddBaseNode(child);
 }
 void SetAboutToAppearImpl(Ark_NativePointer self,

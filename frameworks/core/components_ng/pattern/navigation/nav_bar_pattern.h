@@ -30,7 +30,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
+class TitleBarPattern;
 class NavBarPattern : public NavDestinationPatternBase {
     DECLARE_ACE_TYPE(NavBarPattern, NavDestinationPatternBase);
 
@@ -107,13 +107,15 @@ protected:
 
     void MountTitleBar(const RefPtr<FrameNode>& host, bool& needRunTitleBarAnimation);
 
+    void AdjustScrollOffsetForTitleMode(
+        const RefPtr<TitleBarNode>& titleBarNode, float& startOffset, float& endOffset) override;
+
 private:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     RefPtr<PanEvent> panEvent_;
-    WeakPtr<FrameNode> scrollableNode_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;

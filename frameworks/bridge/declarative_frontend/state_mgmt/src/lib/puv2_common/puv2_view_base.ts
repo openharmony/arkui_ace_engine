@@ -28,6 +28,10 @@
 
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
+type CustomEnvValue = any;
+type CustomEnvMeta = {
+  varToKey: Record<string, number>;
+};
 type AnonymousEnvMonitorEntry<K extends SimpleTypeEnvKey = SimpleTypeEnvKey> = {
   anonymousMonitorFunc: (mon: IMonitor) => void;
   envValue: IEnvironmentValue<EnvTypeMap[K]>;
@@ -41,6 +45,7 @@ enum PrebuildPhase {
 
 //API Version 18
 const API_VERSION_ISOLATION_FOR_5_1: number = 18;
+const CUSTOM_ENV_DECO_META = '__custom_env_deco_meta__';
 
 // Declare MutableBuilder class to make it available for type-checking. See jsEnumStyle.js and
 // build-tools\ets-loader\declarations\common.d.ts
@@ -401,10 +406,68 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
   }
 
+  public findCustomValueByKey(key: number): CustomEnvValue {
+    stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
+    return this.nativeViewPartialUpdate.findCustomValueByKey(key);
+  }
+
+  public findEnvValueByKey(key: string): CustomEnvValue {
+    return this.nativeViewPartialUpdate.findEnvValueByKey(key);
+  }
+
   // Callback handler when instanceId changes in backend
   protected __onJSInstanceIdUpdate__Internal(): void {
     stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
     this.dirtDescendantElementIds_.clear();
+  }
+
+  protected __onCustomEnvValueUpdate__Internal(envKey: number): void {
+    stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no @CustomEnv property registered`);
+    let needUpdated: boolean = false;
+    this.__getCustomEnvPropertyNameToKey__Internal()
+      .forEach(([varName, customEnvKey]) => {
+        if (envKey && customEnvKey !== envKey) {
+          stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no matching @CustomEnv property`);
+          return;
+        }
+        const storeProp = ObserveV2.OB_PREFIX + varName;
+        const updatedEnvValue = this.findCustomValueByKey(customEnvKey);
+        if (updatedEnvValue === undefined) {
+          return;
+        }
+        this[storeProp] = updatedEnvValue;
+        ObserveV2.getObserve().fireChange(this, varName);
+        needUpdated = true;
+      });
+    if (needUpdated) {
+      stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update for key ${envKey}`);
+      ObserveV2.getObserve().updateDirty2(false);
+    }
+  }
+
+  protected __onEnvValueUpdate__Internal(envKey: string): void {
+    stateMgmtConsole.debug(`${this.debugInfo__()}: env update ignored for key ${envKey}, no @Env property registered`);
+    let needUpdated: boolean = false;
+    this.__getEnvPropertyNameToKey__Internal()
+      .forEach(([varName, declaredEnvKey]) => {
+        if (!EnvV2.isDirectQuerySystemEnvKey(declaredEnvKey)) {
+          return;
+        }
+        if (envKey && declaredEnvKey !== envKey) {
+          return;
+        }
+        const storeProp = ObserveV2.ENV_PREFIX + varName;
+        const updatedEnvValue = this.findEnvValueByKey(declaredEnvKey);
+        if (updatedEnvValue === undefined) {
+          return;
+        }
+        this[storeProp] = updatedEnvValue;
+        ObserveV2.getObserve().fireChange(this, varName);
+        needUpdated = true;
+      });
+    if (needUpdated) {
+      ObserveV2.getObserve().updateDirty2(false);
+    }
   }
 
   public __isV2__Internal(): boolean {
@@ -643,9 +706,11 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // loop the [varName, key][]
     this.__getEnvPropertyNameToKey__Internal()
       .forEach(([varName, envKey]) => {
-        const updatedInstanceEnvValue = newInstanceId ?
-          EnvV2.registerEnv(envKey as keyof EnvTypeMap, this, varName, newInstanceId) :
-          EnvV2.findEnvRecursively(envKey, this, this.__latestInstanceId__Internal);
+        const updatedInstanceEnvValue = EnvV2.isDirectQuerySystemEnvKey(envKey) ?
+          this.findEnvValueByKey(envKey) :
+          (newInstanceId ?
+            EnvV2.registerEnv(envKey as keyof EnvTypeMap, this, varName, newInstanceId) :
+            EnvV2.findEnvRecursively(envKey as keyof EnvTypeMap, this, this.__latestInstanceId__Internal));
         const storeProp = ObserveV2.ENV_PREFIX + varName;
         if (updatedInstanceEnvValue !== this[storeProp]) {
           stateMgmtConsole.debug(`findAllEnvPropertiesInView ${this.debugInfo__()} @Env(${envKey}) ${varName} find EnvValue in parent, value is different, reset the local value`);
@@ -671,9 +736,17 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.__hasEnvValue__;
   }
 
-  public __getEnvPropertyNameToKey__Internal(): [string, keyof EnvTypeMap][] {
+  public __getEnvPropertyNameToKey__Internal(): [string, string][] {
     // there is no env in current view
     const meta = this[EnvV2.ENV_DECO_META] as EnvMeta | undefined;
+    if (!meta || !(typeof meta === 'object')) {
+      return [];
+    }
+    return Object.entries(meta.varToKey);
+  }
+
+  public __getCustomEnvPropertyNameToKey__Internal(): [string, number][] {
+    const meta = this[CUSTOM_ENV_DECO_META] as CustomEnvMeta | undefined;
     if (!meta || !(typeof meta === 'object')) {
       return [];
     }

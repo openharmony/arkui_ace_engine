@@ -28,8 +28,9 @@ import { FoldSplitContainerStart } from './FoldSplitContainer';
 
 export default function FoldSplitContainer2() {
   describe('FoldSplitContainer2', () => {
-    beforeAll(async (done: Function) => {
-      await FoldSplitContainerStart(done)
+    beforeAll(async (done: () => void) => {
+      await FoldSplitContainerStart()
+      done()
     })
 
     /**

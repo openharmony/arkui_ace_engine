@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/sheet/sheet_object.h"
+#include "core/components_ng/base/modifier.h"
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
@@ -23,6 +24,9 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -138,6 +142,34 @@ std::function<void()> SheetObject::GetSheetAnimationEvent(bool isTransitionIn, f
     return event;
 }
 
+bool SheetObject::SheetPopupWithSDFShape(const NG::SheetStyle& sheetStyle, const bool sheetPopupWithArrow,
+    const RefPtr<SheetPresentationPattern>& sheetPattern, const RefPtr<FrameNode>& sheetNode,
+    const RefPtr<RenderContext>& renderContext, const SizeF& sheetSize, const NG::BorderRadiusProperty& borderRadius)
+{
+    // Set the SDF shape for SheetPopup with arrow in SystemMaterial condition.
+    CHECK_NULL_RETURN(sheetNode, false);
+    CHECK_NULL_RETURN(sheetPattern, false);
+    CHECK_NULL_RETURN(renderContext, false);
+    if (sheetStyle.systemMaterial && sheetPopupWithArrow) {
+#ifdef ENABLE_ROSEN_BACKEND
+        renderContext->ResetClipShape();
+        auto sdfShape = sheetPattern->GetPopupStyleSheetClipPathSDF(sheetSize, borderRadius);
+        ACE_UINODE_TRACE(sheetNode);
+        renderContext->SetSDFShape(sdfShape);
+
+        std::string clipPath = sheetPattern->GetPopupStyleSheetClipPath(sheetSize, borderRadius);
+        auto path = AceType::MakeRefPtr<Path>();
+        path->SetValue(clipPath);
+        path->SetBasicShapeType(BasicShapeType::PATH);
+        renderContext->SetShadowPath(clipPath);
+        return true;
+#endif
+    }
+    renderContext->SetSDFShape(nullptr);
+    renderContext->ResetShadowPath();
+    return false;
+}
+
 void SheetObject::ClipSheetNode()
 {
     auto pattern = GetPattern();
@@ -172,7 +204,10 @@ void SheetObject::ClipSheetNode()
     if (sheetStyle.radiusRenderStrategy.has_value() && sheetType != SheetType::SHEET_POPUP) {
         renderContext->UpdateRenderStrategy(sheetStyle.radiusRenderStrategy.value());
     }
-    if (sheetType == SheetType::SHEET_POPUP && pattern->GetSheetPopupInfo().showArrow) {
+    bool sheetPopupWithArrow = (sheetType == SheetType::SHEET_POPUP && pattern->GetSheetPopupInfo().showArrow);
+    bool useSDFShape =
+        SheetPopupWithSDFShape(sheetStyle, sheetPopupWithArrow, pattern, host, renderContext, sheetSize, borderRadius);
+    if (!useSDFShape && sheetPopupWithArrow) {
         std::string clipPath = pattern->GetPopupStyleSheetClipPath(sheetSize, borderRadius);
         ACE_UINODE_TRACE(host);
         auto path = AceType::MakeRefPtr<Path>();

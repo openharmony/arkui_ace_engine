@@ -94,23 +94,25 @@ KDouble getFloat64(napi_env env, napi_value value) {
 }
 
 KStringPtr getString(napi_env env, napi_value value) {
-  KStringPtr result {};
-  napi_valuetype valueType = getValueTypeChecked(env, value);
-  if (valueType == napi_valuetype::napi_null || valueType == napi_valuetype::napi_undefined) {
-    return result;
-  }
+    KStringPtr result {};
+    napi_valuetype valueType = getValueTypeChecked(env, value);
+    if (valueType == napi_valuetype::napi_null || valueType == napi_valuetype::napi_undefined) {
+        return result;
+    }
 
-  if (valueType != napi_valuetype::napi_string) {
-    napi_throw_error(env, nullptr, "Expected String");
-    return result;
-  }
+    if (valueType != napi_valuetype::napi_string) {
+        napi_throw_error(env, nullptr, "Expected String");
+        return result;
+    }
 
-  size_t length = 0;
-  napi_status status = napi_get_value_string_utf8(env, value, nullptr, 0, &length);
-  if (status != 0) return result;
-  result.resize(length);
-  status = napi_get_value_string_utf8(env, value, result.data(), length + 1, nullptr);
-  return result;
+    size_t length = 0;
+    napi_status status = napi_get_value_string_utf8(env, value, nullptr, 0, &length);
+    if (status != 0) {
+        return result;
+    }
+    result.resize(length);
+    status = napi_get_value_string_utf8(env, value, result.data(), length + 1, nullptr);
+    return result;
 }
 
 KNativePointer getPointerSlow(napi_env env, napi_value value) {

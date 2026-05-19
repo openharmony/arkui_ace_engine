@@ -22,7 +22,9 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
+#include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_node_ext/custom_node_ext_modifier.h"
 #include "core/pipeline/base/render_node.h"

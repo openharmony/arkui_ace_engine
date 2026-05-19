@@ -1301,10 +1301,11 @@ public:
     int indexOf(const std::list<T>& list, T value)
     {
         int index = 0;
-        for (auto it = list.begin(); it != list.end(); ++it, ++index)
+        for (auto it = list.begin(); it != list.end(); ++it, ++index) {
             if ((*it) == value) {
                 return index;
             }
+        }
         return -1;
     }
 

@@ -491,6 +491,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
         },
         ani_native_function {
+            "_BuilderProxyNode_Mock_Construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeMockConstruct)
+        },
+        ani_native_function {
             "_ContentSlot_construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ContentSlotConstruct)
@@ -692,6 +697,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function { "_Drawable_CreatePixelMapDrawable", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawable)
+        },
+        ani_native_function { "_Drawable_CreatePixelMapDrawableByResource", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawableByResource)
+        },
+        ani_native_function { "_Drawable_CreatePixelMapDrawableByString", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawableByString)
         },
         ani_native_function { "_Drawable_CreateLayeredDrawable", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateLayeredDrawable)
@@ -1786,6 +1797,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::RemovePanListenerCallback)
         },
         ani_native_function {
+            "_GestureEventUIObserver_SetOnNodeRenderState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetOnNodeRenderState)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_RemoveOnNodeRenderState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveOnNodeRenderState)
+        },
+        ani_native_function {
             "_GestureEventUIObserver_SetClickListenerCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetClickListenerCallback)
@@ -1859,6 +1880,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_GetPageRootNode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetPageRootNode)
+        },
+        ani_native_function {
+            "_DumpLogPrint",
+            "iC{std.core.String}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DumpLogPrint)
         }
     };
 

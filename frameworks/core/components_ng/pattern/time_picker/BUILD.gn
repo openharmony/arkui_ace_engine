@@ -17,6 +17,7 @@ import(
 build_component_ng("time_picker_pattern_ng") {
   is_component_model = true
   sources = [
+    "../picker_utils/toss_animation_controller.cpp",
     "timepicker_column_accessibility_property.cpp",
     "timepicker_column_layout_algorithm.cpp",
     "timepicker_column_pattern.cpp",

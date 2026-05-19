@@ -19,6 +19,7 @@
 
 #include "adapter/ohos/entrance/utils.h"
 #include "base/utils/utils.h"
+#include "base/resource/shared_image_manager.h"
 #include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
 #include "core/components/theme/theme_manager_impl.h"

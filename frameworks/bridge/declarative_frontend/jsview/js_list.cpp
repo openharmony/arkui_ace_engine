@@ -20,7 +20,6 @@
 #include "base/geometry/axis.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
@@ -682,6 +681,57 @@ void JSList::SetEditModeOptions(const JSCallbackInfo& info)
     ListModel::GetInstance()->SetEditModeOptions(options);
 }
 
+void JSList::SetEnableEditMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool enableEditMode = false;
+    JSRef<JSVal> changeEventVal;
+    auto enableVal = info[0];
+    if (enableVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(enableVal);
+        enableVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+    if (enableVal->IsBoolean()) {
+        ParseJsBool(enableVal, enableEditMode);
+    }
+    ListModel::GetInstance()->SetEnableEditMode(enableEditMode);
+    if (changeEventVal->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                               bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("List.EnableEditModeChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ListModel::GetInstance()->SetEnableEditModeBindingEvent(std::move(changeEvent));
+    }
+}
+
+void JSList::SetOnEditModeChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("List.OnEditModeChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(1, &newJSVal);
+    };
+    ListModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
+}
+
 void JSList::SetScrollSnapAnimationSpeed(const JSCallbackInfo& args)
 {
     ScrollSnapAnimationSpeed speed = ScrollSnapAnimationSpeed::NORMAL;
@@ -1078,6 +1128,8 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);
+    JSClass<JSList>::StaticMethod("enableEditMode", &JSList::SetEnableEditMode);
+    JSClass<JSList>::StaticMethod("onEditModeChange", &JSList::SetOnEditModeChange);
     JSClass<JSList>::StaticMethod("scrollSnapAnimationSpeed", &JSList::SetScrollSnapAnimationSpeed);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

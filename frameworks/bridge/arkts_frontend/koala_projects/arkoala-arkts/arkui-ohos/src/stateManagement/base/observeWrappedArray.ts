@@ -26,6 +26,9 @@ final class CONSTANT {
 }
 
 export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedKeyedMeta, ISubscribedWatches {
+    // Shared by every length-changing fireChangeBatch call to avoid 10+ per-call
+    // array allocations. ReadonlyArray<string> blocks accidental mutation.
+    private static readonly LENGTH_AND_ANY_KEY: ReadonlyArray<string> = [CONSTANT.OB_LENGTH, CONSTANT.OB_ARRAY_ANY_KEY];
     public store_: Array<T>;
     @JSONStringifyIgnore
     meta_: IMutableKeyedStateMeta;
@@ -79,7 +82,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     }
 
     public shouldAddRef(): boolean {
-        return (OBSERVE.renderingComponent > 0) && (this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId));
+        return OBSERVE.renderingComponent > 0;
     }
 
     override get length(): int {
@@ -92,15 +95,11 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     override set length(newLen: int) {
         const len = this.store_.length;
         if (len !== newLen) {
-            this.store_.length;
-            if (this.store_.length !== len) {
-                // the Array implementation actually changed the length!
-                this.meta_.fireChange(CONSTANT.OB_LENGTH);
-                this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
-
-                // exec all subscribing @Watch
-                this.executeOnSubscribingWatches('length');
-            }
+            this.store_.length = newLen;
+            // the Array implementation actually changed the length!
+            this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
+            // exec all subscribing @Watch
+            this.executeOnSubscribingWatches('length');
         }
     }
 
@@ -109,6 +108,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(idx as Object | undefined | null));
+            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         const value = this.store_[idx];
         if (!value || typeof value !== 'object') {
@@ -124,11 +124,17 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         const orig = this.store_[idx];
         this.store_[idx] = val;
         if (orig !== this.store_[idx]) {
-            this.meta_.fireChange(String(idx as Object | undefined | null));
-            this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+            const idxKey = String(idx as Object | undefined | null);
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.meta_.fireChange(idxKey);
+                this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
 
             // exec all subscribing @Watch functions
-            this.executeOnSubscribingWatches(String(idx as Object | undefined | null));
+            this.executeOnSubscribingWatches(idxKey);
         }
     }
 
@@ -151,8 +157,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override extendTo(arrayLength: int, initialValue: T): void {
         this.store_.extendTo(arrayLength, initialValue);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
         this.executeOnSubscribingWatches('extendTo');
     }
 
@@ -163,8 +168,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override shrinkTo(arrayLength: int): void {
         this.store_.shrinkTo(arrayLength);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
         this.executeOnSubscribingWatches('shrinkTo');
     }
 
@@ -241,8 +245,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override shift(): T | undefined {
         const ret = this.store_.shift();
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('shift');
@@ -258,8 +261,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override pop(): T | undefined {
         const ret = this.store_.pop();
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('pop');
@@ -274,8 +276,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override pushArray(...val: T[]): int {
         const ret = this.store_.push(...val);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('push');
@@ -290,8 +291,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override pushOne(val: T): int {
         const ret = this.store_.push(val);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('push');
@@ -315,8 +315,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override splice(start: int, deleteIdx: int | undefined, ...items: T[]): Array<T> {
         const ret = this.store_.splice(start, deleteIdx, ...items);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('splice');
@@ -333,8 +332,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override splice(start: int): Array<T> {
         const ret = this.store_.splice(start);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('splice');
@@ -364,8 +362,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override unshift(...values: T[]): int {
         const ret = this.store_.unshift(...values);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(WrappedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('unshift');
@@ -461,7 +458,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override copyWithin(target: int, start: int, end?: int): this {
         this.store_.copyWithin(target, start, end);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        // copyWithin does not modify length — fire only OB_ARRAY_ANY_KEY.
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('copyWithin');
@@ -478,7 +475,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override copyWithin(target: int, start: int): this {
         this.store_.copyWithin(target, start);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        // copyWithin does not modify length — fire only OB_ARRAY_ANY_KEY.
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
@@ -495,7 +492,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override copyWithin(target: int): this {
         this.store_.copyWithin(target);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        // copyWithin does not modify length — fire only OB_ARRAY_ANY_KEY.
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
@@ -514,7 +511,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override fill(value: T, start?: int, end?: int): this {
         this.store_.fill(value, start, end);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        // fill does not modify length — fire only OB_ARRAY_ANY_KEY.
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
@@ -877,7 +874,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      */
     public override reverse(): this {
         this.store_.reverse();
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        // reverse does not modify length — fire only OB_ARRAY_ANY_KEY.
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch

@@ -15,7 +15,6 @@
 
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "arkoala_api_generated.h"

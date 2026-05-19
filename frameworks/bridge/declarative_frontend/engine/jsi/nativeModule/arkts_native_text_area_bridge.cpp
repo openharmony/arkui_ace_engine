@@ -38,6 +38,7 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
 constexpr int NUM_9 = 9;
 constexpr int NUM_13 = 13;
 constexpr int NUM_17 = 17;
@@ -61,6 +62,7 @@ constexpr double DEFAULT_OPACITY = 0.2;
 constexpr uint32_t DEFAULT_OVERFLOW = 4;
 const std::string DEFAULT_FONT_WEIGHT = "400";
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr double DEFAULT_LINE_THICKNESS_SCALE = 1.0;
 
 bool ParseLocalizedPadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
     ArkUISizeType& result)
@@ -922,6 +924,7 @@ ArkUINativeModuleValue TextAreaBridge::SetDecoration(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto container = Container::Current();
@@ -944,8 +947,14 @@ ArkUINativeModuleValue TextAreaBridge::SetDecoration(ArkUIRuntimeCallInfo* runti
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
+    double lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    if (!ArkTSUtils::ParseJsDouble(vm, fifthArg, lineThicknessScale)) {
+        lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : lineThicknessScale;
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaDecoration(
-        nativeNode, textAreaDecoration, color.GetValue(), textDecorationStyle, AceType::RawPtr(resourceObject));
+        nativeNode, textAreaDecoration, color.GetValue(), textDecorationStyle, static_cast<float>(lineThicknessScale),
+        AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
  
@@ -3387,6 +3396,150 @@ ArkUINativeModuleValue TextAreaBridge::ResetSelectedDragPreviewStyle(ArkUIRuntim
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaSelectedDragPreviewStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::SetStrokeJoinStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!(secondArg->IsUndefined()) && !(secondArg->IsNull()) && secondArg->IsNumber()) {
+        int32_t value = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaStrokeJoinStyle(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaStrokeJoinStyle(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue TextAreaBridge::ResetStrokeJoinStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaStrokeJoinStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SetTextAreaShaderStyleSetLinear(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto angleArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    std::vector<RefPtr<ResourceObject>> vectorResObj;
+    std::vector<ArkUIInt32orFloat32> colors;
+    std::vector<ArkUIInt32orFloat32> values;
+ 
+    ArkTSUtils::ParseGradientAngle(vm, angleArg, values);
+    int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
+    ArkTSUtils::ParseJsInt32(vm, directionArg, direction);
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(direction) });
+ 
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
+    auto colorRawPtr = static_cast<void*>(&vectorResObj);
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaLinearGradient(
+        nativeNode, values.data(), values.size(), colors.data(), colors.size(), colorRawPtr);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SetTextAreaShaderStyleSetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaColorShaderColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaColorShaderColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(colorResObj));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue TextAreaBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto centerArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto radiusArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (centerArg->BooleaValue(vm) && (radiusArg->IsNumber() || radiusArg->BooleaValue(vm))) {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        std::vector<RefPtr<ResourceObject>> vectorResObj;
+        std::vector<ArkUIInt32orFloat32> colors;
+        std::vector<ArkUIInt32orFloat32> values;
+        ArkTSUtils::ParseGradientCenter(vm, centerArg, values, vectorResObj);
+        CalcDimension radius;
+        RefPtr<ResourceObject> radiusResObj;
+        auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius, radiusResObj, false);
+        if (radiusResObj) {
+            vectorResObj.push_back(radiusResObj);
+        } else {
+            vectorResObj.push_back(nullptr);
+        }
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(hasRadius) });
+        values.push_back({ .f32 = static_cast<ArkUI_Float32>(radius.Value()) });
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(radius.Unit()) });
+        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+        auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
+        auto colorRawPtr = static_cast<void*>(&vectorResObj);
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaRadialGradient(
+            nativeNode, values.data(), values.size(), colors.data(), colors.size(), colorRawPtr);
+    } else if (colorsArg->BooleaValue(vm)) {
+        SetTextAreaShaderStyleSetLinear(runtimeCallInfo);
+    } else if (colorArg->BooleaValue(vm)) {
+        SetTextAreaShaderStyleSetColor(runtimeCallInfo);
+    } else {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaGradient(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue TextAreaBridge::ResetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaGradient(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

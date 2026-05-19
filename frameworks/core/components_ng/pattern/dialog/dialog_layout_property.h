@@ -47,6 +47,7 @@ public:
         props->propHeight_ = CloneHeight();
         props->propEnableHoverMode_ = CloneEnableHoverMode();
         props->propHoverModeArea_ = CloneHoverModeArea();
+        props->propDisplayModeInSubWindow_ = CloneDisplayModeInSubWindow();
         return props;
     }
 
@@ -64,6 +65,7 @@ public:
         ResetHeight();
         ResetEnableHoverMode();
         ResetHoverModeArea();
+        ResetDisplayModeInSubWindow();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogAlignment, DialogAlignment, PROPERTY_UPDATE_MEASURE);
@@ -80,6 +82,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Height, CalcDimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverModeArea, HoverModeAreaType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayModeInSubWindow, DialogDisplayModeInSubWindow, PROPERTY_UPDATE_MEASURE);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
@@ -110,6 +113,9 @@ public:
         json->PutExtAttr("enableHoverMode", propEnableHoverMode_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("HoverModeAreaType", GetHoverModeAreaValue(HoverModeAreaType::BOTTOM_SCREEN) ==
             HoverModeAreaType::BOTTOM_SCREEN ? "BOTTOM_SCREEN" : "TOP_SCREEN", filter);
+        json->PutExtAttr("DisplayModeInSubWindow",
+            GetDisplayModeInSubWindowValue(DialogDisplayModeInSubWindow::SCREEN_BASED)
+                == DialogDisplayModeInSubWindow::SCREEN_BASED ? "SCREEN_BASED" : "WINDOW_BASED", filter);
     }
 
 private:

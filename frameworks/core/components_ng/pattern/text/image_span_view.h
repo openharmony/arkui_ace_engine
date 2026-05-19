@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/image/image_source_info.h"
 #include "frameworks/core/components/image/image_event.h"
 
 namespace OHOS::Ace::NG {

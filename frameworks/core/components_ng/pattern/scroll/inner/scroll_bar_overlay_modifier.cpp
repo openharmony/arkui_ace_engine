@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
+#include "core/animation/animation_pub.h"
+#include "core/animation/curves.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

@@ -28,6 +28,7 @@
 #include "base/memory/type_info_base.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/constant.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -140,6 +141,7 @@ void TextFieldPattern::OnDetachFromMainTreeMultiThread()
     isDetachFromMainTree_ = true;
     RemoveTextFieldInfo();
     RemoveFillContentMap();
+    RemoveMSDPAutoFillType();
     if (selectOverlay_) {
         CloseSelectOverlay();
     }

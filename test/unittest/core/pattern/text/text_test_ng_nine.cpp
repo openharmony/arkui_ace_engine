@@ -15,6 +15,7 @@
 
 #include "text_base.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -534,6 +535,45 @@ HWTEST_F(TextTestNgNine, HandleTouchEvent001, TestSize.Level1)
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -2);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -2);
     pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: HandleTouchEvent002
+ * @tc.desc: test HandleTouchEvent after enabling one step drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, HandleTouchEvent002, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textFrameNode, nullptr);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    pattern->GetTextController()->CloseSelectionMenu();
+
+    int32_t callBack = 0;
+    std::function<void()> buildFunc = [&callBack]() {
+        callBack = 1;
+        return;
+    };
+    pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc, {});
+    ASSERT_TRUE(static_cast<bool>(pattern->oneStepDragController_));
+    EXPECT_FALSE(pattern->GetIsTouchPressed());
+
+    TouchEventInfo touchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetLocalLocation(Offset(0, 0));
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    std::list<TouchLocationInfo> touchLocationInfos;
+    touchLocationInfos.emplace_back(touchLocationInfo);
+    touchEventInfo.SetChangedTouches(std::move(touchLocationInfos));
+
+    pattern->HandleTouchEvent(touchEventInfo);
+
+    EXPECT_TRUE(pattern->GetIsTouchPressed());
 }
 
 /**
@@ -1417,6 +1457,49 @@ HWTEST_F(TextTestNgNine, HandleClickAISpanEvent, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    auto textController = pattern->GetTextController();
+    textController->CloseSelectionMenu();
+    
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+    SelectMenuParam menuParam;
+    pattern->BindPreviewMenu(TextSpanType::TEXT, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    EXPECT_FALSE(static_cast<bool>(pattern->oneStepDragController_->imageDragParam_));
+    EXPECT_FALSE(static_cast<bool>(pattern->oneStepDragController_->placeholderDragParam_));
+    pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    EXPECT_TRUE(static_cast<bool>(pattern->oneStepDragController_));
+    EXPECT_TRUE(static_cast<bool>(pattern->oneStepDragController_->imageDragParam_));
+    EXPECT_FALSE(static_cast<bool>(pattern->oneStepDragController_->placeholderDragParam_));
+}
+
+/**
+ * @tc.name: BindPreviewMenu002
+ * @tc.desc: test BindPreviewMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, BindPreviewMenu002, TestSize.Level1)
 {
     auto textFrameNode =
         FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });

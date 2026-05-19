@@ -1446,4 +1446,42 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmSetAlignmentSwitchLessThanAPIT
     SystemProperties::orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
     EXPECT_FALSE(dialogLayoutAlgorithm.SetAlignmentSwitchLessThanAPITwelve(maxSize, childSize, topLeftPoint));
 }
+
+/**
+ * @tc.name: DialogLayoutAlgorithmAvoidTitlebarInSubwindow
+ * @tc.desc: Test DialogLayoutAlgorithm::AvoidTitlebarInSubwindow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmAvoidTitlebarInSubwindow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    /**
+     * @tc.steps: step2. create dialog with a custom node and layoutWrapper.
+     * @tc.expected: the dialog node created successfully.
+     */
+    DialogProperties propsCustom;
+    propsCustom.type = DialogType::ACTION_SHEET;
+    propsCustom.title = "dialog test";
+    propsCustom.content = "dialog content test";
+    propsCustom.sheetsInfo = sheetItems;
+    propsCustom.buttons = btnItems;
+    auto dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto property = dialogWithCustom->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    dialogLayoutAlgorithm.isWindowBased_ = true;
+    OffsetF topLeftPoint;
+    dialogLayoutAlgorithm.AvoidTitlebarInSubwindow(topLeftPoint, property);
+    EXPECT_EQ(topLeftPoint.GetY(), 0);
+    
+    dialogLayoutAlgorithm.parentWindowRect_ = { 0, 1, 0, 0 };
+    dialogLayoutAlgorithm.AvoidTitlebarInSubwindow(topLeftPoint, property);
+    EXPECT_EQ(topLeftPoint.GetY(), 1.0);
+}
 } // namespace OHOS::Ace::NG

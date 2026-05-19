@@ -411,6 +411,7 @@ void RotationRecognizer::GetGestureEventInfo(GestureEvent& info)
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
+    SetGestureEventCurrentLocalLocation(info, touchPoint);
     info.SetForce(touchPoint.force);
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());

@@ -14,6 +14,8 @@
  */
 
 #include "base/subwindow/subwindow_manager.h"
+
+#include "base/error/error_code.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -308,8 +310,14 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const N
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
-        return;
+        auto parentContainerId = GetParentContainerId(containerId);
+        if (parentContainerId >= MIN_SUBCONTAINER_ID) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu in nested subwindow");
+            return;
+        }
+        containerId = parentContainerId;
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+            "reuse parent container for nested menu, containerId:%{public}d", containerId);
     }
     auto subwindow = GetOrCreateMenuSubWindow(containerId, menuParam.reuse);
     CHECK_NULL_VOID(subwindow);
@@ -328,8 +336,14 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
-        return;
+        auto parentContainerId = GetParentContainerId(containerId);
+        if (parentContainerId >= MIN_SUBCONTAINER_ID) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu in nested subwindow");
+            return;
+        }
+        containerId = parentContainerId;
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+            "reuse parent container for nested menu, containerId:%{public}d", containerId);
     }
     auto subwindow = GetOrCreateMenuSubWindow(containerId, menuParam.reuse);
     CHECK_NULL_VOID(subwindow);
@@ -469,8 +483,14 @@ void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, cons
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show popup ng again");
-        return;
+        auto parentContainerId = GetParentContainerId(containerId);
+        if (parentContainerId >= MIN_SUBCONTAINER_ID) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show popup ng in nested subwindow");
+            return;
+        }
+        containerId = parentContainerId;
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+            "reuse parent container for nested popup ng, containerId:%{public}d", containerId);
     }
 
     auto manager = SubwindowManager::GetInstance();
@@ -543,7 +563,11 @@ void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
-        return;
+        auto parentContainerId = GetParentContainerId(containerId);
+        if (parentContainerId >= MIN_SUBCONTAINER_ID) {
+            return;
+        }
+        containerId = parentContainerId;
     }
     auto targetId = targetNode->GetId();
     auto manager = SubwindowManager::GetInstance();

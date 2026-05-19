@@ -885,9 +885,44 @@ WidthBreakpoint GetCalcWidthBreakpoint(const OHOS::Ace::WidthLayoutBreakPoint &f
     return breakpoint;
 }
 
+WidthBreakpoint GetCalcWidthBreakpoint(const std::vector<double>& customBreakpoints,
+    double density, double width)
+{
+    WidthLayoutBreakPoint finalBreakpoints(customBreakpoints);
+    return GetCalcWidthBreakpoint(finalBreakpoints, density, width);
+}
+
 WidthBreakpoint GetCommonWidthBreakpoint(double width, double density)
 {
     WidthLayoutBreakPoint finalBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
     return GetCalcWidthBreakpoint(finalBreakpoints, density, width);
+}
+
+HeightBreakpoint GetCalcHeightBreakpoint(const OHOS::Ace::HeightLayoutBreakPoint &finalBreakpoints,
+    double aspectRatio)
+{
+    HeightBreakpoint breakpoint;
+    if (finalBreakpoints.heightVPRATIOSM_ < 0 || aspectRatio < finalBreakpoints.heightVPRATIOSM_) {
+        breakpoint = HeightBreakpoint::HEIGHT_SM;
+    } else if (finalBreakpoints.heightVPRATIOMD_ < 0 || aspectRatio < finalBreakpoints.heightVPRATIOMD_) {
+        breakpoint = HeightBreakpoint::HEIGHT_MD;
+    } else {
+        breakpoint = HeightBreakpoint::HEIGHT_LG;
+    }
+    return breakpoint;
+}
+
+HeightBreakpoint GetCalcHeightBreakpoint(const std::vector<double>& customBreakpoints,
+    double aspectRatio)
+{
+    HeightLayoutBreakPoint finalBreakpoints(customBreakpoints.size() > 0 ? customBreakpoints[0] : -1.0,
+                                            customBreakpoints.size() > 1 ? customBreakpoints[1] : -1.0);
+    return GetCalcHeightBreakpoint(finalBreakpoints, aspectRatio);
+}
+
+HeightBreakpoint GetCommonHeightBreakpoint(double aspectRatio)
+{
+    HeightLayoutBreakPoint finalBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
+    return GetCalcHeightBreakpoint(finalBreakpoints, aspectRatio);
 }
 } // namespace OHOS::Ace::NG

@@ -14,9 +14,11 @@
  */
 
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/common/container.h"
 
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"

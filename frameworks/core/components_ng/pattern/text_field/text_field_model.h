@@ -55,6 +55,7 @@ struct Font {
     std::optional<SuperscriptStyle> superscript;
     std::optional<double> fontSizeScale;
     std::optional<FONT_VARIATIONS_LIST> fontVariations;
+    std::optional<StrokeJoinStyle> strokeJoinStyle;
 
     RefPtr<ResourceObject> fontColorResObj;
     RefPtr<ResourceObject> strokeColorResObj;
@@ -456,6 +457,7 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
+    virtual void SetLineThicknessScale(float value) {};
     virtual void SetTextOverflow(Ace::TextOverflow value) {};
     virtual void SetTextIndent(const Dimension& value) {};
     virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) = 0;
@@ -473,6 +475,10 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetStrokeJoinStyle(StrokeJoinStyle style) = 0;
+    virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
+    virtual void SetColorShaderStyle(const Color& value) = 0;
+    virtual void ResetGradientShaderStyle() = 0;
     virtual void SetOrphanCharOptimization(bool isOrphanChar) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) = 0;

@@ -147,7 +147,7 @@ private:
      * @return LayoutWrapper of the FlowItem.
      */
     RefPtr<LayoutWrapper> MeasureItem(
-        int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, bool isCache) const;
+        int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, std::optional<int64_t> deadline) const;
 
     /**
      * @brief Layout a FlowItem at [idx].

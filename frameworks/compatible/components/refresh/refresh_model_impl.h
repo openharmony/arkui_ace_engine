@@ -16,18 +16,21 @@
 #ifndef FRAMEWORKS_COMPATILBE_COMPONENTS_REFRESH_REFRESH_MODEL_IMPL_H
 #define FRAMEWORKS_COMPATILBE_COMPONENTS_REFRESH_REFRESH_MODEL_IMPL_H
 
-#include <optional>
 #include <string>
 
-#include "frameworks/compatible/components/refresh/refresh_component.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_model.h"
+
+namespace OHOS::Ace {
+class RefreshComponent;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT RefreshModelImpl : public RefreshModel {
 public:
     void Create() override;
-    void Pop() override;
+    // @deprecated
+    void Pop() override {}
     void SetRefreshing(bool isRefreshing) override;
     void SetRefreshDistance(const Dimension& refreshDistance) override;
     void SetUseOffset(bool isUseOffset) override;

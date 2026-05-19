@@ -77,7 +77,10 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         return FactoryInternal.mkMutableStateMeta('');
     }
     public makeMutableStateMeta(observedObject: IObservedObject | undefined, propertyName: string): IMutableStateMeta {
-        const meta = FactoryInternal.mkMutableStateMeta(propertyName) as MutableStateMeta;
+        // observedObject is the wildcard LSV target — captured at construction
+        // so per-property fireChange() doesn't need a per-call target argument.
+        const meta = FactoryInternal.mkMutableStateMeta(
+            propertyName, observedObject) as MutableStateMeta;
         if (observedObject) {
             const info = ObservedObjectRegistry.getOrRegister(observedObject!);
             info.setType(propertyName);

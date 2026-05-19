@@ -460,22 +460,6 @@ std::optional<bool> GetOptionalBoolPropertyByName(ani_env* env, ani_object objec
     return value == ANI_TRUE;
 }
 
-std::optional<bool> HasOwnProperty(ani_env* env, ani_object object, const char* key)
-{
-    CHECK_NULL_RETURN(env && object && key, std::nullopt);
-    ani_string aniKey = nullptr;
-    if (ANI_OK != env->String_NewUTF8(key, std::strlen(key), &aniKey)) {
-        return std::nullopt;
-    }
-
-    ani_boolean hasOwn = ANI_FALSE;
-    if (ANI_OK !=
-        env->Object_CallMethodByName_Boolean(object, "hasOwnProperty", "C{std.core.String}:z", &hasOwn, aniKey)) {
-        return std::nullopt;
-    }
-    return hasOwn == ANI_TRUE;
-}
-
 RefPtr<SmartGestureManager> GetManagerByInstanceId(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -599,10 +583,6 @@ public:
             return MonitorResolutionParseResult::SUCCESS;
         }
         if (IsUndefinedOrNull(env, selectedProposalRef)) {
-            auto hasOwnSelectedProposal = HasOwnProperty(env, value, SELECTED_PROPOSAL_KEY);
-            if (hasOwnSelectedProposal.has_value() && hasOwnSelectedProposal.value()) {
-                return MonitorResolutionParseResult::INVALID_SELECTED_PROPOSAL;
-            }
             return MonitorResolutionParseResult::SUCCESS;
         }
 
@@ -842,6 +822,14 @@ class SmartGestureMonitorRegistry final {
 public:
     static bool Register(ani_env* env, int32_t instanceId, ani_fn_object callback)
     {
+        auto iter = states_.find(instanceId);
+        if (iter != states_.end()) {
+            for (const auto& state : iter->second) {
+                if (state && state->MatchesCallback(env, callback)) {
+                    return true;
+                }
+            }
+        }
         auto state = SmartGestureMonitorState::Create(env, instanceId, callback);
         CHECK_NULL_RETURN(state, false);
         states_[instanceId].emplace_back(std::move(state));
@@ -850,30 +838,28 @@ public:
 
     static bool Unregister(ani_env* env, int32_t instanceId, ani_fn_object callback)
     {
-        std::vector<std::shared_ptr<SmartGestureMonitorState>> statesToDetach;
+        std::shared_ptr<SmartGestureMonitorState> stateToDetach;
         auto iter = states_.find(instanceId);
         if (iter == states_.end() || iter->second.empty()) {
             return false;
         }
         auto& stateStack = iter->second;
-        auto removeIter = std::remove_if(stateStack.begin(), stateStack.end(),
-            [&statesToDetach, env, callback](const std::shared_ptr<SmartGestureMonitorState>& state) {
-                if (!state || !state->MatchesCallback(env, callback)) {
-                    return false;
-                }
-                statesToDetach.emplace_back(state);
-                return true;
-            });
-        stateStack.erase(removeIter, stateStack.end());
+        for (auto reverseIter = stateStack.rbegin(); reverseIter != stateStack.rend(); ++reverseIter) {
+            auto state = *reverseIter;
+            if (!state || !state->MatchesCallback(env, callback)) {
+                continue;
+            }
+            stateToDetach = state;
+            stateStack.erase(std::next(reverseIter).base());
+            break;
+        }
         if (stateStack.empty()) {
             states_.erase(iter);
         }
-        for (const auto& state : statesToDetach) {
-            if (state) {
-                state->Detach();
-            }
+        if (stateToDetach) {
+            stateToDetach->Detach();
         }
-        return !statesToDetach.empty();
+        return stateToDetach != nullptr;
     }
 
     static bool Clear(int32_t instanceId)
@@ -921,7 +907,7 @@ public:
             }
             return resolution;
         }
-        return CreateAcceptedResolution();
+        return CreateRejectedResolution();
     }
 
 private:

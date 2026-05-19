@@ -14,9 +14,10 @@
 */
 
 #include "base/utils/utf_helper.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/render/paragraph.h"
-
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace {
 void TLVUtil::WriteString(std::vector<uint8_t>& buff, const std::string& value)
@@ -180,7 +181,7 @@ void TLVUtil::WriteTextShadow(std::vector<uint8_t>& buff, Shadow& value)
 
 Shadow TLVUtil::ReadTextShadow(std::vector<uint8_t>& buff, int32_t& cursor)
 {
-    Shadow shadow;
+    Shadow shadow(0.0);
     if (ReadUint8(buff, cursor) != TLV_TEXTSHADOW_TAG) {
         return shadow;
     }
@@ -573,5 +574,191 @@ NG::LeadingMargin TLVUtil::ReadLeadingMargin(std::vector<uint8_t>& buff, int32_t
         l.pixmap = ReadPixelMap(buff, cursor);
     }
     return l;
+}
+
+void TLVUtil::WriteGradientColors(std::vector<uint8_t>& buff, NG::Gradient& value)
+{
+    WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_GRADIENT_COLORS);
+    auto gradientColors = value.GetColors();
+    auto size = static_cast<int32_t>(gradientColors.size());
+    WriteInt32(buff, size);
+    for (auto& color: gradientColors) {
+        WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_GRADIENT_COLOR);
+        Color c = color.GetColor();
+        WriteColor(buff, c);
+        bool hasValue = color.GetHasValue();
+        WriteBool(buff, hasValue);
+        WriteDimension(buff, color.GetDimension());
+    }
+}
+ 
+std::optional<NG::Gradient> TLVUtil::ReadGradientColors(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    std::optional<NG::Gradient> gradient;
+    if (ReadUint8(buff, cursor) != TLV_SPAN_TEXT_LINE_STYLE_GRADIENT_COLORS) {
+        return gradient;
+    }
+    int32_t size = ReadInt32(buff, cursor);
+    if (size < 0) {
+        return gradient;
+    }
+    NG::Gradient value;
+    for (auto i = 0; i < size; i++) {
+        if (ReadUint8(buff, cursor) != TLV_SPAN_TEXT_LINE_STYLE_GRADIENT_COLOR) {
+            continue;
+        }
+        NG::GradientColor gradientColor;
+        gradientColor.SetColor(ReadColor(buff, cursor));
+        gradientColor.SetHasValue(ReadBool(buff, cursor));
+        gradientColor.SetDimension(ReadDimension(buff, cursor));
+        value.AddColor(gradientColor);
+    }
+    return value;
+}
+ 
+void TLVUtil::WriteRadialGradient(std::vector<uint8_t>& buff, NG::Gradient& value)
+{
+    auto radialGradient = value.GetRadialGradient();
+    CHECK_NULL_VOID(radialGradient);
+    WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT);
+    WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_BEGIN_TAG);
+    auto radialCenterX = radialGradient->radialCenterX;
+    if (radialCenterX.has_value()) {
+        WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_CENTERX);
+        WriteDimension(buff, radialCenterX.value());
+    }
+    auto radialCenterY = radialGradient->radialCenterY;
+    if (radialCenterY.has_value()) {
+        WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_CENTERY);
+        WriteDimension(buff, radialCenterY.value());
+    }
+    auto radius = radialGradient->radialVerticalSize;
+    if (radius.has_value()) {
+        WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_RADIUS);
+        WriteDimension(buff, radius.value());
+    }
+    WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_END_TAG);
+    WriteGradientColors(buff, value);
+    WriteBool(buff, value.GetRepeat());
+}
+ 
+std::optional<NG::Gradient> TLVUtil::ReadRadialGradient(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    if (ReadUint8(buff, cursor) != TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_BEGIN_TAG) {
+        return std::nullopt;
+    }
+    NG::Gradient value;
+    std::optional<Dimension> centerX;
+    std::optional<Dimension> centerY;
+    std::optional<Dimension> radius;
+    for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
+        tag != TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
+        switch (tag) {
+            case TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_CENTERX: {
+                centerX = ReadDimension(buff, cursor);
+                break;
+            }
+            case TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_CENTERY: {
+                centerY = ReadDimension(buff, cursor);
+                break;
+            }
+            case TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_RADIUS: {
+                radius = ReadDimension(buff, cursor);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    auto gradientWithColor = ReadGradientColors(buff, cursor);
+    if (gradientWithColor.has_value()) {
+        auto colors = gradientWithColor.value().GetColors();
+        for (auto& color : colors) {
+            auto tmpColor = color;
+            value.AddColor(tmpColor);
+        }
+    }
+    value.SetRepeat(ReadBool(buff, cursor));
+    value.CreateGradientWithType(NG::GradientType::RADIAL);
+    CHECK_NULL_RETURN(value.GetRadialGradient(), std::nullopt);
+    if (radius.has_value()) {
+        value.GetRadialGradient()->radialVerticalSize = CalcDimension(radius.value());
+        value.GetRadialGradient()->radialHorizontalSize = CalcDimension(radius.value());
+    }
+    if (centerX.has_value()) {
+        value.GetRadialGradient()->radialCenterX = CalcDimension(centerX.value());
+    }
+    if (centerY.has_value()) {
+        value.GetRadialGradient()->radialCenterY = CalcDimension(centerY.value());
+    }
+    return value;
+}
+ 
+void TLVUtil::WriteLinearGradient(std::vector<uint8_t>& buff, NG::Gradient& value)
+{
+    auto linearGradient = value.GetLinearGradient();
+    CHECK_NULL_VOID(linearGradient);
+    WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT);
+    WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_BEGIN_TAG);
+    auto linearX = linearGradient->linearX;
+    auto linearY = linearGradient->linearY;
+    auto direction = GradientConvert::ParseGradientDirection(value);
+    if (linearX.has_value() || linearY.has_value()) {
+        WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_DIRECTION);
+        WriteInt32(buff, static_cast<int32_t>(direction.value_or(NG::GradientDirection::NONE)));
+    }
+    auto angle = linearGradient->angle;
+    if (angle.has_value()) {
+        WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_ANGLE);
+        WriteDimension(buff, angle.value());
+    }
+    WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_END_TAG);
+    WriteGradientColors(buff, value);
+    WriteBool(buff, value.GetRepeat());
+}
+ 
+std::optional<NG::Gradient> TLVUtil::ReadLinearGradient(std::vector<uint8_t>& buff, int32_t& cursor)
+{
+    std::optional<NG::Gradient> gradient;
+    if (ReadUint8(buff, cursor) != TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_BEGIN_TAG) {
+        return gradient;
+    }
+    NG::Gradient value;
+    std::optional<int32_t> direction;
+    std::optional<Dimension> angle;
+    for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
+        tag != TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
+        switch (tag) {
+            case TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_DIRECTION: {
+                direction = ReadInt32(buff, cursor);
+                break;
+            }
+            case TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_ANGLE: {
+                angle = ReadDimension(buff, cursor);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    auto gradientWithColor = ReadGradientColors(buff, cursor);
+    if (gradientWithColor.has_value()) {
+        auto colors = gradientWithColor.value().GetColors();
+        for (auto& color : colors) {
+            auto tmpColor = color;
+            value.AddColor(tmpColor);
+        }
+    }
+    value.SetRepeat(ReadBool(buff, cursor));
+    value.CreateGradientWithType(NG::GradientType::LINEAR);
+    CHECK_NULL_RETURN(value.GetLinearGradient(), gradient);
+    if (angle.has_value()) {
+        value.GetLinearGradient()->angle = angle.value();
+    }
+    if (direction.has_value() && 0 <= direction.value() &&
+            direction.value() <= static_cast<int32_t>(NG::GradientDirection::END_TO_START)) {
+        GradientConvert::SetGradientDirection(value, static_cast<NG::GradientDirection> (direction.value()));
+    }
+    return value;
 }
 } // namespace OHOS::Ace

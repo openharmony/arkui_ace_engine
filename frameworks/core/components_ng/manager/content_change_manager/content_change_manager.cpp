@@ -261,10 +261,9 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
         currentContentChangeConfig_->reportDelayTime = DEFAULT_COMPONENT_REPORT_DELAY_TIME;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] StartContentChangeReport: ratio:%f, minReportTime:%d, "
-        "minWidth:%d, minHeight:%d, reportDelayTime:%d",
-        currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime,
-        currentContentChangeConfig_->minWidth, currentContentChangeConfig_->minHeight,
-        currentContentChangeConfig_->reportDelayTime);
+        "minWidth:%d, minHeight:%d, reportDelayTime:%d", currentContentChangeConfig_->textContentRatio,
+        currentContentChangeConfig_->minReportTime, currentContentChangeConfig_->minWidth,
+        currentContentChangeConfig_->minHeight, currentContentChangeConfig_->reportDelayTime);
     LOGI("[ContentChangeManager] StartContentChangeReport: ratio:%{public}f, minReportTime:%{public}d, "
         "minWidth:%{public}d, minHeight:%{public}d, reportDelayTime:%{public}d",
         currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime,
@@ -281,6 +280,7 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
     changedSwiperNodes_.clear();
     scrollingNodes_.clear();
     transitioningNodes_.clear();
+    scrollingSwiperNodes_.clear();
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
@@ -547,6 +547,25 @@ void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
 
     textAABB_.Reset();
     textCollecting_ = false;
+}
+
+void ContentChangeManager::OnSwiperScrollEnd(const RefPtr<FrameNode>& keyNode)
+{
+    CHECK_NULL_VOID(keyNode);
+    ACE_SCOPED_TRACE("[ContentChangeManager] OnSwiperScrollEnd");
+    scrollingSwiperNodes_.erase(keyNode->GetId());
+}
+
+void ContentChangeManager::OnSwiperScrollStart(const RefPtr<FrameNode>& keyNode)
+{
+    CHECK_NULL_VOID(keyNode);
+    ACE_SCOPED_TRACE("[ContentChangeManager] OnSwiperScrollStart");
+    scrollingSwiperNodes_.emplace(keyNode->GetId());
+}
+
+bool ContentChangeManager::IsSwiperScrolling() const
+{
+    return !scrollingSwiperNodes_.empty();
 }
 
 void ContentChangeManager::OnScrollChangeStart(const RefPtr<FrameNode>& keyNode)

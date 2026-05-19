@@ -112,10 +112,7 @@ bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const To
     auto pattern = GetPattern<WindowPattern>();
     if (pattern != nullptr) {
         auto hotAreas = pattern->GetHotAreas();
-        if (!hotAreas.empty()) {
-            if (!pattern->GetSessionTouchable()) {
-                return true;
-            }
+        if (!hotAreas.empty() && pattern->GetSessionTouchable()) {
             return IsOutOfHotAreas(hotAreas, parentLocalPoint);
         }
     }

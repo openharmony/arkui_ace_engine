@@ -66,6 +66,7 @@ export interface ArkCustomComponent {
 
     // dump info
     onDumpInspector(): string;
+    onDumpInfo(commands: string[]): void;
 
     // dfx
     getName(): string;

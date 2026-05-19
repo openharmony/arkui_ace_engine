@@ -273,6 +273,18 @@ export function RectImpl(
     })
 }
 
+@memo
+export function Rect(
+    @memo @memo_skip
+    style: ((attributes: RectAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkRectComponent>((): ArkRectComponent => {
+        return new ArkRectComponent()
+    })
+    NodeAttach<ArkRectPeer>((): ArkRectPeer => ArkRectPeer.create(receiver), (_: ArkRectPeer): void => {
+        style?.(receiver)
+    })
+}
 export class RectOptions_serializer {
     public static write(buffer: SerializerBase, value: RectOptions): void {
         let valueSerializer: SerializerBase = buffer

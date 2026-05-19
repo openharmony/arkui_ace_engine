@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_FRONTEND_DELEGATE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_FRONTEND_DELEGATE_H
 
+#include <map>
 #include <vector>
 
 #include "base/geometry/size.h"
@@ -23,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/frontend.h"
 #include "core/common/router_recover_record.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"

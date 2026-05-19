@@ -791,6 +791,7 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
         .deadline = deadline,
     };
     itemGroup->SetContentOffset(listSizeValues.contentStartOffset, listSizeValues.contentEndOffset);
+    itemGroup->SetFixOffset(listSizeValues.startFixOffset, listSizeValues.endFixOffset);
     itemGroup->SetCacheParam(param);
     itemGroup->SetListLayoutProperty(listLayoutProperty);
     itemGroup->SetListMainSize(listSizeValues.startPos, listSizeValues.endPos, listSizeValues.referencePos,

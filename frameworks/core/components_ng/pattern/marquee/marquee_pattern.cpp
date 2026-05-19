@@ -14,6 +14,7 @@
  */
 
 #include "base/utils/multi_thread.h"
+#include "core/common/container.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
@@ -201,7 +202,7 @@ void MarqueePattern::StartMarqueeAnimation()
             needSecondPlay, StartMarqueeAnimationType::BOTH);
         return;
     }
-    auto startPosition = GetTextOffset();
+    auto startPosition = GetTextOffset(true);
     PlayMarqueeAnimation(startPosition, repeatCount, needSecondPlay);
 }
 
@@ -333,7 +334,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
         };
         AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
         cancelAnimationCallbacl();
-        auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus();
+        auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus(nullptr, true);
         if (status != CancelAnimationStatus::SUCCESS &&
             status != CancelAnimationStatus::EMPTY_PENDING_SYNC_LIST) {
             ACE_SCOPED_TRACE("Marquee stop property sync failed");
@@ -389,7 +390,7 @@ void MarqueePattern::StopAndResetAnimation()
 void MarqueePattern::ExecuteStopMarquee()
 {
     float offsetX = 0.0f;
-    if (!hasStart_ || GetTextOffsetOnly() != offsetX) {
+    if (!hasStart_ || GetTextOffset() != offsetX) {
         return;
     }
     hasStart_ = false;
@@ -469,7 +470,7 @@ void MarqueePattern::UpdateTextTranslateXY(float offsetX, bool cancel, bool isFi
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-float MarqueePattern::GetTextOffset()
+float MarqueePattern::GetTextOffset(bool needResetOffset)
 {
     float offsetX = 0.0f;
     if (!IsRunMarquee()) {
@@ -486,28 +487,9 @@ float MarqueePattern::GetTextOffset()
     if (playStatus && (marqueeUpdateStrategy == MarqueeUpdateStrategy::PRESERVE_POSITION) &&
         lastAnimationOffset_.has_value()) {
         offsetX = lastAnimationOffset_.value().GetX();
-        lastAnimationOffset_ = std::nullopt;
-    }
-    return offsetX;
-}
-
-float MarqueePattern::GetTextOffsetOnly()
-{
-    float offsetX = 0.0f;
-    if (!IsRunMarquee()) {
-        return offsetX;
-    }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, offsetX);
-    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, offsetX);
-    auto marqueeUpdateStrategy = layoutProperty->GetMarqueeUpdateStrategy().value_or(MarqueeUpdateStrategy::DEFAULT);
-    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, offsetX);
-    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
-    if (playStatus && (marqueeUpdateStrategy == MarqueeUpdateStrategy::PRESERVE_POSITION) &&
-        lastAnimationOffset_.has_value()) {
-        offsetX = lastAnimationOffset_.value().GetX();
+        if (needResetOffset) {
+            lastAnimationOffset_ = std::nullopt;
+        }
     }
     return offsetX;
 }

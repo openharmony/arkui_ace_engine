@@ -111,6 +111,7 @@ protected:
     bool ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle, const TextStyle& textStyle,
         std::vector<TextStyle>& textStyles);
     void UpdateShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty, TextStyle& textStyle);
+    ACE_FORCE_EXPORT void RelayoutShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty);
     ACE_FORCE_EXPORT virtual ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper);
     virtual bool IsNeedParagraphReLayout() const
     {

@@ -80,6 +80,13 @@ public:
     void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) override;
     void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) override;
     void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) override;
+    void SetBarFloatingStyle(const BarFloatingStyleParameters& parameters) override;
+    void ResetBarFloatingStyle() override;
+    static void ProcessDimensionWithResourceObj(
+        FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj);
+    static void ProcessColorWithResourceObj(
+        FrameNode* frameNode, const std::string& name, const RefPtr<ResourceObject>& resObj);
+
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -150,6 +157,9 @@ public:
         bool isModifier = false);
     static void HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         bool isModifier = false);
+
+    static void SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters);
+    static void ResetBarFloatingStyle(FrameNode* frameNode);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

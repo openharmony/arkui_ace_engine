@@ -90,7 +90,8 @@ CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus()
     return CloseImplicitCancelAnimationReturnStatus(nullptr);
 }
 
-CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(
+    const RefPtr<PipelineBase>& context, bool nodeExceptionSensitive)
 {
 #ifdef ENHANCED_ANIMATION
     AnimManager::GetInstance().CloseAnimation();

@@ -26,11 +26,12 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/event/pointer_event.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 
@@ -46,13 +47,14 @@ class AccessibilityEventInfo;
 namespace OHOS::Ace {
 struct UiMaterialParam;
 class NotifyDragEvent;
+class GestureEvent;
+using GestureEventFunc = std::function<void(GestureEvent& info)>;
 }
 
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
-class FocusPattern;
-struct ScopeFocusAlgorithm;
+class VerticalOverflowHandler;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -246,6 +248,23 @@ public:
     {
         CheckLocalized();
         PropagateForegroundColorToChildren();
+    }
+
+    virtual bool NeedReadFontScaleFromEnv()
+    {
+        return false;
+    }
+
+    void ReadFontScaleFromEnv();
+
+    std::optional<float> GetEnvFontScale() const
+    {
+        return envFontScale_;
+    }
+
+    void SetEnvFontScale(const std::optional<float>& fontScale)
+    {
+        envFontScale_ = fontScale;
     }
 
     void PropagateForegroundColorToChildren()
@@ -850,10 +869,7 @@ public:
     {
         return false;
     }
-    virtual RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
-    {
-        return nullptr;
-    }
+    virtual RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host);
     virtual void OnHoverWithHightLight(bool isHover) {}
     virtual void OnPaintFocusState(bool isFocus) {}
     virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
@@ -882,6 +898,7 @@ protected:
 
     WeakPtr<FrameNode> frameNode_;
     RefPtr<PatternResourceManager> resourceMgr_;
+    std::optional<float> envFontScale_;
 
     std::function<bool()> onNeedSoftkeyboardCallback_;
 private:

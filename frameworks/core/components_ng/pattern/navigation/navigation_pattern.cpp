@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include <algorithm>
@@ -32,6 +33,7 @@
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -1319,7 +1321,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     }
     auto indexes = navigationStack_->GetAllPathIndex();
     auto toIndex = indexes.size() - 1;
-    auto topNavPath = navigationStack_->GetTopNavPath();
+    auto topNavPath = navigationStack_->GetPreTopNavPath();
     FireNavigateChangeCallback();
     FireInterceptionBeforeLifeCycleEvent(topNavPath, toIndex);
     needSyncWithJsStack_ = false;
@@ -6246,6 +6248,21 @@ void NavigationPattern::UpdateNavigationStatus()
     SetNavigationWidthToolBarManager(initNavBarWidth_, frameWidth - initNavBarWidth_ - dividerWidth, dividerWidth);
 }
 
+void NavigationPattern::InitToolBarManager()
+{
+    if (!toolbarManager_) {
+        auto pipeline = GetHost()->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        toolbarManager_ = pipeline->GetToolbarManager();
+        UpdateNavigationStatus();
+    }
+}
+
+RefPtr<ToolbarManager> NavigationPattern::GetToolBarManager()
+{
+    return toolbarManager_;
+}
+
 SizeF NavigationPattern::GetNavigationFrameSize()
 {
     auto host = GetHost();
@@ -6352,20 +6369,19 @@ bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
 {
     CHECK_NULL_RETURN(preTopDest, false);
     CHECK_NULL_RETURN(curTopDest, false);
+    if (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
+            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        // In both navigation mode and displace mode, treat dialog destinations as transPages
+        // by default even when developers do not configure them explicitly. This prevents
+        // dialog push/pop from being misidentified as secondary-push-primary transitions.
+        return false;
+    }
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_RETURN(forceSplitMgr, false);
-    if (forceSplitMgr->GetBehaviorMode() == ForceSplitBehaviorMode::DISPLACE &&
-        (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
-            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG)) {
-        // In navigation displace mode, treat dialog destinations as transPages by default even
-        // when developers do not configure them explicitly. This prevents dialog push/pop from
-        // being misidentified as secondary-push-primary transitions.
-        return false;
-    }
     auto preTopPattern = preTopDest->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(preTopPattern, false);
     auto curTopPattern = curTopDest->GetPattern<NavDestinationPattern>();

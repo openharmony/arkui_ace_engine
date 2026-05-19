@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
@@ -30,6 +32,7 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<> UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src);
+void ProcessLinearGradient(const Opt_LinearGradientOptions& linearGradientOpt, Gradient& gradient);
 
 template<>
 OHOS::Ace::FontStyle Convert(const Ark_FontStyle& src)
@@ -110,6 +113,9 @@ void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
         ret.SetStrokeColor(strokeColor.value());
     } else if (auto color = Converter::OptConvert<Color>(src.fontColor); color) {
         ret.SetStrokeColor(color.value());
+    }
+    if (auto strokeJoinStyle = Converter::OptConvert<StrokeJoinStyle>(src.strokeJoinStyle); strokeJoinStyle) {
+        ret.SetStrokeJoinStyle(strokeJoinStyle.value());
     }
 }
 
@@ -236,6 +242,25 @@ UpdateParagraphStyle Convert(const Ark_RichEditorParagraphStyle& src)
     ret.lineBreakStrategy = Converter::OptConvert<LineBreakStrategy>(src.lineBreakStrategy);
     ret.paragraphSpacing = Converter::OptConvert<Dimension>(src.paragraphSpacing);
     ret.textDirection = Converter::OptConvert<TextDirection>(src.textDirection);
+    CHECK_NULL_RETURN(src.shaderStyle.tag != INTEROP_TAG_UNDEFINED, ret);
+    auto shaderStyle = src.shaderStyle;
+    CHECK_NULL_RETURN(shaderStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED, ret);
+    auto shaderStyleProxy = shaderStyle.value;
+    auto colorOpt = Converter::OptConvert<Color>(shaderStyleProxy.color);
+    auto linearGradientOpt = shaderStyleProxy.linearGradientOptions;
+    auto radialGradientOpt = shaderStyleProxy.radialGradientOptions;
+    bool hasLinear = linearGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    bool hasRadial = radialGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    if (colorOpt.has_value()) {
+        ret.colorShaderStyle = colorOpt;
+    } else if (hasLinear) {
+        Gradient gradient;
+        Converter::ProcessLinearGradient(linearGradientOpt, gradient);
+        ret.SetOptGradient(GradientConvert::ToGradient(gradient));
+    } else if (hasRadial) {
+        Gradient gradient = Converter::Convert<Gradient>(radialGradientOpt.value);
+        ret.SetOptGradient(GradientConvert::ToGradient(gradient));
+    }
     return ret;
 }
 
@@ -527,6 +552,49 @@ RangeOptions Convert(const Ark_RichEditorRange& src)
     ret.end = Converter::OptConvert<int32_t>(src.end);
     return ret;
 }
+void ProcessShaderStyle(Ark_RichEditorParagraphStyle& dst, const std::optional<NG::Gradient>& gradientOpt,
+    const std::optional<Color>& color, ConvContext *ctx)
+{
+    CHECK_EQUAL_VOID(gradientOpt.has_value(), color.has_value());
+    Ark_ShaderStyleProxy proxy;
+    proxy.linearGradientOptions = Converter::ArkValue<Opt_LinearGradientOptions>(Ark_Empty(), ctx);
+    proxy.radialGradientOptions = Converter::ArkValue<Opt_RadialGradientOptions>(Ark_Empty(), ctx);
+    proxy.color = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
+    if (gradientOpt.has_value()) {
+        auto gradient = gradientOpt.value();
+        auto type = gradient.GetType();
+        if (type == OHOS::Ace::NG::GradientType::RADIAL) {
+            Opt_RadialGradientOptions options = {
+                .tag = InteropTag::INTEROP_TAG_OBJECT,
+                .value =  Converter::ArkValue<Ark_RadialGradientOptions>(gradient, Converter::FC)
+            };
+            proxy.radialGradientOptions = options;
+            Opt_ShaderStyleProxy shaderStyle;
+            shaderStyle.tag = InteropTag::INTEROP_TAG_OBJECT;
+            shaderStyle.value = proxy;
+            dst.shaderStyle = shaderStyle;
+        }
+        if (type == OHOS::Ace::NG::GradientType::LINEAR) {
+            Opt_LinearGradientOptions options = {
+                .tag = InteropTag::INTEROP_TAG_OBJECT,
+                .value = Converter::ArkValue<Ark_LinearGradientOptions>(gradient, Converter::FC)
+            };
+            proxy.linearGradientOptions = options;
+            Opt_ShaderStyleProxy shaderStyle;
+            shaderStyle.tag = InteropTag::INTEROP_TAG_OBJECT;
+            shaderStyle.value = proxy;
+            dst.shaderStyle = shaderStyle;
+        }
+    }
+    if (color.has_value()) {
+        proxy.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
+        Opt_ShaderStyleProxy shaderStyle;
+        shaderStyle.tag = InteropTag::INTEROP_TAG_OBJECT;
+        shaderStyle.value = proxy;
+        dst.shaderStyle = shaderStyle;
+    }
+}
+
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src, ConvContext *ctx)
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
@@ -548,6 +616,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
     } else {
         dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
+    ProcessShaderStyle(dst, GradientConvert::ToNGGradient(src.GetGradient()), src.colorShaderStyle, ctx);
 }
 
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& src, ConvContext *ctx)
@@ -573,6 +642,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
     } else {
         dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
+    ProcessShaderStyle(dst, GradientConvert::ToNGGradient(src.GetGradient()), src.colorShaderStyle, ctx);
 }
 
 void AssignArkValue(Ark_RichEditorParagraphResult& dst, const ParagraphInfo& src, ConvContext *ctx)
@@ -642,6 +712,7 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& s
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.textBackgroundStyle, ctx);
     dst.strokeWidth = ArkValue<Opt_Float64>(src.strokeWidth);
     dst.strokeColor = ArkUnion<Opt_ResourceColor, Ark_String>(src.strokeColor, ctx);
+    dst.strokeJoinStyle = ArkValue<Opt_StrokeJoinStyle>(src.strokeJoinStyle);
 }
 
 void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src, ConvContext *ctx)

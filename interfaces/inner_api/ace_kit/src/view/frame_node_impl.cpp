@@ -25,6 +25,7 @@
 #include "ui/view/ui_context.h"
 
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -473,5 +474,11 @@ ColorMode FrameNodeImpl::GetLocalColorMode() const
 {
     CHECK_NULL_RETURN(frameNode_, ColorMode::COLOR_MODE_UNDEFINED);
     return static_cast<ColorMode>(frameNode_->GetLocalColorMode());
+}
+
+void FrameNodeImpl::MarkModifyDone()
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->MarkModifyDone();
 }
 } // namespace OHOS::Ace::Kit

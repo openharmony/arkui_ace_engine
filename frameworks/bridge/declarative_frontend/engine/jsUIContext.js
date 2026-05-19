@@ -739,9 +739,9 @@ class UIContext {
     }
 
     enableEventPassthrough(enabled, eventType) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        getUINativeModule().enableEventPassthrough(enabled, eventType);
-        __JSScopeUtil__.restoreInstanceId();
+        return withInstanceId(this.instanceId_, () => {
+            return getUINativeModule().enableEventPassthrough(enabled, eventType);
+        });
     }
 
     getPixelRoundMode() {

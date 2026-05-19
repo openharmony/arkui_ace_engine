@@ -529,6 +529,18 @@ export function PatternLockImpl(
     })
 }
 
+@memo
+export function PatternLock(
+    @memo @memo_skip
+    style: ((attributes: PatternLockAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkPatternLockComponent>((): ArkPatternLockComponent => {
+        return new ArkPatternLockComponent()
+    })
+    NodeAttach<ArkPatternLockPeer>((): ArkPatternLockPeer => ArkPatternLockPeer.create(receiver), (_: ArkPatternLockPeer): void => {
+        style?.(receiver)
+    })
+}
 export class PatternLockController_serializer {
     public static write(buffer: SerializerBase, value: PatternLockController): void {
         let valueSerializer: SerializerBase = buffer

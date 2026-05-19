@@ -20,12 +20,12 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable, MaterializedBaseTag } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { SymbolGlyphModifier_serializer } from './../framework/SymbolGlyphModifier'
-import { CaretStyle_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, IMEClient, SelectedDragPreviewStyle, TextDirection } from './textCommon'
+import { CaretStyle_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, IMEClient, SelectedDragPreviewStyle, TextDirection, StrokeJoinStyle } from './textCommon'
 import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Dimension, Font as arkui_component_units_Font, LengthMetrics as arkui_component_units_LengthMetrics, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Length } from './units'
 import { TextDecorationOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, TextDecorationOptions, Bindable, ArkCommonMethodComponent, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
-import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
-import { extractors, AttributeModifier, hookSearchAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
+import { extractors, AttributeModifier, ShaderStyle, hookSearchAttributeModifier, AttributeUpdater } from '#handwritten'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from './richEditor'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
@@ -913,6 +913,31 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setStrokeJoinStyleAttribute(value: StrokeJoinStyle | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as StrokeJoinStyle)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setStrokeJoinStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setShaderStyleAttribute(value: ShaderStyle | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            const valueTmpValueTransformed: ShaderStyleProxy = extractors.transform_Ark_ShaderStyle_to_Ark_ShaderStyleProxy(valueTmpValue)
+            ShaderStyleProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setShaderStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSearchButtonAttribute(value: string | undefined, option?: SearchButtonOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1200,6 +1225,12 @@ export interface SearchAttribute extends CommonMethod {
     }
     textDirection(value: TextDirection | undefined): this {
         throw new Error('Unimplemented method textDirection')
+    }
+    strokeJoinStyle(value: StrokeJoinStyle | undefined): this {
+        throw new Error('Unimplemented method strokeJoinStyle')
+    }
+    shaderStyle(value: ShaderStyle | undefined): this {
+        throw new Error('Unimplemented method shaderStyle')
     }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         throw new Error('Unimplemented method searchButton')
@@ -1510,6 +1541,16 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         this.getPeer()?.setTextDirectionAttribute(value_casted)
         return this
     }
+    public strokeJoinStyle(value: StrokeJoinStyle | undefined): this {
+        const value_casted = value as (StrokeJoinStyle | undefined)
+        this.getPeer()?.setStrokeJoinStyleAttribute(value_casted)
+        return this
+    }
+    public shaderStyle(value: ShaderStyle | undefined): this {
+        const value_casted = value as (ShaderStyle | undefined)
+        this.getPeer()?.setShaderStyleAttribute(value_casted)
+        return this
+    }
     public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         const value_casted = value as (string | undefined)
         const option_casted = option as (SearchButtonOptions | undefined)
@@ -1556,6 +1597,18 @@ export function SearchImpl(
     })
 }
 
+@memo
+export function Search(
+    @memo @memo_skip
+    style: ((attributes: SearchAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkSearchComponent>((): ArkSearchComponent => {
+        return new ArkSearchComponent()
+    })
+    NodeAttach<ArkSearchPeer>((): ArkSearchPeer => ArkSearchPeer.create(receiver), (_: ArkSearchPeer): void => {
+        style?.(receiver)
+    })
+}
 export class SearchController_serializer {
     public static write(buffer: SerializerBase, value: SearchController): void {
         let valueSerializer: SerializerBase = buffer

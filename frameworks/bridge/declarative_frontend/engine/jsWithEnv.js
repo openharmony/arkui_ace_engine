@@ -12,13 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const WritableSystemProperties = {
-    Layout_Direction: 'system.arkui.layout.direction', 
-};
 
-const WritableEnvProperties = {
-[WritableSystemProperties.Layout_Direction]: false 
-};
+/// <reference path="../state_mgmt/src/lib/env_base/customEnv_key.ts" />
+
+/**
+ * @typedef {Object} SystemEnvKey
+ * @property {string} keyId
+ */
+
+/**
+ * @typedef {Object} WritableSystemEnvKey
+ * @extends SystemEnvKey
+ */
+
+/**
+ * @typedef {Object} ReadonlySystemEnvKey
+ * @extends SystemEnvKey
+ */
+
+/**
+ * @typedef {Object} WritableEnvKey
+ * @property {WritableSystemEnvKey} DIRECTION
+ * @property {WritableSystemEnvKey} FONT_SCALE
+ */
 
 class WithEnvAttribute {
     env(key, value) {
@@ -40,4 +56,4 @@ if (globalThis.WithEnv !== undefined) {
     };
 }
 
-export default { WithEnv, WithEnvAttribute, WritableSystemProperties, WritableEnvProperties}; 
+export default { WithEnv, WithEnvAttribute, SystemEnvKey, WritableSystemEnvKey, ReadonlySystemEnvKey, WritableEnvKey };

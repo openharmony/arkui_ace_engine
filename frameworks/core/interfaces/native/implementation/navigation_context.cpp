@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "navigation_context.h"
 #include "nav_path_info_peer_impl.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"

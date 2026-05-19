@@ -15,13 +15,16 @@
 
 #include "core/components_ng/event/focus_hub.h"
 
-#include "base/subwindow/subwindow_manager.h"
+#include "base/error/error_code.h"
 #include "base/log/dump_log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -1912,6 +1915,15 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     return true;
 }
 
+void FocusHub::ParentSortChildrenByZIndex(const RefPtr<FrameNode>& frameNode)
+{
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
+    CHECK_NULL_VOID(parent);
+    auto renderContext = parent->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SortChildrenByZIndex();
+}
+
 void FocusHub::ClearFocusState(bool isNeedStateStyles, bool isNeedClearCallBack)
 {
     if (isNeedStateStyles) {
@@ -1930,6 +1942,7 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles, bool isNeedClearCallBack)
             renderContext->ResetZIndex();
             renderContext->OnZIndexUpdate(0);
             isRaisedZIndex_ = false;
+            ParentSortChildrenByZIndex(frameNode);
         }
         renderContext->ClearFocusState();
         OnPaintFocusState(false);

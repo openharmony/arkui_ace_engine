@@ -318,7 +318,7 @@ public:
         lastSnapTargetIndex_.reset();
     }
 
-    int32_t GetItemIndexByPosition(float xOffset, float yOffset);
+    int32_t GetItemIndexByPosition(float xOffset, float yOffset) const;
 
     void SetPredictLayoutParamV2(std::optional<ListPredictLayoutParamV2> param)
     {
@@ -352,6 +352,19 @@ public:
     }
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
+    bool NeedJudgeWithHotZone() override;
+    int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
+    bool IsInEditModeHotZone(const PointF& point) const override;
+    void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
+    SwipeSelectStateKey GetSwipeSelectStateKeyAtPosition(float offsetX, float offsetY) const override;
+    SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const override;
+    RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const override;
+    RefPtr<FrameNode> GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const override;
+    void MarkSwipeItemSelectedByStateKey(const SwipeSelectStateKey& stateKey, bool isSelected) override;
+    void BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& startKey, const SwipeSelectStateKey& endKey,
+        std::vector<SwipeSelectStateKey>& keys) const override;
+    void ApplyEditModeToVisibleItems() override;
+    void RemoveEditModeFromItems() override;
 
     void SetItemState(ItemState itemState, int32_t id)
     {
@@ -520,7 +533,8 @@ protected:
     bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
     std::optional<ScrollingConfig> CreateScrollingConfig(
         SmartGestureDirection direction, double distance) const;
-    bool CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const;
+    bool CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos,
+        bool isForceLayoutTarget = false) const;
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -540,7 +554,7 @@ protected:
     bool smooth_ = false;
 
     std::optional<int32_t> jumpIndex_;
-    std::optional<int32_t> targetIndex_;
+    mutable std::optional<int32_t> targetIndex_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
@@ -688,7 +702,7 @@ private:
 
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndexInGroup_;
-    std::optional<bool> isLayoutListForFocus_; // Flag for only do Layout.
+    mutable std::optional<bool> isLayoutListForFocus_; // Flag for only do Layout.
     std::optional<ListScrollTarget> scrollTarget_;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
@@ -726,6 +740,7 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
+    mutable std::optional<ListItemIndex> swipeResolvedItemIndex_;
     bool isNeedDividerAnimation_ = true;
     int32_t repeatDifference_ = 0;
 

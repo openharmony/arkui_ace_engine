@@ -27,7 +27,6 @@
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components/refresh/render_refresh_target.h"
-#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/grid/grid_event.h"
 #include "core/pipeline/base/render_node.h"

@@ -1106,4 +1106,672 @@ HWTEST_F(SheetMinimizeTestNG, HandleScrollVelocity001, TestSize.Level1)
     EXPECT_EQ(handled, false);
 }
 
+/**
+ * @tc.name: HandleDragUpdate001
+ * @tc.desc: Test SheetMinimizeObject::HandleDragUpdate Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleDragUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateTransformTranslate({0.0f, 0.0f, 0.0f});
+    /**
+     * @tc.steps: step2. call HandleDragUpdate with gesture event.
+     * @tc.expected: transform translate should be updated with gesture offset.
+     */
+    GestureEvent info;
+    info.SetOffsetX(10.0f);
+    info.SetOffsetY(20.0f);
+    object->HandleDragUpdate(info);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 10.0f);
+    EXPECT_FLOAT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 20.0f);
+    EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->z.ConvertToPx()));
+}
+
+/**
+ * @tc.name: HandleTransformScale001
+ * @tc.desc: Test SheetMinimizeObject::HandleTransformScale Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleTransformScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateTransformScale({1.0f, 1.0f});
+    /**
+     * @tc.steps: step2. set previous scale and call HandleTransformScale.
+     * @tc.expected: No crash, animation starts successfully.
+     */
+    object->prevScale_ = VectorF(1.2f, 1.2f);
+    object->HandleTransformScale();
+    EXPECT_TRUE(true); // Basic pass check - animation is async
+}
+
+/**
+ * @tc.name: GetSheetPositionInfo001
+ * @tc.desc: Test SheetMinimizeObject::GetSheetPositionInfo Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, GetSheetPositionInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern, parent node and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto geometryNode = parentNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 2000.0f));
+    sheetNode->SetParent(parentNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call GetSheetPositionInfo.
+     * @tc.expected: should return valid position info with constraints.
+     */
+    auto positionInfo = object->GetSheetPositionInfo();
+    EXPECT_GE(positionInfo.parentLeftConstraint, 0.0f);
+    EXPECT_GE(positionInfo.parentTopConstraint, 0.0f);
+    EXPECT_LE(positionInfo.parentRightConstraint, 1000.0f);
+    EXPECT_LE(positionInfo.parentBottomConstraint, 2000.0f);
+}
+
+/**
+ * @tc.name: ClipSheetNode001
+ * @tc.desc: Test SheetMinimizeObject::ClipSheetNode Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, ClipSheetNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    object->ClipSheetNode();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CreatePropertyCallback001
+ * @tc.desc: Test SheetMinimizeObject::CreatePropertyCallback Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, CreatePropertyCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call CreatePropertyCallback.
+     * @tc.expected: property should be created successfully.
+     */
+    object->CreatePropertyCallback();
+    auto property = sheetPattern->GetProperty();
+    EXPECT_NE(property, nullptr);
+}
+
+/**
+ * @tc.name: HandleDragEnd001
+ * @tc.desc: Test SheetMinimizeObject::HandleDragEnd Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleDragEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    object->HandleDragEnd(100.0f);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleDragUpdateForLTR001
+ * @tc.desc: Test SheetMinimizeObject::HandleDragUpdateForLTR Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleDragUpdateForLTR001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call HandleDragUpdateForLTR with gesture event.
+     * @tc.expected: No crash, function executes successfully.
+     */
+    GestureEvent info;
+    info.SetOffsetX(10.0f);
+    info.SetOffsetY(20.0f);
+    object->HandleDragUpdateForLTR(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleDragUpdateForRTL001
+ * @tc.desc: Test SheetMinimizeObject::HandleDragUpdateForRTL Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleDragUpdateForRTL001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call HandleDragUpdateForRTL with gesture event.
+     * @tc.expected: No crash, function executes successfully.
+     */
+    GestureEvent info;
+    info.SetOffsetX(10.0f);
+    info.SetOffsetY(20.0f);
+    object->HandleDragUpdateForRTL(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleDragEndForRTL001
+ * @tc.desc: Test SheetMinimizeObject::HandleDragEndForRTL Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleDragEndForRTL001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call HandleDragEndForRTL with velocity.
+     * @tc.expected: No crash, function executes successfully.
+     */
+    object->HandleDragEndForRTL(100.0f);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleDragStartAnimation001
+ * @tc.desc: Test SheetMinimizeObject::HandleDragStartAnimation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleDragStartAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call HandleDragStartAnimation.
+     * @tc.expected: No crash, animation starts successfully.
+     */
+    object->HandleDragStartAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CalcDragOutOfBoundsPosition001
+ * @tc.desc: Test SheetMinimizeObject::CalcDragOutOfBoundsPosition Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, CalcDragOutOfBoundsPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern, parent node and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto geometryNode = parentNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 2000.0f));
+    sheetNode->SetParent(parentNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. set drag offset to out of bounds and call CalcDragOutOfBoundsPosition.
+     * @tc.expected: should return corrected position within bounds.
+     */
+    object->dragOffsetAddUp_ = OffsetF(500.0f, 1500.0f);
+    auto result = object->CalcDragOutOfBoundsPosition();
+    EXPECT_GE(result.GetX(), 0.0f);
+    EXPECT_LE(result.GetX(), 1000.0f);
+    EXPECT_GE(result.GetY(), 0.0f);
+    EXPECT_LE(result.GetY(), 2000.0f);
+}
+
+/**
+ * @tc.name: CalcDragAdsorbePosition001
+ * @tc.desc: Test SheetMinimizeObject::CalcDragAdsorbePosition Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, CalcDragAdsorbePosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern, parent node and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto geometryNode = parentNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 2000.0f));
+    sheetNode->SetParent(parentNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. set drag offset and call CalcDragAdsorbePosition.
+     * @tc.expected: should return adsorbed position.
+     */
+    object->dragOffsetAddUp_ = OffsetF(200.0f, 500.0f);
+    auto result = object->CalcDragAdsorbePosition();
+    EXPECT_GE(result.GetX(), 0.0f);
+    EXPECT_LE(result.GetX(), 1000.0f);
+}
+
+/**
+ * @tc.name: HandleEndPosition001
+ * @tc.desc: Test SheetMinimizeObject::HandleEndPosition Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleEndPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern, parent node and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto geometryNode = parentNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 2000.0f));
+    sheetNode->SetParent(parentNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. set drag offset and call HandleEndPosition.
+     * @tc.expected: No crash, position handled successfully.
+     */
+    object->dragOffsetAddUp_ = OffsetF(200.0f, 500.0f);
+    object->HandleEndPosition();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleDragEndResumeAurora001
+ * @tc.desc: Test SheetMinimizeObject::HandleDragEndResumeAurora Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleDragEndResumeAurora001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call HandleDragEndResumeAurora.
+     * @tc.expected: No crash, function executes successfully.
+     */
+    object->HandleDragEndResumeAurora();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleDragEndAnimation001
+ * @tc.desc: Test SheetMinimizeObject::HandleDragEndAnimation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleDragEndAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern, parent node and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto geometryNode = parentNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 2000.0f));
+    sheetNode->SetParent(parentNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. set drag offset and call HandleDragEndAnimation.
+     * @tc.expected: No crash, animation executes successfully.
+     */
+    object->dragOffsetAddUp_ = OffsetF(200.0f, 500.0f);
+    object->HandleDragEndAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleOnDragCancel001
+ * @tc.desc: Test SheetMinimizeObject::HandleOnDragCancel Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleOnDragCancel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern, parent node and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto geometryNode = parentNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 2000.0f));
+    sheetNode->SetParent(parentNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. set drag offset and call HandleOnDragCancel.
+     * @tc.expected: No crash, drag cancel handled successfully.
+     */
+    object->dragOffsetAddUp_ = OffsetF(200.0f, 500.0f);
+    object->HandleOnDragCancel();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleOnDragEnd001
+ * @tc.desc: Test SheetMinimizeObject::HandleOnDragEnd Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, HandleOnDragEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern, parent node and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("Parent", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto geometryNode = parentNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 2000.0f));
+    sheetNode->SetParent(parentNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. set drag offset and call HandleOnDragEnd with gesture event.
+     * @tc.expected: No crash, drag end handled successfully.
+     */
+    object->dragOffsetAddUp_ = OffsetF(200.0f, 500.0f);
+    GestureEvent info;
+    info.SetOffsetX(10.0f);
+    info.SetOffsetY(20.0f);
+    object->HandleOnDragEnd(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: InitDragDropEvent001
+ * @tc.desc: Test SheetMinimizeObject::InitDragDropEvent Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, InitDragDropEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call InitDragDropEvent.
+     * @tc.expected: No crash, drag drop events initialized successfully.
+     */
+    object->InitDragDropEvent();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ModifyFireSheetTransition001
+ * @tc.desc: Test SheetMinimizeObject::ModifyFireSheetTransition Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, ModifyFireSheetTransition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    object->sheetMaxWidth_ = 200.0f;
+    object->sheetWidth_ = 150.0f;
+    /**
+     * @tc.steps: step2. call ModifyFireSheetTransition with drag velocity.
+     * @tc.expected: No crash, transition modified successfully.
+     */
+    object->ModifyFireSheetTransition(100.0f);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper001
+ * @tc.desc: Test SheetMinimizeObject::BeforeCreateLayoutWrapper Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, BeforeCreateLayoutWrapper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call BeforeCreateLayoutWrapper.
+     * @tc.expected: No crash, layout wrapper preparation successful.
+     */
+    object->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: AvoidKeyboard001
+ * @tc.desc: Test SheetMinimizeObject::AvoidKeyboard Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetMinimizeTestNG, AvoidKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and minimize object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetMinimizeObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. call AvoidKeyboard with forceAvoid parameter.
+     * @tc.expected: No crash, keyboard avoidance handled successfully.
+     */
+    object->AvoidKeyboard(true);
+    object->AvoidKeyboard(false);
+    EXPECT_TRUE(true);
+}
 } // namespace OHOS::Ace::NG

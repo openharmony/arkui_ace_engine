@@ -568,8 +568,12 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
         u"open_harmony123 password*+#",
         u"openharmony123456*+&@huawei.com",
         u"o达瓦大屋顶pen_harmony456顶顶顶 password*+#得到",
+        u"testOneTime123456",
     };
     std::vector<TestItem<TextInputType, std::string>> testItems;
+    /**
+     * @tc.steps: Initialize text and filter patterns
+     */
     testItems.emplace_back(TextInputType::TEXT, "openharmony123_ *+%$", "TextInputType::TEXT");
     testItems.emplace_back(TextInputType::NUMBER, "123456", "TextInputType::NUMBER");
     testItems.emplace_back(TextInputType::PHONE, " ()#15612932075*", "TextInputType::PHONE");
@@ -580,6 +584,8 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     testItems.emplace_back(TextInputType::NUMBER_PASSWORD, "123456", "TextInputType::NUMBER_PASSWORD");
     testItems.emplace_back(
         TextInputType::SCREEN_LOCK_PASSWORD, "open_harmony456 password*+#", "TextInputType::SCREEN_LOCK_PASSWORD");
+    testItems.emplace_back(
+        TextInputType::ONE_TIME_CODE_NUMBER, "123456", "TextInputType::ONE_TIME_CODE_NUMBER");
 
     /**
      * @tc.expected: Check if text filtering meets expectations
@@ -1821,7 +1827,7 @@ HWTEST_F(TextFieldControllerTest, TextFiledControllerScrollToVisible, TestSize.L
     std::vector<RectF> expectedRects = { RectF(6, 6, 10, 5) };
     EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(expectedRects));
     const OHOS::Ace::NG::ParagraphStyle expectedStyle;
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    mockParagraph->paraStyle_ = expectedStyle;
     controller->ScrollToVisible({ .start = 5, .end = 6 });
     EXPECT_EQ(textFiled->textRect_.GetOffset().GetX(), -6.0f);
 }

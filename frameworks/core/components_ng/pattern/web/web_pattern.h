@@ -693,7 +693,8 @@ public:
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
-    bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info,
+        bool useWebWindowID = false);
     void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
     std::string GetPixelMapName(std::shared_ptr<Media::PixelMap> pixelMap, std::string featureName);
     void UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
@@ -735,6 +736,10 @@ public:
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, const std::shared_ptr<ViewDataCommon>& viewDataCommon);
     AceAutoFillType GetFocusedType();
     HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
+    int SaveMsdpResultForAutoFill(const std::unique_ptr<JsonValue>& comJson);
+    bool MergeHint2TypeAndMsdpType();
+    bool IsMsdpType(const std::string& meta);
+    bool IsHint2Type(const std::string& meta);
     bool HandleAutoFillEvent();
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
@@ -932,8 +937,6 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
-    void OnLanguageConfigurationUpdate() override;
-    void OnDirectionConfigurationUpdate() override;
     void OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy);
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
@@ -1117,8 +1120,6 @@ public:
         isTextSelectionEnable_ = textSelectionEnable;
     }
     void NotifyOverlayRotation();
-    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
-    void SetIsSystemRtlEnable(bool enable);
     void UpdateScrollbarLayout();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
@@ -1153,6 +1154,7 @@ private:
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();
+    void CloseDefaultContextMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
     bool IsNeedResizeVisibleViewport();
@@ -1487,6 +1489,7 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    bool ShouldBlockCursorChangeWhenInvisible(const OHOS::NWeb::CursorType& type);
     void ProcessCustomCursor(std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
     int32_t GetVisibleViewportAvoidHeight();
@@ -1681,6 +1684,9 @@ private:
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isEditableOnContextMenu_ = false;
     WebMenuType autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
+    std::map<std::string, std::string> msdpTypes_;
+    std::mutex msdpTypesMutex_;
+
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     std::shared_ptr<ViewDataCommon> viewDataCommon_;
@@ -1767,6 +1773,8 @@ private:
     bool isDirectionalLockEnabled_ = true;
     ScrollDirectionalLockType scrollDirectionalLockType_ = ScrollDirectionalLockType::NESTED_SCROLL;
     ScrollbarLayoutPolicy scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
+    bool scrollbarLayoutPolicyChanged_ = false;
+    bool isLanguageRtl_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

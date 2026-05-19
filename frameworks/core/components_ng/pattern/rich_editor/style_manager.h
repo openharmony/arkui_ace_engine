@@ -40,6 +40,7 @@ public:
     inline static const std::string DRAG_BACKGROUND_COLOR_KEY = "dragBackgroundColor";
     inline static const std::string SYMBOL_COLOR_KEY_PREFIX = "symbolColor_";
     inline static const std::string STROKE_COLOR_KEY = "strokeColor";
+    inline static const std::string COLOR_SHADER_STYLE_KEY = "colorShaderStyle";
 
     // color updater
     inline static const auto TEXT_COLOR_UPDATER = [](const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
@@ -81,6 +82,20 @@ public:
         Color colorValue;
         ResourceParseUtils::ParseResColor(colorResObj, colorValue);
         updateSpanStyle.updateStrokeColor = colorValue;
+    };
+
+    inline static const auto TEXT_LINE_STYLE_COLOR_SHADER_STYLE_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, TextLineStyle& textLineStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        textLineStyle.UpdateColorShaderStyle(colorValue);
+    };
+ 
+    inline static const auto UPDATE_PARAGRAPH_STYLE_COLOR_SHADER_STYLE_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, struct UpdateParagraphStyle& updateParagraphStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        updateParagraphStyle.colorShaderStyle = colorValue;
     };
 
     inline static const auto TEXT_DECORATION_COLOR_UPDATER = [](
@@ -161,6 +176,25 @@ public:
         const auto& key = STROKE_COLOR_KEY;
         const auto& updater = STROKE_COLOR_UPDATER;
         auto colorResObj = textStyle.GetResource(key);
+        colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
+    }
+
+    static void AddColorShaderStyleResource(struct UpdateParagraphStyle& updateParagraphStyle,
+        const RefPtr<ResourceObject>& colorResObj)
+    {
+        CHECK_NULL_VOID(colorResObj);
+        const auto& key = COLOR_SHADER_STYLE_KEY;
+        const auto& updater = UPDATE_PARAGRAPH_STYLE_COLOR_SHADER_STYLE_UPDATER;
+        updateParagraphStyle.AddResource(key, colorResObj, updater);
+    }
+ 
+    static void UpdateColorShaderStyleResource(RefPtr<SpanNode>& spanNode,
+        const UpdateParagraphStyle& updateParagraphStyle)
+    {
+        CHECK_NULL_VOID(spanNode);
+        const auto& key = COLOR_SHADER_STYLE_KEY;
+        const auto& updater = TEXT_LINE_STYLE_COLOR_SHADER_STYLE_UPDATER;
+        auto colorResObj = updateParagraphStyle.GetResource(key);
         colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
     }
 
@@ -271,6 +305,17 @@ public:
         if (style.leadingMargin.has_value() && !leadingMarginValue.CheckLeadingMargin(style.leadingMargin.value())) {
             spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
             spanNode->UpdateLeadingMargin(*style.leadingMargin);
+        }
+        auto gradient = style.GetGradient();
+        if (gradient.has_value()) {
+            spanNode->UpdateGradient(GradientConvert::ToNGGradient(gradient));
+        } else {
+            spanNode->ResetGradient();
+        }
+        if (style.colorShaderStyle.has_value()) {
+            spanNode->UpdateColorShaderStyle(style.colorShaderStyle);
+        } else {
+            spanNode->ResetColorShaderStyle();
         }
     }
 
@@ -435,7 +480,7 @@ public:
 
         // insert in last new line
         if (rangeBefore.start == rangeBefore.end) {
-            return spans.back()->content.back() == u'\n';
+            return !spans.back()->content.empty() && spans.back()->content.back() == u'\n';
         }
 
         // delete to last new line
@@ -444,7 +489,8 @@ public:
                 if (rangeBefore.start > span->position) {
                     continue;
                 }
-                if ((rangeBefore.start) == span->position && span->content.back() == u'\n') {
+                if ((rangeBefore.start) == span->position && !span->content.empty()
+                    && span->content.back() == u'\n') {
                     return true;
                 }
             }
@@ -459,7 +505,8 @@ public:
         
         // insert in last new Line
         auto contentLength = spans.back()->position;
-        if (caretPosition == contentLength && spans.back()->content.back() == u'\n') {
+        if (caretPosition == contentLength && !spans.back()->content.empty()
+            && spans.back()->content.back() == u'\n') {
             return true;
         }
         return false;
@@ -525,6 +572,8 @@ public:
         spanParagraphStyle.paragraphSpacing = typingParagraphStyle.paragraphSpacing;
         spanParagraphStyle.textVerticalAlign = typingParagraphStyle.textVerticalAlign;
         spanParagraphStyle.textDirection = typingParagraphStyle.textDirection;
+        spanParagraphStyle.SetOptGradient(GradientConvert::ToNGGradient(typingParagraphStyle.GetGradient()));
+        spanParagraphStyle.colorShaderStyle = typingParagraphStyle.colorShaderStyle;
         spans.push_back(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, length));
     }
 

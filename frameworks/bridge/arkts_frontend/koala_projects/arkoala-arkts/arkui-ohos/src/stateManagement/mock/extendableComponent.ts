@@ -22,6 +22,7 @@ import {
 } from '../decorator';
 import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
+import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../utils';
 
 export class ExtendableComponent implements IVariableOwner {
     protected parent_: ExtendableComponent | null;
@@ -74,5 +75,20 @@ export class ExtendableComponent implements IVariableOwner {
     }
 
     __addEnvInstance__Internal(envProperty: IEnvVariable): void {
+    }
+
+    __getCustomComponentContext__Internal(): CustomComponentContext {
+        return {
+            registerActiveAndInactiveCallback: (
+                active?: ActiveAndInactiveCallbackType,
+                inactive?: ActiveAndInactiveCallbackType
+            ): void => {}
+        } as CustomComponentContext;
+    }
+
+    __registerActiveAndInactiveCallback__Internal(
+        active?: ActiveAndInactiveCallbackType,
+        inactive?: ActiveAndInactiveCallbackType
+    ): void {
     }
 }

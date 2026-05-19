@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace {
 
@@ -65,6 +66,31 @@ struct SpanParagraphStyle {
     std::optional<Dimension> paragraphSpacing;
     std::optional<NG::DrawableLeadingMargin> drawableLeadingMargin;
     std::optional<TextDirection> textDirection;
+    ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
+    std::optional<Color> colorShaderStyle;
+    RefPtr<ResourceObject> colorShaderStyleResObj;
+ 
+    bool IsSameGradient(const SpanParagraphStyle& other) const
+    {
+        if (propGradient == nullptr) {
+            return other.propGradient == nullptr;
+        }
+        return propGradient == other.propGradient;
+    }
+ 
+    bool IsColorShaderStyle(const SpanParagraphStyle& other) const
+    {
+        CHECK_EQUAL_RETURN(colorShaderStyle.has_value(), !other.colorShaderStyle.has_value(), false);
+        if (colorShaderStyle.has_value() && other.colorShaderStyle.has_value()) {
+            return colorShaderStyle.value() == other.colorShaderStyle.value();
+        }
+        return true;
+    }
+ 
+    bool IsSameShaderStyle(const SpanParagraphStyle& other) const
+    {
+        return IsSameGradient(other) && IsColorShaderStyle(other);
+    }
 
     bool Equal(const SpanParagraphStyle& other) const
     {
@@ -79,6 +105,7 @@ struct SpanParagraphStyle {
         } else {
             flag &= false;
         }
+        flag &= IsSameShaderStyle(other);
         return flag;
     }
 };
@@ -425,6 +452,7 @@ public:
 
 private:
     void AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    void AddParagraphStylePart2(const RefPtr<NG::SpanItem>& spanItem) const;
     void RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const;
 
     SpanParagraphStyle paragraphStyle_;

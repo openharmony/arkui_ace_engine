@@ -111,6 +111,26 @@ typedef enum {
 } ArkUI_DialogState;
 
 /**
+ * @brief Enumerates the display mode of the dialog box in a subwindow.
+ *
+ * @since 26.0.0
+ */
+typedef enum {
+    /**
+     * @brief The dialog box is displayed based on the screen.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_DIALOG_DISPLAY_MODE_SCREEN_BASED = 0,
+    /**
+     * @brief The dialog box is displayed based on the window.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_DIALOG_DISPLAY_MODE_WINDOW_BASED,
+} OH_ArkUI_DialogDisplayModeInSubWindow;
+
+/**
  * @brief Invoked when the dialog box is closed.
  *
  * @since 12
@@ -1009,6 +1029,22 @@ int32_t OH_ArkUI_CustomDialog_SetAutoCancel(ArkUI_CustomDialogOptions* options, 
  * @since 19
  */
 int32_t OH_ArkUI_CustomDialog_SetSubwindowMode(ArkUI_CustomDialogOptions* options, bool showInSubwindow);
+
+/**
+ * @brief Sets the display mode of the custom dialog box in a subwindow.
+ *
+ * @note This method takes effect only when the dialog box is displayed in a subwindow.
+ * @param options Dialog box parameters.
+ * @param displayModeInSubWindow Display mode of the dialog box in the subwindow.
+ * The parameter type is {@link OH_ArkUI_DialogDisplayModeInSubWindow}.
+ * The default value is <b>OH_ARKUI_DIALOG_DISPLAY_MODE_SCREEN_BASED</b>.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 26
+ */
+int32_t OH_ArkUI_CustomDialog_SetDisplayModeInSubWindow(
+    ArkUI_CustomDialogOptions* options, OH_ArkUI_DialogDisplayModeInSubWindow displayModeInSubWindow);
 
 /**
  * @brief Sets the mask for a custom dialog box.

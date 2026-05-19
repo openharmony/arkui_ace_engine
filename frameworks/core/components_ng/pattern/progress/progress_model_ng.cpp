@@ -78,16 +78,6 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         }
         eventHub->SetHoverEffect(HoverEffectType::NONE);
     }
-    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && frameNode->GetThemeScopeId()) {
-        if (type == ProgressType::LINEAR || type == ProgressType::MOON) {
-            ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetTrackSelectedColor());
-        } else if (type == ProgressType::CAPSULE) {
-            ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetCapsuleSelectColor());
-        }
-        if (type != ProgressType::CAPSULE) {
-            ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetTrackBgColor());
-        }
-    }
     auto pros = frameNode->GetPaintProperty<ProgressPaintProperty>();
     if (pros) {
         pros->ResetBackgroundColorSetByUser();
@@ -186,6 +176,7 @@ void ProgressModelNG::SetBackgroundColorByUser(bool value)
 void ProgressModelNG::SetStrokeWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STROKE_WIDTH);
 }
 
 void ProgressModelNG::SetScaleCount(int32_t value)
@@ -196,6 +187,7 @@ void ProgressModelNG::SetScaleCount(int32_t value)
 void ProgressModelNG::SetScaleWidth(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PROGRESS_SCALE_WIDTH);
 }
 
 void ProgressModelNG::SetBorderColor(const Color& value)
@@ -205,9 +197,17 @@ void ProgressModelNG::SetBorderColor(const Color& value)
     }
 }
 
+void ProgressModelNG::ResetBorderColor()
+{
+    if (isCapsule()) {
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderColor, PROPERTY_UPDATE_RENDER);
+    }
+}
+
 void ProgressModelNG::SetBorderWidth(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderWidth, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PROGRESS_BORDER_WIDTH);
 }
 
 void ProgressModelNG::SetSweepingEffect(bool value)
@@ -226,6 +226,7 @@ void ProgressModelNG::SetFontSize(const Dimension& value)
     textLayoutProperty->UpdateFontSize(value);
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, TextSize, value);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, textHost);
 }
 
 void ProgressModelNG::SetFontColor(const Color& value)
@@ -391,11 +392,13 @@ void ProgressModelNG::SetSmoothEffect(bool value)
 void ProgressModelNG::SetStrokeRadius(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PROGRESS_STROKE_RADIUS);
 }
 
 void ProgressModelNG::ResetStrokeRadius()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, StrokeRadius, PROPERTY_UPDATE_RENDER);
+    ACE_CHECK_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_PROGRESS_STROKE_RADIUS);
 }
 
 void ProgressModelNG::SetValue(FrameNode* frameNode, double value)
@@ -436,6 +439,14 @@ void ProgressModelNG::SetColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value, frameNode);
 }
 
+void ProgressModelNG::SetUserInitiatedColor(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUserInitiatedColor(value);
+}
+
 void ProgressModelNG::SetGradientColor(FrameNode* frameNode, const Gradient& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, value, frameNode);
@@ -449,6 +460,7 @@ void ProgressModelNG::SetSmoothEffect(FrameNode* frameNode, bool value)
 void ProgressModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void ProgressModelNG::SetLinearSweepingEffect(FrameNode* frameNode, bool value)
@@ -479,16 +491,23 @@ void ProgressModelNG::SetScaleCount(FrameNode* frameNode, int32_t value)
 void ProgressModelNG::SetScaleWidth(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PROGRESS_SCALE_WIDTH, frameNode);
 }
 
 void ProgressModelNG::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderWidth, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PROGRESS_BORDER_WIDTH, frameNode);
 }
 
 void ProgressModelNG::SetBorderColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value, frameNode);
+}
+
+void ProgressModelNG::ResetBorderColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void ProgressModelNG::SetSweepingEffect(FrameNode* frameNode, bool value)
@@ -555,6 +574,7 @@ void ProgressModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
     textLayoutProperty->UpdateFontSize(value);
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, textHost);
 }
 
 void ProgressModelNG::SetFontWeight(FrameNode* frameNode, const FontWeight& value)
@@ -593,11 +613,13 @@ void ProgressModelNG::SetItalicFontStyle(FrameNode* frameNode, const Ace::FontSt
 void ProgressModelNG::SetStrokeRadius(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PROGRESS_STROKE_RADIUS, frameNode);
 }
 
 void ProgressModelNG::ResetStrokeRadius(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, StrokeRadius, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_PROGRESS_STROKE_RADIUS, frameNode);
 }
 
 void ProgressModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& value)
@@ -701,21 +723,25 @@ void ProgressModelNG::ProgressInitialize(
 void ProgressModelNG::SetBorderRadius(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PROGRESS_BORDER_RADIUS);
 }
 
 void ProgressModelNG::ResetBorderRadius()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER);
+    ACE_CHECK_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_PROGRESS_BORDER_RADIUS);
 }
 
 void ProgressModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PROGRESS_BORDER_RADIUS, frameNode);
 }
 
 void ProgressModelNG::ResetBorderRadius(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_PROGRESS_BORDER_RADIUS, frameNode);
 }
 
 void ProgressModelNG::ResetColor(FrameNode* frameNode)
@@ -744,22 +770,6 @@ bool ProgressModelNG::isCapsule() const
     CHECK_NULL_RETURN(progressPaintProperty, result);
     const auto& progressType = progressPaintProperty->GetProgressType();
     return progressType == ProgressType::CAPSULE;
-}
-
-void ProgressModelNG::SetModifierInitiatedColor(FrameNode* frameNode, bool value)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->IsModifierInitiatedColor(value);
-}
-
-void ProgressModelNG::SetModifierInitiatedBgColor(FrameNode* frameNode, bool value)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->IsModifierInitiatedBgColor(value);
 }
 
 void ProgressModelNG::SetProgressColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)

@@ -49,6 +49,7 @@ public:
     static void ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsFontVariations(const JSRef<JSObject>& obj, Font& font);
     static void ParseFontWeightConfigs(const JSRef<JSObject>& fontConfigsObj, Font& font);
+    static void ParseJsStrokeJoinStyle(const JSRef<JSObject>& obj, Font& font);
     static void GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color,
         RefPtr<ResourceObject>& resObj, JSRef<JSVal>& colorObj);
     void GetFontColor(const JSCallbackInfo& info);
@@ -69,6 +70,8 @@ public:
     void SetSuperscript(const JSCallbackInfo& info);
     void GetFontConfigs(const JSCallbackInfo& info);
     void SetFontConfigs(const JSCallbackInfo& info);
+    void SetStrokeJoinStyle(const JSCallbackInfo& info);
+    void GetStrokeJoinStyle(const JSCallbackInfo& info);
     void GetFontVariations(const JSCallbackInfo& info);
     void SetFontVariations(const JSCallbackInfo& info);
 
@@ -113,6 +116,7 @@ public:
         std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& leadingMarginObject);
     static void ParseJsTextDirection(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     void GetTextAlign(const JSCallbackInfo& info);
     void SetTextAlign(const JSCallbackInfo& info);
     void GetTextVerticalAlign(const JSCallbackInfo& info);
@@ -133,6 +137,8 @@ public:
     void SetParagraphSpacing(const JSCallbackInfo& info);
     void GetTextDirection(const JSCallbackInfo& info);
     void SetTextDirection(const JSCallbackInfo& info);
+    void GetShaderStyle(const JSCallbackInfo& info);
+    void SetShaderStyle(const JSCallbackInfo& info);
 
     static bool IsPixelMap(const JSRef<JSVal>& jsValue);
 

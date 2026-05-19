@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT WithEnvModelNG : public WithEnvModel {
 public:
     void Create() override;
+    void RemoveEnvProperty(const std::string& key) override;
     void SetEnvProperty(const std::string& key, const std::string& value) override;
     void SetEnvProperty(const std::string& key, double value) override;
     void SetEnvProperty(const std::string& key, bool value) override;

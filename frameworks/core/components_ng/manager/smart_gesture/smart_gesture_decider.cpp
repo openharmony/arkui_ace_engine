@@ -100,7 +100,7 @@ RefPtr<FrameNode> SmartGestureDecider::GetNextVisiblePrimaryNode(
     return *std::next(iter);
 }
 
-std::optional<SmartGestureProposal> SmartGestureDecider::BuildCenterHitProposal(
+SmartGestureProposal SmartGestureDecider::BuildCenterHitProposal(
     const std::vector<RefPtr<FrameNode>>& centerHitPath)
 {
     for (const auto& node : centerHitPath) {

@@ -1041,6 +1041,63 @@ class SearchSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelected
   }
 }
 
+class SearchStrokeJoinStyleModifier extends ModifierWithKey<JoinStyle>{
+  constructor(value: JoinStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchStrokeJoinStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetStrokeJoinStyle(node);
+    } else {
+      getUINativeModule().search.setStrokeJoinStyle(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ 
+class SearchShaderStyleModifier extends ModifierWithKey<{
+  center: Array<any>;
+  radius: number | string;
+  angle?: number | string;
+  direction?: GradientDirection;
+  colors: Array<[ ResourceColor, number ]>;
+  repeating?: boolean;
+  color: ResourceColor;
+}> {
+  constructor(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+    color: ResourceColor;
+  }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchShaderStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetShaderStyle(node, this.value);
+    }
+    else {
+      if (this.value.options) {
+        getUINativeModule().search.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+          this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+      } else {
+        getUINativeModule().search.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+          this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1340,6 +1397,23 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   textDirection(value: TextDirection): this {
     modifierWithKey(this._modifiersWithKeys, SearchTextDirectionModifier.identity, SearchTextDirectionModifier, value);
+    return this;
+  }
+  strokeJoinStyle(value: JoinStyle): this {
+    modifierWithKey(this._modifiersWithKeys, SearchStrokeJoinStyleModifier.identity,
+      SearchStrokeJoinStyleModifier, value);
+    return this;
+  }
+  shaderStyle(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+  }): this {
+    modifierWithKey(this._modifiersWithKeys, SearchShaderStyleModifier.identity,
+      SearchShaderStyleModifier, value);
     return this;
   }
 }

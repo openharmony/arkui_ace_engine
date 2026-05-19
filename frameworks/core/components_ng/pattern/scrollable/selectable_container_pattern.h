@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SELECTABLE_CONTAINER_EVENT_HUB_H
 
 #include "core/animation/select_motion.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -36,12 +37,36 @@ struct EditModeOptions {
     bool enableGatherSelectedItemsAnimation = false;
     GetPreviewBadge getPreviewBadge;
     bool useDefaultMultiSelectStyle = true;
+    bool enableFingerMultiSelect = true;
 };
 
 class SelectableContainerPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(SelectableContainerPattern, ScrollablePattern);
 
 public:
+    struct SwipeSelectStateKey {
+        int32_t index = -1;
+        int32_t indexInGroup = -1;
+
+        bool operator<(const SwipeSelectStateKey& other) const
+        {
+            if (index != other.index) {
+                return index < other.index;
+            }
+            return indexInGroup < other.indexInGroup;
+        }
+
+        bool operator==(const SwipeSelectStateKey& other) const
+        {
+            return index == other.index && indexInGroup == other.indexInGroup;
+        }
+
+        bool IsValid() const
+        {
+            return index >= 0;
+        }
+    };
+
     SelectableContainerPattern() = default;
     ~SelectableContainerPattern() override = default;
     virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() = 0;
@@ -67,11 +92,23 @@ public:
     {
         enableEditModeChangeEvent_ = std::move(event);
     }
+    void SetEnableEditModeBindingEvent(std::function<void(bool)>&& event)
+    {
+        enableEditModeBindingEvent_ = std::move(event);
+    }
     void FireEnableEditModeChangeEvent(bool enable) const
     {
         if (enableEditModeChangeEvent_) {
             enableEditModeChangeEvent_(enable);
         }
+        if (enableEditModeBindingEvent_) {
+            enableEditModeBindingEvent_(enable);
+        }
+    }
+    bool HasEnableEditModeBinding() const
+    {
+        return static_cast<bool>(enableEditModeBindingEvent_) ||
+               static_cast<bool>(enableEditModeChangeEvent_);
     }
     bool IsDefaultMultiSelectStyleEnabled() const
     {
@@ -80,26 +117,81 @@ public:
 
     void InitSwipeSelectEvent();
     void UninitSwipeSelectEvent();
+    bool ShouldEnableTwoFingerSelect() const;
+    void TryEnterEditModeForSwipeSelect();
+    GestureJudgeResult JudgeSwipeSelectGesture(const RefPtr<NG::GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& event);
     void HandleSwipeSelectStart(const GestureEvent& info);
     void HandleSwipeSelectUpdate(const GestureEvent& info);
     void HandleSwipeSelectEnd();
     void HandleSwipeSelectCancel();
     void UpdateSwipeSelection();
 
+    virtual bool NeedJudgeWithHotZone()
+    {
+        return false;
+    }
+
     virtual int32_t GetItemAtPosition(float offsetX, float offsetY) const
     {
         return -1;
     }
 
+    virtual bool IsInEditModeHotZone(const PointF& point) const
+    {
+        return GetItemAtPosition(point.GetX(), point.GetY()) >= 0;
+    }
+
     virtual void MarkSwipeItemSelected(int32_t index, bool isSelected) {}
+    virtual SwipeSelectStateKey GetSwipeSelectStateKeyAtPosition(float offsetX, float offsetY) const
+    {
+        return { GetItemAtPosition(offsetX, offsetY), -1 };
+    }
+    virtual SwipeSelectStateKey GetSwipeSelectStateKeyNearPosition(float offsetX, float offsetY) const
+    {
+        return GetSwipeSelectStateKeyAtPosition(offsetX, offsetY);
+    }
+    virtual SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const
+    {
+        return { index, -1 };
+    }
+    virtual RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const;
+    virtual RefPtr<FrameNode> GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const
+    {
+        return GetSelectableItemAtIndex(stateKey.index);
+    }
+    virtual void MarkSwipeItemSelectedByStateKey(const SwipeSelectStateKey& stateKey, bool isSelected)
+    {
+        MarkSwipeItemSelected(stateKey.index, isSelected);
+    }
+    virtual void BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& startKey,
+        const SwipeSelectStateKey& endKey, std::vector<SwipeSelectStateKey>& keys) const
+    {
+        if (!startKey.IsValid() || !endKey.IsValid()) {
+            return;
+        }
+        auto rangeStartKey = endKey < startKey ? endKey : startKey;
+        auto rangeEndKey = startKey < endKey ? endKey : startKey;
+        for (int32_t index = rangeStartKey.index; index <= rangeEndKey.index; ++index) {
+            auto stateKey = GetSwipeSelectStateKeyAtIndex(index);
+            if (!(stateKey < rangeStartKey) && !(rangeEndKey < stateKey)) {
+                keys.emplace_back(stateKey);
+            }
+        }
+    }
     void SwipeSelectAutoScroll(const PointF& globalPoint);
     void StopSwipeSelectAutoScroll();
+    void UpdateSwipeSelectStateKeyForAutoScroll(float offsetPct);
 
-    void ApplyEditModeToVisibleItems();
-    void RemoveEditModeFromItems();
+    virtual void ApplyEditModeToVisibleItems();
+    virtual void RemoveEditModeFromItems();
 
 protected:
     virtual void ApplyEditModeToCachedItems(bool enabled) {}
+    void RecordSwipeOriginalStatesInRange(const std::vector<SwipeSelectStateKey>& stateKeysInRange);
+    void ApplySwipeSelectionForFirstRange(const std::vector<SwipeSelectStateKey>& stateKeysInRange, bool isSelected);
+    void ApplySwipeSelectionForDeltaRange(
+        const SwipeSelectStateKey& rangeStartKey, const SwipeSelectStateKey& rangeEndKey, bool isSelected);
     struct ItemSelectedStatus {
         std::function<void(bool)> onSelected;
         std::function<void(bool)> selectChangeEvent;
@@ -164,11 +256,16 @@ private:
     EditModeOptions editModeOptions_;
     bool enableEditMode_ = false;
     std::function<void(bool)> enableEditModeChangeEvent_;
+    std::function<void(bool)> enableEditModeBindingEvent_;
     enum class SwipeSelectState { INACTIVE, SELECTING, DESELECTING };
     SwipeSelectState swipeSelectState_ = SwipeSelectState::INACTIVE;
-    int32_t swipeStartIndex_ = -1;
-    int32_t swipeCurrentIndex_ = -1;
-    std::map<int32_t, bool> swipeOriginalStates_;
+    SwipeSelectStateKey swipeStartStateKey_;
+    SwipeSelectStateKey swipeCurrentStateKey_;
+    std::map<SwipeSelectStateKey, bool> swipeOriginalStates_;
+    SwipeSelectStateKey swipePrevRangeStartKey_;
+    SwipeSelectStateKey swipePrevRangeEndKey_;
+    float lastSwipeSelectLocalX_ = -1.0f;
+    static constexpr float SWIPE_SELECT_EDGE_MARGIN_PX = 2.0f;
 };
 } // namespace OHOS::Ace::NG
 

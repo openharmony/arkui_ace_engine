@@ -867,7 +867,7 @@ void DatePickerModelNG::SetSelectedTextStyle(
             ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedColor, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedColor, value.textColor.value(), frameNode);
     } else {
         ResetDataPickerTextStyleColor(frameNode, &DataPickerRowLayoutProperty::GetSelectedTextStyle,
             &DataPickerRowLayoutProperty::UpdateSelectedColor, selectedStyle.GetTextColor());
@@ -898,7 +898,7 @@ void DatePickerModelNG::SetNormalTextStyle(
             ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Color, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Color, value.textColor.value(), frameNode);
     } else {
         ResetDataPickerTextStyleColor(frameNode, &DataPickerRowLayoutProperty::GetTextStyle,
             &DataPickerRowLayoutProperty::UpdateColor, normalStyle.GetTextColor());
@@ -931,7 +931,8 @@ void DatePickerModelNG::SetDisappearTextStyle(
             ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DisappearColor, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            DataPickerRowLayoutProperty, DisappearColor, value.textColor.value(), frameNode);
     } else {
         ResetDataPickerTextStyleColor(frameNode, &DataPickerRowLayoutProperty::GetDisappearTextStyle,
             &DataPickerRowLayoutProperty::UpdateDisappearColor, disappearStyle.GetTextColor());

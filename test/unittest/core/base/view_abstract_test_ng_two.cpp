@@ -203,4 +203,20 @@ HWTEST_F(ViewAbstractTestNg, GetChainStyleTest001, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::GetChainStyle(frameNode).direction, LineDirection::HORIZONTAL);
     EXPECT_EQ(ViewAbstract::GetChainStyle(frameNode).style, ChainStyle::SPREAD);
 }
+
+/**
+ * @tc.name: GetBackgroundColor
+ * @tc.desc: Test GetBackgroundColor of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0106, TestSize.Level1)
+{
+    Color color = Color::TRANSPARENT;
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> backgroundNode =
+        FrameNode::CreateFrameNode("backgroundNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(backgroundNode, nullptr);
+    Color result = ViewAbstract::GetBackgroundColor(AceType::RawPtr(backgroundNode));
+    EXPECT_EQ(result, color);
+}
 } // namespace OHOS::Ace::NG

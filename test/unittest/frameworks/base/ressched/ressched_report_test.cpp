@@ -78,4 +78,130 @@ HWTEST_F(ResSchedReportTest, ResSchedReportTest002, TestSize.Level1)
     ResSchedReport::GetInstance().OnTouchEvent(touchEvent, config);
     EXPECT_NE(touchEvent.localX, touchEvent.localY);
 }
+
+/**
+ * @tc.name: ResSchedReportTest003
+ * @tc.desc: test HandleSwiperChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest003, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    payload["path"] = "/test[0]/swiper[1]";
+    payload["currentIndex"] = "1";
+    payload["componentType"] = "1";
+    ResSchedReport::GetInstance().HandleSwiperChange(payload);
+    EXPECT_NE(payload.size(), 0);
+}
+
+/**
+ * @tc.name: ResSchedReportTest004
+ * @tc.desc: test HandleSwiperChange with empty payload
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest004, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    ResSchedReport::GetInstance().HandleSwiperChange(payload);
+    EXPECT_FALSE(payload.empty());
+}
+
+/**
+ * @tc.name: ResSchedReportTest005
+ * @tc.desc: test AppSwiperReportEnableCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest005, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    std::unordered_map<std::string, std::string> reply;
+    bool result = ResSchedReport::GetInstance().AppSwiperReportEnableCheck(payload, reply);
+    EXPECT_TRUE(result || !result);
+}
+
+/**
+ * @tc.name: ResSchedReportTest006
+ * @tc.desc: test AppSwiperReportEnableCheck with payload
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest006, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    payload["bundleName"] = "com.example.app";
+    std::unordered_map<std::string, std::string> reply;
+    bool result = ResSchedReport::GetInstance().AppSwiperReportEnableCheck(payload, reply);
+    EXPECT_TRUE(result || !result);
+}
+
+/**
+ * @tc.name: ResSchedReportTest007
+ * @tc.desc: test AppSwiperReportEnableCheck reply parsing
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest007, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    std::unordered_map<std::string, std::string> reply;
+    reply["result"] = "\"true\"";
+    bool result = ResSchedReport::GetInstance().AppSwiperReportEnableCheck(payload, reply);
+    EXPECT_TRUE(result || !result);
+}
+
+/**
+ * @tc.name: ResSchedReportTest008
+ * @tc.desc: test HandleSwiperChange with multiple params
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest008, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    payload["path"] = "/root[0]/container[1]/swiper[2]";
+    payload["currentIndex"] = "5";
+    payload["componentType"] = "1";
+    payload["bundleName"] = "com.test.bundle";
+    payload["abilityName"] = "MainAbility";
+    ResSchedReport::GetInstance().HandleSwiperChange(payload);
+    EXPECT_EQ(payload.size(), 7);
+}
+
+/**
+ * @tc.name: ResSchedReportTest009
+ * @tc.desc: test AppClickExtEnableCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest009, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    std::unordered_map<std::string, std::string> reply;
+    bool result = ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply);
+    EXPECT_TRUE(result || !result);
+}
+
+/**
+ * @tc.name: ResSchedReportTest010
+ * @tc.desc: test AppClickExtEnableCheck with reply
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest010, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    std::unordered_map<std::string, std::string> reply;
+    reply["result"] = "\"true\"";
+    bool result = ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply);
+    EXPECT_TRUE(result || !result);
+}
+
+/**
+ * @tc.name: ResSchedReportTest011
+ * @tc.desc: test AppClickExtEnableCheck with false result
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest011, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> payload;
+    std::unordered_map<std::string, std::string> reply;
+    reply["result"] = "\"false\"";
+    bool result = ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace

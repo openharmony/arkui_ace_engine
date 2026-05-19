@@ -26,12 +26,16 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "interfaces/native/native_type.h"
 #undef private
 #undef protected
 
 using namespace testing;
 using namespace testing::ext;
+
 namespace OHOS::Ace::NG {
+
+constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND = 120003;
 class ViewContextTestNG : public testing::Test {
 public:
     static void SetUpTestCase();

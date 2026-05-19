@@ -320,6 +320,21 @@ export function RefreshImpl(
     })
 }
 
+@memo
+export function Refresh(
+    @memo @memo_skip
+    style: ((attributes: RefreshAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRefreshComponent>((): ArkRefreshComponent => {
+        return new ArkRefreshComponent()
+    })
+    NodeAttach<ArkRefreshPeer>((): ArkRefreshPeer => ArkRefreshPeer.create(receiver), (_: ArkRefreshPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class RefreshOptions_serializer {
     public static write(buffer: SerializerBase, value: RefreshOptions): void {
         let valueSerializer: SerializerBase = buffer

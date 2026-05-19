@@ -22,10 +22,12 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -142,6 +144,7 @@ void NavDestinationPattern::OnModifyDone()
     titleBarNode->SetInnerParentId(hostNode->GetInspectorId().value_or(""));
     // set the titlebar to float on the top
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
+    InitScrollEffectOptions();
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());

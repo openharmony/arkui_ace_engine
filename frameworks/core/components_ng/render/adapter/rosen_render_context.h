@@ -261,6 +261,9 @@ public:
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
     void SetShadowPath(const std::string path) override;
     void ResetShadowPath() override;
+    void ClearClipBounds() override;
+
+    void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -401,6 +404,7 @@ public:
     void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void OnZIndexUpdateMultiThread(const RefPtr<FrameNode>& parent);
+    void SortChildrenByZIndex() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json);
@@ -451,7 +455,7 @@ public:
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr, Rosen::Drawing::Rect* rect = nullptr);
     void SetActualForegroundColor(const Color& value) override;
-    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+    void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) override;
@@ -587,9 +591,14 @@ public:
 
     void UpdateOverlayText() override;
 
+    void UpdateSubmenuDistortionParam() override;
+
     void UpdateDistortionParam(const DistortionParam& param) override;
 
     void UpdateForegroundFilterDistortionParam(const DistortionParam& param) override;
+
+    std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
+        const FrostedGlassParam& param, float dipScale) override;
 
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
@@ -606,6 +615,8 @@ public:
     void ResetEdgeLightFilter() override;
 
     void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) override;
+
+    void OnDoubleSidedUpdate(bool doubleSided) override;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.
@@ -988,6 +999,7 @@ private:
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> sdfShape_;
 };
 } // namespace OHOS::Ace::NG
 

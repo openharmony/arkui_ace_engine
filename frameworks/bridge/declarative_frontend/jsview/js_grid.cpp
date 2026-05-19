@@ -20,7 +20,6 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -500,6 +499,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onScrollStop", &JSGrid::JsOnScrollStop);
     JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
     JSClass<JSGrid>::StaticMethod("onScrollFrameBegin", &JSGrid::JsOnScrollFrameBegin);
+    JSClass<JSGrid>::StaticMethod("onEditModeChange", &JSGrid::JsOnEditModeChange);
 
     JSClass<JSGrid>::InheritAndBind<JSScrollableBase>(globalObj);
 }
@@ -601,8 +601,26 @@ void JSGrid::JsEnableEditMode(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &newJSVal);
         };
-        GridModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
+        GridModel::GetInstance()->SetEnableEditModeBindingEvent(std::move(changeEvent));
     }
+}
+
+void JSGrid::JsOnEditModeChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                           node = targetNode](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.OnEditModeChange");
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(1, &newJSVal);
+    };
+    GridModel::GetInstance()->SetEnableEditModeChangeEvent(std::move(changeEvent));
 }
 
 void JSGrid::SetMaxCount(const JSCallbackInfo& info)

@@ -180,6 +180,11 @@ void JSScrollable::ParseEditModeOptions(const JSCallbackInfo& info, NG::EditMode
             options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle->ToBoolean();
         }
 
+        auto enableTwoFingerMultiSelect = obj->GetProperty("enableTwoFingerMultiSelect");
+        if (enableTwoFingerMultiSelect->IsBoolean()) {
+            options.enableFingerMultiSelect = enableTwoFingerMultiSelect->ToBoolean();
+        }
+
         auto getPreviewBadge = obj->GetProperty("onGetPreviewBadge");
         if (getPreviewBadge->IsFunction()) {
             WeakPtr<NG::FrameNode> targetNode =

@@ -57,6 +57,18 @@ void AccessibilityProperty::NotifyComponentChangeEventMultiThread(AccessibilityE
     });
 }
 
+void AccessibilityProperty::SetAccessibilityNextFocusParamsMultiThread(
+    const AccessibilityNextFocusParams& params)
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this), params]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        host->UpdateAccessibilityNextFocusIdMap(params.nextFocusInspectorKey);
+    });
+}
+
 void AccessibilityProperty::SetAccessibilityNextFocusInspectorKeyMultiThread(
     const std::string& accessibilityNextFocusInspectorKey)
 {

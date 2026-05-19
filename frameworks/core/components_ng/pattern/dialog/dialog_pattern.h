@@ -182,6 +182,8 @@ public:
     {
         dialogProperties_ = param;
         InitHostWindowRect();
+        InitParentWindowRect();
+        InitDefaultSystemMaterial();
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
@@ -192,6 +194,7 @@ public:
     }
 
     void OnColorConfigurationUpdate() override;
+    void UpdateResourceColors();
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -270,6 +273,11 @@ public:
         return hostWindowRect_;
     }
 
+    RectF GetParentWindowRect() const
+    {
+        return parentWindowRect_;
+    }
+
     void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
     {
         foldDisplayModeChangedCallbackId_ = id;
@@ -312,6 +320,8 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void InitParentWindowRect();
+    void InitDefaultSystemMaterial();
     void UpdateHostWindowRect();
     void UpdateFontScale();
 
@@ -396,6 +406,23 @@ public:
     RefPtr<FrameNode> GetMaskNode();
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void RegisterOnFinishEvent(std::function<void()>&& onFinishEvent)
+    {
+        onFinishEvent_ = std::move(onFinishEvent);
+    }
+
+    void SetHasExtraNodeForDistortion(bool hasExtraNodeForDistortion)
+    {
+        hasExtraNodeForDistortion_ = hasExtraNodeForDistortion;
+    }
+    
+    bool GetHasExtraNodeForDistortion()
+    {
+        return hasExtraNodeForDistortion_;
+    }
+
+    bool NeedDistortion();
+    bool NeedEdgeLight();
 
 private:
     bool AvoidKeyboard() const override
@@ -411,6 +438,7 @@ private:
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
     void RegisterHoverModeChangeCallback();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     RectF GetContentRect(const RefPtr<FrameNode>& contentNode);
@@ -429,6 +457,9 @@ private:
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props,
+        bool isCustomBorder, RefPtr<DialogTheme> dialogTheme);
+    void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode);
     void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
@@ -451,6 +482,7 @@ private:
         const Dimension& dividerLength, const Dimension& dividerWidth, const Color& color, const Dimension& space);
     RefPtr<FrameNode> CreateButton(
         const ButtonInfo& params, int32_t index, bool isCancel = false, bool isVertical = false, int32_t length = 0);
+    void AddButtonColorCallback(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode);
     RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
@@ -500,6 +532,8 @@ private:
     Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode);
     bool InvertShadowColor();
     void OnWindowShow() override;
+    void PlayFlowLight();
+    void PlayDistortion();
     void ReportActionSheetOnInjectionEvent(bool result,
         std::string reason, int32_t sheetIndex = -1, int32_t buttonIndex = -1);
     int32_t OnInjectionEvent(const std::string& command) override;
@@ -525,6 +559,8 @@ private:
     std::optional<AnimationOption> closeAnimation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
     std::optional<int32_t> hoverModeChangedCallbackId_;
+    std::optional<bool> needDistortion_;
+    std::optional<bool> needFlowLight_;
     bool isFoldStatusChanged_ = false;
 
     // XTS inspector values
@@ -567,6 +603,10 @@ private:
     bool isDialogDisposed_ = false;
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
+    RectF parentWindowRect_;
+    bool isDialogShow_ = true;
+    bool hasExtraNodeForDistortion_ = false;
+    std::function<void()> onFinishEvent_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

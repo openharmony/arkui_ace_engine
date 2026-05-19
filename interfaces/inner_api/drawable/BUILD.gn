@@ -29,6 +29,7 @@ ohos_shared_library("drawable_inner_ani") {
     "cJSON:cjson",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "icu:shared_icuuc",
   ]
   part_name = "ace_engine"
   subsystem_name = "arkui"

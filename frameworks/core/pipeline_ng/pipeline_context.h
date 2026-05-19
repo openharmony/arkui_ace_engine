@@ -28,28 +28,15 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
-#include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/color_inverter.h"
-#include "core/common/frontend.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
-#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
-#include "core/components_ng/manager/full_screen/full_screen_manager.h"
-#include "core/components_ng/manager/memory/memory_manager.h"
-#include "core/components_ng/manager/post_event/post_event_manager.h"
-#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
-#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
-#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"
-#include "core/components_ng/manager/focus/focus_manager.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
@@ -70,8 +57,10 @@ namespace OHOS::Ace::NG {
 
 namespace OHOS::Ace {
 class AIWriteAdapter;
+class RRect;
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
+class TaihangOptimizer;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -83,12 +72,22 @@ using IdleCallbackFunc = std::function<void(uint64_t nanoTimestamp, uint32_t fra
 class NodeRenderStatusMonitor;
 class MagnifierController;
 class PageInfo;
+class AvoidInfoManager;
+class FocusManager;
+class FrameRateManager;
+class FullScreenManager;
+class MemoryManager;
 class ContentChangeManager;
 class InspectorOffscreenNodesMgr;
+class OverlayManager;
+class PostEventManager;
+class PrivacySensitiveManager;
 class SafeAreaManager;
 class SelectOverlayManager;
+class SharedOverlayManager;
 class NavigationManager;
 class StageManager;
+class ToolbarManager;
 class UIExtensionManager;
 class AccessibilityManagerNG;
 class ForceSplitManager;
@@ -97,8 +96,13 @@ class FormEventManager;
 class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
+class DragDropManager;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
+enum class FocusActiveReason : int32_t;
+
+constexpr char ENV_KEY_DIRECTION[] = "system.arkui.layout.direction";
+constexpr char ENV_KEY_FONT_SCALE[] = "system.arkui.fontScale";
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -233,6 +237,12 @@ public:
     void DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
+    std::optional<float> ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host);
+
+    float GetFontScaleFromEnv(const RefPtr<FrameNode>& host = nullptr);
+
+    std::optional<TextDirection> ResolveDirectionFromEnv(const RefPtr<FrameNode>& host);
 
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
@@ -603,13 +613,10 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
-    bool GetIsFocusActive() const
-    {
-        return focusManager_ ? focusManager_->GetIsFocusActive() : false;
-    }
+    bool GetIsFocusActive() const;
 
-    bool SetIsFocusActive(
-        bool isFocusActive, FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
+    bool SetIsFocusActive(bool isFocusActive, bool autoFocusInactive = true);
+    bool SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -645,10 +652,7 @@ public:
 
     void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
-    bool GetIsRequestVsync()
-    {
-        return window_->GetIsRequestVsync();
-    }
+    bool GetIsRequestVsync();
 
     bool IsLayouting() const override
     {
@@ -978,20 +982,14 @@ public:
 
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const;
 
-    RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
-    {
-        return privacySensitiveManager_;
-    }
+    RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const;
 
     const RefPtr<ToolbarManager>& GetToolbarManager() const
     {
         return toolbarManager_;
     }
 
-    void ChangeSensitiveNodes(bool flag) override
-    {
-        privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
-    }
+    void ChangeSensitiveNodes(bool flag) override;
 
     void FlushRequestFocus();
 
@@ -1270,7 +1268,14 @@ public:
     {
         rotationEndCallbackMap_.erase(callbackId);
     }
-
+    void SetUseEnvManager(bool isEnable)
+    {
+        isUseEnvManager_ = isEnable;
+    }
+    bool GetUseEnvManager()
+    {
+        return isUseEnvManager_;
+    }
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
     void NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void NotifyDragMouseEvent(const MouseEvent& event);
@@ -1292,14 +1297,11 @@ public:
 
     uint32_t ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params);
     void OnDumpBindAICaller(const std::vector<std::string>& params) const;
-    bool GetIsRequestFrame() const
-    {
-        CHECK_NULL_RETURN(window_, false);
-        return window_->GetIsRequestFrame();
-    }
+    bool GetIsRequestFrame() const;
 
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
     const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
+    const std::shared_ptr<TaihangOptimizer>& GetTaihangOptimizer() const;
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
@@ -1623,9 +1625,9 @@ private:
     RefPtr<UIExtensionManager> uiExtensionManager_;
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_;
-    RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
-    RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
-    RefPtr<ToolbarManager> toolbarManager_ = MakeRefPtr<ToolbarManager>();
+    RefPtr<FrameRateManager> frameRateManager_;
+    RefPtr<PrivacySensitiveManager> privacySensitiveManager_;
+    RefPtr<ToolbarManager> toolbarManager_;
     Rect displayAvailableRect_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
@@ -1650,6 +1652,7 @@ private:
     bool isDensityChanged_ = false;
     bool isNeedReloadDensity_ = false;
     bool isBeforeDragHandleAxis_ = false;
+    bool isUseEnvManager_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool isWindowSizeDragging_ = false;
@@ -1702,8 +1705,8 @@ private:
 
     int32_t preNodeId_ = -1;
 
-    RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
-    RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
+    RefPtr<AvoidInfoManager> avoidInfoMgr_;
+    RefPtr<MemoryManager> memoryMgr_;
     RefPtr<NavigationManager> navigationMgr_;
     RefPtr<ForceSplitManager> forceSplitMgr_;
     RefPtr<FormVisibleManager> formVisibleMgr_;
@@ -1752,6 +1755,7 @@ private:
     RefPtr<MagnifierController> magnifierController_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
+    std::shared_ptr<TaihangOptimizer> taihangOptimizer_;
     RefPtr<ContentChangeManager> contentChangeMgr_;
     std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
     std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;

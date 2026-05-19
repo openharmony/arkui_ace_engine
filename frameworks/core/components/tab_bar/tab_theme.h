@@ -159,6 +159,18 @@ public:
                 pattern->GetAttr<Dimension>("sub_tab_bar_indicatorstyle_margin_top", 4.0_vp);
             theme->subTabBarThirdLargeFontSizeScale_ =
                 pattern->GetAttr<double>("sub_tab_bar_third_large_font_size_scale", THIRDFONT_DEFAULT_VALUE);
+            theme->interactiveFocusColor_ =
+                pattern->GetAttr<Color>("interactive_focus", Color::BLACK);
+            theme->outlineExtraLarger_ =
+                pattern->GetAttr<Dimension>("outline_extra_larger", 2.0_vp);
+            theme->iconEmphasize_ =
+                pattern->GetAttr<Color>("icon_emphasize", Color::BLACK);
+            theme->iconPrimary_ =
+                pattern->GetAttr<Color>("icon_primary", Color::BLACK);
+            theme->fontEmphasize_ =
+                pattern->GetAttr<Color>("font_emphasize", Color::BLACK);
+            theme->fontPrimary_ =
+                pattern->GetAttr<Color>("font_primary", Color::BLACK);
         }
     };
 
@@ -522,6 +534,33 @@ public:
     {
         return isChangeFocusTextStyle_;
     }
+
+    const Color& GetInteractiveFocusColor() const
+    {
+        return interactiveFocusColor_;
+    }
+
+    const Dimension& GetOutlineExtraLarger() const
+    {
+        return outlineExtraLarger_;
+    }
+
+    const Color& GetIconEmphasize() const
+    {
+        return iconEmphasize_;
+    }
+    const Color& GetIconPrimary() const
+    {
+        return iconPrimary_;
+    }
+    const Color& GetFontEmphasize() const
+    {
+        return fontEmphasize_;
+    }
+    const Color& GetFontPrimary() const
+    {
+        return fontPrimary_;
+    }
     
 protected:
     TabTheme() = default;
@@ -600,6 +639,12 @@ protected:
     Color tabBarFocusedColor_;
     Color subTabTextFocusedColor_;
     bool isChangeFocusTextStyle_;
+    Color interactiveFocusColor_;
+    Dimension outlineExtraLarger_;
+    Color iconEmphasize_;
+    Color iconPrimary_;
+    Color fontEmphasize_;
+    Color fontPrimary_;
 };
 
 } // namespace OHOS::Ace

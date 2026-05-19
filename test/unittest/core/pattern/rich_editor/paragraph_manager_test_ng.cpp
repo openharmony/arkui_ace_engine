@@ -22,6 +22,27 @@
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float TEST_HEIGHT_100 = 100.0f;
+constexpr int32_t TEST_PARAGRAPH_START = 0;
+constexpr int32_t TEST_PARAGRAPH_END_10 = 10;
+constexpr int32_t TEST_PARAGRAPH_END_20 = 20;
+constexpr int32_t TEST_PARAGRAPH_END_25 = 25;
+constexpr int32_t TEST_RECT_START = 0;
+constexpr int32_t TEST_RECT_END = 10;
+constexpr int32_t TEST_RECT_END_20 = 20;
+constexpr int32_t TEST_RECT_START_20 = 20;
+constexpr int32_t TEST_RECT_END_30 = 30;
+constexpr float TEST_RECT_WIDTH = 100.0f;
+constexpr float TEST_RECT_HEIGHT = 20.0f;
+constexpr float TEST_RECT_WIDTH_80 = 80.0f;
+constexpr float TEST_RECT_HEIGHT_25 = 25.0f;
+constexpr float TEST_LINE_LENGTH_100 = 100.0f;
+constexpr float TEST_LINE_LENGTH_200 = 200.0f;
+constexpr float TEST_LINE_LENGTH_150 = 150.0f;
+constexpr size_t TEST_ELLIPSIS_START = 5;
+constexpr size_t TEST_ELLIPSIS_END = 10;
+} // namespace
 
 class RichEditorParagraphManagetTestNg : public RichEditorCommonTestNg {
 public:
@@ -617,7 +638,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes003, TestSize.Level0)
         }));
     const OHOS::Ace::NG::ParagraphStyle expectedStyle;
     LeadingMargin leadingMarginOne;
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    mockParagraph->paraStyle_ = expectedStyle;
     paragraphInfo.paragraph = mockParagraph;
     paragraphInfo.paragraphStyle = expectedStyle;
     paragraphInfo.start = 0;
@@ -652,7 +673,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes004, TestSize.Level0)
             selectedRects.emplace_back(RectF(0, 0, 100, 20));
         }));
     LeadingMargin leadingMarginOne;
-    EXPECT_CALL(*mockParagraphOne, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
+    mockParagraphOne->paraStyle_ = paragraphStyle;
     paragraphInfoOne.paragraph = mockParagraphOne;
     paragraphInfoOne.paragraphStyle = paragraphStyle;
     paragraphInfoOne.start = 0;
@@ -1212,8 +1233,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
     ParagraphStyle testStyle = {};
-    EXPECT_CALL(*paragraph, GetParagraphStyle())
-        .WillRepeatedly(ReturnRef(testStyle));
+    paragraph->paraStyle_ = testStyle;
     /**
      * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
     */
@@ -1249,8 +1269,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
     ASSERT_NE(paragraph, nullptr);
     ParagraphStyle testStyle = {};
     testStyle.leadingMargin = LeadingMargin();
-    EXPECT_CALL(*paragraph, GetParagraphStyle())
-        .WillRepeatedly(ReturnRef(testStyle));
+    paragraph->paraStyle_ = testStyle;
     /**
      * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
     */
@@ -1287,8 +1306,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
     ASSERT_NE(paragraph, nullptr);
     ParagraphStyle testStyle = {};
     testStyle.leadingMargin = LeadingMargin();
-    EXPECT_CALL(*paragraph, GetParagraphStyle())
-        .WillRepeatedly(ReturnRef(testStyle));
+    paragraph->paraStyle_ = testStyle;
     /**
      * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
     */
@@ -1471,4 +1489,370 @@ HWTEST_F(RichEditorParagraphManagetTestNg, AdjustHandleByLineMetrics002, TestSiz
     EXPECT_EQ(handleHeight, 1.0f);
 }
 
+/**
+ * @tc.name: ParagraphManagerGetHeight001
+ * @tc.desc: Test ParagraphManager GetHeight function with empty paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetHeight001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    float height = richEditorPattern->paragraphs_.GetHeight();
+    EXPECT_EQ(height, 0.0f);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetHeight002
+ * @tc.desc: Test ParagraphManager GetHeight function with paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetHeight002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(TEST_HEIGHT_100));
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = paragraph;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info));
+
+    float height = richEditorPattern->paragraphs_.GetHeight();
+    EXPECT_EQ(height, TEST_HEIGHT_100);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetParagraphLength001
+ * @tc.desc: Test ParagraphManager GetParagraphLength function with empty paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetParagraphLength001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    int32_t length = richEditorPattern->paragraphs_.GetParagraphLength();
+    EXPECT_EQ(length, 0);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetParagraphLength002
+ * @tc.desc: Test ParagraphManager GetParagraphLength function with paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetParagraphLength002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = paragraph;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info));
+
+    int32_t length = richEditorPattern->paragraphs_.GetParagraphLength();
+    EXPECT_EQ(length, TEST_PARAGRAPH_END_10);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetParagraphLength003
+ * @tc.desc: Test ParagraphManager GetParagraphLength function with multiple paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetParagraphLength003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph1 = MockParagraph::GetOrCreateMockParagraph();
+    auto paragraph2 = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph1, nullptr);
+    ASSERT_NE(paragraph2, nullptr);
+
+    ParagraphManager::ParagraphInfo info1;
+    info1.paragraph = paragraph1;
+    info1.start = TEST_PARAGRAPH_START;
+    info1.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info1));
+
+    ParagraphManager::ParagraphInfo info2;
+    info2.paragraph = paragraph2;
+    info2.start = TEST_PARAGRAPH_END_10;
+    info2.end = TEST_PARAGRAPH_END_25;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info2));
+
+    int32_t length = richEditorPattern->paragraphs_.GetParagraphLength();
+    EXPECT_EQ(length, TEST_PARAGRAPH_END_25);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetLongestLineWithIndent001
+ * @tc.desc: Test ParagraphManager GetLongestLineWithIndent function with empty paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetLongestLineWithIndent001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    float longestLine = richEditorPattern->paragraphs_.GetLongestLineWithIndent();
+    EXPECT_EQ(longestLine, 0.0f);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetLongestLineWithIndent002
+ * @tc.desc: Test ParagraphManager GetLongestLineWithIndent function with paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetLongestLineWithIndent002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetLongestLineWithIndent()).WillRepeatedly(Return(TEST_LINE_LENGTH_150));
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = paragraph;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info));
+
+    float longestLine = richEditorPattern->paragraphs_.GetLongestLineWithIndent();
+    EXPECT_EQ(longestLine, TEST_LINE_LENGTH_150);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetLongestLineWithIndent003
+ * @tc.desc: Test ParagraphManager GetLongestLineWithIndent function with multiple paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetLongestLineWithIndent003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph1 = MockParagraph::GetOrCreateMockParagraph();
+    auto paragraph2 = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph1, nullptr);
+    ASSERT_NE(paragraph2, nullptr);
+    EXPECT_CALL(*paragraph1, GetLongestLineWithIndent()).WillRepeatedly(Return(TEST_LINE_LENGTH_100));
+    EXPECT_CALL(*paragraph2, GetLongestLineWithIndent()).WillRepeatedly(Return(TEST_LINE_LENGTH_200));
+
+    ParagraphManager::ParagraphInfo info1;
+    info1.paragraph = paragraph1;
+    info1.start = TEST_PARAGRAPH_START;
+    info1.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info1));
+
+    ParagraphManager::ParagraphInfo info2;
+    info2.paragraph = paragraph2;
+    info2.start = TEST_PARAGRAPH_END_10;
+    info2.end = TEST_PARAGRAPH_END_20;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info2));
+
+    float longestLine = richEditorPattern->paragraphs_.GetLongestLineWithIndent();
+    EXPECT_EQ(longestLine, TEST_LINE_LENGTH_200);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetEllipsisTextRange001
+ * @tc.desc: Test ParagraphManager GetEllipsisTextRange function with empty paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetEllipsisTextRange001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto range = richEditorPattern->paragraphs_.GetEllipsisTextRange();
+    EXPECT_EQ(range.first, std::numeric_limits<size_t>::max());
+    EXPECT_EQ(range.second, 0);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetEllipsisTextRange002
+ * @tc.desc: Test ParagraphManager GetEllipsisTextRange function with paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetEllipsisTextRange002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetEllipsisTextRange())
+        .WillRepeatedly(Return(std::make_pair(TEST_ELLIPSIS_START, TEST_ELLIPSIS_END)));
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = paragraph;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info));
+
+    auto range = richEditorPattern->paragraphs_.GetEllipsisTextRange();
+    EXPECT_EQ(range.first, TEST_ELLIPSIS_START);
+    EXPECT_EQ(range.second, TEST_ELLIPSIS_END);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetRects001
+ * @tc.desc: Test ParagraphManager GetRects function with empty paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetRects001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto rects = richEditorPattern->paragraphs_.GetRects(TEST_RECT_START, TEST_RECT_END, RectHeightPolicy::COVER_LINE);
+    EXPECT_EQ(rects.size(), 0);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetRects002
+ * @tc.desc: Test ParagraphManager GetRects function with paragraphs and COVER_TEXT policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetRects002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    std::vector<RectF> mockRects = { RectF(0.0f, 0.0f, TEST_RECT_WIDTH, TEST_RECT_HEIGHT) };
+    EXPECT_CALL(*paragraph, GetTightRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([&](int32_t start, int32_t end, std::vector<RectF>& rects) { rects = mockRects; }));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(TEST_HEIGHT_100));
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = paragraph;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info));
+
+    auto rects = richEditorPattern->paragraphs_.GetRects(TEST_RECT_START, TEST_RECT_END, RectHeightPolicy::COVER_TEXT);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetRects003
+ * @tc.desc: Test ParagraphManager GetRects function with paragraphs and COVER_LINE policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetRects003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    std::vector<RectF> mockRects = { RectF(0.0f, 0.0f, TEST_RECT_WIDTH, TEST_RECT_HEIGHT) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([&](int32_t start, int32_t end, std::vector<RectF>& rects) { rects = mockRects; }));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(TEST_HEIGHT_100));
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = paragraph;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info));
+
+    auto rects = richEditorPattern->paragraphs_.GetRects(TEST_RECT_START, TEST_RECT_END, RectHeightPolicy::COVER_LINE);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetRects004
+ * @tc.desc: Test ParagraphManager GetRects function with start beyond paragraph end
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetRects004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(TEST_HEIGHT_100));
+
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = paragraph;
+    info.start = TEST_PARAGRAPH_START;
+    info.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info));
+
+    auto rects =
+        richEditorPattern->paragraphs_.GetRects(TEST_RECT_START_20, TEST_RECT_END_30, RectHeightPolicy::COVER_LINE);
+    EXPECT_EQ(rects.size(), 0);
+}
+
+/**
+ * @tc.name: ParagraphManagerGetRects005
+ * @tc.desc: Test ParagraphManager GetRects function with multiple paragraphs
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManagerGetRects005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto paragraph1 = MockParagraph::GetOrCreateMockParagraph();
+    auto paragraph2 = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph1, nullptr);
+    ASSERT_NE(paragraph2, nullptr);
+
+    std::vector<RectF> mockRects1 = { RectF(0.0f, 0.0f, TEST_RECT_WIDTH, TEST_RECT_HEIGHT) };
+    std::vector<RectF> mockRects2 = { RectF(0.0f, 0.0f, TEST_RECT_WIDTH_80, TEST_RECT_HEIGHT_25) };
+    EXPECT_CALL(*paragraph1, GetTightRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([&](int32_t start, int32_t end, std::vector<RectF>& rects) { rects = mockRects1; }));
+    EXPECT_CALL(*paragraph1, GetHeight()).WillRepeatedly(Return(TEST_HEIGHT_100));
+    EXPECT_CALL(*paragraph2, GetTightRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([&](int32_t start, int32_t end, std::vector<RectF>& rects) { rects = mockRects2; }));
+    EXPECT_CALL(*paragraph2, GetHeight()).WillRepeatedly(Return(TEST_HEIGHT_100));
+
+    ParagraphManager::ParagraphInfo info1;
+    info1.paragraph = paragraph1;
+    info1.start = TEST_PARAGRAPH_START;
+    info1.end = TEST_PARAGRAPH_END_10;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info1));
+
+    ParagraphManager::ParagraphInfo info2;
+    info2.paragraph = paragraph2;
+    info2.start = TEST_PARAGRAPH_END_10;
+    info2.end = TEST_PARAGRAPH_END_20;
+    richEditorPattern->paragraphs_.AddParagraph(std::move(info2));
+
+    auto rects =
+        richEditorPattern->paragraphs_.GetRects(TEST_RECT_START, TEST_RECT_END_20, RectHeightPolicy::COVER_TEXT);
+    EXPECT_EQ(rects.size(), 2);
+}
 } // namespace OHOS::Ace::NG

@@ -204,9 +204,7 @@ void ResetButtonFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     Color textColor = buttonTheme->GetTextStyle().GetTextColor();
     ButtonModelNG::SetFontColor(frameNode, textColor, true);
@@ -559,9 +557,7 @@ void ResetButtonBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color backgroundColor;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     backgroundColor = buttonTheme->GetBgColor();
     ButtonModelNG::BackgroundColor(frameNode, backgroundColor, true);

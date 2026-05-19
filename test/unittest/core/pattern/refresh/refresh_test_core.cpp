@@ -49,4 +49,26 @@ public:
 };
 
 } // namespace
+
+/**
+ * @tc.name: RefreshLpxAttribute001
+ * @tc.desc: Verify refreshOffset and indicatorOffset keep independent LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestCore, RefreshLpxAttribute001, TestSize.Level1)
+{
+    RefreshModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    model.SetRefreshOffset(Dimension(64.0, DimensionUnit::LPX));
+    model.SetIndicatorOffset(Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_REFRESH_OFFSET));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_INDICATOR_OFFSET));
+
+    model.SetRefreshOffset(Dimension(64.0, DimensionUnit::VP));
+    EXPECT_FALSE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_REFRESH_OFFSET));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_INDICATOR_OFFSET));
+}
 } // namespace OHOS::Ace::NG

@@ -44,6 +44,7 @@ public:
     void SetOpenAnimation(Opt_AnimateParam openAnimation);
     void SetCloseAnimation(Opt_AnimateParam closeAnimation);
     void SetShowInSubWindow(Opt_Boolean showInSubWindow);
+    void SetDisplayModeInSubWindow(Opt_DialogDisplayMode displayModeInSubWindow);
     void SetBackgroundColor(Opt_ResourceColor backgroundColor);
     void SetCornerRadius(Opt_Union_Dimension_BorderRadiuses cornerRadius);
     void SetIsModal(Opt_Boolean isModal);
@@ -80,6 +81,8 @@ public:
     void SetLevelOrderExtender(Opt_LevelOrderExtender levelOrderExtender);
     void SetFocusable(Opt_Boolean focusable);
     void SetSystemMaterial(Opt_uiMaterial_Material systemMaterial);
+    void SetDistortionMode(Opt_DistortionMode distortionMode);
+    void SetEdgeLightMode(Opt_EdgeLightMode edgeLightMode);
 
     DialogProperties GetDialogProperties() const;
 

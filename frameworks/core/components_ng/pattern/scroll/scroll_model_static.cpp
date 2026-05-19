@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/scroll/scroll_model_static.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -20,6 +22,13 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
  
 namespace OHOS::Ace::NG {
+namespace {
+bool HasLpxUnit(const std::vector<Dimension>& dimensions)
+{
+    return std::any_of(dimensions.begin(), dimensions.end(),
+        [](const Dimension& dimension) { return dimension.Unit() == DimensionUnit::LPX; });
+}
+}
  
 RefPtr<FrameNode> ScrollModelStatic::CreateFrameNode(int32_t nodeId)
 {
@@ -202,7 +211,16 @@ void ScrollModelStatic::SetScrollSnap(
         pattern->SetScrollSnapUpdate(true);
     }
     if (scrollSnapAlign != ScrollSnapAlign::NONE) {
-        pattern->SetIntervalSize(intervalSize.value_or(Dimension()));
+        auto value = intervalSize.value_or(Dimension());
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_SCROLL_INTERVAL_SIZE, frameNode);
+        pattern->SetIntervalSize(value);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_INTERVAL_SIZE);
+    }
+    if (HasLpxUnit(snapPaginations)) {
+        frameNode->RegisterLpxAttribute(LpxAttribute::LPX_SCROLL_SNAP_PAGINATIONS);
+    } else {
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SCROLL_SNAP_PAGINATIONS);
     }
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(std::make_pair(enableSnapToStart.value_or(true), enableSnapToEnd.value_or(true)));
@@ -224,9 +242,12 @@ void ScrollModelStatic::SetEnablePaging(FrameNode* frameNode, const std::optiona
 void ScrollModelStatic::SetInitialOffset(FrameNode* frameNode, const std::optional<OffsetT<CalcDimension>>& offset)
 {
     CHECK_NULL_VOID(frameNode);
+    auto offsetValue = offset.value_or(OffsetT(CalcDimension(), CalcDimension()));
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offsetValue.GetX(), LpxAttribute::LPX_INITIAL_OFFSET_X, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offsetValue.GetY(), LpxAttribute::LPX_INITIAL_OFFSET_Y, frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetInitialOffset(offset.value_or(OffsetT(CalcDimension(), CalcDimension())));
+    pattern->SetInitialOffset(offsetValue);
 }
 
 void ScrollModelStatic::SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
@@ -299,4 +320,3 @@ void ScrollModelStatic::SetOnZoomStop(FrameNode* frameNode, std::function<void()
     eventHub->SetOnZoomStop(std::move(event));
 }
 } // namespace OHOS::Ace::NG
- 

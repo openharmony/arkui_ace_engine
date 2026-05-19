@@ -150,6 +150,8 @@ public:
 
 private:
     using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>>;
+    class ScopedThemeResourceAdapterOverride;
+
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
     ThemeWrappers themeWrappersLight_;
     ThemeWrappers themeWrappersDark_;

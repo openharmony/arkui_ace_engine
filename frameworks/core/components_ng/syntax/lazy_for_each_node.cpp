@@ -15,6 +15,7 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -774,6 +775,13 @@ void LazyForEachNode::DumpInfo()
 {
     if (builder_) {
         builder_->DumpInfo();
+    }
+}
+
+void LazyForEachNode::UpdateThemeScopeUpdate(int32_t themeScopeId)
+{
+    if (builder_) {
+        builder_->UpdateThemeScopeUpdate(themeScopeId);
     }
 }
 } // namespace OHOS::Ace::NG

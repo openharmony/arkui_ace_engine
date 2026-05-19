@@ -44,10 +44,21 @@ std::string ParagraphStyle::ToString() const
     result += orphanCharOptimization;
     result += ", compressLeadingPunctuation: ";
     result += compressLeadingPunctuation;
+    result += ", punctuationOverflow: ";
+    result += punctuationOverflow;
     result += ", includeFontPadding: ";
     result += includeFontPadding;
     result += ", fallbackLineSpacing: ";
     result += fallbackLineSpacing;
+    result += ", gradient: ";
+    if (propGradient) {
+        result += propGradient->GetGradient().has_value() ? propGradient->GetGradient().value().ToString().c_str()
+            : "nullptr";
+    } else {
+        result += "nullptr";
+    }
+    result += ", colorShaderStyle: ";
+    result += colorShaderStyle.has_value() ? colorShaderStyle.value().ToString().c_str() : "nullptr";
     return result;
 }
 } // namespace OHOS::Ace::NG

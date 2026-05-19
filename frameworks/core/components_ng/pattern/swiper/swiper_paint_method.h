@@ -20,6 +20,10 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/render/node_paint_method.h"
 
+namespace OHOS::Ace {
+enum class Axis;
+}
+
 namespace OHOS::Ace::NG {
 
 class SwiperPaintMethod : public NodePaintMethod {

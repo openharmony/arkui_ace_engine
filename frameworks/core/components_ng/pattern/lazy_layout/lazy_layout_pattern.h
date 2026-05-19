@@ -16,14 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_VIEW_LAZY_LAYOUT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_VIEW_LAZY_LAYOUT_PATTERN_H
 
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_offset.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-struct AdjustOffset {
-    float start = 0.0f; // Positive: Top edge adjust up, Negative: Top edge adjust down.
-    float end = 0.0f; // Positive: Bottom edge adjust down, Negative: Bottom edge adjust up.
-};
-
 class LazyLayoutPattern : public Pattern {
     DECLARE_ACE_TYPE(LazyLayoutPattern, Pattern);
 public:

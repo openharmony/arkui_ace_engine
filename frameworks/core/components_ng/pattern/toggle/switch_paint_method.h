@@ -95,10 +95,10 @@ public:
         }
         horizontalPadding += horizontalIncrement;
         verticalPadding += verticalIncrement;
-        float boundsRectOriginX = offset.GetX() - horizontalPadding;
-        float boundsRectOriginY = offset.GetY() - verticalPadding;
-        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
-        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        float boundsRectOriginX = offset.GetX() - horizontalPadding - actualPointRadius;
+        float boundsRectOriginY = offset.GetY() - verticalPadding - actualPointRadius;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding + 2 * actualPointRadius;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding + 2 * actualPointRadius;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         switchModifier_->SetBoundsRect(boundsRect);
     }
@@ -244,6 +244,13 @@ public:
     {
         if (switchModifier_) {
             switchModifier_->SetMaterialNodePositionCallback(std::move(callback));
+        }
+    }
+
+    void SetSlideFinishedCallback(SwitchModifier::SlideFinishedCallback&& callback)
+    {
+        if (switchModifier_) {
+            switchModifier_->SetSlideFinishedCallback(std::move(callback));
         }
     }
 

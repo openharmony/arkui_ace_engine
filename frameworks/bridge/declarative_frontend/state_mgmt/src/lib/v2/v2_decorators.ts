@@ -380,16 +380,16 @@ const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescr
  * @partof SDK
  * @since 22
  */
-const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
-  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Env`, envKey);
-
+const Env = (envKey: keyof EnvTypeMap | SystemEnvKey): PropertyDecorator => {
+  const envKeyId = typeof envKey === 'string' ? envKey : envKey.keyId;
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Env`, envKeyId);
   return (proto: object, varName: string): void => {
-    EnvV2.addEnvKeyVariableDecoMeta(proto, varName, envKey);
+    EnvV2.addEnvKeyVariableDecoMeta(proto, varName, envKeyId);
     const storeProp = ObserveV2.ENV_PREFIX + varName;
     Reflect.defineProperty(proto, varName, {
       get() {
-        if (!(envKey in envFactoryMap)) {
-          const message = `Unsupported key '${envKey}' in @Env.`;
+        if (!EnvV2.isDirectQuerySystemEnvKey(envKeyId) && !(envKeyId in envFactoryMap)) {
+          const message = `Unsupported key '${envKeyId}' in @Env.`;
           stateMgmtConsole.applicationError(message);
           throw new BusinessError(UNSUPPORTED_KEY_IN_ENV, message);
         }
@@ -403,14 +403,18 @@ const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
         ObserveV2.getObserve().addRef(this, varName);
         if (!this[storeProp]) {
           // first init env value
-          stateMgmtConsole.debug(`Env get first register EnvValue key ${envKey} varName ${varName} in ${this.debugInfo__()}`);
+          stateMgmtConsole.debug(`Env get first register EnvValue key ${envKeyId} varName ${varName} in ${this.debugInfo__()}`);
           this.__registerUpdateInstanceForEnvFunc__Internal(this.__updateForEnvValue__Internal.bind(this));
-          this[storeProp] = EnvV2.registerEnv(envKey, this, varName);
+          if (EnvV2.isDirectQuerySystemEnvKey(envKeyId)) {
+            this[storeProp] = this.findEnvValueByKey(envKeyId);
+          } else {
+            this[storeProp] = EnvV2.registerEnv(envKeyId as keyof EnvTypeMap, this, varName);
+          }
         }
         return this[storeProp];
       },
       set(_) {
-          const message = `@Env(${envKey}) is read-only and cannot assign value for it.`;
+          const message = `@Env(${envKeyId}) is read-only and cannot assign value for it.`;
           stateMgmtConsole.applicationError(message);
           // toolchain can check
           throw new Error(message);
@@ -419,3 +423,55 @@ const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
     });
   };
 };
+
+
+/**
+ * @CustomEnv Custom environment property decorator.
+ * Returns the current custom environment value corresponding to the specified `envKey`.
+ *
+ * @partof SDK
+ * @since 26
+ */
+const CustomEnv = (envKey: CustomEnvKey): PropertyDecorator => {
+  if (typeof envKey !== 'object') {
+    const message = `@CustomEnv decorator requires an CustomEnvKey key, but received: ${typeof envKey}`;
+    stateMgmtConsole.applicationError(message);
+    throw new Error(message);
+  }
+  const envKeyId = envKey.internalId;
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@CustomEnv`, `${envKeyId}`);
+
+  return (proto: object, varName: string): void => {
+    const storeProp = ObserveV2.OB_PREFIX + varName;
+    const localValueProp = `__custom_env_local_${varName}`;
+    const isCustomEnvInit = ObserveV2.IS_CUSTOM_ENV_INIT + varName;
+    ObserveV2.addCustomEnvDecoratorMeta(proto, varName, envKeyId);
+    Reflect.defineProperty(proto, varName, {
+      get() {
+        if (!(this instanceof ViewPU || this instanceof ViewV2)) {
+          const message = `@CustomEnv can only be declared inside @Component or @ComponentV2.`;
+          stateMgmtConsole.applicationError(message);
+          throw new Error(message);
+        }
+        ObserveV2.getObserve().addRef(this, varName);
+        if (!this[storeProp]) {
+          const envValue = this.findCustomValueByKey(envKeyId);
+          this[storeProp] = envValue !== undefined ? envValue : this[localValueProp];
+        }
+        return ObserveV2.autoProxyObject(this, storeProp);
+      },
+      set(value) {
+        if (!this[isCustomEnvInit]) {
+          this[localValueProp] = value;
+          this[isCustomEnvInit] = true;
+          return;
+        }
+        const message = `@CustomEnv(${envKeyId}) is read-only and cannot assign value for it.`;
+        stateMgmtConsole.applicationError(message);
+        throw new Error(message);
+      },
+      enumerable: true
+    });
+  };
+};
+

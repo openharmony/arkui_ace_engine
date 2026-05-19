@@ -209,7 +209,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
     }
 }
 export interface GaugeOptions {
-    value?: double | undefined;
+    value: double | undefined;
     min?: double;
     max?: double;
 }
@@ -350,6 +350,21 @@ export function GaugeImpl(
     })
 }
 
+@memo
+export function Gauge(
+    @memo @memo_skip
+    style: ((attributes: GaugeAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkGaugeComponent>((): ArkGaugeComponent => {
+        return new ArkGaugeComponent()
+    })
+    NodeAttach<ArkGaugePeer>((): ArkGaugePeer => ArkGaugePeer.create(receiver), (_: ArkGaugePeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class GaugeConfiguration_serializer {
     public static write(buffer: SerializerBase, value: GaugeConfiguration): void {
         let valueSerializer: SerializerBase = buffer

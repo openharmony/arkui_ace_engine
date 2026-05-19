@@ -181,7 +181,11 @@ export function run_state() : Boolean {
   const tests = tsuite('@State tests', () => {
 
     const compA = new EntryComponent(null, {});
-    ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV1;
+    // Use V2 rendering so shouldAddRef returns true unconditionally (V1 also
+    // requires a matching iObjectsRenderId, which the test doesn't set up).
+    // Without this, conditionalAddRef in ClassA's propA getter no-ops and
+    // refCnt/fireChangeCnt counters under-count.
+    ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponentV2;
 
     tcase('Test 1: @State init value ', () => {
         compA.build();
@@ -216,17 +220,17 @@ export function run_state() : Boolean {
     tcase('Test 5: @State AddRef test ', () => {
         StateTracker.reset();
         compA.stateA.propA;
-        // Apr 17, returns 1 here
-        // verify that the value is correct, changed 3 => 2
-        // test("Assign to: AddRef, expect 3", eq(StateTracker.getRefCnt(), 2));
+        // NOTE: re-enabled; test is expected to fail (Apr 17 returned 1, expected 2)
+        test('Assign to: AddRef, expect 3', eq(StateTracker.getRefCnt(), 2));
     })
 
-    // There is no dependencies and fireChange is called but does nothing
-    // Disabling checks
     tcase('Test 6: @State FireChange test ', () => {
         StateTracker.reset();
         compA.stateA.propA = 'newName';
-        //test("Assign to: FireChange, expect 2", eq(StateTracker.getFireChangeCnt(), 2));
+        // One fireChange: on __meta_propA inside ClassA. The @State backing
+        // meta is not fired here (only an inner @Track prop changed; the
+        // backing reference stays the same).
+        test('Assign to: FireChange, expect 1', eq(StateTracker.getFireChangeCnt(), 1));
     })
 
     tcase('Test 7: @State @Watch test ', () => {

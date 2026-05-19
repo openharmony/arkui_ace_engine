@@ -113,7 +113,7 @@ std::optional<bool> ProcessBindableEditMode(FrameNode* frameNode, const Opt_Unio
                 PipelineContext::SetCallBackNode(weakNode);
                 arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(enableEditMode));
             };
-            GridModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(onEvent));
+            GridModelNG::SetEnableEditModeBindingEvent(frameNode, std::move(onEvent));
         },
         [] {});
     return result;
@@ -585,6 +585,16 @@ void SetEditModeOptionsImpl(Ark_NativePointer node,
             };
             options.getPreviewBadge = modelCallback;
         }
+
+        auto useDefaultMultiSelectStyle = Converter::OptConvert<bool>(value->useDefaultMultiSelectStyle);
+        if (useDefaultMultiSelectStyle.has_value()) {
+            options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle.value();
+        }
+
+        auto enableTwoFingerMultiSelect = Converter::OptConvert<bool>(value->enableTwoFingerMultiSelect);
+        if (enableTwoFingerMultiSelect.has_value()) {
+            options.enableFingerMultiSelect = enableTwoFingerMultiSelect.value();
+        }
     }
     GridModelStatic::SetEditModeOptions(frameNode, options);
 }
@@ -726,6 +736,22 @@ void SetEdgeEffectImpl(Ark_NativePointer node, const Opt_EdgeEffect* value, cons
     }
     ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, alwaysEnabled, edge);
 }
+void SetOnEditModeChangeImpl(Ark_NativePointer node,
+                             const Opt_arkui_component_common_Callback_Boolean_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        GridModelNG::SetEnableEditModeChangeEvent(frameNode, nullptr);
+        return;
+    }
+    auto onEditModeChange = [arkCallback = CallbackHelper(*optValue)](bool enableEditMode) {
+        auto arkEnableEditMode = Converter::ArkValue<Ark_Boolean>(enableEditMode);
+        arkCallback.Invoke(arkEnableEditMode);
+    };
+    GridModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(onEditModeChange));
+}
 } // GridAttributeModifier
 const GENERATED_ArkUIGridModifier* GetGridModifier()
 {
@@ -762,6 +788,7 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetAlignItemsImpl,
         GridAttributeModifier::SetEditModeOptionsImpl,
         GridAttributeModifier::SetEnableEditModeImpl,
+        GridAttributeModifier::SetOnEditModeChangeImpl,
         GridAttributeModifier::SetFocusWrapModeImpl,
         GridAttributeModifier::SetSyncLoadImpl,
         GridAttributeModifier::SetOnScrollFrameBeginImpl,

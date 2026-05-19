@@ -63,6 +63,8 @@ constexpr int32_t OUTER_BORDER_WIDTH = 0;
 constexpr int32_t INNER_BORDER_WIDTH = 1;
 constexpr int32_t OUTER_BORDER_LINEAR_GRADIENT = 0;
 constexpr int32_t INNER_BORDER_LINEAR_GRADIENT = 1;
+constexpr int32_t GRID_STYLE_COUNT = 3;
+constexpr int32_t GRID_STYLE_HORIZONTAL_SIZE = 3;
 const std::vector<std::string> BORDER_WIDTH_TYPE = {"outlineWidth", "borderWidth"};
 const std::vector<std::string> BORDER_LINEAR_GRADIENT_TYPE = {"outlineLinearGradient", "borderLinearGradient"};
 
@@ -660,6 +662,34 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     } else {
         if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
             GetBlurStyleFromTheme(popupParam);
+        }
+    }
+
+    auto blurStyleOptionsValue = popupObj->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleOptionsValue->IsObject()) {
+        if (!popupParam->GetBlurStyleOption().has_value()) {
+            popupParam->SetBlurStyleOption(BlurStyleOption());
+        }
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(blurStyleOptionsValue);
+        auto blurStyleOption = popupParam->GetBlurStyleOption();
+        if (blurStyleOption.has_value()) {
+            auto styleOption = blurStyleOption.value();
+            JSViewAbstract::ParseBlurStyleOption(jsOption, styleOption);
+            popupParam->SetBlurStyleOption(styleOption);
+        }
+    }
+
+    auto effectOptionValue = popupObj->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!popupParam->GetEffectOption().has_value()) {
+            popupParam->SetEffectOption(EffectOption());
+        }
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(effectOptionValue);
+        auto effectOption = popupParam->GetEffectOption();
+        if (effectOption.has_value()) {
+            auto option = effectOption.value();
+            JSViewAbstract::ParseEffectOption(jsOption, option);
+            popupParam->SetEffectOption(option);
         }
     }
 
@@ -1432,6 +1462,38 @@ void JSViewPopups::ParseMenuSystemMaterial(const JSRef<JSObject>& menuOptions, N
     }
 }
 
+void JSViewPopups::ParseMenuDistortionMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto distortionValue = menuOptions->GetProperty("distortionMode");
+    if (!distortionValue->IsNumber()) {
+        return;
+    }
+    auto distortionMode = distortionValue->ToNumber<int32_t>();
+    if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_AUTO)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_AUTO;
+    } else if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_ENABLED)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_ENABLED;
+    } else if (distortionMode == static_cast<int32_t>(OHOS::Ace::DistortionMode::DISTORTION_DISABLED)) {
+        menuParam.distortionMode = OHOS::Ace::DistortionMode::DISTORTION_DISABLED;
+    }
+}
+
+void JSViewPopups::ParseMenuEdgeLightMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto edgeLightValue = menuOptions->GetProperty("edgeLightMode");
+    if (!edgeLightValue->IsNumber()) {
+        return;
+    }
+    auto edgeLightMode = edgeLightValue->ToNumber<int32_t>();
+    if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_AUTO)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_AUTO;
+    } else if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_ENABLED)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_ENABLED;
+    } else if (edgeLightMode == static_cast<int32_t>(OHOS::Ace::EdgeLightMode::EDGELIGHT_DISABLED)) {
+        menuParam.edgeLightMode = OHOS::Ace::EdgeLightMode::EDGELIGHT_DISABLED;
+    }
+}
+
 void JSViewPopups::ParseMenuAboutToAppearLifeCycleParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1696,6 +1758,42 @@ void JSViewPopups::ParseMenuTargetSpace(const JSRef<JSObject>& menuOptions, NG::
     }
 }
 
+void JSViewPopups::ParseMenuGridStyleParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto gridStyleValue = menuOptions->GetProperty("gridStyle");
+    if (!gridStyleValue->IsObject()) {
+        return;
+    }
+    auto gridStyleObj = JSRef<JSObject>::Cast(gridStyleValue);
+    NG::MenuGridStyleOptions gridStyle;
+
+    auto countValue = gridStyleObj->GetProperty("count");
+    if (countValue->IsNumber()) {
+        gridStyle.count = countValue->ToNumber<int32_t>();
+        if (gridStyle.count < NUM_ZERO) {
+            gridStyle.count = GRID_STYLE_COUNT;
+        }
+    }
+
+    auto horizontalSizeValue = gridStyleObj->GetProperty("horizontalSize");
+    if (horizontalSizeValue->IsNumber()) {
+        gridStyle.horizontalSize = horizontalSizeValue->ToNumber<int32_t>();
+        if (gridStyle.horizontalSize < NUM_FIRST) {
+            gridStyle.horizontalSize = GRID_STYLE_HORIZONTAL_SIZE;
+        }
+    }
+
+    auto positionValue = gridStyleObj->GetProperty("position");
+    if (positionValue->IsNumber()) {
+        auto pos = positionValue->ToNumber<int32_t>();
+        if (pos >= NUM_ZERO && pos <= NUM_FIRST) {
+            gridStyle.position = static_cast<NG::MenuGridPosition>(pos);
+        }
+    }
+
+    menuParam.gridStyle = gridStyle;
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1736,10 +1834,13 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
     JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
     JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
+    JSViewPopups::ParseMenuDistortionMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuEdgeLightMode(menuOptions, menuParam);
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuScrollBar(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
     JSViewPopups::ParseMenuMaxHeight(menuOptions, menuParam);
+    JSViewPopups::ParseMenuGridStyleParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuAnchoredColorMode(menuOptions, menuParam);
     JSViewPopups::ParseMenuTargetSpace(menuOptions, menuParam);
 }
@@ -2120,6 +2221,28 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         return;
     }
     size_t builderIndex = ParseBindContextMenuShow(info, menuParam);
+    // Array<MenuElement> branch for bindContextMenu
+    if (info[builderIndex]->IsArray()) {
+        std::vector<NG::OptionParam> optionsParam = JSViewPopups::ParseBindOptionParam(info, builderIndex);
+        ResponseType responseType = ResponseType::LONG_PRESS;
+        if (!info[NUM_ZERO]->IsBoolean() &&
+            info.Length() >= PARAMETER_LENGTH_SECOND && info[NUM_FIRST]->IsNumber()) {
+            responseType = static_cast<ResponseType>(info[NUM_FIRST]->ToNumber<int32_t>());
+        }
+
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.type = NG::MenuType::CONTEXT_MENU;
+        std::function<void()> previewBuildFunc = nullptr;
+        if (info.Length() >= PARAMETER_LENGTH_THIRD && info[NUM_SECOND]->IsObject()) {
+            ParseBindContentOptionParam(info, info[NUM_SECOND], menuParam, previewBuildFunc);
+        }
+
+        ViewAbstractModel::GetInstance()->BindContextMenu(
+            responseType, std::move(optionsParam), menuParam, previewBuildFunc);
+        ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
+        return;
+    }
+
     if (!info[builderIndex]->IsObject()) {
         return;
     }
@@ -2166,6 +2289,23 @@ void JSViewAbstract::JsBindContextMenuWithResponse(const JSCallbackInfo& info)
         return;
     }
     size_t builderIndex = ParseBindContextMenuShow(info, menuParam);
+    // Array<MenuElement> branch for bindContextMenuWithResponse
+    if (info[builderIndex]->IsArray()) {
+        std::vector<NG::OptionParam> optionsParam = JSViewPopups::ParseBindOptionParam(info, builderIndex);
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.type = NG::MenuType::CONTEXT_MENU;
+        std::function<void()> previewBuildFunc = nullptr;
+        size_t optionsIndex = builderIndex + 1;
+        if (info.Length() > optionsIndex && info[optionsIndex]->IsObject()) {
+            ParseBindContentOptionParam(info, info[optionsIndex], menuParam, previewBuildFunc);
+        }
+
+        ViewAbstractModel::GetInstance()->BindContextMenu(
+            std::move(optionsParam), menuParam, previewBuildFunc);
+        ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
+        return;
+    }
+
     if (!info[builderIndex]->IsObject()) {
         return;
     }
@@ -2396,6 +2536,18 @@ NG::SheetEffectEdge JSViewAbstract::ParseSheetEffectEdge(const JSRef<JSObject>& 
     return static_cast<NG::SheetEffectEdge>(sheetEffectEdge);
 }
 
+void JSViewPopups::ParseSheetEdgeLightMode(const JSRef<JSVal>& edgeLightMode, NG::SheetStyle& sheetStyle)
+{
+    sheetStyle.sheetEdgeLightMode.reset();
+    if (edgeLightMode->IsNumber()) {
+        auto sheetEdgeLightMode = edgeLightMode->ToNumber<int32_t>();
+        if (sheetEdgeLightMode >= static_cast<int>(EdgeLightMode::EDGELIGHT_AUTO) &&
+            sheetEdgeLightMode <= static_cast<int>(EdgeLightMode::EDGELIGHT_DISABLED)) {
+            sheetStyle.sheetEdgeLightMode = static_cast<EdgeLightMode>(sheetEdgeLightMode);
+        }
+    }
+}
+
 void JSViewAbstract::ParseSheetStyle(
     const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
@@ -2415,11 +2567,14 @@ void JSViewAbstract::ParseSheetStyle(
     auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
     auto systemMaterialObj = paramObj->GetProperty("systemMaterial");
+    auto edgeLightMode = paramObj->GetProperty("edgeLightMode");
     if (systemMaterialObj->IsObject()) {
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
         sheetStyle.systemMaterial = material->Copy();
     }
-    
+
+    JSViewPopups::ParseSheetEdgeLightMode(edgeLightMode, sheetStyle);
+
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
         auto prop = obj->GetProperty("instanceId_");

@@ -172,6 +172,72 @@ ArkUINativeModuleValue ListBridge::ResetEditMode(ArkUIRuntimeCallInfo* runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> arg_enableEditMode = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    bool enableEditMode = arg_enableEditMode->ToBoolean(vm)->Value();
+    GetArkUINodeModifiers()->getListModifier()->setListEnableEditMode(nativeNode, enableEditMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 	 
+ArkUINativeModuleValue ListBridge::ResetEnableEditMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetListEnableEditMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::SetOnEditModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getListModifier()->resetOnListEditModeChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void(bool)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](bool enableEditMode) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        PipelineContext::SetCallBackNode(weakNode);
+        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, enableEditMode) };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getListModifier()->setOnListEditModeChangeCallBack(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetOnEditModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetOnListEditModeChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::SetFocusWrapMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -577,6 +643,14 @@ ArkUINativeModuleValue ListBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runt
                     return badge;
                 };
             options.getPreviewBadge = std::move(onGetPreviewBadge);
+        }
+        auto useDefaultStyle = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "useDefaultMultiSelectStyle"));
+        if (useDefaultStyle->IsBoolean()) {
+            options.useDefaultMultiSelectStyle = useDefaultStyle->ToBoolean(vm)->Value();
+        }
+        auto twoFingerSelect = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableTwoFingerMultiSelect"));
+        if (twoFingerSelect->IsBoolean()) {
+            options.enableFingerMultiSelect = twoFingerSelect->ToBoolean(vm)->Value();
         }
     }
     ListModelNG::SetEditModeOptions(frameNode, options);

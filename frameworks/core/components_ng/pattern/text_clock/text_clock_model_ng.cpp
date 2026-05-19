@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/common/container.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -106,7 +107,13 @@ void TextClockModelNG::SetOnDateChange(std::function<void(const std::string)>&& 
 
 void TextClockModelNG::SetFontSize(const Dimension& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontSize, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontSize, value, frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, textNode);
 }
 
 void TextClockModelNG::SetTextColor(const Color& value)
@@ -265,6 +272,11 @@ void TextClockModelNG::SetFontColorByUser(FrameNode* frameNode, bool isSetByUser
 void TextClockModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontSize, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, textNode);
 }
 
 void TextClockModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)

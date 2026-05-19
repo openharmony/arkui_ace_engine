@@ -25,6 +25,7 @@
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/focus/focus_view.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"

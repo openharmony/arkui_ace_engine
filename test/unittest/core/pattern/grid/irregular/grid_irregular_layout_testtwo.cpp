@@ -1170,4 +1170,274 @@ HWTEST_F(GridIrregularLayoutTestTwo, KeepFocus, TestSize.Level1)
     ScrollTo(0);
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
+
+/**
+ * @tc.name: GridIrregularLayout::PrepareJumpOnResetSkipWhenJumpPending
+ * @tc.desc: When jumpIndex_ is already set (not EMPTY_JUMP_INDEX), PrepareJumpOnReset should not
+ *           overwrite postJumpOffset_, jumpIndex_, or scrollAlign_. This happens when scrollToIndex
+ *           and data refresh occur simultaneously.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTestTwo, PrepareJumpOnResetSkipWhenJumpPending, TestSize.Level1)
+{
+    GridLayoutInfo oldInfo;
+    oldInfo.gridMatrix_ = MATRIX_DEMO_1;
+    oldInfo.currentOffset_ = -20.0f;
+    oldInfo.startMainLineIndex_ = 3;
+    oldInfo.startIndex_ = 5;
+    oldInfo.endMainLineIndex_ = 6;
+    oldInfo.endIndex_ = 10;
+    oldInfo.crossCount_ = 3;
+    oldInfo.lineHeightMap_ = {
+        { 0, 50.0f }, { 1, 50.0f }, { 2, 50.0f }, { 3, 50.0f }, { 4, 50.0f }, { 5, 50.0f }, { 6, 50.0f },
+    };
+    oldInfo.childrenCount_ = 11;
+    oldInfo.jumpIndex_ = 8;
+    oldInfo.scrollAlign_ = ScrollAlign::CENTER;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo1());
+    CreateDone();
+
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->wrapper_ = AceType::RawPtr(frameNode_);
+
+    frameNode_->childrenUpdatedFrom_ = 5;
+    algo->CheckForReset();
+
+    const auto& info = algo->info_;
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.jumpIndex_, 8);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::CENTER);
+    EXPECT_EQ(algo->postJumpOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::MeasureOnJumpPostJumpOffsetOnReset
+ * @tc.desc: Test that after a template change triggers CheckForReset via ConstraintChanged,
+ *           postJumpOffset_ stores the old offset and MeasureOnJump correctly applies it
+ *           through the additive (else) branch. With canOverScrollEnd_ enabled, the offset
+ *           should be preserved.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTestTwo, MeasureOnJumpPostJumpOffsetOnReset, TestSize.Level1)
+{
+    GridLayoutInfo oldInfo;
+    oldInfo.crossCount_ = 2;
+    oldInfo.childrenCount_ = 11;
+    oldInfo.gridMatrix_.clear();
+    oldInfo.currentOffset_ = -30.0f;
+    oldInfo.startMainLineIndex_ = 3;
+    oldInfo.startIndex_ = 5;
+    oldInfo.endMainLineIndex_ = 6;
+    oldInfo.endIndex_ = 10;
+    oldInfo.lineHeightMap_ = {
+        { 0, 50.0f }, { 1, 50.0f }, { 2, 50.0f }, { 3, 50.0f },
+        { 4, 50.0f }, { 5, 50.0f }, { 6, 50.0f },
+    };
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo1());
+    model.SetColumnsGap(Dimension { 5.0f });
+    model.SetRowsGap(Dimension { 1.0f });
+    CreateFixedItems(11);
+    CreateDone();
+    LayoutConstraintF constraint { .maxSize = { 310.0f, 300.0f }, .percentReference = { 310.0f, 300.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->canOverScrollStart_ = true;
+    algo->canOverScrollEnd_ = true;
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    const auto& info = algo->info_;
+    EXPECT_EQ(info.childrenCount_, 11);
+    EXPECT_EQ(info.crossCount_, 3);
+    EXPECT_EQ(info.jumpIndex_, EMPTY_JUMP_INDEX);
+    EXPECT_EQ(info.startIndex_, 5);
+    EXPECT_EQ(info.endIndex_, 10);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::MeasureOnJumpPostJumpOffsetAdditive
+ * @tc.desc: Test that after a constraint change triggers CheckForReset, postJumpOffset_ is set
+ *           and the additive branch (currentOffset_ <= 0, add postJumpOffset) is used in
+ *           MeasureOnJump. Verifies the grid maintains a valid viewport after the reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTestTwo, MeasureOnJumpPostJumpOffsetAdditive, TestSize.Level1)
+{
+    GridLayoutInfo oldInfo;
+    oldInfo.crossCount_ = 2;
+    oldInfo.childrenCount_ = 11;
+    oldInfo.gridMatrix_.clear();
+    oldInfo.currentOffset_ = -10.0f;
+    oldInfo.startMainLineIndex_ = 2;
+    oldInfo.startIndex_ = 3;
+    oldInfo.endMainLineIndex_ = 6;
+    oldInfo.endIndex_ = 10;
+    oldInfo.lineHeightMap_ = {
+        { 0, 25.0f }, { 1, 25.0f }, { 2, 25.0f }, { 3, 25.0f },
+        { 4, 25.0f }, { 5, 25.0f }, { 6, 25.0f },
+    };
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo1());
+    model.SetColumnsGap(Dimension { 5.0f });
+    model.SetRowsGap(Dimension { 1.0f });
+    CreateFixedItems(11);
+    CreateDone();
+    LayoutConstraintF constraint { .maxSize = { 310.0f, 300.0f }, .percentReference = { 310.0f, 300.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->canOverScrollStart_ = true;
+    algo->canOverScrollEnd_ = true;
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    const auto& info = algo->info_;
+    EXPECT_EQ(info.childrenCount_, 11);
+    EXPECT_EQ(info.crossCount_, 3);
+    EXPECT_EQ(info.jumpIndex_, EMPTY_JUMP_INDEX);
+    EXPECT_EQ(info.startIndex_, 1);
+    EXPECT_EQ(info.endIndex_, 10);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::ResetOnEmptyMatrixWithNonZeroOffset
+ * @tc.desc: When gridMatrix_ is empty, startIndex_ is 0, and currentOffset_ is non-zero,
+ *           CheckForReset should trigger a full reset. This catches the edge case where
+ *           layout state becomes inconsistent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTestTwo, ResetOnEmptyMatrixWithNonZeroOffset, TestSize.Level1)
+{
+    GridLayoutInfo oldInfo;
+    oldInfo.crossCount_ = 3;
+    oldInfo.gridMatrix_.clear();
+    oldInfo.currentOffset_ = -50.0f;
+    oldInfo.startMainLineIndex_ = 0;
+    oldInfo.startIndex_ = 0;
+    oldInfo.endMainLineIndex_ = -1;
+    oldInfo.endIndex_ = -1;
+    oldInfo.lineHeightMap_ = {
+        { 0, 50.0f },
+    };
+    oldInfo.childrenCount_ = 8;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateDone();
+
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->wrapper_ = AceType::RawPtr(frameNode_);
+
+    algo->CheckForReset();
+
+    const auto& info = algo->info_;
+    EXPECT_TRUE(info.gridMatrix_.empty());
+    EXPECT_TRUE(info.lineHeightMap_.empty());
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endIndex_, -1);
+    EXPECT_EQ(info.endMainLineIndex_, -1);
+    EXPECT_NE(info.jumpIndex_, EMPTY_JUMP_INDEX);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), -1);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::PrepareLineHeightWithCanOverScrollEnd
+ * @tc.desc: When canOverScrollEnd_ is true, PrepareLineHeight with ScrollAlign::START should not
+ *           fall back to ScrollAlign::END even if the filled content length is less than mainSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTestTwo, PrepareLineHeightWithCanOverScrollEnd, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedItems(15);
+    CreateDone();
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {}, false, true);
+    algorithm->wrapper_ = AceType::RawPtr(frameNode_);
+    algorithm->crossLens_ = { 1.0f, 1.0f, 1.0f };
+    auto& info = algorithm->info_;
+    decltype(info.lineHeightMap_) cmpH = {
+        { 0, 200.0f }, { 1, 200.0f }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f },
+    };
+    info.lineHeightMap_ = cmpH;
+    decltype(info.gridMatrix_) cmp = {
+        { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 } } },
+        { 1, { { 0, 3 }, { 1, 4 }, { 2, 5 } } },
+        { 2, { { 0, 6 }, { 1, 7 }, { 2, 8 } } },
+        { 3, { { 0, 9 }, { 1, 10 }, { 2, 11 } } },
+        { 4, { { 0, 12 }, { 1, 13 }, { 2, 14 } } },
+    };
+    info.gridMatrix_ = cmp;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 15;
+
+    info.scrollAlign_ = ScrollAlign::START;
+    algorithm->overscrollOffsetBeforeJump_ = 0.0f;
+    int32_t idx = 4;
+    algorithm->PrepareLineHeight(300.0f, idx);
+
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 4);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::ScrollToIndexWithDataRefresh
+ * @tc.desc: Integration test: trigger CheckForReset via childrenUpdatedFrom, which sets postJumpOffset_.
+ *           Then Measure applies the jump via MeasureOnJump, which uses the additive offset branch.
+ *           Verifies the grid shows items around the pre-reset startIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTestTwo, ScrollToIndexWithDataRefresh, TestSize.Level1)
+{
+    GridLayoutInfo oldInfo;
+    oldInfo.gridMatrix_ = MATRIX_DEMO_1;
+    oldInfo.currentOffset_ = -20.0f;
+    oldInfo.startMainLineIndex_ = 3;
+    oldInfo.startIndex_ = 5;
+    oldInfo.endMainLineIndex_ = 6;
+    oldInfo.endIndex_ = 10;
+    oldInfo.crossCount_ = 3;
+    oldInfo.lineHeightMap_ = {
+        { 0, 50.0f }, { 1, 50.0f }, { 2, 50.0f }, { 3, 50.0f },
+        { 4, 50.0f }, { 5, 50.0f }, { 6, 50.0f },
+    };
+    oldInfo.childrenCount_ = 11;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo1());
+    model.SetColumnsGap(Dimension { 5.0f });
+    model.SetRowsGap(Dimension { 1.0f });
+    CreateFixedItems(11);
+    CreateDone();
+    LayoutConstraintF constraint { .maxSize = { 310.0f, 300.0f }, .percentReference = { 310.0f, 300.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->canOverScrollStart_ = true;
+    algo->canOverScrollEnd_ = true;
+    algo->wrapper_ = AceType::RawPtr(frameNode_);
+
+    frameNode_->childrenUpdatedFrom_ = 5;
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    const auto& info = algo->info_;
+    EXPECT_EQ(info.childrenCount_, 11);
+    EXPECT_EQ(info.crossCount_, 3);
+    EXPECT_EQ(info.jumpIndex_, EMPTY_JUMP_INDEX);
+    EXPECT_NE(info.gridMatrix_.size(), 0u);
+}
 } // namespace OHOS::Ace::NG

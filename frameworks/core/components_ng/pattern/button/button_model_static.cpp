@@ -157,6 +157,7 @@ void ButtonModelStatic::BackgroundColor(FrameNode* frameNode, const Color& color
 
 void ButtonModelStatic::SetBorderRadius(FrameNode* frameNode, const Dimension& radius)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_BORDER_RADIUS, frameNode);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radius;
     borderRadius.radiusTopRight = radius;
@@ -170,6 +171,10 @@ void ButtonModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optiona
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
 {
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS, frameNode);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radiusTopLeft;
     borderRadius.radiusTopRight = radiusTopRight;
@@ -181,6 +186,7 @@ void ButtonModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optiona
 
 void ButtonModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE, frameNode);
     if (fontSize) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize.value(), frameNode);
     } else {
@@ -287,12 +293,16 @@ void ButtonModelStatic::SetLabelStyle(FrameNode* frameNode, const std::optional<
         ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, frameNode);
     }
     if (buttonParameters && buttonParameters->minFontSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(buttonParameters->minFontSize.value(), LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE,
+            frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             ButtonLayoutProperty, MinFontSize, buttonParameters->minFontSize.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontSize, frameNode);
     }
     if (buttonParameters && buttonParameters->maxFontSize.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(buttonParameters->maxFontSize.value(), LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE,
+            frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             ButtonLayoutProperty, MaxFontSize, buttonParameters->maxFontSize.value(), frameNode);
     } else {

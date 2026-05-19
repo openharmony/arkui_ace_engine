@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -265,6 +266,8 @@ void SetWebOptionsImpl(Ark_NativePointer node,
         WebModelStatic::SetWebIdCallback(frameNode, std::move(controller->setWebIdFunc));
         WebModelStatic::SetHapPathCallback(frameNode, std::move(controller->setHapPathFunc));
         WebModelStatic::SetWebDetachCallback(frameNode, std::move(controller->setWebDetachFunc));
+        WebModelStatic::SetWebDebuggingAccessAndPort(
+            frameNode, controller->getWebDebuggingAccessFunc(), controller->getWebDebuggingPortFunc());
         auto fileSelectorShowFromUserCallback = [callback = std::move(controller->defaultOnShowFileSelectorFunc),
                                                     weakNode = AceType::WeakClaim(frameNode),
                                                     instanceId = Container::CurrentId()](const BaseEventInfo* info) {

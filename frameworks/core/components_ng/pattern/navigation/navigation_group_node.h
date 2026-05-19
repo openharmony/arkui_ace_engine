@@ -114,7 +114,10 @@ public:
     {
         return useHomeDestination_;
     }
-    void SetUseHomeDestinatoin(bool use);
+    void SetUseHomeDestination(bool use)
+    {
+        useHomeDestination_ = use;
+    }
 
     void CreateHomeDestinationIfNeeded();
 

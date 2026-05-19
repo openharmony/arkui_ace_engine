@@ -54,6 +54,8 @@ class RSSyncTransactionHandler;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+struct DecorButtonStyle;
+
 struct StorageWrapper {
     std::optional<napi_value> napiStorage_;
     std::optional<ani_object> aniStorage_;
@@ -81,6 +83,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
     void Background() override;
+    void PostPreFreezeRegisterTask(bool isRegister);
     void Focus() override;
     void UnFocus() override;
     void ActiveWindow() override;

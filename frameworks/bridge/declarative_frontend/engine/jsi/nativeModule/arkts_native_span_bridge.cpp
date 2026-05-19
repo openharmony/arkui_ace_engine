@@ -53,7 +53,7 @@ bool ParseFontVariations(EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vect
         return false;
     }
     auto array = Local<panda::ArrayRef>(jsValue);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     axisValues.reserve(length);
     fontVariations.reserve(length);
     for (uint32_t i = 0; i < length; ++i) {
@@ -133,7 +133,7 @@ bool ParseTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length,
     auto fillArray = std::make_unique<uint32_t[]>(length);
 
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, radiusArg, radiusArray.get(), length,
-        ArkTSUtils::parseShadowRadiusWithResObj, radiusResArr);
+        ArkTSUtils::parseTextShadowRadiusWithResObj, radiusResArr);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(vm, typeArg, typeArray.get(), length,
         ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, colorArg, colorArray.get(), length,

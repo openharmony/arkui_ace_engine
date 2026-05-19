@@ -221,4 +221,209 @@ HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest007, TestSize.Level1)
     EXPECT_GE(result.Height(), 0.0f);
 }
 
+/**
+ * @tc.name: CustomNodeStaticTest008
+ * @tc.desc: Test ConstructCustomNode with onDumpInfoFunc callback set
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NodeKoalaInfo with onDumpInfoFunc callback
+     * @tc.expected: NodeKoalaInfo is created
+     */
+    NodeKoalaInfo info;
+    info.jsViewName = TEST_JS_VIEW_NAME;
+    info.onPageShowFunc = []() {};
+    info.onPageHideFunc = []() {};
+    info.onBackPressedFunc = []() -> bool { return true; };
+    info.pageTransitionFunc = []() {};
+    info.onCleanupFunc = []() {};
+    info.onDumpInspectorFunc = []() -> std::string { return ""; };
+    std::vector<std::string> capturedParams;
+    info.onDumpInfoFunc = [&capturedParams](const std::vector<std::string>& params) {
+        capturedParams.assign(params.begin(), params.end());
+    };
+
+    /**
+     * @tc.steps: step2. Invoke ConstructCustomNode
+     * @tc.expected: CustomNode is created successfully with onDumpInfoFunc set
+     */
+    auto customNode = CustomNodeStatic::ConstructCustomNode(TEST_NODE_ID, std::move(info));
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Fire the onDumpInfoFunc callback
+     * @tc.expected: Callback receives the expected parameters
+     */
+    std::vector<std::string> testParams = { "-dumpAll", "-r" };
+    customNode->FireOnDumpInfoFunc(testParams);
+    EXPECT_EQ(capturedParams.size(), 2);
+    EXPECT_EQ(capturedParams[0], "-dumpAll");
+    EXPECT_EQ(capturedParams[1], "-r");
+}
+
+/**
+ * @tc.name: CustomNodeStaticTest009
+ * @tc.desc: Test ConstructCustomNode without onDumpInfoFunc (default null)
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NodeKoalaInfo without onDumpInfoFunc
+     * @tc.expected: NodeKoalaInfo is created with onDumpInfoFunc as default (null)
+     */
+    NodeKoalaInfo info;
+    info.jsViewName = TEST_JS_VIEW_NAME;
+    info.onPageShowFunc = []() {};
+    info.onPageHideFunc = []() {};
+    info.onBackPressedFunc = []() -> bool { return true; };
+    info.pageTransitionFunc = []() {};
+    info.onCleanupFunc = []() {};
+    info.onDumpInspectorFunc = []() -> std::string { return ""; };
+    // onDumpInfoFunc is left as default (null)
+
+    /**
+     * @tc.steps: step2. Invoke ConstructCustomNode
+     * @tc.expected: CustomNode is created successfully
+     */
+    auto customNode = CustomNodeStatic::ConstructCustomNode(TEST_NODE_ID, std::move(info));
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Fire the onDumpInfoFunc callback when it is null
+     * @tc.expected: No crash occurs, callback is not invoked
+     */
+    std::vector<std::string> testParams = { "-viewHierarchy" };
+    customNode->FireOnDumpInfoFunc(testParams);
+}
+
+/**
+ * @tc.name: CustomNodeStaticTest010
+ * @tc.desc: Test ConstructCustomNode with onDumpInfoFunc receiving empty params
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NodeKoalaInfo with onDumpInfoFunc callback
+     */
+    NodeKoalaInfo info;
+    info.jsViewName = TEST_JS_VIEW_NAME;
+    info.onPageShowFunc = []() {};
+    info.onPageHideFunc = []() {};
+    info.onBackPressedFunc = []() -> bool { return true; };
+    info.pageTransitionFunc = []() {};
+    info.onCleanupFunc = []() {};
+    info.onDumpInspectorFunc = []() -> std::string { return ""; };
+    std::vector<std::string> capturedParams;
+    info.onDumpInfoFunc = [&capturedParams](const std::vector<std::string>& params) {
+        capturedParams.assign(params.begin(), params.end());
+    };
+
+    /**
+     * @tc.steps: step2. Invoke ConstructCustomNode
+     * @tc.expected: CustomNode is created successfully
+     */
+    auto customNode = CustomNodeStatic::ConstructCustomNode(TEST_NODE_ID, std::move(info));
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Fire with empty params
+     * @tc.expected: Callback receives empty vector
+     */
+    std::vector<std::string> emptyParams;
+    customNode->FireOnDumpInfoFunc(emptyParams);
+    EXPECT_TRUE(capturedParams.empty());
+}
+
+/**
+ * @tc.name: CustomNodeStaticTest011
+ * @tc.desc: Test onDumpInfoFunc with multiple sequential FireOnDumpInfoFunc calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NodeKoalaInfo with onDumpInfoFunc that records call count
+     */
+    NodeKoalaInfo info;
+    info.jsViewName = TEST_JS_VIEW_NAME;
+    info.onPageShowFunc = []() {};
+    info.onPageHideFunc = []() {};
+    info.onBackPressedFunc = []() -> bool { return true; };
+    info.pageTransitionFunc = []() {};
+    info.onCleanupFunc = []() {};
+    info.onDumpInspectorFunc = []() -> std::string { return ""; };
+    int callCount = 0;
+    info.onDumpInfoFunc = [&callCount](const std::vector<std::string>& params) { callCount++; };
+
+    /**
+     * @tc.steps: step2. Invoke ConstructCustomNode
+     */
+    auto customNode = CustomNodeStatic::ConstructCustomNode(TEST_NODE_ID, std::move(info));
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Fire the callback multiple times
+     * @tc.expected: Callback is invoked each time
+     */
+    customNode->FireOnDumpInfoFunc({ "-dumpAll" });
+    EXPECT_EQ(callCount, 1);
+    customNode->FireOnDumpInfoFunc({ "-stateVariables", "-viewId=123" });
+    EXPECT_EQ(callCount, 2);
+    customNode->FireOnDumpInfoFunc({ "-inactiveComponents", "-r" });
+    EXPECT_EQ(callCount, 3);
+}
+
+/**
+ * @tc.name: CustomNodeStaticTest012
+ * @tc.desc: Test onDumpInfoFunc with DFX-style commands
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NodeKoalaInfo with onDumpInfoFunc that captures all params
+     */
+    NodeKoalaInfo info;
+    info.jsViewName = TEST_JS_VIEW_NAME;
+    info.onPageShowFunc = []() {};
+    info.onPageHideFunc = []() {};
+    info.onBackPressedFunc = []() -> bool { return true; };
+    info.pageTransitionFunc = []() {};
+    info.onCleanupFunc = []() {};
+    info.onDumpInspectorFunc = []() -> std::string { return ""; };
+    std::vector<std::string> capturedParams;
+    info.onDumpInfoFunc = [&capturedParams](const std::vector<std::string>& params) {
+        capturedParams.assign(params.begin(), params.end());
+    };
+
+    /**
+     * @tc.steps: step2. Invoke ConstructCustomNode
+     */
+    auto customNode = CustomNodeStatic::ConstructCustomNode(TEST_NODE_ID, std::move(info));
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Fire with RecyclePool command (as used in CustomNode::DumpInfo)
+     * @tc.expected: Callback receives "RecyclePool"
+     */
+    customNode->FireOnDumpInfoFunc({ "RecyclePool" });
+    EXPECT_EQ(capturedParams.size(), 1);
+    EXPECT_EQ(capturedParams[0], "RecyclePool");
+
+    /**
+     * @tc.steps: step4. Fire with viewId-based command
+     * @tc.expected: Callback receives viewId command
+     */
+    std::vector<std::string> viewIdParams = { "-dumpAll", "-viewId=100", "-r" };
+    customNode->FireOnDumpInfoFunc(viewIdParams);
+    EXPECT_EQ(capturedParams.size(), 3);
+    EXPECT_EQ(capturedParams[0], "-dumpAll");
+    EXPECT_EQ(capturedParams[1], "-viewId=100");
+    EXPECT_EQ(capturedParams[2], "-r");
+}
+
 } // namespace OHOS::Ace::NG

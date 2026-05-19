@@ -781,9 +781,7 @@ void DynamicPattern::HandleMouseEvent(const MouseInfo& info)
 std::shared_ptr<UIContent> DynamicPattern::GetUIContent() const
 {
     CHECK_NULL_RETURN(dynamicComponentRenderer_, nullptr);
-    auto render = AceType::DynamicCast<DynamicComponentRendererImpl>(dynamicComponentRenderer_);
-    CHECK_NULL_RETURN(render, nullptr);
-    return render->GetUIContent();
+    return dynamicComponentRenderer_->GetUIContent();
 }
 
 } // namespace OHOS::Ace::NG

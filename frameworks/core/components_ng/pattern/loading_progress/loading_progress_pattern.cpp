@@ -61,6 +61,17 @@ void LoadingProgressPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto rendContext = host->GetRenderContext();
+    CHECK_NULL_VOID(rendContext);
+    if (!rendContext->GetForegroundColorFlag().value_or(false)) {
+        RefPtr<ProgressTheme> theme = host->GetTheme<ProgressTheme>(true);
+        CHECK_NULL_VOID(theme);
+        auto paintProperty = GetPaintProperty<LoadingProgressPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateColor(theme->GetLoadingColor());
+        rendContext->UpdateForegroundColor(theme->GetLoadingColor());
+        rendContext->ResetForegroundColorStrategy();
+    }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
@@ -319,15 +330,19 @@ bool LoadingProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return result;
     }
-    auto progressTheme = host->GetTheme<ProgressTheme>(true);
-    CHECK_NULL_RETURN(progressTheme, result);
     auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, result);
+    auto rendContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(rendContext, result);
 
     result = !paintProperty->HasColor();
 
-    if (themeScopeId && !colorLock_) {
+    if (!paintProperty->GetColorSetByUser().value_or(false) || !rendContext->GetForegroundColorFlag().value_or(false)) {
+        auto progressTheme = host->GetTheme<ProgressTheme>(true);
+        CHECK_NULL_RETURN(progressTheme, result);
         paintProperty->UpdateColor(progressTheme->GetLoadingColor());
+        rendContext->UpdateForegroundColor(progressTheme->GetLoadingColor());
+        rendContext->ResetForegroundColorStrategy();
         result = true;
     }
     return result;

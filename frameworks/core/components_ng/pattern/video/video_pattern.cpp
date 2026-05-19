@@ -1610,15 +1610,6 @@ void VideoPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode();
 }
 
-bool VideoPattern::NeedLift() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    return IsFullScreen() && renderContext->IsUniRenderEnabled();
-}
-
 RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
 {
     ContainerScope scope(instanceId_);
@@ -1658,7 +1649,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
     renderContext->UpdateBackgroundColor(videoTheme->GetBkgColor());
     auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
     controlBarLayoutProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-    if (NeedLift()) {
+    if (IsFullScreen()) {
         PaddingProperty padding;
         padding.bottom = CalcLength(LIFT_HEIGHT);
         controlBarLayoutProperty->UpdatePadding(padding);
@@ -2259,6 +2250,11 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
 
     fullScreenNodeId_.reset();
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
+#if defined(ANDROID_PLATFORM)
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        RegisterRenderContextCallBack();
+    }
+#endif
     auto videoNode = GetHost();
     CHECK_NULL_VOID(videoNode);
     // change event hub to the origin video node

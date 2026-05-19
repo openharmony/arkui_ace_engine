@@ -145,7 +145,17 @@ void DepthComponentPattern::OnModifyDone()
     }
 
 #ifdef ENABLE_ROSEN_BACKEND
-    LoadDepthMap();
+    if (IsGltfBackground()) {
+        // Clear 2.5D depth map state when switching to GLTF 3D mode
+        lastLoadedDepthMapKey_.clear();
+        depthMapLoadingCtx_.Reset();
+        auto rsDepthNode = GetRSDepthNode();
+        if (rsDepthNode) {
+            rsDepthNode->SetDepthImage(nullptr);
+        }
+    } else {
+        LoadDepthMap();
+    }
     TransferDataToRosen();
 #endif
 }
@@ -310,6 +320,7 @@ void DepthComponentPattern::OnPaint3D()
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     if (IsGltfBackground() && mrtDepthAdapter_) {
         mrtDepthAdapter_->RenderFrame();
+        MarkRender3D();
     }
 #endif
 }
@@ -362,6 +373,9 @@ void DepthComponentPattern::OnDepthMapDataReady()
 void DepthComponentPattern::OnDepthMapLoadSuccess(const RefPtr<CanvasImage>& canvasImage)
 {
     CHECK_NULL_VOID(canvasImage);
+    if (IsGltfBackground()) {
+        return;
+    }
     auto pixelMapImage = DynamicCast<NG::PixelMapImage>(canvasImage);
     CHECK_NULL_VOID(pixelMapImage);
     auto pixelMap = pixelMapImage->GetPixelMap();

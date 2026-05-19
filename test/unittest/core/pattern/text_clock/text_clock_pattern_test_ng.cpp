@@ -2491,4 +2491,64 @@ HWTEST_F(TextClockPatternTestNG, OnModifyDoneTest002, TestSize.Level1)
     MockPipelineContext::TearDown();
 }
 
+/**
+ * @tc.name: UpdateThemeFontColor001
+ * @tc.desc: Test UpdateThemeFontColor001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, UpdateThemeFontColor001, TestSize.Level1)
+{
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    frameNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY);
+    bool ret = pattern->UpdateThemeFontColor(frameNode);
+    EXPECT_FALSE(ret);
+
+    frameNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY);
+    g_isConfigChangePerform = true;
+    ret = pattern->UpdateThemeFontColor(frameNode);
+    EXPECT_FALSE(ret);
+
+    frameNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    g_isConfigChangePerform = false;
+    ret = pattern->UpdateThemeFontColor(frameNode);
+    EXPECT_FALSE(ret);
+
+    frameNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    g_isConfigChangePerform = true;
+    ret = pattern->UpdateThemeFontColor(frameNode);
+    EXPECT_FALSE(ret);
+
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    textTheme->textClockFontColor_ = TEXT_COLOR_VALUE;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textTheme));
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+    textClockProperty->ResetTextColorSetByUser();
+    ret = pattern->UpdateThemeFontColor(frameNode);
+    EXPECT_TRUE(ret);
+    ASSERT_TRUE(textClockProperty->GetTextColor().has_value());
+    EXPECT_EQ(textClockProperty->GetTextColor(), textTheme->textClockFontColor_);
+
+    textClockProperty->UpdateTextColorSetByUser(false);
+    ret = pattern->UpdateThemeFontColor(frameNode);
+    EXPECT_TRUE(ret);
+    ASSERT_TRUE(textClockProperty->GetTextColor().has_value());
+    EXPECT_EQ(textClockProperty->GetTextColor(), textTheme->textClockFontColor_);
+
+    textClockProperty->UpdateTextColorSetByUser(true);
+    ret = pattern->UpdateThemeFontColor(frameNode);
+    EXPECT_FALSE(ret);
+    MockPipelineContext::TearDown();
+}
+
 } // namespace OHOS::Ace::NG

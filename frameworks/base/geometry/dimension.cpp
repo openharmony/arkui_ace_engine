@@ -15,6 +15,8 @@
 
 #include "base/geometry/dimension.h"
 
+#include <array>
+
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -208,6 +210,81 @@ double Dimension::ConvertToVpByAppFontScale() const
     float fontScale = std::clamp(pipeline->GetFontScale(), 0.0f, maxFontScale);
     return value_ * fontScale;
 }
+
+double Dimension::ConvertToFpWithEnv(std::optional<float> envFontScale) const
+{
+    if (unit_ == DimensionUnit::FP) {
+        return value_;
+    }
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    auto fontScale = std::clamp(envFontScale.value_or(pipeline->GetFontScale()), 0.0f, pipeline->GetMaxAppFontScale());
+    if (LessOrEqual(fontScale, 0.0)) {
+        return 0.0;
+    }
+    if (unit_ == DimensionUnit::NONE) {
+        return value_ / pipeline->GetDipScale() / fontScale;
+    }
+    if (unit_ == DimensionUnit::PX) {
+        return value_ / pipeline->GetDipScale() / fontScale;
+    }
+    if (unit_ == DimensionUnit::VP) {
+        return value_ / fontScale;
+    }
+    if (unit_ == DimensionUnit::LPX) {
+        return value_ * pipeline->GetLogicScale() / pipeline->GetDipScale() / fontScale;
+    }
+    return 0.0;
+}
+
+double Dimension::ConvertToPxDistributeWithEnv(
+    std::optional<float> minOptional, std::optional<float> maxOptional, bool allowScale,
+    std::optional<float> envFontScale) const
+{
+    if (unit_ != DimensionUnit::FP) {
+        return ConvertToPx();
+    }
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, value_);
+    if (!allowScale) {
+        return value_ * pipeline->GetDipScale();
+    }
+    auto minFontScale = minOptional.value_or(0.0f);
+    auto maxFontScale = maxOptional.value_or(static_cast<float>(INT32_MAX));
+    if (!maxOptional.has_value()) {
+        return ConvertToPxByAppFontScaleWithEnv(minFontScale, envFontScale);
+    }
+    return ConvertToPxByCustomFontScaleWithEnv(minFontScale, maxFontScale, envFontScale);
+}
+
+double Dimension::ConvertToPxByCustomFontScaleWithEnv(float minFontScale, float maxFontScale,
+    std::optional<float> envFontScale) const
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, value_);
+    float fontScale = std::clamp(envFontScale.value_or(pipeline->GetFontScale()), minFontScale, maxFontScale);
+    return value_ * pipeline->GetDipScale() * fontScale;
+}
+
+double Dimension::ConvertToPxByAppFontScaleWithEnv(float minFontScale, std::optional<float> envFontScale) const
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, value_);
+    float maxFontScale = pipeline->GetMaxAppFontScale();
+    float fontScale = std::clamp(envFontScale.value_or(pipeline->GetFontScale()), minFontScale, maxFontScale);
+    return value_ * pipeline->GetDipScale() * fontScale;
+}
+
+double Dimension::ConvertToVpByAppFontScaleWithEnv(std::optional<float> envFontScale) const
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, value_);
+    CHECK_NULL_RETURN(pipeline->IsFollowSystem(), value_);
+    float maxFontScale = pipeline->GetMaxAppFontScale();
+    float fontScale = std::clamp(envFontScale.value_or(pipeline->GetFontScale()), 0.0f, maxFontScale);
+    return value_ * fontScale;
+}
+
 
 std::string Dimension::ToString() const
 {

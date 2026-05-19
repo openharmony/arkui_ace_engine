@@ -18,6 +18,7 @@
 #include "ui/base/utils/utils.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {

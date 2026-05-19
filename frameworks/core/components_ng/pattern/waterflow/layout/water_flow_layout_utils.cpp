@@ -14,6 +14,8 @@
  */
 #include "frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
+
 #include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -258,5 +260,21 @@ RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItem(
         return wrapper;
     }
     return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+}
+
+RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItemByIndex(
+    LayoutWrapper* layoutWrapper, int32_t index, bool isCache)
+{
+    CHECK_NULL_RETURN(layoutWrapper, nullptr);
+    const auto& layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
+        auto wrapper = layoutWrapper->GetChildByIndex(index, isCache);
+        if (!wrapper) {
+            wrapper = CreateDummyFlowItem();
+        }
+        return wrapper;
+    }
+    return layoutWrapper->GetChildByIndex(index, isCache);
 }
 } // namespace OHOS::Ace::NG

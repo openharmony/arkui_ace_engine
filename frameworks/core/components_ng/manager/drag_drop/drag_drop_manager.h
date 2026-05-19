@@ -43,6 +43,10 @@ class RSSyncTransactionHandler;
 class RSTransaction;
 } // namespace OHOS::Rosen
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 struct ArkUIInteralDragAction;
 class DragDropSpringLoadingDetector;
 enum class DragDropMgrState : int32_t {

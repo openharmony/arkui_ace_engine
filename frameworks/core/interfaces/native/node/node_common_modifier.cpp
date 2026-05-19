@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/common/container.h"
 
 #include "interfaces/native/node/node_model.h"
 
+#include "base/log/event_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
@@ -43,6 +45,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/event/overflow_scroll_event_hub.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -5057,6 +5060,7 @@ void SetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 safeAreaType, ArkUI_Ui
     opts.type = safeAreaType;
     opts.edges = safeAreaEdge;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR);
 }
 
 void ResetExpandSafeArea(ArkUINodeHandle node)
@@ -5067,6 +5071,7 @@ void ResetExpandSafeArea(ArkUINodeHandle node)
     opts.type = DEFAULT_SAFE_AREA_TYPE;
     opts.edges = DEFAULT_SAFE_AREA_EDGE;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR);
 }
 
 void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdges)
@@ -5857,6 +5862,24 @@ void ResetAccessibilityNextFocusId(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
+}
+
+void SetAccessibilityNextFocusParams(ArkUINodeHandle node, ArkUI_Bool descendantMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::AccessibilityNextFocusParams params;
+    params.descendantMode = descendantMode;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode, params);
+}
+
+void ResetAccessibilityNextFocusParams(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityNextFocusParams();
 }
 
 void SetAccessibilityDefaultFocus(ArkUINodeHandle node, ArkUI_Bool value)
@@ -9652,6 +9675,10 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
     if (arkUITouchEvent->historySize > 0) {
         for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
             SetSingleHistoryEvent(allHistoryEvents, arkUITouchEvent, i);
+            if (arkUITouchEvent->historyEvents[i].touchPointSize > 0 &&
+                !arkUITouchEvent->historyEvents[i].touchPointes) {
+                continue;
+            }
             for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
                 allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
                 allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
@@ -10212,6 +10239,20 @@ void ResetUseUnionEffect(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetUseUnion(frameNode, false);
+}
+
+void SetDoubleSided(ArkUINodeHandle node, bool doubleSided)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDoubleSided(frameNode, doubleSided);
+}
+ 
+void ResetDoubleSided(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDoubleSided(frameNode, true);
 }
 
 ArkUIOffsetType GetCurrentLocation(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
@@ -11552,6 +11593,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityGroup = ResetAccessibilityGroup,
         .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
         .resetAccessibilityNextFocusId = ResetAccessibilityNextFocusId,
+        .setAccessibilityNextFocusParams = SetAccessibilityNextFocusParams,
+        .resetAccessibilityNextFocusParams = ResetAccessibilityNextFocusParams,
         .setAccessibilityDefaultFocus = SetAccessibilityDefaultFocus,
         .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
         .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,
@@ -11870,6 +11913,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setUseUnionEffect = SetUseUnionEffect,
         .resetUseUnionEffect = ResetUseUnionEffect,
         .getCurrentLocation = GetCurrentLocation,
+        .setDoubleSided = SetDoubleSided,
+        .resetDoubleSided = ResetDoubleSided
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

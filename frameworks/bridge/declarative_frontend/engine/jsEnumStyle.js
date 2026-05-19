@@ -2078,6 +2078,13 @@ let SheetSize;
   SheetSize.FIT_CONTENT = 'FIT_CONTENT';
 })(SheetSize || (SheetSize = {}));
 
+let EdgeLightMode;
+(function (EdgeLightMode) {
+  EdgeLightMode[EdgeLightMode.EDGELIGHT_AUTO = 0] = 'EDGELIGHT_AUTO';
+  EdgeLightMode[EdgeLightMode.EDGELIGHT_ENABLED = 1] = 'EDGELIGHT_ENABLED';
+  EdgeLightMode[EdgeLightMode.EDGELIGHT_DISABLED = 2] = 'EDGELIGHT_DISABLED';
+})(EdgeLightMode || (EdgeLightMode = {}));
+
 let SheetType;
 (function (SheetType) {
   SheetType[SheetType.BOTTOM = 0] = 'BOTTOM';
@@ -4129,6 +4136,12 @@ let MenuKeyboardAvoidMode;
   MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
 })(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
 
+let MenuGridPosition;
+(function (MenuGridPosition) {
+  MenuGridPosition[MenuGridPosition.TOP = 0] = 'TOP';
+  MenuGridPosition[MenuGridPosition.BOTTOM = 1] = 'BOTTOM';
+})(MenuGridPosition || (MenuGridPosition = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';
@@ -4380,6 +4393,12 @@ let DragBehavior;
   DragBehavior[DragBehavior.COPY = 0] = 'COPY';
   DragBehavior[DragBehavior.MOVE = 1] = 'MOVE';
 })(DragBehavior || (DragBehavior = {}));
+
+let DragAnimationType;
+(function (DragAnimationType) {
+  DragAnimationType[DragAnimationType.DEFAULT = 0] = 'DEFAULT';
+  DragAnimationType[DragAnimationType.FOLLOW_HAND_MORPH = 1] = 'FOLLOW_HAND_MORPH';
+})(DragAnimationType || (DragAnimationType = {}));
 
 let PatternLockChallengeResult;
 (function (PatternLockChallengeResult) {
@@ -5294,6 +5313,12 @@ let ResolveStrategy;
     ResolveStrategy[ResolveStrategy.UNDEFINED = 5] = 'UNDEFINED';
 })(ResolveStrategy || (ResolveStrategy = {}));
 
+var ScrollEffectType;
+(function (ScrollEffectType) {
+    ScrollEffectType[ScrollEffectType.COMMON_BLUR = 0] = "COMMON_BLUR";
+    ScrollEffectType[ScrollEffectType.GRADUAL_BLUR = 1] = "GRADUAL_BLUR";
+})(ScrollEffectType || (ScrollEffectType = {}));
+
 let ThreatType;
 (function (ThreatType) {
   ThreatType[ThreatType.THREAT_ILLEGAL = 0] = 'THREAT_ILLEGAL';
@@ -5389,6 +5414,13 @@ let GestureShortcut;
   GestureShortcut[GestureShortcut.PRIMARY = 0] = 'PRIMARY';
 })(GestureShortcut || (GestureShortcut = {}));
 globalThis.GestureShortcut = GestureShortcut;
+
+let StrokeJoinStyle;
+(function (StrokeJoinStyle) {
+  StrokeJoinStyle [StrokeJoinStyle.MITER_JOIN = 0] = 'MITER_JOIN';
+  StrokeJoinStyle [StrokeJoinStyle.ROUND_JOIN = 1] = 'ROUND_JOIN';
+  StrokeJoinStyle [StrokeJoinStyle.BEVEL_JOIN = 2] = 'BEVEL_JOIN';
+})(StrokeJoinStyle || (StrokeJoinStyle = {}));
 
 let EdgeLightPosition;
 (function (EdgeLightPosition) {

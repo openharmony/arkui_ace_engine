@@ -37,6 +37,10 @@
 #include "frameworks/core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class InspectorFilter;
 class TextLayoutProperty;
 
@@ -669,6 +673,18 @@ public:
         shouldPlayMaskAnimation_ = shouldPlayMaskAnimation;
     }
 
+    int32_t GetChildrenSize() const;
+
+    bool IsNewMaterial() const
+    {
+        return useNewMaterial_;
+    }
+
+    void SetUseNewMaterial(bool useNewMaterial)
+    {
+        useNewMaterial_ = useNewMaterial;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -705,6 +721,7 @@ private:
     void HandleClick(SourceType type, int32_t index);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(TouchType touchType, int32_t index);
+    void HandleTouchUpAndClickTo(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
     void HandleBottomTabBarClick(int32_t selectedIndex, int32_t unselectedIndex);
     void ChangeMask(int32_t index, float imageSize, const OffsetF& originalMaskOffset, float opacity,
@@ -806,6 +823,7 @@ private:
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
     void UpdateSubTabBarImageIndicator();
     void NotifyTabBarItemsChange();
+    int32_t GetSelectChildIndex(const Offset& offset);
 
     RefPtr<NodeAnimatablePropertyFloat> tabBarProperty_;
     CancelableCallback<void()> showTabBarTask_;
@@ -905,6 +923,7 @@ private:
     Color tabBarItemHoverColor_ = Color::TRANSPARENT;
 
     bool shouldPlayMaskAnimation_ = true;
+    bool useNewMaterial_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };

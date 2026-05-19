@@ -470,8 +470,9 @@ void ConvertSpacingAndHeigh(
         double fontSize = txtStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
-            lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            lineHeight = textStyle.GetLineHeight().ConvertToPxDistributeWithEnv(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         }
         info.lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
@@ -492,8 +493,9 @@ void ConvertSpacingAndHeigh(
         double fontSize = txtStyle.fontSize;
         double lineSpacing = textStyle.GetLineSpacing().Value();
         if (pipelineContext) {
-            lineSpacing = textStyle.GetLineSpacing().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            lineSpacing = textStyle.GetLineSpacing().ConvertToPxDistributeWithEnv(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         }
         info.lineSpacingOnly = true;
         if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
@@ -510,16 +512,18 @@ void ConvertSpacingAndHeigh(
 void CheckMinMaxLineHeight(const TextStyle& textStyle, Rosen::TextStyle& txtStyle, LineSpaceAndHeightInfo& info)
 {
     if (textStyle.GetMinimumLineHeight().has_value()) {
-        double minimumLineHeight = textStyle.GetMinimumLineHeight()->ConvertToPxDistribute(textStyle.GetMinFontScale(),
-            textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        double minimumLineHeight = textStyle.GetMinimumLineHeight()->ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         if (GreatNotEqual(minimumLineHeight, 0.0)) {
             info.minimumLineHeight = minimumLineHeight;
         }
         txtStyle.minLineHeight = info.minimumLineHeight;
     }
     if (textStyle.GetMaximumLineHeight().has_value()) {
-        double maximumLineHeight = textStyle.GetMaximumLineHeight()->ConvertToPxDistribute(textStyle.GetMinFontScale(),
-        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        double maximumLineHeight = textStyle.GetMaximumLineHeight()->ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         if (GreatNotEqual(maximumLineHeight, 0.0)) {
             if (GreatNotEqual(info.minimumLineHeight, 0.0)) {
                 info.maximumLineHeight = std::max(maximumLineHeight, info.minimumLineHeight);
@@ -575,6 +579,20 @@ inline void ConvertBitmap(const Bitmap1& source, Bitmap2& destination)
     }
 }
 
+OHOS::Rosen::Drawing::Pen::JoinStyle ConvertJoinStyle(const StrokeJoinStyle& style)
+{
+    switch (style) {
+        case StrokeJoinStyle::MITER_JOIN:
+            return OHOS::Rosen::Drawing::Pen::JoinStyle::MITER_JOIN;
+        case StrokeJoinStyle::ROUND_JOIN:
+            return OHOS::Rosen::Drawing::Pen::JoinStyle::ROUND_JOIN;
+        case StrokeJoinStyle::BEVEL_JOIN:
+            return OHOS::Rosen::Drawing::Pen::JoinStyle::BEVEL_JOIN;
+        default:
+            return OHOS::Rosen::Drawing::Pen::JoinStyle::MITER_JOIN;
+    }
+}
+
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
     ConvertBitmap(textStyle.GetReLayoutTextStyleBitmap(), txtStyle.relayoutChangeBitmap);
@@ -613,8 +631,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         }
     }
     // Font size must be px when transferring to Rosen::TextStyle
-    txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
     txtStyle.badgeType = ConvertTxtBadgeType(textStyle.GetSuperscript());
 
@@ -622,17 +641,20 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.wordSpacing = textStyle.GetWordSpacing().Value() * txtStyle.fontSize;
     } else {
         if (pipelineContext) {
-            txtStyle.wordSpacing = textStyle.GetWordSpacing().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            txtStyle.wordSpacing = textStyle.GetWordSpacing().ConvertToPxDistributeWithEnv(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         } else {
             txtStyle.wordSpacing = textStyle.GetWordSpacing().Value();
         }
     }
     if (pipelineContext) {
-        txtStyle.letterSpacing = textStyle.GetLetterSpacing().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-        txtStyle.baseLineShift = -textStyle.GetBaselineOffset().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        txtStyle.letterSpacing = textStyle.GetLetterSpacing().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
+        txtStyle.baseLineShift = -textStyle.GetBaselineOffset().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
 
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
@@ -647,9 +669,13 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
 
     if (textStyle.GetStrokeWidth().Value() != DEFAULT_STROKE_WIDTH) {
         RSPen pen;
-        pen.SetWidth(std::abs(textStyle.GetStrokeWidth().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale())));
+        pen.SetWidth(std::abs(textStyle.GetStrokeWidth().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale())));
         pen.SetColor(textStyle.GetStrokeColor().GetValue());
+        if (textStyle.GetStrokeJoinStyle().has_value()) {
+            pen.SetJoinStyle(ConvertJoinStyle(textStyle.GetStrokeJoinStyle().value()));
+        }
         txtStyle.foregroundPen = pen;
     }
     if (textStyle.GetStrokeWidth().Value() < DEFAULT_STROKE_WIDTH) {
@@ -712,8 +738,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     auto radiusConverter = [context = pipelineContext, textStyle](const std::optional<Dimension>& radius) -> double {
         CHECK_NULL_RETURN(radius.has_value(), 0);
         CHECK_NULL_RETURN(context, radius->Value());
-        return radius.value().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        return radius.value().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     };
     txtStyle.backgroundRect.leftTopRadius = radiusConverter(radius->radiusTopLeft);
     txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);

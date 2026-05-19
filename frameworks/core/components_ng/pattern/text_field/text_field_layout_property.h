@@ -27,6 +27,21 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
+#include "frameworks/core/components_ng/pattern/text/advanced_text_layout_property.h"
+ 
+#define ACE_DEFINE_TEXT_FIELD_PROPERTY_ITEM_WITHOUT_GROUP(name, type, changeFlag) \
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)                  \
+public:                                                                     \
+    void Update##name(const type& value)                                    \
+    {                                                                       \
+        if (prop##name##_.has_value()) {                                    \
+            if (NearEqual(prop##name##_.value(), value)) {                  \
+                return;                                                     \
+            }                                                               \
+        }                                                                   \
+        prop##name##_ = value;                                              \
+        UpdatePropertyChangeFlag(changeFlag);                               \
+    }
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldLayoutProperty : public LayoutProperty {
@@ -126,6 +141,7 @@ public:
         std::string style = V2::ConvertWrapTextDecorationStyleToString(
             GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
         jsonDecoration->Put("style", style.c_str());
+        jsonDecoration->Put("thicknessScale", std::to_string(GetLineThicknessScale().value_or(1.0f)).c_str());
         json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
         json->PutExtAttr("minFontSize", GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
         json->PutExtAttr("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
@@ -214,8 +230,10 @@ public:
         FontStyle, TextDecoration, std::vector<TextDecoration>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LineThicknessScale, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeJoinStyle, StrokeJoinStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDragPreviewStyle, Color, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(TextLineStyle, TextLineStyle);
@@ -238,6 +256,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OrphanCharOptimization, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, CompressLeadingPunctuation, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextDirection, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_TEXT_COMMON_PROPERTY_ITEM_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_TEXT_FIELD_PROPERTY_ITEM_UPDATE_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_TEXT_FIELD_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::u16string, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreviewText, PreviewText, PROPERTY_UPDATE_NORMAL);
 
@@ -369,6 +390,7 @@ protected:
 
 private:
     std::function<void(WeakPtr<NG::FrameNode>)> cancelIconSymbol_;
+    RefPtr<AdvancedTextLayoutProperty> advancedTextLayoutProperty_;
 };
 } // namespace OHOS::Ace::NG
 

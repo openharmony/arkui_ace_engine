@@ -22,8 +22,6 @@
 
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
 #include "core/event/key_code.h"
 
 namespace OHOS::Ace {

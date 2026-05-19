@@ -14,7 +14,10 @@
  */
 
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable, IObservedObject, IVariableOwner } from '../decorator';
+import {
+    IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable,
+    IObservedObject, IVariableOwner,
+} from '../decorator';
 import { WatchFuncType, WatchIdType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
@@ -70,9 +73,6 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         const shouldAddRef = this.shouldAddRef();
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
-            if (value instanceof Object) {
-                ObserveSingleton.instance.setV1RenderId(value as NullableObject);
-            }
             uiUtils.builtinContainersAddRefAnyKey(value);
             this.selfTrack();
             ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();

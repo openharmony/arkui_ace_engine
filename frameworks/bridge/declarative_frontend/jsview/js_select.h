@@ -76,6 +76,8 @@ public:
     static void SetMenuSystemMaterial(const JSCallbackInfo& info);
     static void SetMenuBackgroundBlurStyleOptions(const JSCallbackInfo& info);
     static void SetMenuBackgroundEffect(const JSCallbackInfo& info);
+    static void SetMenuDistortionMode(const JSCallbackInfo& info);
+    static void SetMenuEdgeLightMode(const JSCallbackInfo& info);
 
     static void ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type);
     static void ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type);

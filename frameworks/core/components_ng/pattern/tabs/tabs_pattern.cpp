@@ -15,8 +15,11 @@
 
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 
+#include "interfaces/native/ui_input_event.h"
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/log/ace_checker.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/common/recorder/event_recorder.h"
@@ -26,6 +29,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -37,12 +41,26 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "base/log/ace_checker.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHILDREN_MIN_SIZE = 2;
 constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
+
+constexpr int32_t BG_MASK_INDEX = 1;
+constexpr uint32_t DEFAULT_GRADIENT_COLOR_NUM = 21;
+constexpr double DEFAULT_GRADIENT_COLOR_RATIO[21] = { 1, 0.99764, 0.9901, 0.97627, 0.95574, 0.92808, 0.89108, 0.84375,
+    0.78547, 0.71344, 0.63048, 0.53513, 0.4328, 0.33021, 0.23699, 0.15625, 0.09588, 0.05096, 0.02089, 0.00491, 0 };
+constexpr double DEFAULT_GRADIENT_COLOR_DIMENSION[21] = { 0, 5.1, 10.0, 15.1, 20.0, 25.1, 30.0, 35.1, 40.0, 45.1, 50.0,
+    55.1, 60.0, 65.1, 70.0, 74.9, 80.0, 85.1, 90.0, 95.1, 100.0 };
+constexpr uint32_t RGB_MASK = 0x00FFFFFF;
+constexpr uint32_t LEFT_SHIFT_24 = 24;
+
+constexpr uint32_t MASK_COLOR_LIGHT = 0xCCF1F3F5;
+constexpr uint32_t MASK_COLOR_DARK = 0x99000000;
+
+const RefPtr<Curve> FOLLOW_HAND_ANIMATION_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0, 1.0, 224.0, 25.0);
+constexpr int32_t FOLLOW_HAND_ANIMATION_PART2_DELAY = 150;
 } // namespace
 
 void TabsPattern::OnAttachToFrameNode()
@@ -480,11 +498,13 @@ void TabsPattern::OnModifyDone()
     InitFocusEvent();
     InitAccessibilityZIndex();
 
+    InitFloatingBar();
+    OnUpdateShowDivider();
+
     if (onChangeEvent_) {
         return;
     }
     SetOnChangeEvent(nullptr);
-    OnUpdateShowDivider();
 }
 
 void TabsPattern::OnAfterModifyDone()
@@ -1052,6 +1072,7 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
         dividerRenderProperty->UpdateDividerColor(currentDivider.color);
     }
     UpdateTabBarOverlap(tabsLayoutProperty);
+    UpdateBgMaskNode();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1077,6 +1098,7 @@ bool TabsPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         CHECK_NULL_RETURN(dividerRenderProperty, false);
         dividerRenderProperty->UpdateDividerColor(currentDivider.color);
     }
+    UpdateBgMaskNode();
     return false;
 }
 
@@ -1150,5 +1172,383 @@ void TabsPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ")
             .append((onContentDidScroll_ && *onContentDidScroll_) ? "true" : "false"));
+}
+
+RefPtr<LayoutAlgorithm> TabsPattern::CreateLayoutAlgorithm()
+{
+    ACE_UINODE_TRACE(GetHost());
+    auto algo = MakeRefPtr<TabsLayoutAlgorithm>();
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_RETURN(tabsNode, algo);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, algo);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(tabBarPattern, algo);
+
+    algo->SetBarItemSize(tabBarPattern->GetChildrenSize());
+    algo->SetItemIndex(tabsNode->GetItemIndex());
+    algo->SetIsFloatingBar(isFloatingBar_);
+    algo->SetLastFloatingBar(lastFloatingBar_);
+    return algo;
+}
+
+void TabsPattern::InitFloatingBar()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    bool isBarOverlap = property->GetBarOverlap().value_or(false);
+    bool isHorizontal = property->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL;
+    bool isBarPositionEnd = property->GetTabBarPosition().value_or(BarPosition::START) == BarPosition::END;
+    bool isFloatingStyle = property->HasBarFloatingStyle();
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    lastFloatingBar_ = isFloatingBar_;
+    if (isBarOverlap && isHorizontal && isBarPositionEnd && isFloatingStyle) {
+        isFloatingBar_ = true;
+        if (!tabsNode->HasBackgroundMaskNode()) {
+            auto backgroundMaskNode = FrameNode::GetOrCreateFrameNode(V2::TABS_BACKGROUND_MASK_ETS_TAG,
+                tabsNode->GetBackgroundMaskId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
+            backgroundMaskNode->MountToParent(tabsNode, BG_MASK_INDEX);
+            backgroundMaskNode->SetHitTestMode(HitTestMode::HTMNONE);
+            ItemIndex itemIndex = { 0, 1, 2, 3, 4 };
+            tabsNode->SetItemIndex(itemIndex);
+        }
+        UpdateBgMaskNode();
+
+        InitTouchEvent();
+        ApplySystemMaterial();
+    } else {
+        if (tabsNode->HasBackgroundMaskNode()) {
+            auto backgroundMaskNode = AceType::DynamicCast<FrameNode>(tabsNode->GetBackgroundMask());
+            CHECK_NULL_VOID(backgroundMaskNode);
+            backgroundMaskNode->SetActive(false);
+        }
+        isFloatingBar_ = false;
+        if (floatingBarPosition_ != FloatingBarPosition::CENTER) {
+            ResetTabBarFollowHandPosition();
+        }
+        ResetSystemMaterial();
+    }
+    if (isFloatingBar_ != lastFloatingBar_) {
+        tabsNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void TabsPattern::UpdateBgMaskNode()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    if (!tabsNode->HasBackgroundMaskNode()) {
+        return;
+    }
+    auto backgroundMaskNode = AceType::DynamicCast<FrameNode>(tabsNode->GetBackgroundMask());
+    CHECK_NULL_VOID(backgroundMaskNode);
+    auto stackRenderContext = backgroundMaskNode->GetRenderContext();
+    CHECK_NULL_VOID(stackRenderContext);
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto style = property->GetBarFloatingStyle();
+    Color baseColor(MASK_COLOR_LIGHT);
+    if (style.has_value() && style->maskColor.has_value()) {
+        baseColor = style->maskColor.value();
+    } else {
+        auto context = GetContext();
+        if (context && context->GetColorMode() == ColorMode::DARK) {
+            baseColor = Color(MASK_COLOR_DARK);
+        } else if (tabsNode->GetLocalColorMode() == ColorMode::DARK) {
+            baseColor = Color(MASK_COLOR_DARK);
+        }
+    }
+
+    Gradient gradient;
+    gradient.CreateGradientWithType(GradientType::LINEAR);
+    gradient.SetDirection(GradientDirection::TOP);
+
+    for (uint32_t index = 0; index < DEFAULT_GRADIENT_COLOR_NUM; ++index) {
+        double ratio = DEFAULT_GRADIENT_COLOR_RATIO[index];
+        Color stepColor = Color(
+            static_cast<uint32_t>(baseColor.GetAlpha() * ratio) << LEFT_SHIFT_24 | (baseColor.GetValue() & RGB_MASK));
+        gradient.AddColor(CreatePercentGradientColor(DEFAULT_GRADIENT_COLOR_DIMENSION[index], stepColor));
+    }
+
+    stackRenderContext->UpdateLinearGradient(gradient);
+}
+
+GradientColor TabsPattern::CreatePercentGradientColor(float percent, Color color)
+{
+    NG::GradientColor gredient = GradientColor(color);
+    gredient.SetDimension(CalcDimension(percent, DimensionUnit::PERCENT));
+    return gredient;
+}
+
+void TabsPattern::InitTouchEvent()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto style = property->GetBarFloatingStyle();
+    if (!style.has_value() || !style->adaptToHandedness.value_or(false)) {
+        if (floatingBarPosition_ != FloatingBarPosition::CENTER) {
+            ResetTabBarFollowHandPosition();
+        }
+        return;
+    }
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnTouchEvent(info);
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void TabsPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto id = host->GetId();
+    context->AddWindowSizeChangeCallback(id);
+}
+
+void TabsPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    if (gesture && touchListener_) {
+        gesture->RemoveTouchEvent(touchListener_);
+    }
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto id = host->GetId();
+    context->RemoveWindowSizeChangeCallback(id);
+}
+
+void TabsPattern::OnTouchEvent(const TouchEventInfo& info)
+{
+    auto touchEvent = info.ConvertToTouchEvent();
+    if (info.GetTouches().empty()) {
+        return;
+    }
+    auto locationInfo = info.GetTouches().front();
+    auto touchType = locationInfo.GetTouchType();
+    if (touchType != TouchType::UP) {
+        return;
+    }
+    FloatingBarPosition expectedPosition = FloatingBarPosition::CENTER;
+    auto operatingHand = info.GetOperatingHand();
+    if (operatingHand == ARKUI_EVENT_HAND_LEFT) {
+        expectedPosition = FloatingBarPosition::LEFT;
+    } else if (operatingHand == ARKUI_EVENT_HAND_RIGHT) {
+        expectedPosition = FloatingBarPosition::RIGHT;
+    } else if (operatingHand == ARKUI_EVENT_HAND_NONE) {
+        return;
+    }
+    if (floatingBarPosition_ == expectedPosition) {
+        return;
+    }
+    // Once it switches to the left-hand or right-hand posture, it will not return to the center position.
+    if (floatingBarPosition_ != FloatingBarPosition::CENTER && expectedPosition == FloatingBarPosition::CENTER) {
+        return;
+    }
+    floatingBarPosition_ = expectedPosition;
+    FollowHandAnimation();
+}
+
+void TabsPattern::ResetTabBarFollowHandPosition()
+{
+    if (!isFloatingBar_ && !lastFloatingBar_) {
+        return;
+    }
+    auto animations = std::move(floatTabBarFollowHandAnimations_);
+    for (auto& animation : animations) {
+        if (animation) {
+            AnimationUtils::StopAnimation(animation);
+        }
+    }
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto renderContext = tabBar->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    floatingBarPosition_ = FloatingBarPosition::CENTER;
+    renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+}
+
+void TabsPattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)
+{
+    if (WindowSizeChangeReason::ROTATION != type) {
+        return;
+    }
+    ResetTabBarFollowHandPosition();
+}
+
+void TabsPattern::HandleOnTouchScaleAnimation()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsGeometry = tabsNode->GetGeometryNode();
+    CHECK_NULL_VOID(tabsGeometry);
+    auto tabsWidth = tabsGeometry->GetFrameSize().Width();
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto tabBarGeometry = tabBar->GetGeometryNode();
+    CHECK_NULL_VOID(tabBarGeometry);
+    auto tabBarWidth = tabBarGeometry->GetFrameSize().Width();
+    auto oriTranslateX =
+        std::max(0.0f, ((tabsWidth / 2.0f) - (tabBarWidth / 2.0f) - floatingBarMargin_.value_or(0.0f)));
+    auto GetTranslateX = [this, oriTranslateX]() {
+        switch (floatingBarPosition_) {
+            case FloatingBarPosition::CENTER:
+                return 0.0f;
+            case FloatingBarPosition::LEFT:
+                return -oriTranslateX;
+            case FloatingBarPosition::RIGHT:
+                return oriTranslateX;
+            default:
+                return 0.0f;
+        }
+    };
+    auto translateX = GetTranslateX();
+    auto tabBarRenderContext = tabBar->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    tabBarRenderContext->UpdateTransformScale({ 1.15f, 0.85f });
+    tabBarRenderContext->UpdateTransformTranslate({ translateX, 0.0f, 0.0f });
+}
+
+void TabsPattern::HandleOnTouchDelayScaleAnimation()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto tabBarRenderContext = tabBar->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    tabBarRenderContext->UpdateTransformScale({ 1.0f, 1.0f });
+}
+
+void TabsPattern::OnFollowHandAnimationFinish()
+{
+    floatTabBarFollowHandAnimationCount_--;
+    if (floatTabBarFollowHandAnimationCount_ > 0) {
+        return;
+    }
+    floatTabBarFollowHandAnimationCount_ = 0;
+    floatTabBarFollowHandAnimations_.clear();
+}
+
+void TabsPattern::InitTabBarTransformAttributeIfNeeded()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto renderContext = tabBar->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasTransformScale()) {
+        renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    }
+    if (!renderContext->HasTransformTranslate()) {
+        renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    }
+}
+
+void TabsPattern::FollowHandAnimation()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto style = property->GetBarFloatingStyle();
+    if (!style.has_value() || !style->adaptToHandedness.value_or(false)) {
+        return;
+    }
+    // Tab width greater than 600vp is required to fllow hand.
+    if (!floatingBarMargin_.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto CreateTouchAnimation = [weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnTouchScaleAnimation();
+    };
+    auto CreateTouchAnimationNext = [weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnTouchDelayScaleAnimation();
+    };
+    auto finishCallback = [weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnFollowHandAnimationFinish();
+    };
+    AnimationOption options;
+    options.SetCurve(FOLLOW_HAND_ANIMATION_CURVE);
+    options.SetOnFinishEvent(finishCallback);
+    AnimationOption optionsNext = options;
+    optionsNext.SetDelay(FOLLOW_HAND_ANIMATION_PART2_DELAY);
+    floatTabBarFollowHandAnimationCount_++;
+    floatTabBarFollowHandAnimations_.clear();
+    InitTabBarTransformAttributeIfNeeded();
+    auto step1Animation =
+        AnimationUtils::StartAnimation(options, CreateTouchAnimation, options.GetOnFinishEvent(), nullptr, context);
+    floatTabBarFollowHandAnimations_.push_back(step1Animation);
+    floatTabBarFollowHandAnimationCount_++;
+    auto step2Animation = AnimationUtils::StartAnimation(
+        optionsNext, CreateTouchAnimationNext, optionsNext.GetOnFinishEvent(), nullptr, context);
+    floatTabBarFollowHandAnimations_.push_back(step2Animation);
+}
+
+void TabsPattern::ApplySystemMaterial()
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto style = property->GetBarFloatingStyle();
+    if (!style.has_value()) {
+        return;
+    }
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto renderContext = tabBar->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto uiMaterial = style->systemMaterial;
+    if (uiMaterial) {
+        tabBarPattern->SetUseNewMaterial(true);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), uiMaterial.GetRawPtr());
+    } else {
+        tabBarPattern->SetUseNewMaterial(false);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), nullptr);
+    }
+}
+
+void TabsPattern::ResetSystemMaterial()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBar);
+    auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetUseNewMaterial(false);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(tabBar), nullptr);
 }
 } // namespace OHOS::Ace::NG

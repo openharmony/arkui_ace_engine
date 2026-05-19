@@ -45,6 +45,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. update caret rect
+     */
     pattern->UpdateCaretRect(true);
 }
 
@@ -65,6 +68,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. check select area visible
+     */
     pattern->CheckSelectAreaVisible();
 }
 
@@ -3406,5 +3412,149 @@ HWTEST_F(TextFieldPatternTest, TextPattern109, TestSize.Level1)
     std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
     pattern->DumpSimplifyInfo(json);
     EXPECT_EQ(json->GetString("placeholder", DEFAULT_TEXT), DEFAULT_TEXT);
+}
+
+/**
+ * @tc.name: TextPattern111
+ * @tc.desc: test CreateNodePaintMethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern111, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test CreateNodePaintMethod
+     */
+    auto paintMethod = pattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps: step3. verify overlay modifier is created
+     */
+    EXPECT_NE(pattern->GetTextFieldOverlayModifier(), nullptr);
+}
+
+/**
+ * @tc.name: TextPattern112
+ * @tc.desc: test UpdateCaretInfoToController
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern112, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and get focus.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    auto pattern = pattern_;
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateCaretInfoToController without focus
+     */
+    pattern->GetFocusHub()->currentFocus_ = false;
+    pattern->UpdateCaretInfoToController(false);
+
+    /**
+     * @tc.steps: step3. test with focus
+     */
+    pattern->GetFocusHub()->currentFocus_ = true;
+    pattern->selectController_->caretInfo_.index = 3;
+    pattern->contentController_->SetTextValue(u"hello");
+    pattern->UpdateCaretInfoToController(false);
+}
+
+/**
+ * @tc.name: TextPattern114
+ * @tc.desc: test HandleBlurEvent complete flow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern114, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and get focus first.
+     */
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+    GetFocus();
+    auto pattern = pattern_;
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test HandleBlurEvent with FRAME_DESTROY reason
+     */
+    pattern->blurReason_ = BlurReason::FRAME_DESTROY;
+    pattern->HandleBlurEvent();
+
+    /**
+     * @tc.steps: step3. test with WINDOW_BLUR reason
+     */
+    pattern->blurReason_ = BlurReason::WINDOW_BLUR;
+    pattern->isCustomKeyboardAttached_ = true;
+    pattern->HandleBlurEvent();
+}
+
+/**
+ * @tc.name: TextPattern115
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern115, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and get focus.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    auto pattern = pattern_;
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test Tab key handling
+     */
+    KeyEvent tabKeyEvent(KeyCode::KEY_TAB, KeyAction::DOWN);
+    tabKeyEvent.pressedCodes.push_back(KeyCode::KEY_TAB);
+    pattern->focusIndex_ = FocuseIndex::TEXT;
+    auto result = pattern->OnKeyEvent(tabKeyEvent);
+
+    /**
+     * @tc.steps: step3. test Enter key with independent control keyboard
+     */
+    KeyEvent enterKeyEvent(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    pattern->independentControlKeyboard_ = true;
+    pattern->GetFocusHub()->currentFocus_ = true;
+    result = pattern->OnKeyEvent(enterKeyEvent);
+}
+
+/**
+ * @tc.name: TextPattern117
+ * @tc.desc: test HandleOnCopy and HandleOnCut
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern117, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and add text.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto pattern = pattern_;
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test HandleOnCopy
+     */
+    pattern->HandleOnCopy();
+
+    /**
+     * @tc.steps: step3. test HandleOnCut
+     */
+    pattern->HandleOnCut();
 }
 } // namespace OHOS::Ace::NG

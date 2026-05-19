@@ -26,13 +26,13 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
@@ -53,6 +53,10 @@
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+namespace NG {
+class DrawModifier;
+class CustomAnimatableArithmetic;
+} // namespace NG
 
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
@@ -501,7 +505,11 @@ public:
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(ResponseType type, std::vector<NG::OptionParam>&& params,
+        NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) = 0;
     virtual void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(std::vector<NG::OptionParam>&& params, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
     virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -533,6 +541,7 @@ public:
     virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
     virtual void SetAccessibilityGroupOptions(NG::AccessibilityGroupOptions groupOptions) = 0;
     virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
+    virtual void SetAccessibilityNextFocusParams(const NG::AccessibilityNextFocusParams& params) = 0;
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
     virtual void SetOnAccessibilityActionIntercept(
@@ -594,6 +603,7 @@ public:
     virtual void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) {};
     // edgelight
     virtual void SetEdgeLightParam(const std::optional<NG::EdgeLightParam>& param) {};
+    virtual void SetDoubleSided(bool doubleSided) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

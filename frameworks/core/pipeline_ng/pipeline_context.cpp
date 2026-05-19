@@ -22,10 +22,19 @@
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
-#include "core/components_ng/manager/form_visible/form_visible_manager.h"
-#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/event/key_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -47,9 +56,11 @@
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
@@ -57,6 +68,7 @@
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
+#include "core/common/frontend.h"
 #include "core/image/image_cache.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
@@ -74,13 +86,17 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#endif
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -96,6 +112,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
 #endif
 #include "core/image/image_file_cache.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_context.h"
 #ifdef COMPONENT_TEST_ENABLED
 #include "component_test/pipeline_status.h"
@@ -269,6 +286,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
+    taihangOptimizer_->Init();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -301,6 +320,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
+    taihangOptimizer_->Init();
 }
 
 PipelineContext::PipelineContext()
@@ -328,6 +349,20 @@ PipelineContext::PipelineContext()
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
+    taihangOptimizer_->Init();
+}
+
+bool PipelineContext::GetIsRequestVsync()
+{
+    CHECK_NULL_RETURN(window_, false);
+    return window_->GetIsRequestVsync();
+}
+
+bool PipelineContext::GetIsRequestFrame() const
+{
+    CHECK_NULL_RETURN(window_, false);
+    return window_->GetIsRequestFrame();
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()
@@ -2040,6 +2075,11 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
     return focusManager_;
 }
 
+bool PipelineContext::GetIsFocusActive() const
+{
+    return focusManager_ ? focusManager_->GetIsFocusActive() : false;
+}
+
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
@@ -3504,6 +3544,11 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
     return focusManager->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
 }
 
+bool PipelineContext::SetIsFocusActive(bool isFocusActive, bool autoFocusInactive)
+{
+    return SetIsFocusActive(isFocusActive, FocusActiveReason::DEFAULT, autoFocusInactive);
+}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     OnTouchEvent(point, rootNode_, isSubPipe);
@@ -3527,6 +3572,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "OnTouchEvent type:%{public}d, isGenerate:%{public}d",
         static_cast<int32_t>(point.type), point.isGenerate);
     if (ConvertFromMouseAxis(point) && !point.isGenerate && compatibleManager_.NotifyNewEvent(point)) {
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->DelegateTouchEvent(point);
+        }
+        if (point.type == TouchType::MOVE) {
+            RequestFrame();
+        }
         return;
     }
 
@@ -3562,7 +3613,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         formEventMgr->HandleEtsCardTouchEvent(point, etsSerializedGesture);
     }
 
-    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty()) {
+    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty() && !point.isGenerate) {
         eventManager_->DelegateTouchEvent(point);
     }
     auto oriPoint = point;
@@ -3624,9 +3675,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+#ifdef SMART_GESTURE_SUPPORTED
         if (eventManager_) {
             eventManager_->ClearSmartGestureSelected();
         }
+#endif // SMART_GESTURE_SUPPORTED
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -4780,9 +4833,11 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+#ifdef SMART_GESTURE_SUPPORTED
         if (eventManager_) {
             eventManager_->ClearSmartGestureSelected();
         }
+#endif
     }
 
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
@@ -4918,7 +4973,7 @@ void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<F
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.mouseAction = event.action;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    if (event.action != MouseAction::MOVE || event.passThrough) {
+    if (event.action != MouseAction::MOVE || isMousePassThrough_ || event.passThrough) {
         eventManager_->MouseTest(scaleEvent, node, touchRestrict);
         eventManager_->DispatchMouseEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -7825,6 +7880,11 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
     return clickOptimizer_;
 }
 
+const std::shared_ptr<TaihangOptimizer>& PipelineContext::GetTaihangOptimizer() const
+{
+    return taihangOptimizer_;
+}
+
 void PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline)
 {
     PipelineBase::SetParentPipeline(weakPipeline);
@@ -7995,11 +8055,16 @@ bool PipelineContext::FreeMouseStyleHoldNode()
 
 void PipelineContext::InitManagers()
 {
+    avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
+    memoryMgr_ = MakeRefPtr<MemoryManager>();
     navigationMgr_ = MakeRefPtr<NavigationManager>();
+    frameRateManager_ = MakeRefPtr<FrameRateManager>();
+    privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    toolbarManager_ = MakeRefPtr<ToolbarManager>();
     environmentManager_ = MakeRefPtr<EnvironmentManager>();
     recycleManager_ = std::make_unique<RecycleManager>();
 }
@@ -8029,6 +8094,11 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
     return recycleManager_;
 }
 
+RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() const
+{
+    return privacySensitiveManager_;
+}
+
 void PipelineContext::RegisterTouchTimingCallback(
     const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>&&
         callback)
@@ -8050,6 +8120,12 @@ void PipelineContext::ProcessCommand(const std::string& command)
 #endif
 }
 
+void PipelineContext::ChangeSensitiveNodes(bool flag)
+{
+    CHECK_NULL_VOID(privacySensitiveManager_);
+    privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
+}
+
 void PipelineContext::FlushRelaxedInteraction()
 {
 #ifdef RELAXED_INTERACTION_SUPPORT
@@ -8057,6 +8133,60 @@ void PipelineContext::FlushRelaxedInteraction()
     eventManager_->FlushRelaxedInteraction([this]() { RequestFrame(); });
 #endif
 }
+
+std::optional<TextDirection> PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto envManager = GetEnvironmentManager();
+    CHECK_NULL_RETURN(envManager, std::nullopt);
+
+    EnvironmentQueryResult result;
+    if (!envManager->FindValueByKey(
+        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_DIRECTION, result)) {
+        return std::nullopt;
+    }
+
+    if (result.type == EnvironmentValueType::STRING) {
+        if (result.stringValue == "Ltr") {
+            return TextDirection::LTR;
+        }
+        if (result.stringValue == "Rtl") {
+            return TextDirection::RTL;
+        }
+        if (result.stringValue == "Auto") {
+            return TextDirection::AUTO;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto envManager = GetEnvironmentManager();
+    CHECK_NULL_RETURN(envManager, std::nullopt);
+
+    EnvironmentQueryResult result;
+    if (!envManager->FindValueByKey(
+        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_FONT_SCALE, result)) {
+        return std::nullopt;
+    }
+
+    if (result.type == EnvironmentValueType::NUMBER) {
+        return static_cast<float>(result.numberValue);
+    }
+    return std::nullopt;
+}
+
+float PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, GetFontScale());
+    auto pattern = host->GetPattern();
+    CHECK_NULL_RETURN(pattern, GetFontScale());
+    auto envFontScale = pattern->GetEnvFontScale();
+    return envFontScale.has_value() ? envFontScale.value() : GetFontScale();
+}
+
 void PipelineContext::SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager)
 {
     dynamicComponentSafeManager_ = manager;

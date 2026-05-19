@@ -45,7 +45,6 @@ TextTimerOptions Convert(const Ark_TextTimerOptions& src)
     dst.count = Converter::OptConvert<int64_t>(src.count);
     dst.controller = Converter::OptConvert<Ark_TextTimerController>(src.controller);
     dst.startTime = Converter::OptConvert<int32_t>(src.startTime);
-    Validator::ValidateNonNegative(dst.startTime);
     return dst;
 }
 } // namespace Converter
@@ -220,9 +219,11 @@ void SetTextShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    Converter::DefaultShadowBlurRadius defaultBlurRadius(0.0);
     Shadow shadow;
     shadow.SetOffsetX(0.0);
     shadow.SetOffsetY(0.0);
+    shadow.SetBlurRadius(0);
     std::vector<Shadow> defaultShadows = { shadow };
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value).value_or(std::vector<Shadow>(defaultShadows));
     TextTimerModelStatic::SetTextShadow(frameNode, shadowList);

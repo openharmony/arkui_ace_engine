@@ -67,7 +67,7 @@ public:
         Color defaultSelectColor = Color::BLACK;
         auto pipeline = PipelineBase::GetCurrentContext();
         auto frameNode = GetHost();
-        if (pipeline && frameNode) {
+        if (pipeline && frameNode && frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
             auto pickerTheme = pipeline->GetTheme<PickerTheme>(frameNode->GetThemeScopeId());
             if (pickerTheme) {
                 defaultDisappearColor = pickerTheme->GetDisappearOptionStyle().GetTextColor();

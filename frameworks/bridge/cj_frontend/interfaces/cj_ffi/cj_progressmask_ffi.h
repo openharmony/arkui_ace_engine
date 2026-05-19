@@ -18,11 +18,14 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "ffi_remote_data.h"
 
+#include "base/memory/ace_type.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::Framework {
@@ -38,7 +41,12 @@ public:
 
     void EnableBreathingAnimation(bool value);
 
-    RefPtr<NG::ProgressMaskProperty> GetProgressMask() const
+    void SetHostFrameNode(const WeakPtr<NG::FrameNode>& host)
+    {
+        AddHostFrameNode(host);
+    }
+
+    const RefPtr<NG::ProgressMaskProperty> GetProgressMask() const
     {
         return progress_mask_;
     }
@@ -54,7 +62,11 @@ public:
     }
 
 private:
+    void AddHostFrameNode(const WeakPtr<NG::FrameNode>& host);
+    void CommitNewMaskToHost(const RefPtr<NG::ProgressMaskProperty>& next);
+
     RefPtr<NG::ProgressMaskProperty> progress_mask_;
+    std::vector<WeakPtr<NG::FrameNode>> hosts_;
 };
 } // namespace OHOS::Ace::Framework
 

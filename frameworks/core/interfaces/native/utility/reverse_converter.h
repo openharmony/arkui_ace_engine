@@ -134,6 +134,7 @@ enum class TransitionEdge;
 enum class VerticalAlign;
 enum class ViewportFit;
 enum class WordBreak;
+enum class StrokeJoinStyle;
 struct ChangeValueInfo;
 struct CustomSpanMetrics;
 struct EmbedInfo;
@@ -512,6 +513,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src);
     void AssignArkValue(Ark_drawing_FontMetrics& dst, const FontMetrics& src, ConvContext *ctx);
     void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_StrokeJoinStyle& dst, const OHOS::Ace::StrokeJoinStyle& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_GradientDirection& dst, const NG::GradientDirection& src);
 
     template<typename T, std::enable_if_t<std::is_same_v<T, GestureRecognizerJudgeBeginCallback>, bool> = true>
     void AssignArkValue(T& dst, const std::function<void(Ark_VMContext, Ark_Int32, Ark_BaseGestureEvent,

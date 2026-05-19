@@ -2457,6 +2457,7 @@ EventManager::~EventManager() = default;
 
 const RefPtr<NG::SmartGestureManager>& EventManager::GetOrCreateSmartGestureManager()
 {
+#ifdef SMART_GESTURE_SUPPORTED
     if (!smartGestureManager_) {
         auto container = Container::GetContainer(instanceId_);
         CHECK_NULL_RETURN(container, smartGestureManager_);
@@ -2464,6 +2465,7 @@ const RefPtr<NG::SmartGestureManager>& EventManager::GetOrCreateSmartGestureMana
         CHECK_NULL_RETURN(pipeline, smartGestureManager_);
         smartGestureManager_ = AceType::MakeRefPtr<NG::SmartGestureManager>(WeakPtr<NG::PipelineContext>(pipeline));
     }
+#endif
     return smartGestureManager_;
 }
 
@@ -2474,10 +2476,12 @@ const RefPtr<NG::SmartGestureManager>& EventManager::GetSmartGestureManager() co
 
 void EventManager::ClearSmartGestureSelected()
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto smartGestureManager = GetSmartGestureManager();
     if (smartGestureManager) {
         smartGestureManager->ClearSelected();
     }
+#endif
 }
 
 void EventManager::ResetSmartGestureManager()
@@ -2557,6 +2561,11 @@ void EventManager::AddGestureSnapshot(
             AddGestureSnapshot(finger, depth + 1, child, type);
         }
     }
+}
+
+void EventManager::RecordSmartGestureExecution(NG::SmartGestureExecutionSnapshot&& snapshot)
+{
+    eventTree_.AddSmartGestureExecution(std::move(snapshot));
 }
 
 void EventManager::SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults)

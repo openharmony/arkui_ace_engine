@@ -381,6 +381,18 @@ export function UIExtensionComponentImpl(
     })
 }
 
+@memo
+export function UIExtensionComponent(
+    @memo @memo_skip
+    style: ((attributes: UIExtensionComponentAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkUIExtensionComponentComponent>((): ArkUIExtensionComponentComponent => {
+        return new ArkUIExtensionComponentComponent()
+    })
+    NodeAttach<ArkUIExtensionComponentPeer>((): ArkUIExtensionComponentPeer => ArkUIExtensionComponentPeer.create(receiver), (_: ArkUIExtensionComponentPeer): void => {
+        style?.(receiver)
+    })
+}
 export class UIExtensionProxy_serializer {
     public static write(buffer: SerializerBase, value: UIExtensionProxy): void {
         let valueSerializer: SerializerBase = buffer

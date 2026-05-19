@@ -54,7 +54,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     const node = createLazyNode(isRepeat)
 
     let pool = rememberDisposable(
-        () => new LazyItemPool(node, CustomComponent.current),
+        () => new LazyItemPool(node, ExtendableComponent.current),
         (pool?: LazyItemPool) => {
             pool?.dispose()
         }
@@ -132,12 +132,12 @@ class LazyItemCompositionContext {
 
     constructor(parentComponent?: Object) {
         this.prevNeedCreate = setNeedCreate(true) // ensure synchronous creation of all inner CustomComponent
-        this.prevCurrent = CustomComponent.current
-        CustomComponent.current = parentComponent // setup CustomComponent context to link with @Provide variables
+        this.prevCurrent = ExtendableComponent.current
+        ExtendableComponent.current = parentComponent // setup CustomComponent context to link with @Provide variables
     }
 
     exit(): void {
-        CustomComponent.current = this.prevCurrent
+        ExtendableComponent.current = this.prevCurrent
         setNeedCreate(this.prevNeedCreate)
     }
 }

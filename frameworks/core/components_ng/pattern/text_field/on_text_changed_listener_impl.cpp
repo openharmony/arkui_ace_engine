@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
+#include "core/common/container.h"
 
 #include "base/input_manager/input_manager.h"
 #include "base/log/ace_trace.h"

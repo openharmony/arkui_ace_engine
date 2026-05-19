@@ -346,7 +346,13 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
+    void BindContextMenu(ResponseType type, std::vector<NG::OptionParam>&& params,
+        NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) override {};
+
     void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) override {};
+
+    void BindContextMenu(std::vector<NG::OptionParam>&& params, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override {};
 
     int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
@@ -396,6 +402,7 @@ public:
     void SetAccessibilityCustomActions(const std::vector<NG::AccessibilityCustomAction>& actions) override;
     void ResetAccessibilityCustomActions() override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void SetAccessibilityNextFocusParams(const NG::AccessibilityNextFocusParams& params) override;
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void ResetOnAccessibilityFocus() override;

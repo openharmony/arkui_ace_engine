@@ -112,6 +112,9 @@ private:
     float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
     void AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode);
     bool IsDefaultPosition(const RefPtr<DialogLayoutProperty>& dialogProp);
+    void AvoidTitlebarInSubwindow(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp);
+    void UpdateDistortionNodeSize(
+        const RefPtr<FrameNode>& hostNode, const Dimension& dialogWidth, const Dimension& dialogHeight);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
@@ -137,6 +140,7 @@ private:
     double expandDisplayValidHeight_ = 0.0;
     bool isUIExtensionSubWindow_ = false;
     RectF hostWindowRect_;
+    RectF parentWindowRect_;
 
     SizeF dialogChildSize_;
     bool resizeFlag_ = false;
@@ -152,6 +156,8 @@ private:
     std::optional<Dimension> keyboardAvoidDistance_;
 
     bool isShowInFloatingWindow_ = false;
+    bool isWindowBased_ = false;
+    DialogDisplayModeInSubWindow displayModeInSubWindow_ = DialogDisplayModeInSubWindow::SCREEN_BASED;
 
     float embeddedDialogOffsetY_ = 0.0f;
     float stackRootDialogOffsetY_ = 0.0f;

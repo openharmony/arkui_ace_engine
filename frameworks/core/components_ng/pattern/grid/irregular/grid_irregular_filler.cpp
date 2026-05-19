@@ -187,6 +187,16 @@ bool GridIrregularFiller::FindNextItem(int32_t target)
             return true;
         }
     }
+    // check remaining columns in current row (AdvancePos might have stopped at an empty tile)
+    auto currentRowIt = mat.find(posY_);
+    if (currentRowIt != mat.end()) {
+        for (const auto [col, item] : currentRowIt->second) {
+            if (col >= posX_ && item == target) {
+                posX_ = col;
+                return true;
+            }
+        }
+    }
     // to handle empty tiles in the middle of matrix, check next row
     auto nextRow = mat.find(posY_ + 1);
     while (nextRow != mat.end()) {

@@ -61,7 +61,7 @@ bool ParseFontVariations(EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vect
         return false;
     }
     auto array = Local<panda::ArrayRef>(jsValue);
-    auto length = array->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
     axisValues.reserve(length);
     fontVariations.reserve(length);
     for (uint32_t i = 0; i < length; i++) {
@@ -925,7 +925,7 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
-        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResArr);
+        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseTextShadowRadiusWithResObj, radiusResArr);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(
@@ -1674,7 +1674,7 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
     struct ArkUITextDetectConfigStruct arkUITextDetectConfig;
     std::string types;
     auto array = panda::Local<panda::ArrayRef>(typesArg);
-    for (size_t i = 0; i < array->Length(vm); i++) {
+    for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, array); i++) {
         auto value = panda::ArrayRef::GetValueAt(vm, array, i);
         auto index = value->Int32Value(vm);
         if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {

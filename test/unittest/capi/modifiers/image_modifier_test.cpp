@@ -372,7 +372,7 @@ HWTEST_F(ImageModifierTest, setImageOptionsTestSetResourceUrl, testing::ext::Tes
         Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent optImage = {};
         optImage.tag = static_cast<Ark_Tag>(INTEROP_TAG_OBJECT);
         optImage.value = imageRc;
-        modifier_->setImageOptions(node_, &optImage, nullptr);
+        modifier_->setImageOptions0(node_, &optImage, nullptr);
         auto json = GetJsonValue(node_);
         ASSERT_TRUE(json);
         ASSERT_EQ(v.second, GetAttrValue<std::string>(json, "src"));
@@ -397,7 +397,7 @@ HWTEST_F(ImageModifierTest, setImageOptionsTestSetUndefinedResourceUrl, testing:
     Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent optImage = {};
     optImage.tag = static_cast<Ark_Tag>(INTEROP_TAG_OBJECT);
     optImage.value = imageRc;
-    modifier_->setImageOptions(node_, &optImage, nullptr);
+    modifier_->setImageOptions0(node_, &optImage, nullptr);
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     // our predefined state must retain
@@ -422,7 +422,7 @@ HWTEST_F(ImageModifierTest, setImageOptionsTestSetStringUrl, testing::ext::TestS
     Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent optImage = {};
     optImage.tag = static_cast<Ark_Tag>(INTEROP_TAG_OBJECT);
     optImage.value = imageRc;
-    modifier_->setImageOptions(node_, &optImage, nullptr);
+    modifier_->setImageOptions0(node_, &optImage, nullptr);
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
@@ -440,7 +440,7 @@ HWTEST_F(ImageModifierTest, setImageOptionsTestNullOptions, testing::ext::TestSi
     ASSERT_NE(frameNode, nullptr);
     auto json = GetJsonValue(node_);
     auto srcBefore = GetAttrValue<std::string>(json, "src");
-    modifier_->setImageOptions(node_, nullptr, nullptr);
+    modifier_->setImageOptions0(node_, nullptr, nullptr);
     json = GetJsonValue(node_);
     auto srcAfter = GetAttrValue<std::string>(json, "src");
     ASSERT_EQ(srcBefore, srcAfter);
@@ -665,7 +665,7 @@ HWTEST_F(ImageModifierTest, setImageOptionsTestSetImageContentEMPTY, testing::ex
     Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent optImage = {};
     optImage.tag = static_cast<Ark_Tag>(INTEROP_TAG_OBJECT);
     optImage.value = option;
-    modifier_->setImageOptions(node_, &optImage, nullptr);
+    modifier_->setImageOptions0(node_, &optImage, nullptr);
     json = GetJsonValue(node_);
     auto srcAfter = GetAttrValue<std::string>(json, "src");
     ASSERT_EQ(srcBefore, srcAfter);
@@ -689,7 +689,7 @@ HWTEST_F(ImageModifierTest, setImageOptionsTestSetEmptyUrl, testing::ext::TestSi
     Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent optImage = {};
     optImage.tag = static_cast<Ark_Tag>(INTEROP_TAG_OBJECT);
     optImage.value = imageRc;
-    modifier_->setImageOptions(node_, &optImage, nullptr);
+    modifier_->setImageOptions0(node_, &optImage, nullptr);
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
@@ -701,7 +701,7 @@ HWTEST_F(ImageModifierTest, setImageOptionsTestSetEmptyUrl, testing::ext::TestSi
         Ark_ResourceStr>(image);
 
     optImage.value = imageRc;
-    modifier_->setImageOptions(node_, &optImage, nullptr);
+    modifier_->setImageOptions0(node_, &optImage, nullptr);
     json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));

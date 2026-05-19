@@ -14,7 +14,9 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/axis_event_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -73,7 +75,13 @@ Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
 }
 Ark_Float64 GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    AxisInfo* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+
+    double value = event->GetPinchAxisScale();
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
                         Ark_AxisType axisType)
@@ -131,9 +139,7 @@ void SetDisplayXImpl(Ark_AxisEvent peer, Ark_Float64 displayX)
     CHECK_NULL_VOID(info);
     auto screenLocation = info->GetScreenLocation();
     const auto animation = screenLocation.GetXAnimationOption();
-    auto value = Converter::Convert<double>(displayX);
-    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    screenLocation.SetX(xConvert, animation);
+    screenLocation.SetX(displayX, animation);
     info->SetScreenLocation(screenLocation);
 }
 Ark_Float64 GetDisplayYImpl(Ark_AxisEvent peer)
@@ -153,9 +159,7 @@ void SetDisplayYImpl(Ark_AxisEvent peer, Ark_Float64 displayY)
     CHECK_NULL_VOID(info);
     auto screenLocation = info->GetScreenLocation();
     const auto animation = screenLocation.GetXAnimationOption();
-    auto value = Converter::Convert<double>(displayY);
-    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    screenLocation.SetY(yConvert, animation);
+    screenLocation.SetY(displayY, animation);
     info->SetScreenLocation(screenLocation);
 }
 Ark_Float64 GetWindowXImpl(Ark_AxisEvent peer)
@@ -175,9 +179,7 @@ void SetWindowXImpl(Ark_AxisEvent peer, Ark_Float64 windowX)
     CHECK_NULL_VOID(info);
     auto globalLocation = info->GetGlobalLocation();
     const auto animation = globalLocation.GetXAnimationOption();
-    auto value = Converter::Convert<double>(windowX);
-    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    globalLocation.SetX(xConvert, animation);
+    globalLocation.SetX(windowX, animation);
     info->SetGlobalLocation(globalLocation);
 }
 Ark_Float64 GetWindowYImpl(Ark_AxisEvent peer)
@@ -197,9 +199,7 @@ void SetWindowYImpl(Ark_AxisEvent peer, Ark_Float64 windowY)
     CHECK_NULL_VOID(info);
     auto globalLocation = info->GetGlobalLocation();
     const auto animation = globalLocation.GetYAnimationOption();
-    auto value = Converter::Convert<double>(windowY);
-    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    globalLocation.SetY(yConvert, animation);
+    globalLocation.SetY(windowY, animation);
     info->SetGlobalLocation(globalLocation);
 }
 Ark_Float64 GetXImpl(Ark_AxisEvent peer)
@@ -219,9 +219,7 @@ void SetXImpl(Ark_AxisEvent peer, Ark_Float64 x)
     CHECK_NULL_VOID(info);
     auto localLocation = info->GetLocalLocation();
     const auto animation = localLocation.GetXAnimationOption();
-    auto value = Converter::Convert<double>(x);
-    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    localLocation.SetX(xConvert, animation);
+    localLocation.SetX(x, animation);
     info->SetLocalLocation(localLocation);
 }
 Ark_Float64 GetYImpl(Ark_AxisEvent peer)
@@ -241,9 +239,7 @@ void SetYImpl(Ark_AxisEvent peer, Ark_Float64 y)
     CHECK_NULL_VOID(info);
     auto localLocation = info->GetLocalLocation();
     const auto animation = localLocation.GetYAnimationOption();
-    auto value = Converter::Convert<double>(y);
-    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value);
-    localLocation.SetY(yConvert, animation);
+    localLocation.SetY(y, animation);
     info->SetLocalLocation(localLocation);
 }
 Opt_Int32 GetScrollStepImpl(Ark_AxisEvent peer)
@@ -298,9 +294,8 @@ void SetGlobalDisplayXImpl(Ark_AxisEvent peer,
     CHECK_NULL_VOID(info);
     auto globalDisplayLocation = info->GetGlobalDisplayLocation();
     const auto animation = globalDisplayLocation.GetXAnimationOption();
-    auto value = Converter::OptConvertPtr<double>(globalDisplayX);
-    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value.value_or(DEFAULT_VALUE));
-    globalDisplayLocation.SetX(xConvert, animation);
+    auto globalDisplayXValue = Converter::OptConvertPtr<double>(globalDisplayX).value_or(DEFAULT_VALUE);
+    globalDisplayLocation.SetX(globalDisplayXValue, animation);
     info->SetGlobalDisplayLocation(globalDisplayLocation);
 }
 Opt_Float64 GetGlobalDisplayYImpl(Ark_AxisEvent peer)
@@ -320,9 +315,8 @@ void SetGlobalDisplayYImpl(Ark_AxisEvent peer,
     CHECK_NULL_VOID(info);
     auto globalDisplayLocation = info->GetGlobalDisplayLocation();
     const auto animation = globalDisplayLocation.GetYAnimationOption();
-    auto value = Converter::OptConvertPtr<double>(globalDisplayY);
-    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value.value_or(DEFAULT_VALUE));
-    globalDisplayLocation.SetY(yConvert, animation);
+    auto globalDisplayYValue = Converter::OptConvertPtr<double>(globalDisplayY).value_or(DEFAULT_VALUE);
+    globalDisplayLocation.SetY(globalDisplayYValue, animation);
     info->SetGlobalDisplayLocation(globalDisplayLocation);
 }
 } // AxisEventAccessor

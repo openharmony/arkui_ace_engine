@@ -170,6 +170,12 @@ export enum ExpandMode {
     NOT_EXPAND = 0,
     EXPAND = 1,
     LAZY_EXPAND = 2,
+    LAZY_NOT_EXPAND = 3,
+}
+export enum ChildrenCountMode {
+    ALL_EXPAND = 0,
+    ONLY_EXPANDED = 1,
+    ALL_NOT_EXPAND = 2,
 }
 export enum UIState {
     NORMAL = 0,
@@ -280,6 +286,9 @@ export class FrameNode implements MaterializedBase {
                 this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
                 return;
             }
+            if (type === 'BuilderRootWeakFrameNode') {
+                return;
+            }
             const instanceId = this.instanceId_!.toInt();
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
             const isCustomFrameNode = type === undefined || type === 'CustomFrameNode';
@@ -305,6 +314,9 @@ export class FrameNode implements MaterializedBase {
     }
     static getFinalizer(): KPointer {
         return FrameNodeExtender.getDestroy();
+    }
+    public isWeakNode(): boolean {
+        return false;
     }
     public isModifiable(): boolean {
         return FrameNodeExtender.isModifiable(this.peer!.ptr);
@@ -509,7 +521,15 @@ export class FrameNode implements MaterializedBase {
         return null;
     }
     public getChildrenCount(): int {
-        return FrameNodeExtender.getChildrenCount(this);
+        let childrenCountMode_casted: number = 0;
+        return FrameNodeExtender.getChildrenCount(this, childrenCountMode_casted);
+    }
+    public getChildrenCount(childrenCountMode: ChildrenCountMode): int {
+        let childrenCountMode_casted: number = 0;
+        if (childrenCountMode !== undefined && childrenCountMode !== null) {
+            childrenCountMode_casted = childrenCountMode;
+        }
+        return FrameNodeExtender.getChildrenCount(this, childrenCountMode_casted);
     }
     public dispose(): void {
         if (this.isDisposed()) {
@@ -1118,6 +1138,256 @@ export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
         this._nodeId = -1;
     }
 }
+export class BuilderRootWeakFrameNode<T> extends BuilderRootFrameNode<T> {
+    constructor(uiContext: UIContext, type: string = 'BuilderRootWeakFrameNode', ptr?: KPointer) {
+        super(uiContext, 'BuilderRootWeakFrameNode', ptr);
+    }
+    getType(): string {
+        return 'BuilderRootWeakFrameNode';
+    }
+    public isWeakNode(): boolean {
+        return true;
+    }
+    public getRenderNode(): RenderNode | null {
+        return null;
+    }
+    public getChild(index: int32, expandMode?: ExpandMode | undefined): FrameNode | null {
+        const error = Error('weak FrameNode not support getChild');
+        throw new BusinessError(100021, error);
+    }
+    public getFirstChildIndexWithoutExpand(): int {
+        const error = Error('weak FrameNode not support getFirstChildIndexWithoutExpand');
+        throw new BusinessError(100021, error);
+    }
+    public getLastChildIndexWithoutExpand(): int {
+        const error = Error('weak FrameNode not support getLastChildIndexWithoutExpand');
+        throw new BusinessError(100021, error);
+    }
+    public getFirstChild(): FrameNode | null {
+        const error = Error('weak FrameNode not support getFirstChild');
+        throw new BusinessError(100021, error);
+    }
+    public getNextSibling(): FrameNode | null {
+        const error = Error('weak FrameNode not support getNextSibling');
+        throw new BusinessError(100021, error);
+    }
+    public getPreviousSibling(): FrameNode | null {
+        const error = Error('weak FrameNode not support getPreviousSibling');
+        throw new BusinessError(100021, error);
+    }
+    public getParent(): FrameNode | null {
+        const error = Error('weak FrameNode not support getParent');
+        throw new BusinessError(100021, error);
+    }
+    public getChildrenCount(): int {
+        const error = Error('weak FrameNode not support getChildrenCount');
+        throw new BusinessError(100021, error);
+    }
+    public moveTo(targetParent: FrameNode, index?: int): void {
+        const error = Error('weak FrameNode not support moveTo');
+        throw new BusinessError(100021, error);
+    }
+    public getPositionToWindow(): NodePosition {
+        const error = Error('weak FrameNode not support getPositionToWindow');
+        throw new BusinessError(100021, error);
+    }
+    public getPositionToParent(): NodePosition {
+        const error = Error('weak FrameNode not support getPositionToParent');
+        throw new BusinessError(100021, error);
+    }
+    public getMeasuredSize(): Size {
+        const error = Error('weak FrameNode not support getMeasuredSize');
+        throw new BusinessError(100021, error);
+    }
+    public getLayoutPosition(): NodePosition {
+        const error = Error('weak FrameNode not support getLayoutPosition');
+        throw new BusinessError(100021, error);
+    }
+    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
+        const error = Error('weak FrameNode not support getUserConfigBorderWidth');
+        throw new BusinessError(100021, error);
+    }
+    public getUserConfigPadding(): NodeEdges<LengthMetrics> {
+        const error = Error('weak FrameNode not support getUserConfigPadding');
+        throw new BusinessError(100021, error);
+    }
+    public getUserConfigMargin(): NodeEdges<LengthMetrics> {
+        const error = Error('weak FrameNode not support getUserConfigMargin');
+        throw new BusinessError(100021, error);
+    }
+    public getUserConfigSize(): SizeT<LengthMetrics> {
+        const error = Error('weak FrameNode not support getUserConfigSize');
+        throw new BusinessError(100021, error);
+    }
+    public getId(): string {
+        const error = Error('weak FrameNode not support getId');
+        throw new BusinessError(100021, error);
+    }
+    public getOpacity(): double {
+        const error = Error('weak FrameNode not support getOpacity');
+        throw new BusinessError(100021, error);
+    }
+    public isVisible(): boolean {
+        const error = Error('weak FrameNode not support isVisible');
+        throw new BusinessError(100021, error);
+    }
+    public isClipToFrame(): boolean {
+        const error = Error('weak FrameNode not support isClipToFrame');
+        throw new BusinessError(100021, error);
+    }
+    public getCustomProperty(name: string): CustomProperty {
+        const error = Error('weak FrameNode not support getCustomProperty');
+        throw new BusinessError(100021, error);
+    }
+    get commonEvent(): UICommonEvent {
+        const error = Error('weak FrameNode not support commonEvent');
+        throw new BusinessError(100021, error);
+    }
+    get gestureEvent(): UIGestureEvent {
+        const error = Error('weak FrameNode not support gestureEvent');
+        throw new BusinessError(100021, error);
+    }
+    get commonAttribute(): CommonMethod {
+        const error = Error('weak FrameNode not support commonAttribute');
+        throw new BusinessError(100021, error);
+    }
+    public onDrawWrapper(context: DrawContext): void {
+        const error = Error('weak FrameNode not support onDrawWrapper');
+        throw new BusinessError(100021, error);
+    }
+    public setMeasuredSize(size: Size): void {
+        const error = Error('weak FrameNode not support setMeasuredSize');
+        throw new BusinessError(100021, error);
+    }
+    public setLayoutPosition(position: NodePosition): void {
+        const error = Error('weak FrameNode not support setLayoutPosition');
+        throw new BusinessError(100021, error);
+    }
+    public measure(constraint: LayoutConstraint): void {
+        const error = Error('weak FrameNode not support measure');
+        throw new BusinessError(100021, error);
+    }
+    public layout(position: NodePosition): void {
+        const error = Error('weak FrameNode not support layout');
+        throw new BusinessError(100021, error);
+    }
+    public setNeedsLayout(): void {
+        const error = Error('weak FrameNode not support setNeedsLayout');
+        throw new BusinessError(100021, error);
+    }
+    public invalidate(): void {
+        const error = Error('weak FrameNode not support invalidate');
+        throw new BusinessError(100021, error);
+    }
+    public getPositionToScreen(): NodePosition {
+        const error = Error('weak FrameNode not support getPositionToScreen');
+        throw new BusinessError(100021, error);
+    }
+    public getGlobalPositionOnDisplay(): NodePosition {
+        const error = Error('weak FrameNode not support getGlobalPositionOnDisplay');
+        throw new BusinessError(100021, error);
+    }
+    public getPositionToWindowWithTransform(): NodePosition {
+        const error = Error('weak FrameNode not support getPositionToWindowWithTransform');
+        throw new BusinessError(100021, error);
+    }
+    public getPositionToParentWithTransform(): NodePosition {
+        const error = Error('weak FrameNode not support getPositionToParentWithTransform');
+        throw new BusinessError(100021, error);
+    }
+    public getPositionToScreenWithTransform(): NodePosition {
+        const error = Error('weak FrameNode not support getPositionToScreenWithTransform');
+        throw new BusinessError(100021, error);
+    }
+    public disposeTree(): void {
+        const error = Error('weak FrameNode not support disposeTree');
+        throw new BusinessError(100021, error);
+    }
+    public addSupportedUIStates(uiStates: int32, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean | undefined): void {
+        const error = Error('weak FrameNode not support addSupportedUIStates');
+        throw new BusinessError(100021, error);
+    }
+    public removeSupportedUIStates(uiStates: int32): void {
+        const error = Error('weak FrameNode not support removeSupportedUIStates');
+        throw new BusinessError(100021, error);
+    }
+    public addComponentContent<T = undefined>(content: ComponentContent<T> | ReactiveComponentContent) {
+        const error = Error('weak FrameNode not support addComponentContent');
+        throw new BusinessError(100021, error);
+    }
+    public setCrossLanguageOptions(options: CrossLanguageOptions): void {
+        const error = Error('weak FrameNode not support setCrossLanguageOptions');
+        throw new BusinessError(100021, error);
+    }
+    public getCrossLanguageOptions(): CrossLanguageOptions {
+        const error = Error('weak FrameNode not support getCrossLanguageOptions');
+        throw new BusinessError(100021, error);
+    }
+    public recycle(): void {
+        const error = Error('weak FrameNode not support recycle');
+        throw new BusinessError(100021, error);
+    }
+    public reuse(): void {
+        const error = Error('weak FrameNode not support reuse');
+        throw new BusinessError(100021, error);
+    }
+    adoptChild(child: FrameNode): void {
+        const error = Error('weak FrameNode not support adoptChild');
+        throw new BusinessError(100021, error);
+    }
+    removeAdoptedChild(child: FrameNode): void {
+        const error = Error('weak FrameNode not support removeAdoptedChild');
+        throw new BusinessError(100021, error);
+    }
+    public getInteractionEventBindingInfo(eventType: EventQueryType): InteractionEventBindingInfo | undefined {
+        const error = Error('weak FrameNode not support getInteractionEventBindingInfo');
+        throw new BusinessError(100021, error);
+    }
+    public createAnimation(property: AnimationPropertyType, startValue: Array<double> | undefined, endValue: Array<double>, param: AnimateParam): boolean {
+        const error = Error('weak FrameNode not support createAnimation');
+        throw new BusinessError(100021, error);
+    }
+    public cancelAnimations(properties: Array<AnimationPropertyType>): boolean {
+        const error = Error('weak FrameNode not support cancelAnimations');
+        throw new BusinessError(100021, error);
+    }
+    public getNodePropertyValue(property: AnimationPropertyType): Array<double> {
+        const error = Error('weak FrameNode not support getNodePropertyValue');
+        throw new BusinessError(100021, error);
+    }
+    public convertPosition(position: NodePosition, targetNode: FrameNode): NodePosition {
+        const error = Error('weak FrameNode not support convertPosition');
+        throw new BusinessError(100021, error);
+    }
+    public convertPositionToWindow(positionByLocal: NodePosition): NodePosition {
+        const error = Error('weak FrameNode not support convertPositionToWindow');
+        throw new BusinessError(100021, error);
+    }
+    public convertPositionFromWindow(positionByWindow: NodePosition): NodePosition {
+        const error = Error('weak FrameNode not support convertPositionFromWindow');
+        throw new BusinessError(100021, error);
+    }
+    public isInRenderState(): boolean {
+        const error = Error('weak FrameNode not support isInRenderState');
+        throw new BusinessError(100021, error);
+    }
+    public static createFrameNodes(uiContext: UIContext, count: int32): Array<FrameNode> {
+        const error = Error('weak FrameNode not support createFrameNodes');
+        throw new BusinessError(100021, error);
+    }
+    public getFrameNodeById(id: string): FrameNode | null {
+        const error = Error('weak FrameNode not support getFrameNodeById');
+        throw new BusinessError(100021, error);
+    }
+    public getFrameNodeByUniqueId(id: int32): FrameNode | null {
+        const error = Error('weak FrameNode not support getFrameNodeByUniqueId');
+        throw new BusinessError(100021, error);
+    }
+    public invalidateAttributes(): void {
+        const error = Error('weak FrameNode not support invalidateAttributes');
+        throw new BusinessError(100021, error);
+    }
+}
 export interface ResultFrameNode {
     nodeId: int32;
     frameNode: FrameNode;
@@ -1145,10 +1415,12 @@ export class FrameNodeUtils {
         }
         return null;
     }
-    static createBuilderRootFrameNode<T = undefined>(uiContext: UIContext, ptr: KPointer): BuilderRootFrameNode<T> | null {
+    static createBuilderRootFrameNode<T = undefined>(uiContext: UIContext, ptr: KPointer, isWeak: boolean): BuilderRootFrameNode<T> | BuilderRootWeakFrameNode<T> | null {
         const nodeId = FrameNodeExtender.getIdByFrameNode(ptr);
         if (nodeId !== -1 && !FrameNodeExtender.isModifiable(ptr)) {
-            let frameNode = new BuilderRootFrameNode<T>(uiContext, "BuilderRootFrameNode", ptr);
+            let frameNode = isWeak
+                ? new BuilderRootWeakFrameNode<T>(uiContext, 'BuilderRootWeakFrameNode', ptr)
+                : new BuilderRootFrameNode<T>(uiContext, 'BuilderRootFrameNode', ptr);
             frameNode._nodeId = nodeId;
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
             return frameNode;

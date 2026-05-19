@@ -38,6 +38,10 @@ class ExtentPair;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class AnimatablePropertyFloat;
+template<typename T, typename S>
+class NodeAnimatableProperty;
+using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 constexpr float FRICTION_FINAL_POSITION_THRESHOLD = 60.0f;
 
 struct SlidInfo {
@@ -61,6 +65,7 @@ using MouseLeftButtonScroll = std::function<bool()>;
 using ContinuousSlidingCallback = std::function<double()>;
 using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
+using BackToTopCallback = std::function<bool()>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using IsReverseCallback = std::function<bool()>;
@@ -80,9 +85,9 @@ class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
-    Scrollable() = default;
-    Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis) {}
-    Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis) {}
+    Scrollable();
+    Scrollable(ScrollPositionCallback&& callback, Axis axis);
+    Scrollable(const ScrollPositionCallback& callback, Axis axis);
     ~Scrollable() override;
 
     enum class AnimationState {
@@ -508,6 +513,11 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
+    void SetBackToTopCallback(BackToTopCallback&& backToTopCallback)
+    {
+        backToTopCallback_ = std::move(backToTopCallback);
+    }
+
     void StartScrollSnapAnimation(
         float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar, int32_t source = SCROLL_FROM_NONE);
 
@@ -756,6 +766,7 @@ private:
     OnDidStopDraggingCallback onDidStopDraggingCallback_;
     OnWillStartFlingCallback onWillStartFlingCallback_;
     OnDidStopFlingCallback onDidStopFlingCallback_;
+
     Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
@@ -819,6 +830,7 @@ private:
     bool needScrollSnapChange_ = false;
     StartSnapAnimationCallback startSnapAnimationCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
+    BackToTopCallback backToTopCallback_;
     std::list<GestureEventFunc> panActionEndEvents_;
     GestureEventFunc actionEnd_;
 

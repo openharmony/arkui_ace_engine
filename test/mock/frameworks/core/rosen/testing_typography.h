@@ -116,6 +116,10 @@ public:
     {
         return 0.0;
     }
+    virtual std::string GetDumpInfo() const
+    {
+        return "";
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H

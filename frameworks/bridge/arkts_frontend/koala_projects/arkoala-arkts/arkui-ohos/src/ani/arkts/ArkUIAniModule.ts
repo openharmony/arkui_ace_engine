@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
+import { KeyboardAvoidMode, PanListenerCallback, NodeIdentity, NodeRenderStateChangeCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
 import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus } from '@ohos.arkui.drawableDescriptor';
 import { Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
@@ -120,6 +120,7 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
+    native static _BuilderProxyNode_Mock_Construct(id: KInt): KPointer
     native static _DetachedFreeRoot_Construct(id: KInt): KPointer;
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
@@ -247,6 +248,8 @@ export class ArkUIAniModule {
     
     // for drawable
     native static _Drawable_CreatePixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void
+    native static _Drawable_CreatePixelMapDrawableByResource(value: PixelMapDrawableDescriptor, resourceObjectKPointer: KPointer): void
+    native static _Drawable_CreatePixelMapDrawableByString(value: PixelMapDrawableDescriptor, src: string): void
     native static _Drawable_CreateLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
         background?: image.PixelMap, mask?: image.PixelMap): void
     native static _Drawable_CreateAnimatedDrawable(value: AnimatedDrawableDescriptor,
@@ -383,6 +386,7 @@ export class ArkUIAniModule {
     native static _GetAllUIContexts(): Array<KInt>
     native static _ResolveUIContext(): Array<KInt>
     native static _GetPageRootNode(): KPointer
+    native static _DumpLogPrint(depth: KInt, content: string): void
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
@@ -511,6 +515,8 @@ export class ArkUIAniModule {
     // for GestureEvent UIObserver
     native static _GestureEventUIObserver_SetPanListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: PanListenerCallback): void
     native static _GestureEventUIObserver_RemovePanListenerCallback(instanceId: KInt, tag: string, callback?: PanListenerCallback): void
+    native static _GestureEventUIObserver_SetOnNodeRenderState(instanceId: KInt, resourceId: KInt, nodeIdentity: NodeIdentity, callback: NodeRenderStateChangeCallback): void
+ 	native static _GestureEventUIObserver_RemoveOnNodeRenderState(instanceId: KInt, nodeIdentity: NodeIdentity, callback?: NodeRenderStateChangeCallback): void
     native static _GestureEventUIObserver_SetClickListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_RemoveClickListenerCallback(instanceId: KInt, tag: string, callback?: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_SetTapListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: GestureEventListenerCallback): void

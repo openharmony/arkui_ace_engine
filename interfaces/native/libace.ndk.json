@@ -3272,6 +3272,10 @@
         "name": "OH_ArkUI_CustomDialog_SetSubwindowMode"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_CustomDialog_SetDisplayModeInSubWindow"
+    },
+    {
         "first_introduced": "19",
         "name": "OH_ArkUI_CustomDialog_SetMask"
     },
@@ -5012,6 +5016,94 @@
         "name": "OH_ArkUI_SelectedDragPreviewStyle_GetColor"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_Create"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_Destroy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_SetAngle"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_GetAngle"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_SetDirection"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_GetDirection"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_SetRepeating"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_GetRepeating"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_SetColorStop"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_LinearGradientOptions_GetColorStop"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_Create"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_Destroy"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_SetCenterX"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_GetCenterX"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_SetCenterY"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_GetCenterY"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_SetRadius"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_GetRadius"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_SetRepeating"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_GetRepeating"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_SetColorStop"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RadialGradientOptions_GetColorStop"
+    },
+    {
         "first_introduced": "23",
         "name": "OH_ArkUI_PickerIndicatorStyle_Create"
     },
@@ -6090,6 +6182,22 @@
     {
         "first_introduced": "24",
         "name": "OH_ArkUI_ParagraphStyle_GetTextDirection"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ParagraphStyle_SetLinearGradient"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ParagraphStyle_GetLinearGradient"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ParagraphStyle_SetRadialGradient"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ParagraphStyle_GetRadialGradient"
     },
     {
         "first_introduced": "24",

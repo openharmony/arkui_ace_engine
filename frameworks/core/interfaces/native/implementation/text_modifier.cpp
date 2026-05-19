@@ -34,6 +34,7 @@
 #include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG::Converter {
 struct FontSettingOptions {
@@ -194,6 +195,31 @@ void AssignArkValue(Ark_MarqueeState& dst, int32_t src, ConvContext *ctx)
             break;
     }
 }
+
+ACE_FORCE_EXPORT void ProcessLinearGradient(const Opt_LinearGradientOptions& linearGradientOpt, Gradient& gradient)
+{
+    CHECK_NULL_VOID(linearGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED);
+    auto options = linearGradientOpt.value;
+    gradient.CreateGradientWithType(GradientType::LINEAR);
+    auto repeat = Converter::OptConvert<bool>(options.repeating);
+    if (repeat) {
+        gradient.SetRepeat(repeat.value());
+    }
+    auto linear = gradient.GetLinearGradient();
+    CHECK_NULL_VOID(linear);
+    std::optional<float> degreeOpt;
+    constexpr float DEFAULT_ANGLE = 180.0f;
+    Converter::ConvertAngleWithDefault(options.angle, degreeOpt, DEFAULT_ANGLE);
+    if (degreeOpt) {
+        linear->angle = CalcDimension(degreeOpt.value(), DimensionUnit::PX);
+        degreeOpt.reset();
+    }
+    auto direction = Converter::OptConvert<GradientDirection>(options.direction);
+    if (direction) {
+        Converter::AssignLinearGradientDirection(linear, direction.value());
+    }
+    Converter::AssignGradientColors(&gradient, &options.colors);
+}
 } /* namespace OHOS::Ace::NG::Converter */
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -214,6 +240,9 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->ClearSelectionMenu();
 
     auto text = Converter::OptConvertPtr<std::u16string>(content);
     if (text) {
@@ -434,6 +463,7 @@ void SetTextShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    Converter::DefaultShadowBlurRadius defaultBlurRadius(0.0);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
     TextModelStatic::SetTextShadow(frameNode, shadowList);
 }
@@ -715,40 +745,31 @@ void SetOptimizeTrailingSpaceImpl(Ark_NativePointer node,
     TextModelStatic::SetOptimizeTrailingSpace(frameNode, convValue);
 }
 void SetShaderStyleImpl(Ark_NativePointer node,
-                        const Opt_ShaderStyle* value)
+                        const Opt_ShaderStyleProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optShaderStyle = Converter::GetOptPtr(value);
-    if (!optShaderStyle.has_value()) {
+    if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         TextModelNG::ResetTextGradient(frameNode);
         return;
     }
-    auto shaderPeer = reinterpret_cast<ShaderStylePeer*>(value->value);
-    CHECK_NULL_VOID(shaderPeer);
-    switch (shaderPeer->type) {
-        case ShaderStyleType::LINEAR_GRADIENT:
-            {
-                TextModelNG::SetGradientStyle(frameNode, shaderPeer->gradientOptions.value());
-                break;
-            }
-        case ShaderStyleType::RADIAL_GRADIENT:
-            {
-                TextModelNG::SetGradientStyle(frameNode, shaderPeer->gradientOptions.value());
-                break;
-            }
-        case ShaderStyleType::SOLID_COLOR:
-            {
-                if (shaderPeer->colorValue) {
-                    TextModelNG::SetColorShaderStyle(frameNode, shaderPeer->colorValue.value());
-                } else {
-                    TextModelNG::ResetTextGradient(frameNode);
-                }
-                break;
-            }
-        default:
-            TextModelNG::ResetTextGradient(frameNode);
-            break;
+    auto shaderStyleProxy = value->value;
+    auto colorOpt = Converter::OptConvert<Color>(shaderStyleProxy.color);
+    auto linearGradientOpt = shaderStyleProxy.linearGradientOptions;
+    auto radialGradientOpt = shaderStyleProxy.radialGradientOptions;
+    bool hasLinear = linearGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    bool hasRadial = radialGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    if (colorOpt.has_value()) {
+        TextModelNG::SetColorShaderStyle(frameNode, colorOpt.value());
+    } else if (hasLinear) {
+        Gradient gradient;
+        Converter::ProcessLinearGradient(linearGradientOpt, gradient);
+        TextModelNG::SetGradientStyle(frameNode, gradient);
+    } else if (hasRadial) {
+        Gradient gradient = Converter::Convert<Gradient>(radialGradientOpt.value);
+        TextModelNG::SetGradientStyle(frameNode, gradient);
+    } else {
+        TextModelNG::ResetTextGradient(frameNode);
     }
 }
 void SetEnableAutoSpacingImpl(Ark_NativePointer node,

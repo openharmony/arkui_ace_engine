@@ -18,7 +18,6 @@ import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
-import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 import { IncrementalNode } from '@koalaui/runtime';
 import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
@@ -42,6 +41,7 @@ export interface IVariableOwner {
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
     __getCustomComponentContext__Internal(): CustomComponentContext;
     __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
+    __getCanUpdateStateVars__Internal(): boolean;
 }
 
 export interface IDecoratedVariable {
@@ -131,6 +131,12 @@ export interface IMutableStateMeta {
 export interface IMutableKeyedStateMeta {
     addRef(key: string): void;
     fireChange(key: string): void;
+    // Fire several keys as one logical mutation. Sync-monitor callbacks that
+    // bind multiple of the keys (e.g. wildcard binding on both OB_LENGTH and
+    // OB_ARRAY_ANY_KEY) fire ONCE total instead of once per key. Each key
+    // still goes through the per-key fireChange, so non-overlapping bindings
+    // still see their own notification.
+    fireChangeBatch(keys: ReadonlyArray<string>): void;
 }
 
 export interface IObserve {
@@ -141,6 +147,8 @@ export interface IObserve {
 export interface IObservedAnyProp {
     addRefAnyProp(): void;
 }
+
+export interface ObservedBuiltIn extends IObservedAnyProp {}
 
 export const OBSERVE: IObserve = ObserveSingleton.instance;
 
@@ -291,7 +299,9 @@ export interface ISubscribedWatches extends IWatchSubscriberRegister {
     executeOnSubscribingWatches(propertyName: string): void;
 }
 
-export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {
+export interface IComputedDecoratedVariable<T> extends ITrackedDecoratorRef, IDecoratedImmutableVariable<T> {
+    isFreeze(): boolean;
+    fireChange(): void;
     setOwner(owningView: IVariableOwner);
     resetOnReuse(): void;
 }

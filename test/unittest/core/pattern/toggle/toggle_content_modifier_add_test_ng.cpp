@@ -20,6 +20,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"

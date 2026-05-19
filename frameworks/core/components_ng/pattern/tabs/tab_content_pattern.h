@@ -93,6 +93,11 @@ public:
 
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
     void CheckTabAnimateMode()
     {
         if (!shallowBuilder_ || !(firstTimeLayout_ || secondTimeLayout_)) {

@@ -149,6 +149,7 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    void SetLineThicknessScale(float value) override;
     void SetBackBorder() override;
     void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
@@ -165,6 +166,10 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetStrokeJoinStyle(StrokeJoinStyle style) override;
+    void SetGradientShaderStyle(NG::Gradient& gradient) override;
+    void SetColorShaderStyle(const Color& value) override;
+    void ResetGradientShaderStyle() override;
     void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
@@ -182,6 +187,11 @@ public:
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
+    static void SetLineThicknessScale(FrameNode* frameNode, float value);
+    static TextDecoration GetDecoration(FrameNode* frameNode);
+    static Color GetTextDecorationColor(FrameNode* frameNode);
+    static TextDecorationStyle GetTextDecorationStyle(FrameNode* frameNode);
+    static float GetLineThicknessScale(FrameNode* frameNode);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetHalfLeading(FrameNode* frameNode, const bool& value);
@@ -398,6 +408,11 @@ public:
     static void SetStrokeColor(FrameNode* frameNode, const Color& value);
     static void ResetStrokeColor(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static void SetStrokeJoinStyle(FrameNode* frameNode, StrokeJoinStyle style);
+    static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
+    static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
+    static NG::Gradient GetGradientStyle(FrameNode* frameNode);
+    static void ResetGradient(FrameNode* frameNode);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar);
     static bool GetOrphanCharOptimization(FrameNode* frameNode);

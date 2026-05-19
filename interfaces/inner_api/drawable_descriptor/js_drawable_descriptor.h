@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,9 @@
 #define INTERFACES_INNER_API_DRAWABLE_DESCRIPTOR_NEW_JS_DRAWABLE_DESCRIPTOR_H
 
 #include "drawable_descriptor.h"
+#include "drawable_marcos.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-
-#include "base/marcos.h"
 
 namespace OHOS {
 namespace Ace {
@@ -53,6 +52,9 @@ private:
     static napi_value AnimatedConstructor(napi_env env, napi_callback_info info);
     static napi_value PixelMapConstructor(napi_env env, napi_callback_info info);
     static napi_value LayeredConstructor(napi_env env, napi_callback_info info);
+    static void ParseLayeredArgs(
+        napi_env env, size_t argc, napi_value argv[], LayeredDrawableDescriptor* layeredDrawable);
+    static void ParsePixelMapConstructorArg(napi_env env, void* drawable, napi_value arg);
     static void Destructor(napi_env env, void* nativeObject, void* finalize);
     static void NewDestructor(napi_env env, void* nativeObject, void* finalize);
 
@@ -63,6 +65,10 @@ private:
     static void LoadExecute(napi_env env, void* data);
     static void LoadComplete(napi_env env, napi_status status, void* data);
     static napi_value LoadSync(napi_env env, napi_callback_info info);
+
+    // release methods
+    static napi_value Release(napi_env env, napi_callback_info info);
+    static napi_value IsReleased(napi_env env, napi_callback_info info);
 
     // animated drawable descriptor methods
     static napi_value GetAnimationController(napi_env env, napi_callback_info info);
@@ -90,16 +96,10 @@ private:
     static std::vector<napi_property_descriptor> GetPixelMapDrawableDescriptor(napi_env env);
 
     static napi_value CreateDrawableDescriptorTransfer(napi_env env, napi_callback_info info);
-    static size_t DrawableGetDrawableTypeC(void* drawable);
-    static std::shared_ptr<OHOS::Media::PixelMap> DrawableGetPixelMapC(void* drawable);
-    static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetForegroundC(void* drawable);
-    static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetBackgroundC(void* drawable);
-    static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetMaskC(void* drawable);
-    static std::shared_ptr<OHOS::Media::PixelMap> PixelMapGetPixelMapC(void* drawable);
-    static napi_value CreatDrawable(napi_env env, void* native);
     static napi_value CreatLayeredDrawable(napi_env env, void* native);
     static napi_value CreatAnimatedDrawable(napi_env env, void* native);
     static napi_value CreatPixelMapDrawable(napi_env env, void* native);
+    static void TransferToNewDrawable(napi_env env, napi_value result, DrawableDescriptor* drawable);
 };
 } // namespace Napi
 } // namespace Ace

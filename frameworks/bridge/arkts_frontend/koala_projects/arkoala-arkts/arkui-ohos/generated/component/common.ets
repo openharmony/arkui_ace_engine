@@ -5715,9 +5715,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setShouldBuiltInRecognizerParallelWith(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setShouldRecognizerParallelWithAttribute(value: ShouldRecognizerParallelWithCallback): void {
+    setShouldRecognizerParallelWithAttribute(value: ShouldRecognizerParallelWithCallback | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         ArkUIGeneratedNativeModule._CommonMethod_setShouldRecognizerParallelWith(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -5847,6 +5853,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         SmartGestureShortcutOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._CommonMethod_setSmartGestureShortcut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setDoubleSidedAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDoubleSided(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
@@ -6852,7 +6870,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindSheet(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnVisibleAreaChangeAttribute(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): void {
+    setOnVisibleAreaChange0Attribute(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (ratios !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6872,7 +6890,37 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setOnVisibleAreaChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setOnVisibleAreaChange0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnVisibleAreaChange1Attribute(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined, measureFromViewport: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (ratios !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const ratiosTmpValue = ratios!
+            thisSerializer.writeInt32((ratiosTmpValue.length).toInt())
+            for (let ratiosTmpValueCounterI = 0; ratiosTmpValueCounterI < ratiosTmpValue.length; ratiosTmpValueCounterI++) {
+                const ratiosTmpValueTmpElement: double = ratiosTmpValue[ratiosTmpValueCounterI]
+                thisSerializer.writeFloat64(ratiosTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (event !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const eventTmpValue = event!
+            thisSerializer.holdAndWriteCallback(eventTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (measureFromViewport !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const measureFromViewportTmpValue = measureFromViewport!
+            thisSerializer.writeBoolean(measureFromViewportTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnVisibleAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnVisibleAreaApproximateChangeAttribute(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): void {
@@ -8373,6 +8421,7 @@ export interface StateStyles {
     focused?: CustomStyles;
     clicked?: CustomStyles;
     selected?: CustomStyles;
+    hovered?: CustomStyles;
 }
 export interface PopupMessageOptions {
     textColor?: ResourceColor;
@@ -8426,6 +8475,8 @@ export interface PopupCommonOptions {
     borderLinearGradient?: PopupBorderLinearGradient;
     colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
     onDidDisappear?: VoidCallback;
     onWillDisappear?: VoidCallback;
     onWillAppear?: VoidCallback;
@@ -8481,6 +8532,8 @@ export interface PopupOptions {
     borderLinearGradient?: PopupBorderLinearGradient;
     colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
     onWillDisappear?: VoidCallback;
     onDidAppear?: VoidCallback;
     onWillAppear?: VoidCallback;
@@ -8518,6 +8571,8 @@ export interface CustomPopupOptions {
     borderLinearGradient?: PopupBorderLinearGradient;
     colorMode?: AnchoredColorMode;
     systemMaterial?: SystemUiMaterial;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
     onDidAppear?: VoidCallback;
     onWillDisappear?: VoidCallback;
     onDidDisappear?: VoidCallback;
@@ -10651,7 +10706,7 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method shouldBuiltInRecognizerParallelWith')
     }
-    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
+    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
             (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.shouldRecognizerParallelWith(value));
@@ -10794,6 +10849,18 @@ export interface CommonMethod {
             }
         }
         throw new Error('Unimplemented method smartGestureShortcut')
+    }
+    doubleSided(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.doubleSided(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method doubleSided can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method doubleSided')
     }
     customProperty(name: string, value: CustomProperty): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
@@ -11396,6 +11463,16 @@ export interface CommonMethod {
         throw new Error('Unimplemented method debugLine')
     }
     applyAttributesFinish(): void {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.applyAttributesFinish());
+            return;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'applyAttributesFinish' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method applyAttributesFinish') 
     }
 }
 export type CommonAttribute = CommonMethod;
@@ -11516,88 +11593,382 @@ export enum ContentClipMode {
 }
 export interface ScrollableCommonMethod extends CommonMethod {
     scrollBar(value: BarState | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBar(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBar' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBar')
     }
     scrollBarColor(value: arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarColor(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarColor' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBarColor')
     }
     scrollBarWidth(value: double | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarWidth(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarWidth' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBarWidth')
     }
     scrollBarWidth(value: global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarWidth(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarWidth' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBarWidth')
     }
     scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarMargin(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarMargin' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method scrollBarMargin')
     }
     autoAdjustScrollBarMargin(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).autoAdjustScrollBarMargin(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'autoAdjustScrollBarMargin' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method autoAdjustScrollBarMargin')
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).nestedScroll(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'nestedScroll' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method nestedScroll')
     }
     enableScrollInteraction(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).enableScrollInteraction(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'enableScrollInteraction' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method enableScrollInteraction')
     }
     friction(value: double | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).friction(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'friction' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method friction')
     }
     contentStartOffset(value: double | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).contentStartOffset(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'contentStartOffset' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method contentStartOffset')
     }
     contentEndOffset(value: double | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).contentEndOffset(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'contentEndOffset' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method contentEndOffset')
     }
     onWillStartDragging(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onWillStartDragging(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onWillStartDragging' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onWillStartDragging')
     }
     onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onWillStopDragging(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onWillStopDragging' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onWillStopDragging')
     }
     onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onDidStopDragging(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onDidStopDragging' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onDidStopDragging')
     }
     onWillStartFling(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onWillStartFling(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onWillStartFling' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onWillStartFling')
     }
     onDidStopFling(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onDidStopFling(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onDidStopFling' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onDidStopFling')
     }
     enableScrollWithMouse(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).enableScrollWithMouse(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'enableScrollWithMouse' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method enableScrollWithMouse')
     }
     onReachStart(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onReachStart(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onReachStart' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onReachStart')
     }
     onReachEnd(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onReachEnd(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onReachEnd' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onReachEnd')
     }
     onScrollStart(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onScrollStart(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onScrollStart' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onScrollStart')
     }
     onScrollStop(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).onScrollStop(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'onScrollStop' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method onScrollStop')
     }
     flingSpeedLimit(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).flingSpeedLimit(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'flingSpeedLimit' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method flingSpeedLimit')
     }
     clipContent(value: ContentClipMode | RectShape | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).clipContent(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'clipContent' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method clipContent')
     }
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).digitalCrownSensitivity(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'digitalCrownSensitivity' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method digitalCrownSensitivity')
     }
     backToTop(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).backToTop(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'backToTop' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method backToTop')
     }
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).edgeEffect(edgeEffect, options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'edgeEffect' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method edgeEffect')
     }
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).fadingEdge(enabled, options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'fadingEdge' can only be set when creating an extendable component.")
+            }
+        }
         throw new Error('Unimplemented method fadingEdge')
-    }
-    attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export type OnWillScrollCallback = (scrollOffset: double, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult | undefined;
@@ -11626,6 +11997,7 @@ export interface EditModeOptions {
     enableGatherSelectedItemsAnimation?: boolean;
     onGetPreviewBadge?: OnGetPreviewBadgeCallback;
     useDefaultMultiSelectStyle?: boolean;
+    enableTwoFingerMultiSelect?: boolean;
 }
 export interface BackgroundBrightnessOptions {
     rate: double;
@@ -11661,6 +12033,7 @@ export type AccessibilityTransparentCallback = (event: TouchEvent) => void;
 export interface VisibleAreaEventOptions {
     ratios: Array<double>;
     expectedUpdateInterval?: int32;
+    measureFromViewport?: boolean;
 }
 export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: double) => void;
 export interface SelectionOptions {
@@ -11702,6 +12075,16 @@ export interface SmartGestureShortcutOptions {
 }
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<global_resource_Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>>;
+export enum EdgeLightMode {
+    EDGELIGHT_AUTO = 0,
+    EDGELIGHT_ENABLED = 1,
+    EDGELIGHT_DISABLED = 2
+}
+export enum DistortionMode {
+    DISTORTION_AUTO = 0,
+    DISTORTION_ENABLED = 1,
+    DISTORTION_DISABLED = 2
+}
 export interface InputEventInterceptResult {
     action: InputEventInterceptAction;
 }
@@ -12528,8 +12911,8 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setShouldBuiltInRecognizerParallelWithAttribute(value_casted)
         return this
     }
-    public shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
-        const value_casted = value as (ShouldRecognizerParallelWithCallback)
+    public shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback | undefined): this {
+        const value_casted = value as (ShouldRecognizerParallelWithCallback | undefined)
         this.getPeer()?.setShouldRecognizerParallelWithAttribute(value_casted)
         return this
     }
@@ -12586,6 +12969,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public smartGestureShortcut(value: SmartGestureShortcutOptions): this {
         const value_casted = value as (SmartGestureShortcutOptions)
         this.getPeer()?.setSmartGestureShortcutAttribute(value_casted)
+        return this
+    }
+    public doubleSided(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setDoubleSidedAttribute(value_casted)
         return this
     }
     public customProperty(name: string, value: CustomProperty): this {
@@ -12848,7 +13236,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         const ratios_casted = ratios as (Array<double> | undefined)
         const event_casted = event as (VisibleAreaChangeCallback | undefined)
-        this.getPeer()?.setOnVisibleAreaChangeAttribute(ratios_casted, event_casted)
+        this.getPeer()?.setOnVisibleAreaChange0Attribute(ratios_casted, event_casted)
+        return this
+    }
+    public onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined, measureFromViewport: boolean | undefined): this {
+        const ratios_casted = ratios as (Array<double> | undefined)
+        const event_casted = event as (VisibleAreaChangeCallback | undefined)
+        const measureFromViewport_casted = measureFromViewport as (boolean | undefined)
+        this.getPeer()?.setOnVisibleAreaChange1Attribute(ratios_casted, event_casted, measureFromViewport_casted)
         return this
     }
     public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
@@ -14495,6 +14890,14 @@ export class EditModeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEnableTwoFingerMultiSelect = value.enableTwoFingerMultiSelect
+        if (valueHolderForEnableTwoFingerMultiSelect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableTwoFingerMultiSelectTmpValue = valueHolderForEnableTwoFingerMultiSelect!
+            valueSerializer.writeBoolean(valueHolderForEnableTwoFingerMultiSelectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): EditModeOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -14534,7 +14937,13 @@ export class EditModeOptions_serializer {
             useDefaultMultiSelectStyleTmpBuf = valueDeserializer.readBoolean()
         }
         const useDefaultMultiSelectStyleTmpResult: boolean | undefined = useDefaultMultiSelectStyleTmpBuf
-        let value: EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult, onGetPreviewBadge: onGetPreviewBadgeTmpResult, useDefaultMultiSelectStyle: useDefaultMultiSelectStyleTmpResult} as EditModeOptions)
+        const enableTwoFingerMultiSelectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableTwoFingerMultiSelectTmpBuf: boolean | undefined = undefined
+        if ((enableTwoFingerMultiSelectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableTwoFingerMultiSelectTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableTwoFingerMultiSelectTmpResult: boolean | undefined = enableTwoFingerMultiSelectTmpBuf
+        let value: EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult, onGetPreviewBadge: onGetPreviewBadgeTmpResult, useDefaultMultiSelectStyle: useDefaultMultiSelectStyleTmpResult, enableTwoFingerMultiSelect: enableTwoFingerMultiSelectTmpResult} as EditModeOptions)
         return value
     }
 }
@@ -16270,6 +16679,14 @@ export class VisibleAreaEventOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForMeasureFromViewport = value.measureFromViewport
+        if (valueHolderForMeasureFromViewport !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMeasureFromViewportTmpValue = valueHolderForMeasureFromViewport!
+            valueSerializer.writeBoolean(valueHolderForMeasureFromViewportTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): VisibleAreaEventOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -16284,7 +16701,13 @@ export class VisibleAreaEventOptions_serializer {
             expectedUpdateIntervalTmpBuf = valueDeserializer.readInt32()
         }
         const expectedUpdateIntervalTmpResult: int32 | undefined = expectedUpdateIntervalTmpBuf
-        let value: VisibleAreaEventOptions = ({ratios: ratiosTmpResult, expectedUpdateInterval: expectedUpdateIntervalTmpResult} as VisibleAreaEventOptions)
+        const measureFromViewportTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let measureFromViewportTmpBuf: boolean | undefined = undefined
+        if ((measureFromViewportTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            measureFromViewportTmpBuf = valueDeserializer.readBoolean()
+        }
+        const measureFromViewportTmpResult: boolean | undefined = measureFromViewportTmpBuf
+        let value: VisibleAreaEventOptions = ({ratios: ratiosTmpResult, expectedUpdateInterval: expectedUpdateIntervalTmpResult, measureFromViewport: measureFromViewportTmpResult} as VisibleAreaEventOptions)
         return value
     }
 }
@@ -21424,6 +21847,22 @@ export class CustomPopupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForBackgroundBlurStyleOptions = value.backgroundBlurStyleOptions
+        if (valueHolderForBackgroundBlurStyleOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleOptionsTmpValue = valueHolderForBackgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, valueHolderForBackgroundBlurStyleOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBackgroundEffect = value.backgroundEffect
+        if (valueHolderForBackgroundEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundEffectTmpValue = valueHolderForBackgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, valueHolderForBackgroundEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForOnDidAppear = value.onDidAppear
         if (valueHolderForOnDidAppear !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -21809,6 +22248,18 @@ export class CustomPopupOptions_serializer {
             systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
         }
         const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        const backgroundBlurStyleOptionsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let backgroundBlurStyleOptionsTmpBuf: BackgroundBlurStyleOptions | undefined = undefined
+        if ((backgroundBlurStyleOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleOptionsTmpBuf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundBlurStyleOptionsTmpResult: BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptionsTmpBuf
+        const backgroundEffectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let backgroundEffectTmpBuf: BackgroundEffectOptions | undefined = undefined
+        if ((backgroundEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundEffectTmpResult: BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
         const onDidAppearTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let onDidAppearTmpBuf: VoidCallback | undefined = undefined
         if ((onDidAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21885,7 +22336,7 @@ export class CustomPopupOptions_serializer {
             onWillAppearTmpBuf = onWillAppearTmpBufOptClosure
         }
         const onWillAppearTmpResult: VoidCallback | undefined = onWillAppearTmpBuf
-        let value: CustomPopupOptions = ({builder: builderTmpResult, placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onDidAppear: onDidAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult} as CustomPopupOptions)
+        let value: CustomPopupOptions = ({builder: builderTmpResult, placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult} as CustomPopupOptions)
         return value
     }
 }
@@ -23686,6 +24137,22 @@ export class PopupCommonOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForBackgroundBlurStyleOptions = value.backgroundBlurStyleOptions
+        if (valueHolderForBackgroundBlurStyleOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleOptionsTmpValue = valueHolderForBackgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, valueHolderForBackgroundBlurStyleOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBackgroundEffect = value.backgroundEffect
+        if (valueHolderForBackgroundEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundEffectTmpValue = valueHolderForBackgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, valueHolderForBackgroundEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForOnDidDisappear = value.onDidDisappear
         if (valueHolderForOnDidDisappear !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -24051,6 +24518,18 @@ export class PopupCommonOptions_serializer {
             systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
         }
         const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        const backgroundBlurStyleOptionsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let backgroundBlurStyleOptionsTmpBuf: BackgroundBlurStyleOptions | undefined = undefined
+        if ((backgroundBlurStyleOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleOptionsTmpBuf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundBlurStyleOptionsTmpResult: BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptionsTmpBuf
+        const backgroundEffectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let backgroundEffectTmpBuf: BackgroundEffectOptions | undefined = undefined
+        if ((backgroundEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundEffectTmpResult: BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
         const onDidDisappearTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let onDidDisappearTmpBuf: VoidCallback | undefined = undefined
         if ((onDidDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -24127,7 +24606,7 @@ export class PopupCommonOptions_serializer {
             onDidAppearTmpBuf = onDidAppearTmpBufOptClosure
         }
         const onDidAppearTmpResult: VoidCallback | undefined = onDidAppearTmpBuf
-        let value: PopupCommonOptions = ({placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillDisappear: onWillDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onDidAppear: onDidAppearTmpResult} as PopupCommonOptions)
+        let value: PopupCommonOptions = ({placement: placementTmpResult, popupColor: popupColorTmpResult, enableArrow: enableArrowTmpResult, autoCancel: autoCancelTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, targetSpace: targetSpaceTmpResult, offset: offsetTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, focusable: focusableTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillDisappear: onWillDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onDidAppear: onDidAppearTmpResult} as PopupCommonOptions)
         return value
     }
 }
@@ -26031,6 +26510,22 @@ export class PopupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForBackgroundBlurStyleOptions = value.backgroundBlurStyleOptions
+        if (valueHolderForBackgroundBlurStyleOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleOptionsTmpValue = valueHolderForBackgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, valueHolderForBackgroundBlurStyleOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBackgroundEffect = value.backgroundEffect
+        if (valueHolderForBackgroundEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundEffectTmpValue = valueHolderForBackgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, valueHolderForBackgroundEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForOnWillDisappear = value.onWillDisappear
         if (valueHolderForOnWillDisappear !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -26415,6 +26910,18 @@ export class PopupOptions_serializer {
             systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
         }
         const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        const backgroundBlurStyleOptionsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let backgroundBlurStyleOptionsTmpBuf: BackgroundBlurStyleOptions | undefined = undefined
+        if ((backgroundBlurStyleOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleOptionsTmpBuf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundBlurStyleOptionsTmpResult: BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptionsTmpBuf
+        const backgroundEffectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let backgroundEffectTmpBuf: BackgroundEffectOptions | undefined = undefined
+        if ((backgroundEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundEffectTmpResult: BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
         const onWillDisappearTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let onWillDisappearTmpBuf: VoidCallback | undefined = undefined
         if ((onWillDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -26491,7 +26998,7 @@ export class PopupOptions_serializer {
             onDidDisappearTmpBuf = onDidDisappearTmpBufOptClosure
         }
         const onDidDisappearTmpResult: VoidCallback | undefined = onDidDisappearTmpBuf
-        let value: PopupOptions = ({message: messageTmpResult, placement: placementTmpResult, primaryButton: primaryButtonTmpResult, secondaryButton: secondaryButtonTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, messageOptions: messageOptionsTmpResult, targetSpace: targetSpaceTmpResult, enableArrow: enableArrowTmpResult, offset: offsetTmpResult, popupColor: popupColorTmpResult, autoCancel: autoCancelTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidAppear: onDidAppearTmpResult, onWillAppear: onWillAppearTmpResult, onDidDisappear: onDidDisappearTmpResult} as PopupOptions)
+        let value: PopupOptions = ({message: messageTmpResult, placement: placementTmpResult, primaryButton: primaryButtonTmpResult, secondaryButton: secondaryButtonTmpResult, onStateChange: onStateChangeTmpResult, arrowOffset: arrowOffsetTmpResult, showInSubWindow: showInSubWindowTmpResult, mask: maskTmpResult, messageOptions: messageOptionsTmpResult, targetSpace: targetSpaceTmpResult, enableArrow: enableArrowTmpResult, offset: offsetTmpResult, popupColor: popupColorTmpResult, autoCancel: autoCancelTmpResult, width: widthTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, radius: radiusTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, transition: transitionTmpResult, onWillDismiss: onWillDismissTmpResult, enableHoverMode: enableHoverModeTmpResult, followTransformOfTarget: followTransformOfTargetTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, avoidTarget: avoidTargetTmpResult, outlineWidth: outlineWidthTmpResult, borderWidth: borderWidthTmpResult, outlineLinearGradient: outlineLinearGradientTmpResult, borderLinearGradient: borderLinearGradientTmpResult, colorMode: colorModeTmpResult, systemMaterial: systemMaterialTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onWillDisappear: onWillDisappearTmpResult, onDidAppear: onDidAppearTmpResult, onWillAppear: onWillAppearTmpResult, onDidDisappear: onDidDisappearTmpResult} as PopupOptions)
         return value
     }
 }

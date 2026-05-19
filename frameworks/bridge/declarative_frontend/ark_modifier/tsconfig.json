@@ -90,7 +90,9 @@
         "src/toggle_modifier.ts",
         "src/union_effect_container_modifier.ts",
         "src/video_modifier.ts",
-        "src/water_flow_modifier.ts"
+        "src/water_flow_modifier.ts",
+        "src/lazy_column_layout_modifier.ts",
+        "src/lazy_water_flow_layout_modifier.ts"
     ],
     "compilerOptions": {
         "module": "none",

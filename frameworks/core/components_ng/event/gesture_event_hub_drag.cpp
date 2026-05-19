@@ -28,6 +28,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
@@ -44,6 +45,7 @@
 #include "core/pipeline/base/element_register.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
+#include "image_source.h"
 #endif
 
 #include "core/common/udmf/udmf_client.h"
@@ -106,7 +108,6 @@ constexpr int32_t HALF_PIXELMAP = 2;
 constexpr int32_t PASS_THROUGH_EVENT_ID = 100000;
 constexpr int32_t DRAG_START_SUCCESS_CODE = 0;
 constexpr int32_t INVALID_DRAG_RET = -1;
-constexpr int32_t INVALID_MATERIAL_ID = -1;
 constexpr float UNIT_SCALE = 1.0f;
 } // namespace
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
@@ -1212,15 +1213,21 @@ DragDataCore GestureEventHub::CreateDragData(const DragStartContext& ctx, const 
     ShadowInfoCore shadowInfo { ctx.pixelMapDuplicated, ctx.pixelMapOffset.GetX(), ctx.pixelMapOffset.GetY() };
     const int32_t pointerId =
         ctx.info.GetPassThrough() ? ctx.info.GetPointerId() % PASS_THROUGH_EVENT_ID : ctx.info.GetPointerId();
-    const int32_t materialId = ctx.frameNode
-        ? DragDropFuncWrapper::ParseUiMaterial(ctx.frameNode->GetDragPreviewOption())
-        : INVALID_MATERIAL_ID;
+    DragDropFuncWrapper::DragPreviewMaterialInfo materialInfo;
+    if (ctx.frameNode) {
+        materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(
+            ctx.frameNode->GetDragPreviewOption(), ctx.frameNode);
+    }
+    const int32_t materialId = materialInfo.materialId;
+    const bool isSetMaterialFilter = (materialInfo.materialFilter != nullptr);
+    auto materialFilter = materialInfo.materialFilter;
+
     DragDataCore dragData { { shadowInfo }, {}, ctx.udKey, ctx.extraInfoLimited, extraInfoJson,
         static_cast<int32_t>(ctx.info.GetSourceDevice()), ctx.recordsSize, pointerId, screenX, screenY,
         ctx.info.GetTargetDisplayId(), windowId, true, false, ctx.dragSummaryInfo.summary,
         ctx.event->IsUseDataLoadParams(), ctx.dragSummaryInfo.detailedSummary, ctx.dragSummaryInfo.summaryFormat,
         ctx.dragSummaryInfo.version, ctx.dragSummaryInfo.totalSize, ctx.dragSummaryInfo.tag, materialId,
-        ctx.event->GetDragAnimationTypeValue() };
+        ctx.event->GetDragAnimationTypeValue(), isSetMaterialFilter, materialFilter };
     ctx.dragDropManager->SetDragAnimationType(ctx.event->GetDragAnimationType());
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && ctx.info.GetSourceTool() == SourceTool::MOUSE &&
         ctx.info.GetSourceDevice() == SourceType::TOUCH) {
@@ -1391,6 +1398,11 @@ void GestureEventHub::ShowMouseDragWindow(DragStartContext& ctx)
 void GestureEventHub::UpdateDragWindowVisibility(DragStartContext& ctx)
 {
     ShowSceneBoardTouchDragWindow(ctx);
+    // When default animation is disabled (e.g., FOLLOW_HAND_MORPH), transfer to framework immediately
+    if (ctx.preparedInfo.disableArkuiAnimation) {
+        TransferTouchDragWindowToFramework(ctx);
+        return;
+    }
     if (ctx.info.GetInputEventType() != InputEventType::MOUSE_BUTTON && ctx.needChangeFwkForLeaveWindow) {
         TransferTouchDragWindowToFramework(ctx);
         return;
@@ -1489,7 +1501,7 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::u
     float scale, const PreparedInfoForDrag& dragInfoData)
 {
     CHECK_NULL_VOID(arkExtraInfoJson);
-    arkExtraInfoJson->Put("enable_animation", !dragInfoData.disableArkuiAnimation);
+    arkExtraInfoJson->Put("enable_animation", dragInfoData.disableArkuiAnimation);
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);

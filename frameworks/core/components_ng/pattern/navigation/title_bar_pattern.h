@@ -253,6 +253,17 @@ public:
     void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
     void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
 
+    static void SetTextColor(const RefPtr<FrameNode>& textNode, const Color& color);
+    static void SetTextShadow(const RefPtr<FrameNode>& textNode, const std::vector<Shadow>& shadows);
+
+    static void SetBackButtonIconColor(const RefPtr<TitleBarNode>& titleBarNode, const Color& iconColor);
+
+    static void SetMenuItemsStyle(const RefPtr<TitleBarNode>& titleBarNode,
+        const Color& iconColor, const Color& textColor);
+
+    static void SetDividerStyle(const RefPtr<FrameNode>& dividerNode,
+        const NavigationTitleBarDividerStyle& dividerStyle);
+
     bool IsFontSizeSettedByDeveloper() const
     {
         return isFontSizeSettedByDeveloper_;
@@ -301,6 +312,86 @@ public:
     }
 
     void InitMenuDragAndLongPressEvent(const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
+
+    void SetScrollScale(double scrollScale)
+    {
+        scrollScale_ = scrollScale;
+    }
+
+    double GetScrollScale() const
+    {
+        return scrollScale_;
+    }
+
+    void SetParseStartOffset(const std::optional<Dimension>& parseStartOffset)
+    {
+        parseStartOffset_ = parseStartOffset;
+    }
+
+    const std::optional<Dimension>& GetParseStartOffset() const
+    {
+        return parseStartOffset_;
+    }
+
+    void SetParseEndOffset(const std::optional<Dimension>& parseEndOffset)
+    {
+        parseEndOffset_ = parseEndOffset;
+    }
+
+    const std::optional<Dimension>& GetParseEndOffset() const
+    {
+        return parseEndOffset_;
+    }
+
+    void SetIsTitleBarStyleStartUpdate(bool isTitleBarStyleStartUpdate)
+    {
+        isTitleBarStyleStartUpdate_ = isTitleBarStyleStartUpdate;
+    }
+
+    bool IsTitleBarStyleStartUpdate()
+    {
+        return isTitleBarStyleStartUpdate_;
+    }
+
+    void SetIsTitleBarStyleEndUpdate(bool isTitleBarStyleEndUpdate)
+    {
+        isTitleBarStyleEndUpdate_ = isTitleBarStyleEndUpdate;
+    }
+
+    bool IsTitleBarStyleEndUpdate()
+    {
+        return isTitleBarStyleEndUpdate_;
+    }
+
+    void SetOriginalTitleBarBgStyle(const NavigationTitleBarStyle& titleBarBgStyle)
+    {
+        originalBgStyle_ = titleBarBgStyle;
+    }
+
+    const NavigationTitleBarStyle& GetOriginalTitleBarBgStyle() const
+    {
+        return originalBgStyle_;
+    }
+
+    void SetScrollEffectTitleBarBgStyle(const NavigationTitleBarStyle& titleBarBgStyle)
+    {
+        scrollEffectBgStyle_ = titleBarBgStyle;
+    }
+
+    const NavigationTitleBarStyle& GetScrollEffectTitleBarBgStyle() const
+    {
+        return scrollEffectBgStyle_;
+    }
+
+    void SetCurrentTitleBarBgStyle(const NavigationTitleBarStyle& titleBarBgStyle)
+    {
+        currentBgStyle_ = titleBarBgStyle;
+    }
+
+    const NavigationTitleBarStyle& GetCurrentTitleBarBgStyle() const
+    {
+        return currentBgStyle_;
+    }
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -443,6 +534,16 @@ private:
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<FrameNode> dialogNode_;
+
+    double scrollScale_ = 0.0f;
+    std::optional<Dimension> parseStartOffset_;
+    std::optional<Dimension> parseEndOffset_;
+    bool isTitleBarStyleStartUpdate_ = false;
+    bool isTitleBarStyleEndUpdate_ = false;
+    
+    NavigationTitleBarStyle originalBgStyle_;
+    NavigationTitleBarStyle scrollEffectBgStyle_;
+    NavigationTitleBarStyle currentBgStyle_;
 };
 
 } // namespace OHOS::Ace::NG

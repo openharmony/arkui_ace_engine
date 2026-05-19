@@ -87,6 +87,8 @@ public:
     }
     ACE_FORCE_EXPORT void FlushReload();
 
+    void ResetNode() override;
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         /* no fixed attr below, just return */
@@ -230,6 +232,19 @@ public:
         }
     }
 
+    void SetOnSystemEnvUpdateFunc(std::function<void(const std::string&)>&& onSystemEnvUpdate)
+    {
+        onSystemEnvUpdateFunc_ = std::move(onSystemEnvUpdate);
+    }
+
+    void FireOnSystemEnvUpdate(const std::string& key)
+    {
+        auto callback = onSystemEnvUpdateFunc_;
+        if (callback) {
+            callback(key);
+        }
+    }
+
     bool FireOnCleanup();
 private:
     // for DFX
@@ -255,6 +270,7 @@ private:
     std::function<void()> pageTransitionFunc_ = nullptr;
     std::function<void()> onCleanupFunc_ = nullptr;
     std::function<void(const std::string&)> onCustomEnvUpdateFunc_ = nullptr;
+    std::function<void(const std::string&)> onSystemEnvUpdateFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

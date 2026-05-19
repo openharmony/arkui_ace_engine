@@ -25,6 +25,8 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline/container_window_manager.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -137,6 +139,9 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
             borderColor.SetColor(theme->GetEntryBorderColor());
             buttonNode->GetRenderContext()->UpdateBorderColor(borderColor);
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             buttonNode->MarkModifyDone();
 
             auto image = buttonNode->GetChildren().front();
@@ -1421,6 +1426,8 @@ void CalendarPickerPattern::FlushTextStyle()
             SetSelectedType(selected_);
         }
         if (layoutProperty->HasFontSize()) {
+            auto textNode = textLayoutProperty->GetHost();
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(layoutProperty->GetFontSize().value(), LpxAttribute::LPX_FONT_SIZE, textNode);
             textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
         }
         if (layoutProperty->HasWeight()) {

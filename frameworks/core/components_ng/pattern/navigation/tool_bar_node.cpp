@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
 NavToolbarNode::NavToolbarNode(const std::string& tag, int32_t nodeId)

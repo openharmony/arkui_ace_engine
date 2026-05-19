@@ -188,18 +188,15 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
             nodeModifiers->getTextClockModifier()->resetFontColor(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
-        if (!Framework::JSTextClockTheme::ObtainTextColor(color)) {
-            auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-            CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-            auto theme = frameNode->GetTheme<TextTheme>(true);
-            color = theme ? theme->GetTextClockFontColor() : Color::BLACK;
-            if (SystemProperties::ConfigChangePerform()) {
-                nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
-                nodeModifiers->getTextClockModifier()->setTextColorByUser(nativeNode, false);
-                return panda::JSValueRef::Undefined(vm);
-            }
-        }
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        auto theme = frameNode->GetTheme<TextTheme>(true);
+        color = theme ? theme->GetTextClockFontColor() : Color::BLACK;
         nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
+        if (SystemProperties::ConfigChangePerform()) {
+            nodeModifiers->getTextClockModifier()->setTextColorByUser(nativeNode, false);
+            return panda::JSValueRef::Undefined(vm);
+        }
     } else {
         if (isJsView) {
             nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
@@ -461,7 +458,7 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     std::vector<RefPtr<ResourceObject>> offsetXResObjArray;
     std::vector<RefPtr<ResourceObject>> offsetYResObjArray;
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_1),
-        radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResObjArray);
+        radiusArray.get(), length, ArkTSUtils::parseTextShadowRadiusWithResObj, radiusResObjArray);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, runtimeCallInfo->GetCallArgRef(NUM_3),

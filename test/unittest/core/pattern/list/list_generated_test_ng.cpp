@@ -22,6 +22,8 @@
 
 #include "core/components/button/button_theme.h"
 #include "core/components/list/list_theme.h"
+#include "core/components_ng/event/gesture_info.h"
+#include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
@@ -31,6 +33,78 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t ITEM_COUNT = 10;
 constexpr int32_t TEST_NODE_ID = 2;
+
+std::vector<RefPtr<FrameNode>> GetFlatListItems(const RefPtr<FrameNode>& listNode)
+{
+    std::vector<RefPtr<FrameNode>> listItems;
+    CHECK_NULL_RETURN(listNode, listItems);
+    auto& children = listNode->GetChildren();
+    for (const auto& child : children) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (!childFrameNode) {
+            continue;
+        }
+        if (childFrameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+            auto groupChildren = child->GetChildren();
+            for (const auto& item : groupChildren) {
+                auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+                if (itemFrameNode && itemFrameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+                    listItems.emplace_back(itemFrameNode);
+                }
+            }
+            continue;
+        }
+        if (childFrameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+            listItems.emplace_back(childFrameNode);
+        }
+    }
+    return listItems;
+}
+
+PointF ConvertItemCenterToListLocal(const RefPtr<FrameNode>& listNode, const RefPtr<FrameNode>& itemNode)
+{
+    CHECK_NULL_RETURN(listNode, PointF());
+    CHECK_NULL_RETURN(itemNode, PointF());
+    auto listOffset = listNode->GetOffsetRelativeToWindow();
+    auto itemOffset = itemNode->GetOffsetRelativeToWindow();
+    auto itemRect = itemNode->GetGeometryNode()->GetFrameRect();
+    return PointF(itemOffset.GetX() - listOffset.GetX() + itemRect.Width() / 2.0f,
+        itemOffset.GetY() - listOffset.GetY() + itemRect.Height() / 2.0f);
+}
+
+GestureJudgeFunc GetGestureJudgeCallback(const RefPtr<ListPattern>& pattern)
+{
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    return gestureHub->gestureJudgeNativeFunc_;
+}
+
+RefPtr<GestureInfo> CreateGestureInfo(GestureTypeName type, InputEventType inputEventType)
+{
+    auto info = AceType::MakeRefPtr<GestureInfo>(type);
+    info->SetRecognizerType(type);
+    info->SetInputEventType(inputEventType);
+    return info;
+}
+
+std::shared_ptr<PanGestureEvent> CreatePanGestureEvent(
+    int32_t fingerCount, InputEventType inputEventType, const Offset& globalLocation = Offset())
+{
+    auto event = std::make_shared<PanGestureEvent>();
+    event->SetRawInputEventType(inputEventType);
+    std::list<FingerInfo> fingers;
+    for (int32_t i = 0; i < fingerCount; i++) {
+        FingerInfo finger;
+        finger.fingerId_ = i;
+        finger.globalLocation_ = globalLocation;
+        fingers.push_back(finger);
+    }
+    event->SetFingerList(fingers);
+    return event;
+}
 } // namespace
 
 class ListGeneratedTestNg : public ListTestNg {
@@ -1657,5 +1731,345 @@ HWTEST_F(ListGeneratedTestNg, ListItemGroupModelSetFooterStyle001, TestSize.Leve
     ListItemGroupModelNG::SetFooterStyle(listNode, V2::ListItemGroupHeaderFooterStyle::FLOATING);
     EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::FLOATING);
     CreateDone();
+}
+
+/**
+ * @tc.name: ListEnableEditModeModifier001
+ * @tc.desc: Test List enableEditMode modifier updates pattern state and swipe-select pan event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEnableEditModeModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with items.
+     * @tc.expected: List enableEditMode is disabled by default.
+     */
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+    auto frameNode = AceType::RawPtr(frameNode_);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(pattern_->GetEnableEditMode());
+    EXPECT_FALSE(ListModelNG::GetEnableEditMode(frameNode));
+    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
+
+    /**
+     * @tc.steps: step2. Enable edit mode through static ListModelNG interface.
+     * @tc.expected: Pattern state changes, change event fires once, and swipe-select pan event is registered.
+     */
+    int32_t callbackCount = 0;
+    bool lastValue = false;
+    ListModelNG::SetEnableEditModeChangeEvent(frameNode, [&callbackCount, &lastValue](bool enableEditMode) {
+        ++callbackCount;
+        lastValue = enableEditMode;
+    });
+    ListModelNG::SetEnableEditMode(frameNode, true);
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_TRUE(ListModelNG::GetEnableEditMode(frameNode));
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_TRUE(lastValue);
+    pattern_->OnModifyDone();
+    EXPECT_NE(pattern_->swipeSelectPanEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set the same value and then disable edit mode.
+     * @tc.expected: Same value does not fire change event; disabling unregisters swipe-select pan event.
+     */
+    ListModelNG::SetEnableEditMode(frameNode, true);
+    EXPECT_EQ(callbackCount, 1);
+    ListModelNG::SetEnableEditMode(frameNode, false);
+    EXPECT_FALSE(pattern_->GetEnableEditMode());
+    EXPECT_FALSE(ListModelNG::GetEnableEditMode(frameNode));
+    EXPECT_EQ(callbackCount, 2);
+    EXPECT_FALSE(lastValue);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ListSwipeSelectGetItemAtPosition001
+ * @tc.desc: Test swipe multi-select can still resolve item index outside edit-mode hot zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectGetItemAtPosition001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    const PointF point(WIDTH / 2.0f, ITEM_MAIN_SIZE / 2.0f);
+    EXPECT_FALSE(pattern_->IsInEditModeHotZone(point));
+    EXPECT_EQ(pattern_->GetItemAtPosition(point.GetX(), point.GetY()), 0);
+}
+
+/**
+ * @tc.name: ListSwipeSelectHotZoneSingleLane001
+ * @tc.desc: Test swipe multi-select hot zone detection for single-lane list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectHotZoneSingleLane001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    model.SetLanes(1);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    FlushUITasks();
+    const PointF hotZonePoint(WIDTH - 1.0f, ITEM_MAIN_SIZE / 2.0f);
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_TRUE(pattern_->IsInEditModeHotZone(hotZonePoint));
+
+    auto stateKey = pattern_->GetSwipeSelectStateKeyAtPosition(hotZonePoint.GetX(), hotZonePoint.GetY());
+    EXPECT_EQ(stateKey.index, 0);
+    EXPECT_EQ(stateKey.indexInGroup, -1);
+}
+
+/**
+ * @tc.name: ListSwipeSelectTwoFingerEnableCondition001
+ * @tc.desc: Test List two-finger swipe select is enabled only when binding or change event exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectTwoFingerEnableCondition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with edit mode disabled and finger multi-select enabled.
+     * @tc.expected: Without binding or onEditModeChange event, two-finger swipe select is disabled.
+     */
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = false;
+    EXPECT_FALSE(pattern_->ShouldEnableTwoFingerSelect());
+
+    /**
+     * @tc.steps: step2. Register onEditModeChange event.
+     * @tc.expected: Two-finger swipe select is enabled.
+     */
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    EXPECT_TRUE(pattern_->ShouldEnableTwoFingerSelect());
+
+    /**
+     * @tc.steps: step3. Disable enableFingerMultiSelect and then enable edit mode.
+     * @tc.expected: Both conditions disable two-finger swipe select.
+     */
+    options.enableFingerMultiSelect = false;
+    pattern_->SetEditModeOptions(options);
+    EXPECT_FALSE(pattern_->ShouldEnableTwoFingerSelect());
+
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->enableEditMode_ = true;
+    EXPECT_FALSE(pattern_->ShouldEnableTwoFingerSelect());
+}
+
+/**
+ * @tc.name: ListSwipeSelectOnModifyDoneTwoFinger001
+ * @tc.desc: Test List registers swipe-select pan event when two-finger select condition is satisfied
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectOnModifyDoneTwoFinger001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with edit mode disabled but two-finger condition satisfied.
+     * @tc.expected: OnModifyDone registers swipe-select pan event.
+     */
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->SetEnableEditModeBindingEvent([](bool) {});
+    pattern_->enableEditMode_ = false;
+    pattern_->OnModifyDone();
+    EXPECT_NE(pattern_->swipeSelectPanEvent_, nullptr);
+
+    /**
+     * @tc.steps: step2. Remove binding and disable finger multi-select.
+     * @tc.expected: OnModifyDone unregisters swipe-select pan event when edit mode is also disabled.
+     */
+    pattern_->SetEnableEditModeBindingEvent(nullptr);
+    options.enableFingerMultiSelect = false;
+    pattern_->SetEditModeOptions(options);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ListSwipeSelectTwoFingerGestureJudge001
+ * @tc.desc: Test List box-select gesture judge accepts only two-finger touch when edit mode is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectTwoFingerGestureJudge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list and satisfy two-finger select condition.
+     * @tc.expected: Gesture judge callback is registered.
+     */
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    EditModeOptions options;
+    options.enableFingerMultiSelect = true;
+    pattern_->SetEditModeOptions(options);
+    pattern_->SetEnableEditModeChangeEvent([](bool) {});
+    pattern_->enableEditMode_ = false;
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::BOXSELECT, InputEventType::TOUCH_SCREEN);
+
+    /**
+     * @tc.steps: step2. Judge one-finger, two-finger and three-finger box-select gestures.
+     * @tc.expected: Only two-finger touch can continue and enter swipe multi-select.
+     */
+    EXPECT_EQ(callback(gestureInfo, CreatePanGestureEvent(1, InputEventType::TOUCH_SCREEN)),
+        GestureJudgeResult::REJECT);
+    EXPECT_EQ(callback(gestureInfo, CreatePanGestureEvent(2, InputEventType::TOUCH_SCREEN)),
+        GestureJudgeResult::CONTINUE);
+    EXPECT_EQ(callback(gestureInfo, CreatePanGestureEvent(3, InputEventType::TOUCH_SCREEN)),
+        GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: ListSwipeSelectPanGestureJudgeHotZone001
+ * @tc.desc: Test List normal pan gesture is rejected in edit-mode hot zone and continues outside hot zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectPanGestureJudgeHotZone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create single-lane list with edit mode enabled.
+     * @tc.expected: Gesture judge callback is registered.
+     */
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    model.SetLanes(1);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+    FlushUITasks();
+    pattern_->InitSwipeSelectEvent();
+
+    auto callback = GetGestureJudgeCallback(pattern_);
+    ASSERT_NE(callback, nullptr);
+    auto gestureInfo = CreateGestureInfo(GestureTypeName::PAN_GESTURE, InputEventType::TOUCH_SCREEN);
+
+    /**
+     * @tc.steps: step2. Judge normal pan gesture inside and outside edit-mode hot zone.
+     * @tc.expected: Hot-zone pan is rejected by scroll, non-hot-zone pan can continue as list scroll.
+     */
+    const Offset hotZonePoint(WIDTH - 1.0f, ITEM_MAIN_SIZE / 2.0f);
+    EXPECT_TRUE(pattern_->IsInEditModeHotZone(PointF(hotZonePoint.GetX(), hotZonePoint.GetY())));
+    EXPECT_EQ(callback(gestureInfo, CreatePanGestureEvent(1, InputEventType::TOUCH_SCREEN, hotZonePoint)),
+        GestureJudgeResult::REJECT);
+
+    const Offset normalPoint(WIDTH / 2.0f, ITEM_MAIN_SIZE / 2.0f);
+    EXPECT_FALSE(pattern_->IsInEditModeHotZone(PointF(normalPoint.GetX(), normalPoint.GetY())));
+    EXPECT_EQ(callback(gestureInfo, CreatePanGestureEvent(1, InputEventType::TOUCH_SCREEN, normalPoint)),
+        GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: ListSwipeSelectStateKeyForGroup001
+ * @tc.desc: Test swipe multi-select state key resolution for list items inside list item group
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectStateKeyForGroup001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, 3);
+    CreateDone();
+
+    auto listItems = GetFlatListItems(frameNode_);
+    ASSERT_GE(static_cast<int32_t>(listItems.size()), 3);
+    auto point = ConvertItemCenterToListLocal(frameNode_, listItems[0]);
+    auto stateKey = pattern_->GetSwipeSelectStateKeyAtPosition(point.GetX(), point.GetY());
+    EXPECT_EQ(stateKey.index, 0);
+    EXPECT_EQ(stateKey.indexInGroup, 0);
+
+    auto selectedNode = pattern_->GetSelectableItemAtStateKey(stateKey);
+    EXPECT_EQ(selectedNode, listItems[0]);
+}
+
+/**
+ * @tc.name: ListSwipeSelectMarkGroupItem001
+ * @tc.desc: Test swipe multi-select can mark list item inside list item group by state key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectMarkGroupItem001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, 3);
+    CreateDone();
+
+    auto listItems = GetFlatListItems(frameNode_);
+    ASSERT_GE(static_cast<int32_t>(listItems.size()), 3);
+    auto point = ConvertItemCenterToListLocal(frameNode_, listItems[0]);
+    auto stateKey = pattern_->GetSwipeSelectStateKeyAtPosition(point.GetX(), point.GetY());
+    pattern_->MarkSwipeItemSelectedByStateKey(stateKey, true);
+
+    EXPECT_TRUE(listItems[0]->GetPattern<ListItemPattern>()->IsSelected());
+    EXPECT_FALSE(listItems[1]->GetPattern<ListItemPattern>()->IsSelected());
+    EXPECT_FALSE(listItems[2]->GetPattern<ListItemPattern>()->IsSelected());
+}
+
+/**
+ * @tc.name: SetListItemGroupParamStackFromEndContentOffset001
+ * @tc.desc: Test ListLayoutAlgorithm keeps visual content offset for ListItemGroup when stackFromEnd is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, SetListItemGroupParamStackFromEndContentOffset001, TestSize.Level1)
+{
+    auto contentEndOffset = 50.0f;
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listLayoutAlgorithm->isStackFromEnd_ = true;
+    listLayoutAlgorithm->totalItemCount_ = 1;
+    listLayoutAlgorithm->contentStartOffset_ = 0.0f;
+    listLayoutAlgorithm->contentEndOffset_ = contentEndOffset;
+    listLayoutAlgorithm->scrollSnapAlign_ = ScrollSnapAlign::NONE;
+    listLayoutAlgorithm->ProcessStackFromEnd();
+    EXPECT_EQ(listLayoutAlgorithm->contentStartOffset_, contentEndOffset);
+    EXPECT_EQ(listLayoutAlgorithm->contentEndOffset_, 0.0f);
+
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::NONE});
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 2, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ListLayoutProperty> groupLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = groupLayoutProperty;
+    listItemGroupPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, groupLayoutProperty);
+    layoutWrapper->hostNode_ = frameNode;
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(0, 0, 0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
+
+    listLayoutAlgorithm->SetListItemGroupParam(layoutWrapper, 0, 0.0f, true, listLayoutProperty, false);
+
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentStartOffset_, 0.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentEndOffset_, contentEndOffset);
 }
 } // namespace OHOS::Ace::NG

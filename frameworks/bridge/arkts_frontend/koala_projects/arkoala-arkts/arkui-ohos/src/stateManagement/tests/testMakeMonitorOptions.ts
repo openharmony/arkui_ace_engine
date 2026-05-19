@@ -24,7 +24,7 @@ class TestMakeMonitorOptions implements IMonitorable {
     constructor() {
         this._monitorDecorator = StateMgmtFactory.makeMonitor(
             new Array<IMonitorPathInfo>(
-                StateMgmtFactory.makeMonitorPath("counter", () => {
+                StateMgmtFactory.makeMonitorPath('counter', () => {
                     return this._counter;
                 })
             ),
@@ -34,7 +34,7 @@ class TestMakeMonitorOptions implements IMonitorable {
             },
             {
                 owner: this,
-                functionName: "testMonitor"
+                functionName: 'testMonitor'
             }
         );
     }

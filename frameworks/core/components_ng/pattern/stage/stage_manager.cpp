@@ -14,14 +14,17 @@
  */
 
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/common/container.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/ime/input_method_manager.h"
-#include "base/ressched/ressched_report.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"

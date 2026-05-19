@@ -542,6 +542,18 @@ export function XComponentImpl(
     })
 }
 
+@memo
+export function XComponent(
+    @memo @memo_skip
+    style: ((attributes: XComponentAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkXComponentComponent>((): ArkXComponentComponent => {
+        return new ArkXComponentComponent()
+    })
+    NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
+        style?.(receiver)
+    })
+}
 export class XComponentController_serializer {
     public static write(buffer: SerializerBase, value: XComponentController): void {
         let valueSerializer: SerializerBase = buffer

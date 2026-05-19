@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "frameworks/core/components_ng/pattern/text/span/span_object.h"
 #include "frameworks/core/interfaces/native/implementation/length_metrics_peer.h"
 #include "frameworks/core/interfaces/native/utility/callback_helper.h"
 #include "frameworks/core/interfaces/native/utility/reverse_converter.h"
+
 #include "line_height_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -39,8 +41,16 @@ Ark_LineHeightStyle Construct1Impl(const Ark_LengthMetrics* lineHeight,
                                    Ark_Float64 lineHeightMultiple)
 {
     auto peer = PeerUtils::CreatePeer<LineHeightStylePeer>();
-    Dimension height = Converter::OptConvert<Dimension>(*lineHeight).value_or(Dimension());
+    Dimension height = Dimension(0, DimensionUnit::VP);
+    if (lineHeight) {
+        auto heightOpt = Converter::OptConvert<Dimension>(*lineHeight);
+        Validator::ValidateNonPercent(heightOpt);
+        height = heightOpt.value_or(Dimension(0, DimensionUnit::VP));
+    }
     auto multiple = Converter::OptConvert<double>(lineHeightMultiple);
+    if (multiple.has_value() && LessNotEqual(multiple.value(), 0.0)) {
+        multiple.reset();
+    }
     peer->span = AceType::MakeRefPtr<LineHeightSpan>(height, multiple);
     return peer;
 }

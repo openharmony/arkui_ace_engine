@@ -1916,7 +1916,8 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode, .systemMaterial = dialogAttr.systemMaterial
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode, .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode, .edgeLightMode = dialogAttr.edgeLightMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1936,6 +1937,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     }
     if (dialogAttr.backgroundColor.has_value()) {
         dialogProperties.backgroundColor = dialogAttr.backgroundColor.value();
+        dialogProperties.backgroundColorResObj = dialogAttr.backgroundColorResObj;
     }
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
@@ -2021,6 +2023,7 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .onWillDismiss = dialogAttr.customOnWillDismiss,
         .onWillDismissRelease = dialogAttr.customOnWillDismissRelease, .maskColor = dialogAttr.maskColor,
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
+        .backgroundColorResObj = dialogAttr.backgroundColorResObj, .maskColorResObj = dialogAttr.maskColorResObj,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
         .customBuilderWithId = dialogAttr.customBuilderWithId,
@@ -2043,7 +2046,9 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
-        .systemMaterial = dialogAttr.systemMaterial
+        .displayModeInSubWindow = dialogAttr.displayModeInSubWindow,
+        .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode, .edgeLightMode = dialogAttr.edgeLightMode,
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
@@ -2314,6 +2319,8 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
         .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode,
+        .edgeLightMode = dialogAttr.edgeLightMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -3940,7 +3947,9 @@ void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::Fram
         ContainerScope scope(containerId);
         overlayManager->RemoveFrameNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", nullptr);
+    CHECK_NULL_VOID(node);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(node->GetParentFrameNode());
+    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", currentOverlay);
 }
 
 void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)

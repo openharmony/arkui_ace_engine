@@ -121,6 +121,11 @@ common_bin = [
     part_name = "skia"
   },
   {
+    label = "//third_party/expat:expat"
+    subsystem_name = "thirdparty"
+    part_name = "expat"
+  },
+  {
     label = "//third_party/libpng:libpng"
     subsystem_name = "thirdparty"
     part_name = "libpng"
@@ -235,6 +240,11 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_lazycolumnlayout"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_checkbox"
     subsystem_name = "arkui"
     part_name = "ace_engine"
@@ -255,12 +265,22 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_lazywaterflowlayout"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_linearsplit"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
   {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_richeditor"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_containerreader"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },

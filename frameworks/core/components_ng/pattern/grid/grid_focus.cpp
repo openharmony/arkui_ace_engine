@@ -21,6 +21,8 @@
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/base/distributed_ui.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 std::pair<bool, bool> GridFocus::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
@@ -110,7 +112,9 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
             ctx->FlushUITaskWithSingleDirtyNode(host);
         }
         auto next = host->GetChildByIndex(idx);
-        CHECK_NULL_BREAK(next);
+        if (!next || !(next->GetHostNode())) {
+            break;
+        }
         auto nextFocus = next->GetHostNode()->GetFocusHub();
         if (nextFocus && nextFocus->IsFocusable()) {
             return nextFocus;
@@ -429,9 +433,13 @@ WeakPtr<FocusHub> GridFocus::SearchBigItemFocusableChildInCross(
         auto cross = main->second.find(tarCrossIndex);
         while (cross != main->second.end()) {
             auto next = host->GetChildByIndex(cross->second);
-            CHECK_NULL_BREAK(next);
+            if (!next) {
+                break;
+            }
             auto nextNode = next->GetHostNode();
-            CHECK_NULL_BREAK(nextNode);
+            if (!nextNode) {
+                break;
+            }
             auto nextFocus = nextNode->GetFocusHub();
             if (nextFocus && nextFocus->IsFocusable()) {
                 return nextFocus;

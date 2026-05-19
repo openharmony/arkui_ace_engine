@@ -18,6 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
@@ -96,6 +97,9 @@ void ListModelStatic::SetDivider(
 {
     if (divider.has_value()) {
         FREE_NODE_CHECK(frameNode, SetDivider, frameNode, divider, needGetThemeColor);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.value().strokeWidth, LpxAttribute::LPX_DIVIDER_STROKE_WIDTH, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.value().startMargin, LpxAttribute::LPX_DIVIDER_START_MARGIN, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(divider.value().endMargin, LpxAttribute::LPX_DIVIDER_END_MARGIN, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, frameNode);
@@ -269,8 +273,11 @@ void ListModelStatic::SetListNestedScroll(FrameNode* frameNode, const std::optio
 void ListModelStatic::SetLaneGutter(FrameNode* frameNode, const std::optional<Dimension>& laneGutter)
 {
     if (laneGutter.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(laneGutter.value(), LpxAttribute::LPX_LANE_GUTTER, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LANE_GUTTER);
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, frameNode);
     }
 }
@@ -278,8 +285,11 @@ void ListModelStatic::SetLaneGutter(FrameNode* frameNode, const std::optional<Di
 void ListModelStatic::SetListSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
     if (space.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(space.value(), LpxAttribute::LPX_SPACE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE);
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, frameNode);
     }
 }
@@ -287,8 +297,11 @@ void ListModelStatic::SetListSpace(FrameNode* frameNode, const std::optional<Dim
 void ListModelStatic::SetListSpaceWidth(FrameNode* frameNode, const std::optional<Dimension>& spaceWidth)
 {
     if (spaceWidth.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(spaceWidth.value(), LpxAttribute::LPX_SPACE_WIDTH, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SpaceWidth, spaceWidth.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE_WIDTH);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
@@ -446,6 +459,8 @@ void ListModelStatic::SetChainAnimation(FrameNode* frameNode, const std::optiona
 void ListModelStatic::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(options.minSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MIN_SPACE, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(options.maxSpace, LpxAttribute::LPX_CHAIN_ANIMATION_MAX_SPACE, frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetChainAnimationOptions(options);
@@ -582,14 +597,18 @@ void ListModelStatic::SetLaneConstrain(
 
 void ListModelStatic::SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(laneGutter, LpxAttribute::LPX_LANE_GUTTER, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter, frameNode);
 }
 
 void ListModelStatic::SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength)
 {
     if (laneMinLength.IsValid()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(laneMinLength, LpxAttribute::LPX_LANE_MIN_LENGTH, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength, frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LANE_MIN_LENGTH);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMinLength, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
@@ -597,8 +616,11 @@ void ListModelStatic::SetLaneMinLength(FrameNode* frameNode, const Dimension& la
 void ListModelStatic::SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength)
 {
     if (laneMaxLength.IsValid()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(laneMaxLength, LpxAttribute::LPX_LANE_MAX_LENGTH, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength, frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_LANE_MAX_LENGTH);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMaxLength, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }

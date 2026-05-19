@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_method.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_property.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 

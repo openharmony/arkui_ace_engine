@@ -35,6 +35,7 @@ struct Index {
     "LayeredDrawableDescriptorSetBlendMode",
     "AnimationStopModeTest",
     "AnimatedDrawableDescriptorTestBase64",
+    "DrawableDescriptorReleaseTest",
   ]
 
   build() {

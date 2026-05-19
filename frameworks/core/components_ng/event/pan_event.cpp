@@ -156,6 +156,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     panRecognizer_->SetOnActionCancel(actionCancel);
     panRecognizer_->SetIsSystemGesture(true);
     panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    panRecognizer_->SetCanCoexistWithScroll(canCoexistWithScroll_);
 
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
@@ -175,6 +176,16 @@ void PanEventActuator::SetPanEventType(GestureTypeName typeName)
     CHECK_NULL_VOID(gestureInfo);
     gestureInfo->SetType(typeName);
     gestureInfo->SetIsSystemGesture(true);
+}
+
+void PanEventActuator::SetPanEventTag(const std::string& tag)
+{
+    if (panEvents_.empty()) {
+        return;
+    }
+    auto gestureInfo = panRecognizer_->GetOrCreateGestureInfo();
+    CHECK_NULL_VOID(gestureInfo);
+    gestureInfo->SetTag(tag);
 }
 
 void PanEventActuator::DumpVelocityInfo(int32_t fingerId)

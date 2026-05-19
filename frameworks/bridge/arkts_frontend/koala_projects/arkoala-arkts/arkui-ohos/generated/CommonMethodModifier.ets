@@ -217,6 +217,7 @@ export class CommonMethodModifier implements CommonMethod {
     public _onNeedSoftkeyboard_0_0value?: OnNeedSoftkeyboardCallback | undefined
     public _accessibilityStateDescription_0_0value?: string | global_resource_Resource | undefined
     public _accessibilityActionOptions_0_0value?: AccessibilityActionOptions | undefined
+    public _doubleSided_0_0value?: boolean | undefined
     public _customProperty_0_0value?: string
     public _customProperty_0_1value?: CustomProperty
     public _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
@@ -312,6 +313,9 @@ export class CommonMethodModifier implements CommonMethod {
     public _bindSheet_0_2value?: SheetOptions | undefined
     public _onVisibleAreaChange_0_0value?: Array<double> | undefined
     public _onVisibleAreaChange_0_1value?: VisibleAreaChangeCallback | undefined
+    public _onVisibleAreaChange_1_0value?: Array<double> | undefined
+    public _onVisibleAreaChange_1_1value?: VisibleAreaChangeCallback | undefined
+    public _onVisibleAreaChange_1_2value?: boolean | undefined
     public _onVisibleAreaApproximateChange_0_0value?: VisibleAreaEventOptions | undefined
     public _onVisibleAreaApproximateChange_0_1value?: VisibleAreaChangeCallback | undefined
     public _keyboardShortcut_0_0value?: string | FunctionKey | undefined
@@ -327,7 +331,7 @@ export class CommonMethodModifier implements CommonMethod {
     public _onAreaChange_1_1value?: AreaChangeOptions | undefined
     public _toolbar_0_0value?: CustomBuilder | undefined
     public _onGestureCollectIntercept_0_0value?: GestureCollectInterceptCallback
-    public _shouldRecognizerParallelWith_0_0value?: ShouldRecognizerParallelWithCallback
+    public _shouldRecognizerParallelWith_0_0value?: ShouldRecognizerParallelWithCallback | undefined
     public _inspectorLabel_0_0value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
@@ -3899,7 +3903,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[207] != 0) {
             switch (flagArray[207]) {
                 case 1: {
-                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setOnVisibleAreaChange0Attribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
                     flagArray[207] = 2;
                     break;
                 }
@@ -3909,7 +3913,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[207] = 0;
-                    peer.setOnVisibleAreaChangeAttribute(undefined, undefined);
+                    peer.setOnVisibleAreaChange0Attribute(undefined, undefined);
                 }
             }
         }
@@ -4032,7 +4036,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[216] != 0) {
             switch (flagArray[216]) {
                 case 1: {
-                    peer.setShouldRecognizerParallelWithAttribute((this._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback));
+                    peer.setShouldRecognizerParallelWithAttribute((this._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback | undefined));
                     flagArray[216] = 2;
                     break;
                 }
@@ -4042,6 +4046,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[216] = 0;
+                    peer.setShouldRecognizerParallelWithAttribute((undefined as ShouldRecognizerParallelWithCallback | undefined));
                 }
             }
         }
@@ -4059,6 +4064,40 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     flagArray[217] = 0;
                     peer.setInspectorLabelAttribute(undefined);
+                }
+            }
+        }
+        if (flagArray[218] != 0) {
+            switch (flagArray[218]) {
+                case 1: {
+                    peer.setOnVisibleAreaChange1Attribute((this._onVisibleAreaChange_1_0value as Array<double> | undefined), (this._onVisibleAreaChange_1_1value as VisibleAreaChangeCallback | undefined), (this._onVisibleAreaChange_1_2value as boolean | undefined));
+                    flagArray[218] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[218] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[218] = 0;
+                    peer.setOnVisibleAreaChange1Attribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[219] != 0) {
+            switch (flagArray[219]) {
+                case 1: {
+                    peer.setDoubleSidedAttribute((this._doubleSided_0_0value as boolean | undefined));
+                    flagArray[219] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[219] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[219] = 0;
+                    peer.setDoubleSidedAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -6694,10 +6733,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[216]) {
                 case 1:
                 case 3: {
-                    this.shouldRecognizerParallelWith((modifier._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback));
+                    this.shouldRecognizerParallelWith((modifier._shouldRecognizerParallelWith_0_0value as ShouldRecognizerParallelWithCallback | undefined));
                     break;
                 }
                 default: {
+                    this.shouldRecognizerParallelWith((undefined as ShouldRecognizerParallelWithCallback | undefined));
                 }
             }
         }
@@ -6710,6 +6750,30 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.inspectorLabel(undefined);
+                }
+            }
+        }
+        if (flagArray[218] != 0) {
+            switch (flagArray[218]) {
+                case 1:
+                case 3: {
+                    this.onVisibleAreaChange((modifier._onVisibleAreaChange_1_0value as Array<double> | undefined), (modifier._onVisibleAreaChange_1_1value as VisibleAreaChangeCallback | undefined), (modifier._onVisibleAreaChange_1_2value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[219] != 0) {
+            switch (flagArray[219]) {
+                case 1:
+                case 3: {
+                    this.doubleSided((modifier._doubleSided_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.doubleSided((undefined as boolean | undefined));
                 }
             }
         }
@@ -8938,7 +9002,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
+    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback | undefined): this {
         if (((this._flagArray[216]) == (0)) || (true)) {
             this._flagArray[216] = 1
             this._shouldRecognizerParallelWith_0_0value = value
@@ -8955,6 +9019,28 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[217] = 3
+        }
+        return this
+    }
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined, measureFromViewport: boolean | undefined): this {
+        if (((this._flagArray[218]) == (0)) || ((this._onVisibleAreaChange_1_0value) !== (ratios)) || (true) || ((this._onVisibleAreaChange_1_2value) !== (measureFromViewport))) {
+            this._flagArray[218] = 1
+            this._onVisibleAreaChange_1_0value = ratios
+            this._onVisibleAreaChange_1_1value = event
+            this._onVisibleAreaChange_1_2value = measureFromViewport
+            this._state.fireChange()
+        } else {
+            this._flagArray[218] = 3
+        }
+        return this
+    }
+    doubleSided(value: boolean | undefined): this {
+        if (((this._flagArray[219]) == (0)) || ((this._doubleSided_0_0value) !== (value))) {
+            this._flagArray[219] = 1
+            this._doubleSided_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[219] = 3
         }
         return this
     }

@@ -46,21 +46,25 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level0)
 
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
 
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
 
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
 
     EXPECT_EQ(safeAreaManager_->IsAtomicService(), false);
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), false);
     EXPECT_EQ(safeAreaManager_->IsAtomicService(), true);
 }
@@ -127,8 +131,10 @@ HWTEST_F(SafeAreaManagerTest, SystemSafeAreaTest, TestSize.Level0)
     safeAreaManager_->SetIsFullScreen(true);
     auto ret = safeAreaManager_->UpdateSystemSafeArea(systemArea);
     EXPECT_EQ(ret, true);
+
     ret = safeAreaManager_->UpdateSystemSafeArea(systemArea);
     EXPECT_EQ(ret, false);
+
     auto systemSafeArea = safeAreaManager_->GetSystemSafeArea();
     EXPECT_EQ(systemSafeArea, systemArea);
 
@@ -202,6 +208,11 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level0)
     EXPECT_EQ(keyboardInset.end, rootHeight);
 }
 
+/**
+ * @tc.name: UpdateKeyboardSafeAreaWebTest
+ * @tc.desc: Use UpdateKeyboardWebSafeArea and test.
+ * @tc.type: FUNC
+ */
 HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaWebTest, TestSize.Level0)
 {
     /**
@@ -261,7 +272,7 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaWebTest, TestSize.Level0)
  */
 HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level0)
 {
-    /* 
+    /**
      * @tc.steps: step1 call CheckCutoutSafeArea with null rootSize params.
      * @tc.expected: CheckCutoutSafeArea returns false.
      */
@@ -270,7 +281,7 @@ HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level0)
     auto ret = safeAreaManager_->CheckCutoutSafeArea(cutoutArea, rootSize);
     EXPECT_EQ(ret, false);
 
-    /*
+    /**
      * @tc.steps: step2 call CheckCutoutSafeArea with wrong rootSize params.
      * @tc.expected: CheckCutoutSafeArea returns true.
      */
@@ -279,7 +290,7 @@ HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level0)
     ret = safeAreaManager_->CheckCutoutSafeArea(cutoutArea, rootSize);
     EXPECT_EQ(ret, true);
 
-    /*
+    /**
      * @tc.steps: step3 call CheckCutoutSafeArea SafeAreaInsets is not valid params.
      * @tc.expected: CheckCutoutSafeArea returns false.
      */
@@ -345,25 +356,25 @@ HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level0)
     safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
     SafeAreaExpandOpts opt;
 
-    /*@tc.steps: step1 Ignore SafeArea and call GetCombinedSafeArea*/
+    /**@tc.steps: step1 Ignore SafeArea and call GetCombinedSafeArea*/
     safeAreaManager_->SetIgnoreSafeArea(true);
     funExPect(opt, 0.0f, 0.0f, 0.0f, 0.0f);
 
-    /*@tc.steps: step2 Set option is null and call GetCombinedSafeArea*/
+    /**@tc.steps: step2 Set option is null and call GetCombinedSafeArea*/
     safeAreaManager_->SetIgnoreSafeArea(false);
     funExPect(opt, 0.0f, 0.0f, 0.0f, 0.0f);
 
-    /*@tc.steps: step3 Call GetCombinedSafeArea with invalid SafeArea*/
+    /**@tc.steps: step3 Call GetCombinedSafeArea with invalid SafeArea*/
     safeAreaManager_->SetIsNeedAvoidWindow(false);
     safeAreaManager_->SetIsFullScreen(false);
     funExPect(opt, 0.0f, 0.0f, 0.0f, 0.0f);
     safeAreaManager_->SetIsFullScreen(true);
 
-    /*@tc.steps: step4 SafeArea expand type includes SAFE_AREA_TYPE_CUTOUT*/
+    /**@tc.steps: step4 SafeArea expand type includes SAFE_AREA_TYPE_CUTOUT*/
     opt.type |= SAFE_AREA_TYPE_CUTOUT;
     funExPect(opt, 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT);
 
-    /*@tc.steps: step5 SafeArea expand type includes SAFE_AREA_TYPE_SYSTEM*/
+    /**@tc.steps: step5 SafeArea expand type includes SAFE_AREA_TYPE_SYSTEM*/
     opt.type |= SAFE_AREA_TYPE_SYSTEM;
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
 
@@ -385,12 +396,12 @@ HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level0)
     safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
 
-    /*@tc.steps: step7 call GetSafeAreaWithoutCutout*/
+    /**@tc.steps: step7 call GetSafeAreaWithoutCutout*/
     auto res = safeAreaManager_->GetSafeAreaWithoutCutout();
     CommonExpectEQ(Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
 
-    /*@tc.steps: step7 call GetSafeAreaWithoutProcess*/
+    /**@tc.steps: step8 call GetSafeAreaWithoutProcess*/
     res = safeAreaManager_->GetSafeAreaWithoutProcess();
     CommonExpectEQ(Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
@@ -463,12 +474,12 @@ HWTEST_F(SafeAreaManagerTest, ScbCutoutSafeAreaTest, TestSize.Level0)
     ret = safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
     EXPECT_EQ(ret, false);
 
-    /*@tc.steps: Set the window type to SCB window and call GetCutoutSafeArea.*/
+    /**@tc.steps: Set the window type to SCB window and call GetCutoutSafeArea.*/
     safeAreaManager_->SetWindowTypeConfig(false, false, true);
     auto scbCutoutSafeArea = safeAreaManager_->GetCutoutSafeArea();
     EXPECT_EQ(scbCutoutSafeArea, cutoutAreaNotValid);
 
-    /*@tc.steps: Set the window type to app window and call UpdateScbCutoutSafeArea.*/
+    /**@tc.steps: Set the window type to app window and call UpdateScbCutoutSafeArea.*/
     safeAreaManager_->SetWindowTypeConfig(true, false, false);
     ret = safeAreaManager_->UpdateScbCutoutSafeArea(cutoutArea);
     EXPECT_EQ(ret, true);
@@ -477,7 +488,7 @@ HWTEST_F(SafeAreaManagerTest, ScbCutoutSafeAreaTest, TestSize.Level0)
     auto cutoutSafeArea = safeAreaManager_->GetCutoutSafeArea();
     EXPECT_EQ(cutoutSafeArea, cutoutAreaNotValid);
 
-    /*@tc.steps: Set the window type to SCB window and call UpdateScbCutoutSafeArea.*/
+    /**@tc.steps: Set the window type to SCB window and call UpdateScbCutoutSafeArea.*/
     safeAreaManager_->SetWindowTypeConfig(false, false, true);
     scbCutoutSafeArea = safeAreaManager_->GetCutoutSafeArea();
     EXPECT_EQ(scbCutoutSafeArea, cutoutAreaWithRoot);
@@ -567,7 +578,7 @@ HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest2, TestSize.Level0)
     float offset = 100.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
     /**
-     * @tc.steps: SetKeyBoardAvoidMode OFFSET
+     * @tc.steps: SetKeyBoardAvoidMode RESIZE
      */
     auto ret = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     EXPECT_EQ(ret, true);
@@ -591,7 +602,7 @@ HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest3, TestSize.Level0)
     float offset = 100.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
     /**
-     * @tc.steps: SetKeyBoardAvoidMode OFFSET
+     * @tc.steps: SetKeyBoardAvoidMode NONE
      */
     auto ret = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::NONE);
     EXPECT_EQ(ret, true);

@@ -1784,4 +1784,225 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest021, TestSize.Level
     ResetTransitioningNodes();
     EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
 }
+
+/**
+ * @tc.name: ContentChangeManagerTest022
+ * @tc.desc: Test OnSwiperScrollStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnSwiperScrollStart with nullptr.
+     * @tc.expected: scrollingSwiperNodes_ remains empty.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    contentChangeMgr->OnSwiperScrollStart(nullptr);
+    EXPECT_TRUE(contentChangeMgr->scrollingSwiperNodes_.empty());
+
+    /**
+     * @tc.steps: step3. call OnSwiperScrollStart with valid frameNode.
+     * @tc.expected: scrollingSwiperNodes_ contains the node id.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 100, AceType::MakeRefPtr<SwiperPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    contentChangeMgr->OnSwiperScrollStart(frameNode);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->scrollingSwiperNodes_.count(100)), 1);
+
+    /**
+     * @tc.steps: step4. call OnSwiperScrollStart with another node.
+     * @tc.expected: scrollingSwiperNodes_ size increases.
+     */
+    auto frameNode2 = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 101, AceType::MakeRefPtr<SwiperPattern>());
+    ASSERT_NE(frameNode2, nullptr);
+    contentChangeMgr->OnSwiperScrollStart(frameNode2);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->scrollingSwiperNodes_.size()), 2);
+
+    /**
+     * @tc.steps: step5. reset.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    EXPECT_TRUE(contentChangeMgr->scrollingSwiperNodes_.empty());
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest023
+ * @tc.desc: Test OnSwiperScrollEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnSwiperScrollEnd with nullptr.
+     * @tc.expected: scrollingSwiperNodes_ remains unchanged.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.emplace(100);
+    contentChangeMgr->OnSwiperScrollEnd(nullptr);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->scrollingSwiperNodes_.size()), 1);
+
+    /**
+     * @tc.steps: step3. call OnSwiperScrollEnd with valid frameNode that exists in set.
+     * @tc.expected: scrollingSwiperNodes_ size decreases.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 100, AceType::MakeRefPtr<SwiperPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    contentChangeMgr->OnSwiperScrollEnd(frameNode);
+    EXPECT_TRUE(contentChangeMgr->scrollingSwiperNodes_.empty());
+
+    /**
+     * @tc.steps: step4. call OnSwiperScrollEnd with node id not in set.
+     * @tc.expected: scrollingSwiperNodes_ remains unchanged.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.emplace(200);
+    auto frameNode2 = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 999, AceType::MakeRefPtr<SwiperPattern>());
+    ASSERT_NE(frameNode2, nullptr);
+    contentChangeMgr->OnSwiperScrollEnd(frameNode2);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->scrollingSwiperNodes_.size()), 1);
+
+    /**
+     * @tc.steps: step5. reset.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    EXPECT_TRUE(contentChangeMgr->scrollingSwiperNodes_.empty());
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest024
+ * @tc.desc: Test IsSwiperScrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. test IsSwiperScrolling when scrollingSwiperNodes_ is empty.
+     * @tc.expected: IsSwiperScrolling returns false.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
+
+    /**
+     * @tc.steps: step3. test IsSwiperScrolling when scrollingSwiperNodes_ has elements.
+     * @tc.expected: IsSwiperScrolling returns true.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.emplace(100);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+
+    /**
+     * @tc.steps: step4. test IsSwiperScrolling after clearing.
+     * @tc.expected: IsSwiperScrolling returns false.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
+
+    /**
+     * @tc.steps: step5. test with multiple elements.
+     * @tc.expected: IsSwiperScrolling returns true.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.emplace(100);
+    contentChangeMgr->scrollingSwiperNodes_.emplace(200);
+    contentChangeMgr->scrollingSwiperNodes_.emplace(300);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+
+    /**
+     * @tc.steps: step6. reset.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest025
+ * @tc.desc: Test OnSwiperScrollStart and OnSwiperScrollEnd combined
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. simulate swiper scroll start and end sequence.
+     * @tc.expected: scrollingSwiperNodes_ state changes correctly.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 100, AceType::MakeRefPtr<SwiperPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
+    contentChangeMgr->OnSwiperScrollStart(frameNode);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+    contentChangeMgr->OnSwiperScrollEnd(frameNode);
+    EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
+
+    /**
+     * @tc.steps: step3. test duplicate start calls.
+     * @tc.expected: set deduplication works correctly.
+     */
+    contentChangeMgr->OnSwiperScrollStart(frameNode);
+    contentChangeMgr->OnSwiperScrollStart(frameNode);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->scrollingSwiperNodes_.size()), 1);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+
+    /**
+     * @tc.steps: step4. reset.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.clear();
+    EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest026
+ * @tc.desc: Test StartContentChangeReport clears scrollingSwiperNodes_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. add elements to scrollingSwiperNodes_.
+     * @tc.expected: scrollingSwiperNodes_ contains elements.
+     */
+    contentChangeMgr->scrollingSwiperNodes_.emplace(100);
+    contentChangeMgr->scrollingSwiperNodes_.emplace(200);
+    EXPECT_TRUE(contentChangeMgr->IsSwiperScrolling());
+
+    /**
+     * @tc.steps: step3. call StartContentChangeReport.
+     * @tc.expected: scrollingSwiperNodes_ is cleared.
+     */
+    ContentChangeConfig config;
+    contentChangeMgr->StartContentChangeReport(config);
+    EXPECT_TRUE(contentChangeMgr->scrollingSwiperNodes_.empty());
+    EXPECT_FALSE(contentChangeMgr->IsSwiperScrolling());
+}
 } // namespace OHOS::Ace::NG

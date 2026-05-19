@@ -28,7 +28,6 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     private __meta: IMutableStateMeta | undefined;
     private __keyedMeta: IMutableKeyedStateMeta | undefined;
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
-    private ____V1RenderId: RenderIdType = 0;
     private allowDeep_: boolean;
     private _target: Object;
     private isAPI_: boolean;
@@ -53,11 +52,9 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     public executeOnSubscribingWatches(propertyName: string): void {
         this.subscribedWatches.executeOnSubscribingWatches(propertyName);
     }
-    public setV1RenderId(renderId: RenderIdType): void {
-        this.____V1RenderId = renderId;
-    }
+    public setV1RenderId(renderId: RenderIdType): void {}
     public shouldAddRef(): boolean {
-        return this.allowDeep_ || OBSERVE.shouldAddRef(this.____V1RenderId);
+        return OBSERVE.renderingComponent > 0;
     }
     get(target: Object, method: reflect.InstanceMethod): Any {
         const value = method.invoke(this._target);

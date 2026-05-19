@@ -126,6 +126,9 @@ ArkUINativeModuleValue WebBridge::SetMixedMode(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setMixedMode(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -200,6 +203,9 @@ ArkUINativeModuleValue WebBridge::SetCacheMode(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setCacheMode(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -222,6 +228,9 @@ ArkUINativeModuleValue WebBridge::SetDarkMode(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setDarkMode(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -297,6 +306,9 @@ ArkUINativeModuleValue WebBridge::SetKeyboardAvoidMode(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setKeyboardAvoidMode(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -415,6 +427,9 @@ ArkUINativeModuleValue WebBridge::SetTextZoomRatio(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setTextZoomRatio(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -2066,7 +2081,7 @@ ArkUINativeModuleValue SetJavaScriptCommon(ArkUIRuntimeCallInfo* runtimeCallInfo
 
     auto scriptsArr = panda::Local<panda::ArrayRef>(scriptsArg);
     auto scriptRulesArr = panda::Local<panda::ArrayRef>(scriptRulesArg);
-    int32_t size = static_cast<int32_t>(scriptsArr->Length(vm));
+    int32_t size = static_cast<int32_t>(ArkTSUtils::GetArrayLength(vm, scriptsArr));
     std::vector<ArkUI_ScriptItemArray> scriptInfos;
     std::vector<std::vector<ArkUI_CharPtr>> allScriptRules;
 
@@ -2081,7 +2096,7 @@ ArkUINativeModuleValue SetJavaScriptCommon(ArkUIRuntimeCallInfo* runtimeCallInfo
         Local<JSValueRef> scriptRulesVal = panda::ArrayRef::GetValueAt(vm, scriptRulesArr, i);
         if (scriptRulesVal->IsArray(vm)) {
             auto array = panda::Local<panda::ArrayRef>(scriptRulesVal);
-            uint32_t scriptRuleSize = array->Length(vm);
+            uint32_t scriptRuleSize = ArkTSUtils::GetArrayLength(vm, array);
             std::vector<ArkUI_CharPtr> itemRules;
             ParseReferencedId(vm, static_cast<int32_t>(scriptRuleSize), array, itemRules);
             allScriptRules.push_back(std::move(itemRules));
@@ -3903,7 +3918,7 @@ ArkUINativeModuleValue WebBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* ru
     struct ArkUITextDetectConfigStruct arkUITextDetectConfig;
     std::string types;
     auto array = panda::Local<panda::ArrayRef>(typesArg);
-    for (size_t i = 0; i < array->Length(vm); i++) {
+    for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, array); i++) {
         auto value = panda::ArrayRef::GetValueAt(vm, array, i);
         auto index = value->Int32Value(vm);
         if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
@@ -4280,7 +4295,7 @@ ArkUINativeModuleValue WebBridge::SetAiSessionOptions(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
 
     auto array = panda::Local<panda::ArrayRef>(secondArg);
-    int32_t length = static_cast<int32_t>(array->Length(vm));
+    int32_t length = static_cast<int32_t>(ArkTSUtils::GetArrayLength(vm, array));
     if (length <= 0) {
         GetArkUINodeModifiers()->getWebModifier()->resetAiSessionOptions(nativeNode);
         return panda::JSValueRef::Undefined(vm);
@@ -4645,7 +4660,7 @@ void ProcessHeaders(EcmaVM* vm, panda::Local<panda::ObjectRef> jsObj, RefPtr<Web
     auto headersObj = value->ToObject(vm);
     auto keys = headersObj->GetOwnPropertyNames(vm);
 
-    for (size_t i = 0; i < keys->Length(vm); i++) {
+    for (size_t i = 0; i < ArkTSUtils::GetArrayLength(vm, keys); i++) {
         auto key = keys->Get(vm, i);
         auto val = headersObj->Get(vm, key);
         if (key->IsString(vm) && val->IsString(vm)) {
@@ -5094,7 +5109,7 @@ ArkUINativeModuleValue WebBridge::SetBlankScreenDetectionConfig(ArkUIRuntimeCall
 
     if (detectionTimingArg->IsArray(vm)) {
         auto array = panda::Local<panda::ArrayRef>(detectionTimingArg);
-        int32_t size = static_cast<int32_t>(array->Length(vm));
+        int32_t size = static_cast<int32_t>(ArkTSUtils::GetArrayLength(vm, array));
         for (int i = 0; i < size; i++) {
             Local<JSValueRef> data = panda::ArrayRef::GetValueAt(vm, array, i);
             if (data->IsNumber()) {
@@ -5105,7 +5120,7 @@ ArkUINativeModuleValue WebBridge::SetBlankScreenDetectionConfig(ArkUIRuntimeCall
 
     if (detectionMethodsArg->IsArray(vm)) {
         auto array = panda::Local<panda::ArrayRef>(detectionMethodsArg);
-        int32_t size = static_cast<int32_t>(array->Length(vm));
+        int32_t size = static_cast<int32_t>(ArkTSUtils::GetArrayLength(vm, array));
         for (int i = 0; i < size; i++) {
             Local<JSValueRef> method = panda::ArrayRef::GetValueAt(vm, array, i);
             if (method->IsNumber()) {

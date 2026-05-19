@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
+class RichEditorPattern;
+
 class RichEditorSelectOverlay : public TextSelectOverlay {
     DECLARE_ACE_TYPE(RichEditorSelectOverlay, TextSelectOverlay);
 
@@ -84,6 +86,14 @@ protected:
     RectF GetSelectAreaFromRects(SelectRectsType pos) override;
 
 private:
+    void UpdateMagnifierTouchInfo(const GestureEvent& event, TouchType touchType);
+    void ResetMagnifierTouchInfo();
+    void FillSelectOverlayBaseInfo(SelectOverlayInfo& selectInfo, const RefPtr<RichEditorPattern>& pattern);
+    TextResponseType UpdateSelectOverlayHandleInfo(SelectOverlayInfo& selectInfo,
+        const RefPtr<RichEditorPattern>& pattern);
+    void FillSelectOverlayExtraInfo(
+        SelectOverlayInfo& selectInfo, const RefPtr<RichEditorPattern>& pattern,
+        TextResponseType responseType, int32_t requestCode);
     void RemoveAreaChangeInner();
     void CloseMagnifier();
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
@@ -101,6 +111,8 @@ private:
     bool handleIsHidden_ = true;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
     bool lastSingleLine_ = false;
+    TimeStamp magnifierTouchTimeStamp_;
+    TouchType magnifierTouchType_ = TouchType::UNKNOWN;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

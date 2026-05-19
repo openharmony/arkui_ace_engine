@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/hover_event_peer.h"
@@ -51,8 +53,8 @@ void SetXImpl(Ark_HoverEvent peer,
     CHECK_NULL_VOID(info);
     auto location = info->GetLocalLocation();
     auto optX = x ? Converter::OptConvertPtr<float>(x) : std::nullopt;
-    auto value = PipelineBase::Vp2PxWithCurrentDensity(optX.value_or(DEFAULT_VALUE));
-    location.SetX(value, location.GetXAnimationOption());
+    auto xValue = optX.value_or(DEFAULT_VALUE);
+    location.SetX(xValue, location.GetXAnimationOption());
     info->SetLocalLocation(location);
 }
 Opt_Float64 GetYImpl(Ark_HoverEvent peer)
@@ -71,8 +73,8 @@ void SetYImpl(Ark_HoverEvent peer,
     CHECK_NULL_VOID(info);
     auto location = info->GetLocalLocation();
     auto optY = y ? Converter::OptConvertPtr<float>(y) : std::nullopt;
-    auto value = PipelineBase::Vp2PxWithCurrentDensity(optY.value_or(DEFAULT_VALUE));
-    location.SetY(value, location.GetYAnimationOption());
+    auto yValue = optY.value_or(DEFAULT_VALUE);
+    location.SetY(yValue, location.GetYAnimationOption());
     info->SetLocalLocation(location);
 }
 Opt_Float64 GetWindowXImpl(Ark_HoverEvent peer)
@@ -91,8 +93,8 @@ void SetWindowXImpl(Ark_HoverEvent peer,
     CHECK_NULL_VOID(info);
     auto location = info->GetGlobalLocation();
     auto optWX = windowX ? Converter::OptConvertPtr<float>(windowX) : std::nullopt;
-    const auto value = PipelineBase::Vp2PxWithCurrentDensity(optWX.value_or(DEFAULT_VALUE));
-    location.SetX(value, location.GetXAnimationOption());
+    const auto windowXValue = optWX.value_or(DEFAULT_VALUE);
+    location.SetX(windowXValue, location.GetXAnimationOption());
     info->SetGlobalLocation(location);
 }
 Opt_Float64 GetWindowYImpl(Ark_HoverEvent peer)
@@ -111,8 +113,8 @@ void SetWindowYImpl(Ark_HoverEvent peer,
     CHECK_NULL_VOID(info);
     auto location = info->GetGlobalLocation();
     auto optWY = windowY ? Converter::OptConvertPtr<float>(windowY) : std::nullopt;
-    const auto value = PipelineBase::Vp2PxWithCurrentDensity(optWY.value_or(DEFAULT_VALUE));
-    location.SetY(value, location.GetYAnimationOption());
+    const auto windowYValue = optWY.value_or(DEFAULT_VALUE);
+    location.SetY(windowYValue, location.GetYAnimationOption());
     info->SetGlobalLocation(location);
 }
 Opt_Float64 GetDisplayXImpl(Ark_HoverEvent peer)
@@ -131,8 +133,8 @@ void SetDisplayXImpl(Ark_HoverEvent peer,
     CHECK_NULL_VOID(info);
     auto location = info->GetScreenLocation();
     auto optDX = displayX ? Converter::OptConvertPtr<float>(displayX) : std::nullopt;
-    const auto value = PipelineBase::Vp2PxWithCurrentDensity(optDX.value_or(DEFAULT_VALUE));
-    location.SetX(value, location.GetXAnimationOption());
+    const auto displayXValue = optDX.value_or(DEFAULT_VALUE);
+    location.SetX(displayXValue, location.GetXAnimationOption());
     info->SetScreenLocation(location);
 }
 Opt_Float64 GetDisplayYImpl(Ark_HoverEvent peer)
@@ -152,8 +154,8 @@ void SetDisplayYImpl(Ark_HoverEvent peer,
     CHECK_NULL_VOID(info);
     auto location = info->GetScreenLocation();
     auto optDY = displayY ? Converter::OptConvertPtr<float>(displayY) : std::nullopt;
-    const auto value = PipelineBase::Vp2PxWithCurrentDensity(optDY.value_or(DEFAULT_VALUE));
-    location.SetY(value, location.GetYAnimationOption());
+    const auto displayYValue = optDY.value_or(DEFAULT_VALUE);
+    location.SetY(displayYValue, location.GetYAnimationOption());
     info->SetScreenLocation(location);
 }
 void StopPropagationImpl(Ark_HoverEvent peer)
@@ -178,9 +180,8 @@ void SetGlobalDisplayXImpl(Ark_HoverEvent peer,
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto globalDisplayLocation = info->GetGlobalDisplayLocation();
-    auto value = Converter::OptConvertPtr<double>(globalDisplayX);
-    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value.value_or(DEFAULT_VALUE));
-    globalDisplayLocation.SetX(xConvert, globalDisplayLocation.GetXAnimationOption());
+    auto globalDisplayXValue = Converter::OptConvertPtr<double>(globalDisplayX).value_or(DEFAULT_VALUE);
+    globalDisplayLocation.SetX(globalDisplayXValue, globalDisplayLocation.GetXAnimationOption());
     info->SetGlobalDisplayLocation(globalDisplayLocation);
 }
 Opt_Float64 GetGlobalDisplayYImpl(Ark_HoverEvent peer)
@@ -198,9 +199,8 @@ void SetGlobalDisplayYImpl(Ark_HoverEvent peer,
     const auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto globalDisplayLocation = info->GetGlobalDisplayLocation();
-    auto value = Converter::OptConvertPtr<double>(globalDisplayY);
-    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value.value_or(DEFAULT_VALUE));
-    globalDisplayLocation.SetY(yConvert, globalDisplayLocation.GetYAnimationOption());
+    auto globalDisplayYValue = Converter::OptConvertPtr<double>(globalDisplayY).value_or(DEFAULT_VALUE);
+    globalDisplayLocation.SetY(globalDisplayYValue, globalDisplayLocation.GetYAnimationOption());
     info->SetGlobalDisplayLocation(globalDisplayLocation);
 }
 } // HoverEventAccessor

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
+#include "core/components_ng/base/modifier.h"
 
 #include "base/utils/measure_util.h"
 #include "base/utils/multi_thread.h"
@@ -37,6 +38,15 @@ constexpr char MEASURE_SIZE_STRING[] = "TEST";
 const Dimension FONT_SIZE = Dimension(2.0);
 const Dimension FOCUS_SIZE = Dimension(1.0);
 } // namespace
+
+PickerColumnPattern::PickerColumnPattern(bool isVertical) : LinearLayoutPattern(isVertical) {}
+
+PickerColumnPattern::~PickerColumnPattern()
+{
+    if (circleUtils_) {
+        delete circleUtils_;
+    }
+}
 
 void PickerColumnPattern::OnAttachToFrameNode()
 {
@@ -369,10 +379,20 @@ void PickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
 Dimension PickerColumnPattern::LinearFontSize(
     const Dimension& startFontSize, const Dimension& endFontSize, double percent)
 {
+    Dimension start = startFontSize;
+    Dimension end = endFontSize;
+    if (start.Unit() == DimensionUnit::LPX) {
+        start = Dimension(start.ConvertToPx());
+    }
+
+    if (end.Unit() == DimensionUnit::LPX) {
+        end = Dimension(end.ConvertToPx());
+    }
+
     if (percent > FONT_SIZE_PERCENT) {
-        return startFontSize + (endFontSize - startFontSize);
+        return start + (end - start);
     } else {
-        return startFontSize + (endFontSize - startFontSize) * percent;
+        return start + (end - start) * percent;
     }
 }
 
@@ -618,6 +638,9 @@ void PickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerTheme
     textLayoutProperty->UpdateTextColor(pickerLayoutProperty->GetDisappearColor().value_or(
         pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (pickerLayoutProperty->HasDisappearFontSize()) {
+        auto textNode = textLayoutProperty->GetHost();
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(pickerLayoutProperty->GetDisappearFontSize().value(),
+            LpxAttribute::LPX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateFontSize(pickerLayoutProperty->GetDisappearFontSize().value());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
@@ -638,6 +661,9 @@ void PickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme
     textLayoutProperty->UpdateTextColor(
         pickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (pickerLayoutProperty->HasFontSize()) {
+        auto textNode = textLayoutProperty->GetHost();
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(pickerLayoutProperty->GetFontSize().value(),
+            LpxAttribute::LPX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateFontSize(pickerLayoutProperty->GetFontSize().value());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
@@ -668,6 +694,9 @@ void PickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>
     }
 
     if (pickerLayoutProperty->HasSelectedFontSize()) {
+        auto textNode = textLayoutProperty->GetHost();
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(pickerLayoutProperty->GetSelectedFontSize().value(),
+            LpxAttribute::LPX_FONT_SIZE, textNode);
         textLayoutProperty->UpdateFontSize(pickerLayoutProperty->GetSelectedFontSize().value());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
@@ -1130,7 +1159,12 @@ void PickerColumnPattern::AddAnimationTextProperties(
                 optionProperties_[currentIndex].fontheight = optionProperties_[currentIndex].height;
             }
         }
-        properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
+
+        if (textLayoutProperty->GetFontSize().value().Unit() == DimensionUnit::LPX) {
+            properties.fontSize = textLayoutProperty->GetFontSize().value();
+        } else {
+            properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
+        }
     }
     if (textLayoutProperty->HasTextColor()) {
         properties.currentColor = textLayoutProperty->GetTextColor().value();

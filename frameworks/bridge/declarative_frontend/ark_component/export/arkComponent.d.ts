@@ -468,6 +468,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     maxLines(value: number): RichEditorAttribute;
     enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
     compressLeadingPunctuation(enable: Optional<boolean>): RichEditorAttribute;
+    punctuationOverflow(enable: Optional<boolean>): RichEditorAttribute;
     undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
     includeFontPadding(enable: Optional<boolean>): RichEditorAttribute;
     fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute;
@@ -1086,6 +1087,8 @@ declare class ArkContainerPicker extends ArkComponent implements UIPickerCompone
     canLoop(isLoop: Optional<boolean>): this;
     enableHapticFeedback(enable: Optional<boolean>): this;
     selectionIndicator(style: Optional<PickerIndicatorStyle>): this;
+    displayedItemCount(count: Optional<number>): this;
+    itemHeight(height: Optional<LengthMetrics>): this;
 }
 
 declare class ArkSliderComponent extends ArkComponent implements SliderAttribute {
@@ -2205,6 +2208,21 @@ declare class ArkContainerSpanComponent extends ArkComponent implements Containe
 declare class ArkLazyVGridLayoutComponent extends ArkComponent implements LazyVGridLayoutAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     columnsTemplate(value: string): this;
+    onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
+    columnsGap(value: LengthMetrics): this;
+    rowsGap(value: LengthMetrics): this;
+}
+
+declare class ArkLazyColumnLayoutComponent extends ArkComponent implements LazyColumnLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    space(value: LengthMetrics | undefined): this;
+    alignItems(value: HorizontalAlign | undefined): this;
+    onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
+}
+
+declare class ArkLazyVWaterFlowLayoutComponent extends ArkComponent implements LazyVWaterFlowLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    columnsTemplate(value: string | ItemFillPolicy): this;
     onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this;
     columnsGap(value: LengthMetrics): this;
     rowsGap(value: LengthMetrics): this;

@@ -15,6 +15,7 @@
 #include "ui/base/ace_type.h"
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"

@@ -49,7 +49,7 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
     update(newValue: T): void {
         const value = this.backing_.get(false);
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Param ${value === newValue} ${this.updateTraceInfo()}`);
-        if (value === newValue) {
+        if (value === newValue || !this.owningComponent_!.__getCanUpdateStateVars__Internal()) {
             return;
         }
         const processedNewValue = isDynamicObject(newValue)

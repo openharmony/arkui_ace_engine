@@ -907,6 +907,8 @@ void SetListEditModeOptions(ArkUINodeHandle node, ArkUIEditModeOptions options)
     CHECK_NULL_VOID(frameNode);
     EditModeOptions newOptions;
     newOptions.enableGatherSelectedItemsAnimation = options->enableGatherSelectedItemsAnimation;
+    newOptions.useDefaultMultiSelectStyle = options->useDefaultMultiSelectStyle;
+    newOptions.enableFingerMultiSelect = options->enableFingerMultiSelect;
     ListModelNG::SetEditModeOptions(frameNode, newOptions);
 }
 
@@ -918,12 +920,34 @@ void ResetListEditModeOptions(ArkUINodeHandle node)
     ListModelNG::SetEditModeOptions(frameNode, newOptions);
 }
 
-void GetListEditModeOptions(ArkUINodeHandle node, ArkUI_Bool (*values)[1])
+void GetListEditModeOptions(ArkUINodeHandle node, ArkUI_Bool (*values)[3])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     EditModeOptions options = ListModelNG::GetEditModeOptions(frameNode);
     (*values)[0] = options.enableGatherSelectedItemsAnimation ? 1 : 0;
+    (*values)[1] = options.useDefaultMultiSelectStyle ? 1 : 0;
+}
+
+void SetListEnableEditMode(ArkUINodeHandle node, ArkUI_Bool enableEditMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetEnableEditMode(frameNode, enableEditMode);
+}
+ 	 
+void ResetListEnableEditMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetEnableEditMode(frameNode, false);
+}
+ 	 
+ArkUI_Bool GetListEnableEditMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ListModelNG::GetEnableEditMode(frameNode);
 }
 
 void SetListFadingEdge(
@@ -1158,6 +1182,9 @@ const ArkUIListModifier* GetListModifier()
         .setEditModeOptions = SetListEditModeOptions,
         .resetEditModeOptions = ResetListEditModeOptions,
         .getEditModeOptions = GetListEditModeOptions,
+        .setListEnableEditMode = SetListEnableEditMode,
+        .resetListEnableEditMode = ResetListEnableEditMode,
+        .getListEnableEditMode = GetListEnableEditMode,
         .setListFadingEdge = SetListFadingEdge,
         .resetListFadingEdge = ResetListFadingEdge,
         .setShowCached = SetShowCached,
@@ -1181,6 +1208,7 @@ const ArkUIListModifier* GetListModifier()
         .setOnListReachEndCallBack = SetOnListReachEndCallBack,
         .setOnListScrollStartCallBack = SetOnListScrollStartCallBack,
         .setOnListScrollStopCallBack = SetOnListScrollStopCallBack,
+        .setOnListEditModeChangeCallBack = SetOnListEditModeChangeCallBack,
         .resetOnListScrollIndex = ResetOnListScrollIndex,
         .resetOnScrollVisibleContentChange = ResetOnScrollVisibleContentChange,
         .resetOnItemMove = ResetOnItemMove,
@@ -1196,6 +1224,7 @@ const ArkUIListModifier* GetListModifier()
         .resetOnListDidScroll = ResetOnListDidScroll,
         .resetOnListReachStart = ResetOnListReachStart,
         .resetOnListReachEnd = ResetOnListReachEnd,
+        .resetOnListEditModeChange = ResetOnListEditModeChange,
         .createWithResourceObjFriction = CreateWithResourceObjFriction,
         .parseResObjDividerStrokeWidth = ParseResObjDividerStrokeWidth,
         .parseResObjDividerColor = ParseResObjDividerColor,
@@ -1471,6 +1500,40 @@ void SetOnListScrollVisibleContentChange(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     ListModelNG::SetOnScrollVisibleContentChange(frameNode, std::move(onScrollVisibleContentChange));
+}
+
+void SetOnListEditModeChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [extraParam](bool enableEditMode) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_EDIT_MODE_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = enableEditMode ? 1 : 0;
+        SendArkUISyncEvent(&event);
+    };
+    ListModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(onChange));
+}
+
+void ResetOnListEditModeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetEnableEditModeChangeEvent(frameNode, nullptr);
+}
+
+void SetOnListEditModeChangeCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(extraParam);
+        ListModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(*onChange));
+    } else {
+        ListModelNG::SetEnableEditModeChangeEvent(frameNode, nullptr);
+    }
 }
 
 void SetOnListScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)

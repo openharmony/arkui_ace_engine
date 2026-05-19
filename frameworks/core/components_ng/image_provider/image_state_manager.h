@@ -19,7 +19,6 @@
 #include <functional>
 #include <utility>
 
-#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {

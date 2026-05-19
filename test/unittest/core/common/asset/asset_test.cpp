@@ -21,6 +21,7 @@
 
 #include "core/common/asset_manager_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
+#include "core/components_ng/base/frame_node.h"
 
 using namespace testing;
 using namespace testing::ext;

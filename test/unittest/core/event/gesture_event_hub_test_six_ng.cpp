@@ -318,4 +318,181 @@ HWTEST_F(GestureEventHubTestSixNg, FireCustomerOnDragEndResetStatus001, TestSize
     gestureEventHub->FireCustomerOnDragEnd(pipeline, hubWeak);
     EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, nullptr);
 }
+
+/**
+ * @tc.name: SetPanCanCoexistWithScrollTest001
+ * @tc.desc: SetPanCanCoexistWithScroll stores the flag and propagates it to an already-existing panEventActuator_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestSixNg, SetPanCanCoexistWithScrollTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and add a pan event to create panEventActuator_.
+     * @tc.expected: panEventActuator_ is not null; flags start false.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(NODE_TAG, 100, AceType::MakeRefPtr<Pattern>(), false);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    gestureEventHub->AddPanEvent(panEvent, PAN_DIRECTION_ALL, FINGERS, DISTANCE);
+    ASSERT_NE(gestureEventHub->panEventActuator_, nullptr);
+    EXPECT_FALSE(gestureEventHub->panCanCoexistWithScroll_);
+    EXPECT_FALSE(gestureEventHub->panEventActuator_->canCoexistWithScroll_);
+
+    /**
+     * @tc.steps: step2. Call SetPanCanCoexistWithScroll(true).
+     * @tc.expected: Both GestureEventHub flag and actuator flag become true; recognizer also reflects true.
+     */
+    gestureEventHub->SetPanCanCoexistWithScroll(true);
+    EXPECT_TRUE(gestureEventHub->panCanCoexistWithScroll_);
+    EXPECT_TRUE(gestureEventHub->panEventActuator_->canCoexistWithScroll_);
+    EXPECT_TRUE(gestureEventHub->panEventActuator_->panRecognizer_->CanCoexistWithScroll());
+}
+
+/**
+ * @tc.name: SetPanCanCoexistWithScrollTest002
+ * @tc.desc: SetPanCanCoexistWithScroll before AddPanEvent stores the flag; AddPanEvent applies it to the new actuator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestSixNg, SetPanCanCoexistWithScrollTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub without adding a pan event yet.
+     * @tc.expected: panEventActuator_ is null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(NODE_TAG, 101, AceType::MakeRefPtr<Pattern>(), false);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_EQ(gestureEventHub->panEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SetPanCanCoexistWithScroll(true) before AddPanEvent.
+     * @tc.expected: Flag is stored; actuator remains null.
+     */
+    gestureEventHub->SetPanCanCoexistWithScroll(true);
+    EXPECT_TRUE(gestureEventHub->panCanCoexistWithScroll_);
+    EXPECT_EQ(gestureEventHub->panEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call AddPanEvent — creates a new actuator.
+     * @tc.expected: New actuator inherits the stored coexist flag.
+     */
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    gestureEventHub->AddPanEvent(panEvent, PAN_DIRECTION_ALL, FINGERS, DISTANCE);
+    ASSERT_NE(gestureEventHub->panEventActuator_, nullptr);
+    EXPECT_TRUE(gestureEventHub->panEventActuator_->canCoexistWithScroll_);
+}
+
+/**
+ * @tc.name: PackInnerRecognizerParallelTest001
+ * @tc.desc: PackInnerRecognizer uses ParallelRecognizer when panCanCoexistWithScroll_ is true,
+ *           placing the coexist pan alongside an ExclusiveRecognizer that wraps the other recognizers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestSixNg, PackInnerRecognizerParallelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub with panCanCoexistWithScroll_ = true.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(NODE_TAG, 102, AceType::MakeRefPtr<Pattern>(), false);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    gestureEventHub->panCanCoexistWithScroll_ = true;
+
+    /**
+     * @tc.steps: step2. Build a list with a coexist PanRecognizer and a ClickRecognizer.
+     */
+    auto coexistPan = AceType::MakeRefPtr<PanRecognizer>(
+        FINGERS, PanDirection { PanDirection::ALL }, DRAG_DISTANCE);
+    coexistPan->SetCanCoexistWithScroll(true);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, CLICK_COUNTS);
+    std::list<RefPtr<NGGestureRecognizer>> innerRecognizers { clickRecognizer, coexistPan };
+
+    /**
+     * @tc.steps: step3. Call PackInnerRecognizer.
+     * @tc.expected: innerParallelRecognizer_ is created; innerExclusiveRecognizer_ wraps the other recognizers;
+     *               the returned recognizer is innerParallelRecognizer_.
+     */
+    Offset offset;
+    auto result = gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID, nullptr);
+    EXPECT_NE(gestureEventHub->innerParallelRecognizer_, nullptr);
+    EXPECT_NE(gestureEventHub->innerExclusiveRecognizer_, nullptr);
+    EXPECT_EQ(result, gestureEventHub->innerParallelRecognizer_);
+}
+
+/**
+ * @tc.name: PackInnerRecognizerParallelTest002
+ * @tc.desc: PackInnerRecognizer uses ExclusiveRecognizer (default behavior) when panCanCoexistWithScroll_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestSixNg, PackInnerRecognizerParallelTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub with panCanCoexistWithScroll_ = false (default).
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(NODE_TAG, 103, AceType::MakeRefPtr<Pattern>(), false);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+
+    /**
+     * @tc.steps: step2. Build a list with a regular PanRecognizer and a ClickRecognizer.
+     */
+    auto panRec = AceType::MakeRefPtr<PanRecognizer>(
+        FINGERS, PanDirection { PanDirection::ALL }, DRAG_DISTANCE);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, CLICK_COUNTS);
+    std::list<RefPtr<NGGestureRecognizer>> innerRecognizers { panRec, clickRecognizer };
+
+    /**
+     * @tc.steps: step3. Call PackInnerRecognizer.
+     * @tc.expected: innerExclusiveRecognizer_ is created (existing behavior);
+     *               innerParallelRecognizer_ remains null;
+     *               the returned recognizer is innerExclusiveRecognizer_.
+     */
+    Offset offset;
+    auto result = gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID, nullptr);
+    EXPECT_NE(gestureEventHub->innerExclusiveRecognizer_, nullptr);
+    EXPECT_EQ(gestureEventHub->innerParallelRecognizer_, nullptr);
+    EXPECT_EQ(result, gestureEventHub->innerExclusiveRecognizer_);
+}
+
+/**
+ * @tc.name: CleanInnerRecognizerClearsParallelTest001
+ * @tc.desc: CleanInnerRecognizer resets both innerExclusiveRecognizer_ and innerParallelRecognizer_ to null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestSixNg, CleanInnerRecognizerClearsParallelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and invoke PackInnerRecognizer in coexist mode to populate both
+     *            innerParallelRecognizer_ and innerExclusiveRecognizer_.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(NODE_TAG, 104, AceType::MakeRefPtr<Pattern>(), false);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    gestureEventHub->panCanCoexistWithScroll_ = true;
+
+    auto coexistPan = AceType::MakeRefPtr<PanRecognizer>(
+        FINGERS, PanDirection { PanDirection::ALL }, DRAG_DISTANCE);
+    coexistPan->SetCanCoexistWithScroll(true);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, CLICK_COUNTS);
+    std::list<RefPtr<NGGestureRecognizer>> innerRecognizers { clickRecognizer, coexistPan };
+
+    Offset offset;
+    gestureEventHub->PackInnerRecognizer(offset, innerRecognizers, TOUCH_ID, TOUCH_ID, nullptr);
+    EXPECT_NE(gestureEventHub->innerParallelRecognizer_, nullptr);
+    EXPECT_NE(gestureEventHub->innerExclusiveRecognizer_, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CleanInnerRecognizer.
+     * @tc.expected: Both innerParallelRecognizer_ and innerExclusiveRecognizer_ become null.
+     */
+    gestureEventHub->CleanInnerRecognizer();
+    EXPECT_EQ(gestureEventHub->innerParallelRecognizer_, nullptr);
+    EXPECT_EQ(gestureEventHub->innerExclusiveRecognizer_, nullptr);
+}
 } // namespace OHOS::Ace::NG

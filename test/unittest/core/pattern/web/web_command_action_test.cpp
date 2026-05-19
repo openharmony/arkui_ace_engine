@@ -1096,6 +1096,27 @@ HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_InvalidIndexSt
 }
 
 /**
+ * @tc.name: BuildInputMethodAction_InputInsert_InvalidIndexDouble_0100
+ * @tc.desc: Test BuildInputMethodAction with inputInsert JSON where index is a double.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputInsert_InvalidIndexDouble_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": 1.5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputInsert", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
  * @tc.name: BuildInputMethodAction_InputInsert_IndexBoolean_0100
  * @tc.desc: Test BuildInputMethodAction with inputInsert JSON where index is boolean.
  * @tc.type: FUNC
@@ -1442,6 +1463,48 @@ HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_InvalidStartIn
 }
 
 /**
+ * @tc.name: BuildInputMethodAction_InputSelect_InvalidStartIndexType_0200
+ * @tc.desc: Test BuildInputMethodAction with inputSelect where start_index is a double.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_InvalidStartIndexType_0200, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect",
+        "start_index": 1.5,
+        "finish_index": 10
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSelect_InvalidFinishIndexType_0100
+ * @tc.desc: Test BuildInputMethodAction with inputSelect where finish_index is a double.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSelect_InvalidFinishIndexType_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSelect",
+        "start_index": 1,
+        "finish_index": 3.5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSelect", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
  * @tc.name: BuildInputMethodAction_InputSelect_BothIndexesMissing_0100
  * @tc.desc: Test BuildInputMethodAction with inputSelect JSON missing both indexes.
  * @tc.type: FUNC
@@ -1642,6 +1705,26 @@ HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSetCursor_InvalidInde
     const std::string jsonStr = R"({
         "event_type": "inputSetCursor",
         "index": "fifteen"
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<NWebCommandActionImpl> outCommandAction;
+    int result = WebCommandWrapper::BuildInputMethodAction(comJson, "inputSetCursor", outCommandAction);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: BuildInputMethodAction_InputSetCursor_InvalidIndexType_0200
+ * @tc.desc: Test BuildInputMethodAction with inputSetCursor JSON where index is a double.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildInputMethodAction_InputSetCursor_InvalidIndexType_0200, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "event_type": "inputSetCursor",
+        "index": 1.5
     })";
     auto comJson = JsonUtil::ParseJsonString(jsonStr);
     ASSERT_NE(comJson, nullptr);

@@ -78,6 +78,9 @@ build_component_ng("web_pattern_ng") {
       external_deps += [ "webview:libarkweb_utils" ]
     }
 
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+    }
     standard_input_deps = [ "imf:inputmethod_client" ]
   }
 }

@@ -27,7 +27,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_type.h"
 
 namespace OHOS::Ace::NG {
 

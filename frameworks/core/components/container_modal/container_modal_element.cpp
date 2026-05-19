@@ -14,6 +14,7 @@
  */
 
 #include "core/components/container_modal/container_modal_element.h"
+#include "core/pipeline/container_window_manager.h"
 
 #include "core/accessibility/accessibility_manager.h"
 

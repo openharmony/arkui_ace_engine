@@ -403,14 +403,15 @@ int32_t ListPositionMap::GetEntryAtOrAfterIndex(int32_t index) const
 void ListPositionMap::OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos,
     const float offset, const float contentSize)
 {
-    if (NearZero(offset) || GreatOrEqual(contentSize, totalHeight_)) {
+    if (NearZero(offset) || GreatOrEqual(contentSize, totalHeight_) ||
+        posMap_.find(beginIndex) == posMap_.end()) {
         return;
     }
     float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(beginIndex) : 0.0f;
     if (Positive(offset)) {
         float criticalPos = offset;
         std::pair<int32_t, float> rowInfo = GetRowEndIndexAndHeight(beginIndex);
-        while (!NearEqual(posMap_[beginIndex].mainPos + rowInfo.second, totalHeight_) &&
+        while (beginIndex < totalItemCount_ && !NearEqual(posMap_[beginIndex].mainPos + rowInfo.second, totalHeight_) &&
             LessNotEqual(beginPos + rowInfo.second + chainOffset, criticalPos)) {
             beginIndex = rowInfo.first + 1;
             beginPos += (rowInfo.second + space_);
@@ -420,7 +421,7 @@ void ListPositionMap::OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos
     } else {
         float criticalPos = offset + contentSize;
         std::pair<int32_t, float> rowInfo = GetRowEndIndexAndHeight(beginIndex);
-        while (Positive(posMap_[beginIndex].mainPos) &&
+        while (beginIndex < totalItemCount_ && Positive(posMap_[beginIndex].mainPos) &&
             GreatNotEqual(beginPos - rowInfo.second + chainOffset, criticalPos)) {
             beginIndex = GetRowStartIndex(beginIndex) - 1;
             beginPos -= (rowInfo.second + space_);

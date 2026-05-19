@@ -14,6 +14,7 @@
  */
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text_clock/bridge/text_clock_custom_modifier.h"
@@ -248,9 +249,9 @@ void ParseShadowRadiusUpdate(const RefPtr<ResourceObject>& radiusResObj, Shadow&
         return;
     }
     auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
-        double radius = -1.0;
+        double radius = 0.0;
         ResourceParseUtils::ParseResDouble(resObj, radius);
-        shadow.SetBlurRadius(std::max(radius, -1.0));
+        shadow.SetBlurRadius(radius);
     };
     shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
 }
@@ -346,7 +347,7 @@ void ResetTextShadow(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    Shadow shadow;
+    Shadow shadow(0.0);
     shadow.SetOffsetX(0.0);
     shadow.SetOffsetY(0.0);
     TextClockModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });

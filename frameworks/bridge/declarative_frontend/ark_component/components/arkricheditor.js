@@ -185,6 +185,10 @@ class ArkRichEditorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RichEditorCompressLeadingPunctuationModifier.identity, RichEditorCompressLeadingPunctuationModifier, enable);
     return this;
   }
+  punctuationOverflow(enable) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorPunctuationOverflowModifier.identity, RichEditorPunctuationOverflowModifier, enable);
+    return this;
+  }
   undoStyle(style) {
     modifierWithKey(this._modifiersWithKeys, RichEditorUndoStyleModifier.identity, RichEditorUndoStyleModifier, style);
     return this;
@@ -785,6 +789,20 @@ class RichEditorCompressLeadingPunctuationModifier extends ModifierWithKey {
 }
 RichEditorCompressLeadingPunctuationModifier.identity = Symbol('richEditorCompressLeadingPunctuation');
 
+class RichEditorPunctuationOverflowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetPunctuationOverflow(node);
+    } else {
+      getUINativeModule().richEditor.setPunctuationOverflow(node, this.value);
+    }
+  }
+}
+RichEditorPunctuationOverflowModifier.identity = Symbol('richEditorPunctuationOverflow');
+
 class RichEditorUndoStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -1016,6 +1034,9 @@ class JSRichEditor extends JSViewAbstract {
     }
     static compressLeadingPunctuation(enable) {
         getUINativeModule().richEditor.setCompressLeadingPunctuation(true, enable);
+    }
+    static punctuationOverflow(enable) {
+        getUINativeModule().richEditor.setPunctuationOverflow(true, enable);
     }
     static stopBackPress(value) {
         getUINativeModule().richEditor.setStopBackPress(true, value);

@@ -18,6 +18,8 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
+#include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<Modifier> WaterFlowPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)

@@ -235,7 +235,8 @@ RefPtr<Paragraph> RichEditorLayoutAlgorithm::GetOrCreateParagraph(const std::lis
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 {
     RefPtr<SpanItem> lastSpan = allSpans_.empty() ? nullptr : allSpans_.back();
-    bool afterNewLine = !allSpans_.empty() && lastSpan && lastSpan->content.back() == u'\n';
+    bool afterNewLine = !allSpans_.empty() && lastSpan
+        && !lastSpan->content.empty() && lastSpan->content.back() == u'\n';
     bool emptyAndNoPlaceholder = allSpans_.empty() && !needShowPlaceholder_;
     bool needNewLineSpan = afterNewLine || emptyAndNoPlaceholder;
     IF_TRUE(isSingleLineMode_, needNewLineSpan = emptyAndNoPlaceholder);
@@ -371,6 +372,10 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     auto contentHeight = std::min(res.Height(), maxHeight);
     auto contentWidth = IsContentWidthUnlimited() ?
         MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint).Width() : res.Width();
+    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    if (layoutProperty) {
+        RelayoutShaderStyle(layoutProperty);
+    }
     return SizeF(contentWidth, contentHeight);
 }
 
@@ -410,8 +415,8 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
         bool needReLayout = false;
         bool needReLayoutParagraph = false;
         std::optional<TextStyle> firstValidTextStyle;
-        ReLayoutParagraphBySpan(layoutWrapper, textStyles, group, needReLayout, needReLayoutParagraph,
-            firstValidTextStyle);
+        ReLayoutParagraphBySpan(pIter->paragraphStyle, layoutWrapper, textStyles, group,
+            needReLayout, needReLayoutParagraph, firstValidTextStyle);
         if (!needReLayout && needReLayoutParagraph) {
             ACE_SCOPED_TRACE("ReLayoutParagraph");
             paragraph->ReLayout(maxSize.Width(), pIter->paragraphStyle, textStyles, firstValidTextStyle);
@@ -490,9 +495,9 @@ bool RichEditorLayoutAlgorithm::IsWidthAdaptive(LayoutWrapper* layoutWrapper) co
     return layoutPolicy.has_value() && layoutPolicy->IsWidthAdaptive();
 }
 
-void RichEditorLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper,
-    std::vector<TextStyle>& textStyles, std::list<RefPtr<SpanItem>>& group,
-    bool& needReLayout, bool& needReLayoutParagraph, std::optional<TextStyle>& firstValidTextStyle)
+void RichEditorLayoutAlgorithm::ReLayoutParagraphBySpan(const ParagraphStyle& paraStyle, LayoutWrapper* layoutWrapper,
+    std::vector<TextStyle>& textStyles, std::list<RefPtr<SpanItem>>& group, bool& needReLayout,
+    bool& needReLayoutParagraph, std::optional<TextStyle>& firstValidTextStyle)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -511,6 +516,13 @@ void RichEditorLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* layoutWra
         TextStyle currentTextStyle;
         if (child->GetTextStyle().has_value()) {
             currentTextStyle = child->GetTextStyle().value();
+        }
+        currentTextStyle.SetColorShaderStyle(paraStyle.colorShaderStyle);
+        auto gradient = paraStyle.GetGradient();
+        if (gradient.has_value()) {
+            currentTextStyle.SetGradient(GradientConvert::ToGradient(gradient.value()));
+        } else {
+            currentTextStyle.ResetGradient();
         }
         textStyles.emplace_back(currentTextStyle);
         if (!hasFoundFirstValidText && (child->spanItemType == SpanItemType::NORMAL

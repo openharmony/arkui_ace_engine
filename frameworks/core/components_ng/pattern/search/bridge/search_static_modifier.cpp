@@ -34,6 +34,9 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
+namespace OHOS::Ace::NG::Converter {
+void ProcessLinearGradient(const Opt_LinearGradientOptions& linearGradientOpt, Gradient& gradient);
+}
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -499,6 +502,7 @@ void SetDecorationImpl(Ark_NativePointer node, const Opt_TextDecorationOptions* 
     SearchModelStatic::SetTextDecoration(frameNode, options->textDecoration);
     SearchModelStatic::SetTextDecorationColor(frameNode, options->color);
     SearchModelStatic::SetTextDecorationStyle(frameNode, options->textDecorationStyle);
+    SearchModelStatic::SetLineThicknessScale(frameNode, options->lineThicknessScale);
 }
 void SetLetterSpacingImpl(Ark_NativePointer node, const Opt_Union_F64_String_Resource* value)
 {
@@ -772,6 +776,42 @@ void SetStrokeWidthImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
     auto convValue = Converter::OptConvert<Dimension>(*value);
     SearchModelStatic::SetStrokeWidth(frameNode, convValue);
 }
+void SetStrokeJoinStyleImpl(Ark_NativePointer node,
+                            const Opt_StrokeJoinStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStrokeJoinStyle(frameNode, Converter::OptConvertPtr<StrokeJoinStyle>(value)
+        .value_or(StrokeJoinStyle::MITER_JOIN));
+}
+void SetShaderStyleImpl(Ark_NativePointer node,
+                        const Opt_ShaderStyleProxy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        SearchModelNG::ResetSearchGradient(frameNode);
+        return;
+    }
+    auto shaderStyleProxy = value->value;
+    auto colorOpt = Converter::OptConvert<Color>(shaderStyleProxy.color);
+    auto linearGradientOpt = shaderStyleProxy.linearGradientOptions;
+    auto radialGradientOpt = shaderStyleProxy.radialGradientOptions;
+    bool hasLinear = linearGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    bool hasRadial = radialGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    if (colorOpt.has_value()) {
+        SearchModelNG::SetColorShaderStyle(frameNode, colorOpt.value());
+    } else if (hasLinear) {
+        Gradient gradient;
+        Converter::ProcessLinearGradient(linearGradientOpt, gradient);
+        SearchModelNG::SetGradientStyle(frameNode, gradient);
+    } else if (hasRadial) {
+        Gradient gradient = Converter::Convert<Gradient>(radialGradientOpt.value);
+        SearchModelNG::SetGradientStyle(frameNode, gradient);
+    } else {
+        SearchModelNG::ResetSearchGradient(frameNode);
+    }
+}
 void SetOnWillAttachIMEImpl(Ark_NativePointer node, const Opt_Callback_IMEClient_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -944,6 +984,8 @@ const GENERATED_ArkUISearchModifier* GetSearchStaticModifier()
         SearchAttributeModifier::SetFallbackLineSpacingImpl,
         SearchAttributeModifier::SetSelectedDragPreviewStyleImpl,
         SearchAttributeModifier::SetTextDirectionImpl,
+        SearchAttributeModifier::SetStrokeJoinStyleImpl,
+        SearchAttributeModifier::SetShaderStyleImpl,
         SearchAttributeModifier::SetSearchButtonImpl,
         SearchAttributeModifier::SetInputFilterImpl,
         SearchAttributeModifier::SetCustomKeyboardImpl,

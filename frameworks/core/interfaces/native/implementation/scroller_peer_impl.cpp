@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "scroller_peer_impl.h"
 
 #ifdef WINDOWS_PLATFORM

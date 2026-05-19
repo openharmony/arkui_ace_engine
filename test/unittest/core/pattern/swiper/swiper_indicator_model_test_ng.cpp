@@ -703,7 +703,7 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg014, TestSize.Level1)
     EXPECT_TRUE(indicatorPattern_->isClicked_);
     indicatorPattern_->longPressEvent_->GetGestureEventFunc()(info);
     EXPECT_TRUE(indicatorPattern_->IsHorizontalAndRightToLeft());
-    EXPECT_EQ(indicatorPattern_->GetCurrentShownIndex(), 1);
+    EXPECT_EQ(indicatorPattern_->GetCurrentShownIndex(), 0);
 }
 
 /**

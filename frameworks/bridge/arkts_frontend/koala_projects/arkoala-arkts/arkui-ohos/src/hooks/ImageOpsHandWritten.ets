@@ -96,7 +96,7 @@ export class ImageOpsHandWritten {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions(peerPtr, thisSerializer.asBuffer(),
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions0(peerPtr, thisSerializer.asBuffer(),
             thisSerializer.length())
         thisSerializer.release()
     }

@@ -39,6 +39,13 @@ enum class ExpandMode : uint32_t {
     NOT_EXPAND = 0,
     EXPAND,
     LAZY_EXPAND,
+    LAZY_NOT_EXPAND,
+};
+
+enum class ChildrenCountMode : uint32_t {
+    ALL_EXPAND = 0,
+    ONLY_EXPANDED,
+    ALL_NOT_EXPAND,
 };
 
 enum EventQueryType {
@@ -272,17 +279,21 @@ ArkUI_Int32 ConvertPositionFromWindow(
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Bool isExpanded)
+ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Uint32 childrenCountMode)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, 0);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, 0);
-    if (isExpanded) {
-        frameNode->GetAllChildrenWithBuild(false);
+    auto childrenCountModeResult = static_cast<ChildrenCountMode>(childrenCountMode);
+    if (childrenCountModeResult == ChildrenCountMode::ALL_EXPAND) {
+        return frameNode->GetAllChildrenWithBuild(false).size();
+    } else if (childrenCountModeResult == ChildrenCountMode::ONLY_EXPANDED) {
+        return frameNode->GetTotalChildCountWithoutExpanded();
+    } else if (childrenCountModeResult == ChildrenCountMode::ALL_NOT_EXPAND) {
+        return frameNode->GetTotalChildCount();
     }
-    return isExpanded ? frameNode->GetAllChildrenWithBuild(false).size()
-                      : frameNode->GetTotalChildCountWithoutExpanded();
+    return frameNode->GetAllChildrenWithBuild(false).size();
 }
 
 ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode)
@@ -301,6 +312,11 @@ ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 e
         child = frameNode->GetFrameNodeChildByIndex(index, false, expandModeResult == ExpandMode::EXPAND);
     } else if (expandModeResult == ExpandMode::LAZY_EXPAND) {
         child = frameNode->GetFrameNodeChildByIndexWithoutBuild(index);
+        if (child == nullptr) {
+            return GetChild(node, index, static_cast<ArkUI_Uint32>(ExpandMode::EXPAND));
+        }
+    } else if (expandModeResult == ExpandMode::LAZY_NOT_EXPAND) {
+        child = frameNode->GetFrameNodeChildByIndex(index, false, true);
         if (child == nullptr) {
             return GetChild(node, index, static_cast<ArkUI_Uint32>(ExpandMode::EXPAND));
         }

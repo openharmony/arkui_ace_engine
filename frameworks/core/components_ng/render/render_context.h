@@ -27,14 +27,11 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
@@ -45,6 +42,9 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/opinc_type.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/render/canvas_draw_function.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 
@@ -65,8 +65,10 @@ struct SharedTransitionOption;
 class UiMaterial;
 struct UiMaterialInfo;
 struct ImmersiveMaterialConfig;
+struct FrostedGlassParam;
 enum class MaterialType;
 enum class UiMaterialFilterQuality;
+class RenderEdgeLightModifier;
 }
 
 namespace OHOS::Ace::Kit {
@@ -74,19 +76,17 @@ class Modifier;
 }
 
 namespace OHOS::Ace::NG {
-typedef enum {
-    OPINC_INVALID,
-    OPINC_NODE,
-    OPINC_SUGGESTED_OR_EXCLUDED,
-    OPINC_PARENT_POSSIBLE,
-    OPINC_NODE_POSSIBLE,
-} OPINC_TYPE_E;
+
+struct ShapeMaskProperty;
 
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
 class InspectorFilter;
 class Modifier;
+class OverlayModifier;
+class ContentModifier;
+class NodeAnimatablePropertyBase;
 class PipelineContext;
 struct DistortionParam;
 struct GestureDebugBoundaryInfo;
@@ -101,7 +101,6 @@ struct PaintFocusExtraInfo final {
     bool isFocusBoxGlow { false };
 };
 
-using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 using TransitionFinishCallback = std::function<void(bool)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
@@ -375,7 +374,15 @@ public:
     virtual void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) {}
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}
+
+    virtual void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) {}
+
     void SetSystemMaterial(const RefPtr<UiMaterial>& material);
+    virtual std::shared_ptr<Rosen::RSNGFilterBase> CreateFrostedGlassFilter(
+        const FrostedGlassParam& param, float dipScale)
+    {
+        return nullptr;
+    }
     virtual void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality)
     {}
@@ -393,6 +400,7 @@ public:
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnOffsetEdgesUpdate(const EdgesParam& value) {}
+    virtual void ClearClipBounds() {}
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     virtual void SetRotation(float rotationX, float rotationY, float rotationZ) {}
@@ -552,7 +560,7 @@ public:
         return GetForeground() ? GetForeground()->propBlurRadius : std::nullopt;
     }
 
-    virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
+    virtual void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
     virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
@@ -573,6 +581,7 @@ public:
     virtual void OnPositionEdgesUpdate(const EdgesParam& value) {}
     virtual void RecalculatePosition() {}
     virtual void OnZIndexUpdate(int32_t value) {}
+    virtual void SortChildrenByZIndex() {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnPreBackgroundColorUpdate(const Color& value) {}
@@ -810,6 +819,9 @@ public:
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
+    // DoubleSided
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DoubleSided, bool);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
@@ -929,6 +941,8 @@ public:
     {}
 
     virtual void ResetEdgeLightFilter() {}
+
+    virtual void UpdateSubmenuDistortionParam() {}
 
     void SetIsFree(bool isFree)
     {
@@ -1051,6 +1065,7 @@ protected:
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
     virtual void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) {}
+    virtual void OnDoubleSidedUpdate(bool doubleSided) {}
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;

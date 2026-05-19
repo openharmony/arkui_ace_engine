@@ -169,6 +169,18 @@ export function LoadingProgressImpl(
     })
 }
 
+@memo
+export function LoadingProgress(
+    @memo @memo_skip
+    style: ((attributes: LoadingProgressAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkLoadingProgressComponent>((): ArkLoadingProgressComponent => {
+        return new ArkLoadingProgressComponent()
+    })
+    NodeAttach<ArkLoadingProgressPeer>((): ArkLoadingProgressPeer => ArkLoadingProgressPeer.create(receiver), (_: ArkLoadingProgressPeer): void => {
+        style?.(receiver)
+    })
+}
 export class LoadingProgressConfiguration_serializer {
     public static write(buffer: SerializerBase, value: LoadingProgressConfiguration): void {
         let valueSerializer: SerializerBase = buffer

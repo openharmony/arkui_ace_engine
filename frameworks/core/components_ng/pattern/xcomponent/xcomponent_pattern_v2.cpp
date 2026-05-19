@@ -20,6 +20,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
+#include "core/common/window.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"

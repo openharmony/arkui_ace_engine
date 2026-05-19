@@ -888,6 +888,86 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateExtraInfoEnableAnimationTest001
+ * @tc.desc: Test UpdateExtraInfo enable_animation when disableArkuiAnimation is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoEnableAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and gestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateExtraInfo with disableArkuiAnimation = false
+     * @tc.expected: enable_animation should be false
+     */
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    PreparedInfoForDrag data;
+    data.disableArkuiAnimation = false;
+    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f, data);
+    auto enableAnimation = arkExtraInfoJson->GetBool("enable_animation", true);
+    EXPECT_EQ(enableAnimation, false);
+}
+
+/**
+ * @tc.name: UpdateExtraInfoEnableAnimationTest002
+ * @tc.desc: Test UpdateExtraInfo enable_animation when disableArkuiAnimation is true (isSceneBoardTouchDrag)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoEnableAnimationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and gestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateExtraInfo with disableArkuiAnimation = true (isSceneBoardTouchDrag scenario)
+     * @tc.expected: enable_animation should be true
+     */
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    PreparedInfoForDrag data;
+    data.disableArkuiAnimation = true;
+    data.isSceneBoardTouchDrag = true;
+    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f, data);
+    auto enableAnimation = arkExtraInfoJson->GetBool("enable_animation", false);
+    EXPECT_EQ(enableAnimation, true);
+}
+
+/**
+ * @tc.name: UpdateExtraInfoEnableAnimationTest003
+ * @tc.desc: Test UpdateExtraInfo enable_animation when disableArkuiAnimation is true (FOLLOW_HAND_MORPH)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoEnableAnimationTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and gestureEventHub
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateExtraInfo with disableArkuiAnimation = true (FOLLOW_HAND_MORPH scenario)
+     * @tc.expected: enable_animation should be true
+     */
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    PreparedInfoForDrag data;
+    data.disableArkuiAnimation = true;
+    data.isSceneBoardTouchDrag = false;
+    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f, data);
+    auto enableAnimation = arkExtraInfoJson->GetBool("enable_animation", false);
+    EXPECT_EQ(enableAnimation, true);
+}
+
+/**
  * @tc.name: GestureEventHubAddGestureToGestureHierarchyTest001
  * @tc.desc: Test AddGestureToGestureHierarchy.
  * @tc.type: FUNC

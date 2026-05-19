@@ -30,10 +30,11 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_event.h"
-#include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
 class UiMaterial;
+enum class DistortionMode;
+enum class EdgeLightMode;
 class Component;
 class Gesture;
 
@@ -53,22 +54,7 @@ enum class DialogType {
 
 class DialogTypeUtils {
 public:
-    static std::string ConvertDialogTypeToString(DialogType type)
-    {
-        switch (type) {
-            case DialogType::COMMON:
-                return "DialogType.COMMON";
-            case DialogType::ALERT_DIALOG:
-                return "DialogType.ALERT_DIALOG";
-            case DialogType::ACTION_SHEET:
-                return "DialogType.ACTION_SHEET";
-            case DialogType::CHECKBOX_DIALOG:
-                return "DialogType.CHECKBOX_DIALOG";
-            default:
-                break;
-        }
-        return "DialogType.COMMON";
-    }
+    static std::string ConvertDialogTypeToString(DialogType type);
 };
 
 enum class DialogButtonStyle {
@@ -122,68 +108,19 @@ enum class ImmersiveMode {
     EXTEND,
 };
 
-enum class DialogDisplayMode {
+enum class DialogDisplayModeInSubWindow {
     SCREEN_BASED = 0,
     WINDOW_BASED = 1
 };
 
 class DialogAlignmentUtils {
 public:
-    static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment)
-    {
-        std::string Alignment = "";
-        switch (dialogAlignment) {
-            case DialogAlignment::TOP:
-                Alignment = "DialogAlignment.TOP";
-                break;
-            case DialogAlignment::CENTER:
-                Alignment = "DialogAlignment.CENTER";
-                break;
-            case DialogAlignment::BOTTOM:
-                Alignment = "DialogAlignment.BOTTOM";
-                break;
-            case DialogAlignment::TOP_START:
-                Alignment = "DialogAlignment.TOP_START";
-                break;
-            case DialogAlignment::TOP_END:
-                Alignment = "DialogAlignment.TOP_END";
-                break;
-            case DialogAlignment::CENTER_START:
-                Alignment = "DialogAlignment.CENTER_START";
-                break;
-            case DialogAlignment::CENTER_END:
-                Alignment = "DialogAlignment.CENTER_END";
-                break;
-            case DialogAlignment::BOTTOM_START:
-                Alignment = "DialogAlignment.BOTTOM_START";
-                break;
-            case DialogAlignment::BOTTOM_END:
-                Alignment = "DialogAlignment.BOTTOM_END";
-                break;
-            default:
-                Alignment = "DialogAlignment.DEFAULT";
-        }
-        return Alignment;
-    }
+    static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment);
 };
 
 class DialogButtonDirectionUtils {
 public:
-    static std::string ConvertDialogButtonDirectionToString(DialogButtonDirection buttonDirection)
-    {
-        std::string direction = "";
-        switch (buttonDirection) {
-            case DialogButtonDirection::HORIZONTAL:
-                direction = "DialogButtonDirection.HORIZONTAL";
-                break;
-            case DialogButtonDirection::VERTICAL:
-                direction = "DialogButtonDirection.VERTICAL";
-                break;
-            default:
-                direction = "DialogButtonDirection.AUTO";
-        }
-        return direction;
-    }
+    static std::string ConvertDialogButtonDirectionToString(DialogButtonDirection buttonDirection);
 };
 
 struct HasInvertColor {
@@ -219,8 +156,10 @@ struct ActionSheetInfo {
 struct ButtonInfo {
     std::string text;      // text of button.
     std::string textColor; // style of text in button.
+    RefPtr<ResourceObject> textColorResObj;
     bool isBgColorSetted = false;
     Color bgColor;                                   // background color of button.
+    RefPtr<ResourceObject> bgColorResObj;
     RefPtr<NG::ClickEvent> action;                   // NG button click action
     bool enabled = true;                             // status of enabled in button.
     bool defaultFocus = false;                       // status of defaultFocus in button.
@@ -267,10 +206,13 @@ struct DialogProperties {
     int32_t gridCount = -1;
     std::optional<Color> maskColor;
     std::optional<Color> backgroundColor;
+    RefPtr<ResourceObject> maskColorResObj;
+    RefPtr<ResourceObject> backgroundColorResObj;
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
     bool isShowInSubWindow = false;
+    DialogDisplayModeInSubWindow displayModeInSubWindow = DialogDisplayModeInSubWindow::SCREEN_BASED;
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
@@ -290,6 +232,8 @@ struct DialogProperties {
     std::optional<CalcDimension> height;
     std::optional<HoverModeAreaType> hoverModeArea;
     std::optional<int32_t> controllerId;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
     HasInvertColor hasInvertColor;
 
 #ifndef NG_BUILD
@@ -332,8 +276,8 @@ struct DialogProperties {
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
     std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
-    DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
     RefPtr<UiMaterial> systemMaterial;
+    bool isDefaultMaterial = false;           // init use default Material
 };
 
 struct PromptDialogAttr {
@@ -341,6 +285,7 @@ struct PromptDialogAttr {
     std::string message;
     bool autoCancel = true;
     bool showInSubWindow = false;
+    DialogDisplayModeInSubWindow displayModeInSubWindow = DialogDisplayModeInSubWindow::SCREEN_BASED;
     bool isModal = false;
     std::optional<bool> enableHoverMode;
     bool isUserCreatedDialog = false;
@@ -353,6 +298,7 @@ struct PromptDialogAttr {
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
+    RefPtr<ResourceObject> backgroundColorResObj;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
@@ -369,6 +315,7 @@ struct PromptDialogAttr {
     WeakPtr<NG::UINode> contentNode;
     bool customStyle = false;
     std::optional<Color> maskColor;
+    RefPtr<ResourceObject> maskColorResObj;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr;
     RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
     RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;
@@ -381,12 +328,13 @@ struct PromptDialogAttr {
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
     std::optional<double> levelOrder;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
     bool focusable = true;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
-    DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
     RefPtr<UiMaterial> systemMaterial;
 };
 

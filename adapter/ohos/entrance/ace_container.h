@@ -58,6 +58,8 @@ class AccessibilityElementInfo;
 
 namespace OHOS::Ace {
 class FontManager;
+class PageViewportConfig;
+struct PageViewportConfigParams;
 class UIEventTracker;
 }
 
@@ -741,7 +743,8 @@ public:
         int32_t instanceId = -1) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
-    HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder) override;
+    HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder,
+        const std::optional<std::string>& msdpType = std::nullopt) override;
 
     void SearchElementInfoByAccessibilityIdNG(
         int64_t elementId, int32_t mode, int64_t baseParent,

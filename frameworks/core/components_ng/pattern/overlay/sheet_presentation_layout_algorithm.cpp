@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "ui/base/referenced.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -202,7 +203,7 @@ void SheetPresentationLayoutAlgorithm::CalcMaxHeightMinusDoubleStatusBarHeight(
     CHECK_NULL_VOID(host);
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
         if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
             maxHeight = std::min(static_cast<float>(maxHeight), sheetMaxHeight - sheetTopSafeArea * DOUBLE_SIZE);

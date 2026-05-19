@@ -96,8 +96,6 @@ public:
 
     void SetIterations(const int32_t iterations);
 
-    void SetDrawableDescriptorInfo(const RefPtr<DrawableDescriptorInfo>& info);
-
     void ControllAnimation(int32_t nodeId, bool play);
 
     RefPtr<ControlledAnimator> GetControlledAnimator(const std::string& id);
@@ -127,8 +125,6 @@ private:
     bool isSetDurations_ = false;
     std::vector<int32_t> userDurations_;
     std::vector<int32_t> selfDurations_;
-    MediaData rawData_;
-    RefPtr<DrawableDescriptorInfo> info_;
     std::vector<RefPtr<PixelMap>> pixelMapList_;
     mutable std::shared_mutex callMutx_;
     mutable std::mutex loadMutx_;

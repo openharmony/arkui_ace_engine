@@ -35,6 +35,7 @@ constexpr double DEFAULT_FONT_SIZE = 16.0;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::string DEFAULT_FONT_WEIGHT = "400";
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr double DEFAULT_LINE_THICKNESS_SCALE = 1.0;
 constexpr int CALL_ARG_0 = 0;
 constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
@@ -42,8 +43,12 @@ constexpr int CALL_ARG_3 = 3;
 constexpr int CALL_ARG_4 = 4;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
+constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 constexpr int PARAM_ARR_LENGTH_3 = 3;
@@ -1246,6 +1251,7 @@ ArkUINativeModuleValue TextInputBridge::SetDecoration(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1); // 1: textInputDecoration value
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);  // 2: color value
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
+    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto container = Container::Current();
@@ -1268,8 +1274,14 @@ ArkUINativeModuleValue TextInputBridge::SetDecoration(ArkUIRuntimeCallInfo* runt
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
     }
+    double lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    if (!ArkTSUtils::ParseJsDouble(vm, fifthArg, lineThicknessScale)) {
+        lineThicknessScale = DEFAULT_LINE_THICKNESS_SCALE;
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? DEFAULT_LINE_THICKNESS_SCALE : lineThicknessScale;
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputDecoration(
-        nativeNode, textInputDecoration, color.GetValue(), textDecorationStyle, AceType::RawPtr(resourceObject));
+        nativeNode, textInputDecoration, color.GetValue(), textDecorationStyle, static_cast<float>(lineThicknessScale),
+        AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
  
@@ -3298,6 +3310,150 @@ ArkUINativeModuleValue TextInputBridge::ResetSelectedDragPreviewStyle(ArkUIRunti
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputSelectedDragPreviewStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetStrokeJoinStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!(secondArg->IsUndefined()) && !(secondArg->IsNull()) && secondArg->IsNumber()) {
+        int32_t value = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputStrokeJoinStyle(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputStrokeJoinStyle(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue TextInputBridge::ResetStrokeJoinStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputStrokeJoinStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SetTextInputShaderStyleSetLinear(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto angleArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    std::vector<RefPtr<ResourceObject>> vectorResObj;
+    std::vector<ArkUIInt32orFloat32> colors;
+    std::vector<ArkUIInt32orFloat32> values;
+ 
+    ArkTSUtils::ParseGradientAngle(vm, angleArg, values);
+    int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
+    ArkTSUtils::ParseJsInt32(vm, directionArg, direction);
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(direction) });
+ 
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
+    values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
+    auto colorRawPtr = static_cast<void*>(&vectorResObj);
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputLinearGradient(
+        nativeNode, values.data(), values.size(), colors.data(), colors.size(), colorRawPtr);
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue SetTextInputShaderStyleSetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputColorShaderColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputColorShaderColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(colorResObj));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue TextInputBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto centerArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto radiusArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (centerArg->BooleaValue(vm) && (radiusArg->IsNumber() || radiusArg->BooleaValue(vm))) {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        std::vector<RefPtr<ResourceObject>> vectorResObj;
+        std::vector<ArkUIInt32orFloat32> colors;
+        std::vector<ArkUIInt32orFloat32> values;
+        ArkTSUtils::ParseGradientCenter(vm, centerArg, values, vectorResObj);
+        CalcDimension radius;
+        RefPtr<ResourceObject> radiusResObj;
+        auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius, radiusResObj, false);
+        if (radiusResObj) {
+            vectorResObj.push_back(radiusResObj);
+        } else {
+            vectorResObj.push_back(nullptr);
+        }
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(hasRadius) });
+        values.push_back({ .f32 = static_cast<ArkUI_Float32>(radius.Value()) });
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(radius.Unit()) });
+        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
+        auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
+        values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
+        auto colorRawPtr = static_cast<void*>(&vectorResObj);
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputRadialGradient(
+            nativeNode, values.data(), values.size(), colors.data(), colors.size(), colorRawPtr);
+    } else if (colorsArg->BooleaValue(vm)) {
+        SetTextInputShaderStyleSetLinear(runtimeCallInfo);
+    } else if (colorArg->BooleaValue(vm)) {
+        SetTextInputShaderStyleSetColor(runtimeCallInfo);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputGradient(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ 
+ArkUINativeModuleValue TextInputBridge::ResetShaderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputGradient(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

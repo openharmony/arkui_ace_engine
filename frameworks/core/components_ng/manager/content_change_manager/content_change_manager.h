@@ -72,6 +72,10 @@ public:
     uint32_t GetIgnoreEventMask(const std::string& ignoreEventType) const;
     bool IsIgnoringEventType(uint32_t type) const;
 
+    bool IsSwiperScrolling() const;
+    void OnSwiperScrollStart(const RefPtr<FrameNode>& keyNode);
+    void OnSwiperScrollEnd(const RefPtr<FrameNode>& keyNode);
+
 #ifndef IS_RELEASE_VERSION
     std::string DumpInfo() const;
 #endif
@@ -106,6 +110,7 @@ private:
     bool textCollecting_ = false;
     std::set<std::pair<WeakPtr<FrameNode>, bool>> changedSwiperNodes_;
     std::set<int32_t> scrollingNodes_;
+    std::set<int32_t> scrollingSwiperNodes_;
     std::set<int32_t> transitioningNodes_;
     RectF textAABB_; // Axis-aligned bounding box(AABB) of Text rects.
     std::vector<std::tuple<int32_t, RectF, std::string>> imageChangeList_;

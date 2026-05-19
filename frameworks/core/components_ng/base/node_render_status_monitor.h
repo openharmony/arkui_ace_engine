@@ -52,12 +52,15 @@ public:
     using NodeRenderStatusHandleFunc = std::function<void(FrameNode*, NodeRenderState, RenderMonitorReason)>;
 
     MonitorRegisterResult RegisterNodeRenderStatusListener(
-        FrameNode* frameNode, NodeRenderStatusHandleFunc&& func, MonitorSourceType type);
+        FrameNode* frameNode, NodeRenderStatusHandleFunc&& func, MonitorSourceType type, int32_t resourceId = 0);
     void UnRegisterNodeRenderStatusListener(FrameNode* frameNode, int32_t id = MONITOR_INVALID_ID);
     void WalkThroughAncestorForStateListener();
     bool IsRegisterNodeRenderStateChangeCallbackExceedLimit();
+    std::pair<bool, bool> IsNodeRenderStateRegisterLimited(int32_t resourceId, int32_t nodeId);
     NodeRenderState GetNodeCurrentRenderState(FrameNode* frameNode);
     void NotifyFrameNodeRelease(FrameNode* frameNode);
+    void RemoveNodeRenderStateCallbackByResourceId(int32_t nodeId, int32_t resourceId, bool isRemoveAll);
+    void TriggerCallbackForFirstRegister(int32_t nodeId, int32_t resourceId);
 
 private:
     static int32_t GenerateId();
@@ -66,6 +69,10 @@ private:
         MonitorSourceType sourceType;
         int32_t id;
         NodeRenderStatusHandleFunc func;
+        int32_t resourceId;
+        NodeRenderStatusListener(
+            MonitorSourceType sourceType, int32_t id, NodeRenderStatusHandleFunc func, int32_t resourceId = 0)
+            : sourceType(sourceType), id(id), func(std::move(func)), resourceId(resourceId) {};
         NodeRenderStatusListener(MonitorSourceType sourceType, int32_t id, NodeRenderStatusHandleFunc func)
             : sourceType(sourceType), id(id), func(std::move(func)) {};
     };

@@ -57,7 +57,6 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         const shouldAddRef = this.shouldAddRef();
         const value = this.localValue.get(shouldAddRef);
         if (shouldAddRef) {
-            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
             uiUtils.builtinContainersAddRefAnyKey(value);
             this.selfTrack();
             ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();
@@ -94,6 +93,9 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     update(newValue: T): void {
         const sourceValue = this.sourceValue;
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`PropRef ${sourceValue === newValue} ${this.updateTraceInfo()}`);
+        if (!this.owningComponent_!.__getCanUpdateStateVars__Internal()) {
+            return;
+        }
         if (sourceValue !== newValue || this.isForceRender) {
             this.isForceRender = false;
             let value = newValue;
@@ -166,6 +168,11 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     public setProxyValue?: CompatibleStateChangeCallback<T>;
 
     public fireChange(): void {
+        // BackingValue's meta has `this` (BackingValue) as its constructor-stored
+        // wildcard target — a safe anti-target since no user lambda returns a
+        // BackingValue. Passing the current value here would trip the wildcard
+        // transit-dep branch (sources.includes(this.before)) and fire a phantom
+        // callback (same anti-pattern that BackingValue.set had before its fix).
         this.localValue.fireChange();
     }
 

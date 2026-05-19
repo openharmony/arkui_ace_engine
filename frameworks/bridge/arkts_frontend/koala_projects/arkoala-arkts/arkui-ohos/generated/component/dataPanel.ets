@@ -303,6 +303,18 @@ export function DataPanelImpl(
     })
 }
 
+@memo
+export function DataPanel(
+    @memo @memo_skip
+    style: ((attributes: DataPanelAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkDataPanelComponent>((): ArkDataPanelComponent => {
+        return new ArkDataPanelComponent()
+    })
+    NodeAttach<ArkDataPanelPeer>((): ArkDataPanelPeer => ArkDataPanelPeer.create(receiver), (_: ArkDataPanelPeer): void => {
+        style?.(receiver)
+    })
+}
 export class LinearGradient_serializer {
     public static write(buffer: SerializerBase, value: LinearGradient): void {
         let valueSerializer: SerializerBase = buffer

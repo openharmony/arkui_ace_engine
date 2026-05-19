@@ -74,6 +74,16 @@ public:
         return pageNodeInfo_.tag;
     }
 
+    void SetKeyAttribute(const std::string& keyAttribute) override
+    {
+        keyAttribute_ = keyAttribute;
+    }
+
+    const std::string& GetKeyAttribute() const override
+    {
+        return keyAttribute_;
+    }
+
     void SetValue(const std::string& value) override
     {
         pageNodeInfo_.value = value;
@@ -148,9 +158,21 @@ public:
         return pageNodeRect_;
     }
 
+    void SetUserAutoFillType(bool userType) override
+    {
+        isUserAutoFillType_ = userType;
+    }
+
+    bool GetUserAutoFillType() const override
+    {
+        return isUserAutoFillType_;
+    }
+
 private:
     AbilityBase::PageNodeInfo pageNodeInfo_;
     NG::RectF pageNodeRect_;
+    bool isUserAutoFillType_ = false;
+    std::string keyAttribute_;
 };
 
 class ViewDataWrapOhos : public ViewDataWrap {

@@ -99,6 +99,7 @@ void MenuModelStatic::SetFontColor(FrameNode* frameNode, const std::optional<Col
 void MenuModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE, frameNode);
     if (fontSize.has_value() && fontSize.value().IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize.value(), frameNode);
     } else {
@@ -140,6 +141,7 @@ void MenuModelStatic::SetFontFamily(FrameNode* frameNode,
 void MenuModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_BORDER_RADIUS, frameNode);
     if (radius.has_value()) {
         NG::BorderRadiusProperty borderRadius;
         borderRadius.radiusTopLeft = radius;
@@ -169,6 +171,10 @@ void MenuModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optional<
     const std::optional<Dimension>& radiusBottomRight)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopLeft, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopRight, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomLeft, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomRight, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS, frameNode);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radiusTopLeft;
     borderRadius.radiusTopRight = radiusTopRight;

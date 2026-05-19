@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_LIST_V2_LIST_ITEM_GROUP_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_LIST_V2_LIST_ITEM_GROUP_ELEMENT_H
 
-#include "compatible/components/list_v2/list_item_element.h"
-
 #include "core/components_v2/common/element_proxy.h"
 #include "compatible/components/list_v2/render_list_item_group.h"
 #include "compatible/components/list_v2/list_item_generator.h"

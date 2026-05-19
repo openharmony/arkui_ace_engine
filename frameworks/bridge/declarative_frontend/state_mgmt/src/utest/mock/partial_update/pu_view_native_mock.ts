@@ -86,4 +86,14 @@ abstract class NativeViewPartialUpdate {
   sendStateInfo(stateInfo: string): void {
     console.warn("NativeViewPU(Mock).sendStateInfo() -  unimplemented!");
   }
+
+  findCustomValueByKey(key: number): CustomEnvValue {
+    console.warn(`NativeViewPU(Mock).findCustomValueByKey(${key}) - unimplemented!`);
+    return undefined;
+  }
+
+  findEnvValueByKey(key: string): CustomEnvValue {
+    console.warn(`NativeViewPU(Mock).findEnvValueByKey(${key}) - unimplemented!`);
+    return undefined;
+  }
 }

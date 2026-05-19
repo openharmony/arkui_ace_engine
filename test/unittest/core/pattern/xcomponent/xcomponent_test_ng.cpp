@@ -46,6 +46,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
+#include "core/gestures/drag_event.h"
+#include "core/gestures/drag_recognizer.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -771,8 +773,10 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
      */
     std::string onLoadKey;
     std::string onDestroyKey;
-    auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
-    auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
+    auto onLoad =
+        [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
+    auto onDestroy =
+        [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad);
@@ -798,7 +802,8 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
      * @tc.expected: three checkKeys has no change
      */
 
-    auto onLoad2 = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
+    auto onLoad2 =
+        [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
     auto onDestroy2 = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = ""; };
     testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad2);

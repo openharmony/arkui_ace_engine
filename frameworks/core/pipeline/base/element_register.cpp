@@ -20,6 +20,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_v2/common/element_proxy.h"
+#include "core/components_ng/render/render_context.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace {

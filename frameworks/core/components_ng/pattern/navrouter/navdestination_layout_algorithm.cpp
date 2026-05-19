@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -346,6 +347,20 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper, hostNode, navDestinationLayoutProperty, size, containerModalTitleHeight);
     navDestinationPattern->MarkSafeAreaPaddingChangedWithCheckTitleBar(titleBarHeight);
     navDestinationPattern->SetTitleBarHeight(titleBarHeight);
+
+    auto maskUINode = hostNode->GetTitleBarMaskNode();
+    if (maskUINode && navDestinationPattern->IsScrollEffectEnabled()) {
+        auto maskIndex = hostNode->GetChildIndexById(maskUINode->GetId());
+        if (maskIndex >= 0) {
+            auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
+            if (maskWrapper) {
+                auto maskConstraint = navDestinationLayoutProperty->CreateChildConstraint();
+                maskConstraint.selfIdealSize = OptionalSizeF(size.Width(), titleBarHeight);
+                maskWrapper->Measure(maskConstraint);
+            }
+        }
+    }
+
     auto transferedTitleBarHeight = TransferBarHeight(hostNode, titleBarHeight, true);
     float toolBarHeight =
         NavigationLayoutUtil::MeasureToolBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
@@ -382,10 +397,10 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(navDestinationLayoutProperty);
 
     float decorBarHeight = 0.0f;
+    auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(hostNode->GetNavigationNode());
     if (navigationNode) {
         auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-        auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
         if (navigationPattern && navDestinationPattern) {
             auto toolbarManager = navigationPattern->GetToolBarManager();
             auto barStyle = navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
@@ -397,6 +412,21 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, decorBarHeight);
     auto resetTitleBarHeight = TransferBarHeight(hostNode, titlebarHeight, true);
     LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, resetTitleBarHeight);
+
+    auto maskUINode = hostNode->GetTitleBarMaskNode();
+    if (maskUINode && navDestinationPattern && navDestinationPattern->IsScrollEffectEnabled()) {
+        auto maskIndex = hostNode->GetChildIndexById(maskUINode->GetId());
+        if (maskIndex >= 0) {
+            auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
+            if (maskWrapper && maskWrapper->GetGeometryNode()) {
+                auto maskGeometryNode = maskWrapper->GetGeometryNode();
+                float maskOffsetY = navDestinationPattern->GetTitleBarOffsetY();
+                maskGeometryNode->SetMarginFrameOffset(OffsetF(0.0f, maskOffsetY));
+                maskWrapper->Layout();
+            }
+        }
+    }
+
     float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(
         layoutWrapper, hostNode, navDestinationLayoutProperty, true);
     NavigationLayoutUtil::LayoutToolBarDivider(

@@ -25,7 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 
-#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_offset.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,6 +66,8 @@ private:
     std::map<int32_t, GridItemMainPos> posMap_;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    int32_t visibleStartIndex_ = -1;
+    int32_t visibleEndIndex_ = -1;
     int32_t totalItemCount_ = 0;
     int32_t lanes_ = 1;
     float totalMainSize_ = 0.0f;
@@ -95,4 +97,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_INFO_H

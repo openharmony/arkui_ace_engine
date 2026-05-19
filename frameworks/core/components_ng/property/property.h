@@ -59,6 +59,8 @@ bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag);
 
 ACE_FORCE_EXPORT bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
+ACE_FORCE_EXPORT bool CheckHasMeasured(PropertyChangeFlag propertyChangeFlag);
+
 bool CheckForceParentMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
 ACE_FORCE_EXPORT bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);

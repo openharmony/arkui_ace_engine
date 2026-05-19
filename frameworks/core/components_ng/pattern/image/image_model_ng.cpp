@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/common/container.h"
 
 #include "interfaces/native/node/resource.h"
 
@@ -98,8 +99,12 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
     SetFrameNodeDraggable(frameNode, imageInfoConfig.isImageSpan);
     pattern->SetImageType(imageInfoConfig.type);
     pattern->SetNeedLoadAlt(true);
-    pattern->UpdateDrawableDescriptor(imageInfoConfig.drawable);
-    if (imageInfoConfig.type != ImageType::ANIMATED_DRAWABLE) {
+    if (imageInfoConfig.type == ImageType::PIXELMAP_DRAWABLE) {
+        pattern->SetPixelMapDrawable(imageInfoConfig.drawable);
+    } else {
+        pattern->UpdateDrawableDescriptor(imageInfoConfig.drawable);
+    }
+    if (imageInfoConfig.type != ImageType::ANIMATED_DRAWABLE && imageInfoConfig.type != ImageType::PIXELMAP_DRAWABLE) {
         auto srcInfo = CreateSourceInfo(
             imageInfoConfig.src, imageInfoConfig.pixelMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
         srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
@@ -581,10 +586,14 @@ void ImageModelNG::SetDrawableDescriptor(FrameNode* frameNode, void* newDrawable
     auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(newDrawableDescriptor);
     CHECK_NULL_VOID(drawableAddr);
     auto drawableType = drawableAddr->GetDrawableType();
-    if (drawableType != DrawableType::ANIMATED) {
+    if (drawableType != DrawableType::ANIMATED && drawableType != DrawableType::PIXELMAP) {
         auto pixelMap = drawableAddr->GetPixelMap();
         auto srcInfo = ImageSourceInfo(pixelMap);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+    } else if (drawableType == DrawableType::PIXELMAP) {
+        auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
+        pattern->SetImageType(ImageType::PIXELMAP_DRAWABLE);
+        pattern->SetPixelMapDrawable(drawable);
     } else {
         auto drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
         pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);

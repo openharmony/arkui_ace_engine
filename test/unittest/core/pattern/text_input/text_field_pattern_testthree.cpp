@@ -785,7 +785,7 @@ HWTEST_F(TextFieldPatternTestThree, GetTextDirection002, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     paragraphStyle.direction = TextDirection::RTL;
 
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
+    mockParagraph->paraStyle_ = paragraphStyle;
 
     /**
      * @tc.steps: step5. Set paragraph_ in layout algorithm

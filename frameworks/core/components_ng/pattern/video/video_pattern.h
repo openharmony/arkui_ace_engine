@@ -223,8 +223,6 @@ public:
 
     void RecoverState(const RefPtr<VideoPattern>& videoPattern);
 
-    bool NeedLift() const;
-
     RefPtr<FrameNode> GetFullScreenNode() const
     {
         if (!fullScreenNodeId_.has_value()) {

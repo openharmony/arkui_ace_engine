@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -371,6 +372,14 @@ void CustomDialogControllerPeerImpl::SetShowInSubWindow(Opt_Boolean showInSubWin
     }
 }
 
+void CustomDialogControllerPeerImpl::SetDisplayModeInSubWindow(Opt_DialogDisplayMode displayModeInSubWindow)
+{
+    auto result = Converter::OptConvert<DialogDisplayModeInSubWindow>(displayModeInSubWindow);
+    if (result) {
+        dialogProperties_.displayModeInSubWindow = result.value();
+    }
+}
+
 void CustomDialogControllerPeerImpl::SetBackgroundColor(Opt_ResourceColor backgroundColor)
 {
     dialogProperties_.backgroundColor = Converter::OptConvert<Color>(backgroundColor);
@@ -605,6 +614,22 @@ void CustomDialogControllerPeerImpl::SetSystemMaterial(Opt_uiMaterial_Material s
     auto result = Converter::OptConvert<UiMaterial*>(systemMaterial).value_or(nullptr);
     if (result) {
         dialogProperties_.systemMaterial = result->Copy();
+    }
+}
+
+void CustomDialogControllerPeerImpl::SetDistortionMode(Opt_DistortionMode distortionMode)
+{
+    auto result = Converter::OptConvert<DistortionMode>(distortionMode);
+    if (result.has_value()) {
+        dialogProperties_.distortionMode = result.value();
+    }
+}
+
+void CustomDialogControllerPeerImpl::SetEdgeLightMode(Opt_EdgeLightMode edgeLightMode)
+{
+    auto result = Converter::OptConvert<EdgeLightMode>(edgeLightMode);
+    if (result.has_value()) {
+        dialogProperties_.edgeLightMode = result.value();
     }
 }
 

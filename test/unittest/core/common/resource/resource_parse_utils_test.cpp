@@ -26,6 +26,7 @@
 #include "core/common/color_inverter.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/frame_node.h"
 #undef private
 #undef protected
 

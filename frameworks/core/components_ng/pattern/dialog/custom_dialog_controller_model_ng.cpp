@@ -17,6 +17,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -50,6 +51,39 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
 }
 
+void ReloadResources(DialogProperties& dialogProperties)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (dialogProperties.maskColorResObj) {
+        Color maskColor;
+        bool state = ResourceParseUtils::ParseResColor(dialogProperties.maskColorResObj, maskColor);
+        if (state) {
+            dialogProperties.maskColor = maskColor;
+        }
+    }
+    if (dialogProperties.backgroundColorResObj) {
+        Color backgroundColor;
+        bool state = ResourceParseUtils::ParseResColor(dialogProperties.backgroundColorResObj, backgroundColor);
+        if (state) {
+            dialogProperties.backgroundColor = backgroundColor;
+        }
+    }
+    if (dialogProperties.blurStyleOption.has_value()) {
+        dialogProperties.blurStyleOption->ReloadResources();
+    }
+    if (dialogProperties.effectOption.has_value()) {
+        dialogProperties.effectOption->ReloadResources();
+    }
+    if (dialogProperties.borderColor.has_value()) {
+        dialogProperties.borderColor->ReloadResources();
+    }
+    if (dialogProperties.shadow.has_value()) {
+        dialogProperties.shadow->ReloadResources();
+    }
+}
+
 void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayManager>& overlayManager, const RefPtr<Container>& container,
     const WeakPtr<AceType>& controller, RefPtr<NG::FrameNode>& dialog, DialogProperties& dialogProperties,
     std::function<void()>&& func, bool& isShown)
@@ -70,6 +104,8 @@ void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayMana
         TAG_LOGE(AceLogTag::ACE_DIALOG, "set open dialog in task, controller is null.");
         return;
     }
+    // reload Resource
+    ReloadResources(dialogProperties);
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
         CHECK_NULL_VOID(dialog);
@@ -104,8 +140,9 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
         auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
         auto enableOpenSubwindowInSubwindow = expandDisplay || container->IsPcOrFreeMultiWindowCapability();
         if (!enableOpenSubwindowInSubwindow && isSubContainer && dialogProperties.isShowInSubWindow) {
-            TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not open dialog in subwindow");
-            return;
+            enableOpenSubwindowInSubwindow = true;
+            TAG_LOGD(AceLogTag::ACE_DIALOG,
+                "reuse parent container for nested dialog, containerId:%{public}d", currentId);
         }
         if (isSubContainer && (!dialogProperties.isShowInSubWindow || enableOpenSubwindowInSubwindow)) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());

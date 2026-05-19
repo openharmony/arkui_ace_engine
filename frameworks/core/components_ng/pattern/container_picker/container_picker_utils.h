@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_UTILS_H
 
+#include <algorithm>
 #include <optional>
 
 #include "base/memory/referenced.h"
@@ -45,16 +46,17 @@ const float HALF = 2.0;
 const float FADE_OPACITY = 0.4f;
 const float DISABLE_ALPHA = 0.6f;
 const float REAL_K = 2.5f; // Control the relationship between scroll distance and speed.
-const int32_t DISPLAY_COUNT = 7;
 } // namespace
 class ContainerPickerUtils {
 public:
+    static constexpr int32_t DEFAULT_DISPLAYED_ITEM_COUNT = 7;
+
     ContainerPickerUtils() = delete;
     ~ContainerPickerUtils() = delete;
     using PositionMap = std::map<int32_t, PickerItemInfo>;
 
     static LayoutConstraintF CreateChildConstraint(
-        const RefPtr<ContainerPickerLayoutProperty>& property, const OptionalSizeF& idealSize)
+        const RefPtr<ContainerPickerLayoutProperty>& property, const OptionalSizeF& idealSize, float maxItemHeightPx)
     {
         CHECK_NULL_RETURN(property, {});
         auto layoutConstraint = property->CreateChildConstraint();
@@ -68,12 +70,36 @@ public:
                 layoutConstraint.maxSize.SetWidth(widthOpt.value());
             }
         }
-        auto maxHeight = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
-        layoutConstraint.maxSize.SetHeight(maxHeight);
+        layoutConstraint.maxSize.SetHeight(maxItemHeightPx);
         childSelfIdealSize.Reset();
-        childSelfIdealSize.SetHeight(maxHeight);
+        childSelfIdealSize.SetHeight(maxItemHeightPx);
         layoutConstraint.selfIdealSize = childSelfIdealSize;
         return layoutConstraint;
+    }
+
+    static int32_t NormalizeDisplayedItemCount(int32_t count)
+    {
+        constexpr int32_t kMinCount = 2;
+        constexpr int32_t kMaxCount = 9;
+        if (count < kMinCount || count > kMaxCount) {
+            return DEFAULT_DISPLAYED_ITEM_COUNT;
+        }
+        if ((count & 1) == 0) {
+            count = std::min(kMaxCount, count + 1);
+        }
+        return count;
+    }
+
+    static Dimension ClampPickerItemHeight(const Dimension& in)
+    {
+        const float defaultVp = 40.0f;
+        const float minVp = defaultVp;
+        const float maxVp = 64.0f;
+        const float vp = static_cast<float>(in.ConvertToVp());
+        if (vp < minVp || vp > maxVp) {
+            return Dimension(defaultVp, DimensionUnit::VP);
+        }
+        return Dimension(vp, DimensionUnit::VP);
     }
 
     static int32_t GetLoopIndex(int32_t originalIndex, int32_t totalItemCount)

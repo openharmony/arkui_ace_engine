@@ -78,7 +78,13 @@ void TextTimerModelNG::SetStartTime(int32_t value)
 
 void TextTimerModelNG::SetFontSize(const Dimension& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value, frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, textNode);
 }
 
 void TextTimerModelNG::SetTextColor(const Color& value)
@@ -251,7 +257,12 @@ void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
 
 void TextTimerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value, frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, textNode);
 }
 
 void TextTimerModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)

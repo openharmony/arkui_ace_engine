@@ -155,9 +155,19 @@ ClickInfo ClickRecognizer::GetClickInfo()
     }
     ClickInfo info(touchPoint.id);
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = touchPoint.GetOffset();
     TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = touchPoint.postEventNodeId,
+                                           globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalDisplayLocation(touchPoint.GetGlobalDisplayOffset());
@@ -610,7 +620,8 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         HandleReportClick(info);
         auto node = GetAttachedNode().Upgrade();
         if (node && node->GetEnableClickSoundEffect()) {
-            PlayClickSoundEffect();
+            PlayClickSoundEffect(static_cast<int32_t>(info.GetScreenLocation().GetX()),
+                static_cast<int32_t>(info.GetScreenLocation().GetY()));
         }
         onActionFunction(info);
         HandleReports(info, type);
@@ -621,7 +632,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
 #endif
 }
 
-void ClickRecognizer::PlayClickSoundEffect()
+void ClickRecognizer::PlayClickSoundEffect(int32_t abscissa, int32_t ordinate)
 {
 #ifdef ENABLE_DEFAULT_CLICK_SOUND
     if (!interactiveSoundEffectsFunc_) {
@@ -629,7 +640,7 @@ void ClickRecognizer::PlayClickSoundEffect()
         ErrCode errCode =
             ExtraModulesManager::GetInstance().GetCapability("click_sound_effect", "InteractiveSoundEffects", &funcPtr);
         if (errCode == ErrCode::SUCCESS) {
-            interactiveSoundEffectsFunc_ =  reinterpret_cast<InteractiveSoundEffectsFunc>(funcPtr);
+            interactiveSoundEffectsFunc_ = reinterpret_cast<InteractiveSoundEffectsFunc>(funcPtr);
         } else {
             return;
         }
@@ -639,9 +650,10 @@ void ClickRecognizer::PlayClickSoundEffect()
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [interactiveSoundEffectsFunc = interactiveSoundEffectsFunc_]() {
+        [interactiveSoundEffectsFunc = interactiveSoundEffectsFunc_, time = time_, abscissa, ordinate]() {
             if (interactiveSoundEffectsFunc) {
-                interactiveSoundEffectsFunc(0, 0, INT_MIN, INT_MIN);
+                interactiveSoundEffectsFunc(
+                    0, 0, abscissa, ordinate, static_cast<int64_t>(time.time_since_epoch().count()));
             }
         },
         TaskExecutor::TaskType::BACKGROUND, "ArkUIPlayClickSoundEffect");

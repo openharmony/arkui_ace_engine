@@ -281,6 +281,7 @@ public:
     }
 
     MouseEvent ConvertToMouseEvent() const;
+    MouseEvent ConvertToMouseEventForStatic() const;
     void SetIsRightButtonEventFromDoulbeTap(bool isRightButtonEventFromDoulbeTap)
     {
         isRightButtonEventFromDoulbeTap_ = isRightButtonEventFromDoulbeTap;
@@ -289,6 +290,12 @@ public:
     bool GetIsRightButtonEventFromDoulbeTap() const
     {
         return isRightButtonEventFromDoulbeTap_;
+    }
+
+    size_t GetSize() const
+    {
+        static constexpr size_t MOUSE_INFO_SIZE = 3080;
+        return MOUSE_INFO_SIZE;
     }
 
 private:
@@ -374,6 +381,12 @@ public:
     MouseAction GetMouseAction() const
     {
         return mouseAction_;
+    }
+
+    size_t GetSize() const
+    {
+        static constexpr size_t HOVER_INFO_SIZE = 1080;
+        return HOVER_INFO_SIZE;
     }
 
 private:

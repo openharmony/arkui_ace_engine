@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include "base/error/error_code.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 

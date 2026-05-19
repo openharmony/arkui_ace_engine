@@ -19,12 +19,16 @@
 #include "base/geometry/size.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/toggle/switch_accessibility_property.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_base_pattern.h"
+namespace OHOS::Rosen {
+class BrightnessBlender;
+}
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -225,6 +229,8 @@ private:
     float GetActualGap() const;
 
     void ApplyDragFrameNodeSystemMaterial();
+    void ApplyDragFrameNodeBlendMode();
+    std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender();
     void ResetHostMaterialEffects();
 
     // Drag animation helpers
@@ -283,6 +289,8 @@ private:
     RefPtr<FrameNode> blurCoverNode_;
     bool isFrameNodeVisible_ = false;
     CancelableCallback<void()> longPressTask_;
+
+    bool pendingHide_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     std::function<void(bool)> isFocusActiveUpdateEvent_;

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include <algorithm>
 #include <variant>
 #include "arkoala_api_generated.h"
@@ -100,6 +101,7 @@
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
+#include "dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
 #include "core/common/event_manager.h"
@@ -490,6 +492,14 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     auto keyboardAvoidMode = Converter::OptConvert<PopupKeyboardAvoidMode>(src.keyboardAvoidMode);
     if (keyboardAvoidMode.has_value()) {
         popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
+    }
+    auto effectOptionOpt = Converter::OptConvert<EffectOption>(src.backgroundEffect);
+    if (effectOptionOpt.has_value()) {
+        popupParam->SetEffectOption(effectOptionOpt.value());
+    }
+    auto blurStyleOption = Converter::OptConvert<BlurStyleOption>(src.backgroundBlurStyleOptions);
+    if (blurStyleOption.has_value()) {
+        popupParam->SetBlurStyleOption(blurStyleOption.value());
     }
 
     // Parse lifecycle callbacks
@@ -2230,7 +2240,7 @@ NG::SmartGestureShortcutConfig Convert(const Ark_SmartGestureShortcutOptions& sr
     NG::SmartGestureShortcutConfig config;
     config.action = NG::SmartGestureShortcutAction::PRIMARY;
     config.enabled = Converter::OptConvert<bool>(src.enabled).value_or(false);
-    config.selectable = Converter::OptConvert<bool>(src.selectable).value_or(false);
+    config.selectable = Converter::OptConvert<bool>(src.selectable).value_or(config.enabled);
     auto arkAction = Converter::OptConvert<Ark_GestureShortcut>(src.action);
     if (arkAction.has_value()) {
         switch (arkAction.value()) {
@@ -5064,7 +5074,6 @@ void SetAccessibilityNextFocusIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
         return;
     }
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);
@@ -5375,16 +5384,17 @@ void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 void SetShouldRecognizerParallelWithImpl(Ark_NativePointer node,
-                                         const ShouldRecognizerParallelWithCallback* value)
+                                         const Opt_ShouldRecognizerParallelWithCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!value || !CallbackHelper(*value).IsValid()) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
         ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*value), node = weakNode](
+    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*optValue), node = weakNode](
         const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
     ) -> RefPtr<NG::NGGestureRecognizer> {
         PipelineContext::SetCallBackNode(node);
@@ -5596,11 +5606,18 @@ void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
 void SetSmartGestureShortcutImpl(Ark_NativePointer node,
                                  const Ark_SmartGestureShortcutOptions* value)
 {
+#ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    auto optAction = Converter::OptConvert<Ark_GestureShortcut>(value->action);
+    if (!optAction.has_value() || optAction.value() != ARK_GESTURE_SHORTCUT_PRIMARY) {
+        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
+        return;
+    }
     NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
     ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
+#endif
 }
 void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
                                const Opt_OnNeedSoftkeyboardCallback* value)
@@ -5617,6 +5634,14 @@ void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
             .value_or(false);
     };
     ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onEvent));
+}
+void SetDoubleSidedImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstract::SetDoubleSided(frameNode, convValue.value_or(true));
 }
 void SetExpandSafeAreaImpl(Ark_NativePointer node,
                            const Opt_Array_SafeAreaType* types,
@@ -5689,15 +5714,26 @@ void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
 }
-void SetBackgroundImpl(Ark_NativePointer node,
-                       const Opt_Union_CustomNodeBuilder_ResourceColor* content,
-                       const Opt_BackgroundOptions* options)
+
+void TryUpdateBackground(FrameNode* frameNode)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Alignment alignment = Alignment::CENTER;
-    uint32_t parsedEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
-    bool hasEdges = false;
+    auto geometryNode = frameNode->GetGeometryNode();
+    bool hasValidSize = geometryNode &&
+                       geometryNode->GetFrameSize().Width() > 0 &&
+                       geometryNode->GetFrameSize().Height() > 0;
+    if (hasValidSize) {
+        frameNode->UpdateBackground();
+    } else {
+        frameNode->SetIsNeedRefreshBackgroundBuilder(true);
+    }
+}
+
+void ParseBackgroundOptions(const Opt_BackgroundOptions* options,
+    Alignment& alignment, uint32_t& parsedEdges, bool& hasEdges)
+{
+    alignment = Alignment::CENTER;
+    parsedEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    hasEdges = false;
     if (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto alignOpt = Converter::OptConvert<Alignment>(options->value.align);
         if (alignOpt) {
@@ -5714,6 +5750,18 @@ void SetBackgroundImpl(Ark_NativePointer node,
             hasEdges = true;
         }
     }
+}
+
+void SetBackgroundImpl(Ark_NativePointer node,
+                       const Opt_Union_CustomNodeBuilder_ResourceColor* content,
+                       const Opt_BackgroundOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Alignment alignment;
+    uint32_t parsedEdges;
+    bool hasEdges;
+    ParseBackgroundOptions(options, alignment, parsedEdges, hasEdges);
     Converter::VisitUnionPtr(content,
         [frameNode, alignment, parsedEdges, hasEdges, node](const CustomNodeBuilder& builder) {
             CallbackHelper(builder).BuildAsync(
@@ -5729,6 +5777,7 @@ void SetBackgroundImpl(Ark_NativePointer node,
                     ViewAbstract::SetBackgroundAlign(frameNode, alignment);
                     ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
                     ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, alignment);
+                    TryUpdateBackground(frameNode);
                 }, node);
         },
         [frameNode, alignment, parsedEdges, hasEdges](const Ark_ResourceColor& resourceColor) {
@@ -5738,7 +5787,11 @@ void SetBackgroundImpl(Ark_NativePointer node,
             ViewAbstract::SetBackgroundAlign(frameNode, alignment);
             ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
             auto colorValue = Converter::OptConvertPtr<Color>(&resourceColor);
-            ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue.value_or(Color::TRANSPARENT));
+            if (colorValue.has_value()) {
+                ViewAbstract::SetCustomBackgroundColor(frameNode, colorValue.value());
+            } else {
+                ViewAbstract::SetCustomBackgroundColor(frameNode, Color::TRANSPARENT);
+            }
         },
         [frameNode]() {
             ViewAbstractModelStatic::ResetBackground(frameNode);
@@ -6606,12 +6659,7 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
             CHECK_NULL_VOID(frameNode);
             PipelineContext::SetCallBackNode(weak);
             auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-            auto finalNode = CreateProxyNode(builderNode);
-#else
-            auto finalNode = builderNode;
-#endif
-            ViewStackProcessor::GetInstance()->Push(finalNode);
+            ViewStackProcessor::GetInstance()->Push(builderNode);
         };
         ContentCoverParam contentCoverParam;
         ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc), modalStyle,
@@ -6663,12 +6711,7 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
             CHECK_NULL_VOID(frameNode);
             PipelineContext::SetCallBackNode(weak);
             auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-            auto finalNode = CreateProxyNode(builderNode);
-#else
-            auto finalNode = builderNode;
-#endif
-            ViewStackProcessor::GetInstance()->Push(finalNode);
+            ViewStackProcessor::GetInstance()->Push(builderNode);
         };
         ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
             modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
@@ -6731,12 +6774,7 @@ void SetBindSheetImpl(Ark_NativePointer node,
         CHECK_NULL_VOID(frameNode);
         PipelineContext::SetCallBackNode(weak);
         auto builderNode = arkBuilder.BuildSync(node);
-#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-        auto finalNode = CreateProxyNode(builderNode);
-#else
-        auto finalNode = builderNode;
-#endif
-        ViewStackProcessor::GetInstance()->Push(finalNode);
+        ViewStackProcessor::GetInstance()->Push(builderNode);
     };
     ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
         std::move(cbs.titleBuilder), sheetStyle, std::move(cbs.onAppear), std::move(cbs.onDisappear),
@@ -6744,9 +6782,9 @@ void SetBindSheetImpl(Ark_NativePointer node,
         std::move(cbs.onWillDisappear), std::move(cbs.onHeightDidChange), std::move(cbs.onDetentsDidChange),
         std::move(cbs.onWidthDidChange), std::move(cbs.onTypeDidChange), std::move(cbs.sheetSpringBack));
 }
-void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                const Opt_Array_F64* ratios,
-                                const Opt_VisibleAreaChangeCallback* event)
+void SetOnVisibleAreaChange0Impl(Ark_NativePointer node,
+                                 const Opt_Array_F64* ratios,
+                                 const Opt_VisibleAreaChangeCallback* event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -6786,6 +6824,52 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
+void SetOnVisibleAreaChange1Impl(Ark_NativePointer node,
+                                 const Opt_Array_F64* ratios,
+                                 const Opt_VisibleAreaChangeCallback* event,
+                                 const Opt_Boolean* measureFromViewport)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(event);
+    auto optEvent = Converter::GetOptPtr(event);
+    auto optMeasureFromViewport = Converter::OptConvertPtr<bool>(measureFromViewport);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList, optMeasureFromViewport.value_or(false));
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
+    auto rawRatioVec = Converter::OptConvertPtr<std::vector<double>>(ratios);
+    if (!rawRatioVec) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList,
+            optMeasureFromViewport.value_or(false));
+        return;
+    }
+    size_t size = rawRatioVec->size();
+    std::vector<double> ratioVec;
+    for (size_t i = 0; i < size; i++) {
+        double ratio = (*rawRatioVec)[i];
+        if (LessOrEqual(ratio, VISIBLE_RATIO_MIN)) {
+            ratio = VISIBLE_RATIO_MIN;
+        }
+
+        if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
+            ratio = VISIBLE_RATIO_MAX;
+        }
+        ratioVec.push_back(ratio);
+    }
+    ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec,
+        optMeasureFromViewport.value_or(false));
+}
 void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
                                            const Opt_VisibleAreaEventOptions* options,
                                            const Opt_VisibleAreaChangeCallback* event)
@@ -6796,6 +6880,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(event);
     auto expectedUpdateInterval =
         Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
+    auto measureFromViewPort = Converter::OptConvert<bool>(options->value.measureFromViewport).value_or(false);
     if (expectedUpdateInterval < 0) {
         expectedUpdateInterval = DEFAULT_DURATION;
     }
@@ -6803,7 +6888,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     if (!optEvent) {
         std::vector<double> ratioList;
         ViewAbstract::SetOnVisibleAreaApproximateChange(
-            frameNode, nullptr, ratioList, expectedUpdateInterval);
+            frameNode, nullptr, ratioList, expectedUpdateInterval, measureFromViewPort);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -6818,7 +6903,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     if (!rawRatioVec.has_value() || rawRatioVec->empty()) {
         std::vector<double> ratioList;
         ViewAbstract::SetOnVisibleAreaApproximateChange(
-            frameNode, std::move(onVisibleAreaChange), ratioList, expectedUpdateInterval);
+            frameNode, std::move(onVisibleAreaChange), ratioList, expectedUpdateInterval, measureFromViewPort);
         return;
     }
     std::vector<float> floatArray = rawRatioVec.value();
@@ -6836,7 +6921,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
         ratioVec.push_back(ratio);
     }
     ViewAbstract::SetOnVisibleAreaApproximateChange(
-        frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
+        frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval, measureFromViewPort);
 }
 void SetKeyboardShortcutImpl(Ark_NativePointer node,
                              const Opt_Union_String_FunctionKey* value,
@@ -7145,6 +7230,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
         CommonMethodModifier::SetSmartGestureShortcutImpl,
         CommonMethodModifier::SetInspectorLabelImpl,
+        CommonMethodModifier::SetDoubleSidedImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,
@@ -7183,7 +7269,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBindContentCover0Impl,
         CommonMethodModifier::SetBindContentCover1Impl,
         CommonMethodModifier::SetBindSheetImpl,
-        CommonMethodModifier::SetOnVisibleAreaChangeImpl,
+        CommonMethodModifier::SetOnVisibleAreaChange0Impl,
+        CommonMethodModifier::SetOnVisibleAreaChange1Impl,
         CommonMethodModifier::SetOnVisibleAreaApproximateChangeImpl,
         CommonMethodModifier::SetKeyboardShortcutImpl,
         CommonMethodModifier::SetAccessibilityGroupImpl,

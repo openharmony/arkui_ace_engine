@@ -24,6 +24,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/gestures/drag_event.h"
+#include "core/event/key_event.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/unified_data_peer.h"

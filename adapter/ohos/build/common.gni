@@ -25,6 +25,7 @@ declare_args() {
   ace_engine_feature_enable_gpu = true
   ace_engine_feature_enable_preload_dynamic_module  = true
   ace_engine_feature_enable_gesture_debug_boundary = true
+  ace_engine_feature_enable_smart_gesture = true
 }
 
 js_engines = []
@@ -51,6 +52,10 @@ if (ace_engine_feature_enable_web) {
 
 if (ace_engine_feature_enable_gesture_debug_boundary) {
   gesture_debug_boundary_support = true
+}
+
+if (ace_engine_feature_enable_smart_gesture) {
+  smart_gesture_support = true
 }
 
 use_build_in_js_engine = true
@@ -103,6 +108,7 @@ dynamic_component_support = true
 vsync_timeout_check = true
 state_mgmt_use_aot = true
 relaxed_interaction_support = true
+back_to_top_tips_support = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -128,6 +134,10 @@ if (ace_engine_feature_enable_preload_dynamic_module) {
 
 if (defined(gesture_debug_boundary_support) && gesture_debug_boundary_support) {
   defines += [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
+}
+
+if (defined(smart_gesture_support) && smart_gesture_support) {
+  defines += [ "SMART_GESTURE_SUPPORTED" ]
 }
 
 if (defined(is_experiment_build) && is_experiment_build) {
@@ -227,6 +237,10 @@ if (defined(state_mgmt_use_aot) && state_mgmt_use_aot) {
 
 if (defined(relaxed_interaction_support) && relaxed_interaction_support) {
   defines += [ "RELAXED_INTERACTION_SUPPORT" ]
+}
+
+if (defined(back_to_top_tips_support) && back_to_top_tips_support) {
+  defines += [ "BACK_TO_TOP_TIPS_SUPPORT" ]
 }
 
 cflags_cc = [

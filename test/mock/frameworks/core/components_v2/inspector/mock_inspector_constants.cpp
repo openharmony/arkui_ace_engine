@@ -37,4 +37,5 @@ const char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
 const char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
 const char MENU_ETS_TAG[] = "Menu";
 const char SHEET_WRAPPER_TAG[] = "SheetWrapper";
+const char JS_WITH_ENV_ETS_TAG[] = "WithEnv";
 } // namespace OHOS::Ace::V2

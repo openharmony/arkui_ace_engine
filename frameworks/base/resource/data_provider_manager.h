@@ -24,12 +24,13 @@
 #include <string>
 #include <type_traits>
 
-#include "base/image/image_defines.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/data_ability_helper.h"
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
+
+struct ImageErrorInfo;
 
 class DataProviderRes {
 public:

@@ -175,6 +175,16 @@ public:
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
+    const std::vector<RefPtr<FrameNode>>& GetBuilderOptions()
+    {
+        return builderOptions_;
+    }
+    void AddBuilderOptionNode(const RefPtr<FrameNode>& option)
+    {
+        CHECK_NULL_VOID(option);
+        builderOptions_.push_back(option);
+    }
+
     FocusPattern GetFocusPattern() const override;
 
     bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const override;
@@ -222,6 +232,26 @@ public:
     BlurStyleOption GetMenuBackgroundBlurStyle() const
     {
         return blurStyleOption_;
+    }
+
+    void SetMenuDistortionMode(std::optional<DistortionMode> mode)
+    {
+        menuDistortionMode_ = mode;
+    }
+
+    std::optional<DistortionMode> GetMenuDistortionMode() const
+    {
+        return menuDistortionMode_;
+    }
+
+    void SetMenuEdgeLightMode(std::optional<EdgeLightMode> mode)
+    {
+        menuEdgeLightMode_ = mode;
+    }
+
+    std::optional<EdgeLightMode> GetMenuEdgeLightMode() const
+    {
+        return menuEdgeLightMode_;
     }
 
     void SetShowInSubWindow(bool isShowInSubWindow);
@@ -402,6 +432,7 @@ private:
     void ShowScrollBar();
     void UpdateMenuBorderStyle(const RefPtr<FrameNode>& menu);
     std::vector<RefPtr<FrameNode>> options_;
+    std::vector<RefPtr<FrameNode>> builderOptions_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
     RefPtr<FrameNode> text_ = nullptr;
     RefPtr<FrameNode> spinner_ = nullptr;
@@ -424,6 +455,8 @@ private:
     std::optional<Color> optionBgColor_;
     std::optional<Color> fontColor_;
     RefPtr<UiMaterial> menuSystemMaterial_ = nullptr;
+    std::optional<DistortionMode> menuDistortionMode_;
+    std::optional<EdgeLightMode> menuEdgeLightMode_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

@@ -114,7 +114,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_OnDirtyLayoutWrapperSwap001, TestS
 HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextOffset001, TestSize.Level1)
 {
     MarqueePattern marqueeModel;
-    auto offsetX = marqueeModel.GetTextOffset();
+    auto offsetX = marqueeModel.GetTextOffset(true);
     EXPECT_EQ(offsetX, 0);
 }
 
