@@ -2766,4 +2766,49 @@ HWTEST_F(DatePickerTestFour, ReportDialogDateChangeEvent002, TestSize.Level1)
     EXPECT_TRUE(result);
 }
 
+/**
+ * @tc.name: AddAnimationTextPropertiesLpx001
+ * @tc.desc: Test AddAnimationTextProperties with LPX unit for fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, AddAnimationTextPropertiesLpx001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    constexpr double lpxValue = 20.0;
+    textLayoutProperty->UpdateFontSize(Dimension(lpxValue, DimensionUnit::LPX));
+
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->animationProperties_.clear();
+    columnPattern_->AddAnimationTextProperties(0, textLayoutProperty);
+
+    ASSERT_EQ(columnPattern_->animationProperties_.size(), 1);
+    EXPECT_EQ(columnPattern_->animationProperties_[0].fontSize.Unit(), DimensionUnit::LPX);
+    EXPECT_EQ(columnPattern_->animationProperties_[0].fontSize.Value(), lpxValue);
+}
+
+/**
+ * @tc.name: AddAnimationTextPropertiesLpx002
+ * @tc.desc: Test AddAnimationTextProperties with PX unit (non-LPX) for fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, AddAnimationTextPropertiesLpx002, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    constexpr double pxValue = 20.0;
+    textLayoutProperty->UpdateFontSize(Dimension(pxValue, DimensionUnit::PX));
+
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->animationProperties_.clear();
+    columnPattern_->AddAnimationTextProperties(0, textLayoutProperty);
+
+    ASSERT_EQ(columnPattern_->animationProperties_.size(), 1);
+    EXPECT_EQ(columnPattern_->animationProperties_[0].fontSize.Unit(), DimensionUnit::PX);
+}
+
 } // namespace OHOS::Ace::NG
