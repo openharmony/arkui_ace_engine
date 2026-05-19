@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,10 +22,10 @@ import { RecordData } from '@ohos.base';
 
 type pointer = int64
 
-export const PeerNodeType = 11;
-export const RootPeerType = 33;
-export const LazyForEachType = 13;
-export const RepeatType = 14;
+export declare const PeerNodeType: int;
+export declare const RootPeerType: int;
+export declare const LazyForEachType: int;
+export declare const RepeatType: int;
 
 export declare class PeerNode extends IncrementalNode {
     public readonly name: string;
