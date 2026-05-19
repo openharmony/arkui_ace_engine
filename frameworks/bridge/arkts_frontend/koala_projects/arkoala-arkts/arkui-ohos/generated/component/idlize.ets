@@ -22,14 +22,14 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, OnVisibleIndexesChangeCallback, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
 import { extractors, TouchEvent, ContentModifier, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
-import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
+import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ItemFillPolicy_serializer, ItemFillPolicy, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, HorizontalAlign, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
 import { ScrollState, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
@@ -3915,6 +3915,78 @@ export class LazyBuild {
         thisSerializer.release()
     }
 }
+export class LazyColumnLayoutExtender {
+    public static lazyColumnLayoutConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return LazyColumnLayoutExtender.lazyColumnLayoutConstructor_serialize(id_casted)
+    }
+    public static setLazyColumnLayoutOptions(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        LazyColumnLayoutExtender.setLazyColumnLayoutOptions_serialize(node_casted)
+        return
+    }
+    public static space(node: KPointer, space?: arkui_Graphics_LengthMetrics): void {
+        const node_casted = node as (KPointer)
+        const space_casted = space as (arkui_Graphics_LengthMetrics | undefined)
+        LazyColumnLayoutExtender.space_serialize(node_casted, space_casted)
+        return
+    }
+    public static alignItems(node: KPointer, value?: HorizontalAlign): void {
+        const node_casted = node as (KPointer)
+        const value_casted = value as (HorizontalAlign | undefined)
+        LazyColumnLayoutExtender.alignItems_serialize(node_casted, value_casted)
+        return
+    }
+    public static onVisibleIndexesChange(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
+        const node_casted = node as (KPointer)
+        const callback__casted = callback_ as (OnVisibleIndexesChangeCallback | undefined)
+        LazyColumnLayoutExtender.onVisibleIndexesChange_serialize(node_casted, callback__casted)
+        return
+    }
+    private static lazyColumnLayoutConstructor_serialize(id: int32): KPointer {
+        const retval = ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_lazyColumnLayoutConstructor(id)
+        return retval
+    }
+    private static setLazyColumnLayoutOptions_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_setLazyColumnLayoutOptions(node)
+    }
+    private static space_serialize(node: KPointer, space?: arkui_Graphics_LengthMetrics): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (space !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const spaceTmpValue = space!
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, spaceTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_space(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static alignItems_serialize(node: KPointer, value?: HorizontalAlign): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as HorizontalAlign)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_alignItems(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static onVisibleIndexesChange_serialize(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_onVisibleIndexesChange(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export class LazyForEachOps {
     public static NotifyChange(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
         const node_casted = node as (KPointer)
@@ -3980,6 +4052,104 @@ export class LazyForEachOps {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         LazyForEachOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._LazyForEachOps_SetOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export class LazyWaterFlowLayoutExtender {
+    public static lazyVWaterFlowLayoutConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return LazyWaterFlowLayoutExtender.lazyVWaterFlowLayoutConstructor_serialize(id_casted)
+    }
+    public static setLazyVWaterFlowLayoutOptions(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        LazyWaterFlowLayoutExtender.setLazyVWaterFlowLayoutOptions_serialize(node_casted)
+        return
+    }
+    public static rowsGap(node: KPointer, value?: arkui_Graphics_LengthMetrics): void {
+        const node_casted = node as (KPointer)
+        const value_casted = value as (arkui_Graphics_LengthMetrics | undefined)
+        LazyWaterFlowLayoutExtender.rowsGap_serialize(node_casted, value_casted)
+        return
+    }
+    public static columnsGap(node: KPointer, value?: arkui_Graphics_LengthMetrics): void {
+        const node_casted = node as (KPointer)
+        const value_casted = value as (arkui_Graphics_LengthMetrics | undefined)
+        LazyWaterFlowLayoutExtender.columnsGap_serialize(node_casted, value_casted)
+        return
+    }
+    public static columnsTemplate(node: KPointer, value: string | ItemFillPolicy | undefined): void {
+        const node_casted = node as (KPointer)
+        const value_casted = value as (string | ItemFillPolicy | undefined)
+        LazyWaterFlowLayoutExtender.columnsTemplate_serialize(node_casted, value_casted)
+        return
+    }
+    public static onVisibleIndexesChange(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
+        const node_casted = node as (KPointer)
+        const callback__casted = callback_ as (OnVisibleIndexesChangeCallback | undefined)
+        LazyWaterFlowLayoutExtender.onVisibleIndexesChange_serialize(node_casted, callback__casted)
+        return
+    }
+    private static lazyVWaterFlowLayoutConstructor_serialize(id: int32): KPointer {
+        const retval = ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_lazyVWaterFlowLayoutConstructor(id)
+        return retval
+    }
+    private static setLazyVWaterFlowLayoutOptions_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_setLazyVWaterFlowLayoutOptions(node)
+    }
+    private static rowsGap_serialize(node: KPointer, value?: arkui_Graphics_LengthMetrics): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_rowsGap(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static columnsGap_serialize(node: KPointer, value?: arkui_Graphics_LengthMetrics): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_columnsGap(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static columnsTemplate_serialize(node: KPointer, value: string | ItemFillPolicy | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof ItemFillPolicy) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1 = valueTmpValue as ItemFillPolicy
+                ItemFillPolicy_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_columnsTemplate(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static onVisibleIndexesChange_serialize(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_onVisibleIndexesChange(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
