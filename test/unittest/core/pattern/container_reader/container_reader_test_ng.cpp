@@ -14,7 +14,7 @@
  */
 
 #include "container_reader_test_ng.h"
-
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -1614,7 +1614,8 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent003, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     const float flexWidth = 400.0f;
-        const float textHeight = 100.0f;
+    const float flexHeight = 300.0f;
+    const float textHeight = 100.0f;
 
     RefPtr<FrameNode> text;
     RefPtr<FrameNode> reader;
@@ -1647,7 +1648,7 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent003, TestSize.Level1)
     // main-axis matchParent: ContainerReader width = parent width (400), not remaining
     auto readerGeometry = reader->GetGeometryNode();
     ASSERT_NE(readerGeometry, nullptr);
-    EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(flexWidth, textHeight));
+    EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(flexWidth, flexHeight));
 
     MockContainer::Current()->SetApiTargetVersion(savedVersion);
 }
