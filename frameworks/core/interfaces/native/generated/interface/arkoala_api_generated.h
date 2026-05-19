@@ -29849,6 +29849,19 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
                        const Ark_LazyForEachOptions* options);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
+typedef struct GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor {
+    Ark_NativePointer (*lazyVWaterFlowLayoutConstructor)(Ark_Int32 id);
+    void (*setLazyVWaterFlowLayoutOptions)(Ark_NativePointer node);
+    void (*rowsGap)(Ark_NativePointer node,
+                    const Opt_LengthMetrics* value);
+    void (*columnsGap)(Ark_NativePointer node,
+                       const Opt_LengthMetrics* value);
+    void (*columnsTemplate)(Ark_NativePointer node,
+                            const Opt_Union_String_ItemFillPolicy* value);
+    void (*onVisibleIndexesChange)(Ark_NativePointer node,
+                                   const Opt_OnVisibleIndexesChangeCallback* callback_);
+} GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor;
+
 typedef struct GENERATED_ArkUILeadingMarginSpanAccessor {
     void (*destroyPeer)(Ark_LeadingMarginSpan peer);
     Ark_LeadingMarginSpan (*construct)();
@@ -32275,6 +32288,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILayoutPolicyAccessor* (*getLayoutPolicyAccessor)();
     const GENERATED_ArkUILazyBuildAccessor* (*getLazyBuildAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
+    const GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor* (*getLazyWaterFlowLayoutExtenderAccessor)();
     const GENERATED_ArkUILeadingMarginSpanAccessor* (*getLeadingMarginSpanAccessor)();
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
     const GENERATED_ArkUILevelOrderExtenderAccessor* (*getLevelOrderExtenderAccessor)();
@@ -32454,6 +32468,8 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_INDICATOR_COMPONENT,
     GENERATED_ARKUI_LAZY_GRID_LAYOUT_ATTRIBUTE,
     GENERATED_ARKUI_LAZY_VGRID_LAYOUT,
+    GENERATED_ARKUI_LAZY_VWATER_FLOW_LAYOUT,
+    GENERATED_ARKUI_LAZY_WATER_FLOW_LAYOUT_ATTRIBUTE,
     GENERATED_ARKUI_LINE,
     GENERATED_ARKUI_LIST,
     GENERATED_ARKUI_LIST_ITEM,

@@ -42,12 +42,9 @@ public:
         return totalItemCount_;
     }
 
-    static std::optional<ViewPosReference> GetReferencePos(RefPtr<FrameNode> frameNode);
+    static std::optional<ViewPosReference> GetReferencePos(const RefPtr<FrameNode>& frameNode);
 
 private:
-    // Cache window per side, as a fraction of the parent viewport main size.
-    static constexpr float CACHE_SIZE = 0.5f;
-
     struct PrevFrameSnapshot {
         LazyWaterFlowAnchorSnapshot anchor;
     };
@@ -85,6 +82,7 @@ private:
      */
     void RefillLaneWindow(LayoutWrapper* layoutWrapper, int32_t resetFrom, float frontBoundary, float backBoundary,
         float& maxMainSize);
+    bool TryKeepEmptyLanesOutsideVisibleContent(float& maxMainSize);
     bool TryTopEdgeAnchorRefill(LayoutWrapper* layoutWrapper, float backBoundary, float& maxMainSize);
     bool TryTopJumpRefill(LayoutWrapper* layoutWrapper, float frontBoundary, float backBoundary, float& maxMainSize);
     void RefillFromEmptyLanes(LayoutWrapper* layoutWrapper, float frontBoundary, float backBoundary,
@@ -126,8 +124,8 @@ private:
         float childMainSize, const std::optional<float>& cachedSize);
     std::optional<float> MeasureChild(
         LayoutWrapper* layoutWrapper, int32_t index, int32_t laneIdx, float referencePos, ReferenceEdge referenceEdge);
-    void RefreshNestedLazyChildrenInLane(LayoutWrapper* layoutWrapper, int32_t laneIdx);
-    void RefreshNestedLazyChildren(LayoutWrapper* layoutWrapper);
+    void ReMeasureItemsInLane(LayoutWrapper* layoutWrapper, int32_t laneIdx);
+    void ReMeasureItems(LayoutWrapper* layoutWrapper);
     LayoutConstraintF CreateChildConstraintForItem(const RefPtr<LayoutWrapper>& child, int32_t laneIdx,
         float referencePos, ReferenceEdge referenceEdge) const;
     bool CanRenderChildInDeadline(const RefPtr<LayoutWrapper>& child) const;
@@ -143,7 +141,10 @@ private:
     void UpdateVisibleAdjustOffset(float totalDelta);
 
     void LayoutItems(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset);
-    LayoutRange GetLayoutRange() const;
+    LayoutRange GetLayoutRange(const RefPtr<FrameNode>& host) const;
+    bool NeedVisibleRangeForChild(const RefPtr<UINode>& child) const;
+    bool NeedVisibleRangeForChildren(const RefPtr<FrameNode>& host) const;
+    bool ShouldReuseCachedOffscreenSize(LayoutWrapper* layoutWrapper, bool maybeVisible, bool hasCachedSize) const;
     void LayoutBusinessItems(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset,
         const LayoutRange& range);
     void LayoutBusinessItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, int32_t businessIndex);
@@ -152,7 +153,7 @@ private:
     void ClearUnlayoutedBusinessItems(LayoutWrapper* layoutWrapper, const LayoutRange& range) const;
     void UpdateActiveChildRange(LayoutWrapper* layoutWrapper, int32_t visibleStart, int32_t visibleEnd,
         int32_t cachedStart, int32_t cachedEnd) const;
-    void UpdateBusinessActiveRangeOnChildren(const RefPtr<FrameNode>& host, int32_t rawStart, int32_t rawEnd,
+    void UpdateBusinessActiveRangeOnChildren(const RefPtr<FrameNode>& host, int32_t activeStart, int32_t activeEnd,
         int32_t cacheStart, int32_t cacheEnd) const;
     ActiveChildSets BuildActiveChildSets(int32_t rawStart, int32_t rawEnd) const;
 
@@ -166,9 +167,14 @@ private:
     float crossSize_ = 0.0f;
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
-    // Viewport in self-local content coords. Infinity = parent provides no bounded upper edge.
+    // Real viewport in self-local content coords. Infinity = parent provides no bounded upper edge.
     float viewStart_ = 0.0f;
     float viewEnd_ = Infinity<float>();
+    // Real viewport plus parent-provided viewExt; the child cache window expands from this range.
+    float extendedViewStart_ = 0.0f;
+    float extendedViewEnd_ = Infinity<float>();
+    // Cache window per side, as a fraction of the parent viewport main size.
+    float cacheSize_ = 0.5f;
     float cacheStartPos_ = 0.0f;
     float cacheEndPos_ = Infinity<float>();
     std::vector<double> crossLens_;
@@ -183,6 +189,8 @@ private:
     // RefillLaneWindow took the top-anchor short-circuit (lanes re-based to 0). UpdateStartAnchorAdjust must
     // skip the anchor diff so the pure internal coord re-base does not leak as a parent scroll shift.
     bool topAnchorRebased_ = false;
+    // Viewport is fully outside known content; keep the visible window empty and preserve last total height.
+    bool keepEmptyLanesOutsideContent_ = false;
 };
 
 } // namespace OHOS::Ace::NG

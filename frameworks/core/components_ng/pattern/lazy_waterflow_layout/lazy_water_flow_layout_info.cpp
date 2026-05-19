@@ -726,6 +726,12 @@ bool LazyWaterFlowLayoutInfo::NeedPredict() const
     if (!std::isfinite(cacheEndPos_) || totalItemCount_ <= 0) {
         return false;
     }
+    const bool extendedViewOverlapsContent = GreatNotEqual(extendedViewEndPos_, 0.0f) &&
+        (!Positive(totalMainSize_) || LessNotEqual(extendedViewStartPos_, totalMainSize_));
+    // An empty offscreen child cannot start its own predict loop from cache overlap alone.
+    if (posMap_.empty()) {
+        return extendedViewOverlapsContent;
+    }
     auto hasBackwardGap = false;
     if (cachedStartIndex_ > 0) {
         auto iter = posMap_.find(cachedStartIndex_);
@@ -740,6 +746,11 @@ bool LazyWaterFlowLayoutInfo::NeedPredict() const
             auto iter = posMap_.find(cachedEndIndex_);
             hasForwardGap = iter != posMap_.end() && LessNotEqual(iter->second.endPos, cacheEndPos_);
         }
+    }
+    if (!extendedViewOverlapsContent && startIndex_ < 0 && endIndex_ < 0) {
+        // Once parent predict has started an offscreen cache window, let idle predict finish that window.
+        const bool hasStartedOffscreenCache = cachedStartIndex_ >= 0 && cachedEndIndex_ >= cachedStartIndex_;
+        return hasStartedOffscreenCache && (hasBackwardGap || hasForwardGap);
     }
     return hasBackwardGap || hasForwardGap;
 }
