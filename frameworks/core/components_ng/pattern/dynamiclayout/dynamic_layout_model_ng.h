@@ -26,7 +26,8 @@ using UpdateLayoutPropertyFunc = std::function<void(const RefPtr<NG::FrameNode>&
 class ACE_EXPORT DynamicLayoutModelNG : public DynamicLayoutModel {
 public:
     void Create(const RefPtr<AlgorithmParamBase>& algorithmParams, NG::DynamicLayoutType type) override;
-
+    static void SetParams(
+        const RefPtr<NG::FrameNode> &frameNode, const RefPtr<AlgorithmParamBase>& params, NG::DynamicLayoutType type);
 private:
     static void UpdatePropertyFromLinearParam(
         const RefPtr<NG::FrameNode> &frameNode, const RefPtr<AlgorithmParamBase>& params);

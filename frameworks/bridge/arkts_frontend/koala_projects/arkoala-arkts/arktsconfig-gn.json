@@ -148,6 +148,9 @@
             "#arktheme": [
                 "./arkui/theme"
             ],
+            "@ohos.arkui.components.ArkDynamicLayout": [
+                "./@ohos.arkui.components.ArkDynamicLayout"
+            ],
             "@component/customComponent": [
                 "./arkui/component/customComponent.ets"
             ],

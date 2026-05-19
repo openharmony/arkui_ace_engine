@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/dynamiclayout/bridge/dynamic_layout_dynamic_module.h"
 #include "core/components_ng/pattern/dynamiclayout/bridge/arkts_native_dynamic_layout_bridge.h"
 #include "core/components_ng/pattern/dynamiclayout/dynamic_layout_model_ng.h"
+#include "arkoala_api_generated.h"
+#include "core/interfaces/ani/ani_api.h"
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_DynamicLayout()
 {
@@ -28,6 +30,9 @@ namespace NG {
 namespace NodeModifier {
 const ArkUIDynamicLayoutModifier* GetDynamicLayoutDynamicModifier();
 }
+#ifdef INCLUDE_GENERATED_SOURCES
+const ArkUIAniDynamicLayoutModifier* GetArkUIAniDynamicLayoutModifier();
+#endif
 } // namespace NG
 
 void DynamicLayoutDynamicModule::RegisterAttributes(
@@ -60,5 +65,14 @@ void* DynamicLayoutDynamicModule::GetModel()
 const void* DynamicLayoutDynamicModule::GetCustomModifier(const std::string& name)
 {
     return nullptr;
+}
+
+const void* DynamicLayoutDynamicModule::GetAniModifier()
+{
+#ifdef INCLUDE_GENERATED_SOURCES
+    return NG::GetArkUIAniDynamicLayoutModifier();
+#else
+    return nullptr;
+#endif
 }
 } // namespace OHOS::Ace

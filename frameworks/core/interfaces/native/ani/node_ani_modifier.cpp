@@ -55,6 +55,8 @@
 #include "for_each_node_ani_modifier.h"
 #include "uinode_ani_modifier.h"
 #include "xbar_ani_modifier.h"
+#include "dynamiclayout_ani_modifier.h"
+
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
 {
@@ -71,6 +73,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getArkUIAniListModifier = OHOS::Ace::NG::GetArkUIAniListModifier,
+        .getArkUIAniDynamicLayoutModifier = OHOS::Ace::NG::GetArkUIAniDynamicLayoutModifier,
         .getArkUIAniListItemGroupModifier = OHOS::Ace::NG::GetArkUIAniListItemGroupModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
