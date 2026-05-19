@@ -96,3 +96,19 @@ export function ArcScrollBarImpl(
         content_?.()
     })
 }
+
+@memo
+export function ArcScrollBar(
+    @memo @memo_skip
+    style: ((attributes: ArcScrollBarAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkArcScrollBarComponent>((): ArkArcScrollBarComponent => {
+        return new ArkArcScrollBarComponent()
+    })
+    NodeAttach<ArkArcScrollBarPeer>((): ArkArcScrollBarPeer => ArkArcScrollBarPeer.create(receiver), (_: ArkArcScrollBarPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

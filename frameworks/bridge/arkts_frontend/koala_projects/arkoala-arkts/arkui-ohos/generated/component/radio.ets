@@ -203,6 +203,21 @@ export function RadioImpl(
     })
 }
 
+@memo
+export function Radio(
+    @memo @memo_skip
+    style: ((attributes: RadioAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRadioComponent>((): ArkRadioComponent => {
+        return new ArkRadioComponent()
+    })
+    NodeAttach<ArkRadioPeer>((): ArkRadioPeer => ArkRadioPeer.create(receiver), (_: ArkRadioPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class RadioConfiguration_serializer {
     public static write(buffer: SerializerBase, value: RadioConfiguration): void {
         let valueSerializer: SerializerBase = buffer

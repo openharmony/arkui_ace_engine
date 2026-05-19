@@ -91,12 +91,6 @@ ace_unittest("drag_drop_proxy_test_ng") {
   sources = [ "drag_drop_proxy_test_ng.cpp" ]
 }
 
-ace_unittest("start_drag_listener_impl_test_ng") {
-  module_name = "Drag-CommonDrag"
-  type = "new"
-  sources = [ "start_drag_listener_impl_test_ng.cpp" ]
-}
-
 ace_unittest("full_screen_manager_test_ng") {
   module_name = "Animation-Frame"
   type = "new"

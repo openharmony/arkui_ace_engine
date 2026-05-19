@@ -45,6 +45,7 @@ void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_
 void SetCustomCallbackWithCheckForFrameNodes(ani_env* env, ani_object obj, ani_array ptrArray, ani_array nodeArray);
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
+ani_long BuilderProxyNodeMockConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
 void RemoveComponentFromFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content);
 void AddComponentToFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content);
 void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node,

@@ -190,6 +190,7 @@ void SetTextShadowImpl(Ark_NativePointer node, const Opt_Union_ShadowOptions_Arr
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<Shadow> shadowListResult;
+    Converter::DefaultShadowBlurRadius defaultBlurRadius(0.0);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
     if (shadowList.has_value()) {
         shadowListResult = shadowList.value();

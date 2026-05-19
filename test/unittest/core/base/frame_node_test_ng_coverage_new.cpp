@@ -434,6 +434,37 @@ HWTEST_F(FrameNodeTestNg, TriggerShouldParallelWithTddInnerSuccessTest01, TestSi
 }
 
 /**
+ * @tc.name: TriggerShouldParallelWithTddInnerSuccessTest02
+ * @tc.desc: Test TriggerShouldParallelWith covers inner success branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TriggerShouldParallelWithTddInnerSuccessTest02, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    ShouldBuiltInRecognizerParallelWithFunc shouldBuiltInRecognizerParallelWithFunc =
+        [](RefPtr<NGGestureRecognizer> target, std::vector<RefPtr<NGGestureRecognizer>> targets) {
+            return targets.front();
+        };
+    gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
+
+    auto currentPan = CreateParallelPanRecognizer(true, 1);
+    auto currentPanTwo = CreateParallelPanRecognizer(true, 1);
+    auto responsePan = CreateParallelPanRecognizer(true, 1);
+    ResponseLinkResult currentRecognizers;
+    ResponseLinkResult responseLinkRecognizers;
+    currentRecognizers.emplace_back(currentPan);
+    currentRecognizers.emplace_back(currentPanTwo);
+    responseLinkRecognizers.emplace_back(responsePan);
+
+    gestureHub->TriggerShouldParallelWith(currentRecognizers, responseLinkRecognizers);
+
+    EXPECT_TRUE(currentPan->IsBridgeMode());
+    EXPECT_TRUE(currentPanTwo->IsBridgeMode());
+    EXPECT_EQ(responsePan->GetBridgeObj().size(), 2UL);
+}
+
+/**
  * @tc.name: OnSyncGeometryFrameFinishTest
  * @tc.desc: Test the function OnSyncGeometryFrameFinish
  * @tc.type: FUNC

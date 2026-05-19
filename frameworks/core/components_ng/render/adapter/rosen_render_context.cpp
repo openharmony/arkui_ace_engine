@@ -2056,6 +2056,17 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
     }
 }
 
+void RosenRenderContext::ClearClipBounds()
+{
+    FREE_RS_CONTEXT_CHECK(ClearClipBounds);
+    CHECK_NULL_VOID(rsNode_);
+    ResetClipShape();
+    AddOrUpdateModifier<Rosen::ModifierNG::RSBoundsClipModifier,
+        &Rosen::ModifierNG::RSBoundsClipModifier::SetClipBounds, std::shared_ptr<Rosen::RSPath>>(
+        clipBoundModifier_, nullptr);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& width, Dimension& height)
 {
     if (particleImageContextMap_.find(src) != particleImageContextMap_.end()) {
@@ -7944,12 +7955,12 @@ void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<
     // the drawRegion of this index has changed
     drawRegionRects_[index] = rect;
     std::shared_ptr<Rosen::RectF> result;
-    for (size_t index = 0; index < DRAW_REGION_RECT_COUNT; ++index) {
-        if (drawRegionRects_[index]) {
+    for (size_t idx = 0; idx < DRAW_REGION_RECT_COUNT; ++idx) {
+        if (drawRegionRects_[idx]) {
             if (result) {
-                *result = result->JoinRect(*drawRegionRects_[index]);
+                *result = result->JoinRect(*drawRegionRects_[idx]);
             } else {
-                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[index]);
+                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[idx]);
             }
         }
     }

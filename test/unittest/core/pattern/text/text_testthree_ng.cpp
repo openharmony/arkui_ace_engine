@@ -1528,6 +1528,27 @@ HWTEST_F(TextTestThreeNg, TextLineHeightMultiply003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextModelNGLineHeightMultiply004
+ * @tc.desc: Test TextModelNGLineHeightMultiply
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextLineHeightMultiply004, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetLineHeightMultiply(frameNode, -5.0);
+    EXPECT_EQ(textLayoutProperty->HasLineHeightMultiply(), true);
+}
+
+/**
  * @tc.name: TextCompressLeadingPunctuation001
  * @tc.desc: Test TextCompressLeadingPunctuation
  * @tc.type: FUNC

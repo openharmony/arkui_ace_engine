@@ -16,7 +16,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/base/modifier.h"
 
-#include "core/accessibility/accessibility_utils.h"
+#include <algorithm>
+#include <cmath>
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/axis.h"
@@ -27,7 +29,6 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/animation/bezier_variable_velocity_motion.h"
-#include "core/animation/select_motion.h"
 #include "core/animation/velocity_motion.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/common/container.h"
@@ -36,8 +37,10 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
@@ -51,6 +54,7 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
@@ -58,7 +62,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
 #include "core/components_ng/syntax/for_each_node.h"
@@ -66,6 +69,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/event/mouse_event.h"
+#include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/common/properties/os_content.h"
 
@@ -152,6 +156,27 @@ void ScrollablePattern::CreateRefreshCoordination()
         CHECK_NULL_VOID(host);
         refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(host);
     }
+}
+
+float ScrollablePattern::CalculateFriction(float gamma)
+{
+    gamma = std::clamp(gamma, 0.0f, 1.0f);
+    return std::exp(-ratio_.value_or(1.848f) * gamma);
+}
+
+RefPtr<ScrollBar> ScrollablePattern::GetScrollBar() const
+{
+    return scrollBar_;
+}
+
+RefPtr<ScrollBarOverlayModifier> ScrollablePattern::GetScrollBarOverlayModifier() const
+{
+    return scrollBarOverlayModifier_;
+}
+
+void ScrollablePattern::SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
+{
+    scrollBarOverlayModifier_ = scrollBarOverlayModifier;
 }
 
 ScrollablePattern::~ScrollablePattern()
@@ -4653,10 +4678,8 @@ void ScrollablePattern::SearchAndSetParentNestedScroll(const RefPtr<FrameNode>& 
             continue;
         }
 
-        if (AceType::InstanceOf<SwiperPattern>(parentPattern)) {
-            auto swiper = AceType::DynamicCast<SwiperPattern>(parentPattern);
-            CHECK_NULL_VOID(swiper);
-            auto direction = swiper->GetDirection();
+        if (frameNode->GetTag() == V2::SWIPER_ETS_TAG) {
+            auto direction = parentPattern->GetAxis();
             CHECK_EQUAL_VOID(scrollBarAxis, direction);
         }
         auto ScrollPattern = AceType::DynamicCast<ScrollablePattern>(parentPattern);
@@ -4707,10 +4730,8 @@ void ScrollablePattern::SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>
             continue;
         }
 
-        if (AceType::InstanceOf<SwiperPattern>(parentPattern)) {
-            auto swiper = AceType::DynamicCast<SwiperPattern>(parentPattern);
-            CHECK_NULL_VOID(swiper);
-            auto direction = swiper->GetDirection();
+        if (frameNode->GetTag() == V2::SWIPER_ETS_TAG) {
+            auto direction = parentPattern->GetAxis();
             CHECK_EQUAL_VOID(scrollBarAxis, direction);
         }
 

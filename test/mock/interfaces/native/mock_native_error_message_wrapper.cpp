@@ -14,6 +14,7 @@
  */
 
 #include "interfaces/native/native_error_message_wrapper.h"
+#include "core/interfaces/native/utility/error_message_manager.h"
 
 namespace OHOS::Ace {
 void SetErrorCodeAndMessageByModifier(ArkUI_Int32 errorCode, const char* errorMessage)
@@ -30,9 +31,8 @@ void SetErrorFunctionNameByModifier(const char* functionName)
 
 void SetErrorMessageByModifier(ArkUI_Int32 errorCode, const char* functionName, const char* errorMessage)
 {
-    (void)errorCode;
-    (void)functionName;
-    (void)errorMessage;
+    OHOS::Ace::ErrorMessageManager::GetInstance().SetErrorCodeAndMessage(errorCode, errorMessage);
+    OHOS::Ace::ErrorMessageManager::GetInstance().SetFunctionName(functionName);
     return;
 }
 } // namespace OHOS::Ace

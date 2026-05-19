@@ -189,6 +189,16 @@ public:
         return isStaticNode_;
     }
 
+    bool IsPreMake()
+    {
+        return isPreMake_;
+    }
+
+    void SetPreMake(bool isPreMake)
+    {
+        isPreMake_ = isPreMake;
+    }
+
     void NeedSetInActiveAfterTransitionOut(bool needSetInActive);
     void SetInActiveAfterTransitionOut();
 
@@ -836,6 +846,8 @@ public:
     RefPtr<FrameNode> GetFrameNodeByIdInSubTree(const std::string& id);
     RefPtr<FrameNode> GetFrameNodeByUniqueIdInSubTree(int32_t uniqueId);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
+    std::string GetPath();
+    void DetachFromMainTreeByPreMakeFlag();
 
     virtual bool HasVirtualNodeAccessibilityProperty()
     {
@@ -1423,6 +1435,7 @@ private:
 
     void HandleColorModeChange();
 
+    virtual void ResetNode() {};
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
@@ -1505,6 +1518,7 @@ private:
     bool isStaticNode_ = false;
     bool isAdopted_ = false;
     std::string inspectorLabel_;
+    bool isPreMake_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -29,13 +29,13 @@ import { TextDecorationType, Color as arkui_component_enums_Color, TextDecoratio
 import { Resource as global_resource_Resource } from 'global.resource'
 import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
 import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, LayoutPolicy, ClickEvent_serializer } from './common'
-import { extractors, CustomSpan, TouchEvent } from '#handwritten'
+import { extractors, ShaderStyle, CustomSpan, TouchEvent } from '#handwritten'
 import { default as image } from '@ohos.multimedia.image'
 import { DrawingColorFilter } from './image'
 import { default as drawing } from '@ohos.graphics.drawing'
-import { LineSpacingOptions_serializer, LineSpacingOptions, TextVerticalAlign, TextDirection, FontConfigs_serializer, FontConfigs, SuperscriptStyle, FontVariation } from './textCommon'
+import { LineSpacingOptions_serializer, LineSpacingOptions, TextVerticalAlign, TextDirection, FontConfigs_serializer, FontConfigs, SuperscriptStyle, FontVariation, StrokeJoinStyle } from './textCommon'
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from './richEditor'
-import { CustomSpanWrapper, CustomSpanWrapper_serializer, TouchEventProxy, TouchEventProxy_serializer } from './idlize'
+import { ShaderStyleProxy, ShaderStyleProxy_serializer, CustomSpanWrapper, CustomSpanWrapper_serializer, TouchEventProxy, TouchEventProxy_serializer } from './idlize'
 import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
 import { default as text } from '@ohos.graphics.text'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
@@ -750,6 +750,7 @@ export class ParagraphStyle implements MaterializedBase {
     public readonly paragraphSpacing?: double | undefined
     public readonly textDirection?: TextDirection | undefined
     public readonly leadingMarginSpan?: LeadingMarginSpan | undefined
+    public readonly shaderStyle?: ShaderStyle | undefined
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ParagraphStyle.getFinalizer())
         this.textAlign = this.getTextAlign()
@@ -762,6 +763,7 @@ export class ParagraphStyle implements MaterializedBase {
         this.paragraphSpacing = this.getParagraphSpacing()
         this.textDirection = this.getTextDirection()
         this.leadingMarginSpan = this.getLeadingMarginSpan()
+        this.shaderStyle = this.getShaderStyle()
     }
     constructor(value?: ParagraphStyleInterface) {
         this(MaterializedBaseTag.NOP, ParagraphStyle.construct(value))
@@ -775,6 +777,7 @@ export class ParagraphStyle implements MaterializedBase {
         this.paragraphSpacing = this.getParagraphSpacing()
         this.textDirection = this.getTextDirection()
         this.leadingMarginSpan = this.getLeadingMarginSpan()
+        this.shaderStyle = this.getShaderStyle()
     }
     static construct(value?: ParagraphStyleInterface): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -821,6 +824,9 @@ export class ParagraphStyle implements MaterializedBase {
     }
     private getLeadingMarginSpan(): LeadingMarginSpan | undefined {
         return this.getLeadingMarginSpan_serialize()
+    }
+    private getShaderStyle(): ShaderStyle | undefined {
+        return this.getShaderStyle_serialize()
     }
     private getTextAlign_serialize(): TextAlign | undefined {
         const retval = ArkUIGeneratedNativeModule._ParagraphStyle_getTextAlign(this.peer!.ptr)
@@ -950,6 +956,19 @@ export class ParagraphStyle implements MaterializedBase {
         const returnResult: LeadingMarginSpan | undefined = buffer
         retvalDeserializer.dispose()
         return (returnResult as LeadingMarginSpan | undefined)
+    }
+    private getShaderStyle_serialize(): ShaderStyle | undefined {
+        const retval = ArkUIGeneratedNativeModule._ParagraphStyle_getShaderStyle(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: ShaderStyle | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptDeserialized: ShaderStyleProxy = ShaderStyleProxy_serializer.read(retvalDeserializer)
+            buffer = extractors.transform_Ark_ShaderStyleProxy_to_Ark_ShaderStyle(bufferOptDeserialized)
+        }
+        const returnResult: ShaderStyle | undefined = buffer
+        retvalDeserializer.dispose()
+        return (returnResult as ShaderStyle | undefined)
     }
 }
 export class StyledStringInternal {
@@ -1256,6 +1275,7 @@ export class TextStyle implements MaterializedBase {
     public readonly strokeWidth?: double | undefined
     public readonly strokeColor?: ResourceColor | undefined
     public readonly fontVariations?: Array<FontVariation> | undefined
+    public readonly strokeJoinStyle?: StrokeJoinStyle | undefined
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextStyle.getFinalizer())
         this.fontColor = this.getFontColor()
@@ -1268,6 +1288,7 @@ export class TextStyle implements MaterializedBase {
         this.strokeWidth = this.getStrokeWidth()
         this.strokeColor = this.getStrokeColor()
         this.fontVariations = this.getFontVariations()
+        this.strokeJoinStyle = this.getStrokeJoinStyle()
     }
     constructor(value?: TextStyleInterface) {
         this(MaterializedBaseTag.NOP, TextStyle.construct(value))
@@ -1281,6 +1302,7 @@ export class TextStyle implements MaterializedBase {
         this.strokeWidth = this.getStrokeWidth()
         this.strokeColor = this.getStrokeColor()
         this.fontVariations = this.getFontVariations()
+        this.strokeJoinStyle = this.getStrokeJoinStyle()
     }
     static construct(value?: TextStyleInterface): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1327,6 +1349,9 @@ export class TextStyle implements MaterializedBase {
     }
     private getFontVariations(): Array<FontVariation> | undefined {
         return this.getFontVariations_serialize()
+    }
+    private getStrokeJoinStyle(): StrokeJoinStyle | undefined {
+        return this.getStrokeJoinStyle_serialize()
     }
     private getFontColor_serialize(): ResourceColor | undefined {
         const retval = ArkUIGeneratedNativeModule._TextStyle_getFontColor(this.peer!.ptr)
@@ -1478,6 +1503,18 @@ export class TextStyle implements MaterializedBase {
         retvalDeserializer.dispose()
         return (returnResult as Array<FontVariation> | undefined)
     }
+    private getStrokeJoinStyle_serialize(): StrokeJoinStyle | undefined {
+        const retval = ArkUIGeneratedNativeModule._TextStyle_getStrokeJoinStyle(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: StrokeJoinStyle | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = StrokeJoinStyle.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult: StrokeJoinStyle | undefined = buffer
+        retvalDeserializer.dispose()
+        return (returnResult as StrokeJoinStyle | undefined)
+    }
 }
 export class UrlStyleInternal {
     public static fromPtr(ptr: KPointer): UrlStyle {
@@ -1542,6 +1579,7 @@ export interface TextStyleInterface {
     strokeWidth?: arkui_component_units_LengthMetrics;
     strokeColor?: ResourceColor;
     fontVariations?: Array<FontVariation>;
+    strokeJoinStyle?: StrokeJoinStyle;
 }
 export interface DecorationStyleInterface {
     type?: TextDecorationType | undefined;
@@ -1564,6 +1602,7 @@ export interface ParagraphStyleInterface {
     paragraphSpacing?: arkui_component_units_LengthMetrics;
     textDirection?: TextDirection;
     leadingMarginSpan?: LeadingMarginSpan;
+    shaderStyle?: ShaderStyle;
 }
 export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | LineSpacingStyle;
 export enum StyledStringKey {
@@ -2445,6 +2484,14 @@ export class TextStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForStrokeJoinStyle = value.strokeJoinStyle
+        if (valueHolderForStrokeJoinStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeJoinStyleTmpValue = (valueHolderForStrokeJoinStyle as StrokeJoinStyle)
+            valueSerializer.writeInt32(valueHolderForStrokeJoinStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextStyleInterface {
         let valueDeserializer: DeserializerBase = buffer
@@ -2558,7 +2605,13 @@ export class TextStyleInterface_serializer {
             fontVariationsTmpBuf = fontVariationsTmpBufOpt
         }
         const fontVariationsTmpResult: Array<FontVariation> | undefined = fontVariationsTmpBuf
-        let value: TextStyleInterface = ({fontColor: fontColorTmpResult, fontFamily: fontFamilyTmpResult, fontSize: fontSizeTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, fontConfigs: fontConfigsTmpResult, superscript: superscriptTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult, fontVariations: fontVariationsTmpResult} as TextStyleInterface)
+        const strokeJoinStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let strokeJoinStyleTmpBuf: StrokeJoinStyle | undefined = undefined
+        if ((strokeJoinStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strokeJoinStyleTmpBuf = StrokeJoinStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const strokeJoinStyleTmpResult: StrokeJoinStyle | undefined = strokeJoinStyleTmpBuf
+        let value: TextStyleInterface = ({fontColor: fontColorTmpResult, fontFamily: fontFamilyTmpResult, fontSize: fontSizeTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, fontConfigs: fontConfigsTmpResult, superscript: superscriptTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult, fontVariations: fontVariationsTmpResult, strokeJoinStyle: strokeJoinStyleTmpResult} as TextStyleInterface)
         return value
     }
 }
@@ -2756,6 +2809,15 @@ export class ParagraphStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForShaderStyle = value.shaderStyle
+        if (valueHolderForShaderStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShaderStyleTmpValue = valueHolderForShaderStyle!
+            const valueHolderForShaderStyleTmpValueTransformed: ShaderStyleProxy = extractors.transform_Ark_ShaderStyle_to_Ark_ShaderStyleProxy(valueHolderForShaderStyleTmpValue)
+            ShaderStyleProxy_serializer.write(valueSerializer, valueHolderForShaderStyleTmpValueTransformed)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ParagraphStyleInterface {
         let valueDeserializer: DeserializerBase = buffer
@@ -2828,7 +2890,14 @@ export class ParagraphStyleInterface_serializer {
             leadingMarginSpanTmpBuf = (LeadingMarginSpan_serializer.read(valueDeserializer) as LeadingMarginSpan)
         }
         const leadingMarginSpanTmpResult: LeadingMarginSpan | undefined = leadingMarginSpanTmpBuf
-        let value: ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textVerticalAlign: textVerticalAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult, leadingMarginSpan: leadingMarginSpanTmpResult} as ParagraphStyleInterface)
+        const shaderStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let shaderStyleTmpBuf: ShaderStyle | undefined = undefined
+        if ((shaderStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const shaderStyleTmpBufOptDeserialized: ShaderStyleProxy = ShaderStyleProxy_serializer.read(valueDeserializer)
+            shaderStyleTmpBuf = extractors.transform_Ark_ShaderStyleProxy_to_Ark_ShaderStyle(shaderStyleTmpBufOptDeserialized)
+        }
+        const shaderStyleTmpResult: ShaderStyle | undefined = shaderStyleTmpBuf
+        let value: ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textVerticalAlign: textVerticalAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult, leadingMarginSpan: leadingMarginSpanTmpResult, shaderStyle: shaderStyleTmpResult} as ParagraphStyleInterface)
         return value
     }
 }

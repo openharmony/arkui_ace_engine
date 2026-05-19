@@ -2199,6 +2199,21 @@ export function NavigationImpl(
     })
 }
 
+@memo
+export function Navigation(
+    @memo @memo_skip
+    style: ((attributes: NavigationAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkNavigationComponent>((): ArkNavigationComponent => {
+        return new ArkNavigationComponent()
+    })
+    NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (_: ArkNavigationPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class NavigationTransitionProxy_serializer {
     public static write(buffer: SerializerBase, value: NavigationTransitionProxy): void {
         let valueSerializer: SerializerBase = buffer

@@ -927,6 +927,8 @@ const ArkUIGridModifier* GetGridModifier()
         .setGridEnableEditMode = SetGridEnableEditMode,
         .resetGridEnableEditMode = ResetGridEnableEditMode,
         .getGridEnableEditMode = GetGridEnableEditMode,
+        .setOnGridEditModeChangeCallBack = SetOnGridEditModeChangeCallBack,
+        .resetOnGridEditModeChange = ResetOnGridEditModeChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1401,6 +1403,40 @@ void SetOnGridScrollBarUpdate(ArkUINodeHandle node, void* extraParam)
                               std::optional<float>(event.mixedEvent.numberReturnData[1].f32));
     };
     GridModelNG::SetOnScrollBarUpdate(frameNode, std::move(onGridScrollBarUpdate));
+}
+
+void SetOnGridEditModeChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [extraParam](bool enableEditMode) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_EDIT_MODE_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = enableEditMode ? 1 : 0;
+        SendArkUISyncEvent(&event);
+    };
+    GridModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(onChange));
+}
+
+void ResetOnGridEditModeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetEnableEditModeChangeEvent(frameNode, nullptr);
+}
+
+void SetOnGridEditModeChangeCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(extraParam);
+        GridModelNG::SetEnableEditModeChangeEvent(frameNode, std::move(*onChange));
+    } else {
+        GridModelNG::SetEnableEditModeChangeEvent(frameNode, nullptr);
+    }
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

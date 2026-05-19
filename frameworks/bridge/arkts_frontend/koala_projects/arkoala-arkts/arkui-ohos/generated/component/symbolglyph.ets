@@ -22,10 +22,10 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
-import { extractors, AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from '#handwritten'
-import { ShaderStyle_serializer, FontWeightConfigs_serializer, ShaderStyle, FontWeightConfigs } from './textCommon'
+import { ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
+import { extractors, ShaderStyle, AttributeModifier, hookSymbolGlyphAttributeModifier, AttributeUpdater } from '#handwritten'
 import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent } from './common'
+import { FontWeightConfigs_serializer, FontWeightConfigs } from './textCommon'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -337,7 +337,8 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof ShaderStyle) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as ShaderStyle
-                ShaderStyle_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1Transformed: ShaderStyleProxy = extractors.transform_Ark_ShaderStyle_to_Ark_ShaderStyleProxy(valueTmpValueForIdx1)
+                ShaderStyleProxy_serializer.write(thisSerializer, valueTmpValueForIdx1Transformed)
             } else if (valueTmpValue instanceof Array) {
                 if (valueTmpValue.length == 0) {
                     thisSerializer.writeInt8((0).toByte())
@@ -353,7 +354,8 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                             if (valueTmpValueForIdx0TmpElement !== undefined) {
                                 thisSerializer.writeInt8(RuntimeType.OBJECT)
                                 const valueTmpValueForIdx0TmpElementTmpValue = valueTmpValueForIdx0TmpElement!
-                                ShaderStyle_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElementTmpValue)
+                                const valueTmpValueForIdx0TmpElementTmpValueTransformed: ShaderStyleProxy = extractors.transform_Ark_ShaderStyle_to_Ark_ShaderStyleProxy(valueTmpValueForIdx0TmpElementTmpValue)
+                                ShaderStyleProxy_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElementTmpValueTransformed)
                             } else {
                                 thisSerializer.writeInt8(RuntimeType.UNDEFINED)
                             }
@@ -646,6 +648,18 @@ export function SymbolGlyphImpl(
     })
 }
 
+@memo
+export function SymbolGlyph(
+    @memo @memo_skip
+    style: ((attributes: SymbolGlyphAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkSymbolGlyphComponent>((): ArkSymbolGlyphComponent => {
+        return new ArkSymbolGlyphComponent()
+    })
+    NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (_: ArkSymbolGlyphPeer): void => {
+        style?.(receiver)
+    })
+}
 export class AppearSymbolEffect_serializer {
     public static write(buffer: SerializerBase, value: AppearSymbolEffect): void {
         let valueSerializer: SerializerBase = buffer

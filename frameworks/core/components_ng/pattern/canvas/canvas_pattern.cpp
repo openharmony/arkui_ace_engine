@@ -897,9 +897,15 @@ void CanvasPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(GetDumpInfo());
     CHECK_NULL_VOID(paintMethod_);
-    DumpLog::GetInstance().AddDesc(paintMethod_->GetDumpInfo());
+    auto canvasPaints = paintMethod_->GetDumpInfo();
+    for (const auto& canvasPaint : canvasPaints) {
+        DumpLog::GetInstance().AddDesc(canvasPaint);
+    }
     CHECK_NULL_VOID(contentModifier_);
-    DumpLog::GetInstance().AddDesc(contentModifier_->GetDumpInfo());
+    auto canvasModifierInfo = contentModifier_->GetDumpInfo();
+    for (const auto& info : canvasModifierInfo) {
+        DumpLog::GetInstance().AddDesc(info);
+    }
 }
 
 void CanvasPattern::Reset()
@@ -951,9 +957,27 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("CanvasPattern", GetDumpInfo().c_str());
     CHECK_NULL_VOID(paintMethod_);
-    json->Put("CanvasPaint", paintMethod_->GetDumpInfo().c_str());
+    auto canvasPaints = paintMethod_->GetDumpInfo();
+    if (!canvasPaints.empty()) {
+        auto canvasPaintArray = JsonUtil::CreateArray();
+        for (const auto& canvasPaint : canvasPaints) {
+            auto item = JsonUtil::Create();
+            item->Put("text", canvasPaint.c_str());
+            canvasPaintArray->PutRef(std::move(item));
+        }
+        json->PutRef("CanvasPaint", std::move(canvasPaintArray));
+    }
     CHECK_NULL_VOID(contentModifier_);
-    json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
+    auto canvasModifierInfo = contentModifier_->GetDumpInfo();
+    if (!canvasModifierInfo.empty()) {
+        auto canvasModifierArray = JsonUtil::CreateArray();
+        for (const auto& info : canvasModifierInfo) {
+            auto item = JsonUtil::Create();
+            item->Put("text", info.c_str());
+            canvasModifierArray->PutRef(std::move(item));
+        }
+        json->PutRef("CanvasModifier", std::move(canvasModifierArray));
+    }
 }
 
 void CanvasPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)

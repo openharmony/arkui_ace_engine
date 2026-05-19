@@ -62,6 +62,13 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/common/ace_engine.h"
+#include "core/common/resource/resource_object.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/render/render_context.h"
 
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -1147,5 +1154,505 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_006, Test
     EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(validJson), RET_SUCCESS);
     auto cancelJson = buildJson(-1);
     EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(cancelJson), RET_SUCCESS);
+}
+
+/**
+ * @tc.name: DialogPatternAddButtonColorCallbackWithBgColorResObj
+ * @tc.desc: Test AddButtonColorCallback with background color resource object
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternAddButtonColorCallbackWithBgColorResObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and button node
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create button node with bg color resource object
+     */
+    RefPtr<FrameNode> buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    ButtonInfo params;
+    params.text = TITLE;
+    params.bgColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+
+    /**
+     * @tc.steps: step3. Call AddButtonColorCallback
+     * @tc.expected: No crash, callback is added
+     */
+    pattern->AddButtonColorCallback(params, buttonNode);
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternAddButtonColorCallbackWithTextColorResObj
+ * @tc.desc: Test AddButtonColorCallback with text color resource object
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternAddButtonColorCallbackWithTextColorResObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and button node with text child
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create button node with text child and text color resource object
+     */
+    RefPtr<FrameNode> buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(buttonNode);
+
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    ButtonInfo params;
+    params.text = TITLE;
+    params.textColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+
+    /**
+     * @tc.steps: step3. Call AddButtonColorCallback
+     * @tc.expected: No crash, callback is added
+     */
+    pattern->AddButtonColorCallback(params, buttonNode);
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternAddButtonColorCallbackWithoutConfigChangePerform
+ * @tc.desc: Test AddButtonColorCallback returns early when ConfigChangePerform is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    DialogPatternAdditionalTwoTestNg, DialogPatternAddButtonColorCallbackWithoutConfigChangePerform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and button node
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = false;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create button node with resource objects
+     */
+    RefPtr<FrameNode> buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    ButtonInfo params;
+    params.text = TITLE;
+    params.bgColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    params.textColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+
+    /**
+     * @tc.steps: step3. Call AddButtonColorCallback
+     * @tc.expected: Returns early without adding callbacks
+     */
+    pattern->AddButtonColorCallback(params, buttonNode);
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternAddButtonColorCallbackWithBothColorResObj
+ * @tc.desc: Test AddButtonColorCallback with both background and text color resource objects
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternAddButtonColorCallbackWithBothColorResObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and button node with text child
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create button node with text child and both resource objects
+     */
+    RefPtr<FrameNode> buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(buttonNode);
+
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    ButtonInfo params;
+    params.text = TITLE;
+    params.bgColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    params.textColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+
+    /**
+     * @tc.steps: step3. Call AddButtonColorCallback
+     * @tc.expected: No crash, both callbacks are added
+     */
+    pattern->AddButtonColorCallback(params, buttonNode);
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternUpdateResourceColorsWithoutConfigChangePerform001
+ * @tc.desc: Test UpdateResourceColors returns early when ConfigChangePerform is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    DialogPatternAdditionalTwoTestNg, DialogPatternUpdateResourceColorsWithoutConfigChangePerform001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and set ConfigChangePerform to false
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = false;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set mask color and background color resource objects
+     */
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    pattern->dialogProperties_.maskColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    pattern->dialogProperties_.maskColor = Color::GRAY;
+    pattern->dialogProperties_.backgroundColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    pattern->dialogProperties_.backgroundColor = Color::WHITE;
+
+    /**
+     * @tc.steps: step3. Call UpdateResourceColors when ConfigChangePerform is false
+     * @tc.expected: Method returns early without updating any colors
+     */
+    pattern->UpdateResourceColors();
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternUpdateResourceColorsWithMaskColorResObj001
+ * @tc.desc: Test UpdateResourceColors updates mask color when maskColorResObj exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternUpdateResourceColorsWithMaskColorResObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and set ConfigChangePerform to true
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set isModal to true and create mask node with render context
+     */
+    pattern->dialogProperties_.isModal = true;
+    pattern->extraMaskNode_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(pattern->extraMaskNode_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set mask color resource object
+     */
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    pattern->dialogProperties_.maskColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    pattern->dialogProperties_.maskColor = Color::GRAY;
+
+    /**
+     * @tc.steps: step4. Call UpdateResourceColors with mask color resource
+     * @tc.expected: No crash, mask color update is attempted
+     */
+    pattern->UpdateResourceColors();
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternUpdateResourceColorsWithBackgroundColorResObj001
+ * @tc.desc: Test UpdateResourceColors updates background color when backgroundColorResObj exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    DialogPatternAdditionalTwoTestNg, DialogPatternUpdateResourceColorsWithBackgroundColorResObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and set ConfigChangePerform to true
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize content render context
+     */
+    pattern->contentRenderContext_ = frameNode->GetRenderContext();
+    ASSERT_NE(pattern->contentRenderContext_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set background color resource object
+     */
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    pattern->dialogProperties_.backgroundColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    pattern->dialogProperties_.backgroundColor = Color::WHITE;
+
+    /**
+     * @tc.steps: step4. Call UpdateResourceColors with background color resource
+     * @tc.expected: No crash, background color update is attempted
+     */
+    pattern->UpdateResourceColors();
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternUpdateResourceColorsWithBlurStyleOption001
+ * @tc.desc: Test UpdateResourceColors updates blur style when blurStyleOption exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternUpdateResourceColorsWithBlurStyleOption001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and set ConfigChangePerform to true
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize content render context and set blur style
+     */
+    pattern->contentRenderContext_ = frameNode->GetRenderContext();
+    ASSERT_NE(pattern->contentRenderContext_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set blur style option
+     */
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::COMPONENT_THIN;
+    pattern->dialogProperties_.blurStyleOption = blurStyleOption;
+
+    /**
+     * @tc.steps: step4. Call UpdateResourceColors with blur style option
+     * @tc.expected: No crash, blur style reload is attempted
+     */
+    pattern->UpdateResourceColors();
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternUpdateResourceColorsWithEffectOption001
+ * @tc.desc: Test UpdateResourceColors updates effect when effectOption exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternUpdateResourceColorsWithEffectOption001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and set ConfigChangePerform to true
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize content render context and set effect
+     */
+    pattern->contentRenderContext_ = frameNode->GetRenderContext();
+    ASSERT_NE(pattern->contentRenderContext_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set effect option
+     */
+    const std::string BUNDLE_NAME = "com.example.test";
+    const std::string MODULE_NAME = "entry";
+    EffectOption effectOption;
+    effectOption.radius = Dimension(10.0, DimensionUnit::VP);
+    pattern->dialogProperties_.effectOption = effectOption;
+
+    /**
+     * @tc.steps: step4. Call UpdateResourceColors with effect option
+     * @tc.expected: No crash, effect reload is attempted
+     */
+    pattern->UpdateResourceColors();
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternUpdateResourceColorsWithBorderColor001
+ * @tc.desc: Test UpdateResourceColors updates border color when borderColor exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternUpdateResourceColorsWithBorderColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and set ConfigChangePerform to true
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize content render context
+     */
+    pattern->contentRenderContext_ = frameNode->GetRenderContext();
+    ASSERT_NE(pattern->contentRenderContext_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set border color
+     */
+    NG::BorderColorProperty borderColorProperty;
+    borderColorProperty.SetColor(Color::RED);
+    pattern->dialogProperties_.borderColor = borderColorProperty;
+
+    /**
+     * @tc.steps: step4. Call UpdateResourceColors with border color
+     * @tc.expected: No crash, border color reload is attempted
+     */
+    pattern->UpdateResourceColors();
+
+    g_isConfigChangePerform = isConfigChangePerform;
+}
+
+/**
+ * @tc.name: DialogPatternUpdateResourceColorsWithShadow001
+ * @tc.desc: Test UpdateResourceColors updates shadow when shadow exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogPatternUpdateResourceColorsWithShadow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and set ConfigChangePerform to true
+     */
+    auto isConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize content render context
+     */
+    pattern->contentRenderContext_ = frameNode->GetRenderContext();
+    ASSERT_NE(pattern->contentRenderContext_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set shadow
+     */
+    Shadow shadow;
+    shadow.SetColor(Color::GRAY);
+    shadow.SetBlurRadius(10.0);
+    pattern->dialogProperties_.shadow = shadow;
+
+    /**
+     * @tc.steps: step4. Call UpdateResourceColors with shadow
+     * @tc.expected: No crash, shadow reload is attempted
+     */
+    pattern->UpdateResourceColors();
+
+    g_isConfigChangePerform = isConfigChangePerform;
 }
 } // namespace OHOS::Ace::NG

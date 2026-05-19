@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/common/container.h"
+#include "core/common/statistic_event_reporter.h"
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
@@ -28,6 +29,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -229,10 +231,11 @@ void ListPattern::OnModifyDone()
     if (!multiSelectable_ && isMouseEventInit_) {
         UninitMouseEvent();
     }
-    if (GetEnableEditMode() && !swipeSelectPanEvent_) {
+    bool needSwipeSelect = GetEnableEditMode() || ShouldEnableTwoFingerSelect();
+    if (needSwipeSelect && !swipeSelectPanEvent_) {
         InitSwipeSelectEvent();
     }
-    if (!GetEnableEditMode() && swipeSelectPanEvent_) {
+    if (!needSwipeSelect && swipeSelectPanEvent_) {
         UninitSwipeSelectEvent();
     }
     if (IsDefaultMultiSelectStyleEnabled()) {
@@ -675,7 +678,9 @@ bool ListPattern::UpdateStartListItemIndex()
     bool startFlagChanged = (startInfo_.index != startIndex_);
     bool startIsGroup = startWrapper && startWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (startIsGroup) {
-        auto startPattern = startWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
+        auto startNode = startWrapper->GetHostNode();
+        CHECK_NULL_RETURN(startNode, false);
+        auto startPattern = startNode->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo startGroupInfo = GetStartListItemIndex(startPattern);
         startFlagChanged = startFlagChanged || (startInfo_.area != startGroupInfo.area) ||
                            (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
@@ -684,7 +689,7 @@ bool ListPattern::UpdateStartListItemIndex()
         if (startFlagChanged && GetScrollSource() != SCROLL_FROM_NONE) {
             VisibleContentInfo endGroupInfo = GetEndListItemIndex(startPattern);
             int32_t endItemIndexInGroup = endGroupInfo.indexInGroup;
-            startWrapper->GetHostNode()->OnAccessibilityEvent(
+            startNode->OnAccessibilityEvent(
                 AccessibilityEventType::SCROLLING_EVENT, startItemIndexInGroup, endItemIndexInGroup);
         }
     }
@@ -5014,7 +5019,10 @@ bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
     CHECK_NULL_RETURN(pipeline, false);
     pipeline->FlushUITasks();
     RequestFocusForItem(index, focusGroupIndex_.has_value() && indexInGroup >= 0 ? indexInGroup : -1);
-    auto child = host->GetChildByIndex(focusIndex_.value_or(-1));
+    if (!focusIndex_.has_value() || focusIndex_.value() < 0) {
+        return false;
+    }
+    auto child = host->GetChildByIndex(static_cast<uint32_t>(focusIndex_.value()));
     if (child && focusGroupIndex_.has_value()) {
         auto childNode = child->GetHostNode();
         CHECK_NULL_RETURN(childNode, false);

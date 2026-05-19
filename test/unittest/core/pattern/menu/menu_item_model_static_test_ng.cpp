@@ -910,4 +910,79 @@ HWTEST_F(MenuItemModelStaticTestNg, SetSymbolEndIcon001, TestSize.Level1)
     
     ASSERT_NE(menuProperty->GetEndSymbol(), nullptr);
 }
+/**
+ * @tc.name: SetFontSizeLpx001
+ * @tc.desc: Test SetFontSize registers LPX attribute when dimension unit is LPX
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModelStaticTestNg, SetFontSizeLpx001, TestSize.Level1)
+{
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    MenuItemModelStatic::SetFontSize(node, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+
+    MenuItemModelStatic::SetFontSize(node, Dimension(16.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetFontSizeLpx002
+ * @tc.desc: Test SetFontSize unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModelStaticTestNg, SetFontSizeLpx002, TestSize.Level1)
+{
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    MenuItemModelStatic::SetFontSize(node, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+
+    MenuItemModelStatic::SetFontSize(node, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetLabelFontSizeLpx001
+ * @tc.desc: Test SetLabelFontSize registers LPX attribute when dimension unit is LPX
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModelStaticTestNg, SetLabelFontSizeLpx001, TestSize.Level1)
+{
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    MenuItemModelStatic::SetLabelFontSize(node, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_LABEL_FONT_SIZE), 0);
+
+    MenuItemModelStatic::SetLabelFontSize(node, Dimension(16.0, DimensionUnit::VP));
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_LABEL_FONT_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetLabelFontSizeLpx002
+ * @tc.desc: Test SetLabelFontSize unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModelStaticTestNg, SetLabelFontSizeLpx002, TestSize.Level1)
+{
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    MenuItemModelStatic::SetLabelFontSize(node, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(frameNode->lpxAttributes_.count(LpxAttribute::LPX_LABEL_FONT_SIZE), 0);
+
+    MenuItemModelStatic::SetLabelFontSize(node, std::nullopt);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_LABEL_FONT_SIZE), 0);
+}
 } // namespace OHOS::Ace::NG

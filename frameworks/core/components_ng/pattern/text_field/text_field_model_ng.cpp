@@ -2891,6 +2891,108 @@ void TextFieldModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EnableAutoSpacing, enabled, frameNode);
 }
 
+void TextFieldModelNG::SetStrokeJoinStyle(StrokeJoinStyle style)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeJoinStyle, style);
+}
+ 
+void TextFieldModelNG::SetStrokeJoinStyle(FrameNode* frameNode, StrokeJoinStyle style)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeJoinStyle, style, frameNode);
+}
+ 
+void TextFieldModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        pattern->AddResObj("TextFieldGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradient, frameNode);
+}
+ 
+void TextFieldModelNG::SetColorShaderStyle(const Color& value)
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, value);
+}
+ 
+void TextFieldModelNG::ResetGradientShaderStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
+}
+ 
+void TextFieldModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        pattern->AddResObj("TextFieldGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradient, frameNode);
+}
+ 
+void TextFieldModelNG::SetColorShaderStyle(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, value, frameNode);
+}
+ 
+NG::Gradient TextFieldModelNG::GetGradientStyle(FrameNode* frameNode)
+{
+    NG::Gradient value;
+    value.CreateGradientWithType(NG::GradientType::LINEAR);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    return layoutProperty->GetGradientShaderStyle().value_or(value);
+}
+ 
+void TextFieldModelNG::ResetGradient(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
+}
+
 bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);

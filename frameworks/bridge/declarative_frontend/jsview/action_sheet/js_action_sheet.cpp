@@ -535,6 +535,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
             properties.hasInvertColor.hasBackgroundColor = true;
         }
         properties.backgroundColor = backgroundColor;
+        properties.backgroundColorResObj = backgroundColorResObj;
     }
 
     auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");

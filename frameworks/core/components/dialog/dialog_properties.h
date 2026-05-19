@@ -156,8 +156,10 @@ struct ActionSheetInfo {
 struct ButtonInfo {
     std::string text;      // text of button.
     std::string textColor; // style of text in button.
+    RefPtr<ResourceObject> textColorResObj;
     bool isBgColorSetted = false;
     Color bgColor;                                   // background color of button.
+    RefPtr<ResourceObject> bgColorResObj;
     RefPtr<NG::ClickEvent> action;                   // NG button click action
     bool enabled = true;                             // status of enabled in button.
     bool defaultFocus = false;                       // status of defaultFocus in button.
@@ -204,6 +206,8 @@ struct DialogProperties {
     int32_t gridCount = -1;
     std::optional<Color> maskColor;
     std::optional<Color> backgroundColor;
+    RefPtr<ResourceObject> maskColorResObj;
+    RefPtr<ResourceObject> backgroundColorResObj;
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
@@ -273,6 +277,7 @@ struct DialogProperties {
     WeakPtr<NG::UINode> customCNode;
     std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
     RefPtr<UiMaterial> systemMaterial;
+    bool isDefaultMaterial = false;           // init use default Material
 };
 
 struct PromptDialogAttr {
@@ -293,6 +298,7 @@ struct PromptDialogAttr {
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
+    RefPtr<ResourceObject> backgroundColorResObj;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
@@ -309,6 +315,7 @@ struct PromptDialogAttr {
     WeakPtr<NG::UINode> contentNode;
     bool customStyle = false;
     std::optional<Color> maskColor;
+    RefPtr<ResourceObject> maskColorResObj;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr;
     RefPtr<NG::ChainedTransitionEffect> dialogTransitionEffect = nullptr;
     RefPtr<NG::ChainedTransitionEffect> maskTransitionEffect = nullptr;

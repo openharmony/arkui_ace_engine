@@ -324,6 +324,18 @@ export function DatePickerImpl(
     })
 }
 
+@memo
+export function DatePicker(
+    @memo @memo_skip
+    style: ((attributes: DatePickerAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkDatePickerComponent>((): ArkDatePickerComponent => {
+        return new ArkDatePickerComponent()
+    })
+    NodeAttach<ArkDatePickerPeer>((): ArkDatePickerPeer => ArkDatePickerPeer.create(receiver), (_: ArkDatePickerPeer): void => {
+        style?.(receiver)
+    })
+}
 export class DatePickerOptions_serializer {
     public static write(buffer: SerializerBase, value: DatePickerOptions): void {
         let valueSerializer: SerializerBase = buffer

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,6 +128,7 @@ namespace SymbolGlyphAttributeModifier {
 namespace {
 constexpr int32_t MIN_VARIABLE_FONT_WEIGHT = 100;
 constexpr int32_t MAX_VARIABLE_FONT_WEIGHT = 900;
+constexpr float COLOR_COEFFICIENT = 100.0f;
 
 int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
 {
@@ -428,74 +429,114 @@ float DirectionToAngle(const std::optional<GradientDirection> linearX, const std
     return DirectionToAngle(SDKGradientDirection::None);
 }
 
-SymbolGradient ProcessShaderStyleForSymbol(ShaderStylePeer* shaderPeer, FrameNode* frameNode)
+void ConvertGradientDirection(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src)
+{
+    switch (src) {
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_LEFT: dst = GradientDirection::LEFT; break;
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_TOP: dst = GradientDirection::TOP; break;
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_RIGHT: dst = GradientDirection::RIGHT; break;
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_BOTTOM: dst = GradientDirection::BOTTOM; break;
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_LEFT_TOP: dst = GradientDirection::LEFT_TOP; break;
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_LEFT_BOTTOM: dst = GradientDirection::LEFT_BOTTOM; break;
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_RIGHT_TOP: dst = GradientDirection::RIGHT_TOP; break;
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_RIGHT_BOTTOM: dst = GradientDirection::RIGHT_BOTTOM; break;
+        case Ark_GradientDirection::ARK_GRADIENT_DIRECTION_NONE: dst = GradientDirection::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_GradientDirection: %{public}d", src);
+    }
+}
+
+void ProcessLinearGradient(const Opt_LinearGradientOptions& linearGradientOpt, SymbolGradient& symbolGradient)
+{
+    CHECK_NULL_VOID(linearGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED);
+    auto options = linearGradientOpt.value;
+    Gradient gradient;
+    gradient.CreateGradientWithType(GradientType::LINEAR);
+    auto repeat = Converter::OptConvert<bool>(options.repeating);
+    if (repeat) {
+        gradient.SetRepeat(repeat.value());
+    }
+    auto linear = gradient.GetLinearGradient();
+    CHECK_NULL_VOID(linear);
+    std::optional<float> degreeOpt;
+    constexpr float DEFAULT_ANGLE = 180.0f;
+    Converter::ConvertAngleWithDefault(options.angle, degreeOpt, DEFAULT_ANGLE);
+    if (degreeOpt) {
+        linear->angle = CalcDimension(degreeOpt.value(), DimensionUnit::PX);
+        degreeOpt.reset();
+    }
+    std::optional<GradientDirection> direction;
+    auto directionSrc = options.direction;
+    if (directionSrc.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        ConvertGradientDirection(direction, directionSrc.value);
+    }
+    if (direction.has_value()) {
+        Converter::AssignLinearGradientDirection(linear, direction.value());
+    }
+    Converter::AssignGradientColors(&gradient, &options.colors);
+    symbolGradient.type = SymbolGradientType::LINEAR_GRADIENT;
+    const auto& colors = gradient.GetColors();
+    for (const auto& gradientColor : colors) {
+        symbolGradient.symbolColor.emplace_back(gradientColor.GetColor());
+        symbolGradient.symbolOpacities.emplace_back(static_cast<float>(
+            gradientColor.GetDimension().Value() / COLOR_COEFFICIENT));
+    }
+    symbolGradient.repeating = gradient.GetRepeat();
+    if (linear->angle.has_value()) {
+        symbolGradient.angle = linear->angle.value().Value();
+    } else {
+        float angle = DirectionToAngle(linear->linearX, linear->linearY);
+        symbolGradient.angle = angle;
+    }
+}
+
+void ProcessRadialGradient(const Opt_RadialGradientOptions& radialGradientOpt, SymbolGradient& symbolGradient)
+{
+    CHECK_NULL_VOID(radialGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED);
+    Gradient gradient = Converter::Convert<Gradient>(radialGradientOpt.value);
+    symbolGradient.type = SymbolGradientType::RADIAL_GRADIENT;
+    auto radialGradientValue = gradient.GetRadialGradient();
+    CHECK_NULL_VOID(radialGradientValue);
+    const auto& colors = gradient.GetColors();
+    for (const auto& gradientColor : colors) {
+        symbolGradient.symbolColor.emplace_back(gradientColor.GetColor());
+        symbolGradient.symbolOpacities.emplace_back(static_cast<float>(
+            gradientColor.GetDimension().Value() / COLOR_COEFFICIENT));
+    }
+    symbolGradient.repeating = gradient.GetRepeat();
+    symbolGradient.radialCenterX = radialGradientValue->radialCenterX;
+    symbolGradient.radialCenterY = radialGradientValue->radialCenterY;
+    symbolGradient.radius = radialGradientValue->radialVerticalSize;
+}
+
+SymbolGradient ProcessShaderStyleForSymbol(Ark_ShaderStyleProxy shaderStyleProxy, FrameNode* frameNode)
 {
     SymbolGradient gradient;
-    CHECK_NULL_RETURN(shaderPeer, gradient);
-    if (!shaderPeer->gradientOptions.has_value()) {
+    auto colorOpt = Converter::OptConvert<Color>(shaderStyleProxy.color);
+    auto linearGradientOpt = shaderStyleProxy.linearGradientOptions;
+    auto radialGradientOpt = shaderStyleProxy.radialGradientOptions;
+    bool hasLinear = linearGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    bool hasRadial = radialGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    CHECK_NULL_RETURN(colorOpt.has_value() || hasLinear || hasRadial, gradient);
+    if (!hasLinear && !hasRadial) {
         SymbolModelNG::ResetShaderStyle(frameNode);
         return gradient;
     }
-    auto gradientValue = shaderPeer->gradientOptions.value();
-    switch (shaderPeer->type) {
-        case ShaderStyleType::LINEAR_GRADIENT:
-            {
-                gradient.type = SymbolGradientType::LINEAR_GRADIENT;
-                auto linearGradientValue = gradientValue.GetLinearGradient();
-                if (!linearGradientValue) {
-                    break;
-                }
-                const auto& colors = gradientValue.GetColors();
-                for (const auto& gradientColor : colors) {
-                    gradient.symbolColor.emplace_back(gradientColor.GetColor());
-                    gradient.symbolOpacities.emplace_back(static_cast<float>(
- 	                    gradientColor.GetDimension().Value() / 100.0));
-                }
-                gradient.repeating = gradientValue.GetRepeat();
-                if (gradientValue.GetLinearGradient()->angle.has_value()) {
-                    gradient.angle = gradientValue.GetLinearGradient()->angle.value().Value();
-                } else {
-                    float angle = DirectionToAngle(linearGradientValue->linearX, linearGradientValue->linearY);
-                    gradient.angle = angle;
-                }
-                break;
-            }
-        case ShaderStyleType::RADIAL_GRADIENT:
-            {
-                gradient.type = SymbolGradientType::RADIAL_GRADIENT;
-                auto radialGradientValue = gradientValue.GetRadialGradient();
-                if (!radialGradientValue) {
-                    break;
-                }
-                const auto& colors = gradientValue.GetColors();
-                for (const auto& gradientColor : colors) {
-                    gradient.symbolColor.emplace_back(gradientColor.GetColor());
-                    gradient.symbolOpacities.emplace_back(static_cast<float>(
- 	                    gradientColor.GetDimension().Value() / 100.0));
-                }
-                gradient.repeating = gradientValue.GetRepeat();
-                gradient.radialCenterX = radialGradientValue->radialCenterX;
-                gradient.radialCenterY = radialGradientValue->radialCenterY;
-                gradient.radius = radialGradientValue->radialVerticalSize;
-                break;
-            }
-        case ShaderStyleType::SOLID_COLOR:
-            {
-                gradient.type = SymbolGradientType::COLOR_SHADER;
-                if (shaderPeer->colorValue.has_value()) {
-                    gradient.symbolColor.push_back(shaderPeer->colorValue.value());
-                }
-                break;
-            }
-        default:
-            SymbolModelNG::ResetShaderStyle(frameNode);
-            break;
+
+    if (colorOpt.has_value()) {
+        gradient.type = SymbolGradientType::COLOR_SHADER;
+        gradient.symbolColor.push_back(colorOpt.value());
+    } else if (hasLinear) {
+        ProcessLinearGradient(linearGradientOpt, gradient);
+    } else if (hasRadial) {
+        ProcessRadialGradient(radialGradientOpt, gradient);
+    } else {
+        SymbolModelNG::ResetShaderStyle(frameNode);
     }
     return gradient;
 }
 
 void SetShaderStyleImpl(Ark_NativePointer node,
-                        const Opt_Union_Array_Opt_ShaderStyle_ShaderStyle* value)
+                        const Opt_Union_Array_Opt_ShaderStyleProxy_ShaderStyleProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -509,20 +550,17 @@ void SetShaderStyleImpl(Ark_NativePointer node,
     if (valueSelector == 0) {
         gradients.reserve(optUnionArrayShaderStyle.value().value0.length);
         for (int32_t i = 0; i < optUnionArrayShaderStyle.value().value0.length; ++i) {
-            Opt_ShaderStyle optShaderStyle =  optUnionArrayShaderStyle.value().value0.array[i];
-            auto shaderStyle = Converter::GetOptPtr(&optShaderStyle);
-            if (!shaderStyle.has_value()) {
+            Opt_ShaderStyleProxy optShaderStyle =  optUnionArrayShaderStyle.value().value0.array[i];
+            if (optShaderStyle.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
                 continue;
             }
-            auto shaderPeer = reinterpret_cast<ShaderStylePeer*>(shaderStyle.value());
-            SymbolGradient gradient = ProcessShaderStyleForSymbol(shaderPeer, frameNode);
+            SymbolGradient gradient = ProcessShaderStyleForSymbol(optShaderStyle.value, frameNode);
             gradients.emplace_back(std::move(gradient));
         }
-        
         SymbolModelNG::SetShaderStyle(frameNode, gradients);
     } else if (valueSelector == 1) {
-        auto shaderPeer = reinterpret_cast<ShaderStylePeer*>(optUnionArrayShaderStyle.value().value1);
-        SymbolGradient gradient = ProcessShaderStyleForSymbol(shaderPeer, frameNode);
+        auto shaderStyleProxy = optUnionArrayShaderStyle.value().value1;
+        SymbolGradient gradient = ProcessShaderStyleForSymbol(shaderStyleProxy, frameNode);
         gradient.gradientType = GradientDefinedStatus::GRADIENT_TYPE;
         gradients.emplace_back(std::move(gradient));
         SymbolModelNG::SetShaderStyle(frameNode, gradients);

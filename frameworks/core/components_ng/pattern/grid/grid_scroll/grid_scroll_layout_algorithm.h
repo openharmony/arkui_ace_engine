@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 

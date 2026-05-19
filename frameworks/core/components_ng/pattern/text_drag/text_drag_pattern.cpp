@@ -180,8 +180,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     float width = rightHandler.GetX() - leftHandler.GetX();
     float height = rightHandler.GetY() - leftHandler.GetY() + rightHandler.Height();
     auto dragOffset = TEXT_DRAG_OFFSET.ConvertToPx();
-    float globalX = leftHandler.GetX() + globalOffset.GetX() - dragOffset;
-    float globalY = leftHandler.GetY() + globalOffset.GetY() - dragOffset;
+    auto localDragOffset = OffsetF(leftHandler.GetX() - dragOffset, leftHandler.GetY() - dragOffset);
     auto box = boxes.front();
     float delta = 0.0f;
     float handlersDistance = width;
@@ -189,24 +188,31 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
         if (handlersDistance + bothOffset < TEXT_DRAG_MIN_WIDTH.ConvertToPx()) {
             delta = TEXT_DRAG_MIN_WIDTH.ConvertToPx() - (handlersDistance + bothOffset);
             width += delta;
-            globalX -= delta / CONSTANT_HALF;
+            localDragOffset.AddX(-delta / CONSTANT_HALF);
         }
     } else {
-        globalX = contentRect.Left() + globalOffset.GetX() - dragOffset;
+        localDragOffset.SetX(contentRect.Left() - dragOffset);
         dragPattern->AdjustMaxWidth(width, contentRect, boxes);
     }
+    auto globalDragOffset = dragPattern->ConvertToGlobalOffset(localDragOffset, globalOffset);
     float contentX = (leftHandler.GetY() == rightHandler.GetY() ? box.Left() : 0) - dragOffset - delta / CONSTANT_HALF;
     dragPattern->SetContentOffset({contentX, box.Top() - dragOffset});
-    dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalX), Dimension(globalY)));
-    auto offsetXValue = globalOffset.GetX() - globalX;
-    auto offsetYValue = globalOffset.GetY() - globalY;
+    dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalDragOffset.GetX()),
+        Dimension(globalDragOffset.GetY())));
+    auto offsetXValue = -localDragOffset.GetX();
+    auto offsetYValue = -localDragOffset.GetY();
     RectF rect(textStartOffset.GetX() + offsetXValue, textStartOffset.GetY() + offsetYValue, width, height);
     SelectPositionInfo info(leftHandler.GetX() + offsetXValue, leftHandler.GetY() + offsetYValue,
         rightHandler.GetX() + offsetXValue, rightHandler.GetY() + offsetYValue);
-    info.InitGlobalInfo(globalX, globalY);
+    info.InitGlobalInfo(globalDragOffset.GetX(), globalDragOffset.GetY());
     TextDragData data(rect, width + bothOffset, height + bothOffset, leftHandler.Height(), rightHandler.Height());
     data.initSelecitonInfo(info, leftHandler.GetY() == rightHandler.GetY());
     return data;
+}
+
+OffsetF TextDragPattern::ConvertToGlobalOffset(const OffsetF& localOffset, const OffsetF& parentGlobalOffset)
+{
+    return localOffset + parentGlobalOffset;
 }
 
 void TextDragPattern::AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes)

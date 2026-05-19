@@ -152,3 +152,15 @@ export function BlankImpl(
     })
 }
 
+@memo
+export function Blank(
+    @memo @memo_skip
+    style: ((attributes: BlankAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkBlankComponent>((): ArkBlankComponent => {
+        return new ArkBlankComponent()
+    })
+    NodeAttach<ArkBlankPeer>((): ArkBlankPeer => ArkBlankPeer.create(receiver), (_: ArkBlankPeer): void => {
+        style?.(receiver)
+    })
+}

@@ -70,6 +70,7 @@ public:
     void SetIncludeFontPadding(bool enabled) override;
     void SetFallbackLineSpacing(bool enabled) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetPunctuationOverflow(bool enabled) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
@@ -182,6 +183,8 @@ public:
     static bool IsFallbackLineSpacing(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool IsCompressLeadingPunctuation(FrameNode* frameNode);
+    static void SetPunctuationOverflow(FrameNode* frameNode, bool enabled);
+    static bool IsPunctuationOverflow(FrameNode* frameNode);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static bool IsStopBackPress(FrameNode* frameNode);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);

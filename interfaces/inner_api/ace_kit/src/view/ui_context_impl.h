@@ -49,6 +49,11 @@ public:
     ColorMode GetColorMode() override;
     float GetFontScale() override;
 
+    bool GetConfigPerform() override;
+    int32_t GetInstanceId() override;
+    bool HasDarkResource(const RefPtr<ResourceObject>& resObj) override;
+    ColorInvertFunc GetInvertFunc(int32_t instanceId, const std::string& nodeTag) override;
+
     RefPtr<OverlayManager> GetOverlayManager() override;
 
     void AddAfterLayoutTask(Task&& task, bool isFlushInImplicitAnimationTask = false) override;

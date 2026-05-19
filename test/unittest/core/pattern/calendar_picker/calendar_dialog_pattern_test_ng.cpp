@@ -1982,8 +1982,22 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest037, TestSize.Lev
     checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidMonthCommand);
     EXPECT_FALSE(checkResult);
 
+    invalidMonthCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":0,\"day\":19}}";
+    json = JsonUtil::ParseJsonString(invalidMonthCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidMonthCommand);
+    EXPECT_FALSE(checkResult);
+
     std::string invalidDayCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
         "\"params\":{\"year\":2026,\"month\":3,\"day\":32}}";
+    json = JsonUtil::ParseJsonString(invalidDayCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidDayCommand);
+    EXPECT_FALSE(checkResult);
+
+    invalidDayCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":3,\"day\":0}}";
     json = JsonUtil::ParseJsonString(invalidDayCommand);
     paramJson = json->GetValue("params");
     checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidDayCommand);

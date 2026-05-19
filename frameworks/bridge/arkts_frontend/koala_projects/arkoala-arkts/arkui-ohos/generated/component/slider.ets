@@ -868,6 +868,21 @@ export function SliderImpl(
     })
 }
 
+@memo
+export function Slider(
+    @memo @memo_skip
+    style: ((attributes: SliderAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkSliderComponent>((): ArkSliderComponent => {
+        return new ArkSliderComponent()
+    })
+    NodeAttach<ArkSliderPeer>((): ArkSliderPeer => ArkSliderPeer.create(receiver), (_: ArkSliderPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ColorMetricsLinearGradient_serializer {
     public static write(buffer: SerializerBase, value: ColorMetricsLinearGradient): void {
         let valueSerializer: SerializerBase = buffer

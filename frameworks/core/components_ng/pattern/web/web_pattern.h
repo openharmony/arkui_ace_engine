@@ -736,6 +736,10 @@ public:
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, const std::shared_ptr<ViewDataCommon>& viewDataCommon);
     AceAutoFillType GetFocusedType();
     HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
+    int SaveMsdpResultForAutoFill(const std::unique_ptr<JsonValue>& comJson);
+    bool MergeHint2TypeAndMsdpType();
+    bool IsMsdpType(const std::string& meta);
+    bool IsHint2Type(const std::string& meta);
     bool HandleAutoFillEvent();
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
@@ -1680,6 +1684,9 @@ private:
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isEditableOnContextMenu_ = false;
     WebMenuType autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
+    std::map<std::string, std::string> msdpTypes_;
+    std::mutex msdpTypesMutex_;
+
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     std::shared_ptr<ViewDataCommon> viewDataCommon_;

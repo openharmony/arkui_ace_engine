@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/statistic_event_adapter.h"
 
 namespace OHOS::Ace {

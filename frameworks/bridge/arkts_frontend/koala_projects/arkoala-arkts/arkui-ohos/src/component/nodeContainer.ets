@@ -167,3 +167,19 @@ export function NodeContainerImpl(
         style?.(receiver)
     })
 }
+
+/** @memo */
+export function NodeContainer(
+    /** @memo */
+    style: ((attributes: NodeContainerAttribute) => void) | undefined,
+): void {
+    const context: StateManager = __context() as StateManager;
+    const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+    let uiContext = data?.uiContext
+    const receiver = remember(() => {
+        return new ArkNodeContainerComponent(uiContext!)
+    })
+    NodeAttach<ArkNodeContainerPeer>((): ArkNodeContainerPeer => ArkNodeContainerPeer.create(receiver), (_: ArkNodeContainerPeer) => {
+        style?.(receiver)
+    })
+}

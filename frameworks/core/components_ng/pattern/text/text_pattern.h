@@ -282,6 +282,13 @@ public:
         const SelectMenuParam& menuParam);
     void BindPreviewMenu(TextSpanType spanType, std::function<void()>& menuBuilder, const SelectMenuParam& menuParam);
     void UnBindPreviewMenu();
+    bool GetIsTouchPressed() const
+    {
+        return isTouchPressed_;
+    }
+    void IfStartVibratorByLongPress();
+    void UnBindPreviewMenuByCopyOption();
+    void SetEnableEventResponse();
     void HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode);
     void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
     void FillPreviewMenuInJsonOneStep(const std::unique_ptr<JsonValue>& jsonValue) const;
@@ -767,6 +774,7 @@ private:
     int32_t highlightAppearAnimationId_ = 0;
     int32_t highlightDisappearAnimationId_ = 0;
     bool isMeasureBoundary_ = false;
+    bool isTouchPressed_ = false;
     bool isMousePressed_ = false;
     bool leftMousePressed_ = false;
     bool isCustomFont_ = false;

@@ -66,6 +66,8 @@ private:
     std::map<int32_t, GridItemMainPos> posMap_;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    int32_t visibleStartIndex_ = -1;
+    int32_t visibleEndIndex_ = -1;
     int32_t totalItemCount_ = 0;
     int32_t lanes_ = 1;
     float totalMainSize_ = 0.0f;

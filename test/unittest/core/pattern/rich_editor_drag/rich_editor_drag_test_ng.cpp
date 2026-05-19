@@ -496,7 +496,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode004, TestSize.Level0)
             selectedRects.emplace_back(RectF(10, 10, 250, 250));
         }));
     const OHOS::Ace::NG::ParagraphStyle expectedStyle;
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    mockParagraph->paraStyle_ = expectedStyle;
     paragraphInfo.paragraph = mockParagraph;
     paragraphInfo1.paragraph = mockParagraph;
     paragraphInfo.start = 0;
@@ -547,7 +547,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode005, TestSize.Level0)
             selectedRects.emplace_back(RectF(10, 10, 250, 250));
         }));
     const OHOS::Ace::NG::ParagraphStyle expectedStyle;
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    mockParagraph->paraStyle_ = expectedStyle;
     paragraphInfo.paragraph = mockParagraph;
     paragraphInfo1.paragraph = mockParagraph;
     paragraphInfo.start = 0;
@@ -605,7 +605,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNodeIsFilled001, TestSize.Level0)
             selectedRects.emplace_back(RectF(10, 10, 250, 250));
         }));
     const OHOS::Ace::NG::ParagraphStyle expectedStyle;
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    mockParagraph->paraStyle_ = expectedStyle;
     paragraphInfo.paragraph = mockParagraph;
     paragraphInfo1.paragraph = mockParagraph;
     paragraphInfo.start = 0;
@@ -648,7 +648,7 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNodeIsFilled002, TestSize.Level0)
             selectedRects.emplace_back(RectF(10, 10, 250, 250));
         }));
     const OHOS::Ace::NG::ParagraphStyle expectedStyle;
-    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    mockParagraph->paraStyle_ = expectedStyle;
     paragraphInfo.paragraph = mockParagraph;
     paragraphInfo1.paragraph = mockParagraph;
     paragraphInfo.start = 0;

@@ -52,8 +52,8 @@ public:
     }
 
 private:
-    static void GetComponentTextAndImageSourceRecursive(
-        const WeakPtr<NG::FrameNode> weakNode, std::string& text, std::string& imgSrc, const int32_t remain);
+    static void GetComponentTextRecursive(
+        const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain);
 
     bool isInit_ = false;
     std::atomic_bool clickExtEnabled_ = false;

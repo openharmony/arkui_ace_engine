@@ -23,10 +23,9 @@ void DestroyPeerImpl(Ark_ShaderStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ShaderStyle ConstructImpl()
+Ark_ShaderStyleProxy ConstructImpl()
 {
-    auto* peer = PeerUtils::CreatePeer<ShaderStylePeer>();
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {

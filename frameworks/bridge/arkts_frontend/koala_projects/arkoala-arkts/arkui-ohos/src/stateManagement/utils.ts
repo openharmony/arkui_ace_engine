@@ -30,11 +30,12 @@ import {
   RenderIdType,
   WatchIdType,
   STATE_MGMT_FACTORY,
-  IMutableStateMeta
+  IMutableStateMeta,
+  ObservedBuiltIn
 } from './decorator';
 import { SubscribedWatches } from './decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './base/iFactoryInternal';
-import { ObservedBuiltIn } from './base/observeWrappedBase';
+import { ObserveSingleton } from './base/observeSingleton';
 
 final class CONSTANT {
     public static readonly OB_ARRAY_ANY_KEY = '__OB_ANY_INDEX';
@@ -100,6 +101,17 @@ export class UIUtils {
     private static readonly DEFAULT_INDEX = 0;
     private static currentIndex_ = UIUtils.DEFAULT_INDEX;
 
+    // Strong-ref store for monitors created without an `owner`. The framework
+    // only holds WeakRef<MonitorValueInternal> on the meta side
+    // (MutableStateMeta.bindingRefs_), so a monitor whose caller doesn't keep
+    // a strong reference gets eagerly reclaimed by the Panda VM GC mid-flight
+    // — bindings vanish before any state mutation can trigger them. When an
+    // owner is provided, the owner's __registerStateVariables__Internal list
+    // holds the monitor strongly; when not provided, we hold it here. The
+    // caller must call UIUtils.clearMonitor to release the retention. Lazily
+    // allocated — apps that always pass an owner never pay the Set header.
+    private static unownedMonitors_?: Set<IMonitorDecoratedVariable>;
+
     static addMonitor(valueCallback: (() => Any) | Array<() => Any>, monitorCallback: (m: IMonitor) => void, options?: MonitorOptions): IMonitorDecoratedVariable {
         if (options?.owner && !(options?.owner instanceof CustomComponentV2)) {
             const errorCode: Int = 130000;
@@ -111,11 +123,20 @@ export class UIUtils {
         const pathArray = UIUtils.pathToArray(options?.path);
 
         const pathLambda = UIUtils.generatePathLambda(callbackArray, pathArray, options?.isSynchronous);
-        return new MonitorFunctionDecorator(pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+        const monitor = new MonitorFunctionDecorator(
+            pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+        if (!options?.owner) {
+            if (!UIUtils.unownedMonitors_) {
+                UIUtils.unownedMonitors_ = new Set<IMonitorDecoratedVariable>();
+            }
+            UIUtils.unownedMonitors_!.add(monitor);
+        }
+        return monitor;
     }
 
     static clearMonitor(monitor: IMonitorDecoratedVariable): void {
         (monitor as MonitorFunctionDecorator).unbindAllInternalValues();
+        UIUtils.unownedMonitors_?.delete(monitor);
     }
 
     /**
@@ -179,8 +200,7 @@ export class UIUtils {
         });
     }
 
-    private static createPathInfoArray(valueInfo: MonitorValueInfo | Array<MonitorValueInfo>,
-        isSynchronous?: boolean): IMonitorPathInfo[] {
+    private static createPathInfoArray(valueInfo: MonitorValueInfo | Array<MonitorValueInfo>): IMonitorPathInfo[] {
         // We ignore paths passed in options if any, assume path passed only as a part of MonitorValueInfo
         // Single value
         if(valueInfo instanceof MonitorValueInfo) {
@@ -205,8 +225,16 @@ export class UIUtils {
         monitorCallback: (m: IMonitor) => void,
         options?: MonitorBaseOptions): IMonitorDecoratedVariable {
 
-        const pathLambda = UIUtils.createPathInfoArray(valueInfo, options?.isSynchronous);
-        return new MonitorFunctionDecorator(pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+        const pathLambda = UIUtils.createPathInfoArray(valueInfo);
+        const monitor = new MonitorFunctionDecorator(
+            pathLambda, monitorCallback, options?.owner, options?.isSynchronous);
+        if (!options?.owner) {
+            if (!UIUtils.unownedMonitors_) {
+                UIUtils.unownedMonitors_ = new Set<IMonitorDecoratedVariable>();
+            }
+            UIUtils.unownedMonitors_!.add(monitor);
+        }
+        return monitor;
     }
 
 }
@@ -342,6 +370,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
     // compare interface
     @JSONStringifyIgnore
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
+    private static readonly LENGTH_AND_ANY_KEY: ReadonlyArray<string> = [CONSTANT.OB_LENGTH, CONSTANT.OB_ARRAY_ANY_KEY];
 
     constructor() {
         super();
@@ -379,8 +408,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
         if (len !== newLen) {
             super.length = newLen;
             // the Array implementation actually changed the length!
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
-            this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+            this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
 
             // exec all subscribing @Watch
             this.executeOnSubscribingWatches('length');
@@ -415,8 +443,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override extendTo(arrayLength: int, initialValue: T): void {
         super.extendTo(arrayLength, initialValue);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
         this.executeOnSubscribingWatches('extendTo');
     }
 
@@ -427,8 +454,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override shrinkTo(arrayLength: int): void {
         super.shrinkTo(arrayLength);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
         this.executeOnSubscribingWatches('shrinkTo');
     }
 
@@ -439,10 +465,21 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      * @note Mutating method
      */
     public override sort(comparator?: (a: T, b: T) => int): this {
+        const arrCopy = Array.from(super.values());
         super.sort(comparator);
-        // We do not need to fire length change
-        // the length does not change here, closing fireChange on CONSTANT.OB_LENGTH
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        ObserveSingleton.instance.beginSyncMonitorBatch();
+        try {
+            for (let idx = 0; idx < super.length; idx++) {
+                if (super.$_get(idx) != arrCopy[idx]) {
+                    this.meta_.fireChange(String(idx as Object | undefined | null));
+                }
+            }
+            // We do not need to fire length change
+            // the length does not change here, closing fireChange on CONSTANT.OB_LENGTH
+            this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        } finally {
+            ObserveSingleton.instance.endSyncMonitorBatch();
+        }
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('sort');
@@ -458,8 +495,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override shift(): T | undefined {
         const ret = super.shift();
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('shift');
@@ -475,8 +511,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override pop(): T | undefined {
         const ret = super.pop();
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('pop');
@@ -491,8 +526,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override pushArray(...val: T[]): int {
         const ret = super.push(...val);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('push');
@@ -507,8 +541,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override pushOne(val: T): int {
         const ret = super.push(val);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('push');
@@ -532,8 +565,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override splice(start: int, deleteIdx: int | undefined, ...items: T[]): Array<T> {
         const ret = super.splice(start, deleteIdx, ...items);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('splice');
@@ -550,8 +582,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override splice(start: int): Array<T> {
         const ret = super.splice(start);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('splice');
@@ -568,8 +599,7 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override unshift(...values: T[]): int {
         const ret = super.unshift(...values);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
-        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.fireChangeBatch(ObservedArray.LENGTH_AND_ANY_KEY);
 
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('unshift');
@@ -663,7 +693,6 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override copyWithin(target: int, start: int, end?: int): this {
         super.copyWithin(target, start, end);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
         // exec all subscribing @Watch
         this.executeOnSubscribingWatches('copyWithin');
@@ -680,7 +709,6 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override copyWithin(target: int, start: int): this {
         super.copyWithin(target, start);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
@@ -697,7 +725,6 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override copyWithin(target: int): this {
         super.copyWithin(target);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
@@ -716,7 +743,6 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override fill(value: T, start?: int, end?: int): this {
         super.fill(value, start, end);
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
@@ -1046,7 +1072,6 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
      */
     public override reverse(): this {
         super.reverse();
-        this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
@@ -1104,6 +1129,11 @@ export class ObservedArray<T> extends Array<T> implements IObservedObject, Obser
     public override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return super.map<U>(callbackfn);
+    }
+
+    public addRefAnyProp(): void {
+        this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
     }
 }
 
@@ -1166,9 +1196,14 @@ export class ObservedSet<K> extends Set<K> implements IObservedObject, ObservedB
     public override add(val: K): this {
         if (!super.has(val)) {
             super.add(val);
-            this.meta_.fireChange(String(val as Object | undefined | null));
-            this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.meta_.fireChange(String(val as Object | undefined | null));
+                this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+                this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('add');
         }
         return this;
@@ -1208,9 +1243,14 @@ export class ObservedSet<K> extends Set<K> implements IObservedObject, ObservedB
     public override delete(val: K): boolean {
         if (super.has(val)) {
             const res = super.delete(val);
-            this.meta_.fireChange(String(val as Object | undefined | null));
-            this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.meta_.fireChange(String(val as Object | undefined | null));
+                this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+                this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('delete');
             return res;
         } else {
@@ -1223,12 +1263,17 @@ export class ObservedSet<K> extends Set<K> implements IObservedObject, ObservedB
      */
     public override clear(): void {
         if (super.size > 0) {
-            super.forEach((_, val) => {
-                this.meta_.fireChange(String(val as Object | undefined | null));
-            });
-            super.clear();
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
-            this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                super.forEach((_, val) => {
+                    this.meta_.fireChange(String(val as Object | undefined | null));
+                });
+                super.clear();
+                this.meta_.fireChange(CONSTANT.OB_LENGTH);
+                this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('clear');
         }
     }
@@ -1279,6 +1324,11 @@ export class ObservedSet<K> extends Set<K> implements IObservedObject, ObservedB
         this.meta_.addRef(CONSTANT.OB_LENGTH);
         super.forEach(callbackfn);
     }
+
+    public addRefAnyProp(): void {
+        this.meta_.addRef(CONSTANT.OB_SET_ANY_PROPERTY);
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
+    }
 }
 
 export class ObservedMap<K, V> extends Map<K, V> implements IObservedObject, ObservedBuiltIn, ISubscribedWatches {
@@ -1289,6 +1339,7 @@ export class ObservedMap<K, V> extends Map<K, V> implements IObservedObject, Obs
     // support for @Watch
     @JSONStringifyIgnore
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
+    private static readonly LENGTH_AND_MAP_ANY: ReadonlyArray<string> = [CONSTANT.OB_LENGTH, CONSTANT.OB_MAP_ANY_PROPERTY];
     /**
      * Constructs a Map from another Map
      * @param map another map
@@ -1341,14 +1392,19 @@ export class ObservedMap<K, V> extends Map<K, V> implements IObservedObject, Obs
         }
         if (!super.has(key)) {
             super.set(key, val);
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            this.meta_.fireChangeBatch(ObservedMap.LENGTH_AND_MAP_ANY);
             this.executeOnSubscribingWatches('set');
         } else if (super.get(key) !== val) {
             super.set(key, val);
-            this.meta_.fireChange(String(key as Object | undefined | null));
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.meta_.fireChange(String(key as Object | undefined | null));
+                this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('set');
         }
-        this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
         return this;
     }
 
@@ -1384,9 +1440,14 @@ export class ObservedMap<K, V> extends Map<K, V> implements IObservedObject, Obs
     public override delete(key: K): boolean {
         if (super.has(key)) {
             const ret: boolean = super.delete(key);
-            this.meta_.fireChange(String(key as Object | undefined | null));
-            this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.meta_.fireChange(String(key as Object | undefined | null));
+                this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
+                this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('delete');
             return ret;
         } else {
@@ -1399,12 +1460,17 @@ export class ObservedMap<K, V> extends Map<K, V> implements IObservedObject, Obs
      */
     public override clear(): void {
         if (super.size > 0) {
-            super.forEach((_, prop) => {
-                this.meta_.fireChange(String(prop as Object | undefined | null));
-            });
-            super.clear();
-            this.meta_.fireChange(CONSTANT.OB_LENGTH);
-            this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                super.forEach((_, prop) => {
+                    this.meta_.fireChange(String(prop as Object | undefined | null));
+                });
+                super.clear();
+                this.meta_.fireChange(CONSTANT.OB_LENGTH);
+                this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
             this.executeOnSubscribingWatches('clear');
         }
     }
@@ -1489,6 +1555,11 @@ export class ObservedMap<K, V> extends Map<K, V> implements IObservedObject, Obs
         this.meta_.addRef(CONSTANT.OB_MAP_ANY_PROPERTY);
         this.meta_.addRef(CONSTANT.OB_LENGTH);
         return super.forEach(callbackfn);
+    }
+
+    public addRefAnyProp(): void {
+        this.meta_.addRef(CONSTANT.OB_MAP_ANY_PROPERTY);
+        this.meta_.addRef(CONSTANT.OB_LENGTH);
     }
 }
 
@@ -2369,5 +2440,9 @@ export class ObservedDate extends Date implements IObservedObject, ObservedBuilt
     // (IMutableStateMeta)
     private conditionalAddRef(): void {
         this.meta_.addRef();
+    }
+
+    public addRefAnyProp(): void {
+        this.conditionalAddRef();
     }
 }

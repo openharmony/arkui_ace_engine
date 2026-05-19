@@ -43,6 +43,7 @@
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/text_emoji_processor.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -196,7 +197,7 @@ void SpanItem::ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const Inspec
     json->Put("symbolEffect", GetSymbolEffectOptionsInJson(
         symbolStyle ? symbolStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions()) : SymbolEffectOptions())
         .c_str());
-    auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow(0.0) });
     auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
     json->PutExtAttr("textShadow", jsonShadow, filter);
     json->PutExtAttr("fontWeightConfigs", GetFontWeightConfigs().c_str(), filter);
@@ -817,6 +818,28 @@ void SpanNode::OnAllowForceDarkUpdate(uint32_t colorMode)
     }
 }
 
+void SpanItem::UpdateShaderStyle(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    RefPtr<TextLayoutProperty> textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (textLayoutProperty->HasGradientShaderStyle()) {
+        auto gradients = textLayoutProperty->GetGradientShaderStyle().value_or(Gradient());
+        auto gradient = GradientConvert::ToGradient(gradients);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+        textStyle.SetGradient(gradient);
+    } else if (textLayoutProperty->HasColorShaderStyle()) {
+        std::optional<Color> colors = textLayoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT);
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(colors);
+    } else {
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+    }
+}
+
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
     const TextStyle& textStyle, bool isMarquee)
 {
@@ -837,6 +860,14 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     auto spanContent = GetSpanContent(content, isMarquee);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
+    auto paragraphStyle = builder->GetParagraphStyle();
+    spanTextStyle.SetColorShaderStyle(paragraphStyle.colorShaderStyle);
+    auto gradient = paragraphStyle.GetGradient();
+    if (gradient.has_value()) {
+        spanTextStyle.SetGradient(GradientConvert::ToGradient(gradient.value()));
+    } else if (!paragraphStyle.colorShaderStyle.has_value()) {
+        UpdateShaderStyle(frameNode, spanTextStyle);
+    }
     spanTextStyle.SetTextBackgroundStyle(backgroundStyle);
     spanTextStyle.SetTextStyleUid(nodeId_);
     if (fontStyle && !fontStyle->HasTextColor() && urlOnRelease) {
@@ -939,6 +970,7 @@ void SpanItem::UpdateReLayoutTextStyle(
 
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeWidth, StrokeWidth);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeColor, StrokeColor);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeJoinStyle, StrokeJoinStyle);
 
     if (isSymbol && symbolStyle) {
         UPDATE_SPAN_TEXT_STYLE(symbolStyle, SymbolColorList, SymbolColorList);
@@ -962,6 +994,7 @@ void SpanItem::UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextS
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, PunctuationOverflow, PunctuationOverflow);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, HalfLeading, HalfLeading);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextOverflow, TextOverflow);
@@ -978,7 +1011,10 @@ void SpanItem::UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextS
 
 void SpanItem::UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle)
 {
-    if (textStyle.GetGradient().has_value()) {
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, ColorShaderStyle, ColorShaderStyle);
+    if (textLineStyle && (textLineStyle)->GetGradient().has_value()) {
+        spanTextStyle.SetGradient(GradientConvert::ToGradient((textLineStyle)->GetGradient()));
+    } else if (textStyle.GetGradient().has_value()) {
         auto gradient = textStyle.GetGradient();
         spanTextStyle.SetGradient(gradient);
     } else {
@@ -1328,6 +1364,7 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, VariableFontWeight, UpdateVariableFontWeight);
     COPY_TEXT_STYLE(fontStyle, EnableVariableFontWeight, UpdateEnableVariableFontWeight);
     COPY_TEXT_STYLE(fontStyle, EnableDeviceFontWeightCategory, UpdateEnableDeviceFontWeightCategory);
+    COPY_TEXT_STYLE(fontStyle, StrokeJoinStyle, UpdateStrokeJoinStyle);
 }
 
 void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
@@ -1338,6 +1375,7 @@ void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, UpdateIsOnlyBetweenLines);
     COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
     COPY_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, UpdateCompressLeadingPunctuation);
+    COPY_TEXT_STYLE(textLineStyle, PunctuationOverflow, UpdatePunctuationOverflow);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
     COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
     COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
@@ -1355,6 +1393,8 @@ void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
     COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
     COPY_TEXT_STYLE(textLineStyle, TextDirection, UpdateTextDirection);
+    COPY_TEXT_STYLE(textLineStyle, ColorShaderStyle, UpdateColorShaderStyle);
+    sameSpan->textLineStyle->SetOptGradient(textLineStyle->GetGradient());
 }
 
 void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const
@@ -1463,6 +1503,13 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension, LetterSpacing);
     WRITE_TLV_INHERIT(fontStyle, LineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float,
         LineThicknessScale);
+    if (fontStyle->HasStrokeJoinStyle()) {
+        TLVUtil::WriteUint8(buff, TLV_SPAN_FONT_STYLE_STROKEJOINSTYLE);
+        TLVUtil::WriteStrokeJoinStyle(buff, fontStyle->GetStrokeJoinStyle().value());
+    } else if (textStyle_.has_value() && textStyle_->GetStrokeJoinStyle().has_value()) {
+        TLVUtil::WriteUint8(buff, TLV_SPAN_FONT_STYLE_STROKEJOINSTYLE);
+        TLVUtil::WriteStrokeJoinStyle(buff, textStyle_->GetStrokeJoinStyle().value());
+    }
     if (fontStyle->HasTextDecoration()) {
         TLVUtil::WriteTextDecorations(buff, fontStyle->GetTextDecoration().value());
     } else if (textStyle_.has_value()) {
@@ -1501,6 +1548,23 @@ void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
     } else {
         TLVUtil::WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION);
         TLVUtil::WriteTextDirection(buff, TextDirection::INHERIT);
+    }
+    auto optGradient = textLineStyle->GetGradient();
+    if (optGradient.has_value()) {
+        auto gradient = optGradient.value();
+            switch (gradient.GetType()) {
+                case NG::GradientType::RADIAL:
+                    TLVUtil::WriteRadialGradient(buff, gradient);
+                    break;
+                case NG::GradientType::LINEAR:
+                    TLVUtil::WriteLinearGradient(buff, gradient);
+                    break;
+                default:
+                    break;
+        }
+    }
+    if (textLineStyle->HasColorShaderStyle()) {
+        WRITE_TEXT_STYLE_TLV(textLineStyle, ColorShaderStyle, TLV_SPAN_TEXT_LINE_STYLE_COLORSHADERSTYLE, Color);
     }
 }
 
@@ -1543,6 +1607,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateLineThicknessScale, TLV_SPAN_FONT_STYLE_LineThicknessScale, Float);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontSizeScale, TLV_SPAN_FONT_STYLE_FONTSIZESCALE, Double);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateStrokeJoinStyle, TLV_SPAN_FONT_STYLE_STROKEJOINSTYLE, StrokeJoinStyle);
             case TLV_SPAN_FONT_STYLE_TEXTDECORATION: {
                 sameSpan->fontStyle->UpdateTextDecoration(TLVUtil::ReadTextDecorations(buff, cursor));
                 break;
@@ -1574,6 +1639,12 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
                 TextVerticalAlign);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextDirection, TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION,
                 TextDirection);
+            READ_TEXT_STYLE_TLV(textLineStyle, SetOptGradient, TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT,
+                RadialGradient);
+            READ_TEXT_STYLE_TLV(textLineStyle, SetOptGradient, TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT,
+                LinearGradient);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateColorShaderStyle,
+                TLV_SPAN_TEXT_LINE_STYLE_COLORSHADERSTYLE, Color);
 
             case TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR: {
                 if (!sameSpan->backgroundStyle.has_value()) {
@@ -1617,9 +1688,12 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     }
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         sameSpan->textLineStyle->ResetTextVerticalAlign();
-    }
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         sameSpan->textLineStyle->ResetTextDirection();
+    }
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        sameSpan->fontStyle->ResetStrokeJoinStyle();
+        sameSpan->textLineStyle->ResetColorShaderStyle();
+        sameSpan->textLineStyle->ResetGradient();
     }
     return sameSpan;
 }

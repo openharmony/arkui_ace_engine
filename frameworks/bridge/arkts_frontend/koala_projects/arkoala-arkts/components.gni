@@ -22,6 +22,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
   "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkLazyColumnLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkLazyWaterFlowLayout.ets",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
   "arkui-preprocessed/@ohos.arkui.Prefetcher.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
@@ -107,6 +108,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/LazyGridLayoutModifier.ets",
   "arkui-preprocessed/arkui/LazyColumnLayoutModifier.ets",
   "arkui-preprocessed/arkui/LazyVGridLayoutModifier.ets",
+  "arkui-preprocessed/arkui/LazyVWaterFlowLayoutModifier.ets",
   "arkui-preprocessed/arkui/LineModifier.ets",
   "arkui-preprocessed/arkui/ListItemGroupModifier.ets",
   "arkui-preprocessed/arkui/ListItemModifier.ets",
@@ -613,6 +615,7 @@ arkui_path_keys = [
   "@ohos.arkui.ArcScrollBar",
   "@ohos.arkui.ArcSwiper",
   "@ohos.arkui.components.ArkLazyColumnLayout",
+  "@ohos.arkui.components.ArkLazyWaterFlowLayout",
   "#arktheme",
   "arkui/base/ArkUIObjectFinalizationRegisterProxy",
   "@component/customComponent",
@@ -677,6 +680,7 @@ arkui_path_values = [
   "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
   "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkLazyColumnLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkLazyWaterFlowLayout.ets",
   "arkui-preprocessed/arkui/theme",
   "arkui-preprocessed/arkui/base/ArkUIObjectFinalizationRegisterProxy.ets",
   "arkui-preprocessed/arkui/component/customComponent.ets",
@@ -691,5 +695,6 @@ if (defined(ace_engine_feature_enable_smart_gesture) &&
     !ace_engine_feature_enable_smart_gesture) {
   arkui_files -= [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
   arkui_names -= [ "@ohos/arkui/smartGestureController" ]
-  arkui_path_values -= [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
+  arkui_path_values -=
+      [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
 }

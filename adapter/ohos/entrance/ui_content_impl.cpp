@@ -38,6 +38,7 @@
 #include "res_sched_client.h"
 #include "res_type.h"
 #include "resource_manager.h"
+#include "listener/ressched_event_listener.h"
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
@@ -55,6 +56,7 @@
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/module_buffer_reader.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -2432,6 +2434,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     ApsMonitorImpl::GetInstance().SetContainerInstanceId(instanceId_);
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(&ApsMonitorImpl::GetInstance());
 #endif
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    ResschedEventListener::GetInstance()->RegisterToRSS(window->GetWindowId(), instanceId_);
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
@@ -3050,6 +3055,9 @@ void UIContentImpl::Destroy()
         if (windowRotationChangeListener_) {
             window_->UnregisterWindowRotationChangeListener(windowRotationChangeListener_);
         }
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+        ResschedEventListener::GetInstance()->UnRegisterFromRSS(window_->GetWindowId());
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     }
     taskTimeForComeIn_.lastTaskTime = 0;
     taskTimeForExit_.lastTaskTime = 0;

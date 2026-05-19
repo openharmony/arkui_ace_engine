@@ -82,6 +82,10 @@ void ProcessFontVariations(Font& font, const Opt_Array_text_FontVariation* fontV
         });
     }
 }
+void ProcessStrokeJoinStyle(Font& font, const Opt_StrokeJoinStyle& style)
+{
+    font.strokeJoinStyle = Converter::OptConvert<StrokeJoinStyle>(style);
+}
 } // anonymous namespace
 
 void DestroyPeerImpl(Ark_TextStyle peer)
@@ -135,9 +139,10 @@ Ark_TextStyle ConstructImpl(const Opt_TextStyleInterface* value)
         }
         ProcessFontConfigs(font, &options->fontConfigs, theme);
         ProcessFontVariations(font, &options->fontVariations);
+        ProcessStrokeJoinStyle(font, options->strokeJoinStyle);
     }
     peer->span = Referenced::MakeRefPtr<FontSpan>(font);
-
+ 
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -256,6 +261,13 @@ Opt_Array_text_FontVariation GetFontVariationsImpl(Ark_TextStyle peer)
         .value = result,
     };
 }
+Opt_StrokeJoinStyle GetStrokeJoinStyleImpl(Ark_TextStyle peer)
+{
+    auto invalidValue = Converter::ArkValue<Opt_StrokeJoinStyle>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    return Converter::ArkValue<Opt_StrokeJoinStyle>(peer->span->GetFont().strokeJoinStyle);
+}
 } // TextStyleAccessor
 const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
 {
@@ -273,6 +285,7 @@ const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
         TextStyleAccessor::GetStrokeWidthImpl,
         TextStyleAccessor::GetStrokeColorImpl,
         TextStyleAccessor::GetFontVariationsImpl,
+        TextStyleAccessor::GetStrokeJoinStyleImpl,
     };
     return &TextStyleAccessorImpl;
 }

@@ -75,7 +75,7 @@ export class ObjectLinkDecoratedVariable<T>
     public update(newValue: T): void {
         const oldValue = this.backing_.get(false);
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ObjectLink ${oldValue === newValue} ${this.updateTraceInfo()}`);
-        if (oldValue === newValue) {
+        if (oldValue === newValue || !this.owningComponent_!.__getCanUpdateStateVars__Internal()) {
             return;
         }
         const value = uiUtils.makeV1Observed(newValue) as T;

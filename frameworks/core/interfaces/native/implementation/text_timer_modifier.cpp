@@ -220,9 +220,11 @@ void SetTextShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    Converter::DefaultShadowBlurRadius defaultBlurRadius(0.0);
     Shadow shadow;
     shadow.SetOffsetX(0.0);
     shadow.SetOffsetY(0.0);
+    shadow.SetBlurRadius(0);
     std::vector<Shadow> defaultShadows = { shadow };
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value).value_or(std::vector<Shadow>(defaultShadows));
     TextTimerModelStatic::SetTextShadow(frameNode, shadowList);

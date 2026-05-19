@@ -90,13 +90,13 @@ void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const synthetic_Ca
         arkCallback.InvokeSync(arkSurfaceId);
     };
 }
-std::shared_ptr<drawing_CanvasPeer> XComponentControllerPeerImpl::GetCanvas()
+drawing_CanvasPeer* XComponentControllerPeerImpl::GetCanvas()
 {
     CHECK_NULL_RETURN(controller, nullptr);
     CHECK_NULL_RETURN(controller->LockCanvas(), nullptr);
     auto canvas = controller->LockCanvas();
-    if (!rsCanvas_ || rsCanvas_->GetCanvas() != canvas) {
-        rsCanvas_ = std::make_shared<drawing_CanvasPeer>(canvas);
+    if (!rsCanvas_ || rsCanvas_ != reinterpret_cast<drawing_CanvasPeer*>(canvas)) {
+        rsCanvas_ = reinterpret_cast<drawing_CanvasPeer*>(canvas);
     }
     return rsCanvas_;
 }

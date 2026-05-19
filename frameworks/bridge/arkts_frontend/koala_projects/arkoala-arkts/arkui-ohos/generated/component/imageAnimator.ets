@@ -371,6 +371,18 @@ export function ImageAnimatorImpl(
     })
 }
 
+@memo
+export function ImageAnimator(
+    @memo @memo_skip
+    style: ((attributes: ImageAnimatorAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkImageAnimatorComponent>((): ArkImageAnimatorComponent => {
+        return new ArkImageAnimatorComponent()
+    })
+    NodeAttach<ArkImageAnimatorPeer>((): ArkImageAnimatorPeer => ArkImageAnimatorPeer.create(receiver), (_: ArkImageAnimatorPeer): void => {
+        style?.(receiver)
+    })
+}
 export class ImageFrameInfo_serializer {
     public static write(buffer: SerializerBase, value: ImageFrameInfo): void {
         let valueSerializer: SerializerBase = buffer

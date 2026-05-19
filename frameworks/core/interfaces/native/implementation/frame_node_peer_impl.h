@@ -24,8 +24,10 @@
 
 struct FrameNodePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
-
     OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> weakNode;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> mockNode;
+    OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> mockWeakNode;
+
     int32_t nodeId_ = -1;
     static std::map<int32_t, std::shared_ptr<FrameNodePeer>> peerMap_;
     static std::mutex peerMapMutex_;
@@ -58,6 +60,27 @@ struct FrameNodePeer {
         return Create(OHOS::Ace::AceType::Claim<OHOS::Ace::NG::FrameNode>(src));
     }
 
+    static FrameNodePeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode>& src)
+    {
+        if (!src) {
+            return nullptr;
+        }
+        std::lock_guard<std::mutex> lock(peerMapMutex_);
+        auto it = peerMap_.find(src->GetId());
+        if (it != peerMap_.end()) {
+            return (it->second).get();
+        }
+        auto frameNode = std::make_shared<FrameNodePeer>();
+        if (src->IsArkTsFrameNode()) {
+            frameNode->mockNode = src;
+        } else {
+            frameNode->mockWeakNode = OHOS::Ace::WeakPtr(src);
+        }
+        peerMap_.emplace(src->GetId(), frameNode);
+        frameNode->nodeId_ = src->GetId();
+        return frameNode.get();
+    }
+
     static void Destroy(FrameNodePeer* peer)
     {
         if (peer) {
@@ -75,6 +98,20 @@ struct FrameNodePeer {
             return peer->node;
         } else if (peer->weakNode.Upgrade()) {
             return peer->weakNode.Upgrade();
+        } else {
+            return nullptr;
+        }
+    }
+
+    static OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> GetMockFrameNodeByPeer(FrameNodePeer* peer)
+    {
+        if (peer == nullptr) {
+            return nullptr;
+        }
+        if (peer->mockNode) {
+            return peer->mockNode;
+        } else if (peer->mockWeakNode.Upgrade()) {
+            return peer->mockWeakNode.Upgrade();
         } else {
             return nullptr;
         }

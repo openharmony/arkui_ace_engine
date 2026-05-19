@@ -80,6 +80,8 @@ private:
     void GetStartIndexInfo(int32_t& index, float& pos);
     void GetEndIndexInfo(int32_t& index, float& pos);
     void CheckRecycle();
+    void CalculateVisibleStartIndex();
+    void CalculateVisibleEndIndex();
     void MeasureForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
     void MeasureBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
     void LayoutGridItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
@@ -117,6 +119,8 @@ private:
     bool forwardLayout_ = true;
     float startPos_ = 0.0;
     float endPos_ = 0.0f;
+    float viewExtStart_ = 0.0f;
+    float viewExtEnd_ = 0.0f;
 
     // cache
     float cacheSize_ = 0.5f;

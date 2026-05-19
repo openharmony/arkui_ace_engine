@@ -105,7 +105,11 @@ void OneStepDragParam::SetEnableEventResponse(int32_t start, int32_t end, std::l
         auto hub = node->GetOrCreateGestureEventHub();
         CHECK_NULL_CONTINUE(hub);
         auto spanItem = node->GetSpanItem();
-        bool enableResponse = start > spanItem->rangeStart || spanItem->position > end;
+        bool enableResponse = false;
+        if (spanItem) {
+            enableResponse = (start > spanItem->rangeStart && spanItem->rangeStart >= 0)
+                || spanItem->position > end || (start == -1 && end == -1);
+        }
         hub->SetHitTestMode(enableResponse ? HitTestMode::HTMDEFAULT : HitTestMode::HTMNONE);
     }
 }

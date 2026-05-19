@@ -5327,6 +5327,21 @@ export function WebImpl(
     })
 }
 
+@memo
+export function Web(
+    @memo @memo_skip
+    style: ((attributes: WebAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkWebComponent>((): ArkWebComponent => {
+        return new ArkWebComponent()
+    })
+    NodeAttach<ArkWebPeer>((): ArkWebPeer => ArkWebPeer.create(receiver), (_: ArkWebPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class CameraCaptureStateChangeInfo_serializer {
     public static write(buffer: SerializerBase, value: CameraCaptureStateChangeInfo): void {
         let valueSerializer: SerializerBase = buffer

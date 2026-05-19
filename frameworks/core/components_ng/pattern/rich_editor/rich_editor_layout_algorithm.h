@@ -191,9 +191,9 @@ private:
     bool IsContentWidthUnlimited() const;
     bool IsWidthAdaptive(LayoutWrapper* layoutWrapper) const;
     bool IsWidthFix(LayoutWrapper* layoutWrapper) const;
-    void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
-        std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph,
-        std::optional<TextStyle>& firstValidTextStyle);
+    void ReLayoutParagraphBySpan(const ParagraphStyle& paraStyle, LayoutWrapper* layoutWrapper,
+        std::vector<TextStyle>& textStyles, std::list<RefPtr<SpanItem>>& group,
+        bool& needReLayout, bool& needReLayoutParagraph, std::optional<TextStyle>& firstValidTextStyle);
     inline uint64_t Hash(uint64_t hash, const RefPtr<SpanItem>& span);
     uint64_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
     RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,

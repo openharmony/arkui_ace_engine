@@ -737,6 +737,21 @@ export function ButtonImpl(
     })
 }
 
+@memo
+export function Button(
+    @memo @memo_skip
+    style: ((attributes: ButtonAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkButtonComponent>((): ArkButtonComponent => {
+        return new ArkButtonComponent()
+    })
+    NodeAttach<ArkButtonPeer>((): ArkButtonPeer => ArkButtonPeer.create(receiver), (_: ArkButtonPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ButtonConfiguration_serializer {
     public static write(buffer: SerializerBase, value: ButtonConfiguration): void {
         let valueSerializer: SerializerBase = buffer

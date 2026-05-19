@@ -217,14 +217,20 @@ Ark_Boolean IsModifiableImpl(Ark_NativePointer peer)
 Ark_Int32 AppendChildImpl(Ark_FrameNode peer,
                           Ark_FrameNode child)
 {
-    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    auto peerNode = FrameNodePeer::GetMockFrameNodeByPeer(peer);
+    if (!peerNode) {
+        peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    }
     CHECK_NULL_RETURN(peerNode, ERROR_CODE_PARAM_INVALID);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
     CHECK_NULL_RETURN(currentUINodeRef, ERROR_CODE_PARAM_INVALID);
 
     // Thread validation for multithread support
     CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(currentUINodeRef), 0);
-    auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
+    auto childPeerNode = FrameNodePeer::GetMockFrameNodeByPeer(child);
+    if (!childPeerNode) {
+        childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
+    }
     CHECK_NULL_RETURN(childPeerNode, ERROR_CODE_PARAM_INVALID);
     auto childNode = AceType::DynamicCast<UINode>(childPeerNode);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
@@ -527,7 +533,10 @@ Ark_String GetIdImpl(Ark_FrameNode peer)
 }
 Ark_Int32 GetUniqueIdImpl(Ark_FrameNode peer)
 {
-    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    auto frameNode = FrameNodePeer::GetMockFrameNodeByPeer(peer);
+    if (!frameNode) {
+        frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    }
     CHECK_NULL_RETURN(frameNode, 0);
 
     // Thread validation for multithread support
@@ -536,7 +545,10 @@ Ark_Int32 GetUniqueIdImpl(Ark_FrameNode peer)
 }
 Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
 {
-    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    auto frameNode = FrameNodePeer::GetMockFrameNodeByPeer(peer);
+    if (!frameNode) {
+        frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    }
     CHECK_NULL_RETURN(frameNode, {});
 
     // Thread validation for multithread support
@@ -586,7 +598,10 @@ Ark_Boolean IsAttachedImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
     CHECK_ON_UI_THREAD_RETURN(false);
-    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    auto frameNode = FrameNodePeer::GetMockFrameNodeByPeer(peer);
+    if (!frameNode) {
+        frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    }
     CHECK_NULL_RETURN(frameNode, false);
     auto isOnMainTree = frameNode->IsOnMainTree();
     return isOnMainTree;
@@ -595,7 +610,10 @@ Ark_String GetInspectorInfoImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
     CHECK_ON_UI_THREAD_RETURN(Converter::ArkValue<Ark_String>("", Converter::FC));
-    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    auto frameNode = FrameNodePeer::GetMockFrameNodeByPeer(peer);
+    if (!frameNode) {
+        frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    }
     CHECK_NULL_RETURN(frameNode, {});
     auto inspectorInfo = NG::Inspector::GetInspectorOfNode(frameNode);
     return Converter::ArkValue<Ark_String>(inspectorInfo, Converter::FC);
@@ -967,7 +985,10 @@ Ark_Number GetIdByFrameNodeImpl(Ark_NativePointer node)
 {
     auto nodePeer = reinterpret_cast<FrameNodePeer*>(node);
     const auto errValue = Converter::ArkValue<Ark_Number>(-1);
-    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(nodePeer);
+    auto currentNode = FrameNodePeer::GetMockFrameNodeByPeer(nodePeer);
+    if (!currentNode) {
+        currentNode = FrameNodePeer::GetFrameNodeByPeer(nodePeer);
+    }
     CHECK_NULL_RETURN(currentNode, errValue);
     auto nodeId = currentNode->GetId();
     return Converter::ArkValue<Ark_Number>(nodeId);
@@ -1513,7 +1534,10 @@ void ApplyAttributesFinishImpl(Ark_FrameNode peer)
 Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
 {
     CHECK_ON_UI_THREAD_RETURN(false);
-    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    auto frameNode = FrameNodePeer::GetMockFrameNodeByPeer(peer);
+    if (!frameNode) {
+        frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    }
     CHECK_NULL_RETURN(frameNode, false);
     auto isOnMainTree = frameNode->IsOnMainTree();
     return isOnMainTree;

@@ -3433,8 +3433,8 @@ void MenuPattern::OnColorConfigurationUpdate()
             child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         host->SetNeedCallChildrenUpdate(false);
-    } else {
-        host->SetNeedCallChildrenUpdate(SystemProperties::ConfigChangePerform());
+    } else if (SystemProperties::ConfigChangePerform()) {
+        host->SetNeedCallChildrenUpdate(true);
     }
 
     auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();

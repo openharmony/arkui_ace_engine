@@ -38,6 +38,7 @@ public:
         const std::optional<bool>& emulateTouchFromMouseEvent);
     static void SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController);
     static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
+    static void SetWebDebuggingAccessAndPort(FrameNode* frameNode, bool webDebuggingAccess, int32_t port);
     static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
     static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
     static void SetForceDarkAccess(FrameNode* frameNode, bool access);

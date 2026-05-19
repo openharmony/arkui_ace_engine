@@ -400,6 +400,7 @@ public:
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnOffsetEdgesUpdate(const EdgesParam& value) {}
+    virtual void ClearClipBounds() {}
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     virtual void SetRotation(float rotationX, float rotationY, float rotationZ) {}

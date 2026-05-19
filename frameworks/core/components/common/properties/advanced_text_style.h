@@ -60,6 +60,11 @@ public:
         return gradient_;
     }
 
+    void ResetGradient()
+    {
+        gradient_.reset();
+    }
+
     void SetFontForegroudGradiantColor(const std::optional<FontForegroudGradiantColor>& gradiantColor)
     {
         fontForegroudGradiantColor_ = gradiantColor;
@@ -68,6 +73,11 @@ public:
     const std::optional<FontForegroudGradiantColor>& GetFontForegroudGradiantColor() const
     {
         return fontForegroudGradiantColor_;
+    }
+
+    void ResetFontForegroudGradiantColor()
+    {
+        fontForegroudGradiantColor_.reset();
     }
 
 private:

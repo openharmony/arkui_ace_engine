@@ -21,7 +21,7 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from './scroll'
 import { ItemFillPolicy_serializer, ItemFillPolicy, Length, Resource as arkui_component_units_Resource } from './units'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { NestedScrollOptions_serializer, EditModeOptions_serializer, Bindable_Boolean_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, Bindable, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ExtendableCommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { NestedScrollOptions_serializer, EditModeOptions_serializer, Bindable_Boolean_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, Bindable, Callback as arkui_component_common_Callback, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ExtendableCommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -496,6 +496,18 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setEnableEditMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnEditModeChangeAttribute(value: arkui_component_common_Callback<boolean, void> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setOnEditModeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFocusWrapModeAttribute(value: FocusWrapMode | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -922,6 +934,9 @@ export interface GridAttribute extends ScrollableCommonMethod {
         }
         throw new Error('Unimplemented method enableEditMode')
     }
+    onEditModeChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        throw new Error('Unimplemented method onEditModeChange')
+    }
     focusWrapMode(value: FocusWrapMode | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -1218,6 +1233,11 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         this.getPeer()?.setEnableEditModeAttribute(value_casted)
         return this
     }
+    public onEditModeChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<boolean, void> | undefined)
+        this.getPeer()?.setOnEditModeChangeAttribute(value_casted)
+        return this
+    }
     public focusWrapMode(value: FocusWrapMode | undefined): this {
         const value_casted = value as (FocusWrapMode | undefined)
         this.getPeer()?.setFocusWrapModeAttribute(value_casted)
@@ -1286,6 +1306,21 @@ export function GridImpl(
     })
 }
 
+@memo
+export function Grid(
+    @memo @memo_skip
+    style: ((attributes: GridAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkGridComponent>((): ArkGridComponent => {
+        return new ArkGridComponent()
+    })
+    NodeAttach<ArkGridPeer>((): ArkGridPeer => ArkGridPeer.create(receiver), (_: ArkGridPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class StartLineInfo_serializer {
     public static write(buffer: SerializerBase, value: StartLineInfo): void {
         let valueSerializer: SerializerBase = buffer

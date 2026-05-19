@@ -397,7 +397,7 @@ HWTEST_F(RichEditorStyleManagerTest, SpanNodeUpdateTest002, TestSize.Level0) {
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 
     RefPtr<SpanNode> spanNode1 = AceType::MakeRefPtr<SpanNode>(1);
-    spanNode1->CopyResource(spanNode);
+    spanNode1->CopyFontStyleResource(spanNode);
     EXPECT_EQ(spanNode1->spanItem_->fontStyle->resMap_.size(), 1);
 
     spanNode->ReloadResources();
@@ -412,7 +412,7 @@ HWTEST_F(RichEditorStyleManagerTest, SpanItemUpdateTest001, TestSize.Level0) {
     EXPECT_EQ(spanItem->fontStyle->resMap_.size(), 1);
 
     RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
-    spanItem1->CopyResource(spanItem);
+    spanItem1->CopyFontStyleResource(spanItem);
     EXPECT_EQ(spanItem1->fontStyle->resMap_.size(), 1);
 
     spanItem->ReloadResources();

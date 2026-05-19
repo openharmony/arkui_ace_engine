@@ -268,6 +268,18 @@ export function CalendarPickerImpl(
     })
 }
 
+@memo
+export function CalendarPicker(
+    @memo @memo_skip
+    style: ((attributes: CalendarPickerAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkCalendarPickerComponent>((): ArkCalendarPickerComponent => {
+        return new ArkCalendarPickerComponent()
+    })
+    NodeAttach<ArkCalendarPickerPeer>((): ArkCalendarPickerPeer => ArkCalendarPickerPeer.create(receiver), (_: ArkCalendarPickerPeer): void => {
+        style?.(receiver)
+    })
+}
 export class CalendarPickerDialog_serializer {
     public static write(buffer: SerializerBase, value: CalendarPickerDialog): void {
         let valueSerializer: SerializerBase = buffer

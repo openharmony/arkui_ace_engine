@@ -1128,6 +1128,23 @@ void ListModelNG::SetEnableEditModeChangeEvent(FrameNode* frameNode, std::functi
     pattern->SetEnableEditModeChangeEvent(std::move(changeEvent));
 }
 
+void ListModelNG::SetEnableEditModeBindingEvent(FrameNode* frameNode, std::function<void(bool)>&& bindingEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
+void ListModelNG::SetEnableEditModeBindingEvent(std::function<void(bool)>&& bindingEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);

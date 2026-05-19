@@ -151,14 +151,11 @@ export class ArkDynamicComponent extends ArkCommonMethodComponent implements Dyn
 export function DynamicComponentImpl(
     /** @memo */
     style: ((attributes: DynamicComponentAttribute) => void) | undefined,
-    /** @memo */
-    content_?: (() => void) | undefined,
 ): void {
     const receiver = remember(() => {
         return new ArkDynamicComponent()
     })
     NodeAttach<ArkDynamicComponentPeer>((): ArkDynamicComponentPeer => ArkDynamicComponentPeer.create(receiver, DcFlag), (_: ArkDynamicComponentPeer) => {
         style?.(receiver)
-        content_?.()
     })
 }

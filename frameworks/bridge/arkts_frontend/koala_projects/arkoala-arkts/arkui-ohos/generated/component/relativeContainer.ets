@@ -285,6 +285,21 @@ export function RelativeContainerImpl(
     })
 }
 
+@memo
+export function RelativeContainer(
+    @memo @memo_skip
+    style: ((attributes: RelativeContainerAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRelativeContainerComponent>((): ArkRelativeContainerComponent => {
+        return new ArkRelativeContainerComponent()
+    })
+    NodeAttach<ArkRelativeContainerPeer>((): ArkRelativeContainerPeer => ArkRelativeContainerPeer.create(receiver), (_: ArkRelativeContainerPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class BarrierStyle_serializer {
     public static write(buffer: SerializerBase, value: BarrierStyle): void {
         let valueSerializer: SerializerBase = buffer

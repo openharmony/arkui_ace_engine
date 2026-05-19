@@ -114,6 +114,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableImageAnalyzer, bool);
+    using WebDebuggingConfigType = std::tuple<bool, int32_t>;
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabledAndPort, WebDebuggingConfigType);
 
     void SetWebSrc(const std::string &webSrc);
     void SetWebSrcStatic(const std::string &webSrc);
@@ -205,6 +207,7 @@ private:
     void OnFileAccessEnabledUpdate(bool) {}
     void OnOnLineImageAccessEnabledUpdate(bool) {}
     void OnDomStorageAccessEnabledUpdate(bool) {}
+    void OnWebDebuggingAccessEnabledAndPortUpdate(std::tuple<bool, int32_t> const&) {}
     void OnImageAccessEnabledUpdate(bool) {}
     void OnZoomAccessEnabledUpdate(bool) {}
     void OnGeolocationAccessEnabledUpdate(bool) {}

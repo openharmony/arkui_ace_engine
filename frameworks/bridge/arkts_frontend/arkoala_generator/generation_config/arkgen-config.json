@@ -27,7 +27,8 @@
         "ColorMetrics",
         "CustomSpan",
         "TouchEvent",
-        "PanGestureOptions"
+        "PanGestureOptions",
+        "ShaderStyle"
     ],
     "extendableComponents": [
         "arkui.component.button.ExtendableButton",
@@ -88,6 +89,10 @@
         {
             "from": "arkui.component.gesture.PanGestureOptions",
             "to": "arkui.component.idlize.PanGestureOptionsProxy"
+        },
+        {
+            "from": "arkui.component.textCommon.ShaderStyle",
+            "to": "arkui.component.idlize.ShaderStyleProxy"
         }
     ],
     "forceMaterialized": [
@@ -726,7 +731,8 @@
             "ContentSlot",
             "ContentSlotAttribute",
             "ContentSlotInterface",
-            "PanGestureOptions"
+            "PanGestureOptions",
+            "ShaderStyle"
         ],
         "ignoreEntry": [
             "Optional",
@@ -781,7 +787,8 @@
             "If"
         ],
         "ignorePeerMethod": [
-            "attributeModifier"
+            "attributeModifier",
+            "applyAttributesFinish"
         ],
         "ignoreMethodArkts": [
             "testTupleNumberStringEnum",

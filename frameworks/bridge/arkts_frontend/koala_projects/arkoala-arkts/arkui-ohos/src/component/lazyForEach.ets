@@ -169,3 +169,30 @@ export function LazyForEachImpl<T>(
         receiver.itemDragEvent,
         receiver.options)
 }
+
+/** @memo */
+export function LazyForEach<T>(
+    /** @memo */
+    style: ((attributes: LazyForEachAttribute<T>) => void) | undefined
+) {
+    const receiver = remember(() => {
+        return new ArkLazyForEachComponent<T>()
+    })
+    style?.(receiver)
+    if (!receiver.dataSource) {
+        throw new Error('LazyForEach dataSource is null. Application ERROR!')
+    }
+    if (!receiver.itemGenerator) {
+        throw new Error('LazyForEach itemGenerator is null. Application ERROR!')
+    }
+    if (receiver.dataSource!.totalCount() === 0) {
+        console.warn('LazyForEach dataSource totalCount is 0. Please check your data source.')
+    }
+    LazyForEachImplForOptions(
+        receiver.dataSource!,
+        receiver.itemGenerator,
+        receiver.keyGenerator,
+        receiver.onMoveEvent,
+        receiver.itemDragEvent,
+        receiver.options)
+}

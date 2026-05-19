@@ -5715,9 +5715,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setShouldBuiltInRecognizerParallelWith(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setShouldRecognizerParallelWithAttribute(value: ShouldRecognizerParallelWithCallback): void {
+    setShouldRecognizerParallelWithAttribute(value: ShouldRecognizerParallelWithCallback | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         ArkUIGeneratedNativeModule._CommonMethod_setShouldRecognizerParallelWith(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -10688,7 +10694,7 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method shouldBuiltInRecognizerParallelWith')
     }
-    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
+    shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
             (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.shouldRecognizerParallelWith(value));
@@ -11967,6 +11973,7 @@ export interface EditModeOptions {
     enableGatherSelectedItemsAnimation?: boolean;
     onGetPreviewBadge?: OnGetPreviewBadgeCallback;
     useDefaultMultiSelectStyle?: boolean;
+    enableTwoFingerMultiSelect?: boolean;
 }
 export interface BackgroundBrightnessOptions {
     rate: double;
@@ -12880,8 +12887,8 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setShouldBuiltInRecognizerParallelWithAttribute(value_casted)
         return this
     }
-    public shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback): this {
-        const value_casted = value as (ShouldRecognizerParallelWithCallback)
+    public shouldRecognizerParallelWith(value: ShouldRecognizerParallelWithCallback | undefined): this {
+        const value_casted = value as (ShouldRecognizerParallelWithCallback | undefined)
         this.getPeer()?.setShouldRecognizerParallelWithAttribute(value_casted)
         return this
     }
@@ -14854,6 +14861,14 @@ export class EditModeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEnableTwoFingerMultiSelect = value.enableTwoFingerMultiSelect
+        if (valueHolderForEnableTwoFingerMultiSelect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableTwoFingerMultiSelectTmpValue = valueHolderForEnableTwoFingerMultiSelect!
+            valueSerializer.writeBoolean(valueHolderForEnableTwoFingerMultiSelectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): EditModeOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -14893,7 +14908,13 @@ export class EditModeOptions_serializer {
             useDefaultMultiSelectStyleTmpBuf = valueDeserializer.readBoolean()
         }
         const useDefaultMultiSelectStyleTmpResult: boolean | undefined = useDefaultMultiSelectStyleTmpBuf
-        let value: EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult, onGetPreviewBadge: onGetPreviewBadgeTmpResult, useDefaultMultiSelectStyle: useDefaultMultiSelectStyleTmpResult} as EditModeOptions)
+        const enableTwoFingerMultiSelectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableTwoFingerMultiSelectTmpBuf: boolean | undefined = undefined
+        if ((enableTwoFingerMultiSelectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableTwoFingerMultiSelectTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableTwoFingerMultiSelectTmpResult: boolean | undefined = enableTwoFingerMultiSelectTmpBuf
+        let value: EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult, onGetPreviewBadge: onGetPreviewBadgeTmpResult, useDefaultMultiSelectStyle: useDefaultMultiSelectStyleTmpResult, enableTwoFingerMultiSelect: enableTwoFingerMultiSelectTmpResult} as EditModeOptions)
         return value
     }
 }

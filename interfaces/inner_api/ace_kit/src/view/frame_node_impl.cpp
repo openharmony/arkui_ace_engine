@@ -475,4 +475,10 @@ ColorMode FrameNodeImpl::GetLocalColorMode() const
     CHECK_NULL_RETURN(frameNode_, ColorMode::COLOR_MODE_UNDEFINED);
     return static_cast<ColorMode>(frameNode_->GetLocalColorMode());
 }
+
+void FrameNodeImpl::MarkModifyDone()
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->MarkModifyDone();
+}
 } // namespace OHOS::Ace::Kit

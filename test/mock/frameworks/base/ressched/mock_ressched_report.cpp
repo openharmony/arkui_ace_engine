@@ -104,4 +104,7 @@ bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std
 {
     return false;
 }
+
+void ResSchedReport::HandleSwiperChange(std::unordered_map<std::string, std::string>& payload)
+{}
 } // namespace OHOS::Ace

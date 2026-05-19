@@ -86,8 +86,11 @@ class DepsMocked {
     public empty: boolean = true;
 }
 
-class MockedElement {
+export class MockedElement {
     public id: int;
+    constructor(id: int = 0) {
+        this.id = id;
+    }
 }
 
 export class StateImpl<T> extends MutableState<T> implements Dependent {

@@ -148,6 +148,9 @@
             "@ohos.arkui.components.ArkLazyColumnLayout": [
                 "./@ohos.arkui.components.ArkLazyColumnLayout.ets"
             ],
+            "@ohos.arkui.components.ArkLazyWaterFlowLayout": [
+                "./@ohos.arkui.components.ArkLazyWaterFlowLayout.ets"
+            ],
             "#arktheme": [
                 "./arkui/theme"
             ],

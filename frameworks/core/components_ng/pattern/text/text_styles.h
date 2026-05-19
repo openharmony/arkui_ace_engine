@@ -18,6 +18,7 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/image/drawing_color_filter.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
@@ -262,6 +263,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSizeScale, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeJoinStyle, StrokeJoinStyle);
 
     TextDecoration GetTextDecorationFirst() const
     {
@@ -381,8 +383,46 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OrphanCharOptimization, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CompressLeadingPunctuation, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PunctuationOverflow, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextContentAlign, TextContentAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDirection, TextDirection);
+    ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorShaderStyle, Color);
+ 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, TextLineStyle&)>&& updateFunc)
+    {
+        CHECK_NULL_VOID(resObj && updateFunc);
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+ 
+    size_t RemoveResource(const std::string& key)
+    {
+        return resMap_.erase(key);
+    }
+ 
+    void CopyResource(const std::unique_ptr<TextLineStyle>& source)
+    {
+        resMap_ = source->resMap_;
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+        if (propGradient && propGradient->GetGradient().has_value()) {
+            propGradient->GetGradient().value().ReloadResources();
+        }
+    }
+
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, TextLineStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 };
 
 struct HandleInfoNG {

@@ -1451,6 +1451,18 @@ export function ImageImpl(
     })
 }
 
+@memo
+export function Image(
+    @memo @memo_skip
+    style: ((attributes: ImageAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkImageComponent>((): ArkImageComponent => {
+        return new ArkImageComponent()
+    })
+    NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer): void => {
+        style?.(receiver)
+    })
+}
 export class ColorContent_serializer {
     public static write(buffer: SerializerBase, value: ColorContent): void {
         let valueSerializer: SerializerBase = buffer

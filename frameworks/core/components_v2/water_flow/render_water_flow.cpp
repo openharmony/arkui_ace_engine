@@ -19,6 +19,7 @@
 #include "base/log/log_wrapper.h"
 #include "core/animation/curve_animation.h"
 #include "core/components/common/layout/templates_parser.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_v2/water_flow/water_flow_scroll_controller.h"
 
 namespace OHOS::Ace::V2 {

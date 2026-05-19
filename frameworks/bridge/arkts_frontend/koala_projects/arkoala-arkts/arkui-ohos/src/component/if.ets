@@ -235,3 +235,17 @@ export function IfImpl(
         buildContent(component);
     });
 }
+
+/** @memo:intrinsic */
+export function If(
+    /** @memo */
+    style: ((instance: IfAttribute) => void),
+    /** @memo */
+    content: () => void
+): void {
+    NodeAttach(IfElsePeer.create, (peer: IfElsePeer) => {
+        const component = remember(() => new ArkIfElseComponent(content, peer));
+        style(component);
+        buildContent(component);
+    });
+}

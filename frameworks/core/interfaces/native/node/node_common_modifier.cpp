@@ -17,6 +17,7 @@
 
 #include "interfaces/native/node/node_model.h"
 
+#include "base/log/event_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
@@ -5059,6 +5060,7 @@ void SetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 safeAreaType, ArkUI_Ui
     opts.type = safeAreaType;
     opts.edges = safeAreaEdge;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR);
 }
 
 void ResetExpandSafeArea(ArkUINodeHandle node)
@@ -5069,6 +5071,7 @@ void ResetExpandSafeArea(ArkUINodeHandle node)
     opts.type = DEFAULT_SAFE_AREA_TYPE;
     opts.edges = DEFAULT_SAFE_AREA_EDGE;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR);
 }
 
 void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdges)

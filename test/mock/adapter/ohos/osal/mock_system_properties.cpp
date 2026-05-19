@@ -119,6 +119,7 @@ bool SystemProperties::debugThreadSafeNodeEnable_ = false;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
 bool SystemProperties::autoResizeEnabled_ = false;
 std::once_flag SystemProperties::getSysPropertiesFlag_;
+uint32_t SystemProperties::canvasDebugMode_ = 1;
 
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;

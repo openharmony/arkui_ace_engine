@@ -18,6 +18,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -28,6 +29,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1079,6 +1081,23 @@ void GridModelNG::SetEnableEditModeChangeEvent(FrameNode* frameNode, std::functi
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableEditModeChangeEvent(std::move(changeEvent));
+}
+
+void GridModelNG::SetEnableEditModeBindingEvent(FrameNode* frameNode, std::function<void(bool)>&& bindingEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
+}
+
+void GridModelNG::SetEnableEditModeBindingEvent(std::function<void(bool)>&& bindingEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableEditModeBindingEvent(std::move(bindingEvent));
 }
 
 void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)

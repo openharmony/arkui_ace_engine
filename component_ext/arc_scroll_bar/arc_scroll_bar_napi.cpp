@@ -121,7 +121,7 @@ static napi_module arcScrollBarModule = {
     .nm_filename = nullptr,
     .nm_register_func = OHOS::Ace::ArcScrollBar::ExportArcScrollBar,
     .nm_modname = "arkui.ArcScrollBar",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = { 0 },
 };
 

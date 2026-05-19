@@ -57,7 +57,6 @@ ScopeFocusAlgorithm LazyWaterFlowLayoutPattern::GetScopeFocusAlgorithm()
 
 void LazyWaterFlowLayoutPattern::OnActive()
 {
-    idleDeadlineMissCount_ = 0;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -128,18 +127,20 @@ void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange()
 void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange(const std::pair<int32_t, int32_t>& range)
 {
     CHECK_NULL_VOID(onVisibleIndexesChange_);
-    if (hasVisibleIndexesChangeFired_ && range == lastVisibleIndexesRange_) {
+    if (range == lastVisibleIndexesRange_) {
         return;
     }
     onVisibleIndexesChange_(range.first, range.second);
     lastVisibleIndexesRange_ = range;
-    hasVisibleIndexesChangeFired_ = true;
 }
 
 void LazyWaterFlowLayoutPattern::OnInActive()
 {
     if (onVisibleIndexesChange_) {
         FireOnVisibleIndexesChange({ -1, -1 });
+    }
+    if (layoutInfo_) {
+        layoutInfo_->deadline_.reset();
     }
     ResetVisibleIndexesChangeState();
 }
@@ -158,22 +159,20 @@ void LazyWaterFlowLayoutPattern::PostIdleTask()
 void LazyWaterFlowLayoutPattern::ProcessIdleTask(int64_t deadline)
 {
     CHECK_NULL_VOID(layoutInfo_);
-    if (!layoutInfo_->NeedPredict()) {
-        idleDeadlineMissCount_ = 0;
-        return;
-    }
-    // Deadline crossed before we ran. Re-post up to MAX_IDLE_DEADLINE_MISS_COUNT times to absorb frame
-    // boundary jitter; drop after that to avoid sustained main-thread contention.
-    if (GetSysTimestamp() > deadline) {
-        ++idleDeadlineMissCount_;
-        if (idleDeadlineMissCount_ <= MAX_IDLE_DEADLINE_MISS_COUNT) {
-            PostIdleTask();
-        }
-        return;
-    }
-    idleDeadlineMissCount_ = 0;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!host->IsActive()) {
+        layoutInfo_->deadline_.reset();
+        return;
+    }
+    if (!layoutInfo_->NeedPredict()) {
+        return;
+    }
+    // Deadline crossed: re-post unconditionally so predict eventually catches up once main thread frees.
+    if (GetSysTimestamp() > deadline) {
+        PostIdleTask();
+        return;
+    }
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -184,7 +183,6 @@ void LazyWaterFlowLayoutPattern::ProcessIdleTask(int64_t deadline)
 
 void LazyWaterFlowLayoutPattern::ResetVisibleIndexesChangeState()
 {
-    hasVisibleIndexesChangeFired_ = false;
     lastVisibleIndexesRange_ = { -2, -2 };
 }
 

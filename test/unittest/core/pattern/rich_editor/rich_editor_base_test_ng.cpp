@@ -1124,6 +1124,106 @@ HWTEST_F(RichEditorBaseTestNg, SetCompressLeadingPunctuation002, TestSize.Level0
 }
 
 /**
+ * @tc.name: SetPunctuationOverflow001
+ * @tc.desc: test SetPunctuationOverflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetPunctuationOverflow001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create RichEditor node and Set punctuationOverflow True
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    richEditorModel.SetPunctuationOverflow(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = richEditorNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. Get punctuationOverflow value
+     */
+    EXPECT_EQ(textLayoutProperty->GetPunctuationOverflow(), true);
+    EXPECT_EQ(pattern->isPunctuationOverflow_, true);
+    /**
+     * @tc.steps: step3. Set PunctuationOverflow False
+     */
+    RichEditorModelNG::SetPunctuationOverflow(richEditorNode, false);
+    /**
+     * @tc.steps: step4. Get punctuationOverflow value
+     */
+    EXPECT_EQ(textLayoutProperty->GetPunctuationOverflow(), false);
+    EXPECT_EQ(pattern->isPunctuationOverflow_, false);
+}
+/**
+ * @tc.name: SetPunctuationOverflow002
+ * @tc.desc: test SetPunctuationOverflow
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, SetPunctuationOverflow002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetPunctuationOverflow(false);
+    EXPECT_EQ(richEditorPattern->isPunctuationOverflow_, false);
+    richEditorPattern->SetPunctuationOverflow(true);
+    EXPECT_EQ(richEditorPattern->isPunctuationOverflow_, true);
+}
+/**
+ * @tc.name: IsPunctuationOverflow001
+ * @tc.desc: test IsPunctuationOverflow
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, IsPunctuationOverflow001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create RichEditor node and Set punctuationOverflow True
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    richEditorModel.SetPunctuationOverflow(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Check IsPunctuationOverflow returns true
+     */
+    EXPECT_EQ(RichEditorModelNG::IsPunctuationOverflow(richEditorNode), true);
+    EXPECT_EQ(pattern->IsPunctuationOverflow(), true);
+    /**
+     * @tc.steps: step3. Set punctuationOverflow to false and check IsPunctuationOverflow
+     */
+    RichEditorModelNG::SetPunctuationOverflow(richEditorNode, false);
+    EXPECT_EQ(RichEditorModelNG::IsPunctuationOverflow(richEditorNode), false);
+    EXPECT_EQ(pattern->IsPunctuationOverflow(), false);
+}
+/**
+ * @tc.name: IsPunctuationOverflow002
+ * @tc.desc: test IsPunctuationOverflow with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, IsPunctuationOverflow002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Get RichEditor pattern from SetUp (not explicitly set)
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. Check default value (should be false)
+     */
+    EXPECT_EQ(richEditorPattern->isPunctuationOverflow_, false);
+    EXPECT_EQ(richEditorPattern->IsPunctuationOverflow(), false);
+}
+
+/**
  * @tc.name: SetPlaceholder001
  * @tc.desc: test SetPlaceholder
  * @tc.type: FUNC

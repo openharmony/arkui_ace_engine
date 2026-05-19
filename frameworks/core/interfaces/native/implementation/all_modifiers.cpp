@@ -295,6 +295,7 @@ const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
 const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor();
 const GENERATED_ArkUILazyColumnLayoutExtenderAccessor* GetLazyColumnLayoutExtenderAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
+const GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor* GetLazyWaterFlowLayoutExtenderAccessor();
 const GENERATED_ArkUILeadingMarginSpanAccessor* GetLeadingMarginSpanAccessor();
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
 const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor();
@@ -360,7 +361,6 @@ const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor();
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor();
 const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor();
 const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor();
-const GENERATED_ArkUIShaderStyleAccessor* GetShaderStyleAccessor();
 const GENERATED_ArkUISheetDismissAccessor* GetSheetDismissAccessor();
 const GENERATED_ArkUISliderExtenderAccessor* GetSliderExtenderAccessor();
 const GENERATED_ArkUISpringBackActionAccessor* GetSpringBackActionAccessor();
@@ -648,6 +648,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLazyBuildAccessor,
         GetLazyColumnLayoutExtenderAccessor,
         GetLazyForEachOpsAccessor,
+        GetLazyWaterFlowLayoutExtenderAccessor,
         GetLeadingMarginSpanAccessor,
         GetLetterSpacingStyleAccessor,
         GetLevelOrderExtenderAccessor,
@@ -713,7 +714,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetSearchControllerAccessor,
         GetSearchOpsAccessor,
         GetSelectExtenderAccessor,
-        GetShaderStyleAccessor,
         GetSheetDismissAccessor,
         GetSliderExtenderAccessor,
         GetSpringBackActionAccessor,

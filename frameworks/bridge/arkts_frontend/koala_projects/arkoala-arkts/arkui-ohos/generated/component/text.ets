@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, ShaderStyle_serializer, ContentTransition_serializer, SelectedDragPreviewStyle_serializer, FontSettingOptions_serializer, LineSpacingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, ShaderStyle, TextVerticalAlign, ContentTransition, TextContentAlign, SelectedDragPreviewStyle, TextDirection, FontVariation, FontSettingOptions, LineSpacingOptions, MenuType } from './textCommon'
+import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, ContentTransition_serializer, SelectedDragPreviewStyle_serializer, FontSettingOptions_serializer, LineSpacingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, TextVerticalAlign, ContentTransition, TextContentAlign, SelectedDragPreviewStyle, TextDirection, FontVariation, FontSettingOptions, LineSpacingOptions, MenuType } from './textCommon'
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, Callback as arkui_component_common_Callback, ExtendableCommonMethod, ArkCommonMethodComponent } from './common'
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from './styledString'
@@ -25,6 +25,8 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
+import { ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
+import { extractors, ShaderStyle, AttributeModifier, initializers, hookTextAttributeModifier, AttributeUpdater } from '#handwritten'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
 import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Length, LengthMetrics as arkui_component_units_LengthMetrics, Font as arkui_component_units_Font, ResourceStr, VoidCallback } from './units'
@@ -34,7 +36,6 @@ import { PeerNode } from './../PeerNode'
 import { Color as arkui_component_enums_Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, FontWeight, TextOverflow } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit } from 'arkui.Graphics'
-import { AttributeModifier, initializers, hookTextAttributeModifier, AttributeUpdater } from '#handwritten'
 import { default as text } from '@ohos.graphics.text'
 import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
@@ -847,7 +848,8 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            ShaderStyle_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: ShaderStyleProxy = extractors.transform_Ark_ShaderStyle_to_Ark_ShaderStyleProxy(valueTmpValue)
+            ShaderStyleProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2365,6 +2367,21 @@ export function TextImpl(
     })
 }
 
+@memo
+export function Text(
+    @memo @memo_skip
+    style: ((attributes: TextAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkTextComponent>((): ArkTextComponent => {
+        return new ArkTextComponent()
+    })
+    NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class TextController_serializer {
     public static write(buffer: SerializerBase, value: TextController): void {
         let valueSerializer: SerializerBase = buffer

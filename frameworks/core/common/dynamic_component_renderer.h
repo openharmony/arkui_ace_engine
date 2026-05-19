@@ -103,6 +103,7 @@ public:
 
     virtual void NotifyForeground() {};
     virtual void NotifyBackground() {};
+    virtual std::shared_ptr<UIContent> GetUIContent() const { return nullptr; }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRenderer);

@@ -547,6 +547,7 @@ void MenuItemModelNG::SetOnChange(FrameNode* frameNode, std::function<void(bool)
 
 void MenuItemModelNG::SetFontSize(const Dimension& fontSize)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE);
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize);
     } else {
@@ -580,6 +581,7 @@ void MenuItemModelNG::SetFontFamily(const std::vector<std::string> &families)
 
 void MenuItemModelNG::SetLabelFontSize(const Dimension& fontSize)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_LABEL_FONT_SIZE);
     if (fontSize.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize);
     } else {
@@ -666,6 +668,7 @@ void MenuItemModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Col
 
 void MenuItemModelNG::SetLabelFontSize(FrameNode* frameNode, const Dimension& fontSize)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_LABEL_FONT_SIZE, frameNode);
     if (fontSize.IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize, frameNode);
     } else {
@@ -690,6 +693,7 @@ void MenuItemModelNG::SetLabelFontStyle(FrameNode* frameNode, Ace::FontStyle sty
 
 void MenuItemModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE, frameNode);
     if (fontSize.IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize, frameNode);
     } else {

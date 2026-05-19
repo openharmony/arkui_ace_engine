@@ -141,6 +141,7 @@ void TextFieldPattern::OnDetachFromMainTreeMultiThread()
     isDetachFromMainTree_ = true;
     RemoveTextFieldInfo();
     RemoveFillContentMap();
+    RemoveMSDPAutoFillType();
     if (selectOverlay_) {
         CloseSelectOverlay();
     }

@@ -26,12 +26,23 @@
 #include "interfaces/native/node/node_model.h"
 
 namespace OHOS::Ace::NG {
+void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    void* colorRawPtr);
+void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    void* colorRawPtr, FrameNode* frameNode);
+void SetLinearGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength);
+void SetLinearGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    void* colorRawPtr, FrameNode* frameNode);
+GradientDirection ConvertToLinearGradientDirection(std::shared_ptr<LinearGradient> linearGradient);
+}
+namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int NUM_10 = 10;
 constexpr int NUM_16 = 16;
 constexpr int NUM_24 = 24;
 constexpr int NUM_36 = 36;
@@ -63,6 +74,7 @@ thread_local std::string g_strValue;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
+constexpr float DEFAULT_ANGLE = 180.0f;
 
 void ParseBorderColor(NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& topResObj,
     const RefPtr<ResourceObject>& rightResObj, const RefPtr<ResourceObject>& bottomResObj,
@@ -2903,6 +2915,174 @@ void ResetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node)
     TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
+void SetTextAreaStrokeJoinStyle(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    StrokeJoinStyle style = StrokeJoinStyle::MITER_JOIN;
+    if (value >= static_cast<int32_t>(StrokeJoinStyle::MITER_JOIN) &&
+        value <= static_cast<int32_t>(StrokeJoinStyle::BEVEL_JOIN)) {
+        style = static_cast<StrokeJoinStyle>(value);
+    }
+    TextFieldModelNG::SetStrokeJoinStyle(frameNode, style);
+}
+ 
+void ResetTextAreaStrokeJoinStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeJoinStyle(frameNode, StrokeJoinStyle::MITER_JOIN);
+}
+ 
+/**
+ * @param values value value
+ * values[0], values[1] : angle: hasValue, angle value
+ * values[2] : direction
+ * values[3] : repeating
+ * @param valuesLength values length
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetTextAreaLinearGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "TextFieldGradient.gradient");
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    SetLinearGradientValues(gradient, values, valuesLength);
+    SetLinearGradientColors(gradient, colors, colorsLength, colorRawPtr, frameNode);
+    TextFieldModelNG::SetGradientStyle(frameNode, gradient);
+}
+ 
+ArkUI_Int32 GetTextAreaLinearGradient(
+    ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Uint32 (*colors)[10], ArkUI_Float32 (*stop)[10])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto gradient = TextFieldModelNG::GetGradientStyle(frameNode);
+    auto angle = gradient.GetLinearGradient()->angle;
+    //0 angle
+    (*values)[0] = angle.has_value() ? angle.value().Value() : DEFAULT_ANGLE;
+    //1 Direction
+    (*values)[1] = static_cast<int32_t>(ConvertToLinearGradientDirection(gradient.GetLinearGradient()));
+    //2 Repeat
+    (*values)[2] = gradient.GetRepeat();
+ 
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        if (index >= NUM_10) {
+            break;
+        }
+        (*colors)[index] = gradientColor.GetColor().GetValue();
+        (*stop)[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
+ 
+void SetTextAreaRadialGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesLength != NUM_10) || ((colorsLength % NUM_3) != 0)) {
+        return;
+    }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "TextFieldGradient.gradient");
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    SetRadialGradientValues(gradient, values, valuesLength, colorRawPtr);
+    SetRadialGradientColors(gradient, colors, colorsLength, colorRawPtr, frameNode);
+    TextFieldModelNG::SetGradientStyle(frameNode, gradient);
+}
+ 
+ArkUI_Int32 GetTextAreaRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Uint32 (*colors)[10],
+    ArkUI_Float32 (*stops)[10], ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto gradient = TextFieldModelNG::GetGradientStyle(frameNode);
+    auto radialGradient = gradient.GetRadialGradient();
+ 
+    CHECK_NULL_RETURN(radialGradient, ERROR_INT_CODE);
+    (*values)[NUM_0] = radialGradient->radialCenterX->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = radialGradient->radialCenterY->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = radialGradient->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = gradient.GetRepeat();
+ 
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        if (index >= NUM_10) {
+            break;
+        }
+        (*colors)[index] = gradientColor.GetColor().GetValue();
+        (*stops)[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
+ 
+void ResetTextAreaGradient(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "TextFieldGradient.gradient");
+    TextFieldModelNG::ResetGradient(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("ColorShaderStyle");
+    }
+}
+ 
+void SetTextAreaColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    TextFieldModelNG::SetColorShaderStyle(frameNode, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj;
+        if (!colorShaderColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorShaderColorRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("ColorShaderStyle", resObj, result);
+        } else {
+            pattern->UnRegisterResource("ColorShaderStyle");
+        }
+    }
+}
+ 
+void ResetTextAreaColorShaderColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetGradient(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("ColorShaderStyle");
+    }
+}
+
 ArkUI_Uint32 GetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -3139,6 +3319,15 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaSelectedDragPreviewStyle = SetTextAreaSelectedDragPreviewStyle,
         .resetTextAreaSelectedDragPreviewStyle = ResetTextAreaSelectedDragPreviewStyle,
         .getTextAreaSelectedDragPreviewStyle = GetTextAreaSelectedDragPreviewStyle,
+        .setTextAreaStrokeJoinStyle = SetTextAreaStrokeJoinStyle,
+        .resetTextAreaStrokeJoinStyle = ResetTextAreaStrokeJoinStyle,
+        .setTextAreaLinearGradient = SetTextAreaLinearGradient,
+        .getTextAreaLinearGradient = GetTextAreaLinearGradient,
+        .setTextAreaRadialGradient = SetTextAreaRadialGradient,
+        .getTextAreaRadialGradient = GetTextAreaRadialGradient,
+        .resetTextAreaGradient = ResetTextAreaGradient,
+        .setTextAreaColorShaderColor = SetTextAreaColorShaderColor,
+        .resetTextAreaColorShaderColor = ResetTextAreaColorShaderColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

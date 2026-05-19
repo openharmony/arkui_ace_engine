@@ -60,6 +60,13 @@ public:
     virtual ColorMode GetColorMode() = 0;
     virtual float GetFontScale() = 0;
 
+    // dark mode / config query
+    virtual bool GetConfigPerform() = 0;
+    virtual int32_t GetInstanceId() = 0;
+    virtual bool HasDarkResource(const RefPtr<ResourceObject>& resObj) = 0;
+    using ColorInvertFunc = std::function<uint32_t(uint32_t)>;
+    virtual ColorInvertFunc GetInvertFunc(int32_t instanceId, const std::string& nodeTag) = 0;
+
     // overlay manager
     virtual RefPtr<OverlayManager> GetOverlayManager() = 0;
 

@@ -308,3 +308,18 @@ export function ArcAlphabetIndexerImpl(
         receiver.setPeer(undefined)
     })
 }
+
+@memo
+export function ArcAlphabetIndexer(
+    @memo
+    style: ((attributes: ArcAlphabetIndexerAttribute) => void) | undefined
+): void {
+    const receiver = remember<ArkArcAlphabetIndexerComponent>((): ArkArcAlphabetIndexerComponent => {
+        return new ArkArcAlphabetIndexerComponent()
+    })
+    NodeAttach<ArkArcAlphabetIndexerPeer>((): ArkArcAlphabetIndexerPeer => ArkArcAlphabetIndexerPeer.create(receiver), (peer: ArkArcAlphabetIndexerPeer): void => {
+        receiver.setPeer(peer)
+        style?.(receiver)
+        receiver.setPeer(undefined)
+    })
+}

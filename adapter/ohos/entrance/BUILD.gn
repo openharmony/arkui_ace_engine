@@ -183,6 +183,7 @@ template("ace_ohos_standard_source_set") {
         defined(global_parts_info.resourceschedule_resource_schedule_service)) {
       external_deps += [ "resource_schedule_service:ressched_client" ]
       defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+      sources += [ "listener/ressched_event_listener.cpp" ]
     }
 
     if (form_fwk_enable) {

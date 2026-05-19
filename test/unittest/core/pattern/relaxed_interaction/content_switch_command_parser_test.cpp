@@ -319,6 +319,45 @@ const std::string INVALID_COORDINATES_Y_TYPE_JSON = R"({
         }
     }
 })";
+
+const std::string VALID_CONTENT_SWITCH_BACKWARD_JSON = R"({
+    "type": "content_switch",
+    "mode": "target",
+    "action_info": {
+        "direction": "backward",
+        "count": 1,
+        "coordinates": {
+            "pos": {
+                "x": 360.0,
+                "y": 640.0
+            }
+        }
+    }
+})";
+
+const std::string INVALID_X_NULL_JSON = R"({
+    "type": "content_switch",
+    "action_info": {
+        "coordinates": {
+            "pos": {
+                "x": null,
+                "y": 200.0
+            }
+        }
+    }
+})";
+
+const std::string INVALID_Y_NULL_JSON = R"({
+    "type": "content_switch",
+    "action_info": {
+        "coordinates": {
+            "pos": {
+                "x": 100.0,
+                "y": null
+            }
+        }
+    }
+})";
 }
 
 class ContentSwitchCommandParserTest : public testing::Test {
@@ -634,6 +673,51 @@ HWTEST_F(ContentSwitchCommandParserParseTest, Parse_PositionObject_ReturnsEmpty,
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
     ContentSwitchCommandParser parser(context);
     auto json = JsonUtil::ParseJsonString(INVALID_POS_OBJECT_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(ContentSwitchCommandParserParseTest, Parse_ValidBackwardDirection_ReturnsOneExecutor, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ContentSwitchCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(VALID_CONTENT_SWITCH_BACKWARD_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_EQ(executors.size(), 1);
+    EXPECT_NE(executors[0], nullptr);
+}
+
+HWTEST_F(ContentSwitchCommandParserParseTest, Parse_NullXValue_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ContentSwitchCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(INVALID_X_NULL_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(ContentSwitchCommandParserParseTest, Parse_NullYValue_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ContentSwitchCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(INVALID_Y_NULL_JSON);
+    ASSERT_NE(json, nullptr);
+
+    auto executors = parser.Parse(json);
+    EXPECT_TRUE(executors.empty());
+}
+
+HWTEST_F(ContentSwitchCommandParserParseTest, Parse_InvalidCountType_ReturnsEmpty, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ContentSwitchCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(INVALID_COUNT_TYPE_JSON);
     ASSERT_NE(json, nullptr);
 
     auto executors = parser.Parse(json);

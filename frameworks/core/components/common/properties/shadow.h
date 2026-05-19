@@ -56,6 +56,11 @@ public:
     Shadow() = default;
     ~Shadow() = default;
 
+    explicit Shadow(double blurRadius)
+    {
+        SetBlurRadius(blurRadius);
+    };
+
     // create shadow for hardware rending.
     Shadow(float elevation, Offset offset, Color spotColor, ShadowStyle style)
         : offset_(offset), color_(spotColor), style_(style)

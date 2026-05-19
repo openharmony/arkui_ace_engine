@@ -686,6 +686,16 @@ public:
         return customNode_.Upgrade();
     }
 
+    void SetIsGridMenu(bool isGridMenu)
+    {
+        isGridMenu_ = isGridMenu;
+    }
+
+    bool GetIsGridMenu() const
+    {
+        return isGridMenu_;
+    }
+
     void UpdateSelectOptionTextByIndex(int32_t index, const std::string& text);
     void UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon);
 
@@ -909,6 +919,7 @@ private:
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
     bool needHideAfterTouch_ = true;
+    bool isGridMenu_ = false;
 
     std::optional<OffsetF> lastPosition_;
     std::optional<Placement> lastPlacement_;

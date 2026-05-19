@@ -41,6 +41,7 @@ export interface IVariableOwner {
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
     __getCustomComponentContext__Internal(): CustomComponentContext;
     __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
+    __getCanUpdateStateVars__Internal(): boolean;
 }
 
 export interface IDecoratedVariable {
@@ -135,10 +136,6 @@ export interface IMutableKeyedStateMeta {
     // OB_ARRAY_ANY_KEY) fire ONCE total instead of once per key. Each key
     // still goes through the per-key fireChange, so non-overlapping bindings
     // still see their own notification.
-    // ReadonlyArray<string> at the boundary so callers can pass hoisted
-    // immutable batches (e.g. WrappedArray.LENGTH_AND_ANY_KEY) without
-    // worrying about a future mutation slipping in. Array<string> still
-    // satisfies the type since Array implements ReadonlyArray.
     fireChangeBatch(keys: ReadonlyArray<string>): void;
 }
 
@@ -150,6 +147,8 @@ export interface IObserve {
 export interface IObservedAnyProp {
     addRefAnyProp(): void;
 }
+
+export interface ObservedBuiltIn extends IObservedAnyProp {}
 
 export const OBSERVE: IObserve = ObserveSingleton.instance;
 

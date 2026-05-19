@@ -213,9 +213,11 @@ void LazyGridLayoutInfo::SetTotalItemCount(int32_t count)
         updatedStart_ = INT_MAX;
         updatedEnd_ = -1;
         startIndex_ = -1;
+        endIndex_ = -1;
+        visibleStartIndex_ = -1;
+        visibleEndIndex_ = -1;
         cachedUpdatedStart_ = INT_MAX;
         cachedUpdatedEnd_ = -1;
-        endIndex_ = -1;
         totalMainSize_ = 0.0f;
     }
 }

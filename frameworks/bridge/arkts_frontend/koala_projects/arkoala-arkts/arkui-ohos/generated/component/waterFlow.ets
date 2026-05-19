@@ -462,6 +462,21 @@ export function WaterFlowImpl(
     })
 }
 
+@memo
+export function WaterFlow(
+    @memo @memo_skip
+    style: ((attributes: WaterFlowAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkWaterFlowComponent>((): ArkWaterFlowComponent => {
+        return new ArkWaterFlowComponent()
+    })
+    NodeAttach<ArkWaterFlowPeer>((): ArkWaterFlowPeer => ArkWaterFlowPeer.create(receiver), (_: ArkWaterFlowPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class UIWaterFlowEvent_serializer {
     public static write(buffer: SerializerBase, value: UIWaterFlowEvent): void {
         let valueSerializer: SerializerBase = buffer

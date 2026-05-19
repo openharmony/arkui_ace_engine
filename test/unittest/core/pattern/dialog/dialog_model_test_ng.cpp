@@ -418,7 +418,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg011, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
 
     /**
-     * @tc.steps: step2. create a custom node
+     * @tc.steps: step2. create a custom node.
      */
     auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(contentNode, nullptr);
@@ -477,7 +477,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg012, TestSize.Level1)
 
     /**
      * @tc.steps: step2. create DialogNode.
-     * @tc.expected: DialogNode created successfully
+     * @tc.expected: DialogNode created successfully.
      */
     auto dialog = DialogView::CreateDialogNode(dialogProps, nullptr);
     ASSERT_NE(dialog, nullptr);
@@ -520,7 +520,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg013, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create DialogNode.
-     * @tc.expected: DialogNode created successfully
+     * @tc.expected: DialogNode created successfully.
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto dialog = overlayManager->ShowDialog(dialogProps, nullptr, false);
@@ -552,7 +552,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg014, TestSize.Level1)
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
-     * @tc.steps: step2. Create a content node
+     * @tc.steps: step2. Create a content node.
      */
     auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(contentNode, nullptr);
@@ -604,7 +604,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg015, TestSize.Level1)
     ASSERT_NE(contentNode, nullptr);
 
     /**
-     * @tc.steps: step3. Create dialog and layoutWrapper.
+     * @tc.steps: step3. Create dialog and props.
      * @tc.expected: The dialog node created successfully.
      */
     DialogProperties props {
@@ -671,7 +671,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg042, TestSize.Level1)
     };
 
     /**
-     * @tc.steps: step1. Create a custom node
+     * @tc.steps: step1. Create a custom node.
      */
     auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(contentNode, nullptr);

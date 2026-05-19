@@ -17,6 +17,7 @@
 
 #include "interfaces/inner_api/ace/ui_content_config.h"
 
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -26,12 +27,15 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/clipboard/clipboard.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/image/image_cache.h"
 #include "core/common/manager_interface.h"
 #include "core/common/statistic_event_reporter.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/common/window.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -1238,6 +1242,30 @@ void PipelineBase::SetEventManager(const RefPtr<EventManager>& eventManager)
 RefPtr<EventManager> PipelineBase::GetEventManager() const
 {
     return eventManager_;
+}
+
+void PipelineBase::SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
+{
+    thpExtraMgr_ = thpExtraMgr;
+}
+
+const RefPtr<NG::THPExtraManager>& PipelineBase::GetTHPExtraManager() const
+{
+    return thpExtraMgr_;
+}
+
+void PipelineBase::UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter)
+{
+    std::unique_lock<std::shared_mutex> lock(themeMtx_);
+    CHECK_NULL_VOID(themeManager_);
+    auto themeConstants = themeManager_->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+    themeConstants->UpdateResourceAdapter(adapter);
+}
+
+void PipelineBase::SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
+{
+    drawDelegate_ = std::move(delegate);
 }
 
 } // namespace OHOS::Ace

@@ -149,6 +149,21 @@ export function UnionEffectContainerImpl(
     })
 }
 
+@memo
+export function UnionEffectContainer(
+    @memo @memo_skip
+    style: ((attributes: UnionEffectContainerAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkUnionEffectContainerComponent>((): ArkUnionEffectContainerComponent => {
+        return new ArkUnionEffectContainerComponent()
+    })
+    NodeAttach<ArkUnionEffectContainerPeer>((): ArkUnionEffectContainerPeer => ArkUnionEffectContainerPeer.create(receiver), (_: ArkUnionEffectContainerPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class UnionEffectContainerOptions_serializer {
     public static write(buffer: SerializerBase, value: UnionEffectContainerOptions): void {
         let valueSerializer: SerializerBase = buffer

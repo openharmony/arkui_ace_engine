@@ -60,6 +60,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/key_event_manager.cpp",
+    "$ace_root/frameworks/core/common/premake_scope.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
@@ -147,6 +148,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_enums.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
+    "$ace_root/frameworks/core/components/common/properties/text_style_gradient.cpp",
     "$ace_root/frameworks/core/components/display/render_display.cpp",
     "$ace_root/frameworks/core/components/focus_animation/render_focus_animation.cpp",
 
@@ -215,7 +217,7 @@ ohos_unittest("SpringChainTest") {
     libs = [ "curl" ]
   } else {
     configs += [ "//third_party/curl:curl_config" ]
-    deps += [ "//third_party/curl:curl" ]
+    deps += [ "//third_party/curl" ]
     external_deps = [ "hilog:libhilog" ]
   }
 

@@ -439,6 +439,21 @@ export function SideBarContainerImpl(
     })
 }
 
+@memo
+export function SideBarContainer(
+    @memo @memo_skip
+    style: ((attributes: SideBarContainerAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkSideBarContainerComponent>((): ArkSideBarContainerComponent => {
+        return new ArkSideBarContainerComponent()
+    })
+    NodeAttach<ArkSideBarContainerPeer>((): ArkSideBarContainerPeer => ArkSideBarContainerPeer.create(receiver), (_: ArkSideBarContainerPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ButtonIconOptions_serializer {
     public static write(buffer: SerializerBase, value: ButtonIconOptions): void {
         let valueSerializer: SerializerBase = buffer

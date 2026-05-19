@@ -18,7 +18,6 @@
 
 #include <cstdint>
 
-#include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
 #include "base/thread/task_executor.h"
 #include "core/components/common/layout/constants.h"

@@ -160,6 +160,21 @@ export function ListItemGroupImpl(
     })
 }
 
+@memo
+export function ListItemGroup(
+    @memo @memo_skip
+    style: ((attributes: ListItemGroupAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkListItemGroupComponent>((): ArkListItemGroupComponent => {
+        return new ArkListItemGroupComponent()
+    })
+    NodeAttach<ArkListItemGroupPeer>((): ArkListItemGroupPeer => ArkListItemGroupPeer.create(receiver), (_: ArkListItemGroupPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ListItemGroupOptions_serializer {
     public static write(buffer: SerializerBase, value: ListItemGroupOptions): void {
         let valueSerializer: SerializerBase = buffer

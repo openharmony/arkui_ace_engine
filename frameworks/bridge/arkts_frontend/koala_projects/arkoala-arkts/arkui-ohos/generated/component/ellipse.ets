@@ -111,6 +111,18 @@ export function EllipseImpl(
     })
 }
 
+@memo
+export function Ellipse(
+    @memo @memo_skip
+    style: ((attributes: EllipseAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkEllipseComponent>((): ArkEllipseComponent => {
+        return new ArkEllipseComponent()
+    })
+    NodeAttach<ArkEllipsePeer>((): ArkEllipsePeer => ArkEllipsePeer.create(receiver), (_: ArkEllipsePeer): void => {
+        style?.(receiver)
+    })
+}
 export class EllipseOptions_serializer {
     public static write(buffer: SerializerBase, value: EllipseOptions): void {
         let valueSerializer: SerializerBase = buffer

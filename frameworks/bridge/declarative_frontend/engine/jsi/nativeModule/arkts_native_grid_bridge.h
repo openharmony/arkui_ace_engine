@@ -84,6 +84,8 @@ public:
     static ArkUINativeModuleValue SetOnGridItemDrop(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnGridItemDrop(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportLazyLoadingEmptyBranch(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnEditModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnEditModeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

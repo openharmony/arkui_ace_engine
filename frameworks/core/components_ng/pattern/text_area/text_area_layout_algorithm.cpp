@@ -114,6 +114,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     if (!isStyledPlaceholder) {
         CalcMeasureContentWithMinLines(contentSize, layoutWrapper, contentConstraint);
     }
+    RelayoutShaderStyle(textStyle);
     return contentSize;
 }
 

@@ -146,6 +146,10 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
     if (font_.fontSizeScale.has_value()) {
         spanItem->fontStyle->UpdateFontSizeScale(font_.fontSizeScale.value());
     }
+
+    if (font_.strokeJoinStyle.has_value()) {
+        spanItem->fontStyle->UpdateStrokeJoinStyle(font_.strokeJoinStyle.value());
+    }
 }
 
 void FontSpan::AddColorResourceObj(const RefPtr<NG::SpanItem>& spanItem) const
@@ -208,6 +212,7 @@ void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetEnableVariableFontWeight();
     spanItem->fontStyle->ResetEnableDeviceFontWeightCategory();
     spanItem->fontStyle->ResetFontSizeScale();
+    spanItem->fontStyle->ResetStrokeJoinStyle();
 }
 
 Font FontSpan::GetFont() const
@@ -264,6 +269,9 @@ std::string FontSpan::ToString() const
     }
     if (font_.enableDeviceFontWeightCategory.has_value()) {
         ss << " enableDeviceFontWeightCategory:" << (font_.enableDeviceFontWeightCategory.value() ? "true" : "false");
+    }
+    if (font_.strokeJoinStyle.has_value()) {
+        ss << " strokeJoinStyle:" << static_cast<int32_t>(font_.strokeJoinStyle.value());
     }
     std::string output = ss.str();
     return output;
@@ -1081,6 +1089,31 @@ void ParagraphStyleSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, S
     }
 }
 
+void ParagraphStyleSpan::AddParagraphStylePart2(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    if (paragraphStyle_.colorShaderStyle.has_value()) {
+        spanItem->textLineStyle->UpdateColorShaderStyle(paragraphStyle_.colorShaderStyle.value());
+    }
+    if (paragraphStyle_.colorShaderStyle.has_value() && paragraphStyle_.colorShaderStyleResObj) {
+        NG::SpanItem::SpanResourceUpdater resourceUpdater;
+        resourceUpdater.obj = paragraphStyle_.colorShaderStyleResObj;
+        auto&& updateFunc = [](const RefPtr<NG::SpanItem>& spanItem,
+                                    const RefPtr<ResourceObject>& resObj, const RefPtr<NG::FrameNode>& frameNode) {
+            CHECK_NULL_VOID(spanItem);
+            CHECK_NULL_VOID(spanItem->textLineStyle);
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            spanItem->textLineStyle->UpdateColorShaderStyle(color);
+        };
+        resourceUpdater.updateFunc = updateFunc;
+        spanItem->AddResourceObj("colorShaderStyle", resourceUpdater);
+    }
+    auto gradient = paragraphStyle_.GetGradient();
+    if (gradient.has_value()) {
+        spanItem->textLineStyle->SetOptGradient(gradient.value());
+    }
+}
+
 void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     if (paragraphStyle_.align.has_value()) {
@@ -1128,6 +1161,7 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
     if (paragraphStyle_.textDirection.has_value()) {
         spanItem->textLineStyle->UpdateTextDirection(paragraphStyle_.textDirection.value());
     }
+    AddParagraphStylePart2(spanItem);
 }
 
 void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
@@ -1145,6 +1179,8 @@ void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanIt
     spanItem->textLineStyle->ResetParagraphSpacing();
     NG::ResetSpanLpxFlag<Dimension>(spanItem, NG::SpanItem::LPX_FLAG_ParagraphSpacing);
     spanItem->textLineStyle->ResetTextDirection();
+    spanItem->textLineStyle->ResetColorShaderStyle();
+    spanItem->textLineStyle->ResetGradient();
 }
 
 bool ParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const

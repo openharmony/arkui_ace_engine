@@ -18,32 +18,25 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
 
 class DepthComponentPattern;
-class DepthComponentContentModifier;
 
 class DepthComponentPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(DepthComponentPaintMethod, NodePaintMethod);
-    friend class DepthComponentContentModifier;
 
 public:
     explicit DepthComponentPaintMethod(const WeakPtr<DepthComponentPattern>& pattern);
     ~DepthComponentPaintMethod() override = default;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     void PerformPaint(PaintWrapper* paintWrapper);
 
     WeakPtr<DepthComponentPattern> pattern_;
-    RefPtr<DepthComponentContentModifier> contentModifier_;
-    RefPtr<RenderContext> canvasRenderContext_;
 };
 
 } // namespace OHOS::Ace::NG

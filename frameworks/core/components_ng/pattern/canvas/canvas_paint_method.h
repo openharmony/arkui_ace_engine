@@ -113,11 +113,12 @@ public:
 
     void Reset();
     TextDirection GetSystemDirection() override;
-    std::string GetDumpInfo();
+    std::deque<std::string> GetDumpInfo();
     void SetHostCustomNodeName();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void ResetRecordingCanvas();
+    void AddParagraphHistory() override;
 
     void SetCanvasRenderContext(const RefPtr<CanvasRenderContext>& canvasRenderContext);
 
@@ -157,6 +158,7 @@ private:
 
     RefPtr<CanvasModifier> contentModifier_ = nullptr;
     RefPtr<CanvasRenderContext> canvasRenderContext_ = nullptr;
+    std::deque<std::string> paragraphHistory_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

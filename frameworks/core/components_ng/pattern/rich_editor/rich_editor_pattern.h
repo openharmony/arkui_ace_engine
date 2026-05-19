@@ -358,6 +358,8 @@ public:
     bool IsOrphanCharOptimization();
     void SetCompressLeadingPunctuation(bool enabled);
     bool IsCompressLeadingPunctuation();
+    void SetPunctuationOverflow(bool enabled);
+    bool IsPunctuationOverflow();
     BlurReason GetBlurReason();
     uint32_t GetSCBSystemWindowId();
     void OnAttachToMainTree() override;
@@ -678,6 +680,7 @@ public:
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
     bool CheckAIPreviewMenuEnable() override;
     void CreateDragNode();
+    void SetHandleInfo(TextDragInfo& info);
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
         bool hasDragBackgroundColor);
@@ -912,6 +915,9 @@ public:
     void HandleOnPasswordVault();
     bool IsShowAutoFill();
     bool IsInterceptInput(const bool shouldCommitInput, const OperationType operationType);
+    OffsetF ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset);
+    bool HasRenderTransform();
+    VectorF GetHostScale() const;
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override;
@@ -996,6 +1002,8 @@ private:
         RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
     void UpdateStrokeColor(
         RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
+    void UpdateTextStroke(
+          RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateDecoration(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateSymbolStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
@@ -1198,6 +1206,8 @@ private:
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
     RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
+    RectF GetVisibleContentRect();
+    void ConvertLocalToGlobalRect(RectF& localRect);
     void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
     RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);
@@ -1420,6 +1430,7 @@ private:
     bool isEnableAutoSpacing_ = false;
     bool isOrphanCharOptimization_ = false;
     bool isCompressLeadingPunctuation_ = false;
+    bool isPunctuationOverflow_ = false;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;

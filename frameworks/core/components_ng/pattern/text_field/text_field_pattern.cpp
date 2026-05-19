@@ -657,7 +657,9 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
     CHECK_NULL_RETURN(json && !cmd.empty(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, RET_FAILED);
-    if (cmd == "addText" || cmd == "setText" || cmd == "deleteText") {
+    if (cmd == "MSDP_AutoFill") {
+        return HandleMSDPAutoFillCommand(json);
+    } else if (cmd == "addText" || cmd == "setText" || cmd == "deleteText") {
         auto params = json->GetValue("params");
         CHECK_NULL_RETURN(params && params->IsObject(), false);
         HandleTextModifyCommand(host->GetId(), params, cmd);
@@ -698,6 +700,23 @@ bool TextFieldPattern::ParseCommand(const std::string& command)
         return false;
     }
     return true;
+}
+
+bool TextFieldPattern::HandleMSDPAutoFillCommand(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json && json->IsObject(), false);
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "recv msdp_autofill json: %{public}s", json->ToString().c_str());
+    auto params = json->GetValue("params");
+    CHECK_NULL_RETURN(params && params->IsObject(), false);
+    auto result = params->GetValue("result");
+    CHECK_NULL_RETURN(result && result->IsArray(), false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    return textFieldManager->ParseMSDPAutoFillJsonValue(result);
 }
 
 void TextFieldPattern::HandleCopyOrCutCommand(const std::string& cmd, const RefPtr<FrameNode>& frameNode)
@@ -3731,11 +3750,21 @@ HintToTypeWrap TextFieldPattern::GetHintType()
     HintToTypeWrap hintToTypeWrap;
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, hintToTypeWrap);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, hintToTypeWrap);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, hintToTypeWrap);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, hintToTypeWrap);
+    auto msdpType = textFieldManager->GetMSDPAutoFillType(host->GetId());
+    if (msdpType.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "GetHintType msdpType: %{public}s", msdpType.value().c_str());
+    }
     auto onePlaceHolder = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
-    if (onePlaceHolder.empty()) {
+    if (onePlaceHolder.empty() && !msdpType.has_value()) {
         return hintToTypeWrap;
     }
-    return container->PlaceHolderToType(onePlaceHolder);
+    return container->PlaceHolderToType(onePlaceHolder, msdpType);
 }
 
 bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType)
@@ -9340,6 +9369,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
     json->PutExtAttr("autoCapitalizationMode", AutoCapTypeToString().c_str(), filter);
     json->PutExtAttr("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false", filter);
+    json->PutExtAttr("shaderStyle", GetShaderStyleInJson(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueForFontFeature(json, filter);
     ToJsonValueSelectOverlay(json, filter);
@@ -9502,10 +9532,39 @@ std::string TextFieldPattern::GetStrokeColor() const
     return theme->GetTextColor().ColorToString();
 }
 
+std::string TextFieldPattern::GetStrokeJoinStyle() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return StringUtils::ToString(layoutProperty->GetStrokeJoinStyle().value_or(StrokeJoinStyle::MITER_JOIN));
+}
+ 
+std::unique_ptr<JsonValue> TextFieldPattern::GetShaderStyleInJson() const
+{
+    auto resultJson = JsonUtil::Create(true);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, resultJson);
+    if (layoutProperty->HasGradientShaderStyle()) {
+        auto propGradient = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+        auto type = propGradient.GetType();
+        if (type == GradientType::LINEAR) {
+            return GradientJsonUtils::LinearGradientToJson(propGradient);
+        } else if (type == GradientType::RADIAL) {
+            return GradientJsonUtils::RadialGradientToJson(propGradient);
+        }
+    } else if (layoutProperty->HasColorShaderStyle()) {
+        resultJson->Put(
+            "color", layoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT).ColorToString().c_str());
+        return resultJson;
+    }
+    return resultJson;
+}
+
 void TextFieldPattern::ToJsonValueForStroke(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutExtAttr("strokeWidth", GetStrokeWidth().c_str(), filter);
     json->PutExtAttr("strokeColor", GetStrokeColor().c_str(), filter);
+    json->PutExtAttr("strokeJoinStyle", GetStrokeJoinStyle().c_str(), filter);
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -12249,6 +12308,7 @@ void TextFieldPattern::OnDetachFromMainTree()
     isDetachFromMainTree_ = true;
     RemoveTextFieldInfo();
     RemoveFillContentMap();
+    RemoveMSDPAutoFillType();
 }
 
 TextFieldInfo TextFieldPattern::GenerateTextFieldInfo()
@@ -13284,6 +13344,17 @@ void TextFieldPattern::RemoveFillContentMap()
     CHECK_NULL_VOID(textFieldManager);
     auto nodeId = host->GetId();
     textFieldManager->RemoveFillContentMap(nodeId);
+}
+
+void TextFieldPattern::RemoveMSDPAutoFillType()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->RemoveMSDPAutoFillType(host->GetId());
 }
 
 bool TextFieldPattern::NeedsSendFillContent()

@@ -21,6 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
@@ -42,8 +43,11 @@ ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
         .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
+        .punctuationOverflow = textStyle.GetPunctuationOverflow(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
-        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
+        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing(),
+        .propGradient = GradientConvert::ToOptNGGradient(textStyle.GetGradient()),
+        .colorShaderStyle = textStyle.GetColorShaderStyle()
         };
 }
 
@@ -136,6 +140,13 @@ void ParagraphUtil::GetSpanParagraphStyle(
     }
     if (lineStyle->HasParagraphSpacing()) {
         pStyle.paragraphSpacing = lineStyle->GetParagraphSpacingValue();
+    }
+    auto gradient = lineStyle->GetGradient();
+    if (gradient.has_value()) {
+        pStyle.SetOptGradient(gradient);
+    }
+    if (lineStyle->HasColorShaderStyle()) {
+        pStyle.colorShaderStyle = lineStyle->GetColorShaderStyleValue();
     }
     if (lineStyle->HasOrphanCharOptimization()) {
         pStyle.orphanCharOptimization = lineStyle->GetOrphanCharOptimizationValue();

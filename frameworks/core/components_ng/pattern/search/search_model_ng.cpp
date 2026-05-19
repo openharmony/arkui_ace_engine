@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2704,6 +2705,150 @@ bool SearchModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextFieldLayoutProperty, EnableAutoSpacing, value, textFieldChild, value);
     return value;
+}
+
+void SearchModelNG::SetStrokeJoinStyle(StrokeJoinStyle style)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeJoinStyle, style, textFieldChild);
+}
+ 
+void SearchModelNG::SetStrokeJoinStyle(FrameNode* frameNode, StrokeJoinStyle style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeJoinStyle, style, textFieldChild);
+}
+ 
+void SearchModelNG::RemoveResObj(FrameNode* frameNode, const std::string& key)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ViewAbstractModelNG::RemoveResObj(frameNode, key);
+}
+ 
+void SearchModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+ 
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+ 
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UINODE_TRACE(textFieldChild);
+ 
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<SearchPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(AceType::RawPtr(textFieldChild))]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        pattern->AddResObj("TextFieldGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradient, textFieldChild);
+}
+ 
+void SearchModelNG::SetColorShaderStyle(const Color& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, value, textFieldChild);
+}
+ 
+void SearchModelNG::ResetGradientShaderStyle()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF,
+        textFieldChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF,
+        textFieldChild);
+    auto layoutProperty = textFieldChild->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
+}
+ 
+void SearchModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UINODE_TRACE(textFieldChild);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<SearchPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(AceType::RawPtr(textFieldChild))]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        pattern->AddResObj("TextFieldGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradient, textFieldChild);
+}
+ 
+void SearchModelNG::SetColorShaderStyle(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, value, textFieldChild);
+}
+ 
+ 
+void SearchModelNG::ResetSearchGradient(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF,
+        textFieldChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF,
+        textFieldChild);
+    auto layoutProperty = textFieldChild->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void SearchModelNG::SetCompressLeadingPunctuation(bool enabled)

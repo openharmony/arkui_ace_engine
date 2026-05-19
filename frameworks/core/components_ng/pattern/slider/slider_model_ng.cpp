@@ -154,6 +154,7 @@ void SliderModelNG::SetShowTips(bool value, const std::optional<std::string>& co
 }
 void SliderModelNG::SetThickness(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TRACK_THICKNESS);
     if (value.IsNonPositive()) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
@@ -185,6 +186,7 @@ void SliderModelNG::SetBlockBorderColor(const Color& value)
 }
 void SliderModelNG::SetBlockBorderWidth(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BLOCK_BORDER_WIDTH);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth, value);
 }
 void SliderModelNG::SetStepColor(const Color& value)
@@ -194,14 +196,18 @@ void SliderModelNG::SetStepColor(const Color& value)
 }
 void SliderModelNG::SetTrackBorderRadius(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TRACK_BORDER_RADIUS);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value);
 }
 void SliderModelNG::SetSelectedBorderRadius(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_SELECTED_BORDER_RADIUS);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value);
 }
 void SliderModelNG::SetBlockSize(const Dimension& width, const Dimension& height)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(width, LpxAttribute::LPX_BLOCK_SIZE_WIDTH);
+    ACE_CHECK_LPX_ATTRIBUTE(height, LpxAttribute::LPX_BLOCK_SIZE_HEIGHT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_UINODE_TRACE(frameNode);
@@ -242,6 +248,7 @@ void SliderModelNG::SetBlockShape(const RefPtr<BasicShape>& value)
 }
 void SliderModelNG::SetStepSize(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STEP_SIZE);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value);
 }
 void SliderModelNG::SetPrefix(const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options)
@@ -392,6 +399,7 @@ void SliderModelNG::SetShowTips(FrameNode* frameNode, bool value, const std::opt
 
 void SliderModelNG::SetThickness(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TRACK_THICKNESS, frameNode);
     if (value.IsNonPositive()) {
         CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
@@ -416,6 +424,7 @@ void SliderModelNG::SetThickness(FrameNode* frameNode, const Dimension& value)
 }
 void SliderModelNG::SetStepSize(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STEP_SIZE, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value, frameNode);
 }
 void SliderModelNG::SetBlockType(FrameNode* frameNode, BlockStyleType value)
@@ -428,6 +437,8 @@ void SliderModelNG::SetBlockShape(FrameNode* frameNode, const RefPtr<BasicShape>
 }
 void SliderModelNG::SetBlockSize(FrameNode* frameNode, const Dimension& width, const Dimension& height)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(width, LpxAttribute::LPX_BLOCK_SIZE_WIDTH, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(height, LpxAttribute::LPX_BLOCK_SIZE_HEIGHT, frameNode);
     CHECK_NULL_VOID(frameNode);
     ACE_UINODE_TRACE(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
@@ -452,6 +463,7 @@ void SliderModelNG::SetBlockSize(FrameNode* frameNode, const Dimension& width, c
 }
 void SliderModelNG::SetTrackBorderRadius(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TRACK_BORDER_RADIUS, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value, frameNode);
 }
 void SliderModelNG::SetStepColor(FrameNode* frameNode, const Color& value)
@@ -466,6 +478,7 @@ void SliderModelNG::SetBlockBorderColor(FrameNode* frameNode, const Color& value
 }
 void SliderModelNG::SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BLOCK_BORDER_WIDTH, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth, value, frameNode);
 }
 void SliderModelNG::SetBlockColor(FrameNode* frameNode, const Color& value)
@@ -1097,6 +1110,7 @@ Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
 
 void SliderModelNG::SetSelectedBorderRadius(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_SELECTED_BORDER_RADIUS, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value, frameNode);
 }
 

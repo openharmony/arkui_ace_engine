@@ -36,7 +36,7 @@ constexpr int32_t UNKNOWN_INSTANCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
-bool ResourceParseUtils::needReload_ = false;
+bool ResourceParseUtilsBase::needReload_ = false;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -257,7 +257,7 @@ void ReplaceHolder(std::string& originStr, const std::vector<ResourceObjectParam
     }
 }
 
-void ResourceParseUtils::CompleteResourceObjectFromColor(
+void ResourceParseUtilsBase::CompleteResourceObjectFromColor(
     RefPtr<ResourceObject>& resObj, Color& color, const NG::NodeInfo& nodeInfo)
 {
     if (!SystemProperties::ConfigChangePerform()) {
@@ -289,17 +289,17 @@ NG::NodeInfo ResourceParseUtils::MakeNativeNodeInfo(NG::UINode* uiNode)
     return { uiNode->GetTag(), uiNode->GetLocalColorMode(), uiNode->GetForceDarkAllowed() };
 }
 
-bool ResourceParseUtils::ParseResInteger(const RefPtr<ResourceObject>& resObj, uint32_t& result)
+bool ResourceParseUtilsBase::ParseResInteger(const RefPtr<ResourceObject>& resObj, uint32_t& result)
 {
-    return ParseResInteger<uint32_t>(resObj, result);
+    return ResourceParseUtils::ParseResInteger<uint32_t>(resObj, result);
 }
 
-bool ResourceParseUtils::ParseResInteger(const RefPtr<ResourceObject>& resObj, int32_t& result)
+bool ResourceParseUtilsBase::ParseResInteger(const RefPtr<ResourceObject>& resObj, int32_t& result)
 {
-    return ParseResInteger<int32_t>(resObj, result);
+    return ResourceParseUtils::ParseResInteger<int32_t>(resObj, result);
 }
 
-bool ResourceParseUtils::ParseResIntegerArray(const RefPtr<ResourceObject>& resObj, std::vector<uint32_t>& result)
+bool ResourceParseUtilsBase::ParseResIntegerArray(const RefPtr<ResourceObject>& resObj, std::vector<uint32_t>& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     auto resType = resObj->GetType();
@@ -331,7 +331,7 @@ bool ResourceParseUtils::ParseResIntegerArray(const RefPtr<ResourceObject>& resO
     return false;
 }
 
-bool ResourceParseUtils::ParseResStrArray(const RefPtr<ResourceObject>& resObj, std::vector<std::string>& result)
+bool ResourceParseUtilsBase::ParseResStrArray(const RefPtr<ResourceObject>& resObj, std::vector<std::string>& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     auto resType = resObj->GetType();
@@ -363,7 +363,8 @@ bool ResourceParseUtils::ParseResStrArray(const RefPtr<ResourceObject>& resObj, 
     return false;
 }
 
-bool ResourceParseUtils::ParseResFontFamilies(const RefPtr<ResourceObject>& resObj, std::vector<std::string>& result)
+bool ResourceParseUtilsBase::ParseResFontFamilies(
+    const RefPtr<ResourceObject>& resObj, std::vector<std::string>& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     result.clear();
@@ -385,7 +386,7 @@ bool ResourceParseUtils::ParseResFontFamilies(const RefPtr<ResourceObject>& resO
     return true;
 }
 
-void ResourceParseUtils::InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,
+void ResourceParseUtilsBase::InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,
     const ColorMode& colorMode)
 {
     if (!needReload_ || (resObj->GetColorMode() == ColorMode::COLOR_MODE_UNDEFINED)) {
@@ -397,7 +398,7 @@ void ResourceParseUtils::InvertColorWithResource(const RefPtr<ResourceObject>& r
     resObj->SetColorMode(colorMode);
 }
 
-bool ResourceParseUtils::ParseColorWithColorMode(
+bool ResourceParseUtilsBase::ParseColorWithColorMode(
     const RefPtr<ResourceObject>& resObj, Color& result, const ColorMode& colorMode)
 {
     if (resObj->GetColorMode() == ColorMode::COLOR_MODE_UNDEFINED) {
@@ -412,7 +413,7 @@ bool ResourceParseUtils::ParseColorWithColorMode(
     return true;
 }
 
-bool ResourceParseUtils::ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
+bool ResourceParseUtilsBase::ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
     RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode)
 {
     auto params = resObj->GetParams();
@@ -424,7 +425,7 @@ bool ResourceParseUtils::ParseResColorWithName(const RefPtr<ResourceObject>& res
     return true;
 }
 
-bool ResourceParseUtils::ParseResColorWithId(const RefPtr<ResourceObject>& resObj, Color& result,
+bool ResourceParseUtilsBase::ParseResColorWithId(const RefPtr<ResourceObject>& resObj, Color& result,
     RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode, bool adaptMaterial)
 {
     auto resId = resObj->GetId();
@@ -453,7 +454,7 @@ bool ResourceParseUtils::ParseResColorWithId(const RefPtr<ResourceObject>& resOb
     return false;
 }
 
-bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result, bool adaptMaterial)
+bool ResourceParseUtilsBase::ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result, bool adaptMaterial)
 {
     CHECK_NULL_RETURN(resObj, false);
 
@@ -483,7 +484,7 @@ bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Col
     return ParseResColorWithId(resObj, result, resourceWrapper, colorMode, adaptMaterial);
 }
 
-bool ResourceParseUtils::ParseResColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
+bool ResourceParseUtilsBase::ParseResColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
     const ColorMode& colorMode)
 {
     CHECK_NULL_RETURN(resObj, false);
@@ -518,7 +519,7 @@ bool ResourceParseUtils::ParseResColorWithColorMode(const RefPtr<ResourceObject>
     return ParseResColorWithId(resObj, result, overrideWrapper, colorMode);
 }
 
-bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result)
+bool ResourceParseUtilsBase::ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     std::string u8Result;
@@ -530,7 +531,7 @@ bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, st
     return false;
 }
 
-bool ResourceParseUtils::ParseResStringObj(const std::vector<ResourceObjectParams>& params,
+bool ResourceParseUtilsBase::ParseResStringObj(const std::vector<ResourceObjectParams>& params,
     RefPtr<ResourceWrapper>& resourceWrapper, std::string& result, int32_t type)
 {
     if (params.empty()) {
@@ -557,7 +558,7 @@ bool ResourceParseUtils::ParseResStringObj(const std::vector<ResourceObjectParam
     return true;
 }
 
-bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result)
+bool ResourceParseUtilsBase::ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     auto type = resObj->GetType();
@@ -571,7 +572,7 @@ bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, st
     }
     auto resIdNum = resObj->GetId();
     if (resIdNum == -1) {
-        return ResourceParseUtils::ParseResStringObj(params, resourceWrapper, result, type);
+        return ResourceParseUtilsBase::ParseResStringObj(params, resourceWrapper, result, type);
     }
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto originStr = resourceWrapper->GetString(resIdNum);
@@ -600,7 +601,7 @@ bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, st
     return true;
 }
 
-bool ResourceParseUtils::ParseResMedia(const RefPtr<ResourceObject>& resObj, std::string& result)
+bool ResourceParseUtilsBase::ParseResMedia(const RefPtr<ResourceObject>& resObj, std::string& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     auto type = resObj->GetType();
@@ -647,7 +648,7 @@ bool ResourceParseUtils::ParseResMedia(const RefPtr<ResourceObject>& resObj, std
     return false;
 }
 
-bool ResourceParseUtils::ParseResBool(const RefPtr<ResourceObject>& resObj, bool& result)
+bool ResourceParseUtilsBase::ParseResBool(const RefPtr<ResourceObject>& resObj, bool& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     auto type = resObj->GetType();
@@ -678,7 +679,7 @@ bool ResourceParseUtils::ParseResBool(const RefPtr<ResourceObject>& resObj, bool
     return false;
 }
 
-bool ResourceParseUtils::ParseResourceToDouble(const RefPtr<ResourceObject>& resObj, double& result)
+bool ResourceParseUtilsBase::ParseResourceToDouble(const RefPtr<ResourceObject>& resObj, double& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
@@ -718,24 +719,24 @@ bool ResourceParseUtils::ParseResourceToDouble(const RefPtr<ResourceObject>& res
     return false;
 }
 
-bool ResourceParseUtils::ParseResDouble(const RefPtr<ResourceObject>& resObj, double& result)
+bool ResourceParseUtilsBase::ParseResDouble(const RefPtr<ResourceObject>& resObj, double& result)
 {
     return ParseResourceToDouble(resObj, result);
 }
 
-bool ResourceParseUtils::ParseResDimensionFpNG(const RefPtr<ResourceObject>& resObj, CalcDimension& result,
+bool ResourceParseUtilsBase::ParseResDimensionFpNG(const RefPtr<ResourceObject>& resObj, CalcDimension& result,
     bool isSupportPercent)
 {
     return ParseResDimensionNG(resObj, result, DimensionUnit::FP, isSupportPercent);
 }
 
-bool ResourceParseUtils::ParseResDimensionVpNG(const RefPtr<ResourceObject>& resObj, CalcDimension& result,
+bool ResourceParseUtilsBase::ParseResDimensionVpNG(const RefPtr<ResourceObject>& resObj, CalcDimension& result,
     bool isSupportPercent)
 {
     return ParseResDimensionNG(resObj, result, DimensionUnit::VP, isSupportPercent);
 }
 
-bool ResourceParseUtils::ParseResDimensionNG(
+bool ResourceParseUtilsBase::ParseResDimensionNG(
     const RefPtr<ResourceObject>& resObj, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
     CHECK_NULL_RETURN(resObj, false);
@@ -776,24 +777,24 @@ bool ResourceParseUtils::ParseResDimensionNG(
     return false;
 }
 
-bool ResourceParseUtils::ParseResDimensionVp(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
+bool ResourceParseUtilsBase::ParseResDimensionVp(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
 {
     // 'vp' -> the value varies with pixel density of device.
     return ParseResDimension(resObj, result, DimensionUnit::VP);
 }
 
-bool ResourceParseUtils::ParseResDimensionFp(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
+bool ResourceParseUtilsBase::ParseResDimensionFp(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
 {
     // the 'fp' unit is used for text scenes.
     return ParseResDimension(resObj, result, DimensionUnit::FP);
 }
 
-bool ResourceParseUtils::ParseResDimensionPx(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
+bool ResourceParseUtilsBase::ParseResDimensionPx(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
 {
     return ParseResDimension(resObj, result, DimensionUnit::PX);
 }
 
-bool ResourceParseUtils::ParseResDimension(
+bool ResourceParseUtilsBase::ParseResDimension(
     const RefPtr<ResourceObject>& resObj, CalcDimension& result, DimensionUnit defaultUnit)
 {
     CHECK_NULL_RETURN(resObj, false);
@@ -837,7 +838,7 @@ bool ResourceParseUtils::ParseResDimension(
     return true;
 }
 
-bool ResourceParseUtils::ParseResResource(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
+bool ResourceParseUtilsBase::ParseResResource(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     auto resIdNum = resObj->GetId();
@@ -867,7 +868,7 @@ bool ResourceParseUtils::ParseResResource(const RefPtr<ResourceObject>& resObj, 
 }
 
 template<class T>
-bool ResourceParseUtils::ConvertFromResObjNG(const RefPtr<ResourceObject>& resObj, T& result)
+bool ResourceParseUtilsBase::ConvertFromResObjNG(const RefPtr<ResourceObject>& resObj, T& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
@@ -891,7 +892,7 @@ bool ResourceParseUtils::ConvertFromResObjNG(const RefPtr<ResourceObject>& resOb
 }
 
 template<class T>
-bool ResourceParseUtils::ConvertFromResObj(const RefPtr<ResourceObject>& resObj, T& result)
+bool ResourceParseUtilsBase::ConvertFromResObj(const RefPtr<ResourceObject>& resObj, T& result)
 {
     CHECK_NULL_RETURN(resObj, false);
     if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
@@ -914,6 +915,6 @@ bool ResourceParseUtils::ConvertFromResObj(const RefPtr<ResourceObject>& resObj,
     return false;
 }
 
-template bool ACE_FORCE_EXPORT ResourceParseUtils::ConvertFromResObjNG<Dimension>(
+template bool ACE_FORCE_EXPORT ResourceParseUtilsBase::ConvertFromResObjNG<Dimension>(
     const RefPtr<ResourceObject>& resObj, Dimension& result);
 }

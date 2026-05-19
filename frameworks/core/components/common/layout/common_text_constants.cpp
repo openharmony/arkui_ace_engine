@@ -51,4 +51,7 @@ const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverf
 const std::vector<EllipsisMode> ELLIPSIS_MODES = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL,
     EllipsisMode::MULTILINE_HEAD, EllipsisMode::MULTILINE_MIDDLE };
 
+const std::vector<StrokeJoinStyle> STROKE_JOIN_STYLES = { StrokeJoinStyle::MITER_JOIN, StrokeJoinStyle::ROUND_JOIN,
+    StrokeJoinStyle::BEVEL_JOIN };
+
 } // namespace OHOS::Ace

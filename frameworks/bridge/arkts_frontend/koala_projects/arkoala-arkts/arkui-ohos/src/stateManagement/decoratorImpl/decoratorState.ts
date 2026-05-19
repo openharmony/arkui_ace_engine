@@ -14,7 +14,10 @@
  */
 
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable, IObservedObject, IVariableOwner } from '../decorator';
+import {
+    IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable,
+    IObservedObject, IVariableOwner,
+} from '../decorator';
 import { WatchFuncType, WatchIdType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';

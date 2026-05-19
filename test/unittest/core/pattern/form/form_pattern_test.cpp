@@ -2260,4 +2260,39 @@ HWTEST_F(FormPatternTest, FormPatternTest_064, TestSize.Level0)
     pattern->GetRSUIContext();
     EXPECT_FALSE(pattern->rsUIContext_ != nullptr);
 }
+
+/**
+ * @tc.name: FormPatternTest_FireFormSurfaceNodeCallback_001
+ * @tc.desc: Verify ClearAccessibilityChildTreeRegisterFlag is called in FireFormSurfaceNodeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_FireFormSurfaceNodeCallback_001, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
+
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+    host->layoutProperty_ = layoutProperty;
+
+    std::string surfaceNodeName = "ArkTSCardNode";
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
+    auto rsSurfaceNode = std::make_shared<OHOS::Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
+    ASSERT_NE(rsSurfaceNode, nullptr);
+
+    AAFwk::Want want;
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, true);
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
+
+    // ClearAccessibilityChildTreeRegisterFlag resets isReg_, then NotifyAccessibilityChildTreeRegister registers
+    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, want);
+    EXPECT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
+
+    // ClearAccessibilityChildTreeRegisterFlag resets isReg_ again, then re-registers
+    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, want);
+    EXPECT_NE(formNode->accessibilityChildTreeCallback_, nullptr);
+}
 } // namespace OHOS::Ace::NG

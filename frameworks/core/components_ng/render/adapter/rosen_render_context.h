@@ -261,6 +261,7 @@ public:
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
     void SetShadowPath(const std::string path) override;
     void ResetShadowPath() override;
+    void ClearClipBounds() override;
 
     void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
 

@@ -111,6 +111,18 @@ export function RemoteWindowImpl(
     })
 }
 
+@memo
+export function RemoteWindow(
+    @memo @memo_skip
+    style: ((attributes: RemoteWindowAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkRemoteWindowComponent>((): ArkRemoteWindowComponent => {
+        return new ArkRemoteWindowComponent()
+    })
+    NodeAttach<ArkRemoteWindowPeer>((): ArkRemoteWindowPeer => ArkRemoteWindowPeer.create(receiver), (_: ArkRemoteWindowPeer): void => {
+        style?.(receiver)
+    })
+}
 export class RRect_serializer {
     public static write(buffer: SerializerBase, value: RRect): void {
         let valueSerializer: SerializerBase = buffer
