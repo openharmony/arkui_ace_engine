@@ -1488,8 +1488,8 @@ HWTEST_F(ContainerReaderTestNg, LayoutMeasure004, TestSize.Level1)
  */
 HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent001, TestSize.Level1)
 {
-    int32_t savedVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    int32_t savedVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     const float flexWidth = 400.0f;
     const float flexHeight = 300.0f;
@@ -1543,7 +1543,7 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent001, TestSize.Level1)
     ASSERT_NE(readerGeometry, nullptr);
     EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(expectedReaderWidth, flexHeight));
 
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(savedVersion);
+    MockContainer::Current()->SetApiTargetVersion(savedVersion);
 }
 
 /**
@@ -1553,14 +1553,14 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent001, TestSize.Level1)
  */
 HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent002, TestSize.Level1)
 {
-    int32_t savedVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    int32_t savedVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     const float flexWidth = 500.0f;
     const float flexHeight = 200.0f;
     const float textWidth1 = 120.0f;
     const float textWidth2 = 80.0f;
-    const float expectedReaderWidth = flexWidth - textWidth1 - textWidth2;
+        const float expectedReaderWidth = flexWidth - textWidth1 - textWidth2;
 
     RefPtr<FrameNode> text1;
     RefPtr<FrameNode> reader;
@@ -1600,7 +1600,7 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent002, TestSize.Level1)
     ASSERT_NE(readerGeometry, nullptr);
     EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(expectedReaderWidth, flexHeight));
 
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(savedVersion);
+    MockContainer::Current()->SetApiTargetVersion(savedVersion);
 }
 
 /**
@@ -1610,11 +1610,11 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent002, TestSize.Level1)
  */
 HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent003, TestSize.Level1)
 {
-    int32_t savedVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    int32_t savedVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     const float flexWidth = 400.0f;
-    const float textHeight = 100.0f;
+        const float textHeight = 100.0f;
 
     RefPtr<FrameNode> text;
     RefPtr<FrameNode> reader;
@@ -1649,7 +1649,7 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent003, TestSize.Level1)
     ASSERT_NE(readerGeometry, nullptr);
     EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(flexWidth, textHeight));
 
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(savedVersion);
+    MockContainer::Current()->SetApiTargetVersion(savedVersion);
 }
 
 /**
@@ -1659,13 +1659,13 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent003, TestSize.Level1)
  */
 HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent004, TestSize.Level1)
 {
-    int32_t savedVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    int32_t savedVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     const float columnWidth = 300.0f;
     const float columnHeight = 400.0f;
     const float textHeight = 100.0f;
-    // In Column: main axis = vertical, cross axis = horizontal
+        // In Column: main axis = vertical, cross axis = horizontal
     // ContainerReader with cross-axis matchParent → width = parent width (300)
     // ContainerReader main axis (height) = remaining space = 400 - 100 = 300
     const float expectedReaderHeight = columnHeight - textHeight;
@@ -1702,6 +1702,6 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent004, TestSize.Level1)
     ASSERT_NE(readerGeometry, nullptr);
     EXPECT_EQ(readerGeometry->GetFrameSize(), SizeF(columnWidth, expectedReaderHeight));
 
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(savedVersion);
+    MockContainer::Current()->SetApiTargetVersion(savedVersion);
 }
 } // namespace OHOS::Ace::NG
