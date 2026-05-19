@@ -22757,6 +22757,20 @@ class ListEnableEditModeModifier extends ModifierWithKey {
   }
 }
 ListEnableEditModeModifier.identity = Symbol('listEnableEditMode');
+class ListOnEditModeChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetOnEditModeChange(node);
+    }
+    else {
+      getUINativeModule().list.setOnEditModeChange(node, this.value);
+    }
+  }
+}
+ListOnEditModeChangeModifier.identity = Symbol('listOnEditModeChange');
 class ListMultiSelectableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -23487,6 +23501,10 @@ class ArkListComponent extends ArkScrollable {
   }
   enableEditMode(value) {
     modifierWithKey(this._modifiersWithKeys, ListEnableEditModeModifier.identity, ListEnableEditModeModifier, value);
+    return this;
+  }
+  onEditModeChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, ListOnEditModeChangeModifier.identity, ListOnEditModeChangeModifier, callback);
     return this;
   }
   multiSelectable(value) {

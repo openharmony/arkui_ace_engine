@@ -231,10 +231,11 @@ void ListPattern::OnModifyDone()
     if (!multiSelectable_ && isMouseEventInit_) {
         UninitMouseEvent();
     }
-    if (GetEnableEditMode() && !swipeSelectPanEvent_) {
+    bool needSwipeSelect = GetEnableEditMode() || ShouldEnableTwoFingerSelect();
+    if (needSwipeSelect && !swipeSelectPanEvent_) {
         InitSwipeSelectEvent();
     }
-    if (!GetEnableEditMode() && swipeSelectPanEvent_) {
+    if (!needSwipeSelect && swipeSelectPanEvent_) {
         UninitSwipeSelectEvent();
     }
     if (IsDefaultMultiSelectStyleEnabled()) {
