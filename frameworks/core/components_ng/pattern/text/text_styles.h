@@ -482,6 +482,7 @@ std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrateg
 std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value);
 std::unique_ptr<JsonValue> GetSymbolShadowInJson(const std::optional<SymbolShadow>& value);
 std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<SymbolGradient>>& value);
+std::string GetFontVariationsInJson(const FONT_VARIATIONS_LIST& fontVariations);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

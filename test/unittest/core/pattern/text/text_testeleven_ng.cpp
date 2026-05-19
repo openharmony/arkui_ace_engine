@@ -974,7 +974,7 @@ HWTEST_F(TextTestNg, DumpSimplifyInfo001, TestSize.Level1)
     std::string result = json->ToString();
     EXPECT_EQ(result, "{\"content\":\"Hello "
                       "World\",\"fontColor\":\"#FF000000\",\"fontFamily\":\"Na\",\"fontSize\":\"16.00fp\","
-                      "\"fontWeight\":\"FontWeight.Normal\",\"ForegroundColor\":\"Na\"}");
+                      "\"fontWeight\":\"FontWeight.Normal\",\"fontVariations\":\"Na\",\"ForegroundColor\":\"Na\"}");
 }
 
 /**

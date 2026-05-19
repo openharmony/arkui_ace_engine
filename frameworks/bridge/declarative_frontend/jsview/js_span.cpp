@@ -80,34 +80,6 @@ constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyl
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 const int32_t NUM_1 = 1;
 const int32_t NUM_2 = 2;
-
-bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
-{
-    if (!jsValue->IsArray()) {
-        return false;
-    }
-    auto jsArray = JSRef<JSArray>::Cast(jsValue);
-    auto length = jsArray->Length();
-    for (uint32_t i = 0; i < length; ++i) {
-        auto item = jsArray->GetValueAt(i);
-        if (!item->IsObject()) {
-            continue;
-        }
-        auto itemObject = JSRef<JSObject>::Cast(item);
-        auto axis = itemObject->GetProperty("axis");
-        auto value = itemObject->GetProperty("value");
-        auto isNormalized = itemObject->GetProperty("isNormalized");
-        if (!axis->IsString() || !value->IsNumber()) {
-            continue;
-        }
-        std::optional<bool> normalized;
-        if (isNormalized->IsBoolean()) {
-            normalized = isNormalized->ToBoolean();
-        }
-        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
-    }
-    return !fontVariations.empty();
-}
 } // namespace
 
 void JSSpan::RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font)
@@ -613,6 +585,7 @@ void JSSpan::SetFontVariations(const JSCallbackInfo& info)
     FONT_VARIATIONS_LIST fontVariations;
     if (!ParseJsFontVariations(info[0], fontVariations)) {
         SpanModel::GetInstance()->ResetFontVariations();
+        return;
     }
     SpanModel::GetInstance()->SetFontVariations(fontVariations);
 }

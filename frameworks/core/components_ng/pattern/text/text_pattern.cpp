@@ -5341,6 +5341,9 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
         json->Put("content", "");
         return;
     }
+    auto textFontVariations = textLayoutProp->HasFontVariations()
+                                  ? GetFontVariationsInJson(textLayoutProp->GetFontVariations().value())
+                                  : "Na";
     if (spans_.empty()) {
         auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u""));
         json->Put("content", textValue.c_str());
@@ -5350,6 +5353,7 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
             textLayoutProp->HasFontFamily() ? GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str() : "Na");
         json->Put("fontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
+        json->Put("fontVariations", textFontVariations.c_str());
     } else {
         json->Put("content", StringUtils::Str16ToStr8(GetContentWithPlaceholderSpaceFillter()).c_str());
         for (const auto& item : spans_) {
@@ -5370,6 +5374,9 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
                 json->Put("fontWeight", fontStyle && fontStyle->HasFontWeight()
                                             ? GetFontWeightInJson(fontStyle->GetFontWeightValue()).c_str()
                                             : GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
+                json->Put("fontVariations", fontStyle && fontStyle->HasFontVariations()
+                                            ? GetFontVariationsInJson(fontStyle->GetFontVariationsValue()).c_str()
+                                            : textFontVariations.c_str());
                 json->Put("strokeJoinStyle", fontStyle && fontStyle->HasStrokeJoinStyle() ?
                     StringUtils::ToString(fontStyle->GetStrokeJoinStyleValue()).c_str(): "Na");
                 break;
@@ -5631,6 +5638,12 @@ void TextPattern::DumpTextStyleInfo3()
                 .append(" prop: ")
                 .append(textLayoutProp->HasFontFamily() ? GetFontFamilyInJson(textLayoutProp->GetFontFamily().value())
                                                         : "Na"));
+        dumpLog.AddDesc(std::string("fontVariations: ")
+                .append(GetFontVariationsInJson(textStyle_->GetFontVariations()))
+                .append(" prop: ")
+                .append(textLayoutProp->HasFontVariations()
+                        ? GetFontVariationsInJson(textLayoutProp->GetFontVariations().value())
+                        : "Na"));
         dumpLog.AddDesc(
             std::string("LetterSpacing: ")
                 .append(textStyle_->GetLetterSpacing().ToString())
@@ -7762,6 +7775,7 @@ void TextPattern::SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("TextCase", StringUtils::ToString(textStyle_->GetTextCase()).c_str());
         json->Put("EllipsisMode", StringUtils::ToString(textStyle_->GetEllipsisMode()).c_str());
         json->Put("LineBreakStrategy", GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy()).c_str());
+        json->Put("FontVariations", GetFontVariationsInJson(textStyle_->GetFontVariations()).c_str());
     }
 }
 
