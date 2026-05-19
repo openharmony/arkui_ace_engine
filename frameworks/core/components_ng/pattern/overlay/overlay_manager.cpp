@@ -5464,8 +5464,15 @@ void OverlayManager::SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode,
             sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
         }
     } else if (sheetStyle.backgroundColor.has_value() || !isPartialUpdate) {
-        sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value_or(
-            sheetTheme->GetSheetBackgoundColor()));
+        // - has systemMaterial and not SMOOTH -> do not set backgroundColor
+        // - has systemMaterial and SMOOTH -> use default backgroundColor
+        // - no systemMaterial -> follow the normal backgroundColor setting logic
+        if (!sheetStyle.systemMaterial) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(
+                sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
+        } else if (sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+        }
     }
 }
 
