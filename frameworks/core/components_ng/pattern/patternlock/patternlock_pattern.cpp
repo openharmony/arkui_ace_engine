@@ -550,6 +550,7 @@ void PatternLockPattern::AddPointEnd()
 
 void PatternLockPattern::OnTouchUp()
 {
+    fingerId_ = -1;
     CHECK_NULL_VOID(patternLockModifier_);
     patternLockModifier_->SetIsTouchDown(false);
     size_t count = patternLockModifier_->GetChoosePointCount();
@@ -558,7 +559,6 @@ void PatternLockPattern::OnTouchUp()
     }
     StartModifierCanceledAnimate();
     AddPointEnd();
-    fingerId_ = -1;
 }
 
 void PatternLockPattern::InitFocusEvent()
