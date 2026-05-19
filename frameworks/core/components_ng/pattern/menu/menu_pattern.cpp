@@ -1890,11 +1890,7 @@ void MenuPattern::ShowMenuAppearMaterialAnimation()
     CHECK_NULL_VOID(renderContext);
     auto menuPosition = renderContext->GetPaintRectWithoutTransform().GetOffset();
     if (IsUseDistortionAnimation()) {
-        if (isSelectMenu_) {
-            PlaySelectDistortAnimation(menuPosition);
-        } else {
-            PlayDistortAnimation(menuPosition);
-        }
+        PlayDistortAnimation(menuPosition);
     } else {
         renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
         renderContext->UpdateOpacity(1.0f);
