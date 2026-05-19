@@ -12,15 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const WritableSystemProperties = {
-    Layout_Direction: 'system.arkui.layout.direction', 
-    ENV_KEY_FONT_SCALE: 'system.arkui.fontscale'
-};
 
-const WritableEnvProperties = {
-[WritableSystemProperties.Layout_Direction]: false,
-[WritableSystemProperties.ENV_KEY_FONT_SCALE]: 1.0,
-};
+/**
+ * @typedef {Object} SystemEnvKey
+ * @property {string} keyId
+ */
+
+/**
+ * @typedef {Object} WritableSystemEnvKey
+ * @extends SystemEnvKey
+ */
+
+/**
+ * @typedef {Object} ReadonlySystemEnvKey
+ * @extends SystemEnvKey
+ */
+
+/**
+ * @typedef {Object} WritableEnvKey
+ * @property {WritableSystemEnvKey} DIRECTION
+ * @property {WritableSystemEnvKey} FONT_SCALE
+ */
 
 class WithEnvAttribute {
     env(key, value) {
@@ -30,11 +42,6 @@ class WithEnvAttribute {
 
     customEnv(key, value) {
         globalThis.WithEnv.setCustomEnvProperty(key, value);
-        return this;
-    }
-
-    fontScaleEnv(value) {
-        globalThis.WithEnv.setEnvProperty(WritableSystemProperties.ENV_KEY_FONT_SCALE, value);
         return this;
     }
 }
@@ -47,4 +54,4 @@ if (globalThis.WithEnv !== undefined) {
     };
 }
 
-export default { WithEnv, WithEnvAttribute, WritableSystemProperties, WritableEnvProperties}; 
+export default { WithEnv, WithEnvAttribute, SystemEnvKey, WritableSystemEnvKey, ReadonlySystemEnvKey, WritableEnvKey };

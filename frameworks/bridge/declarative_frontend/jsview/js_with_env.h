@@ -28,7 +28,6 @@ public:
     static void Pop();
     static void SetEnvProperty(const JSCallbackInfo& info);
     static void SetCustomEnvProperty(const JSCallbackInfo& info);
-    static void SetFontScaleEnvProperty(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
