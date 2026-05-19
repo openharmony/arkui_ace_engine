@@ -15,10 +15,15 @@
 
 #include "gtest/gtest.h"
 
+#include "core/components_ng/event/event_hub.h"
+
 #define private public
 #define protected public
-#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #undef private
 #undef protected
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -26,6 +31,7 @@
 
 #include "core/common/event_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/property/smart_gesture_property.h"
 #include "core/pipeline/base/element_register.h"
 
 using namespace testing;
@@ -70,6 +76,14 @@ private:
 RefPtr<FrameNode> CreateNode(const RefPtr<Pattern>& pattern)
 {
     return FrameNode::CreateFrameNode(TEST_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pattern);
+}
+
+RefPtr<FrameNode> CreatePrimaryActionNode(bool enabled = true)
+{
+    auto node = CreateNode(AceType::MakeRefPtr<Pattern>());
+    SmartGestureShortcutConfig config { SmartGestureShortcutAction::PRIMARY, enabled, false };
+    node->GetOrCreateSmartGestureProperty()->SetSmartGestureShortcut(config);
+    return node;
 }
 
 ScrollingConfig CreateDistanceScrollingConfig()
@@ -216,13 +230,15 @@ HWTEST_F(SmartGestureManagerTestNg, SmartGestureManagerResolveProposal002, TestS
 
 /**
  * @tc.name: SmartGestureManagerBuildSlideForwardProposal001
- * @tc.desc: BuildSlideForwardProposal wraps to first visible node when selected node is the last visible node.
+ * @tc.desc: BuildSlideForwardProposal wraps to first clickable node when selected node is the last visible node.
  * @tc.type: FUNC
  */
 HWTEST_F(SmartGestureManagerTestNg, SmartGestureManagerBuildSlideForwardProposal001, TestSize.Level1)
 {
-    const auto firstNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto secondNode = CreateNode(AceType::MakeRefPtr<Pattern>());
+    const auto firstNode = CreatePrimaryActionNode();
+    firstNode->GetOrCreateGestureEventHub()->SetCommonClickEvent([](GestureEvent&) {});
+    const auto secondNode = CreatePrimaryActionNode();
+    secondNode->GetOrCreateGestureEventHub()->SetCommonClickEvent([](GestureEvent&) {});
     const std::vector<RefPtr<FrameNode>> visibleNodes { firstNode, secondNode };
 
     auto proposal = manager_->BuildSlideForwardProposal(visibleNodes, secondNode, {});
@@ -283,5 +299,445 @@ HWTEST_F(SmartGestureManagerTestNg, SmartGestureManagerExecuteProposal002, TestS
     auto result = manager_->ExecuteProposal(proposal, event);
 
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_EmptyRegistry
+ * @tc.desc: BuildVisiblePrimaryActionNodes returns empty vector when primaryActionRegistry_ is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_EmptyRegistry, TestSize.Level1)
+{
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_NullContext
+ * @tc.desc: BuildVisiblePrimaryActionNodes returns empty vector when pipeline context is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_NullContext, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->AddPrimaryActionNode(node);
+    manager_->context_ = nullptr;
+
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_ExpiredWeakPtr
+ * @tc.desc: BuildVisiblePrimaryActionNodes cleans up expired weak pointers and returns empty vector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_ExpiredWeakPtr, TestSize.Level1)
+{
+    {
+        auto expiredNode = CreatePrimaryActionNode();
+        manager_->AddPrimaryActionNode(expiredNode);
+    }
+
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+    EXPECT_TRUE(manager_->primaryActionRegistry_.empty());
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_InactiveNode_NoSmartGestureProperty
+ * @tc.desc: BuildVisiblePrimaryActionNodes skips nodes without SmartGestureProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_InactiveNodeNoProperty, TestSize.Level1)
+{
+    auto node = CreateNode(AceType::MakeRefPtr<Pattern>());
+    node->onMainTree_ = true;
+    manager_->AddPrimaryActionNode(node);
+
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_InactiveNode_NotEnabled
+ * @tc.desc: BuildVisiblePrimaryActionNodes skips nodes whose SmartGestureProperty has primary action disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_InactiveNodeNotEnabled, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode(false);
+    node->onMainTree_ = true;
+    manager_->AddPrimaryActionNode(node);
+
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_InactiveNode_ContextMismatch
+ * @tc.desc: BuildVisiblePrimaryActionNodes skips nodes whose pipeline context does not match.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_InactiveNodeContextMismatch, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->AddPrimaryActionNode(node);
+    node->context_ = nullptr;
+
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_InactiveNode_EventHubDisabled
+ * @tc.desc: BuildVisiblePrimaryActionNodes skips nodes whose event hub is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_InactiveNodeEventHubDisabled, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    node->onMainTree_ = true;
+    node->GetEventHub<NG::EventHub>()->SetEnabled(false);
+    manager_->AddPrimaryActionNode(node);
+
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.desc: BuildVisiblePrimaryActionNodes skips nodes that are not on the main tree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_InactiveNodeNotOnMainTree, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->AddPrimaryActionNode(node);
+
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_InvisibleNode_NoGeometry
+ * @tc.desc: BuildVisiblePrimaryActionNodes skips nodes whose visible rect is empty because geometry is not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_InvisibleNodeNoGeometry, TestSize.Level1)
+{
+    auto parent = CreateNode(AceType::MakeRefPtr<Pattern>());
+    auto node = CreatePrimaryActionNode();
+    parent->AddChild(node);
+    parent->onMainTree_ = true;
+    node->onMainTree_ = true;
+    MockPipelineContext::GetCurrent()->onShow_ = true;
+    manager_->AddPrimaryActionNode(node);
+
+    auto result = manager_->BuildVisiblePrimaryActionNodes();
+
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildVisiblePrimaryActionNodes_OrderStored
+ * @tc.desc: BuildVisiblePrimaryActionNodes stores order correctly in the merged registry entry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_OrderStored, TestSize.Level1)
+{
+    auto firstNode = CreatePrimaryActionNode();
+    auto secondNode = CreatePrimaryActionNode();
+    manager_->AddPrimaryActionNode(firstNode);
+    manager_->AddPrimaryActionNode(secondNode);
+
+    EXPECT_EQ(manager_->primaryActionRegistry_[firstNode->GetId()].order, 0u);
+    EXPECT_EQ(manager_->primaryActionRegistry_[secondNode->GetId()].order, 1u);
+}
+
+/**
+ * @tc.name: HandleTrigger_ProductGestureDisabled
+ * @tc.desc: HandleTrigger returns false when product gesture is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_ProductGestureDisabled, TestSize.Level1)
+{
+    manager_->productGestureEnabled_ = false;
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->HandleTrigger(SmartGestureTrigger::TAP, event);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleTrigger_SmartTapSlideDisabledForTap
+ * @tc.desc: HandleTrigger returns false when smartTapAndSlideGesturesEnabled_ is false for TAP trigger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_SmartTapSlideDisabledForTap, TestSize.Level1)
+{
+    manager_->SetSmartTapAndSlideGesturesEnabled(false);
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->HandleTrigger(SmartGestureTrigger::TAP, event);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleTrigger_SmartTapSlideDisabledForSlide
+ * @tc.desc: HandleTrigger returns false when smartTapAndSlideGesturesEnabled_ is false for SLIDE_FORWARD.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_SmartTapSlideDisabledForSlide, TestSize.Level1)
+{
+    manager_->SetSmartTapAndSlideGesturesEnabled(false);
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->HandleTrigger(SmartGestureTrigger::SLIDE_FORWARD, event);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleTrigger_NoArgOverload
+ * @tc.desc: HandleTrigger no-argument overload delegates to the key event overload.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, HandleTrigger_NoArgOverload, TestSize.Level1)
+{
+    auto result = manager_->HandleTrigger(SmartGestureTrigger::TAP);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ResolveProposal_MonitorOverride
+ * @tc.desc: ResolveProposal returns the monitor's selected proposal when it overrides with a valid proposal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ResolveProposal_MonitorOverride, TestSize.Level1)
+{
+    SmartGestureProposal overrideProposal(
+        SmartGestureProposalType::BACK_PRESS, SmartGestureOperateIntention::BACK_PRESS);
+    manager_->SetMonitor([&overrideProposal](const SmartGestureProposal& proposal) {
+        SmartGestureHandlingResolution resolution;
+        resolution.isConsumed = true;
+        resolution.hasSelectedProposal = true;
+        resolution.selectedProposal = overrideProposal;
+        return resolution;
+    });
+    SmartGestureProposal defaultProposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::TAP);
+
+    auto proposal = manager_->ResolveProposal(defaultProposal);
+
+    ASSERT_TRUE(proposal.has_value());
+    EXPECT_EQ(proposal->type, SmartGestureProposalType::BACK_PRESS);
+    EXPECT_EQ(proposal->operateIntention, SmartGestureOperateIntention::BACK_PRESS);
+}
+
+/**
+ * @tc.name: ResolveProposal_InvalidDefaultProposal
+ * @tc.desc: ResolveProposal returns nullopt when the default proposal fails validation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ResolveProposal_InvalidDefaultProposal, TestSize.Level1)
+{
+    SmartGestureProposal defaultProposal(SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP, nullptr);
+
+    auto proposal = manager_->ResolveProposal(defaultProposal);
+
+    EXPECT_FALSE(proposal.has_value());
+}
+
+/**
+ * @tc.name: ResolveProposal_MonitorOverrideInvalid
+ * @tc.desc: ResolveProposal returns nullopt when the monitor's override proposal fails validation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ResolveProposal_MonitorOverrideInvalid, TestSize.Level1)
+{
+    manager_->SetMonitor([](const SmartGestureProposal& proposal) {
+        SmartGestureHandlingResolution resolution;
+        resolution.isConsumed = true;
+        resolution.hasSelectedProposal = true;
+        resolution.selectedProposal =
+            SmartGestureProposal(SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP, nullptr);
+        return resolution;
+    });
+    SmartGestureProposal defaultProposal(
+        SmartGestureProposalType::BACK_PRESS, SmartGestureOperateIntention::BACK_PRESS);
+
+    auto proposal = manager_->ResolveProposal(defaultProposal);
+
+    EXPECT_FALSE(proposal.has_value());
+}
+
+/**
+ * @tc.name: ExecuteProposal_NoneAction
+ * @tc.desc: ExecuteProposal returns false for NONE_ACTION type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ExecuteProposal_NoneAction, TestSize.Level1)
+{
+    SmartGestureProposal proposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::TAP);
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->ExecuteProposal(proposal, event);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ExecuteClickProposal_NullSelectedNode
+ * @tc.desc: ExecuteClickProposal establishes selection when no node is currently selected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ExecuteClickProposal_NullSelectedNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    node->onMainTree_ = true;
+    node->GetOrCreateGestureEventHub()->SetCommonClickEvent([](GestureEvent&) {});
+    manager_->AddPrimaryActionNode(node);
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->ExecuteClickProposal(node, event);
+
+    EXPECT_TRUE(result);
+    EXPECT_NE(manager_->selectedNode_.Upgrade(), nullptr);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade()->GetId(), node->GetId());
+}
+
+/**
+ * @tc.name: ExecuteClickProposal_DifferentSelectedNode
+ * @tc.desc: ExecuteClickProposal returns false when a different node is already selected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ExecuteClickProposal_DifferentSelectedNode, TestSize.Level1)
+{
+    auto existingSelected = CreatePrimaryActionNode();
+    existingSelected->onMainTree_ = true;
+    existingSelected->GetOrCreateGestureEventHub()->SetCommonClickEvent([](GestureEvent&) {});
+    manager_->AddPrimaryActionNode(existingSelected);
+    manager_->selectedNode_ = existingSelected;
+
+    auto targetNode = CreatePrimaryActionNode();
+    targetNode->onMainTree_ = true;
+    targetNode->GetOrCreateGestureEventHub()->SetCommonClickEvent([](GestureEvent&) {});
+    manager_->AddPrimaryActionNode(targetNode);
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    auto result = manager_->ExecuteClickProposal(targetNode, event);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SyncPrimaryActionNode_AddWhenEnabled
+ * @tc.desc: SyncPrimaryActionNode adds node to registry when SmartGestureProperty has primary action enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, SyncPrimaryActionNode_AddWhenEnabled, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->SyncPrimaryActionNode(node);
+    ASSERT_EQ(manager_->primaryActionRegistry_.size(), 1u);
+    EXPECT_NE(manager_->primaryActionRegistry_.find(node->GetId()), manager_->primaryActionRegistry_.end());
+}
+
+/**
+ * @tc.name: SyncPrimaryActionNode_RemoveWhenDisabled
+ * @tc.desc: SyncPrimaryActionNode removes node from registry when SmartGestureProperty does not enable primary action.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, SyncPrimaryActionNode_RemoveWhenDisabled, TestSize.Level1)
+{
+    auto node = CreateNode(AceType::MakeRefPtr<Pattern>());
+    manager_->AddPrimaryActionNode(node);
+    manager_->SyncPrimaryActionNode(node);
+    EXPECT_TRUE(manager_->primaryActionRegistry_.empty());
+}
+
+/**
+ * @tc.name: RemovePrimaryActionNode_ClearsSelected
+ * @tc.desc: RemovePrimaryActionNode clears the selected node when it matches the removed node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RemovePrimaryActionNode_ClearsSelected, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->AddPrimaryActionNode(node);
+    manager_->selectedNode_ = node;
+    manager_->RemovePrimaryActionNode(node->GetId());
+    EXPECT_TRUE(manager_->primaryActionRegistry_.empty());
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RemovePrimaryActionNode_SelectedNotCleared
+ * @tc.desc: RemovePrimaryActionNode does not clear selected node when it does not match the removed node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RemovePrimaryActionNode_SelectedNotCleared, TestSize.Level1)
+{
+    auto selectedNode = CreatePrimaryActionNode();
+    manager_->AddPrimaryActionNode(selectedNode);
+    manager_->selectedNode_ = selectedNode;
+
+    auto otherNode = CreatePrimaryActionNode();
+    manager_->AddPrimaryActionNode(otherNode);
+    manager_->RemovePrimaryActionNode(otherNode->GetId());
+
+    EXPECT_NE(manager_->selectedNode_.Upgrade(), nullptr);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade()->GetId(), selectedNode->GetId());
+}
+
+/**
+ * @tc.name: RefreshSelectedNodeState_ClearsInvalid
+ * @tc.desc: RefreshSelectedNodeState clears selected node when it is no longer valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RefreshSelectedNodeState_ClearsInvalid, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    node->onMainTree_ = true;
+    manager_->AddPrimaryActionNode(node);
+    manager_->selectedNode_ = node;
+    node->onMainTree_ = false;
+    manager_->RefreshSelectedNodeState();
+
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: ValidateProposal_ClickWithNullNode
+ * @tc.desc: ValidateProposal returns false for CLICK type when the target node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ClickWithNullNode, TestSize.Level1)
+{
+    SmartGestureProposal proposal(SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP);
+    auto result = manager_->ValidateProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ClearSelected
+ * @tc.desc: ClearSelected resets the selected node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ClearSelected, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->AddPrimaryActionNode(node);
+    manager_->selectedNode_ = node;
+    manager_->ClearSelected();
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
 }
 } // namespace OHOS::Ace::NG

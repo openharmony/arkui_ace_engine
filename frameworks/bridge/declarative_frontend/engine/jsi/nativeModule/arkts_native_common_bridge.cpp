@@ -5098,15 +5098,14 @@ ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInf
     auto actionVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "action"));
     auto enabledVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enabled"));
     auto selectableVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selectable"));
-    if (!actionVal->IsNumber() || !enabledVal->IsBoolean()) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return panda::JSValueRef::Undefined(vm);
+    config.action = SmartGestureShortcutAction::PRIMARY;
+    if (actionVal->IsNumber()) {
+        config.action = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
     }
-    if (actionVal->Int32Value(vm) != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return panda::JSValueRef::Undefined(vm);
+    config.enabled = false;
+    if (enabledVal->IsBoolean()) {
+        config.enabled = enabledVal->BooleaValue(vm);
     }
-    config.enabled = enabledVal->BooleaValue(vm);
     config.selectable = config.enabled;
     if (!selectableVal->IsUndefined() && selectableVal->IsBoolean()) {
         config.selectable = selectableVal->BooleaValue(vm);
