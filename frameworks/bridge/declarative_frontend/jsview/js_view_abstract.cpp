@@ -11490,7 +11490,7 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         //  [0, 1] -> [0, 100.0];
         gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         gradient.AddColor(gradientColor);
-        if (SystemProperties::ConfigChangePerform() || loadRes) && resObj) {
+        if ((SystemProperties::ConfigChangePerform() || loadRes) && resObj) {
             int32_t indx = static_cast<int32_t>(i) - nullNum;
             if (mapIdx == NUM_1) {
                 NewParseSweepGradientColor(gradient, resObj, gradientColor, indx);
