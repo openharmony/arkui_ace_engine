@@ -1615,7 +1615,6 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent003, TestSize.Level1)
 
     const float flexWidth = 400.0f;
     const float flexHeight = 300.0f;
-    const float textHeight = 100.0f;
 
     RefPtr<FrameNode> text;
     RefPtr<FrameNode> reader;
