@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_MODEL_STATIC_H
 
 #include "base/utils/macros.h"
-#include "core/components_ng/pattern/grid/grid_properties.h"
 #include "core/components_ng/pattern/grid/grid_model.h"
  
 namespace OHOS::Ace::NG {

@@ -32,12 +32,14 @@
 #include "core/animation/scroll_motion.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/taihang_optimizer.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container_scope.h"
+#include "core/common/premake_scope.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
@@ -109,6 +111,8 @@ constexpr Dimension DEFAULT_INDICATOR_HEAD_DISTANCE = 14.0_vp;
 constexpr char SWIPER_SCROLL_DIRECTION_FORWARD[] = "forward";
 constexpr char SWIPER_SCROLL_DIRECTION_BACKWARD[] = "backward";
 constexpr char SWIPER_SCROLL_DIRECTION_BIDIRECTIONAL[] = "bidirectional";
+constexpr int32_t COMPONENT_SWIPER = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
 
 MoveStep GetKeyMoveStep(const KeyEvent& event, Axis axis, bool isRtl)
 {
@@ -322,6 +326,7 @@ void SwiperPattern::OnIndexChange(bool isInLayout)
     auto targetIndex = GetLoopIndex(CurrentIndex());
     if (oldIndex != targetIndex) {
         FireChangeEvent(oldIndex, targetIndex, isInLayout);
+        premakeItems_.erase(targetIndex);
         FireSelectedEvent(oldIndex, targetIndex);
         FireUnselectedEvent(oldIndex, targetIndex);
         // lazyBuild feature.
@@ -336,6 +341,7 @@ void SwiperPattern::OnIndexChange(bool isInLayout)
     if (fastAnimationChange_ && !fastAnimationRunning_) {
         fastAnimationChange_ = false;
         FireChangeEvent(oldIndex, targetIndex, isInLayout);
+        premakeItems_.erase(targetIndex);
     }
 }
 
@@ -1730,6 +1736,7 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
     swiperEventHub->FireIndicatorChangeEvent(currentIndex);
     swiperEventHub->FireIndicatorIndexChangeEvent(currentIndex);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
+    ReportSwiperChangeContent(currentIndex);
     if (swiperController_) {
         swiperController_->FireOnChangeEvent(currentIndex);
     }
@@ -1738,6 +1745,26 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    }
+}
+
+void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto curPageName = pipeline->GetCurrentPageName();
+    auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
+    if (pipeline->GetTaihangOptimizer()->CheckSwiperPathValid(bundleName, curPageName) && !isInAutoPlay_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        RefPtr<NG::UINode> curUINode = host;
+        std::string path = curUINode->GetPath();
+        std::unordered_map<std::string, std::string> payload;
+        payload["path"] = path;
+        payload["currentIndex"] = std::to_string(currentIndex);
+        payload["componentType"] = std::to_string(COMPONENT_SWIPER);
+        ResSchedReport::GetInstance().HandleSwiperChange(payload);
     }
 }
 
@@ -1810,11 +1837,33 @@ void SwiperPattern::FireUnselectedEvent(int32_t currentIndex, int32_t targetInde
     }
 }
 
+void SwiperPattern::NotifyScrollStateEvent(ScrollState scrollState)
+{
+    if (scrollState_ == scrollState) {
+        return;
+    }
+    if (scrollState_ != ScrollState::IDLE && scrollState != ScrollState::IDLE) {
+        return;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    if (scrollState_ == ScrollState::IDLE) {
+        mgr->OnSwiperScrollStart(host);
+    }
+    if (scrollState == ScrollState::IDLE) {
+        mgr->OnSwiperScrollEnd(host);
+    }
+}
+
 void SwiperPattern::FireScrollStateEvent(ScrollState scrollState)
 {
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     if (scrollState_ != scrollState) {
+        NotifyScrollStateEvent(scrollState);
         scrollState_ = scrollState;
         swiperEventHub->FireScrollStateChangedEvent(scrollState);
     }
@@ -2528,6 +2577,47 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
     taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI, "ArkUIFirePreloadFinish");
 }
 
+void SwiperPattern::PreMakeItems(const std::set<int32_t>& indexSet)
+{
+    ACE_SCOPED_TRACE("Swiper PreMakeItems");
+    TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperPattern::PreMakeItems");
+    std::set<int32_t> validIndexSet;
+    auto childrenSize = RealTotalCount();
+    for (const auto& index : indexSet) {
+        if (index < 0 || index >= childrenSize) {
+            continue;
+        }
+        validIndexSet.emplace(index);
+    }
+
+    if (validIndexSet.empty()) {
+        return;
+    }
+
+    auto preMakeTask = [weak = WeakClaim(this), id = GetHostInstanceId(), validIndexSet]() {
+        ContainerScope scope(id);
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetParent();
+        PreMakeScope preMakeScope;
+        if (AceType::InstanceOf<TabsNode>(parent)) {
+            swiperPattern->DoTabsPreloadItems(validIndexSet);
+        } else {
+            swiperPattern->DoSwiperPreMakeItems(validIndexSet);
+        }
+
+        swiperPattern->FirePreloadFinishEvent(ERROR_CODE_NO_ERROR);
+    };
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(preMakeTask, TaskExecutor::TaskType::UI, "ArkUIFirePreMakeFinish");
+}
+
 void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string message)
 {
     if (swiperController_ && swiperController_->GetPreloadFinishCallback()) {
@@ -2603,6 +2693,29 @@ void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        for (auto index : indexSet) {
+            if (lazyForEachNode) {
+                lazyForEachNode->GetFrameChildByIndex(index, true);
+            }
+        }
+    }
+    const auto& children = host->GetChildren();
+    for (const auto& child : children) {
+        BuildForEachChild(indexSet, child);
+    }
+}
+
+void SwiperPattern::DoSwiperPreMakeItems(const std::set<int32_t>& indexSet)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+    premakeItems_.insert(indexSet.begin(), indexSet.end());
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
@@ -6204,6 +6317,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         FireSelectedEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         FireUnselectedEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         FireChangeEvent(tempOldIndex, GetLoopIndex(currentIndex_));
+        premakeItems_.erase(GetLoopIndex(currentIndex_));
         // lazyBuild feature.
         SetLazyLoadFeature(true);
     }
@@ -6566,7 +6680,7 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
         fromIndex = currentProxyInAnimation_->GetToIndex();
 
         FireChangeEvent(CurrentIndex(), fromIndex);
-
+        premakeItems_.erase(fromIndex);
         UpdateCurrentIndex(fromIndex);
         oldIndex_ = fromIndex;
 
@@ -8256,5 +8370,31 @@ void SwiperPattern::CheckOffsetAfterLyout(float offset)
         offsetXY_ += Offset(offset, 0);
     }
     velocityTracker_.UpdateTrackerPoint(offsetXY_.GetX(), offsetXY_.GetY(), std::chrono::high_resolution_clock::now());
+}
+
+void SwiperPattern::OnNotifyMemoryLevel(int32_t level)
+{
+    if (level != MEMORY_LEVEL_CRITICAL) {
+        return;
+    }
+    if (premakeItems_.empty()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    for (const auto& child : children) {
+        auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
+        if (!forEachNode) {
+            continue;
+        }
+        for (auto index : premakeItems_) {
+            auto childNode = forEachNode->GetChildAtIndex(index);
+            if (!childNode) {
+                continue;
+            }
+            childNode->DetachFromMainTreeByPreMakeFlag();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

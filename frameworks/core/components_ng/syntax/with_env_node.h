@@ -48,10 +48,14 @@ public:
         return true;
     }
 
+    void RemoveEnvProperty(const std::string& key);
     void SetEnvProperty(const std::string& key, const std::string& value);
     void SetEnvProperty(const std::string& key, double value);
     void SetEnvProperty(const std::string& key, bool value);
     void SetCustomEnvProperty(const std::string& key, std::any value);
+    bool GetEnvProperty(const std::string& key, std::string& value) const;
+    bool GetEnvProperty(const std::string& key, double& value) const;
+    bool GetEnvProperty(const std::string& key, bool& value) const;
 
     const std::any* GetCustomEnvPropertyAny(const std::string& key) const;
     bool HasEnvProperty(const std::string& key) const;

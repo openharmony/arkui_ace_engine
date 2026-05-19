@@ -22,6 +22,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_progressmask_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/matrix4/cj_matrix4_ffi.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -1648,6 +1649,10 @@ void FfiOHOSAceFrameworkViewAbstractSetMaskByProgressMask(int64_t progressId)
     if (nativeMask == nullptr) {
         LOGI("set mask error, Cannot get NativeProgressMask by id: %{public}" PRId64, progressId);
         return;
+    }
+    auto* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (frameNode != nullptr) {
+        nativeMask->SetHostFrameNode(AceType::WeakClaim(frameNode));
     }
     ViewAbstractModel::GetInstance()->SetProgressMask(nativeMask->GetProgressMask());
 }

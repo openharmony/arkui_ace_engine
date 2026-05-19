@@ -130,6 +130,12 @@ public:
     void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
+
+    bool NeedReadFontScaleFromEnv() override
+    {
+        return true;
+    }
+
     void DumpParagraphsInfo();
     TextSelector GetTextSelector() const;
     const std::u16string& GetTextForDisplay() const;
@@ -276,6 +282,13 @@ public:
         const SelectMenuParam& menuParam);
     void BindPreviewMenu(TextSpanType spanType, std::function<void()>& menuBuilder, const SelectMenuParam& menuParam);
     void UnBindPreviewMenu();
+    bool GetIsTouchPressed() const
+    {
+        return isTouchPressed_;
+    }
+    void IfStartVibratorByLongPress();
+    void UnBindPreviewMenuByCopyOption();
+    void SetEnableEventResponse();
     void HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode);
     void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
     void FillPreviewMenuInJsonOneStep(const std::unique_ptr<JsonValue>& jsonValue) const;
@@ -723,6 +736,8 @@ private:
     RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
     std::u16string GetContentWithPlaceholderSpaceFillter() const;
     std::u16string TextHighlightSelectedContent(int32_t start, int32_t end) const;
+    void UpdateLpxUnitFlag();
+
     RefPtr<ParagraphManager> pManager_;
     RefPtr<TextEffect> textEffect_;
     RefPtr<PreviewMenuController> previewController_;
@@ -761,6 +776,7 @@ private:
     int32_t highlightAppearAnimationId_ = 0;
     int32_t highlightDisappearAnimationId_ = 0;
     bool isMeasureBoundary_ = false;
+    bool isTouchPressed_ = false;
     bool isMousePressed_ = false;
     bool leftMousePressed_ = false;
     bool isCustomFont_ = false;
@@ -784,6 +800,7 @@ private:
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
     bool isMeasured_ = false;
+    bool hasLpxUnitStyle_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
     friend class OneStepDragController;
     std::unique_ptr<OneStepDragController> oneStepDragController_;

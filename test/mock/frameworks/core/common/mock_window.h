@@ -45,6 +45,7 @@ public:
     MOCK_METHOD1(SetRootRenderNode, void(const RefPtr<RenderNode>& root));
     MOCK_METHOD1(FlushAnimation, bool(uint64_t timeStamp));
     MOCK_METHOD2(RecordFrameTime, void(uint64_t timeStamp, const std::string& name));
+    MOCK_METHOD2(ForceFlushVsync, void(uint64_t nanoTimestamp, uint64_t frameCount));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_WINDOW_H

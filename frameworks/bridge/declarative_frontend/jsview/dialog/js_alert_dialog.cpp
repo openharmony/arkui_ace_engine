@@ -111,14 +111,18 @@ void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& pr
     }
 
     Color textColor;
-    if (JSAlertDialog::ParseJsColor(objInner->GetProperty("fontColor"), textColor)) {
+    RefPtr<ResourceObject> textColorResObj;
+    if (JSAlertDialog::ParseJsColor(objInner->GetProperty("fontColor"), textColor, textColorResObj)) {
         buttonInfo.textColor = textColor.ColorToString();
+        buttonInfo.textColorResObj = textColorResObj;
     }
 
     Color backgroundColor;
-    if (JSAlertDialog::ParseJsColor(objInner->GetProperty("backgroundColor"), backgroundColor)) {
+    RefPtr<ResourceObject> backgroundColorResObj;
+    if (JSAlertDialog::ParseJsColor(objInner->GetProperty("backgroundColor"), backgroundColor, backgroundColorResObj)) {
         buttonInfo.isBgColorSetted = true;
         buttonInfo.bgColor = backgroundColor;
+        buttonInfo.bgColorResObj = backgroundColorResObj;
     }
 
     auto actionValue = objInner->GetProperty("action");
@@ -572,6 +576,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
                 properties.hasInvertColor.hasBackgroundColor = true;
             }
             properties.backgroundColor = backgroundColor;
+            properties.backgroundColorResObj = backgroundColorResObj;
         }
         auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");
         if (backgroundBlurStyle->IsNumber()) {

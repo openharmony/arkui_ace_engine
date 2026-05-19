@@ -18,7 +18,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/syntax/with_env_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -32,18 +32,35 @@ void JSWithEnv::Create(const JSCallbackInfo& info)
 
 void JSWithEnv::Pop()
 {
-    ViewStackProcessor::GetInstance()->PopContainer();
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSWithEnv][pop]", &JSWithEnv::Pop);
+    }
+
+    ViewStackModel::GetInstance()->PopContainer();
 }
 
 void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
 {
-    if (info.Length() < NUM_SECOND || !info[0]->IsString()) {
+    if (info.Length() < NUM_SECOND) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetEnvProperty invalid args");
         return;
     }
-    auto key = info[0]->ToString();
+    std::string key;
+    if (info[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[0]);
+        auto keyIdVal = obj->GetProperty("keyId");
+        if (keyIdVal->IsString()) {
+            key = keyIdVal->ToString();
+        }
+    }
+    if (key.empty()) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetEnvProperty invalid key");
+        return;
+    }
 
-    if (info[1]->IsBoolean()) {
+    if (info[1]->IsUndefined()) {
+        WithEnvModel::GetInstance()->RemoveEnvProperty(key);
+    } else if (info[1]->IsBoolean()) {
         auto value = info[1]->ToBoolean();
         WithEnvModel::GetInstance()->SetEnvProperty(key, value);
     } else if (info[1]->IsNumber()) {
@@ -59,14 +76,19 @@ void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
 
 void JSWithEnv::SetCustomEnvProperty(const JSCallbackInfo& info)
 {
-    if (info.Length() < NUM_SECOND || !info[0]->IsString()) {
+    if (info.Length() < NUM_SECOND || !info[0]->IsObject()) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetCustomEnvProperty invalid args");
         return;
     }
-    auto key = info[0]->ToString();
-    // customEnv<T>(key: string, value: T) — value is generic, handle by JS type
+    std::string key;
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto keyIdVal = obj->GetProperty("_internal_id");
+    if (keyIdVal->IsNumber()) {
+        key = std::to_string(keyIdVal->ToNumber<int32_t>());
+    }
     WithEnvModel::GetInstance()->SetCustomEnvProperty(key, std::any(info[1]));
 }
+
     
 void JSWithEnv::JSBind(BindingTarget globalObj)
 {

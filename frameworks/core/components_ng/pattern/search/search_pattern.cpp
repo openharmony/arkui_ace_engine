@@ -297,6 +297,19 @@ void SearchPattern::SetAccessibilityClearAction()
     textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
+void SearchPattern::OnAttachToMainTree()
+{
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            auto host = GetHost();
+            if (host) {
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+    }
+}
+
 void SearchPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -1901,6 +1914,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("enterKeyType", searchTextFieldPattern->TextInputActionToString().c_str(), filter);
     json->PutExtAttr("selectionMenuHidden",
         textFieldLayoutProperty->GetSelectionMenuHidden().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("shaderStyle", textFieldPattern->GetShaderStyleInJson(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -2947,7 +2961,8 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     symbolEffectOptions.SetIsTxtActive(false);
     symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     auto fontSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
-    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale()),
+    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPxDistributeWithEnv(GetMinFontScale(), GetMaxFontScale(), true,
+        GetEnvFontScale()),
         ICON_MAX_SIZE.ConvertToPx())) {
         symbolLayoutProperty->UpdateFontSize(ICON_MAX_SIZE);
     }
@@ -3009,12 +3024,14 @@ const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSi
     CHECK_NULL_RETURN(host, iconSizeValue);
     auto maxFontScale = GetMaxFontScale();
     auto minFontScale = GetMinFontScale();
-    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale),
+    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
+        GetEnvFontScale()),
         ICON_MAX_SIZE.ConvertToPx())) {
         return ICON_MAX_SIZE;
     }
     if (iconSizeValue.Unit() != DimensionUnit::VP) {
-        return Dimension(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale));
+        return Dimension(
+            iconSizeValue.ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true, GetEnvFontScale()));
     } else {
         return iconSizeValue;
     }

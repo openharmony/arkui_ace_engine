@@ -30,6 +30,7 @@ ace_unittest("ressched_report_test") {
     "$ace_root/frameworks/base/ressched/ressched_click_optimizer.cpp",
     "$ace_root/frameworks/base/ressched/ressched_report.cpp",
     "$ace_root/frameworks/base/ressched/ressched_touch_optimizer.cpp",
+    "$ace_root/frameworks/base/ressched/taihang_optimizer.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_cpu_boost.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_image_packer_ohos.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_input_manager.cpp",
@@ -104,6 +105,7 @@ ace_unittest("ressched_report_test") {
     "$ace_root/test/mock/frameworks/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_animated_image.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_component_snapshot.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_ui_material_filter_creator.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_canvas_image.cpp",
@@ -123,6 +125,7 @@ ace_unittest("ressched_report_test") {
     "ressched_report_test.cpp",
     "ressched_touch_optimizer_test.cpp",
     "ressched_touch_optimizer_two_test.cpp",
+    "taihang_optimizer_test.cpp",
   ]
   extra_deps = []
   extra_deps += [

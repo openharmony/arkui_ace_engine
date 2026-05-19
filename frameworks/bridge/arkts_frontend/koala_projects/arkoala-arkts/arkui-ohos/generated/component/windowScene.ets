@@ -129,3 +129,18 @@ export function WindowSceneImpl(
     })
 }
 
+@memo
+export function WindowScene(
+    @memo @memo_skip
+    style: ((attributes: WindowSceneAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkWindowSceneComponent>((): ArkWindowSceneComponent => {
+        return new ArkWindowSceneComponent()
+    })
+    NodeAttach<ArkWindowScenePeer>((): ArkWindowScenePeer => ArkWindowScenePeer.create(receiver), (_: ArkWindowScenePeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

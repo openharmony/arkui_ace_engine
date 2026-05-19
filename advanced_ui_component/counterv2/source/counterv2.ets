@@ -12,31 +12,2916 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { LengthMetrics } from '@ohos.arkui.node';
+import { BusinessError, Callback } from '@ohos.base';
+import common from '@ohos.app.ability.common';
+import { accessibility } from '@kit.AccessibilityKit';
+import { intl } from '@kit.LocalizationKit';
+import i18n from '@ohos.i18n';
+import { systemDateTime } from '@kit.BasicServicesKit';
 
-export interface CounterV2Options {
-  message?: string
+export enum CounterV2Type {
+  LIST = 0,
+  COMPACT = 1,
+  INLINE = 2,
+  INLINE_DATE = 3
 }
 
-@Builder
-export function CounterV2(options: CounterV2Options) {
-  CounterV2Component({message: options.message ?? 'CounterV2'})
+enum FocusText {
+  NONE,
+  TEXT1,
+  TEXT2,
+  TEXT3,
 }
 
-@Component
+@ObservedV2
+export class CounterV2CommonOptions {
+  @Trace public focusable?: boolean;
+  @Trace public step?: number;
+  public onHoverIncrease?: (isHover: boolean) => void;
+  public onHoverDecrease?: (isHover: boolean) => void;
+}
+
+@ObservedV2
+export class CounterV2InlineStyleOptions extends CounterV2CommonOptions {
+  @Trace public value?: number;
+  @Trace public min?: number;
+  @Trace public max?: number;
+  @Trace public textWidth?: number;
+  public onChange?: (value: number) => void;
+}
+
+@ObservedV2
+export class CounterV2NumberStyleOptions extends CounterV2InlineStyleOptions {
+  @Trace public label?: ResourceStr;
+  public onFocusIncrease?: () => void;
+  public onFocusDecrease?: () => void;
+  public onBlurIncrease?: () => void;
+  public onBlurDecrease?: () => void;
+}
+
+export class CounterV2DateData {
+  public year: number;
+  public month: number;
+  public day: number;
+
+  constructor(year: number, month: number, day: number) {
+    this.year = year;
+    this.month = month;
+    this.day = day;
+  }
+
+  toString(): string {
+    let date = this.year.toString() + '-';
+    let month = this.month < 10 ? '0' + this.month.toString() : this.month.toString();
+    date += month + '-';
+    let day = this.day < 10 ? '0' + this.day.toString() : this.day.toString();
+    date += day;
+    return date;
+  }
+}
+
+@ObservedV2
+export class CounterV2DateStyleOptions extends CounterV2CommonOptions {
+  @Trace public year?: number;
+  @Trace public month?: number;
+  @Trace public day?: number;
+  public onDateChange?: (date: CounterV2DateData) => void;
+}
+
+@ObservedV2
+export class CounterV2Options {
+  @Trace public type: CounterV2Type = CounterV2Type.LIST;
+  @Trace public direction?: Direction;
+  @Trace public numberOptions?: CounterV2NumberStyleOptions;
+  @Trace public inlineOptions?: CounterV2InlineStyleOptions;
+  @Trace public dateOptions?: CounterV2DateStyleOptions;
+}
+
+class CounterResource {
+  // counter color
+  public static readonly BUTTON_BACKGROUD_COLOR = $r('sys.color.ohos_id_color_button_normal');
+  public static readonly BUTTON_ICON_COLOR = $r('sys.color.ohos_id_color_primary');
+  public static readonly BUTTON_BORDER_FOCUSED_COLOR = $r('sys.color.ohos_id_color_focused_outline');
+  public static readonly COUNTER_TEXT_COLOR = $r('sys.color.ohos_id_color_text_primary');
+  public static readonly COUNTER_BORDER_COLOR = $r('sys.color.ohos_id_color_component_normal');
+  // button icon
+  public static readonly BUTTON_ADD_ICON = $r("sys.media.ohos_ic_public_add");
+  public static readonly BUTTON_SUB_ICON = $r("sys.media.ohos_ic_public_minus");
+  public static readonly BUTTON_ARROW_UP = $r('sys.media.ohos_ic_public_arrow_up');
+  public static readonly BUTTON_ARROW_DOWN = $r('sys.media.ohos_ic_public_arrow_down');
+  // counter size
+  public static readonly BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
+  public static readonly BUTTON_BORDER_BLUR_WIDTH = '0vp';
+  public static readonly COUNTER_BORDER_WIDTH_NUMBER = 1;
+  public static readonly COUNTER_LIST_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  public static readonly COUNTER_LIST_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  public static readonly COUNTER_COMPACT_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body2');
+  public static readonly COUNTER_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  public static readonly COUNTER_LIST_LEFT_PADDING = $r('sys.float.ohos_id_default_padding_start');
+  public static readonly COUNTER_LIST_RIGHT_PADDING = $r('sys.float.ohos_id_default_padding_end');
+  public static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = $r('sys.float.button_icon_size');
+  public static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = $r('sys.float.container_height');
+  public static readonly COUNTER_BORDER_WIDTH = $r('sys.float.border_width');
+  public static readonly COUNTER_COMPACT_BUTTON_SIZE = $r('sys.float.button_size');
+  public static readonly COUNTER_COMPACT_CONTAINER_RADIUS = $r('sys.float.container_radius');
+  public static readonly COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN = $r('sys.float.button_container_margin');
+  public static readonly COUNTER_LIST_PADDING = 12;
+  public static readonly COUNTER_LIST_HEIGHT = '48vp';
+  public static readonly COUNTER_LIST_BUTTON_ICON_SIZE = '20vp';
+  public static readonly COUNTER_LIST_BUTTON_SIZE = '32vp';
+  public static readonly COUNTER_LIST_BUTTON_RADIUS = '16vp';
+  public static readonly COUNTER_LIST_BUTTON_TEXT_DISTANCE = '8vp';
+  public static readonly COUNTER_LIST_BUTTON_TEXT_MARGIN = 8;
+  public static readonly COUNTER_LIST_FOCUS_BORDER_SIZE = '30vp';
+  public static readonly COUNTER_LIST_FOCUS_BORDER_RADIUS = '15vp';
+  public static readonly COUNTER_LIST_BUTTON_HOT_SPOT_X = '-8vp';
+  public static readonly COUNTER_LIST_BUTTON_HOT_SPOT_Y = '-8vp';
+  public static readonly COUNTER_COMPACT_BUTTON_RADIUS = '12vp';
+  public static readonly COUNTER_COMPACT_BUTTON_TEXT_DISTANCE = '10vp';
+  public static readonly COUNTER_COMPACT_BUTTON_TEXT_MARGIN = 10;
+  public static readonly COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE = '8vp';
+  public static readonly COUNTER_COMPACT_FOCUS_BORDER_SIZE = '22vp';
+  public static readonly COUNTER_COMPACT_FOCUS_BORDER_RADIUS = '11vp';
+  public static readonly COUNTER_INLINE_BUTTON_ICON_WIDTH = '24vp';
+  public static readonly COUNTER_INLINE_BUTTON_ICON_HEIGHT = '12vp';
+  public static readonly COUNTER_INLINE_BUTTON_TEXT_DISTANCE = '12vp';
+  public static readonly COUNTER_INLINE_CONTAINER_HEIGHT = '32vp';
+  public static readonly COUNTER_INLINE_BUTTON_WIDTH = '32vp';
+  public static readonly COUNTER_INLINE_BUTTON_HEIGHT = '16vp';
+  public static readonly COUNTER_INLINE_RADIUS = '8vp';
+  public static readonly COUNTER_INLINE_FOCUS_BORDER_WIDTH = '28vp';
+  public static readonly COUNTER_INLINE_FOCUS_BORDER_HEIGHT = '13.5vp';
+  public static readonly COUNTER_INLINE_DATE_TEXT_MARGIN = 12;
+  public static readonly COUNTER_INLINE_INPUT_TEXT_MARGIN = 12;
+  public static readonly COUNTER_BUTTON_INITIAL_OPACITY = 1;
+  public static readonly COUNTER_BUTTON_DISABLE_OPACITY = 0.4;
+  public static readonly COUNTER_LABEL_MAX_FONT_SIZE_SCALE = 2;
+  public static readonly COUNTER_NUMBER_MAX_FONT_SIZE_SCALE = 1;
+}
+
+class CounterConstant {
+  public static readonly COUNTER_MAX_YEAR = 5000;
+  public static readonly COUNTER_MIN_YEAR = 1;
+  public static readonly COUNTER_INITIAL_MONTH = 1;
+  public static readonly COUNTER_INITIAL_DAY = 1;
+  public static readonly COUNTER_INITIAL_STEP = 1;
+  public static readonly COUNTER_TEN_NUMBER = 10;
+  public static readonly COUNTER_MIN_MONTH = 1;
+  public static readonly COUNTER_MAX_MONTH = 12;
+  public static readonly COUNTER_MIN_DAY = 1;
+  public static readonly KEYCODE_DPAD_UP = 2012;
+  public static readonly KEYCODE_DPAD_DOWN = 2013;
+  public static readonly KEYCODE_DPAD_LEFT = 2014;
+  public static readonly KEYCODE_DPAD_RIGHT = 2015;
+  public static readonly KEYCODE_MOVE_HOME = 2081;
+  public static readonly KEYCODE_MOVE_END = 2082;
+  public static readonly KEYCODE_TAB = 2049;
+  public static readonly KEYCODE_ESC = 2070;
+  public static readonly COUNTER_MIN_VALUE = 0;
+  public static readonly COUNTER_MAX_VALUE = 999;
+  public static readonly JANUARY = 1;
+  public static readonly FEBRUARY = 2;
+  public static readonly MARCH = 3;
+  public static readonly APRIL = 4;
+  public static readonly MAY = 5;
+  public static readonly JUNE = 6;
+  public static readonly JULY = 7;
+  public static readonly AUGUST = 8;
+  public static readonly SEPTEMBER = 9;
+  public static readonly OCTOBER = 10;
+  public static readonly NOVEMBER = 11;
+  public static readonly DECEMBER = 12;
+  public static readonly BIG_MONTH_DAYS = 31;
+  public static readonly SMALL_MONTH_DAYS = 30;
+  public static readonly FEBRUARY_DAYS = 28;
+  public static readonly AUSPICIOUS_FEBRUARY_DAYS = 29;
+  public static readonly AUSPICIOUS_FOUR = 4;
+  public static readonly AUSPICIOUS_HUNDRED = 100;
+  public static readonly AUSPICIOUS_FOUR_HUNDRED = 400;
+}
+
+@ComponentV2
 export struct CounterV2Component {
-  @State message: string = 'Hello World';
+  @Require @Param options: CounterV2Options;
+  @Local type: number = -1;
+  @Local counterDirection: Direction = Direction.Auto;
+  @Local choverEffect: HoverEffect = HoverEffect.Auto;
+  @Local focusEnable: boolean = true;
+  @Local step: number = CounterConstant.COUNTER_INITIAL_STEP;
+  @Local inputValue: string = '0';
+  @Local inputYear: number = CounterConstant.COUNTER_MIN_YEAR;
+  @Local inputMoon: number = 0;
+  @Local inputDay: number = 0;
+  @Local subOpacity: number = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+  @Local addOpacity: number = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+  @Local subBtnStateEffect: boolean = true;
+  @Local addBtnStateEffect: boolean = true;
+  @Local focusText: number = FocusText.NONE;
+  @Local hasFocusText1: boolean = false
+  @Local hasFocusText2: boolean = false
+  @Local hasFocusText3: boolean = false
+  @Local subBtnFocusWidth: string = '0vp'
+  @Local addBtnFocusWidth: string = '0vp'
+  @Local value: number = 0;
+  @Local year: number = 0;
+  @Local month: number = 0;
+  @Local day: number = 0;
+  @Local hour: number = 0;
+  @Local minute: number = 0;
+  @Local second: number = 0;
+  @Local subBtnEnabled: boolean = true
+  @Local addBtnEnabled: boolean = true
+  @Local hasInputText1: boolean = false;
+  @Local hasInputText2: boolean = false;
+  @Local hasInputText3: boolean = false;
+  @Local textWidth: number = 0;
+  @Local min: number = CounterConstant.COUNTER_MIN_VALUE;
+  @Local max: number = CounterConstant.COUNTER_MAX_VALUE;
+  private maxYear: number = CounterConstant.COUNTER_MAX_YEAR;
+  private minYear: number = CounterConstant.COUNTER_MIN_YEAR;
+  private numberStrList: Array<string> = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09'];
+  private onHoverIncrease?: (isHover: boolean) => void;
+  private onHoverDecrease?: (isHover: boolean) => void;
+  private onFocusIncrease?: () => void;
+  private onFocusDecrease?: () => void;
+  private onBlurIncrease?: () => void;
+  private onBlurDecrease?: () => void;
+  private onChange?: (value: number) => void;
+  private onDateChange?: (date: CounterV2DateData) => void;
+  private timeoutID1: number = -1;
+  private timeoutID2: number = -1;
+  private timeoutID3: number = -1;
+  private numberStyleOptions: CounterV2NumberStyleOptions = new CounterV2NumberStyleOptions();
+  private dateStyleOptions: CounterV2DateStyleOptions = new CounterV2DateStyleOptions();
+  private inlineStyleOptions: CounterV2InlineStyleOptions = new CounterV2InlineStyleOptions();
+  private timeStamp: number = 0;
+  private hasTextWidth: boolean = false;
+  private controller1: TextInputController = new TextInputController();
+  private controller2: TextInputController = new TextInputController();
+  private controller3: TextInputController = new TextInputController();
+  private yearTextWidth: number = 0;
+  private monthDayTextWidth: number = 0;
+  private dateDayMap: Map<number, string> | null = null;
+
+  getTextInputFontSize(): string {
+    let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
+    let uiContext = this.getUIContext();
+    let fontSizeScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (fontSizeScale < 1) {
+      return fontSize + 'fp';
+    } else {
+      return fontSize + 'vp';
+    }
+  }
+
+  private getMeasuredTextWidth(text: string): number {
+    let measureUtils = this.getUIContext().getMeasureUtils();
+    let widthPx = measureUtils.measureText({
+      textContent: text,
+      fontSize: this.getTextInputFontSize(),
+      fontWeight: FontWeight.Medium,
+    });
+    return px2vp(widthPx);
+  }
+
+  getDate(value: string | undefined): string {
+    return `[n2] ${value} [n0]`
+  }
+
+  getDateYear(value: number): string {
+    let locale = new intl.Locale();
+    let localeID = locale.toString();
+    let date = new Date(this.year, this.month - 1, this.day);
+    date.setFullYear(this.year);
+    let dateFormatYear: Intl.DateTimeFormat | undefined;
+    try {
+      dateFormatYear = new Intl.DateTimeFormat(localeID, {
+        year: 'numeric',
+        timeZone: systemDateTime.getTimezoneSync(),
+      });
+    } catch (error) {
+      console.log(`Accessility getDateYear fail. message: ${error.message}, code: ${error.code}`);
+    }
+    if (!dateFormatYear) {
+      dateFormatYear = new Intl.DateTimeFormat(localeID, { year: 'numeric' });
+    }
+    let formattedDateYear = dateFormatYear.format(date);
+    return this.getDate(formattedDateYear);
+  }
+
+  getDateMonth(value: number): string {
+    let locale = new intl.Locale();
+    let localeID = locale.toString();
+    let date = new Date(this.year, this.month - 1, this.day);
+    date.setFullYear(this.year);
+    let dateFormatMonth: Intl.DateTimeFormat | undefined;
+    try {
+      dateFormatMonth = new Intl.DateTimeFormat(localeID, {
+        month: 'long',
+        timeZone: systemDateTime.getTimezoneSync()
+      });
+    } catch (error) {
+      console.log(`Accessility getDateMonth fail. message: ${error.message}, code: ${error.code}`);
+    }
+    if (!dateFormatMonth) {
+      dateFormatMonth = new Intl.DateTimeFormat(localeID, { month: 'long' });
+    }
+    let formattedDateMonth = dateFormatMonth.format(date);
+    return this.getDate(formattedDateMonth);
+  }
+
+  getDateDay(value: number): string {
+    try {
+      if (!this.dateDayMap) {
+        const manager = this.getUIContext().getHostContext()?.resourceManager;
+        if (!manager) {
+          return this.getDate('');
+        }
+        this.dateDayMap = new Map([
+          [1, manager.getStringByNameSync('First_counter_accessibility_text')],
+          [2, manager.getStringByNameSync('Second_counter_accessibility_text')],
+          [3, manager.getStringByNameSync('Third_counter_accessibility_text')],
+          [4, manager.getStringByNameSync('Fourth_counter_accessibility_text')],
+          [5, manager.getStringByNameSync('Fifth_counter_accessibility_text')],
+          [6, manager.getStringByNameSync('Sixth_counter_accessibility_text')],
+          [7, manager.getStringByNameSync('Seventh_counter_accessibility_text')],
+          [8, manager.getStringByNameSync('Eighth_counter_accessibility_text')],
+          [9, manager.getStringByNameSync('Ninth_counter_accessibility_text')],
+          [10, manager.getStringByNameSync('Tenth_counter_accessibility_text')],
+          [11, manager.getStringByNameSync('Eleventh_counter_accessibility_text')],
+          [12, manager.getStringByNameSync('Twelfth_counter_accessibility_text')],
+          [13, manager.getStringByNameSync('Thirteenth_counter_accessibility_text')],
+          [14, manager.getStringByNameSync('Fourteenth_counter_accessibility_text')],
+          [15, manager.getStringByNameSync('Fifteenth_counter_accessibility_text')],
+          [16, manager.getStringByNameSync('Sixteenth_counter_accessibility_text')],
+          [17, manager.getStringByNameSync('Seventeenth_counter_accessibility_text')],
+          [18, manager.getStringByNameSync('Eighteenth_counter_accessibility_text')],
+          [19, manager.getStringByNameSync('Nineteenth_counter_accessibility_text')],
+          [20, manager.getStringByNameSync('Twentieth_counter_accessibility_text')],
+          [21, manager.getStringByNameSync('TwentyFirst_counter_accessibility_text')],
+          [22, manager.getStringByNameSync('TwentySecond_counter_accessibility_text')],
+          [23, manager.getStringByNameSync('TwentyThird_counter_accessibility_text')],
+          [24, manager.getStringByNameSync('TwentyFourth_counter_accessibility_text')],
+          [25, manager.getStringByNameSync('TwentyFifth_counter_accessibility_text')],
+          [26, manager.getStringByNameSync('TwentySixth_counter_accessibility_text')],
+          [27, manager.getStringByNameSync('TwentySeventh_counter_accessibility_text')],
+          [28, manager.getStringByNameSync('TwentyEighth_counter_accessibility_text')],
+          [29, manager.getStringByNameSync('TwentyNinth_counter_accessibility_text')],
+          [30, manager.getStringByNameSync('Thirtieth_counter_accessibility_text')],
+          [31, manager.getStringByNameSync('ThirtyFirst_counter_accessibility_text')],
+        ]);
+      }
+      return this.getDate(this.dateDayMap!.get(this.day) ?? '');
+    } catch (error) {
+      console.log(`Accessility getDate fail. message: ${error.message}, code: ${error.code}`);
+      return '';
+    }
+  }
+
+  convertNumberToString(value: number): string {
+    if (value >= 0 && value < CounterConstant.COUNTER_TEN_NUMBER) {
+      return this.numberStrList[value];
+    } else {
+      return value.toString();
+    }
+  }
+
+  aboutToAppear(): void {
+    let dateTime = new Date();
+    this.timeStamp = dateTime.getTime();
+    if (this.options !== undefined && this.options !== null) {
+      this.applyOptions(this.options);
+    }
+  }
+
+  private updateNumberStyleOptions(): void {
+    if (this.numberStyleOptions.label === undefined) {
+      this.numberStyleOptions.label = '';
+    }
+    const prevValue = this.value;
+    if (this.numberStyleOptions.value !== undefined) {
+      this.value = this.numberStyleOptions.value;
+    } else {
+      this.value = 0;
+    }
+    this.inputValue = this.value.toString();
+    if (this.numberStyleOptions.min !== undefined) {
+      this.min = this.numberStyleOptions.min;
+    }
+    if (this.numberStyleOptions.max !== undefined) {
+      this.max = this.numberStyleOptions.max;
+    }
+    if (this.min > this.max) {
+      this.min = this.max;
+    }
+    if (this.numberStyleOptions.textWidth !== undefined) {
+      this.textWidth = this.numberStyleOptions.textWidth;
+      if (this.textWidth < 0) {
+        this.textWidth = 0;
+      }
+      this.hasTextWidth = true;
+    }
+    if (this.value <= this.min) {
+      this.value = this.min;
+      this.inputValue = this.value.toString();
+    }
+    if (this.value >= this.max) {
+      this.value = this.max;
+      this.inputValue = this.value.toString();
+    }
+    if (this.numberStyleOptions.step !== undefined) {
+      if (this.numberStyleOptions.step < 1) {
+        this.step = 1
+      } else {
+        this.step = this.numberStyleOptions.step;
+      }
+    }
+    if (this.value !== prevValue) {
+      this.onChange?.(this.value);
+    }
+    this.updateButtonStatus()
+    this.updateNumberStyleOptionsEvent();
+  }
+
+  private updateNumberStyleOptionsEvent(): void {
+    if (this.numberStyleOptions.onHoverIncrease !== undefined) {
+      this.onHoverIncrease = this.numberStyleOptions.onHoverIncrease;
+    }
+    if (this.numberStyleOptions.onHoverDecrease !== undefined) {
+      this.onHoverDecrease = this.numberStyleOptions.onHoverDecrease;
+    }
+    if (this.numberStyleOptions.onFocusIncrease !== undefined) {
+      this.onFocusIncrease = this.numberStyleOptions.onFocusIncrease;
+    }
+    if (this.numberStyleOptions.onFocusDecrease !== undefined) {
+      this.onFocusDecrease = this.numberStyleOptions.onFocusDecrease;
+    }
+    if (this.numberStyleOptions.onBlurIncrease !== undefined) {
+      this.onBlurIncrease = this.numberStyleOptions.onBlurIncrease;
+    }
+    if (this.numberStyleOptions.onBlurDecrease !== undefined) {
+      this.onBlurDecrease = this.numberStyleOptions.onBlurDecrease;
+    }
+    if (this.numberStyleOptions.onChange !== undefined) {
+      this.onChange = this.numberStyleOptions.onChange;
+    }
+    if (this.numberStyleOptions.focusable !== undefined) {
+      this.focusEnable = this.numberStyleOptions.focusable;
+    }
+  }
+
+  private updateInlineStyleOptions(): void {
+    const prevValue = this.value;
+    const truncatedValue = Math.trunc(this.inlineStyleOptions.value ?? 0);
+    this.value = Number.isFinite(truncatedValue) ? truncatedValue : 0;
+    this.inputValue = this.value.toString();
+    if (this.inlineStyleOptions.min !== undefined) {
+      this.min = this.inlineStyleOptions.min;
+    }
+    if (this.inlineStyleOptions.max !== undefined) {
+      this.max = this.inlineStyleOptions.max;
+    }
+    if (this.min > this.max) {
+      this.min = this.max;
+    }
+
+    if (this.inlineStyleOptions.textWidth !== undefined) {
+      this.textWidth = this.inlineStyleOptions.textWidth;
+      if (this.textWidth < 0) {
+        this.textWidth = 0;
+      }
+      this.hasTextWidth = true;
+    }
+    if (this.value <= this.min) {
+      this.value = this.min;
+      this.inputValue = this.value.toString();
+    }
+    if (this.value >= this.max) {
+      this.value = this.max;
+      this.inputValue = this.value.toString();
+    }
+    if (this.inlineStyleOptions.step !== undefined) {
+      if (this.inlineStyleOptions.step < 1) {
+        this.step = 1
+      } else {
+        this.step = this.inlineStyleOptions.step;
+      }
+    }
+    if (this.value !== prevValue) {
+      this.onChange?.(this.value);
+    }
+    this.updateButtonStatus()
+    this.updateInlineStyleOptionsEvent();
+  }
+
+  private updateInlineStyleOptionsEvent(): void {
+    if (this.inlineStyleOptions.onHoverIncrease !== undefined) {
+      this.onHoverIncrease = this.inlineStyleOptions.onHoverIncrease;
+    }
+    if (this.inlineStyleOptions.onHoverDecrease !== undefined) {
+      this.onHoverDecrease = this.inlineStyleOptions.onHoverDecrease;
+    }
+    if (this.inlineStyleOptions.onChange !== undefined) {
+      this.onChange = this.inlineStyleOptions.onChange;
+    }
+    if (this.inlineStyleOptions.focusable !== undefined) {
+      this.focusEnable = this.inlineStyleOptions.focusable;
+    }
+  }
+
+  private updateDateStyleOptions(): void {
+    if (this.dateStyleOptions.step !== undefined) {
+      if (this.dateStyleOptions.step < 1) {
+        this.step = 1
+      } else {
+        this.step = Math.floor(this.dateStyleOptions.step);
+      }
+    }
+    if (this.dateStyleOptions.onHoverIncrease !== undefined) {
+      this.onHoverIncrease = this.dateStyleOptions.onHoverIncrease;
+    }
+    if (this.dateStyleOptions.onHoverDecrease !== undefined) {
+      this.onHoverDecrease = this.dateStyleOptions.onHoverDecrease;
+    }
+    if (this.dateStyleOptions.year !== undefined &&
+      this.dateStyleOptions.year >= this.minYear &&
+      this.dateStyleOptions.year <= this.maxYear) {
+      if (this.year === 0) {
+        this.year = this.dateStyleOptions.year;
+      }
+    } else {
+      this.year = CounterConstant.COUNTER_MIN_YEAR;
+    }
+    if (this.dateStyleOptions.month !== undefined &&
+      this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
+      this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
+      if (this.month === 0) {
+        this.month = this.dateStyleOptions.month;
+      }
+    } else {
+      this.month = CounterConstant.COUNTER_INITIAL_MONTH;
+    }
+    if (this.dateStyleOptions.day !== undefined &&
+      this.dateStyleOptions.day <= this.getDayNumber() &&
+      this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
+      if (this.day === 0) {
+        this.day = this.dateStyleOptions.day;
+      }
+    } else {
+      this.day = CounterConstant.COUNTER_INITIAL_DAY;
+    }
+    if (this.dateStyleOptions.onDateChange !== undefined) {
+      this.onDateChange = this.dateStyleOptions.onDateChange;
+    }
+    if (this.dateStyleOptions.focusable !== undefined) {
+      this.focusEnable = this.dateStyleOptions.focusable;
+    }
+    this.updateDay();
+  }
+
+  private applyOptions(options: CounterV2Options): void {
+    this.type = options.type;
+    if (options.direction) {
+      this.counterDirection = options.direction;
+    } else {
+      this.counterDirection = Direction.Auto;
+    }
+
+    if (this.type === CounterV2Type.LIST ||
+      this.type === CounterV2Type.COMPACT) {
+      if (options.numberOptions !== undefined) {
+        this.numberStyleOptions = options.numberOptions;
+      }
+      this.updateNumberStyleOptions();
+    } else if (this.type === CounterV2Type.INLINE) {
+      if (options.inlineOptions !== undefined) {
+        this.inlineStyleOptions = options.inlineOptions;
+      }
+      this.updateInlineStyleOptions();
+    } else if (this.type === CounterV2Type.INLINE_DATE) {
+      let dateOptions = options.dateOptions;
+      if (dateOptions !== undefined) {
+        dateOptions.year = dateOptions.year ? dateOptions.year : CounterConstant.COUNTER_MIN_YEAR;
+        dateOptions.month = dateOptions.month ? dateOptions.month : CounterConstant.COUNTER_MIN_MONTH;
+        dateOptions.day = dateOptions.day ? dateOptions.day : CounterConstant.COUNTER_MIN_DAY;
+        this.dateStyleOptions = dateOptions;
+      }
+      this.updateDateStyleOptions();
+      if (this.yearTextWidth <= 0) {
+        this.yearTextWidth = this.getMeasuredTextWidth('0000');
+      }
+      if (this.monthDayTextWidth <= 0) {
+        this.monthDayTextWidth = this.getMeasuredTextWidth('00');
+      }
+    } else {
+
+    }
+  }
+
+  @Monitor(
+    'options',
+    'options.type',
+    'options.direction',
+    'options.numberOptions',
+    'options.inlineOptions',
+    'options.dateOptions',
+  )
+  private onOptionsChange(monitor: IMonitor): void {
+    const options = monitor.value<CounterV2Options>('options')?.now;
+    if (options === undefined) {
+      return;
+    }
+    this.applyOptions(options);
+  }
+
+  private subValue(): void {
+    this.validateInlineInput();
+    if (this.subBtnStateEffect) {
+      this.value -= this.step;
+    }
+    if (!this.addBtnStateEffect) {
+      this.addBtnStateEffect = true;
+      this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      this.addBtnEnabled = true;
+    }
+    if (this.value <= this.min) {
+      this.value = this.min;
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
+    } else {
+      if (this.subOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      }
+      if (!this.subBtnStateEffect) {
+        this.subBtnStateEffect = true;
+      }
+      if (!this.subBtnEnabled) {
+        this.subBtnEnabled = true;
+      }
+    }
+    this.focusText1();
+  }
+
+  private focusText1(): void {
+    if (this.type === CounterV2Type.INLINE) {
+      if (this.focusText === FocusText.NONE) {
+        this.focusText = FocusText.TEXT1;
+        this.hasFocusText1 = true;
+        this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+      }
+    }
+  }
+
+  private validateInlineInput(): void {
+    if (this.type !== CounterV2Type.INLINE) {
+      return;
+    }
+    if (!this.hasInputText1) {
+      return;
+    }
+    let num = Number(this.inputValue);
+    if (this.inputValue !== '' && !isNaN(num) && Number.isInteger(num) && num <= this.max && num >= this.min) {
+      this.value = num;
+    } else {
+      this.inputValue = this.value.toString();
+    }
+    this.hasInputText1 = false;
+  }
+
+  private addValue(): void {
+    this.validateInlineInput();
+    if (this.addBtnStateEffect) {
+      this.value += this.step;
+    }
+
+    if (!this.subBtnStateEffect) {
+      this.subBtnStateEffect = true;
+      this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      this.subBtnEnabled = true;
+    }
+    if (this.value >= this.max) {
+      this.value = this.max;
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
+    } else {
+      if (this.addOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      }
+      if (!this.addBtnStateEffect) {
+        this.addBtnStateEffect = true;
+      }
+      if (!this.addBtnEnabled) {
+        this.addBtnEnabled = true;
+      }
+    }
+
+    this.focusText1();
+  }
+
+  private getDayNumber(): number {
+    switch (this.month) {
+      case CounterConstant.JANUARY:
+      case CounterConstant.MARCH:
+      case CounterConstant.MAY:
+      case CounterConstant.JULY:
+      case CounterConstant.AUGUST:
+      case CounterConstant.OCTOBER:
+      case CounterConstant.DECEMBER:
+        return CounterConstant.BIG_MONTH_DAYS;
+        break;
+      case CounterConstant.APRIL:
+      case CounterConstant.JUNE:
+      case CounterConstant.SEPTEMBER:
+      case CounterConstant.NOVEMBER:
+        return CounterConstant.SMALL_MONTH_DAYS;
+        break;
+      case CounterConstant.FEBRUARY:
+        if ((this.year % CounterConstant.AUSPICIOUS_FOUR === 0 &&
+          this.year % CounterConstant.AUSPICIOUS_HUNDRED !== 0) ||
+          this.year % CounterConstant.AUSPICIOUS_FOUR_HUNDRED === 0) {
+          return CounterConstant.AUSPICIOUS_FEBRUARY_DAYS;
+        } else {
+          return CounterConstant.FEBRUARY_DAYS;
+        }
+        break;
+      default:
+        return CounterConstant.SMALL_MONTH_DAYS;
+        break;
+    }
+  }
+
+  private accessibilityBroadcastSubDate(): void {
+    if (this.focusText === FocusText.TEXT1) {
+      if (this.subBtnStateEffect) {
+        this.inputYear = this.year;
+        this.year -= this.step;
+        if (!this.hasFocusText1) {
+          this.hasFocusText1 = true;
+        }
+      }
+      if (!this.addBtnStateEffect) {
+        this.addBtnStateEffect = true;
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.addBtnEnabled = true;
+      }
+      if (this.year <= this.minYear) {
+        this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+        this.subBtnStateEffect = false;
+        this.subBtnEnabled = false;
+      } else {
+        if (this.subOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+          this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        }
+        if (!this.subBtnStateEffect) {
+          this.subBtnStateEffect = true;
+        }
+        if (!this.subBtnEnabled) {
+          this.subBtnEnabled = true;
+        }
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.getDateYear(this.year) + ',' + this.getDateYear(this.year) +
+            '/' +
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility subYear click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility subYear faild error code:${code} message:${message}`);
+      }
+    } else if (this.focusText === FocusText.TEXT2) {
+      this.month -= this.step % CounterConstant.COUNTER_MAX_MONTH;
+      if (this.month < CounterConstant.COUNTER_MIN_MONTH) {
+        this.month += CounterConstant.COUNTER_MAX_MONTH;
+      }
+      if (!this.hasFocusText2) {
+        this.hasFocusText2 = true;
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.getDateMonth(this.month) + ',' + this.getDateYear(this.year) +
+            '/' +
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility subMonth click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility subMonth faild error code:${code} message:${message}`);
+      }
+    } else if (this.focusText === FocusText.TEXT3) {
+      this.day -= this.step % this.getDayNumber();
+      if (this.day < CounterConstant.COUNTER_MIN_DAY) {
+        this.day += this.getDayNumber();
+      }
+      if (!this.hasFocusText3) {
+        this.hasFocusText3 = true;
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.getDateDay(this.day) + ',' + this.getDateYear(this.year) +
+            '/' +
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility subDay click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility subDay faild error code:${code} message:${message}`);
+      }
+    } else {
+      this.focusDayWitdhSub();
+    }
+  }
+
+  private subDate(): void {
+    if (this.focusText === FocusText.TEXT1) {
+      if (this.subBtnStateEffect) {
+        this.inputYear = this.year;
+        this.year -= this.step;
+        if (!this.hasFocusText1) {
+          this.hasFocusText1 = true;
+        }
+      }
+      if (!this.addBtnStateEffect) {
+        this.addBtnStateEffect = true;
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.addBtnEnabled = true;
+      }
+      if (this.year <= this.minYear) {
+        this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+        this.subBtnStateEffect = false;
+        this.subBtnEnabled = false;
+      } else {
+        if (this.subOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+          this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        }
+        if (!this.subBtnStateEffect) {
+          this.subBtnStateEffect = true;
+        }
+        if (!this.subBtnEnabled) {
+          this.subBtnEnabled = true;
+        }
+      }
+    } else if (this.focusText === FocusText.TEXT2) {
+      this.month -= this.step % CounterConstant.COUNTER_MAX_MONTH;
+      if (this.month < CounterConstant.COUNTER_MIN_MONTH) {
+        this.month += CounterConstant.COUNTER_MAX_MONTH;
+      }
+      if (!this.hasFocusText2) {
+        this.hasFocusText2 = true;
+      }
+    } else if (this.focusText === FocusText.TEXT3) {
+      this.day -= this.step % this.getDayNumber();
+      if (this.day < CounterConstant.COUNTER_MIN_DAY) {
+        this.day += this.getDayNumber();
+      }
+      if (!this.hasFocusText3) {
+        this.hasFocusText3 = true;
+      }
+    } else {
+      this.focusDayWitdhSub();
+    }
+  }
+
+  private focusDayWitdhSub(): void {
+    this.focusText = FocusText.TEXT3;
+    this.hasFocusText3 = true;
+    this.day -= this.step % this.getDayNumber();
+    if (this.day < CounterConstant.COUNTER_MIN_DAY) {
+      this.day += this.getDayNumber();
+    }
+    this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
+  }
+
+  private accessibilityBroadcastAddDate(): void {
+    if (this.focusText === FocusText.TEXT1) {
+      if (this.addBtnStateEffect) {
+        this.inputYear = this.year;
+        this.year += this.step;
+        if (!this.hasFocusText1) {
+          this.hasFocusText1 = true;
+        }
+      }
+      if (!this.subBtnStateEffect) {
+        this.subBtnStateEffect = true;
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.subBtnEnabled = true;
+      }
+      if (this.year >= this.maxYear) {
+        this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+        this.addBtnStateEffect = false;
+        this.addBtnEnabled = false;
+      } else {
+        if (this.addOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+          this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        }
+        if (!this.addBtnStateEffect) {
+          this.addBtnStateEffect = true;
+        }
+        if (!this.addBtnEnabled) {
+          this.addBtnEnabled = true;
+        }
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.getDateYear(this.year) + ',' + this.getDateYear(this.year) +
+            '/' +
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility addYear click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility addYear click faild error code:${code} message:${message}`);
+      }
+    } else if (this.focusText === FocusText.TEXT2) {
+      this.month += this.step % CounterConstant.COUNTER_MAX_MONTH;
+      if (this.month > CounterConstant.COUNTER_MAX_MONTH) {
+        this.month -= CounterConstant.COUNTER_MAX_MONTH;
+      }
+      if (!this.hasFocusText2) {
+        this.hasFocusText2 = true;
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.getDateMonth(this.month) + ',' + this.getDateYear(this.year) +
+            '/' +
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility addMonth click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility addMonth faild error code:${code} message:${message}`);
+      }
+    } else if (this.focusText === FocusText.TEXT3) {
+      this.day += this.step % this.getDayNumber();
+      if (this.day > this.getDayNumber()) {
+        this.day -= this.getDayNumber();
+      }
+      if (!this.hasFocusText3) {
+        this.hasFocusText3 = true;
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (this.getUIContext().getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.getDateDay(this.day) + ',' + this.getDateYear(this.year) +
+            '/' +
+          this.getDateMonth(this.month) + '/' + this.getDateDay(this.day))
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility addDay click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility addDay faild error code:${code} message:${message}`);
+      }
+    } else {
+      this.focusDayWithAdd();
+    }
+  }
+
+  private addDate(): void {
+    if (this.focusText === FocusText.TEXT1) {
+      if (this.addBtnStateEffect) {
+        this.inputYear = this.year;
+        this.year += this.step;
+        if (!this.hasFocusText1) {
+          this.hasFocusText1 = true;
+        }
+      }
+      if (!this.subBtnStateEffect) {
+        this.subBtnStateEffect = true;
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.subBtnEnabled = true;
+      }
+      if (this.year >= this.maxYear) {
+        this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+        this.addBtnStateEffect = false;
+        this.addBtnEnabled = false;
+      } else {
+        if (this.addOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+          this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        }
+        if (!this.addBtnStateEffect) {
+          this.addBtnStateEffect = true;
+        }
+        if (!this.addBtnEnabled) {
+          this.addBtnEnabled = true;
+        }
+      }
+    } else if (this.focusText === FocusText.TEXT2) {
+      this.month += this.step % CounterConstant.COUNTER_MAX_MONTH;
+      if (this.month > CounterConstant.COUNTER_MAX_MONTH) {
+        this.month -= CounterConstant.COUNTER_MAX_MONTH;
+      }
+      if (!this.hasFocusText2) {
+        this.hasFocusText2 = true;
+      }
+    } else if (this.focusText === FocusText.TEXT3) {
+      this.day += this.step % this.getDayNumber();
+      if (this.day > this.getDayNumber()) {
+        this.day -= this.getDayNumber();
+      }
+      if (!this.hasFocusText3) {
+        this.hasFocusText3 = true;
+      }
+    } else {
+      this.focusDayWithAdd();
+    }
+  }
+
+  private focusDayWithAdd(): void {
+    this.focusText = FocusText.TEXT3;
+    this.hasFocusText3 = true;
+    this.day += this.step % this.getDayNumber();
+    if (this.day > this.getDayNumber()) {
+      this.day -= this.getDayNumber();
+    }
+    this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
+  }
+
+  private updateInlineEnableState(): void {
+    if (this.value >= this.max) {
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
+    } else {
+      this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      this.addBtnStateEffect = true;
+      this.addBtnEnabled = true;
+    }
+    if (this.value <= this.min) {
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
+    } else {
+      this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      this.subBtnStateEffect = true;
+      this.subBtnEnabled = true;
+    }
+  }
+
+  private updateDateEnableState(): void {
+    if (this.year === this.maxYear && this.focusText === FocusText.TEXT1) {
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
+    } else {
+      if (this.addOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      }
+      if (!this.addBtnStateEffect) {
+        this.addBtnStateEffect = true;
+      }
+      if (!this.addBtnEnabled) {
+        this.addBtnEnabled = true;
+      }
+    }
+    if (this.year === this.minYear && this.focusText === FocusText.TEXT1) {
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
+    } else {
+      if (this.subOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      }
+      if (!this.subBtnStateEffect) {
+        this.subBtnStateEffect = true;
+      }
+      if (!this.subBtnEnabled) {
+        this.subBtnEnabled = true;
+      }
+    }
+  }
+
+  private updateDay(): void {
+    if (this.day > this.getDayNumber()) {
+      this.day = this.getDayNumber();
+    }
+  }
+
+  private resetFocusText(): void {
+    this.focusText = FocusText.NONE;
+    this.hasFocusText1 = false;
+    this.hasFocusText2 = false;
+    this.hasFocusText3 = false;
+  }
+
+  private resetFocusButton(): void {
+    if (this.addBtnFocusWidth === CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
+      this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+      this.onBlurIncrease && this.onBlurIncrease();
+    }
+    if (this.subBtnFocusWidth === CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
+      this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+      this.onBlurDecrease && this.onBlurDecrease();
+    }
+  }
+
+  private homeFocusText(): void {
+    this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
+  }
+
+  private endFocusText(): void {
+    this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
+  }
+
+  private homeFirstValue(): void {
+    this.value = this.min;
+    if (!this.addBtnStateEffect) {
+      this.addBtnStateEffect = true;
+      this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      this.addBtnEnabled = true;
+    }
+  }
+
+  private endLastValue(): void {
+    this.value = this.max;
+    if (!this.subBtnStateEffect) {
+      this.subBtnStateEffect = true;
+      this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      this.subBtnEnabled = true;
+    }
+  }
+
+  private updateButtonStatus(): void {
+    if (this.value <= this.min) {
+      if (!this.addBtnStateEffect && this.max !== this.min) {
+        this.addBtnStateEffect = true;
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.addBtnEnabled = true;
+      }
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
+    }
+    if (this.value >= this.max) {
+      if (!this.subBtnStateEffect && this.max !== this.min) {
+        this.subBtnStateEffect = true;
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.subBtnEnabled = true;
+      }
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
+    }
+    if (this.value > this.min && this.value < this.max) {
+      if (!this.addBtnStateEffect) {
+        this.addBtnStateEffect = true;
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.addBtnEnabled = true;
+      }
+      if (!this.subBtnStateEffect) {
+        this.subBtnStateEffect = true;
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.subBtnEnabled = true;
+      }
+    }
+  }
+
+  private getValue(): string {
+    if (this.inputValue === undefined || this.inputValue === null) {
+      this.inputValue = ''
+    }
+    return this.hasInputText1 ? this.inputValue : this.value.toString();
+  }
+
+  private getYear(): string {
+    let year: string = this.year.toString();
+    if (year.length === 1) {
+      year = '000' + year;
+    } else if (year.length === 2) {
+      year = '00' + year;
+    } else if (year.length === 3) {
+      year = '0' + year;
+    } else {
+      year = year;
+    }
+    return year;
+  }
+
+  private focusWithTarget(key: string): void {
+    setTimeout(() => {
+      let res = focusControl.requestFocus(key);
+      if (res) {
+        console.log('Request success');
+      } else {
+        console.log('Request failed');
+      }
+    });
+  }
+
+  private focusCurrentText(text: FocusText): void {
+    if (text === FocusText.TEXT1) {
+      if (this.focusText === FocusText.NONE) {
+        this.focusText = FocusText.TEXT1;
+      }
+      if (!this.hasFocusText1) {
+        this.hasFocusText1 = true;
+      }
+    } else if (text === FocusText.TEXT2) {
+      if (this.focusText === FocusText.NONE) {
+        this.focusText = FocusText.TEXT2;
+      }
+      if (!this.hasFocusText2) {
+        this.hasFocusText2 = true;
+      }
+    } else if (text === FocusText.TEXT3) {
+      if (this.focusText === FocusText.NONE) {
+        this.focusText = FocusText.TEXT3;
+      }
+      if (!this.hasFocusText3) {
+        this.hasFocusText3 = true;
+      }
+    } else {
+
+    }
+  }
+
+  private getMaxLength(): number {
+    if (this.max.toString().length > this.min.toString().length) {
+      return this.max.toString().length + 1;
+    } else {
+      return this.min.toString().length + 1;
+    }
+  }
+
+  private resourceToVp(value: Resource): number {
+    try {
+      if ((value as Resource).id !== -1) {
+        return px2vp(this.getUIContext().getHostContext()?.resourceManager.getNumber((value as Resource).id))
+      } else {
+        return px2vp(this.getUIContext().getHostContext()
+        ?.resourceManager
+          .getNumberByName(((value.params as string[])[0]).split('.')[2]))
+      }
+    } catch (error) {
+      return CounterResource.COUNTER_LIST_PADDING
+    }
+  }
+
+  public getAccessibilityResource(resource: ResourceStr | string | undefined): string {
+    let accessibilityResource: string = '';
+    try {
+      if (typeof resource === 'string') {
+        accessibilityResource = resource;
+      } else {
+        accessibilityResource = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(resource?.id) ?? '';
+      }
+    } catch (error) {
+      let code: number = (error as BusinessError).code;
+      let message: string = (error as BusinessError).message;
+      console.log(`Get accessility resource error code:${code} message:${message}`);
+    }
+    return accessibilityResource;
+  }
+
+  private getTextDirection(): Direction {
+    if (this.counterDirection === Direction.Auto) {
+      return i18n.isRTL(i18n.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr;
+    } else {
+      return this.counterDirection;
+    }
+  }
+
+  private getIncreaseStr(): string {
+    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+  }
+
+  private getReduceStr(): string {
+    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+  }
 
   build() {
-    Column() {
-      Text(this.message)
-        .fontSize(18)
-        .fontWeight(FontWeight.Bold)
+    if (this.type === CounterV2Type.LIST) {
+      RelativeContainer() {
+        Text(this.numberStyleOptions.label)
+          .direction(this.getTextDirection())
+          .fontSize(CounterResource.COUNTER_LIST_LABEL_SIZE)
+          .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE)
+          .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+          .margin({
+            start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_LIST_LEFT_PADDING))
+          })
+          .alignRules({
+            center: { anchor: '__container__', align: VerticalAlign.Center },
+            start: { anchor: '__container__', align: HorizontalAlign.Start },
+            end: { anchor: 'Row1', align: HorizontalAlign.Start }
+          })
+          .id('Text')
+        Row() {
+          Stack() {
+            Image(CounterResource.BUTTON_SUB_ICON)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE)
+              .height(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.subOpacity)
+            Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
+              .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+              .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+              .responseRegion({
+                x: CounterResource.COUNTER_LIST_BUTTON_HOT_SPOT_X,
+                y: CounterResource.COUNTER_LIST_BUTTON_HOT_SPOT_Y,
+                width: '150%',
+                height: '150%'
+              })
+              .groupDefaultFocus(true)
+              .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+              .opacity(this.subOpacity)
+              .enabled(this.subBtnEnabled)
+              .key('ListSubButton' + this.timeStamp.toString())
+              .onKeyEvent((event: KeyEvent) => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                  this.resetFocusButton();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                  event.stopPropagation();
+                  this.homeFirstValue();
+                  this.focusWithTarget('ListAddButton' + this.timeStamp.toString());
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                  event.stopPropagation();
+                  if (this.addBtnStateEffect) {
+                    this.addBtnStateEffect = false;
+                    this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+                    this.addBtnEnabled = false;
+                  }
+                  this.endLastValue();
+                  this.focusWithTarget('ListAddButton' + this.timeStamp.toString());
+                }
+              })
+              .onClick((event: ClickEvent) => {
+                this.subValue();
+                this.onChange?.(this.value);
+                if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                  this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (this.getUIContext()
+                      .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility subValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility subValue faild error code:${code} message:${message}`);
+                }
+              })
+              .gesture(
+                LongPressGesture({ repeat: true })
+                  .onAction((event: GestureEvent) => {
+                    if (event.repeat) {
+                      this.subValue();
+                      this.onChange?.(this.value);
+                    }
+                    this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (this.getUIContext()
+                          .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility subValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility subValue longPress faild error code:${code} message:${message}`);
+                    }
+                  })
+              )
+              .hoverEffect(this.choverEffect)
+              .onHover((isHover: boolean) => {
+                this.onHoverDecrease && this.onHoverDecrease(isHover);
+              })
+              .focusable(this.focusEnable)
+              .onFocus(() => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusDecrease && this.onFocusDecrease();
+                this.updateButtonStatus();
+              })
+              .onBlur(() => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurDecrease && this.onBlurDecrease();
+              })
+          }
+          .direction(this.counterDirection)
+          .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+          .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+          .borderRadius(CounterResource.COUNTER_LIST_BUTTON_RADIUS)
+          .borderWidth(this.subBtnFocusWidth)
+          .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+          .clip(true)
+
+          if (this.hasTextWidth) {
+            Text(this.value.toString())
+              .accessibilityText(this.getAccessibilityResource(this.numberStyleOptions.label) + '[n2]' +
+              this.value.toString() + '[n0]')
+              .direction(this.counterDirection)
+              .width(this.textWidth.toString())
+              .textAlign(TextAlign.Center)
+              .fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE)
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+              .margin({
+                start: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN),
+                end: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN)
+              })
+          } else {
+            Text(this.value.toString())
+              .accessibilityText(this.getAccessibilityResource(this.numberStyleOptions.label) + '[n2]' +
+              this.value.toString() + '[n0]')
+              .direction(this.counterDirection)
+              .textAlign(TextAlign.Center)
+              .fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE)
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+              .margin({
+                start: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN),
+                end: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN)
+              })
+          }
+
+          Stack() {
+            Image(CounterResource.BUTTON_ADD_ICON)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE)
+              .height(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.addOpacity)
+            Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
+              .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+              .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+              .responseRegion({
+                x: CounterResource.COUNTER_LIST_BUTTON_HOT_SPOT_X,
+                y: CounterResource.COUNTER_LIST_BUTTON_HOT_SPOT_Y,
+                width: '150%',
+                height: '150%'
+              })
+              .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+              .opacity(this.addOpacity)
+              .enabled(this.addBtnEnabled)
+              .key('ListAddButton' + this.timeStamp.toString())
+              .onKeyEvent((event: KeyEvent) => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                  this.resetFocusButton();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                  event.stopPropagation();
+                  this.homeFirstValue();
+                  if (this.subBtnStateEffect) {
+                    this.subBtnStateEffect = false;
+                    this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+                    this.subBtnEnabled = false;
+                  }
+                  this.focusWithTarget('ListAddButton' + this.timeStamp.toString());
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                  event.stopPropagation();
+                  this.endLastValue();
+                  this.focusWithTarget('ListSubButton' + this.timeStamp.toString());
+                }
+              })
+              .onClick((event: ClickEvent) => {
+                this.addValue();
+                this.onChange?.(this.value);
+                if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                  this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (this.getUIContext()
+                      .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility addValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility addValue click longPress faild error code:${code} message:${message}`);
+                }
+              })
+              .gesture(
+                LongPressGesture({ repeat: true })
+                  .onAction((event: GestureEvent) => {
+                    if (event.repeat) {
+                      this.addValue();
+                      this.onChange?.(this.value);
+                    }
+                    this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (this.getUIContext()
+                          .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility addValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility addValue longPress longPress faild error code:${code} message:${message}`);
+                    }
+                  })
+              )
+              .hoverEffect(this.choverEffect)
+              .onHover((isHover: boolean) => {
+                this.onHoverIncrease && this.onHoverIncrease(isHover);
+              })
+              .focusable(this.focusEnable)
+              .onFocus(() => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusIncrease && this.onFocusIncrease();
+                this.updateButtonStatus();
+              })
+              .onBlur(() => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurIncrease && this.onBlurIncrease();
+              })
+          }
+          .direction(this.counterDirection)
+          .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+          .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+          .borderRadius(CounterResource.COUNTER_LIST_BUTTON_RADIUS)
+          .borderWidth(this.addBtnFocusWidth)
+          .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+          .clip(true)
+        }
+        .direction(this.counterDirection)
+        .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
+        .margin({
+          end: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_LIST_RIGHT_PADDING))
+        })
         .alignRules({
           center: { anchor: '__container__', align: VerticalAlign.Center },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
+          end: { anchor: '__container__', align: HorizontalAlign.End }
         })
+        .tabIndex(0)
+        .id('Row1')
+      }
+      .direction(this.counterDirection)
+      .width('100%')
+      .height(CounterResource.COUNTER_LIST_HEIGHT)
+    } else if (this.type === CounterV2Type.COMPACT) {
+      Column() {
+        Row() {
+          Stack() {
+            Image(CounterResource.BUTTON_SUB_ICON)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE)
+              .height(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.subOpacity)
+            Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
+              .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
+              .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
+              .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+              .opacity(this.subOpacity)
+              .enabled(this.subBtnEnabled)
+              .key('CompactSubButton' + this.timeStamp.toString())
+              .onKeyEvent((event: KeyEvent) => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                  this.resetFocusButton();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                  event.stopPropagation();
+                  this.homeFirstValue();
+                  this.focusWithTarget('CompactAddButton' + this.timeStamp.toString());
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                  event.stopPropagation();
+                  this.endLastValue();
+                  if (this.addBtnStateEffect) {
+                    this.addBtnStateEffect = false;
+                    this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+                    this.addBtnEnabled = false;
+                  }
+                  this.focusWithTarget('CompactSubButton' + this.timeStamp.toString());
+                }
+              })
+              .onClick((event: ClickEvent) => {
+                this.subValue();
+                this.onChange?.(this.value);
+                if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                  this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (this.getUIContext()
+                      .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility subValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility subValue click longPress faild error code:${code} message:${message}`);
+                }
+              })
+              .gesture(
+                LongPressGesture({ repeat: true })
+                  .onAction((event: GestureEvent) => {
+                    if (event.repeat) {
+                      this.subValue();
+                      this.onChange?.(this.value);
+                    }
+                    if (event.source === SourceType.Mouse ||
+                      event.source === SourceType.TouchScreen) {
+                      this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    }
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (this.getUIContext()
+                          .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility subValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility subValue longPress longPress faild error code:${code} message:${message}`);
+                    }
+                  })
+              )
+              .hoverEffect(this.choverEffect)
+              .onHover((isHover: boolean) => {
+                this.onHoverDecrease && this.onHoverDecrease(isHover);
+              })
+              .focusable(this.focusEnable)
+              .groupDefaultFocus(true)
+              .onFocus(() => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusDecrease && this.onFocusDecrease();
+                this.updateButtonStatus();
+              })
+              .onBlur(() => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurDecrease && this.onBlurDecrease();
+              })
+          }
+          .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
+          .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
+          .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
+          .borderWidth(this.subBtnFocusWidth)
+          .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+          .margin({
+            start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN))
+          })
+          .clip(true)
+
+          if (this.hasTextWidth) {
+            Text(this.value.toString())
+              .accessibilityText(this.getAccessibilityResource(this.numberStyleOptions.label) + '[n2]' +
+              this.value.toString() + '[n0]')
+              .textAlign(TextAlign.Center)
+              .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+              .width(this.textWidth.toString())
+              .margin({
+                start: LengthMetrics.vp(CounterResource.COUNTER_COMPACT_BUTTON_TEXT_MARGIN),
+                end: LengthMetrics.vp(CounterResource.COUNTER_COMPACT_BUTTON_TEXT_MARGIN)
+              })
+          } else {
+            Text(this.value.toString())
+              .accessibilityText(this.getAccessibilityResource(this.numberStyleOptions.label) + '[n2]' +
+              this.value.toString() + '[n0]')
+              .direction(this.counterDirection)
+              .textAlign(TextAlign.Center)
+              .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+              .margin({
+                start: LengthMetrics.vp(CounterResource.COUNTER_COMPACT_BUTTON_TEXT_MARGIN),
+                end: LengthMetrics.vp(CounterResource.COUNTER_COMPACT_BUTTON_TEXT_MARGIN)
+              })
+          }
+
+          Stack() {
+            Image(CounterResource.BUTTON_ADD_ICON)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE)
+              .height(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.addOpacity)
+            Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
+              .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
+              .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
+              .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+              .opacity(this.addOpacity)
+              .enabled(this.addBtnEnabled)
+              .key('CompactAddButton' + this.timeStamp.toString())
+              .onKeyEvent((event: KeyEvent) => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                  this.resetFocusButton();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                  event.stopPropagation();
+                  this.homeFirstValue();
+                  if (this.subBtnStateEffect) {
+                    this.subBtnStateEffect = false;
+                    this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+                    this.subBtnEnabled = false;
+                  }
+                  this.focusWithTarget('CompactAddButton' + this.timeStamp.toString());
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                  event.stopPropagation();
+                  this.endLastValue();
+                  this.focusWithTarget('CompactSubButton' + this.timeStamp.toString());
+                }
+              })
+              .onClick((event: ClickEvent) => {
+                this.addValue();
+                this.onChange?.(this.value);
+                if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                  this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (this.getUIContext()
+                      .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility addValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility addValue click longPress faild error code:${code} message:${message}`);
+                }
+              })
+              .gesture(
+                LongPressGesture({ repeat: true })
+                  .onAction((event: GestureEvent) => {
+                    if (event.repeat) {
+                      this.addValue();
+                      this.onChange?.(this.value);
+                    }
+                    if (event.source === SourceType.Mouse ||
+                      event.source === SourceType.TouchScreen) {
+                      this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    }
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (this.getUIContext()
+                          .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility addValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility addValue longPress longPress faild error code:${code} message:${message}`);
+                    }
+                  })
+              )
+              .hoverEffect(this.choverEffect)
+              .onHover((isHover: boolean) => {
+                this.onHoverIncrease && this.onHoverIncrease(isHover);
+              })
+              .focusable(this.focusEnable)
+              .onFocus(() => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusIncrease && this.onFocusIncrease();
+                this.updateButtonStatus();
+              })
+              .onBlur(() => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurIncrease && this.onBlurIncrease();
+              })
+          }
+          .direction(this.counterDirection)
+          .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
+          .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
+          .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
+          .borderWidth(this.addBtnFocusWidth)
+          .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+          .margin({
+            end: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN))
+          })
+          .clip(true)
+        }
+        .direction(this.counterDirection)
+        .tabIndex(0)
+        .height(CounterResource.COUNTER_COMPACT_CONTAINER_HEIGHT)
+        .align(Alignment.Center)
+        .borderWidth(CounterResource.COUNTER_BORDER_WIDTH)
+        .borderColor(CounterResource.COUNTER_BORDER_COLOR)
+        .borderRadius(CounterResource.COUNTER_COMPACT_CONTAINER_RADIUS)
+
+        Text(this.numberStyleOptions.label)
+          .direction(this.counterDirection)
+          .margin({ top: CounterResource.COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE })
+          .fontSize(CounterResource.COUNTER_COMPACT_LABEL_SIZE)
+          .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE)
+          .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+          .align(Alignment.Top)
+      }
+    } else if (this.type === CounterV2Type.INLINE) {
+      Row() {
+        if (this.hasTextWidth) {
+          RelativeContainer() {
+            TextInput({
+              text: this.hasInputText1 ? this.inputValue : this.value.toString(),
+              controller: this.controller1
+            })
+              .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
+              .alignRules({
+                center: { anchor: '__container__', align: VerticalAlign.Center },
+                middle: { anchor: '__container__', align: HorizontalAlign.Center }
+              })
+              .width('100%')
+              .height('20vp')
+              .padding(0)
+              .borderRadius(0)
+              .textAlign(TextAlign.Center)
+              .type(InputType.PhoneNumber)
+              .copyOption(CopyOptions.None)
+              .fontSize(this.getTextInputFontSize())
+              .fontWeight(FontWeight.Medium)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+              .maxLength(this.getMaxLength())
+              .backgroundColor(Color.Transparent)
+              .key('InlineTextInput' + this.timeStamp.toString())
+              .onKeyEvent((event: KeyEvent) => {
+                this.focusCurrentText(FocusText.TEXT1)
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                  this.resetFocusText();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                  this.addValue();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                  event.stopPropagation();
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                  event.stopPropagation();
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                  this.subValue();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                  event.stopPropagation();
+                }
+              })
+              .onChange((value: string) => {
+                this.inputValue = value;
+                this.hasInputText1 = true;
+                let c = value[value.length - 1];
+                if (value.length === this.getMaxLength()) {
+                  this.inputValue = c;
+                }
+                this.updateInlineEnableState();
+              })
+              .onSubmit((enterKey: EnterKeyType) => {
+                this.hasInputText1 = false;
+                let submitNum = Number(this.inputValue);
+                if (Number.isInteger(submitNum) && submitNum >= this.min && submitNum <= this.max) {
+                  this.value = submitNum;
+                  this.onChange?.(this.value);
+                } else {
+                  this.inputValue = this.value.toString();
+                }
+                this.updateInlineEnableState();
+              })
+              .focusable(true)
+              .focusOnTouch(true)
+              .onFocus(() => {
+                this.focusText = FocusText.TEXT1;
+                this.hasFocusText1 = true;
+                this.controller1.caretPosition(this.value.toString().length);
+              })
+              .onBlur(() => {
+                if (this.hasInputText1) {
+                  let oldValue = this.value;
+                  this.validateInlineInput();
+                  if (this.value !== oldValue) {
+                    this.onChange?.(this.value);
+                  }
+                }
+                this.focusText = FocusText.NONE;
+                this.hasFocusText1 = false;
+              })
+              .onClick((event: ClickEvent) => {
+                this.focusText = FocusText.TEXT1;
+                this.hasFocusText1 = true;
+                this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                this.controller1.caretPosition(this.value.toString().length);
+              })
+          }
+          .direction(this.counterDirection)
+          .margin({
+            start: LengthMetrics.vp(CounterResource.COUNTER_INLINE_INPUT_TEXT_MARGIN),
+            end: LengthMetrics.vp(CounterResource.COUNTER_INLINE_INPUT_TEXT_MARGIN)
+          })
+          .height('100%')
+          .width(this.textWidth)
+        } else {
+          Row() {
+            TextInput({
+              text: this.hasInputText1 ? this.inputValue : this.value.toString(),
+              controller: this.controller1
+            })
+              .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
+              .direction(this.counterDirection)
+              .width(this.getMeasuredTextWidth(this.getValue()))
+              .height('20vp')
+              .padding(0)
+              .borderRadius(0)
+              .textAlign(TextAlign.Center)
+              .type(InputType.PhoneNumber)
+              .copyOption(CopyOptions.None)
+              .fontSize(this.getTextInputFontSize())
+              .fontWeight(FontWeight.Medium)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+              .maxLength(this.getMaxLength())
+              .backgroundColor(Color.Transparent)
+              .key('InlineTextInput' + this.timeStamp.toString())
+              .onKeyEvent((event: KeyEvent) => {
+                this.focusCurrentText(FocusText.TEXT1)
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                  this.resetFocusText();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                  this.addValue();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                  this.subValue();
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                  event.stopPropagation();
+                }
+              })
+              .onChange((value: string) => {
+                this.inputValue = value;
+                this.hasInputText1 = true;
+                let c = value[value.length -1];
+                if (value.length === this.getMaxLength()) {
+                  this.inputValue = c;
+                }
+                this.updateInlineEnableState();
+              })
+              .onSubmit((enterKey: EnterKeyType) => {
+                this.hasInputText1 = false;
+                let submitNum = Number(this.inputValue);
+                if (Number.isInteger(submitNum) && submitNum >= this.min && submitNum <= this.max) {
+                  this.value = submitNum;
+                  this.onChange?.(this.value);
+                } else {
+                  this.inputValue = this.value.toString();
+                }
+                this.updateInlineEnableState();
+              })
+              .focusable(true)
+              .focusOnTouch(true)
+              .onFocus(() => {
+                this.focusText = FocusText.TEXT1;
+                this.hasFocusText1 = true;
+                this.controller1.caretPosition(this.value.toString().length);
+              })
+              .onBlur(() => {
+                if (this.hasInputText1) {
+                  let oldValue = this.value;
+                  this.validateInlineInput();
+                  if (this.value !== oldValue) {
+                    this.onChange?.(this.value);
+                  }
+                }
+                this.focusText = FocusText.NONE;
+                this.hasFocusText1 = false;
+              })
+              .onClick((event: ClickEvent) => {
+                this.focusText = FocusText.TEXT1;
+                this.hasFocusText1 = true;
+                this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                this.controller1.caretPosition(this.value.toString().length);
+              })
+          }
+          .direction(this.counterDirection)
+          .margin({
+            start: LengthMetrics.vp(CounterResource.COUNTER_INLINE_INPUT_TEXT_MARGIN),
+            end: LengthMetrics.vp(CounterResource.COUNTER_INLINE_INPUT_TEXT_MARGIN)
+          })
+        }
+
+        Column() {
+          Stack() {
+            Rect()
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_FOCUS_BORDER_HEIGHT)
+              .radius([
+                ['0vp', '0vp'],
+                [CounterResource.COUNTER_INLINE_RADIUS, CounterResource.COUNTER_INLINE_RADIUS],
+                ['0vp', '0vp'],
+                ['0vp', '0vp']])
+              .strokeWidth(this.addBtnFocusWidth)
+              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              .margin({ end: LengthMetrics.vp(2) })
+              .fillOpacity(0)
+            Image(CounterResource.BUTTON_ARROW_UP)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.addOpacity)
+
+            Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
+              .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+              .backgroundColor(Color.Transparent)
+              .opacity(this.addOpacity)
+              .enabled(this.addBtnEnabled)
+              .onClick((event: ClickEvent) => {
+                this.addValue();
+                this.onChange?.(this.value);
+                if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                  this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (this.getUIContext()
+                      .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility addValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility addValue click longPress faild error code:${code} message:${message}`);
+                }
+              })
+              .gesture(
+                LongPressGesture({ repeat: true })
+                  .onAction((event: GestureEvent) => {
+                    if (event.repeat) {
+                      this.addValue();
+                    }
+                    this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (this.getUIContext()
+                          .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility addValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility addValue longPress faild error code:${code} message:${message}`);
+                    }
+                  })
+              )
+              .hoverEffect(this.choverEffect)
+              .onHover((isHover: boolean) => {
+                this.onHoverIncrease && this.onHoverIncrease(isHover);
+              })
+              .focusable(false)
+              .onFocus(() => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusIncrease && this.onFocusIncrease();
+              })
+              .onBlur(() => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurIncrease && this.onBlurIncrease();
+              })
+          }
+          .direction(this.counterDirection)
+          .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+          .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+          .padding({ top: '1vp' })
+          .borderWidth({ bottom: '1vp' })
+          .borderColor(CounterResource.COUNTER_BORDER_COLOR)
+          .clip(true)
+
+          Stack() {
+            Rect()
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_FOCUS_BORDER_HEIGHT)
+              .radius([
+                ['0vp', '0vp'],
+                ['0vp', '0vp'],
+                [CounterResource.COUNTER_INLINE_RADIUS, CounterResource.COUNTER_INLINE_RADIUS],
+                ['0vp', '0vp']
+              ])
+              .strokeWidth(this.subBtnFocusWidth)
+              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              .margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) })
+              .fillOpacity(0)
+            Image(CounterResource.BUTTON_ARROW_DOWN)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.subOpacity)
+            Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect })
+              .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+              .backgroundColor(Color.Transparent)
+              .opacity(this.subOpacity)
+              .enabled(this.subBtnEnabled)
+              .onClick((event: ClickEvent) => {
+                this.subValue();
+                this.onChange?.(this.value);
+                if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                  this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (this.getUIContext()
+                      .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility subValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility subValue click faild error code:${code} message:${message}`);
+                }
+              })
+              .gesture(
+                LongPressGesture({ repeat: true })
+                  .onAction((event: GestureEvent) => {
+                    if (event.repeat) {
+                      this.subValue();
+                    }
+                    this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (this.getUIContext()
+                          .getHostContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility subValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility subValue longPress faild error code:${code} message:${message}`);
+                    }
+                  })
+              )
+              .hoverEffect(this.choverEffect)
+              .onHover((isHover: boolean) => {
+                this.onHoverDecrease && this.onHoverDecrease(isHover);
+              })
+              .focusable(false)
+              .onFocus(() => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusDecrease && this.onFocusDecrease();
+              })
+              .onBlur(() => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurDecrease && this.onBlurDecrease();
+              })
+          }
+          .direction(this.counterDirection)
+          .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+          .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+          .clip(true)
+        }
+        .direction(this.counterDirection)
+        .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+        .height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT)
+        .borderWidth({ start: LengthMetrics.vp(CounterResource.COUNTER_BORDER_WIDTH_NUMBER) })
+        .borderColor(CounterResource.COUNTER_BORDER_COLOR)
+      }
+      .direction(this.counterDirection)
+      .height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT)
+      .borderWidth(CounterResource.COUNTER_BORDER_WIDTH)
+      .borderColor(CounterResource.COUNTER_BORDER_COLOR)
+      .borderRadius(CounterResource.COUNTER_INLINE_RADIUS)
+      .clip(true)
+    } else if (this.type === CounterV2Type.INLINE_DATE) {
+      Row() {
+        Row() {
+          TextInput({
+            text: this.hasInputText1 ? this.inputYear.toString() : this.getYear(),
+            controller: this.controller1
+          })
+            .accessibilityText(this.getDateYear(this.year))
+            .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
+            .direction(this.counterDirection)
+            .type(InputType.Number)
+            .copyOption(CopyOptions.None)
+            .fontSize(this.getTextInputFontSize())
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+            .maxLength(5)
+            .padding(0)
+            .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+            .width(this.yearTextWidth)
+            .height('20vp')
+            .borderRadius(0)
+            .borderWidth(0)
+            .key('DateTextInput1' + this.timeStamp.toString())
+            .onKeyEvent((event: KeyEvent) => {
+              this.focusCurrentText(FocusText.TEXT1);
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                this.resetFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                this.addDate();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                this.subDate();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                this.homeFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                this.endFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                this.focusWithTarget('DateTextInput2' + this.timeStamp.toString());
+              }
+            })
+            .onChange((value: string) => {
+              if (value.length !== 4) {
+                this.hasInputText1 = true;
+              }
+              this.inputYear = Number(value)
+              if (value.length === 5) {
+                this.inputYear = this.inputYear % 10;
+              }
+
+              if (this.timeoutID1 !== -1) {
+                clearTimeout(this.timeoutID1);
+                this.timeoutID1 = -1;
+              }
+
+              this.timeoutID1 = setTimeout(() => {
+                this.hasInputText1 = false;
+                this.inputYear = this.year;
+                this.updateDateEnableState();
+                this.updateDay();
+              }, 1500);
+
+              if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
+                this.year = this.inputYear;
+                this.updateDateEnableState();
+                this.updateDay();
+              }
+
+              if (value.length === 4) {
+                let date = new CounterV2DateData(this.year, this.month, this.day);
+                this.onDateChange?.(date);
+              }
+            })
+            .onSubmit((enterKey: EnterKeyType) => {
+              if (this.timeoutID1 !== -1) {
+                clearTimeout(this.timeoutID1);
+                this.timeoutID1 = -1;
+              }
+              this.hasInputText1 = false;
+              this.year -= 1;
+              if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
+                this.year = this.inputYear;
+              } else {
+                this.year += 1;
+                this.inputYear = this.year;
+              }
+              this.updateDateEnableState();
+              this.updateDay();
+            })
+            .tabIndex(0)
+            .focusOnTouch(true)
+            .focusable(true)
+            .onFocus(() => {
+              this.focusText = FocusText.TEXT1;
+              this.hasFocusText1 = true;
+              this.updateDateEnableState();
+              this.controller1.caretPosition(this.getYear().length);
+            })
+            .onBlur(() => {
+              this.focusText = FocusText.NONE;
+              this.hasFocusText1 = false;
+              this.updateDateEnableState();
+            })
+            .onClick((event: ClickEvent) => {
+              this.focusText = FocusText.TEXT1;
+              this.hasFocusText1 = true;
+              this.updateDateEnableState();
+              this.controller1.caretPosition(this.getYear().length);
+            })
+          Text('/')
+            .accessibilityLevel('no')
+            .direction(this.counterDirection)
+            .textAlign(TextAlign.Center)
+            .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
+            .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+            .width('8vp')
+          TextInput({
+            text: this.hasInputText2 ? this.inputMoon.toString() : this.convertNumberToString(this.month),
+            controller: this.controller2
+          })
+            .accessibilityText(this.getDateMonth(this.month))
+            .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
+            .direction(this.counterDirection)
+            .type(InputType.Number)
+            .copyOption(CopyOptions.None)
+            .fontSize(this.getTextInputFontSize())
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.hasFocusText2 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+            .maxLength(3)
+            .padding(0)
+            .backgroundColor(this.hasFocusText2 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+            .width(this.monthDayTextWidth)
+            .height('20vp')
+            .borderRadius(0)
+            .key('DateTextInput2' + this.timeStamp.toString())
+            .onKeyEvent((event: KeyEvent) => {
+              this.focusCurrentText(FocusText.TEXT2)
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                this.resetFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                this.subDate();
+                this.updateDay();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                this.addDate();
+                this.updateDay();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                this.homeFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                this.endFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
+              }
+
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_TAB) {
+                event.stopPropagation();
+                this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
+              }
+            })
+            .onChange((value: string) => {
+              this.inputMoon = Number(value);
+              if (value.length !== 2) {
+                this.hasInputText2 = true;
+              }
+              if (value.length === 3) {
+                this.inputMoon = this.inputMoon % 10;
+              }
+              if (this.timeoutID2 !== -1) {
+                clearTimeout(this.timeoutID2);
+                this.timeoutID2 = -1;
+              }
+
+              this.timeoutID2 = setTimeout(() => {
+                this.hasInputText2 = false;
+                this.month -= 1;
+                if (this.inputMoon >= 1 && this.inputMoon <= 12) {
+                  this.month = this.inputMoon;
+                } else {
+                  this.month += 1;
+                  this.inputMoon = this.month;
+                }
+                this.updateDay();
+              }, 1000);
+
+              if (value.length === 2) {
+                this.hasInputText2 = false;
+                this.month -= 1;
+                if (this.inputMoon >= 1 && this.inputMoon <= 12) {
+                  this.month = this.inputMoon;
+                  let date = new CounterV2DateData(this.year, this.month, this.day);
+                  this.onDateChange?.(date);
+                } else {
+                  this.month += 1;
+                  this.inputMoon = this.month;
+                }
+                this.updateDay();
+              }
+            })
+            .onSubmit((enterKey: EnterKeyType) => {
+              if (this.timeoutID2 !== -1) {
+                clearTimeout(this.timeoutID2);
+                this.timeoutID2 = -1;
+              }
+              this.hasInputText2 = false;
+              this.month -= 1;
+              if (this.inputMoon >= 1 && this.inputMoon <= 12) {
+                this.month = this.inputMoon;
+                this.updateDay();
+              } else {
+                this.month += 1;
+              }
+            })
+            .focusOnTouch(true)
+            .tabIndex(-1)
+            .focusable(true)
+            .onFocus(() => {
+              this.focusText = FocusText.TEXT2;
+              this.hasFocusText2 = true;
+              this.controller2.caretPosition(this.convertNumberToString(this.month).length);
+            })
+            .onBlur(() => {
+              this.focusText = FocusText.NONE
+              this.hasFocusText2 = false
+            })
+            .onClick((event: ClickEvent) => {
+              this.focusText = FocusText.TEXT2;
+              this.hasFocusText2 = true;
+              this.controller2.caretPosition(this.convertNumberToString(this.month).length);
+            })
+          Text('/')
+            .accessibilityLevel('no')
+            .direction(this.counterDirection)
+            .textAlign(TextAlign.Center)
+            .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
+            .fontColor(CounterResource.COUNTER_TEXT_COLOR)
+            .width('8vp')
+          TextInput({
+            text: this.hasInputText3 ? this.inputDay.toString() : this.convertNumberToString(this.day),
+            controller: this.controller3
+          })
+            .accessibilityText(this.getDateDay(this.day))
+            .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
+            .direction(this.counterDirection)
+            .type(InputType.Number)
+            .copyOption(CopyOptions.None)
+            .fontSize(this.getTextInputFontSize())
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.hasFocusText3 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+            .maxLength(3)
+            .padding(0)
+            .backgroundColor(this.hasFocusText3 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+            .width(this.monthDayTextWidth)
+            .height('20vp')
+            .borderRadius(0)
+            .key('DateTextInput3' + this.timeStamp.toString())
+            .onKeyEvent((event: KeyEvent) => {
+              this.focusCurrentText(FocusText.TEXT3)
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
+                this.resetFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                this.subDate();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                this.addDate();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                this.homeFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                this.endFocusText();
+                event.stopPropagation();
+              }
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                this.focusWithTarget('DateTextInput2' + this.timeStamp.toString());
+              }
+
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
+                event.stopPropagation();
+              }
+
+              if (event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_TAB) {
+                event.stopPropagation();
+                this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
+              }
+            })
+            .onChange((value: string) => {
+              this.inputDay = Number(value)
+              if (value.length !== 2) {
+                this.hasInputText3 = true;
+              }
+              if (value.length === 3) {
+                this.inputDay = this.inputDay % 10;
+              }
+              if (this.timeoutID3 !== -1) {
+                clearTimeout(this.timeoutID3);
+                this.timeoutID3 = -1;
+              }
+
+              this.timeoutID3 = setTimeout(() => {
+                this.hasInputText3 = false;
+                this.day -= 1;
+                if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
+                  this.day = this.inputDay;
+                } else {
+                  this.day += 1;
+                  this.inputDay = this.day;
+                }
+              }, 1000);
+
+              if (value.length === 2) {
+                this.hasInputText3 = false;
+                this.day -= 1;
+                if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
+                  this.day = this.inputDay;
+                  let date = new CounterV2DateData(this.year, this.month, this.day);
+                  this.onDateChange?.(date);
+                } else {
+                  this.day += 1;
+                  this.inputDay = this.day;
+                }
+              }
+            })
+            .onSubmit((enterKey: EnterKeyType) => {
+              if (this.timeoutID3 !== -1) {
+                clearTimeout(this.timeoutID3);
+                this.timeoutID3 = -1;
+              }
+              this.hasInputText3 = false;
+              this.day -= 1;
+              if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
+                this.day = this.inputDay;
+              } else {
+                this.day += 1;
+              }
+            })
+            .tabIndex(-2)
+            .focusOnTouch(true)
+            .focusable(true)
+            .onFocus(() => {
+              this.focusText = FocusText.TEXT3;
+              this.hasFocusText3 = true;
+              this.controller3.caretPosition(this.convertNumberToString(this.day).length);
+            })
+            .onBlur(() => {
+              this.focusText = FocusText.NONE;
+              this.hasFocusText3 = false;
+            })
+            .onClick((event: ClickEvent) => {
+              this.focusText = FocusText.TEXT3;
+              this.hasFocusText3 = true;
+              this.controller3.caretPosition(this.convertNumberToString(this.day).length);
+            })
+        }
+        .direction(this.counterDirection)
+        .width('92vp')
+        .height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT)
+        .margin({
+          start: LengthMetrics.vp(CounterResource.COUNTER_INLINE_DATE_TEXT_MARGIN),
+          end: LengthMetrics.vp(CounterResource.COUNTER_INLINE_DATE_TEXT_MARGIN)
+        })
+
+        Column() {
+          Stack() {
+            Rect()
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_FOCUS_BORDER_HEIGHT)
+              .radius([
+                ['0vp', '0vp'],
+                [CounterResource.COUNTER_INLINE_RADIUS, CounterResource.COUNTER_INLINE_RADIUS],
+                ['0vp', '0vp'],
+                ['0vp', '0vp']])
+              .strokeWidth(this.addBtnFocusWidth)
+              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              .margin({ end: LengthMetrics.vp(1) })
+              .fillOpacity(0)
+            Image(CounterResource.BUTTON_ARROW_UP)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.addOpacity)
+            Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
+              .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
+              .accessibilityDescription($r('sys.string.increase_counter_double_click_description'))
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+              .backgroundColor(Color.Transparent)
+              .opacity(this.addOpacity)
+              .enabled(this.addBtnEnabled)
+              .onClick((event: ClickEvent) => {
+                this.accessibilityBroadcastAddDate();
+                if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                  this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                }
+              })
+              .gesture(
+                LongPressGesture({ repeat: true })
+                  .onAction((event: GestureEvent) => {
+                    if (event.repeat) {
+                      this.addDate();
+                    }
+                    this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    this.accessibilityBroadcastAddDate();
+                  })
+              )
+              .hoverEffect(this.choverEffect)
+              .onHover((isHover: boolean) => {
+                this.onHoverIncrease && this.onHoverIncrease(isHover);
+              })
+              .focusable(false)
+              .onFocus(() => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusIncrease && this.onFocusIncrease();
+              })
+              .onBlur(() => {
+                this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurIncrease && this.onBlurIncrease();
+              })
+          }
+          .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+          .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+          .padding({ top: '1vp' })
+          .borderWidth({ bottom: '1vp' })
+          .borderColor(CounterResource.COUNTER_BORDER_COLOR)
+          .clip(true)
+
+          Stack() {
+            Rect()
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_FOCUS_BORDER_HEIGHT)
+              .radius([
+                ['0vp', '0vp'],
+                ['0vp', '0vp'],
+                [CounterResource.COUNTER_INLINE_RADIUS, CounterResource.COUNTER_INLINE_RADIUS],
+                ['0vp', '0vp']
+              ])
+              .strokeWidth(this.subBtnFocusWidth)
+              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              .margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) })
+              .fillOpacity(0)
+            Image(CounterResource.BUTTON_ARROW_DOWN)
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.subOpacity)
+            Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect })
+              .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
+              .accessibilityDescription($r('sys.string.reduce_counter_double_click_description'))
+              .direction(this.counterDirection)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+              .backgroundColor(Color.Transparent)
+              .opacity(this.subOpacity)
+              .enabled(this.subBtnEnabled)
+              .onClick((event: ClickEvent) => {
+                this.accessibilityBroadcastSubDate();
+                if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                  this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                }
+              })
+              .gesture(
+                LongPressGesture({ repeat: true })
+                  .onAction((event: GestureEvent) => {
+                    if (event.repeat) {
+                      this.subDate();
+                    }
+                    this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    this.accessibilityBroadcastSubDate();
+                  })
+              )
+              .hoverEffect(this.choverEffect)
+              .onHover((isHover: boolean) => {
+                this.onHoverDecrease && this.onHoverDecrease(isHover);
+              })
+              .focusable(false)
+              .onFocus(() => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusDecrease && this.onFocusDecrease();
+              })
+              .onBlur(() => {
+                this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurDecrease && this.onBlurDecrease();
+              })
+          }.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+          .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+          .clip(true)
+        }
+        .direction(this.counterDirection)
+        .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
+        .height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT)
+        .borderWidth({ start: LengthMetrics.vp(CounterResource.COUNTER_BORDER_WIDTH_NUMBER) })
+        .borderColor(CounterResource.COUNTER_BORDER_COLOR)
+      }
+      .direction(this.counterDirection)
+      .height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT)
+      .borderWidth(CounterResource.COUNTER_BORDER_WIDTH)
+      .borderColor(CounterResource.COUNTER_BORDER_COLOR)
+      .borderRadius(CounterResource.COUNTER_INLINE_RADIUS)
+      .clip(true)
+    } else {
     }
-    .height(100)
-    .width('100%')
   }
 }

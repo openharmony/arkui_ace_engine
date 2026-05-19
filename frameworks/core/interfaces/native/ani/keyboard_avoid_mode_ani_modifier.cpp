@@ -18,7 +18,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/interfaces/ani/ani_api.h"
 #include "frameworks/core/components/common/layout/constants.h"
-#include "interfaces/inner_api/drawable_descriptor/base/log.h"
 
 namespace OHOS::Ace::NG {
 const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE,
@@ -29,7 +28,7 @@ void SetKeyboardAvoidMode(int32_t index)
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (index < 0 || index >= static_cast<int32_t>(KEYBOARD_AVOID_MODES.size())) {
-        HILOGE("Invalid Type, setKeyboardAvoid failed");
+        LOGE("Invalid Type, setKeyboardAvoid failed");
         return;
     }
     pipeline->SetEnableKeyBoardAvoidMode(KEYBOARD_AVOID_MODES[index]);
@@ -53,4 +52,4 @@ const ArkUIAniKeyboardAvoidModeModifier* GetKeyboardAvoidModeAniModifier()
     };
     return &impl;
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG

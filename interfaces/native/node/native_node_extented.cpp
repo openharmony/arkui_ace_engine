@@ -2138,6 +2138,211 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+OH_ArkUI_LinearGradientOptions* OH_ArkUI_LinearGradientOptions_Create()
+{
+    auto* options = new OH_ArkUI_LinearGradientOptions();
+    options->angle = ArkUI_OptionalFloat { 0, 0.0f };
+    options->direction = ArkUI_LinearGradientDirection::ARKUI_LINEAR_GRADIENT_DIRECTION_NONE;
+    options->repeating = false;
+    options->colorStop.clear();
+    return options;
+}
+ 
+void OH_ArkUI_LinearGradientOptions_Destroy(OH_ArkUI_LinearGradientOptions* options)
+{
+    CHECK_NULL_VOID(options);
+    delete options;
+    options = nullptr;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetAngle(OH_ArkUI_LinearGradientOptions* options, float angle)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->angle.isSet = 1;
+    options->angle.value = angle;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetAngle(const OH_ArkUI_LinearGradientOptions* options, float* angle)
+{
+    CHECK_NULL_RETURN(options && angle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *angle = options->angle.value;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetDirection(OH_ArkUI_LinearGradientOptions* options,
+    ArkUI_LinearGradientDirection direction)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->direction = direction;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetDirection(const OH_ArkUI_LinearGradientOptions* options,
+    ArkUI_LinearGradientDirection* direction)
+{
+    CHECK_NULL_RETURN(options && direction, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *direction = options->direction;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetRepeating(OH_ArkUI_LinearGradientOptions* options, bool repeating)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->repeating = repeating;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetRepeating(
+    const OH_ArkUI_LinearGradientOptions* options, bool* repeating)
+{
+    CHECK_NULL_RETURN(options && repeating, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *repeating = options->repeating;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetColorStop(
+    OH_ArkUI_LinearGradientOptions* options, const uint32_t* colors, const float* stops, int32_t colorsAndStopsSize)
+{
+    CHECK_NULL_RETURN(options && colors && stops, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    for (int32_t i = 0; i < colorsAndStopsSize; i++) {
+        options->colorStop.emplace_back(
+            std::pair<uint32_t, float>(colors[i], stops[i]));
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetColorStop(
+    const OH_ArkUI_LinearGradientOptions* options, uint32_t* colors, float* stops, int32_t colorsAndStopsSize,
+    int32_t* writeLength)
+{
+    CHECK_NULL_RETURN(options && colors && stops && colorsAndStopsSize >= 0,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto size = static_cast<int32_t>(options->colorStop.size());
+    *writeLength = size;
+    CHECK_NULL_RETURN(colorsAndStopsSize >= size, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (size == 0) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+    }
+    for (int32_t i = 0; i < size; i++) {
+        auto temp = options->colorStop[i];
+        colors[i] = temp.first;
+        stops[i] = temp.second;
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+OH_ArkUI_RadialGradientOptions* OH_ArkUI_RadialGradientOptions_Create()
+{
+    auto* options = new OH_ArkUI_RadialGradientOptions();
+    options->centerX = ArkUI_OptionalFloat { 0, 0.0f };
+    options->centerY = ArkUI_OptionalFloat { 0, 0.0f };
+    options->radius = ArkUI_OptionalFloat { 0, 0.0f };
+    options->repeating = false;
+    options->colorStop.clear();
+    return options;
+}
+ 
+void OH_ArkUI_RadialGradientOptions_Destroy(OH_ArkUI_RadialGradientOptions* options)
+{
+    CHECK_NULL_VOID(options);
+    delete options;
+    options = nullptr;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetCenterX(OH_ArkUI_RadialGradientOptions* options, float centerX)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->centerX.isSet = 1;
+    options->centerX.value = centerX;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetCenterX(
+    const OH_ArkUI_RadialGradientOptions* options, float* centerX)
+{
+    CHECK_NULL_RETURN(options && centerX, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *centerX = options->centerX.value;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetCenterY(OH_ArkUI_RadialGradientOptions* options, float centerY)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->centerY.isSet = 1;
+    options->centerY.value = centerY;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetCenterY(
+    const OH_ArkUI_RadialGradientOptions* options, float* centerY)
+{
+    CHECK_NULL_RETURN(options && centerY, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *centerY = options->centerY.value;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetRadius(OH_ArkUI_RadialGradientOptions* options, float radius)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->radius.isSet = 1;
+    options->radius.value = radius;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetRadius(
+    const OH_ArkUI_RadialGradientOptions* options, float* radius)
+{
+    CHECK_NULL_RETURN(options && radius, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *radius = options->radius.value;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetRepeating(OH_ArkUI_RadialGradientOptions* options, bool repeating)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->repeating = repeating;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetRepeating(
+    const OH_ArkUI_RadialGradientOptions* options, bool* repeating)
+{
+    CHECK_NULL_RETURN(options && repeating, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *repeating = options->repeating;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetColorStop(
+    OH_ArkUI_RadialGradientOptions* options, const uint32_t* colors, const float* stops, int32_t colorsAndStopsSize)
+{
+    CHECK_NULL_RETURN(options && colors && stops, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    for (int32_t i = 0; i < colorsAndStopsSize; i++) {
+        options->colorStop.emplace_back(
+            std::pair<uint32_t, float>(colors[i], stops[i]));
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetColorStop(
+    const OH_ArkUI_RadialGradientOptions* options, uint32_t* colors, float* stops, int32_t colorsAndStopsSize,
+    int32_t* writeLength)
+{
+    CHECK_NULL_RETURN(options && colors && stops && colorsAndStopsSize >= 0,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto size = static_cast<int32_t>(options->colorStop.size());
+    *writeLength = size;
+    CHECK_NULL_RETURN(colorsAndStopsSize >= size, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (size == 0) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+    }
+    for (int32_t i = 0; i < size; i++) {
+        auto temp = options->colorStop[i];
+        colors[i] = temp.first;
+        stops[i] = temp.second;
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
 #ifdef __cplusplus
 };
 #endif

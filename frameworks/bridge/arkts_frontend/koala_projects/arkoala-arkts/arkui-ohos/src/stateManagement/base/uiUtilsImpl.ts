@@ -19,7 +19,8 @@ import { WrappedArray } from './observeWrappedArray';
 import { WrappedDate } from './observeWrappedDate';
 import { WrappedSet } from './observeWrappedSet';
 import { WrappedMap } from './observeWrappedMap';
-import { ObserveWrappedBase, ObserveWrappedKeyedMeta, ObservedBuiltIn } from './observeWrappedBase';
+import { ObserveWrappedBase, ObserveWrappedKeyedMeta } from './observeWrappedBase';
+import { ObservedBuiltIn } from '../decorator';
 import { Binding, MutableBinding } from '../utils';
 import { getRawObject, isDynamicObject } from '#generated';
 

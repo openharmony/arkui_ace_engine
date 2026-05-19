@@ -48,6 +48,9 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD = 1 <
 
 //only used in ArkTs1.2
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_WHEN_ADD_CHILD = 1 << 10;
+
+//only used in FrameNode::Measure(), Mark self to prevent secondaryMeasure when constraint not change
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT_BY_MEASURE = 1 << 11;
 struct DirtySwapConfig {
     bool frameSizeChange = false;
     bool frameOffsetChange = false;

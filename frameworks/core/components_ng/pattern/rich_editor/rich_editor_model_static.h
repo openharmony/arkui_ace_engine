@@ -38,6 +38,7 @@ public:
     static void SetAboutToDelete(FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetPunctuationOverflow(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func,
         const std::optional<bool>& supportAvoidance);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);

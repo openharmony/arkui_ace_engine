@@ -33,12 +33,13 @@ constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
 constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
 constexpr uint32_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
-constexpr uint32_t SYNC_RES_TYPE_APP_IS_IN_CLICK_REPORT_EXT_LIST = 511;
+constexpr uint32_t SYNC_RES_TYPE_APP_IS_IN_TAIHANG_LIST = 511;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
 constexpr uint32_t RES_TYPE_OVERLAY        = 151;
 constexpr uint32_t RES_TYPE_BACKPRESSED_EVENT = 184;
+constexpr uint32_t RES_TYPE_COMPONENT_STATE_CHANGE = 212;
 constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
@@ -338,7 +339,14 @@ bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std
 bool ResSchedReport::AppClickExtEnableCheck(const std::unordered_map<std::string, std::string>& payload,
     std::unordered_map<std::string, std::string>& reply)
 {
-    ResScheSyncEventReport(SYNC_RES_TYPE_APP_IS_IN_CLICK_REPORT_EXT_LIST, 0, payload, reply);
+    ResScheSyncEventReport(SYNC_RES_TYPE_APP_IS_IN_TAIHANG_LIST, 0, payload, reply);
+    return reply["result"] == "\"true\"";
+}
+
+bool ResSchedReport::AppSwiperReportEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(SYNC_RES_TYPE_APP_IS_IN_TAIHANG_LIST, 1, payload, reply);
     return reply["result"] == "\"true\"";
 }
 
@@ -684,6 +692,12 @@ void ResSchedReport::HandlePageTransition(const std::string& fromPage,
     payload[TO_COMPONENT_NAME] = toComponentName;
     LoadAceApplicationContext(payload);
     ResSchedDataReport(RES_TYPE_PAGE_TRANSITION, 0, payload);
+}
+
+void ResSchedReport::HandleSwiperChange(std::unordered_map<std::string, std::string>& payload)
+{
+    LoadAceApplicationContext(payload);
+    ResSchedDataReport(RES_TYPE_COMPONENT_STATE_CHANGE, 0, payload);
 }
 
 ResSchedReportScope::ResSchedReportScope(const std::string& name,

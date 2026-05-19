@@ -73,8 +73,6 @@ public:
 
         json->PutExtAttr("color",
             propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str(), filter);
-        json->PutExtAttr("foregroundColor",
-            propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("enableLoading", GetEnableLoading().value_or(true) ? "true" : "false", filter);
     }
 

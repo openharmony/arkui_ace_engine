@@ -230,6 +230,12 @@ public:
 
 private:
     void OnModifyDone() override;
+    void OnAttachToMainTree() override;
+
+    bool NeedReadFontScaleFromEnv() override
+    {
+        return true;
+    }
     void OnAfterModifyDone() override;
     void SetAccessibilityAction();
     void SetAccessibilityClearAction();

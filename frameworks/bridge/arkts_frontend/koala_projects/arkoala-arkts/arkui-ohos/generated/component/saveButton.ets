@@ -313,9 +313,7 @@ export interface SaveButtonAttribute extends SecurityComponentMethod {
     setText(value: string | arkui_component_units_Resource | undefined): this {
         throw new Error('Unimplemented method setText')
     }
-    iconSize(value: Dimension | SizeOptions | undefined): this {
-        throw new Error('Unimplemented method iconSize')
-    }
+    iconSize(value: Dimension | SizeOptions | undefined): this
     iconBorderRadius(value: Dimension | BorderRadiuses | undefined): this {
         throw new Error('Unimplemented method iconBorderRadius')
     }

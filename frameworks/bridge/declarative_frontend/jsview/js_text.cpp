@@ -102,33 +102,6 @@ void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
         }
     }
 }
-
-bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
-{
-    if (!jsValue->IsArray()) {
-        return false;
-    }
-    auto array = JSRef<JSArray>::Cast(jsValue);
-    for (uint32_t i = 0; i < array->Length(); ++i) {
-        auto item = array->GetValueAt(i);
-        if (!item->IsObject()) {
-            continue;
-        }
-        auto itemObj = JSRef<JSObject>::Cast(item);
-        auto axis = itemObj->GetProperty("axis");
-        auto value = itemObj->GetProperty("value");
-        auto isNormalized = itemObj->GetProperty("isNormalized");
-        if (!axis->IsString() || !value->IsNumber()) {
-            continue;
-        }
-        std::optional<bool> normalized;
-        if (isNormalized->IsBoolean()) {
-            normalized = isNormalized->ToBoolean();
-        }
-        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
-    }
-    return !fontVariations.empty();
-}
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -1204,7 +1177,7 @@ bool JSText::BindPreviewMenu(const JSRef<JSVal> argsMenuOptions, NG::TextRespons
     bool isPreviewMenu = !menuType->IsUndefined() && !menuType->IsNull() && menuType->IsNumber() &&
                         (menuType->ToNumber<int32_t>() == 1);
     bool bindImagePreviewMenu = isPreviewMenu && responseType == NG::TextResponseType::LONG_PRESS;
-    if (bindImagePreviewMenu) {
+    if (bindImagePreviewMenu && textSpanType == NG::TextSpanType::IMAGE) {
         TextModel::GetInstance()->BindPreviewMenu(textSpanType, buildFunc, menuParam);
         return true;
     } else {
@@ -1310,6 +1283,7 @@ void JSText::SetFontVariations(const JSCallbackInfo& info)
     FONT_VARIATIONS_LIST fontVariations;
     if (!ParseJsFontVariations(info[0], fontVariations)) {
         TextModel::GetInstance()->ResetFontVariations();
+        return;
     }
     TextModel::GetInstance()->SetFontVariations(fontVariations);
 }

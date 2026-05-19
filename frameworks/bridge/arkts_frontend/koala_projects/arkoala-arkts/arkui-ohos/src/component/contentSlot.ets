@@ -31,6 +31,9 @@ export interface ContentSlotAttribute {
     debugLine(sourceLine: string, moduleName?: string): this {
         throw new Error("Unimplemented method debugLine")
     }
+    applyAttributesFinish(): void {
+        throw new Error("Unimplemented method applyAttributesFinish")
+    }
 }
 
 export class ArkContentSlotPeer extends PeerNode {
@@ -93,3 +96,17 @@ export function ContentSlotImpl(
         style?.(receiver)
     })
 }
+
+/** @memo */
+export function ContentSlot(
+    /** @memo */
+    style: ((attributes: ContentSlotAttribute) => void) | undefined,
+): void {
+    const receiver = remember(() => {
+        return new ArkContentSlotComponent()
+    })
+    NodeAttach<ArkContentSlotPeer>((): ArkContentSlotPeer => ArkContentSlotPeer.create(receiver), (_: ArkContentSlotPeer) => {
+        style?.(receiver)
+    })
+}
+

@@ -371,6 +371,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
  */
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest7, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1 Set flags and update areas, test SafeAreaToPadding with RESIZE mode.
+     * @tc.expected: SafeAreaToPadding returns correct padding with keyboard height.
+     */
     safeAreaManager_->SetIgnoreSafeArea(false);
     safeAreaManager_->SetIsFullScreen(false);
     safeAreaManager_->SetIsNeedAvoidWindow(true);
@@ -425,7 +429,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest7, TestSize.Level1)
  */
 HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
 {
-    // create nodes
+    /**
+     * @tc.steps: step1 Create frame nodes and mount them to build a UI tree.
+     * @tc.expected: Nodes mount correctly with expected parent tags.
+     */
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
     auto frameNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -435,7 +442,6 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
     frameNode2->MountToParent(frameNode1);
     frameNode3->MountToParent(frameNode2);
 
-    // make sure nodes mount correctly
     EXPECT_EQ(frameNode1->GetParent()->GetTag(), V2::PAGE_ETS_TAG);
     EXPECT_EQ(frameNode2->GetParent()->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(frameNode3->GetParent()->GetTag(), V2::FLEX_ETS_TAG);
@@ -449,7 +455,10 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
     auto rowLayoutProperty = frameNode3->GetLayoutProperty();
     EXPECT_NE(rowLayoutProperty, nullptr);
     rowLayoutProperty->UpdateSafeAreaExpandOpts(opts);
-    // page start to measure
+    /**
+     * @tc.steps: step2 Start layout from page and verify expand node set.
+     * @tc.expected: Three nodes added to expand set, page not added.
+     */
     frameNode0->SetLayoutDirtyMarked(true);
     frameNode0->CreateLayoutTask();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -457,7 +466,6 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
     auto manager = pipeline->GetSafeAreaManager();
     EXPECT_NE(manager, nullptr);
     auto nodeSet = manager->GetExpandNodeSet();
-    // page should not be added
     EXPECT_EQ(nodeSet.size(), 3);
     auto iter = nodeSet.begin();
     EXPECT_NE(iter, nodeSet.end());
@@ -486,6 +494,10 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
  */
 HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1 Create frame nodes and add them to expand list.
+     * @tc.expected: All nodes added successfully, returns true.
+     */
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
     auto frameNode1 =
@@ -501,7 +513,10 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode3), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode4), true);
 
-    // repeat add should not work
+    /**
+     * @tc.steps: step2 Add nodes again and verify repeat add returns false.
+     * @tc.expected: Repeat add should not work, returns false.
+     */
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), false);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode1), false);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), false);
@@ -519,6 +534,10 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
  */
 HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1 Test different keyboard avoid modes for IsModeOffset and IsModeResize.
+     * @tc.expected: Each mode returns correct offset/resize status.
+     */
     std::vector<KeyBoardAvoidMode> modeArr = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE,
         KeyBoardAvoidMode::OFFSET_WITH_CARET, KeyBoardAvoidMode::RESIZE_WITH_CARET, KeyBoardAvoidMode::NONE };
 
@@ -539,6 +558,10 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
  */
 HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInset, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1 Test GetKeyboardWebInset with different keyboard avoid modes.
+     * @tc.expected: Returns correct inset based on mode.
+     */
     SafeAreaInsets::Inset inset;
     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
     auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
@@ -557,6 +580,10 @@ HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInset, TestSize.Level1)
  */
 HWTEST_F(SafeAreaManagerTest, SetAndGetKeyboardInsetImplTest, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1 Set keyboard inset implementation and verify GetKeyboardInsetImpl.
+     * @tc.expected: GetKeyboardInsetImpl returns correct inset.
+     */
     safeAreaManager_->SetKeyboardInsetImpl([](SafeAreaManager* manager) { return manager->GetKeyboardWebInset(); });
     EXPECT_NE(safeAreaManager_->getKeyboardInset, nullptr);
     auto ret = safeAreaManager_->GetKeyboardInsetImpl();

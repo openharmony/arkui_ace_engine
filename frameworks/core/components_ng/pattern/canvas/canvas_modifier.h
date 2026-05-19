@@ -33,7 +33,7 @@ public:
     CanvasModifier();
     ~CanvasModifier() override = default;
     void onDraw(DrawingContext& drawingContext) override;
-    std::string GetDumpInfo();
+    std::deque<std::string> GetDumpInfo();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& array);
 
     void SetRenderContext(const WeakPtr<RenderContext>& renderContext);

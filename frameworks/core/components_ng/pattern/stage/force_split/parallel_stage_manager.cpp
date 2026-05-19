@@ -335,7 +335,7 @@ bool ParallelStageManager::PushPage(const RefPtr<FrameNode>& node, bool needHide
     auto isNewLifecycle = AceApplicationInfo::GetInstance()
         .GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
     if (IsVirtualStackBasedSplit()) {
-        return PushPageInVirtualStackBasedSplit(node, isNewLifecycle, needHideLast, needTransition);
+        return PushPageInVirtualStackBasedSplit(node, needHideLast, needTransition);
     }
     return PushPageInSplitMode(node, isNewLifecycle, needHideLast, needTransition);
 }
@@ -1706,14 +1706,13 @@ void ParallelStageManager::OnWindowStateChangeInVirtualStackBasedSplit(bool show
     fireHide(primaryPage);
 }
 
-bool ParallelStageManager::PushPageInVirtualStackBasedSplit(const RefPtr<FrameNode>& newPageNode,
-    bool isNewLifecycle, bool needHideLast, bool needTransition)
+bool ParallelStageManager::PushPageInVirtualStackBasedSplit(
+    const RefPtr<FrameNode>& newPageNode, bool needHideLast, bool needTransition)
 {
     auto currentTopPage = GetLastPageInStack();
     auto touchedSecondaryPage = TakeTouchedSecondaryColumnPage();
     auto secondaryPageTriggered = touchedSecondaryPage && touchedSecondaryPage == currentTopPage;
-    auto usePushToPrimaryFlow =
-        !isNewPageReplacing_ && secondaryPageTriggered && ShouldCurrentPushPageToPrimary(newPageNode);
+    auto usePushToPrimaryFlow = secondaryPageTriggered && ShouldCurrentPushPageToPrimary(currentTopPage, newPageNode);
     auto pipeline = stageNode_->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto newTopPattern = newPageNode->GetPattern<ParallelPagePattern>();
@@ -1810,13 +1809,13 @@ bool ParallelStageManager::PopPageInVirtualStackBasedSplit(bool needShowNext, bo
     // Pop should only stay in push-to-primary flow when the current split relation already contains
     // a pushed-primary detail page. Unlike push, pop-to-secondary may be triggered by
     // edge-swipe/system back, so it must not depend on a secondary-column touch source.
-    auto touchedSecondaryPage = TakeTouchedSecondaryColumnPage();
-    auto needPushPageToPrimaryStateHandling = !isNewPageReplacing_ && HasRouterPushPageToPrimaryState();
     CHECK_NULL_RETURN(stageNode_, false);
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
     auto pipeline = stageNode_->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
+    TakeTouchedSecondaryColumnPage();
+    auto needPushPageToPrimaryStateHandling = !isNewPageReplacing_ && HasRouterPushPageToPrimaryState();
 
     const int32_t transitionPageSize = 2;
     int32_t pageNumber = 0;
@@ -1832,15 +1831,10 @@ bool ParallelStageManager::PopPageInVirtualStackBasedSplit(bool needShowNext, bo
     auto relatedOrPhPage = GetRelatedOrPlaceHolderPage();
     auto stackPages = CollectRouterStackPages();
     auto preTopPage = !stackPages.empty() ? stackPages.back() : nullptr;
-    RefPtr<FrameNode> newTopPage = nullptr;
     CHECK_NULL_RETURN(preTopPage, false);
-    std::vector<RefPtr<FrameNode>> remainingStackPages;
-    if (!stackPages.empty()) {
-        remainingStackPages.assign(stackPages.begin(), stackPages.end() - 1);
-    }
-    if (!remainingStackPages.empty()) {
-        newTopPage = remainingStackPages.back();
-    }
+    auto remainingStackPages = stackPages;
+    remainingStackPages.pop_back();
+    auto newTopPage = remainingStackPages.empty() ? nullptr : remainingStackPages.back();
 
     auto newVisiblePages = ResolveRouterVisiblePagesFromStackPages(remainingStackPages, relatedOrPhPage);
     auto movePageToSecondaryIsAllowed = CheckIfMovePageToSecondaryIsAllowed(preVisiblePages, newVisiblePages);
@@ -1895,7 +1889,7 @@ bool ParallelStageManager::PopPageToIndexInVirtualStackBasedSplit(
     // back(index/url) may remove multiple pages in one shot.
     // The new flow still follows the rule "visible diff decides show/hide, detach decides aboutToDisappear".
     // Like ordinary pop, pop-to-secondary back may come from system/gesture back instead of a page click.
-    auto touchedSecondaryPage = TakeTouchedSecondaryColumnPage();
+    TakeTouchedSecondaryColumnPage();
     auto needPushPageToPrimaryStateHandling = !isNewPageReplacing_ && HasRouterPushPageToPrimaryState();
     auto pipeline = stageNode_->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -1907,10 +1901,10 @@ bool ParallelStageManager::PopPageToIndexInVirtualStackBasedSplit(
     if (pageNumber <= 0) {
         return false;
     }
-    int32_t popSize = pageNumber - index - 1;
-    if (popSize < 0) {
+    if (index < 0 || index >= pageNumber) {
         return false;
     }
+    int32_t popSize = pageNumber - index - 1;
     if (popSize == 0) {
         return true;
     }
@@ -2087,13 +2081,13 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
         newVisiblePages.detail = relatedOrPhPage;
     }
 
-    auto isPushToPrimary = needPushPageToPrimaryStateHandling &&
-        CheckIfMovePageToPrimaryIsAllowed(preVisiblePages, newVisiblePages);
-    auto isPopToSecondary =
-        needPushPageToPrimaryStateHandling && CheckIfMovePageToSecondaryIsAllowed(preVisiblePages, newVisiblePages);
+    auto isPushToPrimary = false;
+    auto isPopToSecondary = false;
     auto hideTransitionType = PageTransitionType::NONE;
     auto showTransitionType = PageTransitionType::NONE;
-    if (needTransition) {
+    if (needTransition && needPushPageToPrimaryStateHandling) {
+        isPushToPrimary = CheckIfMovePageToPrimaryIsAllowed(preVisiblePages, newVisiblePages);
+        isPopToSecondary = CheckIfMovePageToSecondaryIsAllowed(preVisiblePages, newVisiblePages);
         if (isPushToPrimary) {
             hideTransitionType = GetRouterPushHideTransitionType(true);
             showTransitionType = GetRouterPushShowTransitionType(true);
@@ -2336,16 +2330,12 @@ bool ParallelStageManager::HasRouterPushPageToPrimaryState() const
     return false;
 }
 
-bool ParallelStageManager::ShouldCurrentPushPageToPrimary(const RefPtr<FrameNode>& newPageNode) const
+bool ParallelStageManager::ShouldCurrentPushPageToPrimary(
+    const RefPtr<FrameNode>& currentTopPage, const RefPtr<FrameNode>& newPageNode) const
 {
-    if (!IsVirtualStackBasedSplit()) {
-        return false;
-    }
     if (isNewPageReplacing_) {
         return false;
     }
-    auto currentTopPage = GetLastPageInStack();
-    CHECK_NULL_RETURN(currentTopPage, false);
     return ShouldMovePageToPrimaryForTransition(currentTopPage, newPageNode, false) ||
         HasRouterPushPageToPrimaryState();
 }

@@ -57,6 +57,19 @@ ArkUITextStyle ConvertToOriginTextStyle(const OH_ArkUI_TextStyle& textStyle)
     return originStyle;
 }
 
+void ConvertTolinearGradient(const OH_ArkUI_ParagraphStyle& paragraphStyle, ArkUIParagraphStyle& originStyle)
+{
+    auto gradient = paragraphStyle.linearGradient.value();
+    ArkUILinearGradientOptions options;
+    if (gradient.angle.isSet) {
+        options.angle = gradient.angle.value;
+    }
+    options.direction = static_cast<int32_t>(gradient.direction);
+    options.repeating = gradient.repeating;
+    options.colors = gradient.colorStop;
+    originStyle.linearGradient = options;
+}
+
 ArkUIParagraphStyle ConvertToOriginParagraphStyle(const OH_ArkUI_ParagraphStyle& paragraphStyle)
 {
     ArkUIParagraphStyle originStyle;
@@ -83,6 +96,25 @@ ArkUIParagraphStyle ConvertToOriginParagraphStyle(const OH_ArkUI_ParagraphStyle&
     originStyle.onDrawLeadingMargin = paragraphStyle.onDrawLeadingMargin;
     originStyle.onGetLeadingMargin = paragraphStyle.onGetLeadingMargin;
     originStyle.textDirection = static_cast<int32_t>(paragraphStyle.textDirection);
+    if (paragraphStyle.linearGradient.has_value()) {
+        ConvertTolinearGradient(paragraphStyle, originStyle);
+    }
+    if (paragraphStyle.radialGradient.has_value()) {
+        auto gradient = paragraphStyle.radialGradient.value();
+        ArkUIRadialGradientOptions options;
+        if (gradient.centerX.isSet) {
+            options.centerX = gradient.centerX.value;
+        }
+        if (gradient.centerY.isSet) {
+            options.centerY = gradient.centerY.value;
+        }
+        if (gradient.radius.isSet) {
+            options.radius = gradient.radius.value;
+        }
+        options.repeating = gradient.repeating;
+        options.colors = gradient.colorStop;
+        originStyle.radialGradient = options;
+    }
     return originStyle;
 }
 
@@ -362,6 +394,19 @@ OH_ArkUI_GestureStyle ConvertToCGestureStyle(const ArkUIGestureStyle& style)
     return gestureStyle;
 }
 
+void ConvertToCLinearGradient(const ArkUIParagraphStyle& style, OH_ArkUI_ParagraphStyle& paragraphStyle)
+{
+    auto gradient = style.linearGradient.value();
+    OH_ArkUI_LinearGradientOptions options;
+    if (gradient.angle.has_value()) {
+        options.angle = ArkUI_OptionalFloat { 1, gradient.angle.value() };
+    }
+    options.direction = static_cast<ArkUI_LinearGradientDirection>(gradient.direction);
+    options.repeating = gradient.repeating;
+    options.colorStop = gradient.colors;
+    paragraphStyle.linearGradient = options;
+}
+
 OH_ArkUI_ParagraphStyle ConvertToCParagraphStyle(const ArkUIParagraphStyle& style)
 {
     OH_ArkUI_ParagraphStyle paragraphStyle;
@@ -385,6 +430,25 @@ OH_ArkUI_ParagraphStyle ConvertToCParagraphStyle(const ArkUIParagraphStyle& styl
     paragraphStyle.onDrawLeadingMargin = style.onDrawLeadingMargin;
     paragraphStyle.onGetLeadingMargin = style.onGetLeadingMargin;
     paragraphStyle.textDirection = static_cast<ArkUI_TextDirection>(style.textDirection);
+    if (style.linearGradient.has_value()) {
+        ConvertToCLinearGradient(style, paragraphStyle);
+    }
+    if (style.radialGradient.has_value()) {
+        auto gradient = style.radialGradient.value();
+        OH_ArkUI_RadialGradientOptions options;
+        if (gradient.centerX.has_value()) {
+            options.centerX = ArkUI_OptionalFloat { 1, gradient.centerX.value() };
+        }
+        if (gradient.centerY.has_value()) {
+            options.centerY = ArkUI_OptionalFloat { 1, gradient.centerY.value() };
+        }
+        if (gradient.radius.has_value()) {
+            options.radius = ArkUI_OptionalFloat { 1, gradient.radius.value() };
+        }
+        options.repeating = gradient.repeating;
+        options.colorStop = gradient.colors;
+        paragraphStyle.radialGradient = options;
+    }
     return paragraphStyle;
 }
 
@@ -686,6 +750,12 @@ void ClearSpanStyle(OH_ArkUI_SpanStyle* spanStyle)
     spanStyle->imageAttachment.isPixelMap = std::nullopt;
     spanStyle->imageAttachment.isDrawingColorFilter = std::nullopt;
     spanStyle->imageAttachment.colorFilter = {};
+    if (spanStyle->paragraphStyle.linearGradient.has_value()) {
+        spanStyle->paragraphStyle.linearGradient->colorStop.clear();
+    }
+    if (spanStyle->paragraphStyle.radialGradient.has_value()) {
+        spanStyle->paragraphStyle.radialGradient->colorStop.clear();
+    }
 }
 
 OH_ArkUI_SpanStyle* OH_ArkUI_SpanStyle_Create()
@@ -797,6 +867,12 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetParagraphStyle(
     style.onDrawLeadingMargin = paragraphStyle->onDrawLeadingMargin;
     style.onGetLeadingMargin = paragraphStyle->onGetLeadingMargin;
     style.textDirection = paragraphStyle->textDirection;
+    if (paragraphStyle->linearGradient.has_value()) {
+        style.linearGradient = paragraphStyle->linearGradient.value();
+    }
+    if (paragraphStyle->radialGradient.has_value()) {
+        style.radialGradient = paragraphStyle->radialGradient.value();
+    }
     spanStyle->paragraphStyle = style;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -827,6 +903,12 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetParagraphStyle(
     paragraphStyle->onDrawLeadingMargin = spanStyle->paragraphStyle.onDrawLeadingMargin;
     paragraphStyle->onGetLeadingMargin = spanStyle->paragraphStyle.onGetLeadingMargin;
     paragraphStyle->textDirection = spanStyle->paragraphStyle.textDirection;
+    if (spanStyle->paragraphStyle.linearGradient.has_value()) {
+        paragraphStyle->linearGradient = spanStyle->paragraphStyle.linearGradient.value();
+    }
+    if (spanStyle->paragraphStyle.radialGradient.has_value()) {
+        paragraphStyle->radialGradient = spanStyle->paragraphStyle.radialGradient.value();
+    }
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1499,6 +1581,65 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetTextDirection(
 {
     CHECK_NULL_RETURN(paragraphStyle && textDirection, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *textDirection = paragraphStyle->textDirection;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetLinearGradient(
+    OH_ArkUI_ParagraphStyle* paragraphStyle, const OH_ArkUI_LinearGradientOptions* linearGradient)
+{
+    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_LinearGradientOptions gradient;
+    gradient.angle = linearGradient->angle;
+    gradient.direction = linearGradient->direction;
+    gradient.repeating = linearGradient->repeating;
+    if (!linearGradient->colorStop.empty()) {
+        auto colorStop = linearGradient->colorStop;
+        gradient.colorStop = colorStop;
+    }
+    paragraphStyle->linearGradient = gradient;
+    paragraphStyle->radialGradient = std::nullopt;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetLinearGradient(
+    const OH_ArkUI_ParagraphStyle* paragraphStyle, OH_ArkUI_LinearGradientOptions* linearGradient)
+{
+    CHECK_NULL_RETURN(paragraphStyle && paragraphStyle->linearGradient.has_value()
+        && linearGradient, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    linearGradient->angle = paragraphStyle->linearGradient->angle;
+    linearGradient->direction = paragraphStyle->linearGradient->direction;
+    linearGradient->repeating = paragraphStyle->linearGradient->repeating;
+    linearGradient->colorStop = paragraphStyle->linearGradient->colorStop;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetRadialGradient(
+    OH_ArkUI_ParagraphStyle* paragraphStyle, const OH_ArkUI_RadialGradientOptions* radialGradient)
+{
+    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_RadialGradientOptions gradient;
+    gradient.centerX = radialGradient->centerX;
+    gradient.centerY = radialGradient->centerY;
+    gradient.repeating = radialGradient->repeating;
+    gradient.radius = radialGradient->radius;
+    if (!radialGradient->colorStop.empty()) {
+        gradient.colorStop = radialGradient->colorStop;
+    }
+    paragraphStyle->radialGradient = gradient;
+    paragraphStyle->linearGradient = std::nullopt;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetRadialGradient(
+    const OH_ArkUI_ParagraphStyle* paragraphStyle, OH_ArkUI_RadialGradientOptions* radialGradient)
+{
+    CHECK_NULL_RETURN(paragraphStyle && paragraphStyle->radialGradient.has_value()
+        && radialGradient, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    radialGradient->centerX = paragraphStyle->radialGradient->centerX;
+    radialGradient->centerY = paragraphStyle->radialGradient->centerY;
+    radialGradient->radius = paragraphStyle->radialGradient->radius;
+    radialGradient->repeating = paragraphStyle->radialGradient->repeating;
+    radialGradient->colorStop = paragraphStyle->radialGradient->colorStop;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 

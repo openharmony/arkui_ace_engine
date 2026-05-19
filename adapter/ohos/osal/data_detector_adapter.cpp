@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/ai/data_detector_adapter.h"
 
 #include "adapter/ohos/entrance/ace_container.h"

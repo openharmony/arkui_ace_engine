@@ -846,6 +846,17 @@ SizeF CleanNodeResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     return textInputMeasure;
 }
 
+float CleanNodeResponseArea::GetIconSize()
+{
+    auto envFontScale = std::optional<float>();
+    auto pattern = hostPattern_.Upgrade();
+    if (pattern) {
+        envFontScale = pattern->GetEnvFontScale();
+    }
+    return static_cast<float>(iconSize_.ConvertToPxDistributeWithEnv(std::optional<float>(), std::optional<float>(),
+        true, envFontScale));
+}
+
 void CleanNodeResponseArea::AddIconHotZoneRect()
 {
     auto pattern = hostPattern_.Upgrade();
@@ -1293,7 +1304,7 @@ void CleanNodeResponseArea::LoadingImageProperty()
             CHECK_NULL_VOID(host);
             auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
-            auto maxFontScale = pipeline->GetFontScale();
+            auto maxFontScale = pipeline->GetFontScaleFromEnv(host);
             auto minFontScale = 0.0f;
             if (textFieldLayoutProperty->HasMaxFontScale()) {
                 maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
@@ -1301,7 +1312,8 @@ void CleanNodeResponseArea::LoadingImageProperty()
             if (textFieldLayoutProperty->HasMinFontScale()) {
                 minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
             }
-            iconSize_ = Dimension(iconSizeValue).ConvertToPxDistribute(minFontScale, maxFontScale);
+            iconSize_ = Dimension(iconSizeValue).ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
+                pattern->GetEnvFontScale());
         }
     }
     if (textFieldLayoutProperty->HasIconSrc()) {
@@ -1480,8 +1492,13 @@ void VoiceNodeResponseArea::ParseTheme(
 {
     micIconColor_ = theme->GetMicIconColor();
     micIconActiveBgColor_ = theme->GetMicIconActiveBgColor();
-    micIconSize_ = theme->GetMicIconSize().ConvertToPxDistribute(
-        symbolProperty->GetMinFontScale().value_or(0.0f), MAX_FONT_SCALE, true);
+    auto envFontScale = std::optional<float>();
+    auto pattern = hostPattern_.Upgrade();
+    if (pattern) {
+        envFontScale = pattern->GetEnvFontScale();
+    }
+    micIconSize_ = theme->GetMicIconSize().ConvertToPxDistributeWithEnv(
+        symbolProperty->GetMinFontScale().value_or(0.0f), MAX_FONT_SCALE, true, envFontScale);
     micPadding_ = theme->GetMicPadding().ConvertToPx();
     micBgOffsetToIcon_ =
         Dimension((theme->GetMicSize().Value() - theme->GetMicIconSize().Value()) / HALF_SPACE, DimensionUnit::VP);

@@ -30,7 +30,9 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
+#include "core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/property/property.h"
@@ -64,6 +66,7 @@ double NormalizeToPx(const Dimension& dimension, PipelineContext* context)
 }
 } // namespace
 
+RefreshPattern::RefreshPattern() = default;
 RefreshPattern::~RefreshPattern() = default;
 
 Dimension RefreshPattern::GetTriggerRefreshDisTance()
@@ -896,7 +899,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     option.SetCurve(curve);
     animation_ = AnimationUtils::StartAnimation(
         option,
-        [&, weak = AceType::WeakClaim(this)]() {
+        [weak = AceType::WeakClaim(this), targetOffset]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto offsetProperty = pattern->offsetProperty_;
@@ -1136,7 +1139,12 @@ void RefreshPattern::LoadingProgressRefreshingAnimation(bool isDrag)
         option.SetDuration(LOADING_ANIMATION_DURATION);
     }
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { lowVersionOffset_->Set(GetTriggerRefreshDisTance().ConvertToPx()); });
+        option, [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->lowVersionOffset_);
+            pattern->lowVersionOffset_->Set(pattern->GetTriggerRefreshDisTance().ConvertToPx());
+        });
 }
 
 void RefreshPattern::LoadingProgressExit()
@@ -1147,7 +1155,13 @@ void RefreshPattern::LoadingProgressExit()
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { lowVersionOffset_->Set(0.0f); },
+        option,
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->lowVersionOffset_);
+            pattern->lowVersionOffset_->Set(0.0f);
+        },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1189,7 +1203,12 @@ void RefreshPattern::CustomBuilderRefreshingAnimation(bool isDrag)
         option.SetDuration(CUSTOM_BUILDER_ANIMATION_DURATION);
     }
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { lowVersionOffset_->Set(GetTriggerRefreshDisTance().ConvertToPx()); });
+        option, [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->lowVersionOffset_);
+            pattern->lowVersionOffset_->Set(pattern->GetTriggerRefreshDisTance().ConvertToPx());
+        });
 }
 
 void RefreshPattern::CustomBuilderExit()
@@ -1199,7 +1218,13 @@ void RefreshPattern::CustomBuilderExit()
     AnimationOption option;
     option.SetDuration(CUSTOM_BUILDER_ANIMATION_DURATION);
     option.SetCurve(DEFAULT_CURVE);
-    animation_ = AnimationUtils::StartAnimation(option, [&]() { lowVersionOffset_->Set(0.0f); });
+    animation_ = AnimationUtils::StartAnimation(
+        option, [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->lowVersionOffset_);
+            pattern->lowVersionOffset_->Set(0.0f);
+        });
 }
 
 void RefreshPattern::UpdateCustomBuilderProperty()

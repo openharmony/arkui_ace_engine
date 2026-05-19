@@ -64,6 +64,7 @@ void ProgressModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::option
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             ProgressLayoutProperty, StrokeWidth, PROPERTY_UPDATE_MEASURE, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value_or(Dimension()), LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void ProgressModelStatic::SetLinearSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value)
@@ -121,6 +122,7 @@ void ProgressModelStatic::SetScaleWidth(FrameNode* frameNode, const std::optiona
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, ScaleWidth, PROPERTY_UPDATE_RENDER, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value_or(Dimension()), LpxAttribute::LPX_PROGRESS_SCALE_WIDTH, frameNode);
 }
 
 void ProgressModelStatic::SetBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -130,6 +132,7 @@ void ProgressModelStatic::SetBorderWidth(FrameNode* frameNode, const std::option
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderWidth, PROPERTY_UPDATE_RENDER, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value_or(Dimension()), LpxAttribute::LPX_PROGRESS_BORDER_WIDTH, frameNode);
 }
 
 void ProgressModelStatic::SetBorderColor(FrameNode* frameNode, const std::optional<Color>& value)
@@ -149,6 +152,7 @@ void ProgressModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optio
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER,
             frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value_or(Dimension()), LpxAttribute::LPX_PROGRESS_BORDER_RADIUS, frameNode);
 }
 
 void ProgressModelStatic::SetSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value)
@@ -303,6 +307,7 @@ void ProgressModelStatic::SetStrokeRadius(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, StrokeRadius, PROPERTY_UPDATE_RENDER, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value_or(Dimension()), LpxAttribute::LPX_PROGRESS_STROKE_RADIUS, frameNode);
 }
 
 void ProgressModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)

@@ -4124,6 +4124,42 @@ HWTEST_F(ListLayoutTestNg, NullLazyForEach001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PartFrameChildrenCachePredictNode001
+ * @tc.desc: Test predict nodes exist in partFrameChildren_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PartFrameChildrenCachePredictNode001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(20, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // in view
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 6));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 7));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 8));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 9));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 10));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 11));
+    // below cache
+    EXPECT_FALSE(IsExist(frameNode_, 12));
+    EXPECT_FALSE(IsExist(frameNode_, 13));
+
+    // test predict nodes exist in partFrameChildren_
+    auto child_index8 = frameNode_->GetChildByIndex(8, true);
+    EXPECT_EQ(frameNode_->GetChildTrueIndex(child_index8), 8);
+    auto child_index9 = frameNode_->GetChildByIndex(9, true);
+    EXPECT_EQ(frameNode_->GetChildTrueIndex(child_index9), 9);
+    auto child_index10 = frameNode_->GetChildByIndex(10, true);
+    EXPECT_EQ(frameNode_->GetChildTrueIndex(child_index10), 10);
+    auto child_index11 = frameNode_->GetChildByIndex(11, true);
+    EXPECT_EQ(frameNode_->GetChildTrueIndex(child_index11), 11);
+}
+
+/**
  * @tc.name: ListAddDelChildTest001
  * @tc.desc: Test list del child in snap end mode.
  * @tc.type: FUNC

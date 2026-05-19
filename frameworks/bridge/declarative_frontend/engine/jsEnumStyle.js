@@ -4136,6 +4136,12 @@ let MenuKeyboardAvoidMode;
   MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
 })(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
 
+let MenuGridPosition;
+(function (MenuGridPosition) {
+  MenuGridPosition[MenuGridPosition.TOP = 0] = 'TOP';
+  MenuGridPosition[MenuGridPosition.BOTTOM = 1] = 'BOTTOM';
+})(MenuGridPosition || (MenuGridPosition = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';
@@ -5408,6 +5414,13 @@ let GestureShortcut;
   GestureShortcut[GestureShortcut.PRIMARY = 0] = 'PRIMARY';
 })(GestureShortcut || (GestureShortcut = {}));
 globalThis.GestureShortcut = GestureShortcut;
+
+let StrokeJoinStyle;
+(function (StrokeJoinStyle) {
+  StrokeJoinStyle [StrokeJoinStyle.MITER_JOIN = 0] = 'MITER_JOIN';
+  StrokeJoinStyle [StrokeJoinStyle.ROUND_JOIN = 1] = 'ROUND_JOIN';
+  StrokeJoinStyle [StrokeJoinStyle.BEVEL_JOIN = 2] = 'BEVEL_JOIN';
+})(StrokeJoinStyle || (StrokeJoinStyle = {}));
 
 let EdgeLightPosition;
 (function (EdgeLightPosition) {

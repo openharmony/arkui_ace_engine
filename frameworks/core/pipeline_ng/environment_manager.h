@@ -89,6 +89,8 @@ public:
 
     RefPtr<UINode> FindWithEnvNode(const RefPtr<UINode>& startNode) const;
 
+    bool RemoveValue(
+        const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key);
     bool SetValue(
         const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key, std::any value);
     bool FindValueByKey(const RefPtr<UINode>& startScope, EnvironmentPropertyKind kind, const std::string& key,

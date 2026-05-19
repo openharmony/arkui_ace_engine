@@ -156,6 +156,21 @@ export function ScrollBarImpl(
     })
 }
 
+@memo
+export function ScrollBar(
+    @memo @memo_skip
+    style: ((attributes: ScrollBarAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkScrollBarComponent>((): ArkScrollBarComponent => {
+        return new ArkScrollBarComponent()
+    })
+    NodeAttach<ArkScrollBarPeer>((): ArkScrollBarPeer => ArkScrollBarPeer.create(receiver), (_: ArkScrollBarPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ScrollBarOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollBarOptions): void {
         let valueSerializer: SerializerBase = buffer

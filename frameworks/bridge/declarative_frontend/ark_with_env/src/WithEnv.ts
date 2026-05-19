@@ -12,21 +12,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-enum WritableSystemProperties {
-    Layout_Direction = 'system.arkui.layout.direction',
+
+declare class SystemEnvKey {
+    keyId: string;
+    constructor(keyId: string);
 }
 
-interface WritableEnvProperties {
-    [WritableSystemProperties.Layout_Direction]: boolean,
+declare class CustomEnvKey<T> {
+    _internal_id: number;
+    static create<T>(): CustomEnvKey<T>;
+}
+
+class WritableSystemEnvKey<T> extends SystemEnvKey {}
+
+class ReadonlySystemEnvKey<T> extends SystemEnvKey {}
+
+declare class WritableEnvKey {
+    static readonly DIRECTION: WritableSystemEnvKey<Direction>;
+    static readonly FONT_SCALE: WritableSystemEnvKey<number>;
 }
 
 class WithEnvAttribute {
-    env(key: WritableSystemProperties, value: WritableEnvProperties[WritableSystemProperties]): WithEnvAttribute {
+    env<T>(key: WritableSystemEnvKey<T>, value: T): WithEnvAttribute {
+
         globalThis.WithEnv.setEnvProperty(key, value);
         return this;
     }
 
-    customEnv(key: string, value: any): WithEnvAttribute {
+    customEnv<T>(key: CustomEnvKey<T>, value: T): WithEnvAttribute {
         globalThis.WithEnv.setCustomEnvProperty(key, value);
         return this;
     }
@@ -40,4 +53,6 @@ if (globalThis.WithEnv !== undefined) {
     };
 }
 
-export default { WithEnv, WithEnvAttribute, WritableSystemProperties, WritableEnvProperties};
+
+export default { WithEnv, WithEnvAttribute, SystemEnvKey, WritableSystemEnvKey, ReadonlySystemEnvKey, WritableEnvKey };
+

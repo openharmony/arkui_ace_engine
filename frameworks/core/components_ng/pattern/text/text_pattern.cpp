@@ -43,6 +43,7 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
@@ -78,6 +79,7 @@ constexpr int32_t PREVIEW_MENU_DELAY = 600;
 constexpr int32_t DRAG_NODE_HIDE = 300;
 constexpr int32_t HIGHLIGHT_ANIMATION_DURATION = 300;
 constexpr int32_t HIGHLIGHT_SHOWING_DURATION = 5000;
+const auto LPX_UNIT_SPAN_FILTER = [](const RefPtr<SpanItem>& span) { return span && span->HasLpxUnitStyle(); };
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
@@ -211,6 +213,12 @@ void TextPattern::OnAttachToMainTree()
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
     isDetachFromMainTree_ = false;
+    if (!GetEnvFontScale()) {
+        ReadFontScaleFromEnv();
+        if (GetEnvFontScale()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 void TextPattern::OnDetachFromMainTree()
@@ -634,11 +642,11 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (selectOverlay_ && selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     }
-
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && textForDisplay_.length() != 0) {
-        StartVibratorByLongPress();
+    if (oneStepDragController_ && info.GetSourceDevice() == SourceType::TOUCH && !isTouchPressed_) {
+        return;
     }
+
+    IfStartVibratorByLongPress();
 
     if (IsDraggable(localOffset)) {
         // prevent long press event from being triggered when dragging
@@ -665,6 +673,14 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
     StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd(), localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::IfStartVibratorByLongPress()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && textForDisplay_.length() != 0) {
+        StartVibratorByLongPress();
+    }
 }
 
 void TextPattern::InitSelectionOnLongPress(const Offset& localOffset)
@@ -1099,6 +1115,7 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::T
     fontStyle.UpdateAdaptMinFontSize(textStyle->GetAdaptMinFontSize());
     fontStyle.UpdateAdaptMaxFontSize(textStyle->GetAdaptMaxFontSize());
     fontStyle.UpdateLetterSpacing(textStyle->GetLetterSpacing());
+    fontStyle.UpdateStrokeJoinStyle(textStyle->GetStrokeJoinStyle());
     symbolStyle.UpdateSymbolColorList(textStyle->GetSymbolColorList());
     symbolStyle.UpdateSymbolType(textStyle->GetSymbolType());
     textLineStyle.UpdateLineHeight(textStyle->GetLineHeight());
@@ -1115,6 +1132,8 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::T
     textLineStyle.UpdateHalfLeading(textStyle->GetHalfLeading());
     textLineStyle.UpdateAllowScale(textStyle->IsAllowScale());
     textLineStyle.UpdateParagraphSpacing(textStyle->GetParagraphSpacing());
+    textLineStyle.SetOptGradient(GradientConvert::ToNGGradient(textStyle->GetGradient()));
+    textLineStyle.UpdateColorShaderStyle(textStyle->GetColorShaderStyle());
 }
 
 RefPtr<TaskExecutor> TextPattern::GetTaskExecutorItem()
@@ -1699,6 +1718,10 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
+        if (!pattern->oneStepDragController_) {
+            return;
+        }
+        pattern->SetEnableEventResponse();
     };
     textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
@@ -2685,7 +2708,7 @@ void TextPattern::RecoverCopyOption()
     copyOption_ = textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE
                       ? CopyOptions::None
                       : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
-
+    UnBindPreviewMenuByCopyOption();
     const auto& children = contentHost->GetChildren();
     if (children.empty() && IsSetObscured() && !isSpanStringMode_) {
         copyOption_ = CopyOptions::None;
@@ -3107,6 +3130,16 @@ void TextPattern::MarkDirtySelf()
 
 void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    if (!info.GetChangedTouches().empty() && oneStepDragController_) {
+        const auto& changed = info.GetChangedTouches().front();
+        auto touchType = changed.GetTouchType();
+        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+            isTouchPressed_ = false;
+        } else {
+            isTouchPressed_ = true;
+        }
+    }
+    UnBindPreviewMenuByCopyOption();
     DoGestureSelection(info);
     ResetOriginCaretPosition();
 }
@@ -3833,6 +3866,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.fontColor = node->GetTextColorValue(Color::BLACK).ColorToString();
     textStyle.fontStyle = static_cast<int32_t>(node->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     textStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
+    textStyle.strokeJoinStyle = node->GetStrokeJoinStyle();
     std::string fontFamilyValue;
     const std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
     auto fontFamily = node->GetFontFamilyValue(defaultFontFamily);
@@ -3850,10 +3884,11 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
     auto lm = node->GetLeadingMarginValue({});
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFp();
-        textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToFp();
-        textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToFp();
-        textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToFp();
+        textStyle.fontSize =
+            node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFpWithEnv(GetEnvFontScale());
+        textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToFpWithEnv(GetEnvFontScale());
+        textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToFpWithEnv(GetEnvFontScale());
+        textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToFpWithEnv(GetEnvFontScale());
     } else {
         textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp();
         textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
@@ -3872,9 +3907,10 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.textBackgroundStyle = node->GetTextBackgroundStyle();
     textStyle.paragraphSpacing = node->GetParagraphSpacing();
     textStyle.textDirection = static_cast<int32_t>(node->GetTextDirectionValue(TextDirection::INHERIT));
-    auto textVerticalAlign = node->GetTextVerticalAlign();
-    if (textVerticalAlign.has_value()) {
-        textStyle.textVerticalAlign =static_cast<int32_t>(textVerticalAlign.value());
+    textStyle.SetOptGradient(GradientConvert::ToGradient(node->GetGradient()));
+    textStyle.colorShaderStyle = node->GetColorShaderStyle();
+    if (auto textVerticalAlign = node->GetTextVerticalAlign(); textVerticalAlign.has_value()) {
+        textStyle.textVerticalAlign = static_cast<int32_t>(textVerticalAlign.value());
     }
     textStyle.strokeWidth = node->GetStrokeWidthValue(Dimension()).ConvertToVp();
     textStyle.strokeColor = node->GetStrokeColorValue(Color::BLACK).ColorToString();
@@ -4008,7 +4044,8 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
         symbolColorValue.substr(0, !symbolColorValue.empty() ? static_cast<int32_t>(symbolColorValue.size()) - 1 : 0);
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToFp();
+        symbolSpanStyle.fontSize =
+            node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToFpWithEnv(GetEnvFontScale());
     } else {
         symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
     }
@@ -4693,7 +4730,9 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
-    IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
+    if (oneStepDragController_) {
+        SetEnableEventResponse();
+    }
     ProcessOverlayAfterLayout();
     return true;
 }
@@ -4814,6 +4853,7 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
             dataDetectorAdapter_->StartAITask();
         }
     }
+    UpdateLpxUnitFlag();
 }
 
 void TextPattern::ResetAfterTextChange()
@@ -4855,6 +4895,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (HasSpanOnHoverEvent()) {
         InitSpanMouseEvent();
     }
+    IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
 }
 
 bool TextPattern::ResetTextEffectBeforeLayout(bool onlyReset)
@@ -5300,6 +5341,9 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
         json->Put("content", "");
         return;
     }
+    auto textFontVariations = textLayoutProp->HasFontVariations()
+                                  ? GetFontVariationsInJson(textLayoutProp->GetFontVariations().value())
+                                  : "Na";
     if (spans_.empty()) {
         auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u""));
         json->Put("content", textValue.c_str());
@@ -5309,6 +5353,7 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
             textLayoutProp->HasFontFamily() ? GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str() : "Na");
         json->Put("fontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
+        json->Put("fontVariations", textFontVariations.c_str());
     } else {
         json->Put("content", StringUtils::Str16ToStr8(GetContentWithPlaceholderSpaceFillter()).c_str());
         for (const auto& item : spans_) {
@@ -5329,6 +5374,11 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
                 json->Put("fontWeight", fontStyle && fontStyle->HasFontWeight()
                                             ? GetFontWeightInJson(fontStyle->GetFontWeightValue()).c_str()
                                             : GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
+                json->Put("fontVariations", fontStyle && fontStyle->HasFontVariations()
+                                            ? GetFontVariationsInJson(fontStyle->GetFontVariationsValue()).c_str()
+                                            : textFontVariations.c_str());
+                json->Put("strokeJoinStyle", fontStyle && fontStyle->HasStrokeJoinStyle() ?
+                    StringUtils::ToString(fontStyle->GetStrokeJoinStyleValue()).c_str(): "Na");
                 break;
             }
         }
@@ -5588,6 +5638,12 @@ void TextPattern::DumpTextStyleInfo3()
                 .append(" prop: ")
                 .append(textLayoutProp->HasFontFamily() ? GetFontFamilyInJson(textLayoutProp->GetFontFamily().value())
                                                         : "Na"));
+        dumpLog.AddDesc(std::string("fontVariations: ")
+                .append(GetFontVariationsInJson(textStyle_->GetFontVariations()))
+                .append(" prop: ")
+                .append(textLayoutProp->HasFontVariations()
+                        ? GetFontVariationsInJson(textLayoutProp->GetFontVariations().value())
+                        : "Na"));
         dumpLog.AddDesc(
             std::string("LetterSpacing: ")
                 .append(textStyle_->GetLetterSpacing().ToString())
@@ -5722,7 +5778,7 @@ void TextPattern::DumpScaleInfo()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     auto fontWeightScale = pipeline->GetFontWeightScale();
     auto followSystem = pipeline->IsFollowSystem();
     float maxFontScale = pipeline->GetMaxAppFontScale();
@@ -5732,6 +5788,9 @@ void TextPattern::DumpScaleInfo()
         .append(std::string(", IsFollowSystem: ")).append(std::to_string(followSystem))
         .append(std::string(", maxFontScale: ")).append(std::to_string(maxFontScale))
         .append(std::string(", ConfigHalfLeading: ")).append(std::to_string(halfLeading)));
+    auto envFontScale = GetEnvFontScale();
+    dumpLog.AddDesc(std::string("envFontScale: ").append(envFontScale.has_value()
+        ? std::to_string(envFontScale.value()) : "NA"));
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     auto minFontScale = textLayoutProp->GetMinFontScale().value_or(0.0f);
@@ -6335,13 +6394,34 @@ void TextPattern::BindPreviewMenu(TextSpanType spanType, std::function<void()>& 
         oneStepDragController_ = std::make_unique<OneStepDragController>(WeakClaim(this));
     }
     oneStepDragController_->SetMenuParam(spanType, menuBuilder, menuParam);
+    SetEnableEventResponse();
 }
 
 void TextPattern::UnBindPreviewMenu()
 {
     if (oneStepDragController_) {
         oneStepDragController_->SetMenuParam(TextSpanType::IMAGE, nullptr, {});
+        oneStepDragController_.reset();
     }
+}
+
+void TextPattern::UnBindPreviewMenuByCopyOption()
+{
+    if (!(oneStepDragController_ && copyOption_ == CopyOptions::None)) {
+        return;
+    }
+    const auto& childNodes = GetImageSpanNodeList();
+    for (const auto& child : childNodes) {
+        RefPtr<FrameNode> frameNode = child.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+        RefPtr<ImageSpanNode> imageNode = AceType::DynamicCast<ImageSpanNode>(frameNode);
+        if (imageNode) {
+            DisableDrag(imageNode);
+        }
+    }
+    UnBindPreviewMenu();
 }
 
 void TextPattern::CloseSelectionMenu()
@@ -6732,6 +6812,18 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSel
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(WeakClaim(Referenced::RawPtr(host)));
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+    UpdateLpxUnitFlag();
+}
+
+void TextPattern::UpdateLpxUnitFlag()
+{
+    bool hasLpx = std::any_of(spans_.begin(), spans_.end(), LPX_UNIT_SPAN_FILTER);
+    CHECK_NULL_VOID(hasLpxUnitStyle_ != hasLpx);
+    hasLpxUnitStyle_ = hasLpx;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    hasLpx ? host->RegisterLpxAttribute(LpxAttribute::LPX_TEXT_SPAN)
+           : host->UnRegisterLpxAttribute(LpxAttribute::LPX_TEXT_SPAN);
 }
 
 void TextPattern::StyledStringRegisterResource()
@@ -6866,6 +6958,7 @@ void TextPattern::ProcessSpanString()
         auto imageSpan = DynamicCast<ImageSpanItem>(span);
         if (imageSpan) {
             dataDetectorAdapter_->textForAI_ += u'\n';
+            imageSpan->SetImageSpanOptions(imageSpan->options); // update LPX flag
             MountImageNode(imageSpan);
         } else {
             dataDetectorAdapter_->textForAI_ += span->content;
@@ -6938,6 +7031,7 @@ void TextPattern::SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans)
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateContent(textForDisplay_);
+    UpdateLpxUnitFlag();
 }
 
 RectF TextPattern::GetTextContentRect(bool isActualText) const
@@ -7647,7 +7741,7 @@ void TextPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     auto fontWeightScale = pipeline->GetFontWeightScale();
     json->Put("fontScale", std::to_string(fontScale).c_str());
     json->Put("fontWeightScale", std::to_string(fontWeightScale).c_str());
@@ -7681,6 +7775,7 @@ void TextPattern::SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("TextCase", StringUtils::ToString(textStyle_->GetTextCase()).c_str());
         json->Put("EllipsisMode", StringUtils::ToString(textStyle_->GetEllipsisMode()).c_str());
         json->Put("LineBreakStrategy", GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy()).c_str());
+        json->Put("FontVariations", GetFontVariationsInJson(textStyle_->GetFontVariations()).c_str());
     }
 }
 
@@ -8049,6 +8144,25 @@ bool TextPattern::SetFallbackLineSpacingAndIncludeFontPadding(bool flag)
     textLayoutProperty->UpdateIncludeFontPadding(flag);
     textLayoutProperty->UpdateFallbackLineSpacing(flag);
     return true;
+}
+
+void TextPattern::SetEnableEventResponse()
+{
+    std::list<WeakPtr<ImageSpanNode>> imageNodes;
+    std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
+    const auto& childNodes = GetImageSpanNodeList();
+    for (const auto& child : childNodes) {
+        RefPtr<FrameNode> frameNode = child.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+        RefPtr<ImageSpanNode> imageNode = AceType::DynamicCast<ImageSpanNode>(frameNode);
+        if (imageNode) {
+            imageNodes.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+        }
+    }
+    IF_PRESENT(oneStepDragController_,
+        SetEnableEventResponse(textSelector_, imageNodes, builderNodes));
 }
 
 RefPtr<FrameNode> TextPattern::GetContentHost() const

@@ -372,6 +372,21 @@ export function ArcListImpl(
     })
 }
 
+@memo
+export function ArcList(
+    @memo @memo_skip
+    style: ((attributes: ArcListAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkArcListComponent>((): ArkArcListComponent => {
+        return new ArkArcListComponent()
+    })
+    NodeAttach<ArkArcListPeer>((): ArkArcListPeer => ArkArcListPeer.create(receiver), (_: ArkArcListPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ArkArcListItemPeer extends ArkCommonMethodPeer {
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -453,6 +468,22 @@ export function ArcListItemImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
+        content_?.()
+    })
+}
+
+@memo
+export function ArcListItem(
+    @memo @memo_skip
+    style: ((attributes: ArcListItemAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkArcListItemComponent>((): ArkArcListItemComponent => {
+        return new ArkArcListItemComponent()
+    })
+    NodeAttach<ArkArcListItemPeer>((): ArkArcListItemPeer => ArkArcListItemPeer.create(receiver), (_: ArkArcListItemPeer): void => {
+        style?.(receiver)
         content_?.()
     })
 }

@@ -39,7 +39,6 @@
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components/common/properties/motion_path_option.h"
-#include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
@@ -595,6 +594,7 @@ public:
     // progress mask
     static void SetProgressMask(const RefPtr<ProgressMaskProperty> &progress);
     static void SetEdgeLightParam(const std::optional<EdgeLightParam>& param);
+    static void SetDoubleSided(bool doubleSided);
 
     static void Pop();
 
@@ -981,6 +981,7 @@ public:
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style, bool isReset = false);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
+    static void SetDoubleSided(FrameNode* frameNode, bool doubleSided);
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback);
 #endif

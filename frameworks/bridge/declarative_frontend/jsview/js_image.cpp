@@ -413,12 +413,11 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 #ifdef PIXEL_MAP_SUPPORTED
     if (!srcValid) {
         type = ParseImageType(imageInfo);
-        if (type == ImageType::ANIMATED_DRAWABLE) {
+        if (type == ImageType::ANIMATED_DRAWABLE || type == ImageType::PIXELMAP_DRAWABLE) {
             auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(UnwrapNapiValue(imageInfo));
             drawable = Referenced::Claim<DrawableDescriptor>(drawableAddr);
-        } else if (type == ImageType::PIXELMAP_DRAWABLE || type == ImageType::DRAWABLE ||
-                   type == ImageType::LAYERED_DRAWABLE) {
-            pixmap = GetDrawablePixmap(imageInfo);
+        } else if (type == ImageType::DRAWABLE || type == ImageType::LAYERED_DRAWABLE) {
+            pixmap = PixelMap::GetFromDrawable(UnwrapNapiValue(imageInfo));
         } else {
             pixmap = CreatePixelMapFromNapiValue(imageInfo);
         }
@@ -1011,6 +1010,9 @@ void JSImage::DestructorCallback(ImageColorFilter* obj)
 
 void JSImage::SetColorFilterMatrix(const JSRef<JSVal>& jsArray)
 {
+    if (!jsArray->IsArray()) {
+        return;
+    }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsArray);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
         ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);

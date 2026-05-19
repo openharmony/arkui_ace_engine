@@ -1037,6 +1037,9 @@ int32_t SetInnerGestureParallelTo(ArkUI_NodeHandle node, void* userData,
 ArkUI_ErrorCode SetGestureParallelTo(ArkUI_NodeHandle node, void* userData,
     ArkUI_GestureRecognizer* (*parallelGesture)(ArkUI_ParallelGestureEvent* event))
 {
+    if (node == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
     auto callback = reinterpret_cast<ArkUIGestureRecognizer* (*)(ArkUIParallelGestureEvent * current)>(parallelGesture);
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->setGestureParallelTo(
         node->uiNodeHandle, userData, callback);

@@ -17,10 +17,14 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
 
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

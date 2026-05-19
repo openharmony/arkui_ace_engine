@@ -533,7 +533,8 @@ protected:
     bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
     std::optional<ScrollingConfig> CreateScrollingConfig(
         SmartGestureDirection direction, double distance) const;
-    bool CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const;
+    bool CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos,
+        bool isForceLayoutTarget = false) const;
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -553,7 +554,7 @@ protected:
     bool smooth_ = false;
 
     std::optional<int32_t> jumpIndex_;
-    std::optional<int32_t> targetIndex_;
+    mutable std::optional<int32_t> targetIndex_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
@@ -701,7 +702,7 @@ private:
 
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndexInGroup_;
-    std::optional<bool> isLayoutListForFocus_; // Flag for only do Layout.
+    mutable std::optional<bool> isLayoutListForFocus_; // Flag for only do Layout.
     std::optional<ListScrollTarget> scrollTarget_;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;

@@ -18,25 +18,25 @@
 
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
 import { AttributeModifier, hookUIPickerComponentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { ResourceColor, Resource as arkui_component_units_Resource, BorderRadiuses, LocalizedBorderRadiuses, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer } from './units'
 import { Color as arkui_component_enums_Color } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { UIPickerComponentModifier } from './../UIPickerComponentModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkUIPickerComponentPeer extends ArkCommonMethodPeer {
     uIPickerComponentAttributeSet?: UIPickerComponentModifier;
@@ -271,6 +271,21 @@ export function UIPickerComponentImpl(
     })
 }
 
+@memo
+export function UIPickerComponent(
+    @memo @memo_skip
+    style: ((attributes: UIPickerComponentAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkUIPickerComponentComponent>((): ArkUIPickerComponentComponent => {
+        return new ArkUIPickerComponentComponent()
+    })
+    NodeAttach<ArkUIPickerComponentPeer>((): ArkUIPickerComponentPeer => ArkUIPickerComponentPeer.create(receiver), (_: ArkUIPickerComponentPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class UIPickerComponentOptions_serializer {
     public static write(buffer: SerializerBase, value: UIPickerComponentOptions): void {
         let valueSerializer: SerializerBase = buffer

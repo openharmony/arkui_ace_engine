@@ -71,9 +71,11 @@ group("advanced_ui_component") {
   deps = []
   deps += [
     ":dialog",
+    ":datepickercomponent",
     "arcbutton/interfaces:arcbutton",
     "arcslider/interfaces:arcslider",
     "counter/interfaces:counter",
+    "counterv2:counterv2",
     "dialogv2/interfaces:dialogv2",
     "downloadfilebutton/interfaces:downloadfilebutton",
     "foldsplitcontainer/interfaces:foldsplitcontainer",
@@ -93,7 +95,6 @@ group("advanced_ui_component") {
       "composelistitemv2/interfaces:composelistitemv2",
       "composetitlebar/interfaces:composetitlebar",
       "composetitlebarv2/interfaces:composetitlebarv2",
-      "counterv2:counterv2",
       "editabletitlebar/interfaces:editabletitlebar",
       "editabletitlebarv2/interfaces:editabletitlebarv2",
       "exceptionprompt/interfaces:exceptionprompt",

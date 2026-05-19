@@ -15,12 +15,13 @@
 
 import { int32 } from '@koalaui/common';
 import { ArkUIAniModule } from 'arkui.ani';
-import { IMutableStateMeta, IMutableKeyedStateMeta, IObservedObject } from '../decorator';
+import {
+    IMutableStateMeta, IMutableKeyedStateMeta, IObservedObject,
+} from '../decorator';
 import { Dependent, MutableState, GlobalStateManager, IncrementalNode } from '@koalaui/runtime';
 import { ObserveSingleton } from './observeSingleton';
 import { RenderIdType } from '../decorator';
 import { StateUpdateLoop } from './stateUpdateLoop';
-import { StateTracker } from '../tests/lib/stateTracker';
 import { ObservedObjectRegistry, StateMgmtDFX } from '../tools/stateMgmtDFX';
 import { ElementInfo } from '../utils';
 
@@ -46,31 +47,16 @@ export interface ITrackedDecoratorRef {
     getDFXInfo(): ElementInfo;
 }
 
-// TrackedMutableStateMeta class used by unit test framework only
-export class TrackedMutableStateMeta extends MutableStateMeta {
-    constructor(info: string, metaDependency?: MutableState<int32>) {
-        super(info, metaDependency);
-    }
-
-    public addRef(): void {
-        if (
-            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingMonitor ||
-            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed ||
-            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingPersistentStorage
-        ) {
-        } else {
-            StateTracker.increaseRefCnt();
-        }
-        super.addRef();
-    }
-
-    public fireChange(): void {
-        if (this.shouldFireChange()) {
-            StateTracker.increaseFireChangeCnt();
-        }
-        super.fireChange();
-    }
-}
+// The wildcard LSV target sentinel: the object stored in MutableStateMeta.target_
+// (and accumulated in ObserveSingleton's per-monitor sources Array). The wildcard
+// LSV identity check (`sources.includes(this.before)`) is the only consumer; a
+// non-matching value falls through to `before !== now`. Concrete callers pass
+// the IObservedObject that owns the meta, or for IBindingSource owners
+// (BackingValue, PropRefDecoratedVariable) `this` itself — a user lambda will
+// never return one of those, so they're safe anti-targets. Typed as Object so
+// any class instance qualifies without forcing each owner to formally implement
+// IBindingSource just to be a target.
+export type MonitorTarget = Object | undefined;
 
 /**
  * manage one meta MutableState
@@ -95,14 +81,22 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     dynamicAddRefFunc?: () => void;
     dynamicFireChangeFunc?: () => void;
     private hasFired: boolean;
+    // Per-meta wildcard LSV target (the IObservedObject / IBindingSource that
+    // owns this meta). Captured at construction so fireChange() doesn't need
+    // a per-call target argument. Undefined when the meta is created without
+    // an owner (legacy field-initializer pattern); recordMonitorSource skips
+    // undefined sources, so the wildcard LSV check still falls through to
+    // `before !== now` correctly.
+    private readonly target_?: MonitorTarget;
 
-    constructor(info: string, metaDependency?: MutableState<int32>) {
+    constructor(info: string, target?: MonitorTarget, metaDependency?: MutableState<int32>) {
         super(info);
         this.__metaDependency = metaDependency ?? GlobalStateManager.instance.mutableState<int32>(0, true);
         this.bindingRefs_ = new Set<WeakRef<ITrackedDecoratorRef>>();
         this.weakThis = new WeakRef<IBindingSource>(this);
         this.metaValue = 0;
         this.hasFired = false;
+        this.target_ = target;
         MutableStateMeta.registry.register(this, new WeakRef<MutableState<int32>>(this.__metaDependency));
     }
 
@@ -144,7 +138,9 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
             this.bindingRefs_.forEach((listener: WeakRef<ITrackedDecoratorRef>) => {
                 let trackedObject = listener.deref();
                 if (trackedObject) {
-                    ObserveSingleton.instance.addDirtyRef(trackedObject);
+                    // we have dependent object to execute: Computed, Monitor...
+                    // Collect id of items to run
+                    ObserveSingleton.instance.addDirtyRef(trackedObject, this.target_);
                 } else {
                     this.clearBindingRefs(listener);
                 }
@@ -195,33 +191,36 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
 export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMutableKeyedStateMeta {
     protected readonly __metaDependencies = new Map<string, MutableStateMeta>();
     private observed: IObservedObject | undefined = undefined;
-    constructor(info: string = '') {
+    constructor(info: string = '', observed?: IObservedObject) {
         super(info);
-    }
-    constructor(info: string, observed: IObservedObject) {
-        super(info);
-        this.observed = observed;
-        const observedObject = this.observed as IObservedObject;
-        const observedInfo = ObservedObjectRegistry.getOrRegister(observedObject!);
-        let resolvedKey: string = ''
-        if (info.startsWith('__metaBuiltInV1_')) {
-            resolvedKey = '__metaBuiltInV1Key_';
-        } else if (info.startsWith('__metaBuiltInV2_')) {
-            resolvedKey = '__metaBuiltInV2Key_';
-        } else if (info.startsWith('__metaBuiltInMakeObserved_')) {
-            resolvedKey = '__metaMakeObservedKey_';
-        } else if (info.startsWith('__metaInterfaceMakeObserved_')) {
-            resolvedKey = '__metaInterfaceMakeObservedKey_';
+        if (observed) {
+            this.observed = observed;
+            const observedInfo = ObservedObjectRegistry.getOrRegister(observed!);
+            let resolvedKey: string = ''
+            if (info.startsWith('__metaBuiltInV1_')) {
+                resolvedKey = '__metaBuiltInV1Key_';
+            } else if (info.startsWith('__metaBuiltInV2_')) {
+                resolvedKey = '__metaBuiltInV2Key_';
+            } else if (info.startsWith('__metaBuiltInMakeObserved_')) {
+                resolvedKey = '__metaMakeObservedKey_';
+            } else if (info.startsWith('__metaInterfaceMakeObserved_')) {
+                resolvedKey = '__metaInterfaceMakeObservedKey_';
+            }
+            observedInfo.setType(resolvedKey);
         }
-        observedInfo.setType(resolvedKey);
     }
 
     public addRef(key: string): void {
         let metaDependency: MutableStateMeta | undefined = this.__metaDependencies.get(key);
         if (!metaDependency) {
-            // incremental engine does not allow create mutableState while building tree
+            // Pass `this.observed` as the wildcard LSV target so per-key
+            // fireChange routes through addDirtyRef with the owning
+            // IObservedObject as the trigger, without needing a per-call
+            // target argument. incremental engine does not allow create
+            // mutableState while building tree.
             metaDependency = new MutableStateMeta(
                 key,
+                this.observed,
                 GlobalStateManager.instance.mutableState<int32>(0, true)
             );
             if (this.observed) {
@@ -237,6 +236,9 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
     public fireChange(key: string): void {
         let metaDependency: MutableStateMeta | undefined = this.__metaDependencies.get(key);
         if (metaDependency) {
+            // The per-key sub-meta has its own constructor-stored target
+            // (this.observed) baked in via addRef, so MutableStateMeta.fireChange
+            // resolves the wildcard target without an explicit per-call arg.
             metaDependency.fireChange();
         }
     }

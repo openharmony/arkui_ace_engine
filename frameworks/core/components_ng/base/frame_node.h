@@ -29,7 +29,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
-#include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -175,6 +174,88 @@ enum class LpxAttribute {
     LPX_BORDER_IMAGE_RIGHT,
     LPX_BORDER_IMAGE_TOP,
     LPX_BORDER_IMAGE_BOTTOM,
+    LPX_SCROLL_BAR_WIDTH,
+    LPX_FADING_EDGE_LENGTH,
+    LPX_COLUMNS_GAP,
+    LPX_ROWS_GAP,
+    LPX_SPACE,
+    LPX_SPACE_WIDTH,
+    LPX_LANE_MIN_LENGTH,
+    LPX_LANE_MAX_LENGTH,
+    LPX_LANE_GUTTER,
+    LPX_LIST_ITEM_START_DELETE_AREA_DISTANCE,
+    LPX_LIST_ITEM_END_DELETE_AREA_DISTANCE,
+    LPX_REFRESH_OFFSET,
+    LPX_INDICATOR_OFFSET,
+    LPX_SCROLL_INTERVAL_SIZE,
+    LPX_SCROLL_SNAP_PAGINATIONS,
+    LPX_ITEM_MIN_WIDTH,
+    LPX_ITEM_MIN_HEIGHT,
+    LPX_ITEM_MAX_WIDTH,
+    LPX_ITEM_MAX_HEIGHT,
+    LPX_CHAIN_ANIMATION_MIN_SPACE,
+    LPX_CHAIN_ANIMATION_MAX_SPACE,
+    LPX_DIVIDER_STROKE_WIDTH,
+    LPX_DIVIDER_START_MARGIN,
+    LPX_DIVIDER_END_MARGIN,
+    LPX_SCROLL_BAR_MARGIN_START,
+    LPX_SCROLL_BAR_MARGIN_END,
+    LPX_INITIAL_OFFSET_X,
+    LPX_INITIAL_OFFSET_Y,
+    LPX_PICKER_ITEM_HEIGHT,
+    LPX_PICKER_GRADIENT_HEIGHT,
+    LPX_PICKER_COLUMN_WIDTH,
+    LPX_EDGE_ALIGN_X,
+    LPX_EDGE_ALIGN_Y,
+    LPX_PADDING_LEFT,
+    LPX_PADDING_RIGHT,
+    LPX_PADDING_TOP,
+    LPX_PADDING_BOTTOM,
+    LPX_PADDING_START,
+    LPX_PADDING_END,
+    LPX_PICKER_RADIUS,
+    LPX_BORDER_RADIUS_TOP_LEFT,
+    LPX_BORDER_RADIUS_TOP_RIGHT,
+    LPX_BORDER_RADIUS_BOTTOM_LEFT,
+    LPX_BORDER_RADIUS_BOTTOM_RIGHT,
+    LPX_BORDER_RADIUS,
+    LPX_TRACK_THICKNESS,
+    LPX_BLOCK_BORDER_WIDTH,
+    LPX_TRACK_BORDER_RADIUS,
+    LPX_STEP_SIZE,
+    LPX_BLOCK_SIZE_WIDTH,
+    LPX_BLOCK_SIZE_HEIGHT,
+    LPX_SELECTED_BORDER_RADIUS,
+    LPX_LABEL_FONT_SIZE,
+    LPX_MARK_SIZE,
+    LPX_MARK_STROKE_WIDTH,
+    LPX_BADGE_BORDER_WIDTH,
+    LPX_BADGE_CIRCLE_SIZE,
+    LPX_BADGE_OUTER_BORDER_WIDTH,
+    LPX_BADGE_POSITION_X,
+    LPX_BADGE_POSITION_Y,
+    LPX_BASE_LINE_OFFSET,
+    LPX_CANCEL_ICON_SIZE,
+    LPX_CARET_WIDTH,
+    LPX_GAUGE_INDICATOR_SPACE,
+    LPX_LETTER_SPACING,
+    LPX_LINE_SPACING,
+    LPX_LINE_HEIGHT,
+    LPX_MARQUEE_SPACING,
+    LPX_MAX_LINE_HEIGHT,
+    LPX_MIN_LINE_HEIGHT,
+    LPX_PATTERNLOCK_ACTIVE_CIRCLE_RADIUS,
+    LPX_PATTERNLOCK_CIRCLE_RADIUS,
+    LPX_PATTERNLOCK_SIDE_LENGTH,
+    LPX_PLACEHOLDER_FONT_SIZE,
+    LPX_PROGRESS_BORDER_RADIUS,
+    LPX_PROGRESS_BORDER_WIDTH,
+    LPX_PROGRESS_SCALE_WIDTH,
+    LPX_PROGRESS_STROKE_RADIUS,
+    LPX_SEARCH_HEIGHT,
+    LPX_STROKE_WIDTH,
+    LPX_TEXT_INDENT,
+    LPX_TEXT_SPAN,
     ALWAYS
 };
 
@@ -217,6 +298,11 @@ public:
     ~FrameNode() override;
 
     void OnDelete() override;
+
+    bool HasPreMake()
+    {
+        return hasPreMake_;
+    }
 
     int32_t FrameCount() const override
     {
@@ -1059,6 +1145,7 @@ public:
         uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
     RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
+    bool CheckIfHasMeasured() const;
     bool ReachResponseDeadline() const override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -1736,6 +1823,7 @@ private:
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
     void OnHoverWithHightLight(bool isHover) const;
+    bool IsPreMakeAndScroll();
     bool isAccessibilityPropertyInitialized_ = false;
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1851,6 +1939,8 @@ private:
     // Marks whether the background builder needs to be refreshed due to surface changes.
     bool isNeedRefreshBackgroundBuilder_ = false;
     int32_t refreshBackgroundBuilderId_ = 0;
+
+    bool hasPreMake_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

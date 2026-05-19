@@ -31,7 +31,8 @@ import {
     uiUtils,
     IObservedObject,
     OBSERVE,
-    LocalStorage
+    LocalStorage,
+    StateMgmtDFX
 } from '../stateManagement';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { IDecoratedV1Variable, IMutableStateMeta, STATE_MGMT_FACTORY, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
@@ -100,10 +101,17 @@ export function compatibleComponent(
     update: (instance: ESValue) => void,
     component?: ExtendableComponent
 ): void {
+    StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('compatibleComponent');
     NodeAttach<CompatiblePeerNode>((): CompatiblePeerNode => {
         let global = ESValue.getGlobal();
+        if (!global) {
+ 	        throw new Error('compatibleComponent error: global objects is undefined');
+ 	    }
         let staticComponent = component;
         const ptr = ArkUIAniModule._CreateViewStackProcessor();
+        if(!ptr){
+ 	        throw new Error('compatibleComponent error: failed to create ViewStackProcessor');
+ 	    }
         if (staticComponent === undefined) {
             staticComponent = (ExtendableComponent.current) as (ExtendableComponent | undefined);
         }
@@ -130,6 +138,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     options?: () => T_Options,
     content?: () => void
 ): [() => void, number] {
+    StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('compatibleStaticComponent');
     const instantiateImpl = /** @memo */ (): void => {
         BaseCustomComponent._invokeImpl<T, T_Options>(undefined, factory, options, undefined, content);
     };
@@ -194,6 +203,9 @@ function openInterop(): void {
 
 function closeInterop(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('closeInterop error: global objects is undefined');
+ 	}
     const closeInterop = global.getProperty('closeInterop');
     closeInterop.invoke();
     InteropState.getInstance().disable();
@@ -206,6 +218,9 @@ type StateUnion<T> = StateDecoratedVariable<T> | ProvideDecoratedVariable<T> | P
 
 export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESValue {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('getCompatibleState error: global objects is undefined');
+ 	}
     const createState = global.getProperty('createStateVariable');
     let source = staticState;
 
@@ -295,18 +310,27 @@ export function isDynamicObject<T>(value: T): boolean {
 
 export function getRawObject<T>(value: T): T {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('getRawObject error: global objects is undefined');
+    }
     const getRawObjectForInterop = global.getProperty('getRawObjectForInterop');
     return getRawObjectForInterop.invoke(ESValue.wrap(value)).unwrap() as T;
 }
 
 export function getObservedObject<T>(value: T): T {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('getObservedObject error: global objects is undefined');
+ 	}
     const createObservedObject = global.getProperty('createObservedObject');
     return createObservedObject.invoke(ESValue.wrap(value)).unwrap() as T;
 }
 
 export function getV2ObservedObject<T>(value: T): T {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('getV2ObservedObject error: global objects is undefined');
+ 	}
     const createObservedObject = global.getProperty('createV2ObservedObject');
     return createObservedObject.invoke(ESValue.wrap(value)).unwrap() as T;
 }
@@ -319,6 +343,9 @@ export function registerCreateWatchFuncCallback(): void {
         return watchFunc;
     }
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registerCreateWatchFuncCallback error: global objects is undefined');
+ 	}
     const registerCallback = global.getProperty('registerCallbackForCreateWatchID');
     registerCallback.invoke(createWatchFuncCallback);
 }
@@ -336,18 +363,27 @@ abstract class DummyBaseCustom extends BaseCustomComponent<undefined> {}
 
 export function registerCompatibleStaticComponentCallback(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registerCompatibleStaticComponentCallback error: global objects is undefined');
+ 	}
     const registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
     registerCallback.invoke(compatibleStaticComponent<DummyBaseCustom, undefined>);
 }
 
 export function registerMakeBuilderParameterStaticProxy(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registerMakeBuilderParameterStaticProxy error: global objects is undefined');
+ 	}
     const registerCallback = global.getProperty('registerMakeBuilderParameterStaticProxy');
     registerCallback.invoke(makeBuilderParameterStaticProxy);
 }
 
 export function registerTransferCompatibleBuilderCallback(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registerTransferCompatibleBuilderCallback error: global objects is undefined');
+ 	}
     const registerCallback = global.getProperty('registerTransferCompatibleBuilderCallback');
     const callback = (builder: Function) => { return transferCompatibleBuilder(builder).unwrap()!};
     registerCallback.invoke(callback);
@@ -355,15 +391,18 @@ export function registerTransferCompatibleBuilderCallback(): void {
 
 export function registerTransferCompatibleUpdatableBuilderCallback(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registerTransferCompatibleUpdatableBuilderCallback error: global objects is undefined');
+ 	}
     const registerCallback = global.getProperty('registerTransferCompatibleUpdatableBuilderCallback');
-    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder<Any>(builder).unwrap()!};
-    registerCallback.invoke(callback);
+    registerCallback.invoke(unwrapTransferCompatibleUpdatableBuilder<Any>);
 }
 
 type ESValueOrUndefined  = ESValue | undefined;
 
 /** @memo */
 export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESValue>): void {
+    StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('compatibleWrappedBuilder');
     compatibleWrappedBuilderInternal(builder, ...args);
 }
 
@@ -371,6 +410,9 @@ export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESVal
 export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArray<ESValueOrUndefined>): void {
     compatibleComponent((() => {
         const global = ESValue.getGlobal();
+        if (!global) {
+ 	        throw new Error('compatibleWrappedBuilderInternal error: global objects is undefined');
+ 	    }
         const viewStackProcessor = global.getProperty('ViewStackProcessor');
         const createId = viewStackProcessor.getProperty('AllocateNewElmetIdForNextComponent');
         const elmtId = createId.invoke();
@@ -497,6 +539,7 @@ export function transferCompatibleBuilder<T extends Function>(
     /** @memo */
     builder: T
 ): ESValue {
+    StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleBuilder');
     const staticBuilderFunc = (...params: FixedArray<Any>): Any => {
         let state: MutableState<int32> | undefined = undefined;
         for (let i = 0; i < params.length; i++) {
@@ -519,6 +562,9 @@ export function transferCompatibleBuilder<T extends Function>(
         };
 
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
+        if (!uiContext) {
+ 	        throw new Error('transferCompatibleBuilder: failed to get UIContext');
+ 	    }
         const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
@@ -546,6 +592,7 @@ export function transferCompatibleUpdatableBuilder<T>(
     /** @memo */
     builder: (args: T) => void
 ): ESValue {
+    StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleUpdatableBuilder');
     const staticBuilderFunc = (args: T): [number, ()=>void] => {
         let state: MutableState<int32> | undefined = undefined;
         if (isDynamicObject(args)) {
@@ -575,6 +622,13 @@ export function transferCompatibleUpdatableBuilder<T>(
     const createDynamicUpdatableBuilder = ESValue.getGlobal().getProperty('createDynamicUpdatableBuilder');
     const dynamicBuilder = createDynamicUpdatableBuilder.invoke(ESValue.wrap(staticBuilderFunc));
     return dynamicBuilder;
+}
+
+export function unwrapTransferCompatibleUpdatableBuilder<T>(
+    /** @memo */
+    builder: (args: T) => void
+): Any {
+    return transferCompatibleUpdatableBuilder(builder).unwrap();
 }
 
 /**
@@ -639,6 +693,9 @@ class InteropBuilderLiteralProxyHandler implements reflect.InvocationHandler {
 
 function registertransferCompatibleDynamicBuilderCallback(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registertransferCompatibleDynamicBuilderCallback error: global objects is undefined');
+ 	}
     const registerCallback = global.getProperty('registerTransferCompatibleDynamicBuilderCallback');
     registerCallback.invoke(transferCompatibleDynamicBuilder);
 }
@@ -928,6 +985,9 @@ function setPathStackCallback(stack: KPointer, pathStack: string, animated?: boo
 
 function registerNavPathStackCallback(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registerNavPathStackCallback error: global objects is undefined');
+ 	}
 
     const registeNavPushPathCallback = global.getProperty('registeNavPushPathCallback');
     registeNavPushPathCallback.invoke(pushPathCallback);
@@ -1015,6 +1075,7 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
     return (
         /** @memo */
         (...args: FixedArray<Any>) => {
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('transferCompatibleDynamicBuilder');
             let argsESValue: FixedArray<ESValueOrUndefined> = new FixedArray<ESValueOrUndefined>(args.length);
             for (let i = 0; i < args.length; i++) {
                 if (args[i] instanceof ESValue) {
@@ -1030,6 +1091,9 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
 
 export function registerCreateCompatibleStaticState(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registerCreateCompatibleStaticState error: global objects is undefined');
+ 	}
     const registerCallback = global.getProperty('registerCreateCompatibleStaticState');
     registerCallback.invoke(createCompatibleStaticState<undefined>);
 }
@@ -1154,6 +1218,9 @@ export function staticStateBindObservedObject<T>(
     onTrackPropertyChange?: (readPropName: string) => void
 ): T {
     let global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('staticStateBindObservedObject error: global objects is undefined');
+ 	}
     let staticStateBindObservedObject = global.getProperty('staticStateBindObservedObject');
     return staticStateBindObservedObject.invoke(
         ESValue.wrap(value),
@@ -1164,6 +1231,9 @@ export function staticStateBindObservedObject<T>(
 
 function registerLocalStorageSetProxy(): void {
     const global = ESValue.getGlobal();
+    if (!global) {
+ 	    throw new Error('registerLocalStorageSetProxy error: global objects is undefined');
+ 	}
     const registerCallback = global.getProperty('registerLocalStorageSetProxy');
     registerCallback.invoke(localStorageSetProxy);
 }

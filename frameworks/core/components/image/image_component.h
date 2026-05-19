@@ -27,7 +27,6 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
-#include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/measurable.h"
 #include "core/pipeline/base/render_component.h"

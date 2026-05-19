@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { NodeAttach, remember, once } from '@koalaui/runtime';
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { SyntaxItemPeer } from './base/SyntaxNodeBase'
 import { ArkComponentRoot } from "./ArkComponentRoot"
@@ -35,6 +35,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     public _initializers?: () => T_Options
     public reuseForceAddRefFlag: boolean = false;
     private themeScopeId?: int32
+    public canUpdateStateVars_: boolean = false;
 
     setPeer(peer: PeerNode): void {
         this.peer = peer
@@ -134,6 +135,9 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             } else {
                 this.updateStructWithMemoParameter(initializers);
             }
+            once(() => {
+                this.canUpdateStateVars_ = true;
+            });
             const savedRenderingComponent = OBSERVE.renderingComponent
             OBSERVE.renderingComponent = 
             this.isV2()

@@ -505,7 +505,11 @@ public:
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(ResponseType type, std::vector<NG::OptionParam>&& params,
+        NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) = 0;
     virtual void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, NG::MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindContextMenu(std::vector<NG::OptionParam>&& params, NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
     virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -599,6 +603,7 @@ public:
     virtual void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) {};
     // edgelight
     virtual void SetEdgeLightParam(const std::optional<NG::EdgeLightParam>& param) {};
+    virtual void SetDoubleSided(bool doubleSided) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

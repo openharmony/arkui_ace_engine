@@ -91,10 +91,12 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::u16st
 void TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
     const LayoutConstraintF& contentConstraint)
 {
-    maxFontSize = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    minFontSize = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    maxFontSize = textStyle.GetAdaptMaxFontSize().ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
+    minFontSize = textStyle.GetAdaptMinFontSize().ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
 }
 
 void TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
@@ -105,7 +107,8 @@ void TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double
         step = textStyle.GetAdaptFontSizeStep();
     }
     stepSize =
-        step.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        step.ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
 }
 
 SizeF TextAdaptFontSizer::GetMaxMeasureSize(const LayoutConstraintF& contentConstraint)
@@ -151,8 +154,9 @@ bool TextAdaptFontSizer::IsNeedAdaptFontSize(const TextStyle& textStyle, const L
 
 void TextAdaptFontSizer::SetAdaptFontSizeLineHeight(const Dimension& lineHeight, const TextStyle& textStyle)
 {
-    lineHeight_ = lineHeight.ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    lineHeight_ = lineHeight.ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
 }
 
 bool TextAdaptFontSizer::IsAdaptFontSizeExceedLineHeight(const RefPtr<Paragraph>& paragraph)

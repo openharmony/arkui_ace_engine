@@ -98,3 +98,18 @@ export function FlowItemImpl(
     })
 }
 
+@memo
+export function FlowItem(
+    @memo @memo_skip
+    style: ((attributes: FlowItemAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkFlowItemComponent>((): ArkFlowItemComponent => {
+        return new ArkFlowItemComponent()
+    })
+    NodeAttach<ArkFlowItemPeer>((): ArkFlowItemPeer => ArkFlowItemPeer.create(receiver), (_: ArkFlowItemPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

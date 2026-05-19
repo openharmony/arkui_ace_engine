@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_RENDER_GRID_ITEM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GRID_RENDER_GRID_ITEM_H
 
-#include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {

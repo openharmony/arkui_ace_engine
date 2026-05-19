@@ -261,6 +261,7 @@ public:
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
     void SetShadowPath(const std::string path) override;
     void ResetShadowPath() override;
+    void ClearClipBounds() override;
 
     void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
 
@@ -614,6 +615,8 @@ public:
     void ResetEdgeLightFilter() override;
 
     void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) override;
+
+    void OnDoubleSidedUpdate(bool doubleSided) override;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.

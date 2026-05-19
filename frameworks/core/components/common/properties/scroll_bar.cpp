@@ -194,7 +194,7 @@ void ScrollBar::SetCallBack(const ScrollBarPositionCallback& callback, const Scr
 
 void ScrollBar::HandleScrollBarEnd()
 {
-    if (displayMode_ == DisplayMode::AUTO) {
+    if (displayMode_ == DisplayMode::AUTO && barController_) {
         barController_->HandleScrollBarEnd();
     }
 }

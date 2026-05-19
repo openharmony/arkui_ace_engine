@@ -27,6 +27,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 
 namespace OHOS::Ace {
@@ -186,6 +187,9 @@ private:
     int32_t layoutedEndIndex_ = -1;
     float cacheStartPos_ = 0.0f;
     float cacheEndPos_ = 0.0f;
+    // Real viewport plus parent-provided viewExt, excluding this component's own cache expansion.
+    float extendedViewStartPos_ = 0.0f;
+    float extendedViewEndPos_ = Infinity<float>();
     int32_t cachedStartIndex_ = -1;
     int32_t cachedEndIndex_ = -1;
     // Set => current Measure is a PredictPass; Algorithm enables deadline checks.

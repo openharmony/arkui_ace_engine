@@ -57,6 +57,7 @@ void PatternLockModelStatic::SetCircleRadius(FrameNode* frameNode, const std::op
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(radius.value_or(Dimension()), LpxAttribute::LPX_PATTERNLOCK_CIRCLE_RADIUS, frameNode);
 }
 
 void PatternLockModelStatic::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
@@ -76,6 +77,8 @@ void PatternLockModelStatic::SetSideLength(FrameNode* frameNode, const std::opti
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             PatternLockLayoutProperty, SideLength, PROPERTY_UPDATE_MEASURE, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        sideLength.value_or(Dimension()), LpxAttribute::LPX_PATTERNLOCK_SIDE_LENGTH, frameNode);
 }
 
 void PatternLockModelStatic::SetAutoReset(FrameNode* frameNode, const std::optional<bool>& isAutoReset)
@@ -94,6 +97,7 @@ void PatternLockModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::opt
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathStrokeWidth, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(lineWidth.value_or(Dimension()), LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void PatternLockModelStatic::SetRegularColor(FrameNode* frameNode, const std::optional<Color>& regularColor)
@@ -133,6 +137,8 @@ void PatternLockModelStatic::SetActiveCircleRadius(
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleRadius, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        activeCircleRadius.value_or(Dimension()), LpxAttribute::LPX_PATTERNLOCK_ACTIVE_CIRCLE_RADIUS, frameNode);
 }
 
 void PatternLockModelStatic::SetEnableWaveEffect(FrameNode* frameNode, const std::optional<bool>& enableWaveEffect)

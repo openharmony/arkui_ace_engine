@@ -202,3 +202,15 @@ export function DividerImpl(
     })
 }
 
+@memo
+export function Divider(
+    @memo @memo_skip
+    style: ((attributes: DividerAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkDividerComponent>((): ArkDividerComponent => {
+        return new ArkDividerComponent()
+    })
+    NodeAttach<ArkDividerPeer>((): ArkDividerPeer => ArkDividerPeer.create(receiver), (_: ArkDividerPeer): void => {
+        style?.(receiver)
+    })
+}

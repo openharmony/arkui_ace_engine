@@ -89,6 +89,7 @@ void RefreshModelNG::SetPullUpToCancelRefresh(bool pullUpToCancelRefresh)
 
 void RefreshModelNG::SetRefreshOffset(const Dimension& offset)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(offset, LpxAttribute::LPX_REFRESH_OFFSET);
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset);
 }
 
@@ -99,6 +100,7 @@ void RefreshModelNG::SetRefreshing(bool isRefreshing)
 
 void RefreshModelNG::SetIndicatorOffset(const Dimension& indicatorOffset)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(indicatorOffset, LpxAttribute::LPX_INDICATOR_OFFSET);
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IndicatorOffset, indicatorOffset);
 }
 
@@ -289,6 +291,7 @@ bool RefreshModelNG::GetRefreshing(FrameNode* frameNode)
 
 void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& offset)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(offset, LpxAttribute::LPX_REFRESH_OFFSET, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset, frameNode);
 }
 
@@ -376,8 +379,9 @@ void RefreshModelNG::CreateWithResourceObjRefreshOffset(FrameNode* frameNode, co
         CHECK_NULL_VOID(node);
         CalcDimension result(.0f);
         if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
-            result.SetValue(.0f);
+            result = 0.0_vp;
         }
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_REFRESH_OFFSET, AceType::RawPtr(node));
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, result, node);
         node->MarkModifyDone();
     };

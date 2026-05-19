@@ -3459,11 +3459,11 @@ export interface WebKeyboardCallbackInfo {
 }
 export type WebKeyboardCallback = (keyboardCallbackInfo: WebKeyboardCallbackInfo) => WebKeyboardOptions;
 export enum MessageLevel {
-    DEBUG = 0,
-    ERROR = 1,
+    DEBUG = 1,
     INFO = 2,
-    LOG = 3,
-    WARN = 4
+    WARN = 3,
+    ERROR = 4,
+    LOG = 5
 }
 export enum ConsoleMessageSource {
     XML = 0,
@@ -5327,6 +5327,21 @@ export function WebImpl(
     })
 }
 
+@memo
+export function Web(
+    @memo @memo_skip
+    style: ((attributes: WebAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkWebComponent>((): ArkWebComponent => {
+        return new ArkWebComponent()
+    })
+    NodeAttach<ArkWebPeer>((): ArkWebPeer => ArkWebPeer.create(receiver), (_: ArkWebPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class CameraCaptureStateChangeInfo_serializer {
     public static write(buffer: SerializerBase, value: CameraCaptureStateChangeInfo): void {
         let valueSerializer: SerializerBase = buffer

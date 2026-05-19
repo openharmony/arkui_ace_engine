@@ -869,7 +869,8 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
     }
 
     // Set direction
-    dst.direction = Converter::ArkValue<Opt_GradientDirection>(Ark_Empty());
+    auto direction = GradientConvert::ParseGradientDirection(src);
+    dst.direction = Converter::ArkValue<Opt_GradientDirection>(direction);
 
     // Set colors
     std::vector<Ark_Tuple_ResourceColor_F64> colorStops;

@@ -1113,6 +1113,11 @@ public:
         ViewAbstract::SetEdgeLightParam(param);
     }
 
+    void SetDoubleSided(bool doubleSided) override
+    {
+        ViewAbstract::SetDoubleSided(doubleSided);
+    }
+
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);
@@ -1641,7 +1646,13 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
+    void BindContextMenu(ResponseType type, std::vector<NG::OptionParam>&& params,
+        MenuParam& menuParam, std::function<void()>& previewBuildFunc) override;
+
     void BindContextMenu(std::function<void(MenuBindingType)>& buildFuncWithType, MenuParam& menuParam,
+        std::function<void()>& previewBuildFunc) override;
+
+    void BindContextMenu(std::vector<NG::OptionParam>&& params, MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
@@ -2017,12 +2028,16 @@ public:
     static void RemoveResObj(FrameNode* frameNode, const std::string& key);
     static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
         MenuParam& menuParam, std::function<void()>& previewBuildFunc, bool needDirty = false);
+    static void BindContextMenuWithLongPressOptions(const RefPtr<FrameNode>& targetNode,
+        std::vector<NG::OptionParam>&& params, MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void SetDebugLineSta(UINode* node, const std::string& debugLine);
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    void RegisterContextMenuKeyEventOptions(
+        const RefPtr<FrameNode>& targetNode, std::vector<NG::OptionParam>&& params, const MenuParam& menuParam);
 
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override

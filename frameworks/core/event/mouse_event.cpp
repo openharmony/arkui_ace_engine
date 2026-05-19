@@ -334,6 +334,29 @@ MouseEvent MouseInfo::ConvertToMouseEvent() const
     return mouseEvent;
 }
 
+MouseEvent MouseInfo::ConvertToMouseEventForStatic() const
+{
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = GetSourceDevice();
+    mouseEvent.sourceTool = GetSourceTool();
+    mouseEvent.time = GetTimeStamp();
+    mouseEvent.deviceId = GetDeviceId();
+    mouseEvent.targetDisplayId = GetTargetDisplayId();
+    mouseEvent.x = globalLocation_.GetX();
+    mouseEvent.y = globalLocation_.GetY();
+    mouseEvent.globalDisplayX = globalDisplayLocation_.GetX();
+    mouseEvent.globalDisplayY = globalDisplayLocation_.GetY();
+    mouseEvent.button = button_;
+    mouseEvent.action = action_;
+    mouseEvent.screenX = screenLocation_.GetX();
+    mouseEvent.screenY = screenLocation_.GetY();
+    mouseEvent.rawDeltaX = rawDeltaX_;
+    mouseEvent.rawDeltaY = rawDeltaY_;
+    mouseEvent.pressedKeyCodes_ = GetPressedKeyCodes();
+    mouseEvent.pressedButtonsArray = pressedButtonsArray_;
+    return mouseEvent;
+}
+
 void HoverEffectTarget::SetHoverNode(const WeakPtr<NG::FrameNode>& node)
 {
     hoverNode_ = node;

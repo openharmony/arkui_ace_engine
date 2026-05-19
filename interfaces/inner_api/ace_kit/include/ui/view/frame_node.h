@@ -114,6 +114,7 @@ public:
     virtual NodeHandle GetParentHandle() = 0;
     virtual void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper) = 0;
     virtual ColorMode GetLocalColorMode() const = 0;
+    virtual void MarkModifyDone() = 0;
 };
 } // namespace OHOS::Ace::Kit
 

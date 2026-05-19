@@ -1675,6 +1675,18 @@ export function RichEditorImpl(
     })
 }
 
+@memo
+export function RichEditor(
+    @memo @memo_skip
+    style: ((attributes: RichEditorAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkRichEditorComponent>((): ArkRichEditorComponent => {
+        return new ArkRichEditorComponent()
+    })
+    NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer): void => {
+        style?.(receiver)
+    })
+}
 export class CopyEvent_serializer {
     public static write(buffer: SerializerBase, value: CopyEvent): void {
         let valueSerializer: SerializerBase = buffer

@@ -21,7 +21,6 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 
 #include "base/utils/utils.h"
-#include "base/pixel_map.h"
 
 #ifdef __cplusplus
 extern "C" {

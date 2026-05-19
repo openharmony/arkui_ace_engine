@@ -136,6 +136,21 @@ export function EffectComponentImpl(
     })
 }
 
+@memo
+export function EffectComponent(
+    @memo @memo_skip
+    style: ((attributes: EffectComponentAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkEffectComponentComponent>((): ArkEffectComponentComponent => {
+        return new ArkEffectComponentComponent()
+    })
+    NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (_: ArkEffectComponentPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class EffectComponentOptions_serializer {
     public static write(buffer: SerializerBase, value: EffectComponentOptions): void {
         let valueSerializer: SerializerBase = buffer

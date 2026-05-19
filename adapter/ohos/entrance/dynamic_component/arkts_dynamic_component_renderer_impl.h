@@ -92,7 +92,10 @@ public:
 
     void NotifyForeground() override;
     void NotifyBackground() override;
-
+    std::shared_ptr<UIContent> GetUIContent() const override
+    {
+        return uiContent_;
+    }
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();

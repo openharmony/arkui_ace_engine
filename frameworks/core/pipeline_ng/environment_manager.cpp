@@ -73,6 +73,20 @@ bool ReadScopeValue(
         outResult.value = value;
         return true;
     }
+    if (kind == EnvironmentPropertyKind::ENV) {
+        if (scope->GetEnvProperty(key, outResult.boolValue)) {
+            outResult.type = EnvironmentValueType::BOOLEAN;
+            return true;
+        }
+        if (scope->GetEnvProperty(key, outResult.numberValue)) {
+            outResult.type = EnvironmentValueType::NUMBER;
+            return true;
+        }
+        if (scope->GetEnvProperty(key, outResult.stringValue)) {
+            outResult.type = EnvironmentValueType::STRING;
+            return true;
+        }
+    }
     return false;
 }
 
@@ -193,6 +207,24 @@ void EnvironmentManager::RegisterValueChangedCallback(
 RefPtr<UINode> EnvironmentManager::FindWithEnvNode(const RefPtr<UINode>& startNode) const
 {
     return FindWithEnvNodeInternal(startNode);
+}
+
+bool EnvironmentManager::RemoveValue(
+    const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key)
+{
+    if (!IsValidKind(kind)) {
+        return false;
+    }
+    auto withEnvNode = AceType::DynamicCast<WithEnvNode>(scope);
+    CHECK_NULL_RETURN(withEnvNode, false);
+
+    if (kind == EnvironmentPropertyKind::ENV) {
+        withEnvNode->RemoveEnvProperty(key);
+    } else {
+        return false;
+    }
+    NotifyValueChanged(scope, kind, key);
+    return true;
 }
 
 bool EnvironmentManager::SetValue(
@@ -317,6 +349,13 @@ void EnvironmentManager::DispatchValueChangedToAffectedNode(
         auto customNode = AceType::DynamicCast<CustomNode>(node);
         if (customNode) {
             customNode->FireOnCustomEnvUpdate(key);
+            customNode->MarkNeedUpdate();
+        }
+    }
+    if (kind == EnvironmentPropertyKind::ENV) {
+        auto customNode = AceType::DynamicCast<CustomNode>(node);
+        if (customNode) {
+            customNode->FireOnSystemEnvUpdate(key);
             customNode->MarkNeedUpdate();
         }
     }

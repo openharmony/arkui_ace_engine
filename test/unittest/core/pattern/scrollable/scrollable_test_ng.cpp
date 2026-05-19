@@ -24,6 +24,7 @@
 #define protected public
 #define private public
 #include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"

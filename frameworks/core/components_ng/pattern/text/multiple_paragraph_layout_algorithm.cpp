@@ -37,6 +37,7 @@
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -134,7 +135,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
-    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme,
+        textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG, pattern);
     textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
     if (textLayoutProperty->HasFontForegroudGradiantColor()) {
         textStyle.SetFontForegroudGradiantColor(textLayoutProperty->GetFontForegroudGradiantColor());
@@ -204,6 +206,49 @@ void MultipleParagraphLayoutAlgorithm::UpdateShaderStyle(
     } else {
         textStyle.SetGradient(std::nullopt);
         textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+    }
+}
+
+void MultipleParagraphLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_VOID(paragraphManager_);
+    auto paragraphs = paragraphManager_->GetParagraphs();
+    if (spans_.empty()) {
+        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
+            auto paragraph = pIter->paragraph;
+            if (!paragraph) {
+                continue;
+            }
+            auto textStyle = textStyle_;
+            CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
+            textStyle.SetForeGroundBrushBitMap();
+            paragraph->ReLayoutForeground(textStyle);
+        }
+        return;
+    }
+    if (!spans_.empty()) {
+        size_t itemIndex = -1;
+        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
+            ++itemIndex;
+            auto paragraph = pIter->paragraph;
+            if (!paragraph) {
+                continue;
+            }
+            if (itemIndex >= spans_.size()) {
+                return;
+            }
+            auto spans = spans_[itemIndex];
+            TextStyle textStyle;
+            if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
+                spans.front()->GetTextStyle()->GetGradient().has_value()) {
+                textStyle = spans.front()->GetTextStyle().value();
+            } else {
+                textStyle = textStyle_;
+            }
+            CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
+            textStyle.SetForeGroundBrushBitMap();
+            paragraph->ReLayoutForeground(textStyle);
+        }
     }
 }
 
@@ -689,8 +734,9 @@ bool MultipleParagraphLayoutAlgorithm::ImageSpanMeasure(const RefPtr<ImageSpanIt
     CHECK_NULL_RETURN(geometryNode, true);
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
-    placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     return imageSpanItem->UpdatePlaceholderRun(placeholderStyle);
 }
 
@@ -708,11 +754,11 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
     CHECK_NULL_RETURN(theme, false);
     auto width = 0.0f;
     auto height = 0.0f;
-    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
+    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScaleFromEnv(frameNode);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
     auto fontSizeOpt = textLayoutProperty->GetFontSize();
     if (fontSizeOpt.has_value()) {
-        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScale();
+        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScaleFromEnv(frameNode);
     }
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
@@ -726,7 +772,7 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpan
         CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize, maxWidth, layoutPolicy });
         width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
         height = static_cast<float>(
-            customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
+        customSpanMetrics.height.value_or(fontSize / context->GetFontScaleFromEnv(frameNode)) * context->GetDipScale());
     }
     PlaceholderStyle placeholderStyle;
     placeholderStyle.width = width;
@@ -864,14 +910,18 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
         if (paraStyleSpanItem) {
             ParagraphUtil::GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle, group);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
-                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
-                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+                spanParagraphStyle.fontSize =
+                    paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistributeWithEnv(
+                        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
             }
             spanParagraphStyle.isEndAddParagraphSpacing =
                 paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&
                 Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) &&
                 std::next(groupIt) != spans_.end();
             spanParagraphStyle.isFirstParagraphLineSpacing = (groupIt == spans_.begin());
+            spanParagraphStyle.colorShaderStyle = paraStyleSpanItem->textLineStyle->GetColorShaderStyle();
+            spanParagraphStyle.SetOptGradient(paraStyleSpanItem->textLineStyle->GetGradient());
         }
         auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
         CHECK_NULL_RETURN(paragraph, false);

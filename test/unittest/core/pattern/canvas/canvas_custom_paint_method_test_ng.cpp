@@ -52,6 +52,7 @@ const double END_ANGLE = 8.0;
 const double MAX_END_ANGLE = 1160.0;
 const double HALF = 0.5;
 const double HANGING_PERCENT = 0.8;
+constexpr size_t MAX_PARAGRAPH_HISTORY_SIZE = 30;
 } // namespace
 
 class CanvasCustomPaintMethodTestNg : public testing::Test {
@@ -1148,10 +1149,10 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>();
     ASSERT_NE(paintMethod, nullptr);
-    paintMethod->paragraph_ = std::make_unique<RSParagraph>();
     paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    paintMethod->paragraph_ = std::make_unique<RSParagraph>();
     Testing::MockTypography typography;
     Testing::MockCanvas canvas;
     /**
@@ -1169,6 +1170,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
     paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
+    EXPECT_EQ(paintMethod->paragraphHistory_.size(), 1);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -1177,6 +1179,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
     paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
+    EXPECT_EQ(paintMethod->paragraphHistory_.size(), 2);
 
     maxWidth = 10.0;
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -1185,6 +1188,12 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
     paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
+    EXPECT_EQ(paintMethod->paragraphHistory_.size(), 3);
+
+    for (int i = 0; i < MAX_PARAGRAPH_HISTORY_SIZE; ++i) {
+        paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
+    }
+    EXPECT_EQ(paintMethod->paragraphHistory_.size(), MAX_PARAGRAPH_HISTORY_SIZE);
 }
 
 /**

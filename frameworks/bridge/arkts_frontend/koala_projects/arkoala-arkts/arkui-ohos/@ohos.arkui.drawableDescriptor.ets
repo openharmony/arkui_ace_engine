@@ -55,19 +55,54 @@ class DrawableDescriptorLoadedResultImpl implements DrawableDescriptorLoadedResu
 export class DrawableDescriptor {
   @JSONStringifyIgnore protected pixelMap?: image.PixelMap = undefined
   @JSONStringifyIgnore protected nativeObj: long = 0
+  @JSONStringifyIgnore protected finalization: NativeDestructor | null = null
+  @JSONStringifyIgnore protected _isReleased: boolean = false
 
-  constructor() { }
+  constructor() {
+    this.finalization = new NativeDestructor(0)
+  }
 
   getPixelMap(): image.PixelMap | undefined {
+    if (this._isReleased) {
+      return undefined
+    }
     return this.pixelMap
   }
 
   loadSync(): DrawableDescriptorLoadedResult {
+    if (this._isReleased) {
+      let result = new DrawableDescriptorLoadedResultImpl()
+      result.imageWidth = -1
+      result.imageHeight = -1
+      return result
+    }
     return ArkUIAniModule._Drawable_LoadSync(this)
   }
 
   load(): Promise<DrawableDescriptorLoadedResult> {
+    if (this._isReleased) {
+      return new Promise<DrawableDescriptorLoadedResult>((resolve) => {
+        let result = new DrawableDescriptorLoadedResultImpl()
+        result.imageWidth = -1
+        result.imageHeight = -1
+        resolve(result)
+      })
+    }
     return ArkUIAniModule._Drawable_Load(this)
+  }
+
+  release(): void {
+    let f = this.finalization
+    if (f != null && this.nativeObj != 0) {
+      f.clean()
+      finalizerUnregister(this)
+      this.nativeObj = 0
+      this._isReleased = true
+    }
+  }
+
+  isReleased(): boolean {
+    return this._isReleased
   }
 
   static transferStatic(input: Any): Object {
@@ -101,17 +136,30 @@ export class DrawableDescriptor {
 }
 
 export class PixelMapDrawableDescriptor extends DrawableDescriptor {
-  @JSONStringifyIgnore private finalization: NativeDestructor
-
-  constructor(src?: image.PixelMap) {
+  constructor(src?: image.PixelMap | ResourceStr) {
     super()
-    this.pixelMap = src
-    ArkUIAniModule._Drawable_CreatePixelMapDrawable(this, src)
-    this.finalization = new NativeDestructor(this.nativeObj)
-    finalizerRegister(this, this.finalization)
+    if (src == undefined) {
+      ArkUIAniModule._Drawable_CreatePixelMapDrawable(this, undefined)
+    } else if (src instanceof ResourceStr) {
+      if (src instanceof string) {
+        ArkUIAniModule._Drawable_CreatePixelMapDrawableByString(this, src as string)
+      } else if (src instanceof Resource) {
+        let resourceObjectKPointer = SystemOps.createResourceObject(src as Resource)
+        ArkUIAniModule._Drawable_CreatePixelMapDrawableByResource(this, resourceObjectKPointer)
+      }
+    } else {
+      this.pixelMap = src as image.PixelMap
+      ArkUIAniModule._Drawable_CreatePixelMapDrawable(this, src as image.PixelMap)
+    }
+    let finalization = new NativeDestructor(this.nativeObj)
+    this.finalization = finalization
+    finalizerRegister(this, finalization)
   }
 
   getPixelMap(): image.PixelMap | undefined {
+    if (this._isReleased) {
+      return undefined
+    }
     if (this.pixelMap) {
       return this.pixelMap
     }
@@ -124,7 +172,6 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
   @JSONStringifyIgnore private foreground?: DrawableDescriptor = undefined
   @JSONStringifyIgnore private background?: DrawableDescriptor = undefined
   @JSONStringifyIgnore private mask?: DrawableDescriptor = undefined
-  @JSONStringifyIgnore private finalization: NativeDestructor
 
   constructor(foreground?: DrawableDescriptor, background?: DrawableDescriptor, mask?: DrawableDescriptor) {
     super();
@@ -133,11 +180,15 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
     this.mask = mask
     ArkUIAniModule._Drawable_CreateLayeredDrawable(
       this, foreground?.getPixelMap(), background?.getPixelMap(), mask?.getPixelMap())
-    this.finalization = new NativeDestructor(this.nativeObj)
-    finalizerRegister(this, this.finalization)
+    let finalization = new NativeDestructor(this.nativeObj)
+    this.finalization = finalization
+    finalizerRegister(this, finalization)
   }
 
   getPixelMap(): image.PixelMap | undefined {
+    if (this._isReleased) {
+      return undefined
+    }
     if (this.pixelMap != undefined) {
       return this.pixelMap
     }
@@ -146,6 +197,9 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
   }
 
   getForeground(): DrawableDescriptor | undefined {
+    if (this._isReleased) {
+      return undefined
+    }
     if (this.foreground != undefined) {
       return this.foreground
     }
@@ -154,6 +208,9 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
   }
 
   getBackground(): DrawableDescriptor | undefined {
+    if (this._isReleased) {
+      return undefined
+    }
     if (this.background != undefined) {
       return this.background
     }
@@ -162,6 +219,9 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
   }
 
   getMask(): DrawableDescriptor | undefined {
+    if (this._isReleased) {
+      return undefined
+    }
     if (this.mask != undefined) {
       return this.mask
     }
@@ -198,6 +258,7 @@ class AnimationOptionsImpl implements AnimationOptions {
   iterations?: int;
   frameDurations?: Array<int>;
   autoPlay?: boolean;
+  stopMode?: AnimationStopMode;
   constructor() { }
 }
 
@@ -236,7 +297,6 @@ class AnimationControllerInner implements AnimationController {
 export class AnimatedDrawableDescriptor extends DrawableDescriptor {
   @JSONStringifyIgnore private pixelMaps!: Array<image.PixelMap>
   @JSONStringifyIgnore private options: AnimationOptions | undefined = undefined
-  @JSONStringifyIgnore private finalization: NativeDestructor
   constructor(pixelMaps: Array<image.PixelMap>, options?: AnimationOptions) {
     super()
     if (pixelMaps.length > 0) {
@@ -245,8 +305,9 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
     this.pixelMaps = pixelMaps
     this.options = options
     ArkUIAniModule._Drawable_CreateAnimatedDrawable(this, pixelMaps, options)
-    this.finalization = new NativeDestructor(this.nativeObj)
-    finalizerRegister(this, this.finalization)
+    let finalization = new NativeDestructor(this.nativeObj)
+    this.finalization = finalization
+    finalizerRegister(this, finalization)
   }
 
   constructor(src: ResourceStr | Array<image.PixelMap>, options?: AnimationOptions) {
@@ -268,12 +329,16 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
       this.pixelMaps = pixelMapsParm
       ArkUIAniModule._Drawable_CreateAnimatedDrawable(this, pixelMapsParm, options)
     }
-    
-    this.finalization = new NativeDestructor(this.nativeObj)
-    finalizerRegister(this, this.finalization)
+
+    let finalization2 = new NativeDestructor(this.nativeObj)
+    this.finalization = finalization2
+    finalizerRegister(this, finalization2)
   }
 
   getPixelMap(): image.PixelMap | undefined {
+    if (this._isReleased) {
+      return undefined
+    }
     if (this.pixelMap) {
       return this.pixelMap
     }

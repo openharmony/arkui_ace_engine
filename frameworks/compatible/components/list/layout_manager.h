@@ -21,8 +21,6 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/system_properties.h"
-#include "core/event/touch_event.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/render_node.h"
 

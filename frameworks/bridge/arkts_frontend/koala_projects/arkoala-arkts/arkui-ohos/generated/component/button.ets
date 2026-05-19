@@ -23,12 +23,12 @@ import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
-import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethodComponent } from './common'
+import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ExtendableCommonMethod, ArkCommonMethodComponent } from './common'
 import { ResourceColor, Resource as arkui_component_units_Resource, Length, ResourceStr, Font as arkui_component_units_Font, arkui_component_units_Font_serializer } from './units'
 import { Color as arkui_component_enums_Color, FontWeight, FontStyle, TextOverflow, TextHeightAdaptivePolicy, TextAlign } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { ContentModifier, AttributeModifier, hookButtonContentModifier, hookButtonAttributeModifier, AttributeUpdater } from '#handwritten'
-import { CustomBuilder } from './builder'
+import { CustomBuilder, ConstructorT, CustomBuilderT } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -347,55 +347,276 @@ export interface ButtonLabelStyle {
 }
 export interface ButtonAttribute extends CommonMethod {
     setButtonOptions(label: ResourceStr, options?: ButtonOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).setButtonOptions(label, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute setButtonOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setButtonOptions')
     }
     setButtonOptions(options?: ButtonOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).setButtonOptions(options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute setButtonOptions can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method setButtonOptions')
     }
     type(value: ButtonType | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).type(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute type can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method type')
     }
     stateEffect(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).stateEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute stateEffect can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method stateEffect')
     }
     buttonStyle(value: ButtonStyleMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).buttonStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute buttonStyle can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method buttonStyle')
     }
     controlSize(value: ControlSize | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).controlSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute controlSize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method controlSize')
     }
     role(value: ButtonRole | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).role(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute role can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method role')
     }
     fontColor(value: ResourceColor | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).fontColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute fontColor can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontColor')
     }
     fontSize(value: Length | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).fontSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute fontSize can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontSize')
     }
     fontWeight(value: int32 | FontWeight | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).fontWeight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute fontWeight can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontWeight')
     }
     fontStyle(value: FontStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).fontStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute fontStyle can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontStyle')
     }
     fontFamily(value: string | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).fontFamily(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute fontFamily can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method fontFamily')
     }
     contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).contentModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute contentModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method contentModifier')
     }
     labelStyle(value: ButtonLabelStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).labelStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute labelStyle can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method labelStyle')
     }
     minFontScale(value: double | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).minFontScale(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute minFontScale can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method minFontScale')
     }
     maxFontScale(value: double | global_resource_Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).maxFontScale(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute maxFontScale can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method maxFontScale')
     }
     attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ButtonAttribute).attributeModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Button attribute attributeModifier can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method attributeModifier')
+    }
+}
+
+export abstract class ExtendableButton extends ExtendableCommonMethod implements ButtonAttribute {
+    @memo
+    static _instantiateImpl<T extends ExtendableButton>(
+        @memo @memo_skip
+        styles: (instance: T) => void,
+        factory: () => T,
+        @memo @memo_skip
+        _content: CustomBuilder): void
+    {
+        const instanceExtendable = remember(factory);
+        @memo @memo_skip
+        const cb = (instance: ButtonAttribute): void => {
+            styles(instanceExtendable);
+            let commonStyles = instanceExtendable.__get__commonStyles__Internal()
+            if (commonStyles) {
+                commonStyles.forEach((func) => {
+                    func(instance);
+                })
+            }
+            instanceExtendable.__set__commonStyles__Internal(new Array<(instance: CommonMethod) => void>);
+        }
+        ButtonImpl(
+            cb,
+            _content
+        );
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableButton>(factory: () => T, label: ResourceStr, options?: ButtonOptions, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    @ComponentBuilder
+    static $_instantiate<T extends ExtendableButton>(factory: () => T, options?: ButtonOptions, content_?: CustomBuilder): T {
+        throw Error("Illegal call of $_instantiate")
+    }
+
+    setButtonOptions(label: ResourceStr, options?: ButtonOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ButtonAttribute).setButtonOptions(label, options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Button attribute 'setButtonOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setButtonOptions')
+    }
+
+    setButtonOptions(options?: ButtonOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ButtonAttribute).setButtonOptions(options)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Button attribute 'setButtonOptions' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method setButtonOptions')
     }
 }
 
@@ -516,6 +737,21 @@ export function ButtonImpl(
     })
 }
 
+@memo
+export function Button(
+    @memo @memo_skip
+    style: ((attributes: ButtonAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkButtonComponent>((): ArkButtonComponent => {
+        return new ArkButtonComponent()
+    })
+    NodeAttach<ArkButtonPeer>((): ArkButtonPeer => ArkButtonPeer.create(receiver), (_: ArkButtonPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ButtonConfiguration_serializer {
     public static write(buffer: SerializerBase, value: ButtonConfiguration): void {
         let valueSerializer: SerializerBase = buffer

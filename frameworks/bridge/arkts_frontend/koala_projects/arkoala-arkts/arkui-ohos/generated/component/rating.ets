@@ -215,6 +215,21 @@ export function RatingImpl(
     })
 }
 
+@memo
+export function Rating(
+    @memo @memo_skip
+    style: ((attributes: RatingAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkRatingComponent>((): ArkRatingComponent => {
+        return new ArkRatingComponent()
+    })
+    NodeAttach<ArkRatingPeer>((): ArkRatingPeer => ArkRatingPeer.create(receiver), (_: ArkRatingPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class RatingConfiguration_serializer {
     public static write(buffer: SerializerBase, value: RatingConfiguration): void {
         let valueSerializer: SerializerBase = buffer

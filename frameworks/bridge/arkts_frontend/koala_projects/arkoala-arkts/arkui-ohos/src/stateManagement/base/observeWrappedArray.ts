@@ -108,6 +108,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(idx as Object | undefined | null));
+            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         const value = this.store_[idx];
         if (!value || typeof value !== 'object') {
@@ -123,11 +124,17 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         const orig = this.store_[idx];
         this.store_[idx] = val;
         if (orig !== this.store_[idx]) {
-            this.meta_.fireChange(String(idx as Object | undefined | null));
-            this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+            const idxKey = String(idx as Object | undefined | null);
+            ObserveSingleton.instance.beginSyncMonitorBatch();
+            try {
+                this.meta_.fireChange(idxKey);
+                this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+            } finally {
+                ObserveSingleton.instance.endSyncMonitorBatch();
+            }
 
             // exec all subscribing @Watch functions
-            this.executeOnSubscribingWatches(String(idx as Object | undefined | null));
+            this.executeOnSubscribingWatches(idxKey);
         }
     }
 

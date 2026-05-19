@@ -283,7 +283,7 @@ void TextTimerPattern::UpdateTextTimer(double elapsedTime)
 
     // format time text.
     bool isNegative = false;
-    if (elapsedTime < 0) {
+    if (Negative(elapsedTime)) {
         elapsedTime = -elapsedTime;
         isNegative = true;
     }

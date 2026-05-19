@@ -176,6 +176,8 @@ enum class SymbolStyleAttribute {
     MAX_SYMBOL_STYLE,
 };
 
+enum class StrokeJoinStyle { MITER_JOIN, ROUND_JOIN, BEVEL_JOIN };
+
 namespace StringUtils {
 
 ACE_FORCE_EXPORT std::string ToString(const FontStyle& fontStyle);
@@ -196,6 +198,8 @@ ACE_FORCE_EXPORT std::string ToString(const WordBreak& wordBreak);
 ACE_FORCE_EXPORT std::string ToString(const PlaceholderAlignment& placeholderAlignment);
 
 ACE_FORCE_EXPORT std::string ToString(const SpanItemType& spanItemType);
+
+ACE_FORCE_EXPORT std::string ToString(const StrokeJoinStyle& strokeJoinStyle);
 
 } // namespace StringUtils
 

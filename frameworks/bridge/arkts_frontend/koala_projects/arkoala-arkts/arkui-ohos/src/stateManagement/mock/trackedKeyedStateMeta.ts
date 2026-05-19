@@ -14,12 +14,13 @@
  */
 
 import { MutableKeyedStateMeta } from '../base/mutableStateMeta';
+import { IObservedObject } from '../decorator';
 import { int32 } from '@koalaui/common';
 
 export class TestMutableKeyedStateMeta extends MutableKeyedStateMeta {
 
-    constructor(info: string) {
-        super(info);
+    constructor(info: string, observed?: IObservedObject) {
+        super(info, observed);
     }
 
     private refsMap: Map<string, int> = new Map<string, int>();

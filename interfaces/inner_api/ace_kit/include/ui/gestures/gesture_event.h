@@ -399,6 +399,12 @@ public:
         return secCompHandleEvent_;
     }
 #endif
+    size_t GetSize() const
+    {
+        static constexpr size_t GESTURE_EVENT_INFO_SIZE = 5200;
+        return GESTURE_EVENT_INFO_SIZE;
+    }
+
 private:
     bool repeat_ = false;
     bool pressed_ = false;

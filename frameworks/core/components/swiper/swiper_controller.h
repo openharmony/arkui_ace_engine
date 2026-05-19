@@ -32,6 +32,7 @@ using ChangeIndexImpl = std::function<void(const int32_t, bool)>;
 using ChangeIndexWithModeImpl = std::function<void(const int32_t, SwiperAnimationMode)>;
 using PreloadItemsFunc = std::function<void(const std::set<int32_t>)>;
 using PreloadItemsFinishFunc = std::function<void(const int32_t, const std::string)>;
+using PreMakeItemsFunc = std::function<void(const std::set<int32_t>)>;
 using OnChangeFunc = std::function<void(int32_t index)>;
 using FakeDragFunc = std::function<bool()>;
 using FakeDragByFunc = std::function<bool(double)>;
@@ -305,6 +306,18 @@ public:
         isFakeDraggingImpl_ = isFakeDraggingImpl;
     }
 
+    void SetPreMakeItemsImpl(const PreMakeItemsFunc& preMakeItemsImpl)
+    {
+        preMakeItemsImpl_ = preMakeItemsImpl;
+    }
+
+    void PreMakeItems(const std::set<int32_t>& indexSet) const
+    {
+        if (preMakeItemsImpl_) {
+            preMakeItemsImpl_(indexSet);
+        }
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
@@ -324,6 +337,7 @@ private:
     CommonFunc surfaceChangeCallback_;
     PreloadItemsFinishFunc preloadFinishCallback_;
     PreloadItemsFunc preloadItemsImpl_;
+    PreMakeItemsFunc preMakeItemsImpl_;
     OnChangeFunc onChangeImpl_;
     FakeDragFunc startFakeDragImpl_;
     FakeDragByFunc fakeDragByImpl_;

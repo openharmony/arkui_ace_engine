@@ -369,6 +369,18 @@ export function MarqueeImpl(
     })
 }
 
+@memo
+export function Marquee(
+    @memo @memo_skip
+    style: ((attributes: MarqueeAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkMarqueeComponent>((): ArkMarqueeComponent => {
+        return new ArkMarqueeComponent()
+    })
+    NodeAttach<ArkMarqueePeer>((): ArkMarqueePeer => ArkMarqueePeer.create(receiver), (_: ArkMarqueePeer): void => {
+        style?.(receiver)
+    })
+}
 export class MarqueeOptions_serializer {
     public static write(buffer: SerializerBase, value: MarqueeOptions): void {
         let valueSerializer: SerializerBase = buffer

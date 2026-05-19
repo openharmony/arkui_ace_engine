@@ -18,6 +18,10 @@
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/input_event_hub.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_algorithm.h"
@@ -25,6 +29,7 @@
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

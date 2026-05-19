@@ -49,6 +49,11 @@ bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag)
            ((propertyChangeFlag & PROPERTY_UPDATE_BY_CHILD_REQUEST) == PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
+bool CheckHasMeasured(PropertyChangeFlag propertyChangeFlag)
+{
+    return ((propertyChangeFlag & PROPERTY_UPDATE_LAYOUT_BY_MEASURE) == PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
+}
+
 bool CheckForceParentMeasureFlag(PropertyChangeFlag propertyChangeFlag)
 {
     return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||

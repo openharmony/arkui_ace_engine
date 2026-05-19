@@ -1227,3 +1227,19 @@ export interface DynamicNode {
 export function makeBindable<T>(value: T, onChange: Callback<T>): Bindable<T> {
     return { value, onChange } as Bindable<T>;
 }
+
+export abstract class ExtendableCommonMethod implements CommonMethod {
+    private __styles_Internal = new Array<(instance: CommonMethod) => void>();
+
+    public __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
+        return this.__styles_Internal;
+    }
+    
+    public __set__commonStyles__Internal(styles: Array<(instance: CommonMethod) => void>): void {
+        this.__styles_Internal = styles;
+    }
+
+    public __is_CustomComponent__Internal(): boolean {
+        return true;
+    }
+}

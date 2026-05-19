@@ -444,7 +444,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
 
         // Update background color and blur style only if SystemMaterial is not set
         UpdateBubbleBackgroundAndBlur(
-            renderContext, popupPaintProp, popupTheme, param, bubblePattern, isUserSetMaterial);
+            renderContext, popupPaintProp, popupTheme, param, bubblePattern, isUserSetMaterial, popupNode);
 
         // Update shadow based on SystemMaterial and applyShadow
         UpdateBubbleShadow(renderContext, param, popupNode);
@@ -566,7 +566,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
 
         // Update background color and blur style only if SystemMaterial is not set
         UpdateBubbleBackgroundAndBlur(
-            columnRenderContext, popupPaintProps, popupTheme, param, popupPattern, isUserSetMaterial);
+            columnRenderContext, popupPaintProps, popupTheme, param, popupPattern, isUserSetMaterial, popupNode);
 
         // Update shadow based on SystemMaterial and applyShadow
         UpdateBubbleShadow(columnRenderContext, param, popupNode);
@@ -871,8 +871,37 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     bubblePattern->SetIsShadowStyle(param->IsShadowStyle());
     bubblePattern->SetShadow(param->GetShadow());
     bool wasUserSetMaterial = bubblePattern->IsUserSetMaterial();
+    auto previousMaterial = renderContext ? renderContext->GetSystemMaterial() : nullptr;
+    // Get previous and current material types
+    MaterialType previousMaterialType = MaterialType::NONE;
+    MaterialType currentMaterialType = MaterialType::NONE;
+
+    if (previousMaterial) {
+        auto typeOpt = MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(previousMaterial));
+        if (typeOpt.has_value()) {
+            previousMaterialType = typeOpt.value();
+        }
+    }
+
+    auto currentMaterial = param->GetSystemMaterial();
+    if (MaterialUtils::IsEnableMaterialParam(currentMaterial)) {
+        auto typeOpt = MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(currentMaterial));
+        if (typeOpt.has_value()) {
+            currentMaterialType = typeOpt.value();
+        }
+    }
+    // Reset SDF shape when material type changes
+    if (wasUserSetMaterial && previousMaterialType != currentMaterialType) {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(childNode), nullptr);
+        if (renderContext) {
+            renderContext->SetSDFShape(nullptr);
+        }
+    }
     bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(childNode, param);
     bubblePattern->SetIsUserSetMaterial(isUserSetMaterial);
+    if (isUserSetMaterial) {
+        renderContext->SetClipToBounds(true);
+    }
     // Clear SystemMaterial when transitioning from having material to no material
     if (wasUserSetMaterial && !isUserSetMaterial) {
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(childNode), nullptr);
@@ -883,7 +912,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         auto popupTheme = GetPopupTheme();
         CHECK_NULL_VOID(popupTheme);
         UpdateBubbleBackgroundAndBlur(
-            renderContext, popupPaintProp, popupTheme, param, bubblePattern, isUserSetMaterial);
+            renderContext, popupPaintProp, popupTheme, param, bubblePattern, isUserSetMaterial, popupNode);
     }
 
     // Update shadow based on SystemMaterial and applyShadow
@@ -1333,11 +1362,12 @@ RefPtr<OverlayManager> BubbleView::GetPopupOverlayManager(const RefPtr<UINode>& 
 bool BubbleView::ShouldUpdateShadow(const RefPtr<PopupParam>& param)
 {
     auto systemMaterial = param->GetSystemMaterial();
-    if (!systemMaterial || !MaterialUtils::CheckMaterialValid(systemMaterial->GetType())) {
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(systemMaterial));
+    if (!nativeMaterial) {
         return true;  // Should update shadow when no valid material
     }
 
-    auto materialType = MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(systemMaterial));
+    auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
     if (!materialType.has_value()) {
         return true;  // Should update shadow when material type is unknown
     }
@@ -1363,27 +1393,112 @@ void BubbleView::UpdateBubbleBackgroundAndBlur(
     const RefPtr<PopupTheme>& theme,
     const RefPtr<PopupParam>& param,
     const RefPtr<BubblePattern>& pattern,
-    bool isUserSetMaterial)
+    bool isUserSetMaterial,
+    const RefPtr<FrameNode>& popupNode)
 {
     if (isUserSetMaterial) {
         return;  // Only update if SystemMaterial is not set
     }
 
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        IsSupportBlurStyle(renderContext, param->IsShowInSubWindow(), param->IsTips())) {
-        auto backgroundColor = paintProp->GetBackgroundColor().value_or(theme->GetDefaultBGColor());
-        renderContext->UpdateBackgroundColor(backgroundColor);
-        BlurStyleOption styleOption;
-        if (param->IsTips()) {
-            styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-        } else {
-            styleOption.blurStyle = param->GetBlurStyle();
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !IsSupportBlurStyle(renderContext, param->IsShowInSubWindow(), param->IsTips())) {
+        UpdateLegacyBackground(renderContext, paintProp, theme);
+        return;
+    }
+
+    UpdateModernBackgroundAndBlur(renderContext, paintProp, theme, param, pattern, popupNode);
+}
+
+void BubbleView::UpdateLegacyBackground(
+    const RefPtr<RenderContext>& renderContext,
+    const RefPtr<BubbleRenderProperty>& paintProp,
+    const RefPtr<PopupTheme>& theme)
+{
+    renderContext->UpdateBackgroundColor(
+        paintProp->GetBackgroundColor().value_or(theme->GetBackgroundColor()));
+}
+
+void BubbleView::UpdateModernBackgroundAndBlur(
+    const RefPtr<RenderContext>& renderContext,
+    const RefPtr<BubbleRenderProperty>& paintProp,
+    const RefPtr<PopupTheme>& theme,
+    const RefPtr<PopupParam>& param,
+    const RefPtr<BubblePattern>& pattern,
+    const RefPtr<FrameNode>& popupNode)
+{
+    auto pipelineContext = popupNode ? popupNode->GetContextWithCheck() : nullptr;
+    auto backgroundColor = paintProp->GetBackgroundColor().value_or(theme->GetDefaultBGColor());
+    renderContext->UpdateBackgroundColor(backgroundColor);
+
+    auto styleOption = CreateBlurStyleOption(param, pattern);
+    UpdateBlurStyleOption(renderContext, param, styleOption, pipelineContext, popupNode);
+    UpdateEffectOption(renderContext, param, pipelineContext, popupNode);
+}
+
+BlurStyleOption BubbleView::CreateBlurStyleOption(
+    const RefPtr<PopupParam>& param,
+    const RefPtr<BubblePattern>& pattern)
+{
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = param->IsTips() ? BlurStyle::COMPONENT_REGULAR : param->GetBlurStyle();
+    styleOption.colorMode = pattern->GetStyleOptionColorMode();
+    return styleOption;
+}
+
+void BubbleView::UpdateBlurStyleOption(
+    const RefPtr<RenderContext>& renderContext,
+    const RefPtr<PopupParam>& param,
+    const BlurStyleOption& styleOption,
+    PipelineContext* pipelineContext,
+    const RefPtr<FrameNode>& popupNode)
+{
+    BlurStyleOption finalStyleOption = styleOption;
+
+    if (param->GetBlurStyleOption().has_value()) {
+        finalStyleOption = param->GetBlurStyleOption().value();
+        finalStyleOption.blurStyle = styleOption.blurStyle;
+        UpdateWindowFocusCallback(pipelineContext, popupNode, finalStyleOption.policy);
+
+        if (renderContext->GetBackgroundEffect().has_value()) {
+            renderContext->UpdateBackgroundEffect(std::nullopt);
         }
-        styleOption.colorMode = pattern->GetStyleOptionColorMode();
-        renderContext->UpdateBackBlurStyle(styleOption);
+    }
+
+    renderContext->UpdateBackBlurStyle(finalStyleOption);
+}
+
+void BubbleView::UpdateEffectOption(
+    const RefPtr<RenderContext>& renderContext,
+    const RefPtr<PopupParam>& param,
+    PipelineContext* pipelineContext,
+    const RefPtr<FrameNode>& popupNode)
+{
+    if (!param->GetEffectOption().has_value()) {
+        return;
+    }
+
+    auto effectOption = param->GetEffectOption().value();
+    UpdateWindowFocusCallback(pipelineContext, popupNode, effectOption.policy);
+
+    if (renderContext->GetBackBlurStyle().has_value()) {
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+    }
+    renderContext->UpdateBackgroundEffect(effectOption);
+}
+
+void BubbleView::UpdateWindowFocusCallback(
+    PipelineContext* pipelineContext,
+    const RefPtr<FrameNode>& popupNode,
+    BlurStyleActivePolicy policy)
+{
+    if (!pipelineContext || !popupNode) {
+        return;
+    }
+
+    if (policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipelineContext->AddWindowFocusChangedCallback(popupNode->GetId());
     } else {
-        renderContext->UpdateBackgroundColor(
-            paintProp->GetBackgroundColor().value_or(theme->GetBackgroundColor()));
+        pipelineContext->RemoveWindowFocusChangedCallback(popupNode->GetId());
     }
 }
 

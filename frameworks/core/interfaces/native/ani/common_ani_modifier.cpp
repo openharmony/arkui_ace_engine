@@ -37,6 +37,7 @@
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #include "core/event/touch_event.h"
 #include "core/interfaces/native/implementation/axis_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
@@ -271,6 +272,14 @@ ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
     stackLayoutAlgorithm->UpdateAlignment(Alignment::TOP_LEFT);
     proxyNode->IncRefCount();
     return reinterpret_cast<ani_long>(AceType::RawPtr(proxyNode));
+}
+
+ani_long BuilderProxyNodeMockConstruct(ArkUI_Int32 id)
+{
+    auto node = AceType::MakeRefPtr<NG::DetachedFreeRootProxyNode>(id);
+    CHECK_NULL_RETURN(node, 0);
+    node->IncRefCount();
+return reinterpret_cast<ani_long>(AceType::RawPtr(node));
 }
 
 ani_ref GetSharedLocalStorage()
@@ -1216,6 +1225,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
         .getFocusedInstanceId = OHOS::Ace::NG::GetFocusedInstanceId,
         .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
+        .builderProxyNodeMockConstruct = OHOS::Ace::NG::BuilderProxyNodeMockConstruct,
         .getSharedLocalStorage = OHOS::Ace::NG::GetSharedLocalStorage,
         .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,
         .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,

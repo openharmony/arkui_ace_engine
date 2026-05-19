@@ -325,6 +325,8 @@ private:
     bool IsItemSelected(float offsetX, float offsetY) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
+    int32_t GetNearestItemIndex(double x, double y) const;
+    SwipeSelectStateKey GetSwipeSelectStateKeyNearPosition(float offsetX, float offsetY) const override;
     void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);

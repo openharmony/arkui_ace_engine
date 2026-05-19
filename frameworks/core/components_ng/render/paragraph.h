@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_range.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_layout_info.h"
@@ -198,8 +199,11 @@ struct ParagraphStyle {
     bool enableAutoSpacing = false;
     bool orphanCharOptimization = false;
     bool compressLeadingPunctuation = false;
+    bool punctuationOverflow = false;
     bool includeFontPadding = false;
     bool fallbackLineSpacing = false;
+    ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
+    std::optional<Color> colorShaderStyle;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -213,7 +217,9 @@ struct ParagraphStyle {
                enableAutoSpacing == others.enableAutoSpacing &&
                orphanCharOptimization == others.orphanCharOptimization &&
                compressLeadingPunctuation == others.compressLeadingPunctuation &&
-               includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing;
+               punctuationOverflow == others.punctuationOverflow &&
+               includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing &&
+               propGradient == others.propGradient && colorShaderStyle == others.colorShaderStyle ;
     }
 
     bool operator!=(const ParagraphStyle others) const

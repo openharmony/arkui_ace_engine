@@ -37,6 +37,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components/common/properties/text_style_gradient.h"
 namespace OHOS::Ace {
 struct SpanPositionInfo {
     SpanPositionInfo(int32_t index, int32_t start, int32_t end, int32_t offset)
@@ -83,6 +84,7 @@ struct UpdateSpanStyle {
         updateUrlAddress.reset();
         updateStrokeWidth.reset();
         updateStrokeColor.reset();
+        updateStrokeJoinStyle.reset();
 
         updateLineHeight.reset();
         updateHalfLeading.reset();
@@ -120,6 +122,7 @@ struct UpdateSpanStyle {
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
     std::optional<CalcDimension> updateStrokeWidth = std::nullopt;
     std::optional<Color> updateStrokeColor = std::nullopt;
+    std::optional<StrokeJoinStyle> updateStrokeJoinStyle = std::nullopt;
     std::optional<std::u16string> updateUrlAddress = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
@@ -202,6 +205,7 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
         JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
         JSON_STRING_PUT_BOOL(jsonValue, strokeColorFollowFontColor);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateStrokeJoinStyle);
         return jsonValue->ToString();
     }
 };
@@ -216,6 +220,8 @@ struct UpdateParagraphStyle {
         paragraphSpacing.reset();
         textVerticalAlign.reset();
         textDirection.reset();
+        ResetGradient();
+        colorShaderStyle.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
@@ -224,6 +230,37 @@ struct UpdateParagraphStyle {
     std::optional<Dimension> paragraphSpacing;
     std::optional<TextVerticalAlign> textVerticalAlign;
     std::optional<TextDirection> textDirection;
+    ACE_DEFINE_TEXT_STYLE_GRADIENT_OPTIONAL_TYPE();
+    std::optional<Color> colorShaderStyle;
+ 
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, struct UpdateParagraphStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+ 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, struct UpdateParagraphStyle&)>&& updateFunc)
+    {
+        CHECK_NULL_VOID(resObj && updateFunc);
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+ 
+    const RefPtr<ResourceObject>& GetResource(const std::string& key) const
+    {
+        static const RefPtr<ResourceObject> invalidResObj = nullptr;
+        auto iter = resMap_.find(key);
+        return iter == resMap_.end() ? invalidResObj : iter->second.resObj;
+    }
 
     std::string ToString() const
     {
@@ -235,6 +272,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paragraphSpacing);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, textVerticalAlign);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, textDirection);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, colorShaderStyle);
         return jsonValue->ToString();
     }
 };
@@ -442,6 +480,7 @@ public:
     virtual void SetEnableAutoSpacing(bool enabled) {};
     virtual void SetOrphanCharOptimization(bool enabled) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) {};
+    virtual void SetPunctuationOverflow(bool enabled) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
     virtual void SetSupportStyledUndo(bool enabled) {};

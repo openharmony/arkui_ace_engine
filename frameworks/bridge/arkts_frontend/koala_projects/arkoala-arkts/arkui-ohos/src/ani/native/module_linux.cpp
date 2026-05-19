@@ -34,6 +34,21 @@
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
 
+namespace {
+namespace Stubs {
+ani_long VideoSetVoidCallback([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
+    [[maybe_unused]] ani_object callback)
+{
+    return 0L;
+}
+ani_long VideoSetErrorCallback([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
+    [[maybe_unused]] ani_object callback)
+{
+    return 0L;
+}
+} // namespace Stubs
+} // namespace
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
     ani_env* env;
@@ -119,6 +134,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
         },
         ani_native_function {
+            "_BuilderProxyNode_Mock_Construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeMockConstruct)
+        },
+        ani_native_function {
             "_ContentSlot_construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ContentSlotConstruct)
@@ -197,6 +217,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_RequireArkoalaNodeId",
             "i:i",
             reinterpret_cast<void*>(OHOS::Ace::Ani::RequireArkoalaNodeId)
+        },
+        ani_native_function {
+            "_Video_SetVoidCallback",
+            "lC{std.core.Function0}:",
+            reinterpret_cast<void*>(Stubs::VideoSetVoidCallback)
+        },
+        ani_native_function {
+            "_Video_SetErrorCallback",
+            "lC{std.core.Function1}:",
+            reinterpret_cast<void*>(Stubs::VideoSetErrorCallback)
         },
         ani_native_function {
             "_PersistentStorage_Get",

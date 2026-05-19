@@ -840,21 +840,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Array_Opt_ShaderStyle_ShaderStyle& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt& src)
 {
     switch (src.selector) {
@@ -1494,6 +1479,22 @@ void AssignUnionTo(std::optional<T>& dst,
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Resource_image_PixelMap_String& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3230,6 +3231,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Array_Opt_ShaderStyleProxy_ShaderStyleProxy& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_BadgeParamWithNumber_BadgeParamWithString& src)
 {
     switch (src.selector) {
@@ -3627,6 +3643,7 @@ ASSIGN_OPT(Opt_drawing_Canvas)
 ASSIGN_OPT(Opt_drawing_ColorFilter)
 ASSIGN_OPT(Opt_drawing_FontEdging)
 ASSIGN_OPT(Opt_drawing_Lattice)
+ASSIGN_OPT(Opt_drawing_Typeface)
 ASSIGN_OPT(Opt_DrawingRenderingContext)
 ASSIGN_OPT(Opt_DrawModifier)
 ASSIGN_OPT(Opt_DynamicRangeMode)
@@ -3979,7 +3996,6 @@ ASSIGN_OPT(Opt_SecurityComponentLayoutDirection)
 ASSIGN_OPT(Opt_SeekMode)
 ASSIGN_OPT(Opt_SelectedMode)
 ASSIGN_OPT(Opt_SelectStatus)
-ASSIGN_OPT(Opt_ShaderStyle)
 ASSIGN_OPT(Opt_ShadowStyle)
 ASSIGN_OPT(Opt_ShadowType)
 ASSIGN_OPT(Opt_SharedTransitionEffectType)
@@ -4007,6 +4023,7 @@ ASSIGN_OPT(Opt_SslErrorHandler)
 ASSIGN_OPT(Opt_StartLineInfo)
 ASSIGN_OPT(Opt_StickyStyle)
 ASSIGN_OPT(Opt_String)
+ASSIGN_OPT(Opt_StrokeJoinStyle);
 ASSIGN_OPT(Opt_StyledString)
 ASSIGN_OPT(Opt_StyledStringController)
 ASSIGN_OPT(Opt_StyledStringKey)
@@ -4231,6 +4248,7 @@ ASSIGN_OPT(Opt_Array_ColorStop)
 ASSIGN_OPT(Opt_Array_DateRange)
 ASSIGN_OPT(Opt_Array_Dimension)
 ASSIGN_OPT(Opt_Array_DisturbanceFieldOptionsInner)
+ASSIGN_OPT(Opt_Array_drawing_Typeface)
 ASSIGN_OPT(Opt_Array_EmitterPropertyInner)
 ASSIGN_OPT(Opt_Array_F64)
 ASSIGN_OPT(Opt_Array_FingerInfo)
@@ -4270,7 +4288,7 @@ ASSIGN_OPT(Opt_Array_Number)
 ASSIGN_OPT(Opt_Array_Object)
 ASSIGN_OPT(Opt_Array_ObscuredReasons)
 ASSIGN_OPT(Opt_Array_Opt_Object)
-ASSIGN_OPT(Opt_Array_Opt_ShaderStyle)
+ASSIGN_OPT(Opt_Array_Opt_ShaderStyleProxy)
 ASSIGN_OPT(Opt_Array_ParticleOptionsInner)
 ASSIGN_OPT(Opt_Array_ParticlePropertyAnimationColorInner)
 ASSIGN_OPT(Opt_Array_ParticlePropertyAnimationNumberInner)
@@ -4996,7 +5014,6 @@ ASSIGN_OPT(Opt_Union_arkui_component_enums_Color_String_Resource_I64)
 ASSIGN_OPT(Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle)
 ASSIGN_OPT(Opt_Union_Array_MenuElement_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder)
-ASSIGN_OPT(Opt_Union_Array_Opt_ShaderStyle_ShaderStyle)
 ASSIGN_OPT(Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt)
 ASSIGN_OPT(Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent)
 ASSIGN_OPT(Opt_Union_Array_ToolbarItem_CustomNodeBuilder)
@@ -5039,6 +5056,7 @@ ASSIGN_OPT(Opt_Union_MenuPreviewMode_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_NestedScrollOptions_NestedScrollOptionsExt)
 ASSIGN_OPT(Opt_Union_OutlineStyle_EdgeOutlineStyles)
 ASSIGN_OPT(Opt_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner)
+ASSIGN_OPT(Opt_Union_Resource_image_PixelMap_String)
 ASSIGN_OPT(Opt_Union_Resource_String)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColorContent_ColorMetricsExt)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColoringStrategy)
@@ -5408,7 +5426,6 @@ ASSIGN_OPT(Opt_NativeEmbedInfo)
 ASSIGN_OPT(Opt_NavigationMenuOptions)
 ASSIGN_OPT(Opt_NavigationToolbarOptions)
 ASSIGN_OPT(Opt_OutlineOptions)
-ASSIGN_OPT(Opt_ParagraphStyleInterface)
 ASSIGN_OPT(Opt_PickerBackgroundStyle)
 ASSIGN_OPT(Opt_PickerDialogButtonStyle)
 ASSIGN_OPT(Opt_PickerIndicatorStyle)
@@ -5418,8 +5435,7 @@ ASSIGN_OPT(Opt_PopupCommonOptions)
 ASSIGN_OPT(Opt_PopupMessageOptions)
 ASSIGN_OPT(Opt_ResizableOptions)
 ASSIGN_OPT(Opt_RichEditorLayoutStyle)
-ASSIGN_OPT(Opt_RichEditorParagraphStyle)
-ASSIGN_OPT(Opt_RichEditorParagraphStyleOptions)
+ASSIGN_OPT(Opt_ShaderStyleProxy)
 ASSIGN_OPT(Opt_SheetOptions)
 ASSIGN_OPT(Opt_SwipeActionOptions)
 ASSIGN_OPT(Opt_TabBarLabelStyle)
@@ -5428,6 +5444,7 @@ ASSIGN_OPT(Opt_TextBackgroundStyle)
 ASSIGN_OPT(Opt_TextPickerTextStyle)
 ASSIGN_OPT(Opt_TouchEventProxy)
 ASSIGN_OPT(Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions)
+ASSIGN_OPT(Opt_Union_Array_Opt_ShaderStyleProxy_ShaderStyleProxy)
 ASSIGN_OPT(Opt_Union_BadgeParamWithNumber_BadgeParamWithString)
 ASSIGN_OPT(Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions)
 ASSIGN_OPT(Opt_Union_Length_GutterOption)
@@ -5442,12 +5459,14 @@ ASSIGN_OPT(Opt_ImageAttachmentInterface)
 ASSIGN_OPT(Opt_InputEventType)
 ASSIGN_OPT(Opt_NativeEmbedDataInfo)
 ASSIGN_OPT(Opt_NativeEmbedTouchInfo)
+ASSIGN_OPT(Opt_ParagraphStyleInterface)
 ASSIGN_OPT(Opt_ParticleOptionsInner)
 ASSIGN_OPT(Opt_PopupOptions)
 ASSIGN_OPT(Opt_ResourceImageAttachmentOptions)
 ASSIGN_OPT(Opt_RichEditorImageSpanStyle)
 ASSIGN_OPT(Opt_RichEditorImageSpanStyleResult)
-ASSIGN_OPT(Opt_RichEditorParagraphResult)
+ASSIGN_OPT(Opt_RichEditorParagraphStyle)
+ASSIGN_OPT(Opt_RichEditorParagraphStyleOptions)
 ASSIGN_OPT(Opt_RichEditorTextStyle)
 ASSIGN_OPT(Opt_RichEditorTextStyleResult)
 ASSIGN_OPT(Opt_RichEditorUpdateImageSpanStyleOptions)
@@ -5461,6 +5480,7 @@ ASSIGN_OPT(Opt_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt)
 ASSIGN_OPT(Opt_AttachmentType)
 ASSIGN_OPT(Opt_RichEditorImageSpanOptions)
 ASSIGN_OPT(Opt_RichEditorImageSpanResult)
+ASSIGN_OPT(Opt_RichEditorParagraphResult)
 ASSIGN_OPT(Opt_RichEditorTextSpanOptions)
 ASSIGN_OPT(Opt_RichEditorTextSpanResult)
 ASSIGN_OPT(Opt_Union_RichEditorImageSpanResult_RichEditorTextSpanResult)

@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -68,6 +69,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    textStyle.SetTextStyleUid(frameNode->GetId() + 1);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
@@ -81,6 +83,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
+    UpdateStrokeJoinStyle(textFieldLayoutProperty, textStyle);
     auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
@@ -296,7 +299,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
     }
     // first line indent
     CHECK_NULL_VOID(paragraph_);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -310,8 +313,9 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
         float minFontScale = textFieldLayoutProperty->GetMinFontScale().value_or(0.0f);
         float maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value_or(
             pipeline->GetMaxAppFontScale());
-        float fontScale = std::min(pipeline->GetFontScale(), maxFontScale);
-        indentValue = Dimension(indentValue).ConvertToPxDistribute(minFontScale, maxFontScale);
+        float fontScale = std::min(pipeline->GetFontScaleFromEnv(frameNode), maxFontScale);
+        indentValue = Dimension(indentValue).ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
+            pattern->GetEnvFontScale());
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
             fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
@@ -775,6 +779,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleFontScale(const RefPtr<TextFieldLa
     if (textFieldLayoutProperty->HasMinFontScale()) {
         textStyle.SetMinFontScale(textFieldLayoutProperty->GetMinFontScale().value());
     }
+    textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextStyleSetTextColor(const RefPtr<FrameNode>& frameNode,
@@ -817,14 +822,16 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(theme);
+    UpdateShaderStyle(layoutProperty, textStyle);
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
 
     Dimension fontSize = theme->GetFontSize();
     if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
-        fontSize = Dimension(layoutProperty->GetFontSizeValue(Dimension()).ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()));
+        fontSize = Dimension(layoutProperty->GetFontSizeValue(Dimension()).ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale()));
     }
     textStyle.SetFontSize(fontSize);
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
@@ -1498,7 +1505,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleLineHeight(const RefPtr<FrameNode>
             textStyle.SetLineHeight(heightValue);
         } else {
             textStyle.SetLineHeight(
-                Dimension(heightValue.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale())));
+                Dimension(heightValue.ConvertToPxDistributeWithEnv(
+                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                    textStyle.IsAllowScale(), textStyle.GetEnvFontScale())));
         }
         textStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value_or(pipeline->GetHalfLeading()));
     }
@@ -1581,8 +1590,9 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
             placeholderTextStyle.SetLineHeight(heightValue);
         } else {
             placeholderTextStyle.SetLineHeight(
-                Dimension(heightValue.ConvertToPxDistribute(placeholderTextStyle.GetMinFontScale(),
-                    placeholderTextStyle.GetMaxFontScale())));
+                Dimension(heightValue.ConvertToPxDistributeWithEnv(placeholderTextStyle.GetMinFontScale(),
+                    placeholderTextStyle.GetMaxFontScale(),
+                    placeholderTextStyle.IsAllowScale(), placeholderTextStyle.GetEnvFontScale())));
         }
         placeholderTextStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value_or(pipeline->GetHalfLeading()));
     }
@@ -1592,6 +1602,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     if (layoutProperty->HasMinFontScale()) {
         placeholderTextStyle.SetMinFontScale(layoutProperty->GetMinFontScale().value());
     }
+    placeholderTextStyle.SetEnvFontScale(pattern->GetEnvFontScale());
     placeholderTextStyle.SetLineSpacing(theme->GetPlaceholderLineSpacing());
 }
 
@@ -1603,6 +1614,51 @@ bool TextFieldLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
         GreatNotEqual(paragraph->GetHeight(), maxSize.Height()) ||
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
         IsAdaptFontSizeExceedLineHeight(paragraph);
+}
+
+void TextFieldLayoutAlgorithm::UpdateShaderStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    TextStyle& textStyle)
+{
+    if (layoutProperty->HasGradientShaderStyle()) {
+        auto gradients = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+        auto gradient = GradientConvert::ToGradient(gradients);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+        textStyle.SetGradient(gradient);
+    } else if (layoutProperty->HasColorShaderStyle()) {
+        std::optional<Color> colors = layoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT);
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(colors);
+    } else {
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
+    }
+}
+ 
+void TextFieldLayoutAlgorithm::UpdateStrokeJoinStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    TextStyle& textStyle)
+{
+    if (layoutProperty->HasStrokeJoinStyle()) {
+        auto style = layoutProperty->GetStrokeJoinStyle().value_or(StrokeJoinStyle::MITER_JOIN);
+        textStyle.SetStrokeJoinStyle(style);
+    } else {
+        textStyle.SetStrokeJoinStyle(std::nullopt);
+    }
+}
+ 
+void TextFieldLayoutAlgorithm::RelayoutShaderStyle(TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(textStyle.GetGradient().has_value());
+    CHECK_NULL_VOID(paragraph_ || inlineParagraph_);
+    auto txtStyle = textStyle;
+    txtStyle.ResetReCreateAndReLayoutBitmap();
+    txtStyle.SetForeGroundBrushBitMap();
+ 
+    if (paragraph_) {
+        paragraph_->ReLayoutForeground(txtStyle);
+    }
+    if (inlineParagraph_) {
+        inlineParagraph_->ReLayoutForeground(txtStyle);
+    }
 }
 
 bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)

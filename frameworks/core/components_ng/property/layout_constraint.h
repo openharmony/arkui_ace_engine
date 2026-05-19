@@ -37,6 +37,8 @@ enum class ReferenceEdge {
 struct ViewPosReference {
     float viewPosStart;
     float viewPosEnd;
+    float viewExtStart;
+    float viewExtEnd;
     float referencePos;
     ReferenceEdge referenceEdge;
     Axis axis;

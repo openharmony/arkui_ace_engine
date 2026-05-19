@@ -70,6 +70,7 @@ public:
     static void JsOnScrollStop(const JSCallbackInfo& args);
     static void JsOnScrollIndex(const JSCallbackInfo& args);
     static void JsOnScrollFrameBegin(const JSCallbackInfo& args);
+    static void JsOnEditModeChange(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

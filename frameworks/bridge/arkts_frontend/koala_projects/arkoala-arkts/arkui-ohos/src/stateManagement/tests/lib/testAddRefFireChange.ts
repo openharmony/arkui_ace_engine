@@ -1,10 +1,12 @@
 import { IFactoryInternal } from '../../base/iFactoryInternal';
 import { IBackingValue } from '../../base/iBackingValue';
 import { IBackingValue } from '../../base/iBackingValue';
-import { IMutableStateMeta } from '../../decorator';
+import { IMutableStateMeta, IObservedObject } from '../../decorator';
 import { IMutableKeyedStateMeta } from '../../decorator';
 import { DecoratorBackingValue } from '../../base/backingValue';
-import { MutableStateMeta, MutableKeyedStateMeta } from '../../base/mutableStateMeta'
+import {
+    MutableStateMeta, MutableKeyedStateMeta, MonitorTarget,
+} from '../../base/mutableStateMeta'
 import { StateTracker } from './stateTracker.ts';
 import { int32 } from '@koalaui/common';
 import { TestMutableKeyedStateMeta } from '../../mock/trackedKeyedStateMeta';
@@ -17,16 +19,13 @@ export class TestFactory implements IFactoryInternal {
         return new TestDecoratorBackingValue<T>(info, initValue)
     }
 
-    mkMutableStateMeta(info: string): IMutableStateMeta {
-        return new TestMutableStateMeta(info);
+    mkMutableStateMeta(info: string, target?: MonitorTarget): IMutableStateMeta {
+        return new TestMutableStateMeta(info, target);
     }
 
     // IMutableKeyedStateMeta used by wrapper classes for Array, Map, Set, Date
-    mkMutableKeyedStateMeta(info: string): IMutableKeyedStateMeta {
-        return new TestMutableKeyedStateMeta(info);
-    }
-    mkMutableKeyedStateMeta(info: string, observed: Object): IMutableKeyedStateMeta {
-        return new TestMutableKeyedStateMeta(info);
+    mkMutableKeyedStateMeta(info: string, observed?: IObservedObject): IMutableKeyedStateMeta {
+        return new TestMutableKeyedStateMeta(info, observed);
     }
 
     mkObservedInterfaceProxy<T extends Object>(x: T): T {
@@ -56,14 +55,12 @@ class TestDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
         super.addRef();
         this.__refsCount += 1;
         StateTracker.increaseRefCnt();
-        //StateMgmtConsole.propertyAccess(`ADD REF ${this.propertyName_} ${this.__refsCount}`);
     }
 
     public override fireChange(): void {
         super.fireChange();
         this.__fireChangeCount += 1;
         StateTracker.increaseFireChangeCnt();
-        //StateMgmtConsole.propertyAccess(`Fire change ${this.propertyName_} ${this.__fireChangeCount}`);
     }
 
     public getFireChangeCnt(): int32 {
@@ -81,10 +78,10 @@ class TestDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
     }
 }
 
-class TestMutableStateMeta extends MutableStateMeta {
+export class TestMutableStateMeta extends MutableStateMeta {
 
-    constructor(info: string) {
-        super(info);
+    constructor(info: string, target?: MonitorTarget) {
+        super(info, target);
     }
 
     private __refsCount: int32 = 0;
@@ -93,12 +90,10 @@ class TestMutableStateMeta extends MutableStateMeta {
     public override addRef(): void {
         super.addRef();
         this.__refsCount += 1;
-        //stateMgmtConsole.propertyAccess(`ADD REF ${this!.info_} ${this.__refsCount}`);
     }
 
     public override fireChange(): void {
         super.fireChange();
-        //stateMgmtConsole.propertyAccess(`Fire change ${this.info_} ${this.__fireChangeCount}`);
         this.__fireChangeCount += 1;
     }
 

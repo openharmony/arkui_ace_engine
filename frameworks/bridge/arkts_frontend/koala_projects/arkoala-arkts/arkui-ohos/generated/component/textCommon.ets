@@ -20,7 +20,7 @@ import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, 
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
-import { extractors } from '#handwritten'
+import { extractors, ShaderStyle } from '#handwritten'
 import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
 import { text_LineMetrics_serializer, text_TextBox_serializer } from './../framework/ohos.graphics.text'
 import { default as text } from '@ohos.graphics.text'
@@ -278,30 +278,6 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         const returnResult: Array<TextBox> | undefined = buffer
         retvalDeserializer.dispose()
         return (returnResult as Array<TextBox> | undefined)
-    }
-}
-export class ShaderStyleInternal {
-    public static fromPtr(ptr: KPointer): ShaderStyle {
-        return new ShaderStyle(MaterializedBaseTag.NOP, ptr)
-    }
-}
-export class ShaderStyle implements MaterializedBase {
-    public peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, ShaderStyle.getFinalizer())
-    }
-    constructor() {
-        this(MaterializedBaseTag.NOP, ShaderStyle.construct())
-    }
-    static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._ShaderStyle_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ShaderStyle_getFinalizer()
     }
 }
 export interface StyledStringController {
@@ -718,6 +694,11 @@ export enum TextContentAlign {
     CENTER = 1,
     BOTTOM = 2
 }
+export enum StrokeJoinStyle {
+    MITER_JOIN = 0,
+    ROUND_JOIN = 1,
+    BEVEL_JOIN = 2
+}
 export enum KeyboardGradientMode {
     NONE = 0,
     LINEAR_GRADIENT = 1
@@ -730,10 +711,6 @@ export enum SuperscriptStyle {
     NORMAL = 0,
     SUPERSCRIPT = 1,
     SUBSCRIPT = 2
-}
-export enum MaxLinesMode {
-    CLIP = 0,
-    SCROLL = 1
 }
 export enum KeyboardFluidLightMode {
     NONE = 0,
@@ -760,12 +737,6 @@ export enum TextVerticalAlign {
     CENTER = 2,
     TOP = 3
 }
-export interface MaxLinesOptions {
-    overflowMode?: MaxLinesMode;
-}
-export interface LineSpacingOptions {
-    onlyBetweenLines?: boolean;
-}
 export interface NumericTextTransitionOptions {
     flipDirection?: FlipDirection;
     enableBlur?: boolean;
@@ -776,6 +747,16 @@ export interface TextLayoutOptions {
 export interface KeyboardAppearanceConfig {
     gradientMode?: KeyboardGradientMode;
     fluidLightMode?: KeyboardFluidLightMode;
+}
+export enum MaxLinesMode {
+    CLIP = 0,
+    SCROLL = 1
+}
+export interface LineSpacingOptions {
+    onlyBetweenLines?: boolean;
+}
+export interface MaxLinesOptions {
+    overflowMode?: MaxLinesMode;
 }
 export interface VoiceButtonOptions {
     enabled?: boolean;
@@ -862,17 +843,6 @@ export class RadialGradientStyle_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         return RadialGradientStyleInternal.fromPtr(ptr)
-    }
-}
-export class ShaderStyle_serializer {
-    public static write(buffer: SerializerBase, value: ShaderStyle): void {
-        let valueSerializer: SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): ShaderStyle {
-        let valueDeserializer: DeserializerBase = buffer
-        let ptr: KPointer = valueDeserializer.readPointer()
-        return ShaderStyleInternal.fromPtr(ptr)
     }
 }
 export class StyledStringController_serializer {
@@ -2085,9 +2055,14 @@ export class ColorShaderStyleInternal {
     }
 }
 export class ColorShaderStyle extends ShaderStyle implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
     public color: ResourceColor
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        super(tag, peerPtr)
+        super()
+        this.peer = new Finalizable(peerPtr, ColorShaderStyle.getFinalizer())
         this.color = this.getColor()
     }
     constructor(color: ResourceColor) {
@@ -2177,9 +2152,14 @@ export class LinearGradientStyleInternal {
     }
 }
 export class LinearGradientStyle extends ShaderStyle implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
     public options: LinearGradientOptions
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        super(tag, peerPtr)
+        super()
+        this.peer = new Finalizable(peerPtr, LinearGradientStyle.getFinalizer())
         this.options = this.getOptions()
     }
     constructor(options: LinearGradientOptions) {
@@ -2323,9 +2303,14 @@ export class RadialGradientStyleInternal {
     }
 }
 export class RadialGradientStyle extends ShaderStyle implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
     public options: RadialGradientOptions
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        super(tag, peerPtr)
+        super()
+        this.peer = new Finalizable(peerPtr, RadialGradientStyle.getFinalizer())
         this.options = this.getOptions()
     }
     constructor(options: RadialGradientOptions) {

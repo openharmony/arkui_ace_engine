@@ -111,6 +111,18 @@ export function CircleImpl(
     })
 }
 
+@memo
+export function Circle(
+    @memo @memo_skip
+    style: ((attributes: CircleAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkCircleComponent>((): ArkCircleComponent => {
+        return new ArkCircleComponent()
+    })
+    NodeAttach<ArkCirclePeer>((): ArkCirclePeer => ArkCirclePeer.create(receiver), (_: ArkCirclePeer): void => {
+        style?.(receiver)
+    })
+}
 export class CircleOptions_serializer {
     public static write(buffer: SerializerBase, value: CircleOptions): void {
         let valueSerializer: SerializerBase = buffer

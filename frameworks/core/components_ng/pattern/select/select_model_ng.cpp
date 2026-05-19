@@ -359,6 +359,7 @@ void SelectModelNG::SetPaddingBottom(const CalcDimension& buttomValue)
 
 void SelectModelNG::SetSpace(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_SPACE);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSpace(value);
@@ -830,6 +831,7 @@ void SelectModelNG::SetArrowPosition(FrameNode* frameNode, const ArrowPosition v
 
 void SelectModelNG::SetSpace(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_SPACE, frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetSpace(value);

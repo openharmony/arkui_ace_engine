@@ -820,4 +820,655 @@ HWTEST_F(InputEventTestNg, OnCollectPenHoverMoveEvent005, TestSize.Level1)
     hoverEventActuator->penHoverMoveEventTarget_->onPenHoverMoveEventCallback_(hover);
     EXPECT_NE(inputEventHub, nullptr);
 }
+
+/**
+ * @tc.name: InputEventOperatorTest001
+ * @tc.desc: Test InputEvent operator() overloads with valid callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, InputEventOperatorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. operator()(MouseInfo&) with callback.
+     * @tc.expected: callback is invoked.
+     */
+    int32_t mouseCount = 0;
+    OnMouseEventFunc onMouse = [&mouseCount](MouseInfo& info) { mouseCount++; };
+    auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse));
+    MouseInfo mouseInfo;
+    (*mouseEvent)(mouseInfo);
+    EXPECT_EQ(mouseCount, 1);
+
+    /**
+     * @tc.steps: step2. operator()(bool, HoverInfo&) with callback.
+     * @tc.expected: callback is invoked.
+     */
+    int32_t hoverCount = 0;
+    OnHoverFunc onHover = [&hoverCount](bool, HoverInfo&) { hoverCount++; };
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover));
+    HoverInfo hoverInfo;
+    (*hoverEvent)(true, hoverInfo);
+    EXPECT_EQ(hoverCount, 1);
+
+    /**
+     * @tc.steps: step3. operator()(bool) with OnHoverEventFunc callback.
+     * @tc.expected: callback is invoked.
+     */
+    int32_t hoverEventCount = 0;
+    OnHoverEventFunc onHoverEvent = [&hoverEventCount](bool) {
+        hoverEventCount++;
+        return true;
+    };
+    auto hoverEventInput = AceType::MakeRefPtr<InputEvent>(std::move(onHoverEvent));
+    (*hoverEventInput)(true);
+    EXPECT_EQ(hoverEventCount, 1);
+
+    /**
+     * @tc.steps: step4. operator()(AxisInfo&) with callback.
+     * @tc.expected: callback is invoked.
+     */
+    int32_t axisCount = 0;
+    OnAxisEventFunc onAxis = [&axisCount](AxisInfo& info) { axisCount++; };
+    auto axisEvent = AceType::MakeRefPtr<InputEvent>(std::move(onAxis));
+    AxisInfo axisInfo;
+    (*axisEvent)(axisInfo);
+    EXPECT_EQ(axisCount, 1);
+
+    /**
+     * @tc.steps: step5. operator()(CoastingAxisInfo&) with callback.
+     * @tc.expected: callback is invoked.
+     */
+    int32_t coastingCount = 0;
+    OnCoastingAxisEventFunc onCoasting = [&coastingCount](CoastingAxisInfo& info) { coastingCount++; };
+    auto coastingEvent = AceType::MakeRefPtr<InputEvent>(std::move(onCoasting));
+    CoastingAxisInfo coastingInfo;
+    (*coastingEvent)(coastingInfo);
+    EXPECT_EQ(coastingCount, 1);
+
+    /**
+     * @tc.steps: step6. operator()(HoverInfo&) with OnHoverMoveFunc callback.
+     * @tc.expected: callback is invoked.
+     */
+    int32_t hoverMoveCount = 0;
+    OnHoverMoveFunc onHoverMove = [&hoverMoveCount](HoverInfo& info) { hoverMoveCount++; };
+    auto hoverMoveEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHoverMove));
+    HoverInfo hoverMoveInfo;
+    (*hoverMoveEvent)(hoverMoveInfo);
+    EXPECT_EQ(hoverMoveCount, 1);
+}
+
+/**
+ * @tc.name: InputEventOperatorNullTest001
+ * @tc.desc: Test InputEvent operator() overloads with null callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, InputEventOperatorNullTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. operator()(MouseInfo&) with null callback.
+     * @tc.expected: callback is nullptr, operator() returns without crash.
+     */
+    OnMouseEventFunc onMouse = nullptr;
+    auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse));
+    ASSERT_NE(mouseEvent, nullptr);
+    EXPECT_FALSE(mouseEvent->GetOnMouseEventFunc());
+    MouseInfo mouseInfo;
+    (*mouseEvent)(mouseInfo);
+
+    /**
+     * @tc.steps: step2. operator()(bool, HoverInfo&) with null callback.
+     * @tc.expected: callback is nullptr, operator() returns without crash.
+     */
+    OnHoverFunc onHover = nullptr;
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover));
+    ASSERT_NE(hoverEvent, nullptr);
+    EXPECT_FALSE(hoverEvent->GetOnHoverFunc());
+    HoverInfo hoverInfo;
+    (*hoverEvent)(true, hoverInfo);
+
+    /**
+     * @tc.steps: step3. operator()(bool) with null OnHoverEventFunc.
+     * @tc.expected: callback is nullptr, operator() returns without crash.
+     */
+    OnHoverEventFunc onHoverEvent = nullptr;
+    auto hoverEventInput = AceType::MakeRefPtr<InputEvent>(std::move(onHoverEvent));
+    ASSERT_NE(hoverEventInput, nullptr);
+    EXPECT_FALSE(hoverEventInput->GetOnHoverEventFunc());
+    (*hoverEventInput)(true);
+
+    /**
+     * @tc.steps: step4. operator()(AxisInfo&) with null callback.
+     * @tc.expected: callback is nullptr, operator() returns without crash.
+     */
+    OnAxisEventFunc onAxis = nullptr;
+    auto axisEvent = AceType::MakeRefPtr<InputEvent>(std::move(onAxis));
+    ASSERT_NE(axisEvent, nullptr);
+    EXPECT_FALSE(axisEvent->GetOnAxisEventFunc());
+    AxisInfo axisInfo;
+    (*axisEvent)(axisInfo);
+
+    /**
+     * @tc.steps: step5. operator()(CoastingAxisInfo&) with null callback.
+     * @tc.expected: no crash (no getter for CoastingAxisEventFunc).
+     */
+    OnCoastingAxisEventFunc onCoasting = nullptr;
+    auto coastingEvent = AceType::MakeRefPtr<InputEvent>(std::move(onCoasting));
+    ASSERT_NE(coastingEvent, nullptr);
+    CoastingAxisInfo coastingInfo;
+    (*coastingEvent)(coastingInfo);
+
+    /**
+     * @tc.steps: step6. operator()(HoverInfo&) with null OnHoverMoveFunc.
+     * @tc.expected: callback is nullptr, operator() returns without crash.
+     */
+    OnHoverMoveFunc onHoverMove = nullptr;
+    auto hoverMoveEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHoverMove));
+    ASSERT_NE(hoverMoveEvent, nullptr);
+    EXPECT_FALSE(hoverMoveEvent->GetOnHoverMoveEventFunc());
+    HoverInfo hoverMoveInfo;
+    (*hoverMoveEvent)(hoverMoveInfo);
+}
+
+/**
+ * @tc.name: InputEventActuatorInternalTest001
+ * @tc.desc: Test InputEventActuator ClearUserCallback, ClearJSFrameNodeCallback, HasUserCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, InputEventActuatorInternalTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create actuator with empty WeakPtr so constructor returns early.
+     * @tc.expected: HasUserCallback returns false initially.
+     */
+    auto actuator = AceType::MakeRefPtr<InputEventActuator>(WeakPtr<InputEventHub>());
+    EXPECT_FALSE(actuator->HasUserCallback());
+
+    /**
+     * @tc.steps: step2. Set user callback and verify.
+     * @tc.expected: HasUserCallback returns true.
+     */
+    OnMouseEventFunc onMouse = [](MouseInfo& info) {};
+    actuator->ReplaceInputEvent(std::move(onMouse));
+    EXPECT_TRUE(actuator->HasUserCallback());
+
+    /**
+     * @tc.steps: step3. Clear user callback and verify.
+     * @tc.expected: HasUserCallback returns false.
+     */
+    actuator->ClearUserCallback();
+    EXPECT_FALSE(actuator->HasUserCallback());
+
+    /**
+     * @tc.steps: step4. Set JSFrameNode callback and clear it.
+     * @tc.expected: ClearJSFrameNodeCallback works without crash.
+     */
+    OnMouseEventFunc onJSFrameNode = [](MouseInfo& info) {};
+    actuator->ReplaceJSFrameNodeInputEvent(std::move(onJSFrameNode));
+    actuator->ClearJSFrameNodeCallback();
+    EXPECT_FALSE(actuator->HasUserCallback());
+
+    /**
+     * @tc.steps: step5. Call ClearUserCallback and ClearJSFrameNodeCallback on empty actuator.
+     * @tc.expected: no crash.
+     */
+    actuator->ClearUserCallback();
+    actuator->ClearJSFrameNodeCallback();
+}
+
+/**
+ * @tc.name: OnCollectHoverEffectTest001
+ * @tc.desc: Test OnCollectHoverEffect creates hoverEffectTarget_ and adds to result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectHoverEffectTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub and setup hoverEffectActuator_.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEffectActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    /**
+     * @tc.steps: step2. Call OnCollectHoverEffect.
+     * @tc.expected: result size is 1, hoverEffectTarget_ is created.
+     */
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->hoverEffectActuator_->OnCollectHoverEffect(
+        COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_NE(inputEventHub->hoverEffectActuator_->hoverEffectTarget_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnCollectHoverEffect again.
+     * @tc.expected: result size is 2, reuses existing hoverEffectTarget_.
+     */
+    inputEventHub->hoverEffectActuator_->OnCollectHoverEffect(
+        COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), 2);
+}
+
+/**
+ * @tc.name: OnCollectMouseEventReuseTarget001
+ * @tc.desc: Test OnCollectMouseEvent reuses existing mouseEventTarget_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectMouseEventReuseTarget001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->mouseEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    OnMouseEventFunc onMouse = [](MouseInfo& info) {};
+    inputEventHub->mouseEventActuator_->userCallback_ = AceType::MakeRefPtr<InputEvent>(std::move(onMouse));
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+
+    /**
+     * @tc.steps: step1. First call creates mouseEventTarget_.
+     */
+    inputEventHub->mouseEventActuator_->OnCollectMouseEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result);
+    auto firstTarget = inputEventHub->mouseEventActuator_->mouseEventTarget_;
+    EXPECT_NE(firstTarget, nullptr);
+    EXPECT_EQ(result.size(), 1);
+
+    /**
+     * @tc.steps: step2. Second call reuses mouseEventTarget_.
+     * @tc.expected: same target pointer, result size 2.
+     */
+    inputEventHub->mouseEventActuator_->OnCollectMouseEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->mouseEventTarget_, firstTarget);
+    EXPECT_EQ(result.size(), 2);
+}
+
+/**
+ * @tc.name: OnCollectHoverEventReuseTarget001
+ * @tc.desc: Test OnCollectHoverEvent reuses existing hoverEventTarget_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectHoverEventReuseTarget001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    OnHoverFunc onHover = [](bool, HoverInfo) {};
+    inputEventHub->hoverEventActuator_->userCallback_ = AceType::MakeRefPtr<InputEvent>(std::move(onHover));
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+
+    /**
+     * @tc.steps: step1. First call creates hoverEventTarget_.
+     */
+    inputEventHub->hoverEventActuator_->OnCollectHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result);
+    auto firstTarget = inputEventHub->hoverEventActuator_->hoverEventTarget_;
+    EXPECT_NE(firstTarget, nullptr);
+    EXPECT_EQ(result.size(), 1);
+
+    /**
+     * @tc.steps: step2. Second call reuses hoverEventTarget_.
+     */
+    inputEventHub->hoverEventActuator_->OnCollectHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->hoverEventTarget_, firstTarget);
+    EXPECT_EQ(result.size(), 2);
+}
+
+/**
+ * @tc.name: OnCollectPenHoverEventReuseTarget001
+ * @tc.desc: Test OnCollectPenHoverEvent reuses existing penHoverEventTarget_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectPenHoverEventReuseTarget001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    OnHoverFunc onHover = [](bool, HoverInfo) {};
+    inputEventHub->hoverEventActuator_->userCallback_ = AceType::MakeRefPtr<InputEvent>(std::move(onHover));
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+
+    /**
+     * @tc.steps: step1. First call creates penHoverEventTarget_.
+     */
+    inputEventHub->hoverEventActuator_->OnCollectPenHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result, frameNode);
+    auto firstTarget = inputEventHub->hoverEventActuator_->penHoverEventTarget_;
+    EXPECT_NE(firstTarget, nullptr);
+    EXPECT_EQ(result.size(), 1);
+
+    /**
+     * @tc.steps: step2. Second call reuses penHoverEventTarget_.
+     */
+    inputEventHub->hoverEventActuator_->OnCollectPenHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result, frameNode);
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->penHoverEventTarget_, firstTarget);
+    EXPECT_EQ(result.size(), 2);
+}
+
+/**
+ * @tc.name: OnCollectHoverEffect001
+ * @tc.desc: Test OnCollectHoverEffect creates hoverEffectTarget and adds to result
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectHoverEffect001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->hoverEventActuator_->OnCollectHoverEffect(COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_NE(inputEventHub->hoverEventActuator_->hoverEffectTarget_, nullptr);
+}
+
+/**
+ * @tc.name: OnCollectHoverEffect002
+ * @tc.desc: Test OnCollectHoverEffect reuses existing hoverEffectTarget_
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectHoverEffect002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    TouchTestResult result1;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->hoverEventActuator_->OnCollectHoverEffect(COORDINATE_OFFSET, getEventTargetImpl, result1);
+    EXPECT_EQ(result1.size(), 1);
+    auto savedTarget = inputEventHub->hoverEventActuator_->hoverEffectTarget_;
+
+    TouchTestResult result2;
+    inputEventHub->hoverEventActuator_->OnCollectHoverEffect(COORDINATE_OFFSET, getEventTargetImpl, result2);
+    EXPECT_EQ(result2.size(), 1);
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->hoverEffectTarget_, savedTarget);
+}
+
+/**
+ * @tc.name: OnCollectMouseEventEarlyReturn001
+ * @tc.desc: Test OnCollectMouseEvent returns early when all empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectMouseEventEarlyReturn001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->mouseEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->mouseEventActuator_->OnCollectMouseEvent(COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: OnCollectMouseEventWithInputEvents001
+ * @tc.desc: Test OnCollectMouseEvent with inputEvents_ only, triggers inner callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectMouseEventWithInputEvents001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->mouseEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    int32_t count = 0;
+    OnMouseEventFunc onMouse = [&count](MouseInfo& info) { count++; };
+    auto onMouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse));
+    inputEventHub->mouseEventActuator_->inputEvents_.emplace_back(onMouseEvent);
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->mouseEventActuator_->OnCollectMouseEvent(COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), 1);
+
+    MouseInfo mouse;
+    inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: OnCollectHoverEventJSFrameNode001
+ * @tc.desc: Test OnCollectHoverEvent with userJSFrameNodeCallback_ triggers callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectHoverEventJSFrameNode001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    int32_t jsFrameNodeCount = 0;
+    OnHoverFunc onJSFrameNode = [&jsFrameNodeCount](bool, HoverInfo) { jsFrameNodeCount++; };
+    auto onJSFrameNodeEvent = AceType::MakeRefPtr<InputEvent>(std::move(onJSFrameNode));
+    inputEventHub->hoverEventActuator_->userJSFrameNodeCallback_ = onJSFrameNodeEvent;
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->hoverEventActuator_->OnCollectHoverEvent(COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), 1);
+
+    HoverInfo hover;
+    inputEventHub->hoverEventActuator_->hoverEventTarget_->onHoverEventCallback_(true, hover);
+    EXPECT_EQ(jsFrameNodeCount, 1);
+}
+
+/**
+ * @tc.name: OnCollectHoverEventForTipsNoTips001
+ * @tc.desc: Test OnCollectHoverEventForTips with istips=false, callback not invoked
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectHoverEventForTipsNoTips001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    int32_t callCount = 0;
+    auto hoverTask = [&callCount](bool, HoverInfo& info) { callCount++; };
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
+    hoverEvent->SetIstips(false);
+    inputEventHub->hoverEventActuator_->inputEvents_.clear();
+    inputEventHub->hoverEventActuator_->inputEvents_.emplace_back(hoverEvent);
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->hoverEventActuator_->OnCollectHoverEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
+    EXPECT_EQ(result.size(), 1);
+
+    HoverInfo hover;
+    inputEventHub->hoverEventActuator_->hoverEventTarget_->onHoverEventCallback_(true, hover);
+    EXPECT_EQ(callCount, 0);
+}
+
+/**
+ * @tc.name: OnCollectAccessibilityHoverEventJSFrameNode001
+ * @tc.desc: Test OnCollectAccessibilityHoverEvent with userJSFrameNodeCallback_ prevents early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectAccessibilityHoverEventJSFrameNode001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto hoverEventActuator =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    OnHoverFunc onJSFrameNode = [](bool, HoverInfo) {};
+    auto onJSFrameNodeEvent = AceType::MakeRefPtr<InputEvent>(std::move(onJSFrameNode));
+    hoverEventActuator->userJSFrameNodeCallback_ = onJSFrameNodeEvent;
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    hoverEventActuator->OnCollectAccessibilityHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result, frameNode);
+    EXPECT_EQ(result.size(), 1);
+}
+
+/**
+ * @tc.name: OnCollectAccessibilityHoverEventReuseTarget001
+ * @tc.desc: Test OnCollectAccessibilityHoverEvent reuses existing accessibilityHoverEventTarget_
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectAccessibilityHoverEventReuseTarget001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto hoverEventActuator =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    OnAccessibilityHoverFunc onAccessibilityHover = [](bool, AccessibilityHoverInfo&) {};
+    auto userEvent = AceType::MakeRefPtr<InputEvent>(std::move(onAccessibilityHover));
+    hoverEventActuator->userCallback_ = userEvent;
+
+    TouchTestResult result1;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    hoverEventActuator->OnCollectAccessibilityHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result1, frameNode);
+    EXPECT_EQ(result1.size(), 1);
+    auto savedTarget = hoverEventActuator->accessibilityHoverEventTarget_;
+    EXPECT_NE(savedTarget, nullptr);
+
+    TouchTestResult result2;
+    hoverEventActuator->OnCollectAccessibilityHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result2, frameNode);
+    EXPECT_EQ(result2.size(), 1);
+    EXPECT_EQ(hoverEventActuator->accessibilityHoverEventTarget_, savedTarget);
+}
+
+/**
+ * @tc.name: OnCollectPenHoverMoveEventReuseTarget001
+ * @tc.desc: Test OnCollectPenHoverMoveEvent reuses existing penHoverMoveEventTarget_
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectPenHoverMoveEventReuseTarget001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto hoverEventActuator =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    OnHoverMoveFunc onHoverMove = [](HoverInfo&) {};
+    auto onHoverMoveEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHoverMove));
+    hoverEventActuator->userCallback_ = onHoverMoveEvent;
+
+    TouchTestResult result1;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    hoverEventActuator->OnCollectPenHoverMoveEvent(COORDINATE_OFFSET, getEventTargetImpl, result1, frameNode);
+    EXPECT_EQ(result1.size(), 1);
+    auto savedTarget = hoverEventActuator->penHoverMoveEventTarget_;
+    EXPECT_NE(savedTarget, nullptr);
+
+    TouchTestResult result2;
+    hoverEventActuator->OnCollectPenHoverMoveEvent(COORDINATE_OFFSET, getEventTargetImpl, result2, frameNode);
+    EXPECT_EQ(result2.size(), 1);
+    EXPECT_EQ(hoverEventActuator->penHoverMoveEventTarget_, savedTarget);
+}
+
+/**
+ * @tc.name: OnCollectAxisEventReuseTarget001
+ * @tc.desc: Test OnCollectAxisEvent reuses existing axisEventTarget_
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectAxisEventReuseTarget001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->axisEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    OnAxisEventFunc onAxis = [](AxisInfo&) {};
+    auto onAxisEvent = AceType::MakeRefPtr<InputEvent>(std::move(onAxis));
+    inputEventHub->axisEventActuator_->userCallback_ = onAxisEvent;
+
+    AxisTestResult result1;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->axisEventActuator_->OnCollectAxisEvent(COORDINATE_OFFSET, getEventTargetImpl, result1);
+    EXPECT_EQ(result1.size(), 1);
+    auto savedTarget = inputEventHub->axisEventActuator_->axisEventTarget_;
+    EXPECT_NE(savedTarget, nullptr);
+
+    AxisTestResult result2;
+    inputEventHub->axisEventActuator_->OnCollectAxisEvent(COORDINATE_OFFSET, getEventTargetImpl, result2);
+    EXPECT_EQ(result2.size(), 1);
+    EXPECT_EQ(inputEventHub->axisEventActuator_->axisEventTarget_, savedTarget);
+}
+
+/**
+ * @tc.name: OnCollectAccessibilityHoverEventCallback001
+ * @tc.desc: Test OnCollectAccessibilityHoverEvent callback invokes userCallback_
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectAccessibilityHoverEventCallback001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto hoverEventActuator =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    int32_t callCount = 0;
+    OnAccessibilityHoverFunc onAccessibilityHover = [&callCount](bool, AccessibilityHoverInfo&) {
+        callCount++;
+    };
+    auto userEvent = AceType::MakeRefPtr<InputEvent>(std::move(onAccessibilityHover));
+    hoverEventActuator->userCallback_ = userEvent;
+
+    TouchTestResult result;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    hoverEventActuator->OnCollectAccessibilityHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, result, frameNode);
+    EXPECT_EQ(result.size(), 1);
+
+    AccessibilityHoverInfo accessibilityHoverInfo;
+    hoverEventActuator->accessibilityHoverEventTarget_->onAccessibilityHoverCallback_(true, accessibilityHoverInfo);
+    EXPECT_EQ(callCount, 1);
+}
 } // namespace OHOS::Ace::NG

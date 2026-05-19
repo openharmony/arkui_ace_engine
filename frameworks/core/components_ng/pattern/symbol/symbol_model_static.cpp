@@ -32,6 +32,7 @@ void SymbolModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Di
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             TextLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
         frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_FONT_SIZE, frameNode);
     }
 }
 

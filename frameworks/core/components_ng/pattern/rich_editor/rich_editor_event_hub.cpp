@@ -859,6 +859,16 @@ OHOS::Ace::FontStyle RichEditorAbstractSpanResult::GetFontStyle() const
     return fontStyle_;
 }
 
+void RichEditorAbstractSpanResult::SetStrokeJoinStyle(StrokeJoinStyle style)
+{
+    strokeJoinStyle_ = style;
+}
+ 
+StrokeJoinStyle RichEditorAbstractSpanResult::GetStrokeJoinStyle() const
+{
+    return strokeJoinStyle_;
+}
+
 void RichEditorChangeValue::reset()
 {
     originalSpans_.clear();

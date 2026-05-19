@@ -28,7 +28,6 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
-#include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/color_inverter.h"
 #include "core/common/thp_extra_manager.h"
@@ -61,6 +60,7 @@ class AIWriteAdapter;
 class RRect;
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
+class TaihangOptimizer;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -100,6 +100,9 @@ class DragDropManager;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
 enum class FocusActiveReason : int32_t;
+
+constexpr char ENV_KEY_DIRECTION[] = "system.arkui.layout.direction";
+constexpr char ENV_KEY_FONT_SCALE[] = "system.arkui.fontScale";
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -234,6 +237,12 @@ public:
     void DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
+    std::optional<float> ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host);
+
+    float GetFontScaleFromEnv(const RefPtr<FrameNode>& host = nullptr);
+
+    std::optional<TextDirection> ResolveDirectionFromEnv(const RefPtr<FrameNode>& host);
 
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
@@ -1259,7 +1268,14 @@ public:
     {
         rotationEndCallbackMap_.erase(callbackId);
     }
-
+    void SetUseEnvManager(bool isEnable)
+    {
+        isUseEnvManager_ = isEnable;
+    }
+    bool GetUseEnvManager()
+    {
+        return isUseEnvManager_;
+    }
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
     void NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void NotifyDragMouseEvent(const MouseEvent& event);
@@ -1285,6 +1301,7 @@ public:
 
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
     const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
+    const std::shared_ptr<TaihangOptimizer>& GetTaihangOptimizer() const;
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
@@ -1635,6 +1652,7 @@ private:
     bool isDensityChanged_ = false;
     bool isNeedReloadDensity_ = false;
     bool isBeforeDragHandleAxis_ = false;
+    bool isUseEnvManager_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool isWindowSizeDragging_ = false;
@@ -1737,6 +1755,7 @@ private:
     RefPtr<MagnifierController> magnifierController_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
+    std::shared_ptr<TaihangOptimizer> taihangOptimizer_;
     RefPtr<ContentChangeManager> contentChangeMgr_;
     std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
     std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;

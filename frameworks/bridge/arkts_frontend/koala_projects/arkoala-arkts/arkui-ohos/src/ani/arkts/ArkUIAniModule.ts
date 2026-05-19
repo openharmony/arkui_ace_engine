@@ -120,6 +120,7 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
+    native static _BuilderProxyNode_Mock_Construct(id: KInt): KPointer
     native static _DetachedFreeRoot_Construct(id: KInt): KPointer;
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
@@ -247,6 +248,8 @@ export class ArkUIAniModule {
     
     // for drawable
     native static _Drawable_CreatePixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void
+    native static _Drawable_CreatePixelMapDrawableByResource(value: PixelMapDrawableDescriptor, resourceObjectKPointer: KPointer): void
+    native static _Drawable_CreatePixelMapDrawableByString(value: PixelMapDrawableDescriptor, src: string): void
     native static _Drawable_CreateLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
         background?: image.PixelMap, mask?: image.PixelMap): void
     native static _Drawable_CreateAnimatedDrawable(value: AnimatedDrawableDescriptor,

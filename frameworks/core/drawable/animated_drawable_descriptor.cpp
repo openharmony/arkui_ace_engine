@@ -221,11 +221,6 @@ void AnimatedDrawableDescriptor::SetIterations(const int32_t iterations)
     iterations_ = iterations;
 }
 
-void AnimatedDrawableDescriptor::SetDrawableDescriptorInfo(const RefPtr<DrawableDescriptorInfo>& info)
-{
-    info_ = info;
-}
-
 void AnimatedDrawableDescriptor::SetPixelMapList(const std::vector<RefPtr<PixelMap>>& pixelMapList)
 {
     pixelMapList_ = pixelMapList;

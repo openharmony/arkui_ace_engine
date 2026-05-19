@@ -49,6 +49,8 @@ extern const std::vector<TextOverflow> TEXT_OVERFLOWS;
 
 extern const std::vector<EllipsisMode> ELLIPSIS_MODES;
 
+extern const std::vector<StrokeJoinStyle> STROKE_JOIN_STYLES;
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT__COMMON_TEXT_CONSTANTS_H

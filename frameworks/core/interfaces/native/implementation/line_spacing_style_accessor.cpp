@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 #include "core/interfaces/native/implementation/line_spacing_style_peer.h"
 
@@ -29,9 +30,15 @@ Ark_LineSpacingStyle ConstructImpl(const Ark_LengthMetrics* lineSpacing,
                                    const Opt_LineSpacingOptions* options)
 {
     auto peer = PeerUtils::CreatePeer<LineSpacingStylePeer>();
-    Dimension spacing = Converter::OptConvert<Dimension>(*lineSpacing).value_or(Dimension());
-    auto value = Converter::OptConvertPtr<Ark_LineSpacingOptions>(options);
+    Dimension spacing = Dimension(0, DimensionUnit::VP);
+    if (lineSpacing) {
+        auto spacingOpt = Converter::OptConvert<Dimension>(*lineSpacing);
+        Validator::ValidateNonPercent(spacingOpt);
+        Validator::ValidateNonNegative(spacingOpt);
+        spacing = spacingOpt.value_or(Dimension(0, DimensionUnit::VP));
+    }
     std::optional<LineSpacingOptions> lineSpacingOptions;
+    auto value = Converter::OptConvertPtr<Ark_LineSpacingOptions>(options);
     if (value) {
         LineSpacingOptions optionObject;
         optionObject.onlyBetweenLines = Converter::OptConvert<bool>(value->onlyBetweenLines);

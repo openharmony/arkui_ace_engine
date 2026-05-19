@@ -189,6 +189,23 @@ HWTEST_F(ScrollSimulatingExecutorStepTest, ExecuteStep_ReturnsFAILED, TestSize.L
     EXPECT_EQ(result, ExecutorResult::FAILED);
 }
 
+HWTEST_F(ScrollSimulatingExecutorStepTest, ExecuteStep_ReturnFAILED, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::AUTO;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.coordinates.x2 = 600.0;
+    tmpCmd.actionInfo.coordinates.y2 = 600.0;
+    tmpCmd.isY2Set = false;
+    ScrollSimulatingExecutor executor(context, tmpCmd);
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::FAILED);
+}
+
 HWTEST_F(ScrollSimulatingExecutorGetTypeTest, GetType_ReturnsType, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
@@ -443,4 +460,44 @@ HWTEST_F(TouchEventBuilderSumStepsTest, SumSteps_ZeroDistance_ReturnsZero, TestS
     EXPECT_EQ(steps, 0);
 }
 
+HWTEST_F(TouchEventBuilderSumStepsTest, SumSteps_ZeroDistance_ReturnsZero1, TestSize.Level1)
+{
+    ScrollSimulatingExecutor::TouchEventBuilder builder;
+    int steps = builder.SumSteps(50.0, 50.0, 50.0, 50.0, 0);
+    EXPECT_EQ(steps, 0);
+}
+
+HWTEST_F(ScrollSimulatingExecutorStepTest, ExecuteStep_ReturnPENDING, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.coordinates.x2 = 600.0;
+    tmpCmd.actionInfo.coordinates.y2 = 600.0;
+    tmpCmd.isY2Set = false;
+    ScrollSimulatingExecutor executor(context, tmpCmd);
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::PENDING);
+}
+
+HWTEST_F(ScrollSimulatingExecutorStepTest, ExecuteStep_ReturnPENDING1, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    Command tmpCmd;
+    tmpCmd.type = "scroll";
+    tmpCmd.mode = ExecuteMode::TARGET;
+    tmpCmd.actionInfo.distance = 1200.0;
+    tmpCmd.actionInfo.coordinates.x1 = 0.0;
+    tmpCmd.actionInfo.coordinates.y1 = 0.0;
+    tmpCmd.actionInfo.coordinates.x2 = 600.0;
+    tmpCmd.actionInfo.coordinates.y2 = 600.0;
+    tmpCmd.isY2Set = true;
+    ScrollSimulatingExecutor executor(context, tmpCmd);
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::PENDING);
+}
 } // namespace OHOS::Ace::NG

@@ -60,55 +60,6 @@ public:                                                                     \
         propNeedReCreateParagraph_ = true;                                  \
     }
 
-#define ACE_DEFINE_TEXT_PROPERTY_ITEM_IN_ADVANCE_PROPS(name, type, changeFlag)                  \
-public:                                                                                         \
-    std::optional<type> Get##name() const                                                       \
-    {                                                                                           \
-        CHECK_NULL_RETURN(advancedTextLayoutProperty_, std::nullopt);                           \
-        return advancedTextLayoutProperty_->Get##name();                                        \
-    }                                                                                           \
-    bool Has##name() const                                                                      \
-    {                                                                                           \
-        CHECK_NULL_RETURN(advancedTextLayoutProperty_, false);                                  \
-        return advancedTextLayoutProperty_->Get##name().has_value();                            \
-    }                                                                                           \
-    const type& Get##name##Value() const                                                        \
-    {                                                                                           \
-        return advancedTextLayoutProperty_->Get##name().value();                                \
-    }                                                                                           \
-    const type& Get##name##Value(const type& defaultValue) const                                \
-    {                                                                                           \
-        if (!Has##name()) {                                                                     \
-            return defaultValue;                                                                \
-        }                                                                                       \
-        return advancedTextLayoutProperty_->Get##name().value();                                \
-    }                                                                                           \
-    std::optional<type> Clone##name() const                                                     \
-    {                                                                                           \
-        CHECK_NULL_RETURN(advancedTextLayoutProperty_, std::nullopt);                           \
-        return advancedTextLayoutProperty_->Get##name();                                        \
-    }                                                                                           \
-    void Reset##name()                                                                          \
-    {                                                                                           \
-    CHECK_NULL_VOID(advancedTextLayoutProperty_);                                               \
-        return advancedTextLayoutProperty_->Reset##name();                                      \
-    }                                                                                           \
-    void Update##name(const type& value)                                                        \
-    {                                                                                           \
-        if (!advancedTextLayoutProperty_) {                                                     \
-            advancedTextLayoutProperty_ = AceType::MakeRefPtr<AdvancedTextLayoutProperty>();    \
-        }                                                                                       \
-        CHECK_NULL_VOID(advancedTextLayoutProperty_);                                           \
-        if (Has##name()) {                                                                      \
-            if (NearEqual(Get##name##Value(), value)) {                                         \
-                return;                                                                         \
-            }                                                                                   \
-        }                                                                                       \
-        advancedTextLayoutProperty_->Set##name(value);                                          \
-        UpdatePropertyChangeFlag(changeFlag);                                                   \
-        propNeedReCreateParagraph_ = true;                                                      \
-    }                                                                                           
-
 class InspectorFilter;
 
 struct TextMarqueeOptions {
@@ -193,6 +144,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OptimizeTrailingSpace, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, OrphanCharOptimization, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, CompressLeadingPunctuation, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, PunctuationOverflow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
@@ -237,7 +189,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LineHeightMultiply, double, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinimumLineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaximumLineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_TEXT_COMMON_PROPERTY_ITEM_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_UPDATE_IN_ADVANCE_PROPS(GradientShaderStyle, Gradient, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(IncludeFontPadding, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(FallbackLineSpacing, bool, PROPERTY_UPDATE_MEASURE);
 

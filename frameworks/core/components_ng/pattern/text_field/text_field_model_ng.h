@@ -166,6 +166,10 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetStrokeJoinStyle(StrokeJoinStyle style) override;
+    void SetGradientShaderStyle(NG::Gradient& gradient) override;
+    void SetColorShaderStyle(const Color& value) override;
+    void ResetGradientShaderStyle() override;
     void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
@@ -404,6 +408,11 @@ public:
     static void SetStrokeColor(FrameNode* frameNode, const Color& value);
     static void ResetStrokeColor(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static void SetStrokeJoinStyle(FrameNode* frameNode, StrokeJoinStyle style);
+    static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
+    static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
+    static NG::Gradient GetGradientStyle(FrameNode* frameNode);
+    static void ResetGradient(FrameNode* frameNode);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar);
     static bool GetOrphanCharOptimization(FrameNode* frameNode);

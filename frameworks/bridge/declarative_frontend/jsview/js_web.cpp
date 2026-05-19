@@ -6151,6 +6151,7 @@ void JSWeb::OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args)
 
 void JSWeb::OnInputMethodAttached(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M132();
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
@@ -7446,6 +7447,7 @@ void JSWeb::KeyboardAvoidMode(int32_t mode)
 
 void JSWeb::KeyboardAppearance(int32_t mode)
 {
+    RETURN_IF_CALLING_FROM_M132();
     if (mode < static_cast<int32_t>(WebKeyboardAppearanceMode::NONE_IMMERSIVE) ||
         mode > static_cast<int32_t>(WebKeyboardAppearanceMode::DARK_IMMERSIVE)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAppearance param err");
@@ -7970,6 +7972,7 @@ void JSWeb::EnableScrollDirectionalLock(const JSCallbackInfo& args)
 
 void JSWeb::EnableDrag(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M132();
     if (args.Length() < 1 || !args[0]->IsBoolean()) {
         WebModel::GetInstance()->SetEnableDrag(true);
         return;
@@ -7980,6 +7983,7 @@ void JSWeb::EnableDrag(const JSCallbackInfo& args)
 
 void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M132();
     if (args.Length() < 1 || !(args[0]->IsNumber())) {
         return;
     }

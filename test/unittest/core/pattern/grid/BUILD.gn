@@ -29,6 +29,7 @@ COMMON_SRC = [
   "grid_swipe_select_gesture_test_ng.cpp",
   "grid_swipe_select_test_ng.cpp",
   "grid_swipe_select_autoscroll_test_ng.cpp",
+  "grid_two_finger_select_test_ng.cpp",
   "grid_item_edit_mode_test.cpp",
   "grid_pattern_test_ng.cpp",
   "selectable_item_test.cpp",

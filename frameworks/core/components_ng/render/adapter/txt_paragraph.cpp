@@ -106,6 +106,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
     style.orphanCharOptimization = paraStyle.orphanCharOptimization;
     style.compressHeadPunctuation = paraStyle.compressLeadingPunctuation;
+    style.punctuationOverflow = paraStyle.punctuationOverflow;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);

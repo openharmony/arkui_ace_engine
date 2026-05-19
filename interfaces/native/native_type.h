@@ -7072,6 +7072,269 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback(
     void (*callback)(int32_t start, int32_t end, void* userData));
 
 /**
+ * @brief Defines linear gradient options.
+ *
+ * @since 26.0.0
+ */
+typedef struct OH_ArkUI_LinearGradientOptions OH_ArkUI_LinearGradientOptions;
+ 
+/**
+ * @brief Defines radial gradient options.
+ *
+ * @since 26.0.0
+ */
+typedef struct OH_ArkUI_RadialGradientOptions OH_ArkUI_RadialGradientOptions;
+ 
+/**
+ * @brief Creates a linear gradient options object.
+ *
+ * @return Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @since 26.0.0
+ */
+OH_ArkUI_LinearGradientOptions* OH_ArkUI_LinearGradientOptions_Create();
+ 
+/**
+ * @brief Destroys a linear gradient options object.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @since 26.0.0
+ */
+void OH_ArkUI_LinearGradientOptions_Destroy(OH_ArkUI_LinearGradientOptions* options);
+ 
+/**
+ * @brief Sets angle of linear gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @param angle Start angle of linear gradient.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetAngle(OH_ArkUI_LinearGradientOptions* options, float angle);
+ 
+/**
+ * @brief Gets angle of linear gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @param angle Pointer to the start angle of linear gradient.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetAngle(const OH_ArkUI_LinearGradientOptions* options, float* angle);
+ 
+/**
+ * @brief Sets direction of linear gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @param direction Direction of linear gradient.
+ * The parameter type is {@link ArkUI_LinearGradientDirection}.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetDirection(OH_ArkUI_LinearGradientOptions* options,
+    ArkUI_LinearGradientDirection direction);
+ 
+/**
+ * @brief Gets direction of linear gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @param direction Pointer to the direction of linear gradient.
+ * The parameter type is {@link ArkUI_LinearGradientDirection}.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetDirection(const OH_ArkUI_LinearGradientOptions* options,
+    ArkUI_LinearGradientDirection* direction);
+ 
+/**
+ * @brief Sets whether colors are repeated in linear gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @param repeating Whether colors are repeated.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetRepeating(OH_ArkUI_LinearGradientOptions* options, bool repeating);
+ 
+/**
+ * @brief Gets whether colors are repeated in linear gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @param repeating Pointer to whether colors are repeated.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetRepeating(
+    const OH_ArkUI_LinearGradientOptions* options, bool* repeating);
+ 
+/**
+ * @brief Sets color stops of linear gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @param colors Pointer to the color array.
+ * @param stops Pointer to the stop array.
+ * @param colorsAndStopsSize Number of elements in colors and stops.
+ *                           The number of elements in colors and stops must be the same.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_SetColorStop(
+    OH_ArkUI_LinearGradientOptions* options, const uint32_t* colors, const float* stops, int32_t colorsAndStopsSize);
+ 
+/**
+ * @brief Gets color stops of linear gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_LinearGradientOptions</b> object.
+ * @param colors Buffer pointer to the color array.
+ * @param stops Buffer pointer to the stop array.
+ * @param colorsAndStopsSize Buffer size reserved for color stops by developer.
+ *                           The number of elements in colors and stops must be the same.
+ *                           It should be larger than writeLength,
+ *                           otherwise the operation will return ARKUI_ERROR_CODE_PARAM_INVALID.
+ * @param writeLength Number of color stops actually written.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_LinearGradientOptions_GetColorStop(
+    const OH_ArkUI_LinearGradientOptions* options, uint32_t* colors, float* stops, int32_t colorsAndStopsSize,
+    int32_t* writeLength);
+ 
+/**
+ * @brief Creates a radial gradient options object.
+ *
+ * @return Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @since 26.0.0
+ */
+OH_ArkUI_RadialGradientOptions* OH_ArkUI_RadialGradientOptions_Create();
+ 
+/**
+ * @brief Destroys a radial gradient options object.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @since 26.0.0
+ */
+void OH_ArkUI_RadialGradientOptions_Destroy(OH_ArkUI_RadialGradientOptions* options);
+ 
+/**
+ * @brief Sets centerX of radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param centerX X-coordinate of center point.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetCenterX(OH_ArkUI_RadialGradientOptions* options, float centerX);
+ 
+/**
+ * @brief Gets centerX of radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param centerX Pointer to the X-coordinate of center point.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetCenterX(
+    const OH_ArkUI_RadialGradientOptions* options, float* centerX);
+ 
+/**
+ * @brief Sets centerY of radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param centerY Y-coordinate of center point.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetCenterY(OH_ArkUI_RadialGradientOptions* options, float centerY);
+ 
+/**
+ * @brief Gets centerY of radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param centerY Pointer to the Y-coordinate of center point.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetCenterY(
+    const OH_ArkUI_RadialGradientOptions* options, float* centerY);
+ 
+/**
+ * @brief Sets radius of radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param radius Radius of radial gradient.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetRadius(OH_ArkUI_RadialGradientOptions* options, float radius);
+ 
+/**
+ * @brief Gets radius of radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param radius Pointer to the radius of radial gradient.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetRadius(
+    const OH_ArkUI_RadialGradientOptions* options, float* radius);
+ 
+/**
+ * @brief Sets whether colors are repeated in radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param repeating Whether colors are repeated.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetRepeating(OH_ArkUI_RadialGradientOptions* options, bool repeating);
+ 
+/**
+ * @brief Gets whether colors are repeated in radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param repeating Pointer to whether colors are repeated.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetRepeating(
+    const OH_ArkUI_RadialGradientOptions* options, bool* repeating);
+ 
+/**
+ * @brief Sets color stops of radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param colors Pointer to the color array.
+ * @param stops Pointer to the stop array.
+ * @param colorsAndStopsSize Number of elements in colors and stops.
+ *                           The number of elements in colors and stops must be the same.
+ * @return Returns the result code.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_SetColorStop(
+    OH_ArkUI_RadialGradientOptions* options, const uint32_t* colors, const float* stops, int32_t colorsAndStopsSize);
+ 
+/**
+ * @brief Gets color stops of radial gradient options.
+ *
+ * @param options Pointer to the <b>OH_ArkUI_RadialGradientOptions</b> object.
+ * @param colors Buffer pointer to the color array.
+ * @param stops Buffer pointer to the stop array.
+ * @param colorsAndStopsSize Buffer size reserved for color stops by developer.
+ *                           The number of elements in colors and stops must be the same.
+ *                           It should be larger than writeLength,
+ *             otherwise the operation will return ARKUI_ERROR_CODE_PARAM_INVALID.
+ * @param writeLength Number of color stops actually written.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RadialGradientOptions_GetColorStop(
+    const OH_ArkUI_RadialGradientOptions* options, uint32_t* colors, float* stops, int32_t colorsAndStopsSize,
+    int32_t* writeLength);
+
+/**
  * @brief Create an object of the text content base controller.
  *
  * @return A pointer to the controller object.

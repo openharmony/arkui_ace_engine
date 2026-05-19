@@ -45,10 +45,10 @@ class SymbolEffectOptions;
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 143
+#define ARKUI_FULL_API_VERSION 144
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 143
+#define ARKUI_NODE_API_VERSION 144
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -697,6 +697,21 @@ struct ArkUIRichEditorPlaceholderOptionsStruct {
     ArkUI_Uint32 fontColor;
 };
 
+struct ArkUILinearGradientOptions {
+    std::optional<float> angle;
+    ArkUI_Int32 direction;
+    bool repeating;
+    std::vector<std::pair<uint32_t, float>> colors;
+};
+ 
+struct ArkUIRadialGradientOptions {
+    std::optional<float> centerX;
+    std::optional<float> centerY;
+    std::optional<float> radius;
+    bool repeating;
+    std::vector<std::pair<uint32_t, float>> colors;
+};
+
 // Note: Not all member variables are used in different scenarios.
 struct ArkUIParagraphStyle {
     ArkUI_Int32 textAlign;
@@ -714,6 +729,8 @@ struct ArkUIParagraphStyle {
     ArkUI_Int32 overflow;
     void* onDrawLeadingMargin;
     void* onGetLeadingMargin;
+    std::optional<ArkUILinearGradientOptions> linearGradient = std::nullopt;
+    std::optional<ArkUIRadialGradientOptions> radialGradient = std::nullopt;
 };
 
 struct ArkUILeadingMarginSpanDrawInfo {
@@ -1495,6 +1512,7 @@ enum ArkUIEventSubKind {
     ON_LIST_REACH_START,
     ON_LIST_REACH_END,
     ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE,
+    ON_LIST_EDIT_MODE_CHANGE,
 
     ON_LIST_ITEM_SELECTED = ARKUI_MAX_EVENT_NUM * ARKUI_LIST_ITEM,
 
@@ -1596,6 +1614,7 @@ enum ArkUIEventSubKind {
     ON_GRID_ITEM_DRAG_MOVE,
     ON_GRID_ITEM_DRAG_LEAVE,
     ON_GRID_ITEM_DROP,
+    ON_GRID_EDIT_MODE_CHANGE,
 
     ON_GRID_ITEM_SELECT = ARKUI_MAX_EVENT_NUM * ARKUI_GRID_ITEM,
 
@@ -3707,6 +3726,8 @@ struct ArkUICommonModifier {
     void (*resetUseUnionEffect)(ArkUINodeHandle node);
     ArkUIOffsetType (*getCurrentLocation)(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
         const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit);
+    void (*setDoubleSided)(ArkUINodeHandle node, bool doubleSided);
+    void (*resetDoubleSided)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -4455,6 +4476,7 @@ struct ArkUIListModifier {
     void (*setOnListReachEndCallBack)(ArkUINodeHandle node, void* callback);
     void (*setOnListScrollStartCallBack)(ArkUINodeHandle node, void* callback);
     void (*setOnListScrollStopCallBack)(ArkUINodeHandle node, void* callback);
+    void (*setOnListEditModeChangeCallBack)(ArkUINodeHandle node, void* callback);
 
     void (*resetOnListScrollIndex)(ArkUINodeHandle node);
     void (*resetOnScrollVisibleContentChange)(ArkUINodeHandle node);
@@ -4471,6 +4493,7 @@ struct ArkUIListModifier {
     void (*resetOnListDidScroll)(ArkUINodeHandle node);
     void (*resetOnListReachStart)(ArkUINodeHandle node);
     void (*resetOnListReachEnd)(ArkUINodeHandle node);
+    void (*resetOnListEditModeChange)(ArkUINodeHandle node);
     void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
     void (*parseResObjDividerStrokeWidth)(ArkUINodeHandle node, void* resObj);
     void (*parseResObjDividerColor)(ArkUINodeHandle node, void* resObj);
@@ -4988,6 +5011,8 @@ struct ArkUIGridModifier {
     void (*setGridEnableEditMode)(ArkUINodeHandle node, ArkUI_Bool enableEditMode);
     void (*resetGridEnableEditMode)(ArkUINodeHandle node);
     ArkUI_Bool (*getGridEnableEditMode)(ArkUINodeHandle node);
+    void (*setOnGridEditModeChangeCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridEditModeChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {
@@ -5303,6 +5328,8 @@ struct ArkUITabsModifier {
     void (*createTabBarHeightWithResourceObj)(ArkUINodeHandle node, void* heightRawPtr);
     void (*createBarBackgroundEffectWithResourceObj)(ArkUINodeHandle node,
         void* colorRawPtr, void* inactiveColorRawPtr);
+    void (*setTabsBarFloatingStyle)(ArkUINodeHandle node, void* paramRawPtr);
+    void (*resetTabsBarFloatingStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {
@@ -5987,6 +6014,19 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetTextAreaSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    void (*setTextAreaStrokeJoinStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextAreaStrokeJoinStyle)(ArkUINodeHandle node);
+    void (*setTextAreaLinearGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values,
+        ArkUI_Int32 valuesLength, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr);
+    ArkUI_Int32 (*getTextAreaLinearGradient)(
+        ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Uint32 (*colors)[10], ArkUI_Float32 (*stop)[10]);
+    void (*setTextAreaRadialGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values,
+        ArkUI_Int32 valuesLength, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr);
+    ArkUI_Int32 (*getTextAreaRadialGradient)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4],
+        ArkUI_Uint32 (*colors)[10], ArkUI_Float32 (*stops)[10], ArkUI_Int32 unit);
+    void (*resetTextAreaGradient)(ArkUINodeHandle node);
+    void (*setTextAreaColorShaderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr);
+    void (*resetTextAreaColorShaderColor)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -6261,6 +6301,19 @@ struct ArkUITextInputModifier {
     void (*setTextInputSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetTextInputSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextInputSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    void (*setTextInputStrokeJoinStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextInputStrokeJoinStyle)(ArkUINodeHandle node);
+    void (*setTextInputLinearGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values,
+        ArkUI_Int32 valuesLength, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr);
+    ArkUI_Int32 (*getTextInputLinearGradient)(
+        ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Uint32 (*colors)[10], ArkUI_Float32 (*stop)[10]);
+    void (*setTextInputRadialGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values,
+        ArkUI_Int32 valuesLength, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr);
+    ArkUI_Int32 (*getTextInputRadialGradient)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4],
+        ArkUI_Uint32 (*colors)[10], ArkUI_Float32 (*stops)[10], ArkUI_Int32 unit);
+    void (*resetTextInputGradient)(ArkUINodeHandle node);
+    void (*setTextInputColorShaderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr);
+    void (*resetTextInputColorShaderColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -7605,6 +7658,15 @@ struct ArkUISearchModifier {
     void (*setSearchBackgroundColor)(ArkUINodeHandle node, uint32_t color);
     void (*resetSearchBackgroundColor)(ArkUINodeHandle node);
     void (*setBackBorder)(ArkUINodeHandle node);
+    void (*setSearchStrokeJoinStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetSearchStrokeJoinStyle)(ArkUINodeHandle node);
+    void (*setSearchLinearGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+        const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr);
+    void (*setSearchRadialGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+        const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr);
+    void (*resetSearchGradient)(ArkUINodeHandle node);
+    void (*setSearchColorShaderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr);
+    void (*resetSearchColorShaderColor)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -8432,6 +8494,9 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Int32 (*getRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node);
     void (*resetRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node);
+    void (*setRichEditorPunctuationOverflow)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorPunctuationOverflow)(ArkUINodeHandle node);
+    void (*resetRichEditorPunctuationOverflow)(ArkUINodeHandle node);
     void (*setRichEditorIncludeFontPadding)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Int32 (*getRichEditorIncludeFontPadding)(ArkUINodeHandle node);
     void (*resetRichEditorIncludeFontPadding)(ArkUINodeHandle node);

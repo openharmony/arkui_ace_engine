@@ -179,3 +179,18 @@ export function CounterImpl(
     })
 }
 
+@memo
+export function Counter(
+    @memo @memo_skip
+    style: ((attributes: CounterAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkCounterComponent>((): ArkCounterComponent => {
+        return new ArkCounterComponent()
+    })
+    NodeAttach<ArkCounterPeer>((): ArkCounterPeer => ArkCounterPeer.create(receiver), (_: ArkCounterPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

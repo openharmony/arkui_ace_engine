@@ -1062,6 +1062,21 @@ export function TabsImpl(
     })
 }
 
+@memo
+export function Tabs(
+    @memo @memo_skip
+    style: ((attributes: TabsAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkTabsComponent>((): ArkTabsComponent => {
+        return new ArkTabsComponent()
+    })
+    NodeAttach<ArkTabsPeer>((): ArkTabsPeer => ArkTabsPeer.create(receiver), (_: ArkTabsPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class TabContentTransitionProxy_serializer {
     public static write(buffer: SerializerBase, value: TabContentTransitionProxy): void {
         let valueSerializer: SerializerBase = buffer

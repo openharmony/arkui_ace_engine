@@ -77,6 +77,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
+#include "core/common/premake_scope.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -413,13 +414,29 @@ public:
         return nullptr;
     }
 
+    bool EnableCachePredictNodes() const
+    {
+        CHECK_NULL_RETURN(hostNode_, false);
+        auto pattern = hostNode_->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->EnableCachePredictNodes();
+    }
+
     RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
             auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
-            if (child && !isCache) {
+            if (child && (!isCache || EnableCachePredictNodes())) {
+                partFrameNodeChildren_[index] = child;
+            }
+            return child;
+        } else if (!itor->second->IsActive() && !isCache && EnableCachePredictNodes()) {
+            // Re-acquire the node when entering the viewport.
+            // Pending analysis scenarios: cachedItems_ erase, but not notify partFrameNodeChildren_.
+            auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
+            if (child) {
                 partFrameNodeChildren_[index] = child;
             }
             return child;
@@ -472,7 +489,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index)
     {
         auto itor = partFrameNodeChildren_.find(index);
-        if (itor == partFrameNodeChildren_.end()) {
+        if (itor == partFrameNodeChildren_.end() ||
+            (!itor->second->IsActive() && EnableCachePredictNodes())) {
             return;
         }
         itor->second->SetActive(false);
@@ -496,8 +514,12 @@ public:
 
     void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false)
     {
-        int32_t startIndex = showCache ? start - cacheStart : start;
-        int32_t endIndex = showCache ? end + cacheEnd : end;
+        int32_t startIndex = start;
+        int32_t endIndex = end;
+        if (showCache || EnableCachePredictNodes()) {
+            startIndex = start - cacheStart;
+            endIndex = end + cacheEnd;
+        }
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
             if ((startIndex <= endIndex && index >= startIndex && index <= endIndex) ||
@@ -640,6 +662,7 @@ FrameNode::FrameNode(
     if (isRoot) {
         isPendingState_ = true;
     }
+    hasPreMake_ = PreMakeScope::IsPreMake();
     isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
     if (IsFree()) {
@@ -1874,6 +1897,12 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
         ResourceParseUtils::SetNeedReload(false);
     } else {
         ResourceParseUtils::SetNeedReload(true);
+    }
+    if (configurationUpdateCallback_) {
+        auto cb = configurationUpdateCallback_;
+        ConfigurationChange configurationChange;
+        configurationChange.colorModeUpdate = true;
+        cb(configurationChange);
     }
     if (pattern_) {
         pattern_->OnThemeScopeUpdate(GetThemeScopeId());
@@ -5944,6 +5973,7 @@ bool FrameNode::IsVerticalScrollable() const
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    PreMakeScope preMakeScope(hasPreMake_);
     if (GetIgnoreLayoutProcess() && EnsureDelayedMeasureBeingOnlyOnce()) {
         return;
     }
@@ -5964,6 +5994,17 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
+
+    if (IsPreMakeAndScroll()) {
+        layoutAlgorithm_->SetSkipMeasure();
+        layoutAlgorithm_->SetSkipLayout();
+        isLayoutDirtyMarked_ = true;
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddDirtyLayoutNode(Claim(this));
+        ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d] reason: Node is PreMake", tag_.c_str(), nodeId_);
+        ACE_LAYOUT_TRACE_END()
+        return;
+    }
 
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         layoutAlgorithm_->SetSkipMeasure();
@@ -6026,6 +6067,12 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             ACE_LAYOUT_TRACE_END()
             return;
         }
+        if (CheckIfHasMeasured()) {
+            ACE_SCOPED_TRACE(
+                "SkipMeasure [%s][self:%d] reason:AlreadyMeasuredInCurrentFrame", tag_.c_str(), nodeId_);
+            ACE_LAYOUT_TRACE_END()
+            return;
+        }
     } else {
         contentConstraintChanges_.UpdateFlags(contentConstraint, layoutProperty_->GetContentLayoutConstraint());
         constraintChanges_.UpdateFlags(preConstraint, layoutProperty_->GetLayoutConstraint());
@@ -6079,12 +6126,15 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     PostTaskForIgnore();
 
-    layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    if (!(layoutProperty_->GetPropertyChangeFlag() & PROPERTY_UPDATE_LAYOUT)) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
+    }
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("MeasureFinish[frameRect:%s][contentSize:%s]",
             GetGeometryNode()->GetFrameRect().ToString().c_str(),
             GetGeometryNode()->GetContentSize().ToString().c_str());
     }
+    hasPreMake_ = false;
     ACE_LAYOUT_TRACE_END()
 }
 
@@ -6297,6 +6347,8 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             context->AddDirtyLayoutNode(Claim(this));
         }
         layoutAlgorithm_.Reset();
+        PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
+        layoutProperty_->UpdatePropertyChangeFlag(flag & ~PROPERTY_UPDATE_LAYOUT_BY_MEASURE);
         return false;
     }
     // update layout size.
@@ -6554,6 +6606,12 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 {
     PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+}
+
+bool FrameNode::CheckIfHasMeasured() const
+{
+    PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
+    return CheckHasMeasured(flag) && !CheckNeedMeasure(flag);
 }
 
 bool FrameNode::ReachResponseDeadline() const
@@ -8700,6 +8758,22 @@ void FrameNode::UnRegisterLpxAttribute(LpxAttribute attribute)
         CHECK_NULL_VOID(context);
         context->UnRegisterLpxDirtyNode(WeakClaim(this));
     }
+}
+
+bool FrameNode::IsPreMakeAndScroll()
+{
+    // IsActive function is make sure active nodes can be draw when scrolling
+    if (IsActive() || !HasPreMake()) {
+        return false;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto contentChangeMgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_RETURN(contentChangeMgr, false);
+    if (contentChangeMgr->IsSwiperScrolling() || contentChangeMgr->IsScrolling()) {
+        return true;
+    }
+    return false;
 }
 
 template<typename T>

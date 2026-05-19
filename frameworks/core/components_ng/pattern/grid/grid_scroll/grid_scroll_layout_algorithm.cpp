@@ -52,10 +52,6 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
 
-    // Pre-recycle
-    ScrollableUtils::RecycleItemsOutOfBoundary(
-        info_.axis_, info_.currentOffset_ - info_.prevOffset_, info_.startIndex_, info_.endIndex_, layoutWrapper);
-
     // Step1: Decide size of Grid
     Axis axis = info_.axis_;
     frameSize_ = CreateIdealSize(

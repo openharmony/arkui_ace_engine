@@ -674,6 +674,7 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
     NodeModifier::SetOnListScrollVisibleContentChange,
+    NodeModifier::SetOnListEditModeChange,
 };
 
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -694,6 +695,7 @@ const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetGridOnItemDragMove,
     NodeModifier::SetGridOnItemDragLeave,
     NodeModifier::SetGridOnItemDrop,
+    NodeModifier::SetOnGridEditModeChange,
 };
 
 const ComponentAsyncEventHandler GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -919,6 +921,7 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnListReachStart,
     NodeModifier::ResetOnListReachEnd,
     NodeModifier::ResetOnScrollVisibleContentChange,
+    NodeModifier::ResetOnListEditModeChange,
 };
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -939,6 +942,7 @@ const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnGridItemDragMove,
     NodeModifier::ResetOnGridItemDragStart,
     NodeModifier::ResetOnGridItemDrop,
+    NodeModifier::ResetOnGridEditModeChange,
 };
 
 const ResetComponentAsyncEventHandler GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

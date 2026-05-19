@@ -25,7 +25,10 @@ constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/platformsdk/libhint2t
 constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/platformsdk/libhint2type.z.so";
 #endif
 constexpr char HINT_2_TYPE[] = "Hint2Type";
+constexpr char MERGE_HINT_2_TYPE_AND_MSDP_TYPE[] = "MergeHint2TypeAndMsdpType";
 using Hint2Type = int (*) (std::vector<std::string>, std::vector<int>&, std::vector<std::string>&);
+using MergeHint2TypeAndMsdpType = int (*) (const std::vector<std::string>&, const std::vector<std::string>&,
+    std::vector<int>&, std::vector<std::string>&);
 
 RefPtr<PageNodeInfoWrap> PageNodeInfoWrap::CreatePageNodeInfoWrap()
 {
@@ -80,6 +83,31 @@ bool ViewDataWrap::LoadHint2Type(const std::vector<std::string>& placeHolder, st
     }
     if (hintFun(placeHolder, intType, metadata)) {
         LOGE("Failed to Hint 2 intType");
+        dlclose(handle);
+        return false;
+    }
+    dlclose(handle);
+    return true;
+}
+
+bool ViewDataWrap::LoadMergeHint2TypeAndMsdpType(const std::vector<std::string>& placeHolder,
+    const std::vector<std::string>& msdpType, std::vector<int>& intType, std::vector<std::string>& metadata)
+{
+    void* handle = dlopen(LIB_HINT2_TYPE_Z_SO_NAME, RTLD_LAZY);
+    if (handle == nullptr) {
+        LOGE("Failed to open libhint2type library %{public}s, reason: %{public}sn",
+            LIB_HINT2_TYPE_Z_SO_NAME, dlerror());
+        return false;
+    }
+    auto mergeHintFun = reinterpret_cast<MergeHint2TypeAndMsdpType>(dlsym(handle, MERGE_HINT_2_TYPE_AND_MSDP_TYPE));
+    if (mergeHintFun == nullptr) {
+        dlclose(handle);
+        LOGE("Failed to get symbol %{public}s in %{public}s", MERGE_HINT_2_TYPE_AND_MSDP_TYPE,
+            LIB_HINT2_TYPE_Z_SO_NAME);
+        return false;
+    }
+    if (mergeHintFun(placeHolder, msdpType, intType, metadata)) {
+        LOGE("Failed to call MergeHint2TypeAndMsdpType");
         dlclose(handle);
         return false;
     }

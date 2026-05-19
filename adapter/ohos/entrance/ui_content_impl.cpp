@@ -38,6 +38,7 @@
 #include "res_sched_client.h"
 #include "res_type.h"
 #include "resource_manager.h"
+#include "listener/ressched_event_listener.h"
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
@@ -55,6 +56,7 @@
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/module_buffer_reader.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -66,6 +68,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/container_window_manager.h"
 
@@ -2432,6 +2435,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     ApsMonitorImpl::GetInstance().SetContainerInstanceId(instanceId_);
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(&ApsMonitorImpl::GetInstance());
 #endif
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    ResschedEventListener::GetInstance()->RegisterToRSS(window->GetWindowId(), instanceId_);
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
@@ -2934,6 +2940,10 @@ void UIContentImpl::Foreground()
     if (!isDynamicRender_) {
         ContainerScope::UpdateRecentForeground(instanceId_);
     }
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Unregister instanceId for pre-freeze flush. Exclude form/dc (dynamic render) instances.
+        PostPreFreezeRegisterTask(false);
+    }
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2952,11 +2962,41 @@ void UIContentImpl::Background()
     LOGI("[%{public}s][%{public}s][%{public}d]: window background", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
     PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsEnd();
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Register instanceId from pre-freeze flush when app goes to background.
+        PostPreFreezeRegisterTask(true);
+    }
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
+}
+
+// Posts a task to UI thread to register/unregister the instance for pre-freeze flush.
+// Uses ContainerScope to ensure correct engine context and WillRunOnCurrentThread optimization.
+void UIContentImpl::PostPreFreezeRegisterTask(bool needRegister)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto task = [instanceId = instanceId_, needRegister]() {
+        ContainerScope scope(instanceId);
+        if (needRegister) {
+            DetachedRsNodeManager::GetInstance().RegisterPreFreezeInstance(instanceId);
+        } else {
+            DetachedRsNodeManager::GetInstance().UnregisterPreFreezeInstance(instanceId);
+        }
+    };
+
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        task();
+    } else {
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI,
+            needRegister ? "RegisterPreFreeze" : "UnregisterPreFreeze");
+    }
 }
 
 void UIContentImpl::ReloadForm(const std::string& url)
@@ -3024,6 +3064,10 @@ void UIContentImpl::Destroy()
     LOGI("[%{public}s][%{public}s][%{public}d]: window destroy", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Unregister instanceId for pre-freeze flush.
+        PostPreFreezeRegisterTask(false);
+    }
     // stop performance check and output json file
     AcePerformanceCheck::Stop();
     if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
@@ -3050,6 +3094,9 @@ void UIContentImpl::Destroy()
         if (windowRotationChangeListener_) {
             window_->UnregisterWindowRotationChangeListener(windowRotationChangeListener_);
         }
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+        ResschedEventListener::GetInstance()->UnRegisterFromRSS(window_->GetWindowId());
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
     }
     taskTimeForComeIn_.lastTaskTime = 0;
     taskTimeForExit_.lastTaskTime = 0;

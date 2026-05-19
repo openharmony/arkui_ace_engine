@@ -27,6 +27,8 @@ using namespace testing;
 using namespace testing::ext;
 
 static constexpr int TEST_HEIGHT = 100;
+static constexpr double TEST_MULTIPLE = 1.5;
+static constexpr double EPSILON = 0.00001;
 
 class LineHeightStyleAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUILineHeightStyleAccessor,
@@ -36,6 +38,11 @@ public:
     {
         auto metrics = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_HEIGHT));
         return accessor_->construct0(&metrics);
+    }
+    void DestroyPeer(LineHeightStylePeer* peer)
+    {
+        finalyzer_(peer);
+        peer = nullptr;
     }
 };
 
@@ -50,6 +57,37 @@ HWTEST_F(LineHeightStyleAccessorTest, getLineHeightTest, TestSize.Level1)
     auto retHeight = accessor_->getLineHeight(peer_);
     int ret = Converter::Convert<int>(retHeight);
     EXPECT_EQ(ret, TEST_HEIGHT);
+}
+
+HWTEST_F(LineHeightStyleAccessorTest, construct1TestNormalValues, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct1, nullptr);
+    auto metrics = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_HEIGHT));
+    Ark_Float64 multiple = TEST_MULTIPLE;
+    auto peer = accessor_->construct1(&metrics, multiple);
+    ASSERT_NE(peer, nullptr);
+    auto retHeight = accessor_->getLineHeight(peer);
+    EXPECT_NEAR(TEST_HEIGHT, Converter::Convert<double>(retHeight), EPSILON);
+    auto retMultiple = accessor_->getLineHeightMultiple(peer);
+    auto multipleOpt = Converter::GetOpt(retMultiple);
+    ASSERT_TRUE(multipleOpt.has_value());
+    EXPECT_NEAR(TEST_MULTIPLE, multipleOpt.value(), EPSILON);
+    finalyzer_(peer);
+}
+
+HWTEST_F(LineHeightStyleAccessorTest, construct1TestNullLineHeight, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct1, nullptr);
+    Ark_Float64 multiple = TEST_MULTIPLE;
+    auto peer = accessor_->construct1(nullptr, multiple);
+    ASSERT_NE(peer, nullptr);
+    auto retHeight = accessor_->getLineHeight(peer);
+    EXPECT_NEAR(0.0, Converter::Convert<double>(retHeight), EPSILON);
+    auto retMultiple = accessor_->getLineHeightMultiple(peer);
+    auto multipleOpt = Converter::GetOpt(retMultiple);
+    ASSERT_TRUE(multipleOpt.has_value());
+    EXPECT_NEAR(TEST_MULTIPLE, multipleOpt.value(), EPSILON);
+    finalyzer_(peer);
 }
 
 } // namespace OHOS::Ace::NG

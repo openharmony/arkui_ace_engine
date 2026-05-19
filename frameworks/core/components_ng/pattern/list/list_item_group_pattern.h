@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_GROUP_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_GROUP_PATTERN_H
 
+#include <cfloat>
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
@@ -67,6 +68,8 @@ struct ListMainSizeValues {
     float referencePos = 0.0f;
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
+    float startFixOffset = 0.0f;
+    float endFixOffset = 0.0f;
     bool forward = true;
     bool backward = false;
 };
@@ -491,6 +494,11 @@ public:
     void SetIsCardStyleInitialized(bool isCardStyleInitialized)
     {
         isCardStyleInitialized_ = isCardStyleInitialized;
+    }
+
+    bool EnableCachePredictNodes() const override
+    {
+        return true;
     }
 
 private:

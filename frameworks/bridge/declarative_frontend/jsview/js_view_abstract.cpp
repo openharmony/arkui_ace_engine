@@ -102,6 +102,7 @@
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/common/color_inverter.h"
+#include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
@@ -4000,7 +4001,9 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
         }
         params.position = position;
     }
-
+    if (positionValue->IsNumber()) {
+        params.depth = positionValue->ToNumber<float>();
+    }
     auto occlusionWeightValue = jsObject->GetProperty("occlusionWeight");
     if (occlusionWeightValue->IsNumber()) {
         params.occlusionWeight = occlusionWeightValue->ToNumber<float>();
@@ -6301,6 +6304,19 @@ void JSViewAbstract::JSEdgeLight(const JSCallbackInfo& info)
     };
     ParseEdgeLightParam(jsObj, param);
     ViewAbstractModel::GetInstance()->SetEdgeLightParam(param);
+}
+
+void JSViewAbstract::JSDoubleSided(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> argDoubleSided = info[0];
+    bool doubleSided = true;
+    if (argDoubleSided->IsBoolean()) {
+        doubleSided = argDoubleSided->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetDoubleSided(doubleSided);
 }
 
 bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
@@ -8659,6 +8675,125 @@ void JSViewAbstract::SetGradientDirection(NG::Gradient& newGradient, const Gradi
     }
 }
 
+void JSViewAbstract::ParseJsTextShaderStyle(std::optional<NG::Gradient>& gradientShaderStyle,
+        std::optional<Color>& colorShaderStyle, JSRef<JSObject>& shaderStyleObj, RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(!shaderStyleObj->IsUndefined());
+    if (shaderStyleObj->HasProperty("options")) {
+        auto optionsValue = shaderStyleObj->GetProperty("options");
+        if (optionsValue->IsObject()) {
+            shaderStyleObj = JSRef<JSObject>::Cast(optionsValue);
+        }
+    }
+    if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
+        NG::Gradient gradient;
+        NewRadialGradient(shaderStyleObj, gradient);
+        gradientShaderStyle = gradient;
+    } else if (shaderStyleObj->HasProperty("colors")) {
+        NG::Gradient gradient;
+        NewLinearGradient(shaderStyleObj, gradient);
+        gradientShaderStyle = gradient;
+    } else if (shaderStyleObj->HasProperty("color")) {
+        Color textColor;
+        auto infoColor = shaderStyleObj->GetProperty("color");
+        if (ParseJsColor(infoColor, textColor, resObj)) {
+            colorShaderStyle = textColor;
+        }
+    } else {
+        LOGD("shader data not match");
+    }
+}
+ 
+void JSViewAbstract::ConvertJsTextShaderStyle(const std::optional<NG::Gradient>& gradientShaderStyle,
+    const std::optional<Color>& colorShaderStyle, JSRef<JSObject>& obj)
+{
+    bool hasGradient = gradientShaderStyle.has_value();
+    bool hasColor = colorShaderStyle.has_value();
+    CHECK_EQUAL_VOID(hasGradient, hasColor);
+    if (hasGradient) {
+        auto gradient = gradientShaderStyle.value();
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        JSRef<JSObject> options = objectTemplate->NewInstance();
+        switch (gradient.GetType()) {
+            case NG::GradientType::RADIAL:
+                ParseRadialGradient(gradient, options);
+                break;
+            case NG::GradientType::LINEAR:
+                ParseLinearGradient(gradient, options);
+                break;
+            default:
+                LOGD("not match gradient");
+                return;
+        }
+        obj->SetPropertyObject("options", options);
+    }
+    if (hasColor) {
+        obj->SetProperty<std::string>("color", colorShaderStyle.value().ToString());
+    }
+}
+ 
+void JSViewAbstract::ParseRadialGradient(const NG::Gradient& gradient, JSRef<JSObject>& options)
+{
+    CHECK_NULL_VOID(gradient.GetRadialGradient());
+    auto radialCenterX = gradient.GetRadialGradient()->radialCenterX;
+    auto radialCenterY = gradient.GetRadialGradient()->radialCenterY;
+    auto center = JSRef<JSArray>::New();
+    if (radialCenterX.has_value()) {
+        center->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(radialCenterX.value().ToString())));
+    }
+    if (radialCenterY.has_value()) {
+        center->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(radialCenterY.value().ToString())));
+    }
+    if (radialCenterX.has_value() || radialCenterY.has_value()) {
+        options->SetPropertyObject("center", center);
+    }
+    auto radialVerticalSize = gradient.GetRadialGradient()->radialVerticalSize;
+    if (radialVerticalSize.has_value()) {
+        options->SetProperty<std::string>("radius", radialVerticalSize.value().ToString());
+    }
+    auto gradientColors = gradient.GetColors();
+    if (!gradientColors.empty()) {
+        auto colors = JSRef<JSArray>::New();
+        auto size = static_cast<int32_t>(gradientColors.size());
+        for (int32_t index = 0; index < size; index++) {
+            auto color = gradientColors[index];
+            CHECK_NULL_CONTINUE(color.GetDimension().Unit() == DimensionUnit::PERCENT);
+            auto temp = JSRef<JSArray>::New();
+            temp->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(color.GetColor().ToString())));
+            temp->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(color.GetDimension().Value() / 100.0)));
+            colors->SetValueAt(index, temp);
+        }
+        options->SetPropertyObject("colors", colors);
+    }
+    options->SetProperty<bool>("repeating", gradient.GetRepeat());
+}
+ 
+void JSViewAbstract::ParseLinearGradient(const NG::Gradient& gradient, JSRef<JSObject>& options)
+{
+    CHECK_NULL_VOID(gradient.GetLinearGradient());
+    auto angle = gradient.GetLinearGradient()->angle;
+    if (angle.has_value()) {
+        options->SetProperty<float>("angle", angle.value().ConvertToPx());
+    }
+    auto direction = GradientConvert::ParseGradientDirection(gradient);
+    options->SetProperty<int32_t>("direction", static_cast<int32_t>(direction.value_or(NG::GradientDirection::NONE)));
+    auto gradientColors = gradient.GetColors();
+    if (!gradientColors.empty()) {
+        auto colors = JSRef<JSArray>::New();
+        auto size = static_cast<int32_t>(gradientColors.size());
+        for (int32_t index = 0; index < size; index++) {
+            auto color = gradientColors[index];
+            CHECK_NULL_CONTINUE(color.GetDimension().Unit() == DimensionUnit::PERCENT);
+            auto temp = JSRef<JSArray>::New();
+            temp->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(color.GetColor().ToString())));
+            temp->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(color.GetDimension().Value() / 100.0)));
+            colors->SetValueAt(index, temp);
+        }
+        options->SetPropertyObject("colors", colors);
+    }
+    options->SetProperty<bool>("repeating", gradient.GetRepeat());
+}
+
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("RadialGradient.gradient");
@@ -10315,6 +10450,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
 
     JSClass<JSViewAbstract>::StaticMethod("edgeLight", &JSViewAbstract::JSEdgeLight);
+    JSClass<JSViewAbstract>::StaticMethod("doubleSided", &JSViewAbstract::JSDoubleSided);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -10884,7 +11020,8 @@ void JSViewAbstract::ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& s
     }
 }
 
-void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow)
+void JSViewAbstract::ParseShadowPropsUpdate(
+    const JSRef<JSObject>& jsObj, double defaultRadius, double& radius, Shadow& shadow)
 {
     if (jsObj->IsUndefined()) {
         return;
@@ -10892,8 +11029,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     RefPtr<ResourceObject> radiusResObj;
     ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = -1.0;
+        auto&& updateFunc = [defaultRadius](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
+            double radius = defaultRadius;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
             shadow.SetBlurRadius(radius);
         };
@@ -10901,8 +11038,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     }
 }
 
-bool JSViewAbstract::ParseShadowProps(
-    const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
+bool JSViewAbstract::ParseShadowPropsInner(
+    const JSRef<JSVal>& jsValue, Shadow& shadow, double defaultRadius, const bool configChangePerform, bool needResObj)
 {
     int32_t shadowStyle = 0;
     if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
@@ -10913,8 +11050,8 @@ bool JSViewAbstract::ParseShadowProps(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    double radius = -1.0;
-    ParseShadowPropsUpdate(jsObj, radius, shadow);
+    double radius = defaultRadius;
+    ParseShadowPropsUpdate(jsObj, defaultRadius, radius, shadow);
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(jsObj, shadow);
 
@@ -10950,6 +11087,18 @@ bool JSViewAbstract::ParseShadowProps(
     bool isFilled = jsObj->GetPropertyValue<bool>(static_cast<int32_t>(ArkUIIndex::FILL), false);
     shadow.SetIsFilled(isFilled);
     return true;
+}
+
+bool JSViewAbstract::ParseShadowProps(
+    const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
+{
+    return ParseShadowPropsInner(jsValue, shadow, -1.0, configChangePerform, needResObj);
+}
+
+bool JSViewAbstract::ParseTextShadowProps(
+    const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
+{
+    return ParseShadowPropsInner(jsValue, shadow, 0.0, configChangePerform, needResObj);
 }
 
 bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform)

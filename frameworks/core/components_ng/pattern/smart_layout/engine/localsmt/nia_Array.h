@@ -44,7 +44,7 @@ public:
         return *this;
     }
 
-    void Swap(Array& first, Array& second) noexcept
+    void Swap(Array& first, Array& second) const noexcept
     {
         using std::swap;
         swap(first.array, second.array);
@@ -65,7 +65,7 @@ public:
 
     void InsertElement(int32_t e)
     {
-        if (e < 0 || e >= indexInArray.size() || IsInArray(e)) {
+        if (e < 0 || static_cast<size_t>(e) >= indexInArray.size() || IsInArray(e)) {
             return;
         }
         if (arraySize < arrayCapacity) {

@@ -339,4 +339,26 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest014, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Finish();
 }
 
+/**
+ * @tc.name: WithEnvSyntaxTest015
+ * @tc.desc: RemoveEnvProperty via model removes property and HasEnvProperty returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest015, TestSize.Level1)
+{
+    WithEnvModelNG model;
+    model.Create();
+
+    model.SetEnvProperty(ENV_KEY_DIRECTION, ENV_VALUE_TRUE);
+
+    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(node, nullptr);
+    EXPECT_TRUE(node->HasEnvProperty(ENV_KEY_DIRECTION));
+
+    model.RemoveEnvProperty(ENV_KEY_DIRECTION);
+    EXPECT_FALSE(node->HasEnvProperty(ENV_KEY_DIRECTION));
+
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
 } // namespace OHOS::Ace::NG

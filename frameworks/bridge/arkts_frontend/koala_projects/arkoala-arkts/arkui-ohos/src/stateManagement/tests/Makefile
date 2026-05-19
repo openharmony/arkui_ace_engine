@@ -85,6 +85,7 @@ SRCSTS = \
 	mock/decoratorEnv_mock.ts \
 	mock/koalaui-common.ts \
 	mock/trackedKeyedStateMeta.ts \
+	mock/trackedMutableStateMeta.ts \
 	\
 	remember.ts \
 	mock/factoryInternal.ts \

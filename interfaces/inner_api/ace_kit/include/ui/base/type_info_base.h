@@ -105,21 +105,13 @@ public:
     static T* DynamicCast(O* rawPtr)
     {
         VERIFY_DECLARED_CLASS(T);
-        if constexpr(std::is_base_of_v<T, O>) {
-            return rawPtr;
-        } else {
-            return rawPtr != nullptr ? reinterpret_cast<T*>(rawPtr->SafeCastById(T::TypeId())) : nullptr;
-        }
+        return rawPtr != nullptr ? reinterpret_cast<T*>(rawPtr->SafeCastById(T::TypeId())) : nullptr;
     }
     template<class T, class O>
     static const T* DynamicCast(const O* rawPtr)
     {
         VERIFY_DECLARED_CLASS(T);
-        if constexpr(std::is_base_of_v<T, O>) {
-            return rawPtr;
-        } else {
-            return rawPtr != nullptr ? reinterpret_cast<const T*>(rawPtr->SafeCastById(T::TypeId())) : nullptr;
-        }
+        return rawPtr != nullptr ? reinterpret_cast<const T*>(rawPtr->SafeCastById(T::TypeId())) : nullptr;
     }
 
     // Get type info by instance.
@@ -172,20 +164,12 @@ public:
     template<class T, class O>
     static bool InstanceOf(const O* rawPtr)
     {
-        if constexpr(std::is_base_of_v<T, O>) {
-            return rawPtr != nullptr;
-        } else {
-            return DynamicCast<T>(rawPtr) != nullptr;
-        }
+        return DynamicCast<T>(rawPtr) != nullptr;
     }
     template<class T, class O, std::enable_if_t<!std::is_pointer_v<O>, bool> = true>
     static bool InstanceOf(const O& instance)
     {
-        if constexpr(std::is_base_of_v<T, O>) {
-            return true;
-        } else {
-            return reinterpret_cast<T*>(instance.SafeCastById(T::TypeId())) != nullptr;
-        }
+        return reinterpret_cast<T*>(instance.SafeCastById(T::TypeId())) != nullptr;
     }
 };
 

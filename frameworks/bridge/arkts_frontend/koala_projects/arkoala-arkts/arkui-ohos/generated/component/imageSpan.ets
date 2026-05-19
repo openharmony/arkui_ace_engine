@@ -284,6 +284,18 @@ export function ImageSpanImpl(
     })
 }
 
+@memo
+export function ImageSpan(
+    @memo @memo_skip
+    style: ((attributes: ImageSpanAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkImageSpanComponent>((): ArkImageSpanComponent => {
+        return new ArkImageSpanComponent()
+    })
+    NodeAttach<ArkImageSpanPeer>((): ArkImageSpanPeer => ArkImageSpanPeer.create(receiver), (_: ArkImageSpanPeer): void => {
+        style?.(receiver)
+    })
+}
 export class ImageLoadResult_serializer {
     public static write(buffer: SerializerBase, value: ImageLoadResult): void {
         let valueSerializer: SerializerBase = buffer

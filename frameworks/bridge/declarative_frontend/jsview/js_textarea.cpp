@@ -132,6 +132,8 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
     JSClass<JSTextArea>::StaticMethod("strokeWidth", &JSTextField::SetStrokeWidth);
     JSClass<JSTextArea>::StaticMethod("strokeColor", &JSTextField::SetStrokeColor);
+    JSClass<JSTextArea>::StaticMethod("strokeJoinStyle", &JSTextField::SetStrokeJoinStyle);
+    JSClass<JSTextArea>::StaticMethod("shaderStyle", &JSTextField::SetShaderStyle);
     JSClass<JSTextArea>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
     JSClass<JSTextArea>::StaticMethod("scrollBarColor", &JSTextField::SetScrollBarColor);
     JSClass<JSTextArea>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);

@@ -400,6 +400,7 @@ public:
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnOffsetEdgesUpdate(const EdgesParam& value) {}
+    virtual void ClearClipBounds() {}
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     virtual void SetRotation(float rotationX, float rotationY, float rotationZ) {}
@@ -818,6 +819,9 @@ public:
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
+    // DoubleSided
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DoubleSided, bool);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
@@ -1061,6 +1065,7 @@ protected:
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
     virtual void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) {}
+    virtual void OnDoubleSidedUpdate(bool doubleSided) {}
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;

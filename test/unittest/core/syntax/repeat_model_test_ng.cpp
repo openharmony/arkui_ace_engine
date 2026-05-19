@@ -69,7 +69,7 @@ void RepeatSyntaxTestNg::TearDown()
 
 /**
  * @tc.name: RepeatSyntaxStartRenderTest001
- * @tc.desc: StartRender creates RepeatNode and pushes to ViewStackProcessor
+ * @tc.desc: StartRender creates RepeatNode and pushes to stack
  * @tc.type: FUNC
  */
 HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxStartRenderTest001, TestSize.Level1)
@@ -83,7 +83,7 @@ HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxStartRenderTest001, TestSize.Level1)
 
 /**
  * @tc.name: RepeatSyntaxStartRenderTest002
- * @tc.desc: StartRender creates RepeatNode with correct atomic property
+ * @tc.desc: StartRender creates non-atomic RepeatNode
  * @tc.type: FUNC
  */
 HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxStartRenderTest002, TestSize.Level1)
@@ -97,7 +97,7 @@ HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxStartRenderTest002, TestSize.Level1)
 
 /**
  * @tc.name: RepeatSyntaxFinishRenderTest003
- * @tc.desc: FinishRender completes rendering and pops container
+ * @tc.desc: FinishRender completes rendering and pops container.
  * @tc.type: FUNC
  */
 HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxFinishRenderTest003, TestSize.Level1)
@@ -113,7 +113,7 @@ HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxFinishRenderTest003, TestSize.Level1)
 
 /**
  * @tc.name: RepeatSyntaxFinishRenderTest004
- * @tc.desc: FinishRender with null node handles gracefully
+ * @tc.desc: FinishRender without StartRender handles gracefully.
  * @tc.type: FUNC
  */
 HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxFinishRenderTest004, TestSize.Level1)
@@ -126,7 +126,7 @@ HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxFinishRenderTest004, TestSize.Level1)
 
 /**
  * @tc.name: RepeatSyntaxMoveChildTest005
- * @tc.desc: MoveChild triggers node movement
+ * @tc.desc: MoveChild triggers move callback with correct indices
  * @tc.type: FUNC
  */
 HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxMoveChildTest005, TestSize.Level1)
@@ -139,7 +139,7 @@ HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxMoveChildTest005, TestSize.Level1)
 
 /**
  * @tc.name: RepeatSyntaxMoveChildTest006
- * @tc.desc: MoveChild with different indices
+ * @tc.desc: MoveChild with different indices.
  * @tc.type: FUNC
  */
 HWTEST_F(RepeatSyntaxTestNg, RepeatSyntaxMoveChildTest006, TestSize.Level1)

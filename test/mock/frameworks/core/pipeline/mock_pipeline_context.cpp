@@ -25,6 +25,7 @@
 #include "base/resource/shared_image_manager.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "base/ressched/taihang_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
@@ -222,6 +223,11 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
 const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
 {
     return clickOptimizer_;
+}
+
+const std::shared_ptr<TaihangOptimizer>& PipelineContext::GetTaihangOptimizer() const
+{
+    return taihangOptimizer_;
 }
 
 bool PipelineContext::GetIsRequestFrame() const
@@ -1417,6 +1423,7 @@ void PipelineContext::InitManagers()
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
 }
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
@@ -1748,6 +1755,21 @@ bool NG::PipelineContext::GetContainerCustomTitleVisible()
 bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return g_isContainerControlButtonVisible;
+}
+
+std::optional<float> NG::PipelineContext::ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    return std::nullopt;
+}
+
+float NG::PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
+{
+    return 1.0f;
+}
+
+std::optional<TextDirection> NG::PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
+{
+    return std::nullopt;
 }
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}

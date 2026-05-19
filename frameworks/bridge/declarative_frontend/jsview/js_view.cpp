@@ -972,11 +972,19 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         }
     }
 
-    JSRef<JSVal> hasCustomEnv = jsViewObject_->GetProperty("__hasCustomEnvValue__");
-    if (hasCustomEnv->ToBoolean()) {
+    JSRef<JSVal> customEnvMeta = jsViewObject_->GetProperty("__custom_env_deco_meta__");
+    if (customEnvMeta->ToBoolean()) {
         JSRef<JSVal> onCustomEnvUpdateFunc = jsViewObject_->GetProperty("__onCustomEnvValueUpdate__Internal");
         if (onCustomEnvUpdateFunc->IsFunction()) {
             RegisterOnCustomEnvUpdateCallback(JSRef<JSFunc>::Cast(onCustomEnvUpdateFunc));
+        }
+    }
+
+    JSRef<JSVal> hasEnv = jsViewObject_->GetProperty("__hasEnv__Internal");
+    if (hasEnv->ToBoolean()) {
+        JSRef<JSVal> onSystemEnvUpdateFunc_ = jsViewObject_->GetProperty("__onEnvValueUpdate__Internal");
+        if (onSystemEnvUpdateFunc_->IsFunction()) {
+            RegisterOnSystemEnvUpdateCallback(JSRef<JSFunc>::Cast(onSystemEnvUpdateFunc_));
         }
     }
 
@@ -1448,7 +1456,7 @@ void JSViewPartialUpdate::JSGetDialogController(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsString()) {
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
         info.SetReturnValue(JSVal::Undefined());
         return;
     }
@@ -1465,11 +1473,44 @@ void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
         return;
     }
 
-    auto key = info[0]->ToString();
+    auto key = info[0]->ToNumber<int32_t>();
     auto withEnvNode = environmentManager->FindWithEnvNode(node);
     NG::EnvironmentQueryResult queryResult;
-    bool found =
-        environmentManager->FindValueByKey(withEnvNode, node, NG::EnvironmentPropertyKind::CUSTOM, key, queryResult);
+    auto stringKey = std::to_string(key);
+    bool found = environmentManager->FindValueByKey(
+        withEnvNode, node, NG::EnvironmentPropertyKind::CUSTOM, stringKey, queryResult);
+    if (!found) {
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+    SetEnvironmentQueryReturnValue(info, queryResult);
+}
+
+void JSViewPartialUpdate::JSFindSystemEnvValueByKey(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsString()) {
+        TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "JSFindSystemEnvValueByKey called with invalid arguments");
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+
+    ContainerScope scope(GetInstanceId());
+    auto key = info[0]->ToString();
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    if (!node) {
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+    auto environmentManager = GetEnvironmentManager(node);
+    if (!environmentManager) {
+        info.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+
+    auto withEnvNode = environmentManager->FindWithEnvNode(node);
+    NG::EnvironmentQueryResult queryResult;
+    bool found = environmentManager->FindValueByKey(
+        withEnvNode, node, NG::EnvironmentPropertyKind::ENV, key, queryResult);
     if (!found) {
         info.SetReturnValue(JSVal::Undefined());
         return;
@@ -1479,8 +1520,7 @@ void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>& onCustomEnvUpdateFunc)
 {
-    updateCustomEnvCallback_ = [weak = WeakClaim(this), func = std::move(onCustomEnvUpdateFunc)](
-                                   const std::string& key) {
+    updateCustomEnvCallback_ = [weak = WeakClaim(this), func = std::move(onCustomEnvUpdateFunc)](int32_t key) {
         JAVASCRIPT_EXECUTION_SCOPE_STATIC;
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
@@ -1490,10 +1530,6 @@ void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>&
         auto jsFunc = JSRef<JSFunc>::Cast(func);
         if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
             jsFunc->Call(self->jsViewObject_, 1, params);
-        } else {
-            TAG_LOGW(AceLogTag::ACE_STATE_MGMT,
-                "JSView %{public}s jsViewObject_ is empty, cannot invoke updateCustomEnvCallback_",
-                self->GetJSViewName().c_str());
         }
     };
 
@@ -1502,8 +1538,38 @@ void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>&
     customNode->SetOnCustomEnvUpdateFunc([weak = WeakClaim(this)](const std::string& key) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
+        auto customEnvKey = StringUtils::StringToInt(key, INT_MAX);
+        if (customEnvKey == INT_MAX) {
+            TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "key is not a valid integer");
+        }
         if (self->updateCustomEnvCallback_) {
-            self->updateCustomEnvCallback_(key);
+            self->updateCustomEnvCallback_(customEnvKey);
+        }
+    });
+}
+
+void JSViewPartialUpdate::RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>& onSystemEnvUpdateFunc_)
+{
+    updateEnvCallback_ = [weak = WeakClaim(this), func = std::move(onSystemEnvUpdateFunc_)](const std::string& key) {
+        JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        ContainerScope scope(self->GetInstanceId());
+        JSRef<JSVal> jsKey = JSRef<JSVal>::Make(ToJSValue(key));
+        JSRef<JSVal> params[1] = { jsKey };
+        auto jsFunc = JSRef<JSFunc>::Cast(func);
+        if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
+            jsFunc->Call(self->jsViewObject_, 1, params);
+        }
+    };
+
+    auto customNode = AceType::DynamicCast<NG::CustomNode>(this->GetViewNode());
+    CHECK_NULL_VOID(customNode);
+    customNode->SetOnSystemEnvUpdateFunc([weak = WeakClaim(this)](const std::string& key) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        if (self->updateEnvCallback_) {
+            self->updateEnvCallback_(key);
         }
     });
 }
@@ -1543,6 +1609,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "registerUpdateInstanceForEnvFunc", &JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc);
     JSClass<JSViewPartialUpdate>::CustomMethod("findCustomValueByKey", &JSViewPartialUpdate::JSFindCustomValueByKey);
+    JSClass<JSViewPartialUpdate>::CustomMethod("findEnvValueByKey", &JSViewPartialUpdate::JSFindSystemEnvValueByKey);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);

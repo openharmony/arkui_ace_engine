@@ -162,6 +162,22 @@ constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY = 0xA8;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_FONTSIZESCALE = 0xA9;
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_ISONLYBETWEENLINES = 0xAA;
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHTMULTIPLY = 0xAB;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKEJOINSTYLE = 0xAC;
+constexpr uint8_t TLV_STROKEJOINSTYLE_TAG = 0xAD;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_GRADIENT_COLORS = 0xAE;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_GRADIENT_COLOR = 0xAF;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT = 0xB0;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_BEGIN_TAG = 0xB1;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_END_TAG = 0xB2;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_CENTERX = 0xB3;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_CENTERY = 0xB4;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_RADIUS = 0xB5;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT = 0xB6;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_BEGIN_TAG = 0xB7;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_END_TAG = 0xB8;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_ANGLE = 0xB9;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_LINEARGRADIENT_DIRECTION = 0xBA;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_COLORSHADERSTYLE = 0xBB;
 
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
@@ -250,6 +266,7 @@ public:
     TLV_DEFINE_ENUM_TYPE(ImageFit, TLV_IMAGEFIT_TAG);
     TLV_DEFINE_ENUM_TYPE(TextVerticalAlign, TLV_TEXTVERTICALALIGN_TAG);
     TLV_DEFINE_ENUM_TYPE(TextDirection, TLV_TEXTDIRECTION_TAG);
+    TLV_DEFINE_ENUM_TYPE(StrokeJoinStyle, TLV_STROKEJOINSTYLE_TAG);
 
     static void WriteString(std::vector<uint8_t>& buff, const std::string& value);
     static std::string ReadString(std::vector<uint8_t>& buff, int32_t& cursor);
@@ -289,6 +306,12 @@ public:
     static std::vector<TextDecoration> ReadTextDecorations(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteFloat(std::vector<uint8_t>& buff, float value);
     static float ReadFloat(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteGradientColors(std::vector<uint8_t>& buff, NG::Gradient& value);
+    static std::optional<NG::Gradient> ReadGradientColors(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteRadialGradient(std::vector<uint8_t>& buff, NG::Gradient& value);
+    static std::optional<NG::Gradient> ReadRadialGradient(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteLinearGradient(std::vector<uint8_t>& buff, NG::Gradient& value);
+    static std::optional<NG::Gradient> ReadLinearGradient(std::vector<uint8_t>& buff, int32_t& cursor);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_TLV_UTIL_H

@@ -112,6 +112,28 @@ public:
                     ControlSize::SMALL, pattern->GetAttr<Dimension>("small_text_font_size", 0.0_vp)));
             }
             theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
+            // grid menu theme
+            theme->gridMenuFontSize_ =
+                pattern->GetAttr<Dimension>("grid_menu_text_font_size", theme->gridMenuFontSize_);
+            theme->gridMenuFontWeight_ = FontWeight(static_cast<int32_t>(
+                pattern->GetAttr<double>("grid_menu_font_weight", static_cast<double>(FontWeight::W400))));
+            theme->gridMenuFontColor_ = pattern->GetAttr<Color>("grid_menu_font_color", theme->gridMenuFontColor_);
+            theme->gridMenuIconColor_ = pattern->GetAttr<Color>("grid_menu_icon_color", theme->gridMenuIconColor_);
+            theme->gridMenuHoverColor_ = pattern->GetAttr<Color>("grid_menu_hover_color", theme->gridMenuHoverColor_);
+            theme->gridMenuClickedColor_ =
+                pattern->GetAttr<Color>("grid_menu_clicked_color", theme->gridMenuClickedColor_);
+            theme->gridMenuDividerColor_ =
+                pattern->GetAttr<Color>("grid_menu_divider_color", theme->gridMenuDividerColor_);
+            theme->gridMenuIconTextSpace_ =
+                pattern->GetAttr<Dimension>("grid_menu_icon_text_space", theme->gridMenuIconTextSpace_);
+            theme->gridMenuItemPadding_ =
+                pattern->GetAttr<Dimension>("grid_menu_item_padding", theme->gridMenuItemPadding_);
+            theme->gridMenuCornerRadius_ =
+                pattern->GetAttr<Dimension>("grid_menu_corner_radius", theme->gridMenuCornerRadius_);
+            theme->gridMenuContainerPadding_ =
+                pattern->GetAttr<Dimension>("grid_menu_container_padding", theme->gridMenuContainerPadding_);
+            theme->gridMenuDividerHeight_ =
+                pattern->GetAttr<Dimension>("grid_menu_divider_height", theme->gridMenuDividerHeight_);
             theme->menuTitleFontSize_ =
                 pattern->GetAttr<Dimension>("menu_title_text_font_size", theme->menuTitleFontSize_);
             theme->menuTitleFontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuTitleFontColor_);
@@ -1712,6 +1734,55 @@ public:
         return menuFontWeight_;
     }
 
+    const Dimension& GetGridMenuFontSize() const
+    {
+        return gridMenuFontSize_;
+    }
+    FontWeight GetGridMenuFontWeight() const
+    {
+        return gridMenuFontWeight_;
+    }
+    const Color& GetGridMenuFontColor() const
+    {
+        return gridMenuFontColor_;
+    }
+    const Color& GetGridMenuIconColor() const
+    {
+        return gridMenuIconColor_;
+    }
+    const Color& GetGridMenuHoverColor() const
+    {
+        return gridMenuHoverColor_;
+    }
+    const Color& GetGridMenuClickedColor() const
+    {
+        return gridMenuClickedColor_;
+    }
+    const Color& GetGridMenuDividerColor() const
+    {
+        return gridMenuDividerColor_;
+    }
+    const Dimension& GetGridMenuIconTextSpace() const
+    {
+        return gridMenuIconTextSpace_;
+    }
+    const Dimension& GetGridMenuItemPadding() const
+    {
+        return gridMenuItemPadding_;
+    }
+    const Dimension& GetGridMenuCornerRadius() const
+    {
+        return gridMenuCornerRadius_;
+    }
+    const Dimension& GetGridMenuContainerPadding() const
+    {
+        return gridMenuContainerPadding_;
+    }
+    const Dimension& GetGridMenuDividerHeight() const
+    {
+        return gridMenuDividerHeight_;
+    }
+
     RefPtr<Curve> GetMenuAnimationCurve() const
     {
         if (menuAnimationCurve_ == "smooth") {
@@ -1760,6 +1831,20 @@ private:
     Dimension selectMenuAdditionY_ = 0.0_vp;
     double disabledBackgroundColorAlpha_ = 1.0;
     FontWeight menuFontWeight_ { FontWeight::NORMAL };
+
+    // grid menu theme
+    Dimension gridMenuFontSize_ = 12.0_fp;
+    FontWeight gridMenuFontWeight_ { FontWeight::REGULAR };
+    Color gridMenuFontColor_;
+    Color gridMenuIconColor_;
+    Color gridMenuHoverColor_ = Color(0x0c000000);
+    Color gridMenuClickedColor_ = Color(0x19000000);
+    Color gridMenuDividerColor_ = Color(0x0C182431);
+    Dimension gridMenuIconTextSpace_ = 2.0_vp;
+    Dimension gridMenuItemPadding_ = 4.0_vp;
+    Dimension gridMenuCornerRadius_ = 8.0_vp;
+    Dimension gridMenuContainerPadding_ = 4.0_vp;
+    Dimension gridMenuDividerHeight_ = 8.0_vp;
 
     bool allowScale_ = true;
     Dimension fontSize_;

@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/event_manager.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 

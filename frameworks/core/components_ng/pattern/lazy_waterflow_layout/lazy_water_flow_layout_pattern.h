@@ -64,8 +64,6 @@ public:
     }
 
 private:
-    static constexpr int32_t MAX_IDLE_DEADLINE_MISS_COUNT = 3;
-
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void ResetVisibleIndexesChangeState();
     void PostIdleTask();
@@ -76,10 +74,8 @@ private:
 
     int32_t itemTotalCount_ = 0;
     RefPtr<LazyWaterFlowLayoutInfo> layoutInfo_;
-    bool hasVisibleIndexesChangeFired_ = false;
-    int32_t idleDeadlineMissCount_ = 0;
     std::function<void(int32_t, int32_t)> onVisibleIndexesChange_;
-    std::pair<int32_t, int32_t> lastVisibleIndexesRange_ = { -1, -1 };
+    std::pair<int32_t, int32_t> lastVisibleIndexesRange_ = { -2, -2 };
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyWaterFlowLayoutPattern);
 };

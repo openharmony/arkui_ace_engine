@@ -41,6 +41,13 @@ RefPtr<WithEnvNode> WithEnvNode::GetOrCreateWithEnvNode(int32_t nodeId)
     return WithEnvNode::CreateWithEnvNode(nodeId);
 }
 
+void WithEnvNode::RemoveEnvProperty(const std::string& key)
+{
+    envPropertiesStringType_.erase(key);
+    envPropertiesDoubleType_.erase(key);
+    envPropertiesBoolType_.erase(key);
+}
+
 void WithEnvNode::SetEnvProperty(const std::string& key, const std::string& value)
 {
     envPropertiesStringType_[key] = value;
@@ -59,6 +66,36 @@ void WithEnvNode::SetEnvProperty(const std::string& key, bool value)
 void WithEnvNode::SetCustomEnvProperty(const std::string& key, std::any value)
 {
     customEnvObjProperties_[key] = std::move(value);
+}
+
+bool WithEnvNode::GetEnvProperty(const std::string& key, std::string& value) const
+{
+    auto it = envPropertiesStringType_.find(key);
+    if (it == envPropertiesStringType_.end()) {
+        return false;
+    }
+    value = it->second;
+    return true;
+}
+ 
+bool WithEnvNode::GetEnvProperty(const std::string& key, double& value) const
+{
+    auto it = envPropertiesDoubleType_.find(key);
+    if (it == envPropertiesDoubleType_.end()) {
+        return false;
+    }
+    value = it->second;
+    return true;
+}
+ 
+bool WithEnvNode::GetEnvProperty(const std::string& key, bool& value) const
+{
+    auto it = envPropertiesBoolType_.find(key);
+    if (it == envPropertiesBoolType_.end()) {
+        return false;
+    }
+    value = it->second;
+    return true;
 }
 
 const std::any* WithEnvNode::GetCustomEnvPropertyAny(const std::string& key) const

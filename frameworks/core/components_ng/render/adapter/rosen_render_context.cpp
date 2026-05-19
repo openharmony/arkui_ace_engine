@@ -1679,19 +1679,25 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
 {
     FREE_RS_CONTEXT_CHECK(OnSpatialEffectUpdate, params);
     CHECK_NULL_VOID(rsNode_);
-    std::shared_ptr<Rosen::SpatialEffectPara> spatialEffect;
+    std::shared_ptr<Rosen::SpatialEffectVariantPara> variantPara =
+        std::make_shared<Rosen::SpatialEffectVariantPara>();
     if (params.position.has_value()) {
-        spatialEffect = std::make_shared<Rosen::SpatialEffectPara>();
         const auto& position = params.position.value();
-        spatialEffect->leftTop = Rosen::Vector3f { position.leftTop.x, position.leftTop.y, position.leftTop.z };
-        spatialEffect->rightTop = Rosen::Vector3f { position.rightTop.x, position.rightTop.y, position.rightTop.z };
-        spatialEffect->leftBottom =
+        Rosen::SpatialEffectPara::CornerPositions corners;
+        corners[Rosen::SpatialEffectPara::LEFT_TOP_INDEX] =
+            Rosen::Vector3f { position.leftTop.x, position.leftTop.y, position.leftTop.z };
+        corners[Rosen::SpatialEffectPara::RIGHT_TOP_INDEX] =
+            Rosen::Vector3f { position.rightTop.x, position.rightTop.y, position.rightTop.z };
+        corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] =
             Rosen::Vector3f { position.leftBottom.x, position.leftBottom.y, position.leftBottom.z };
-        spatialEffect->rightBottom =
+        corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] =
             Rosen::Vector3f { position.rightBottom.x, position.rightBottom.y, position.rightBottom.z };
-        spatialEffect->occlusionWeight = params.occlusionWeight;
+        variantPara->position = corners;
+    } else {
+        variantPara->position = params.depth;
     }
-    rsNode_->SetSpatialEffectPara(spatialEffect);
+    variantPara->occlusionWeight = params.occlusionWeight;
+    rsNode_->SetSpatialEffectPara(variantPara);
     RequestNextFrame();
 }
 
@@ -2048,6 +2054,17 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
             rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
         }
     }
+}
+
+void RosenRenderContext::ClearClipBounds()
+{
+    FREE_RS_CONTEXT_CHECK(ClearClipBounds);
+    CHECK_NULL_VOID(rsNode_);
+    ResetClipShape();
+    AddOrUpdateModifier<Rosen::ModifierNG::RSBoundsClipModifier,
+        &Rosen::ModifierNG::RSBoundsClipModifier::SetClipBounds, std::shared_ptr<Rosen::RSPath>>(
+        clipBoundModifier_, nullptr);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& width, Dimension& height)
@@ -7938,12 +7955,12 @@ void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<
     // the drawRegion of this index has changed
     drawRegionRects_[index] = rect;
     std::shared_ptr<Rosen::RectF> result;
-    for (size_t index = 0; index < DRAW_REGION_RECT_COUNT; ++index) {
-        if (drawRegionRects_[index]) {
+    for (size_t idx = 0; idx < DRAW_REGION_RECT_COUNT; ++idx) {
+        if (drawRegionRects_[idx]) {
             if (result) {
-                *result = result->JoinRect(*drawRegionRects_[index]);
+                *result = result->JoinRect(*drawRegionRects_[idx]);
             } else {
-                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[index]);
+                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[idx]);
             }
         }
     }
@@ -9035,5 +9052,13 @@ void RosenRenderContext::ResetEdgeLightFilter()
     rsNode_->SetOverlayNGShader(nullptr);
     RequestNextFrame();
 #endif
+}
+
+void RosenRenderContext::OnDoubleSidedUpdate(bool doubleSided)
+{
+    FREE_RS_CONTEXT_CHECK(OnDoubleSidedUpdate, doubleSided);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetDoubleSidedEnabled(doubleSided);
+    RequestNextFrame();
 }
 } // namespace OHOS::Ace::NG

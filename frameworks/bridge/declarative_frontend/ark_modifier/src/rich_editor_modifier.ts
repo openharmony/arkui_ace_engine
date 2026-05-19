@@ -208,6 +208,11 @@ class LazyArkRichEditorComponent extends ArkComponent {
    return this;
   }
 
+  punctuationOverflow(enable: Optional<boolean>): LazyArkRichEditorComponent {
+   this.lazyComponent.punctuationOverflow(enable);
+   return this;
+  }
+
   undoStyle(style: Optional<UndoStyle>): LazyArkRichEditorComponent {
    this.lazyComponent.undoStyle(style);
    return this;

@@ -31,6 +31,11 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/interfaces/native/implementation/color_shader_style_peer_impl.h"
+ 
+namespace OHOS::Ace::NG::Converter {
+void ProcessLinearGradient(const Opt_LinearGradientOptions& linearGradientOpt, Gradient& gradient);
+}
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -934,6 +939,44 @@ void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextFieldModelStatic::SetOrphanCharOptimization(frameNode, convValue);
 }
+ 
+void SetStrokeJoinStyleImpl(Ark_NativePointer node,
+                            const Opt_StrokeJoinStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeJoinStyle(frameNode, Converter::OptConvertPtr<StrokeJoinStyle>(value)
+        .value_or(StrokeJoinStyle::MITER_JOIN));
+}
+void SetShaderStyleImpl(Ark_NativePointer node,
+                        const Opt_ShaderStyleProxy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        TextFieldModelNG::ResetGradient(frameNode);
+        return;
+    }
+    auto shaderStyleProxy = value->value;
+    auto colorOpt = Converter::OptConvert<Color>(shaderStyleProxy.color);
+    auto linearGradientOpt = shaderStyleProxy.linearGradientOptions;
+    auto radialGradientOpt = shaderStyleProxy.radialGradientOptions;
+    bool hasLinear = linearGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    bool hasRadial = radialGradientOpt.tag != InteropTag::INTEROP_TAG_UNDEFINED;
+    if (colorOpt.has_value()) {
+        TextFieldModelNG::SetColorShaderStyle(frameNode, colorOpt.value());
+    } else if (hasLinear) {
+        Gradient gradient;
+        Converter::ProcessLinearGradient(linearGradientOpt, gradient);
+        TextFieldModelNG::SetGradientStyle(frameNode, gradient);
+    } else if (hasRadial) {
+        Gradient gradient = Converter::Convert<Gradient>(radialGradientOpt.value);
+        TextFieldModelNG::SetGradientStyle(frameNode, gradient);
+    } else {
+        TextFieldModelNG::ResetGradient(frameNode);
+    }
+}
+
 void SetVoiceButtonImpl(Ark_NativePointer node,
                         const Opt_VoiceButtonOptions* value)
 {
@@ -1151,6 +1194,8 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetVoiceButtonImpl,
         TextAreaAttributeModifier::SetHorizontalScrollingImpl,
         TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
+        TextAreaAttributeModifier::SetStrokeJoinStyleImpl,
+        TextAreaAttributeModifier::SetShaderStyleImpl,
         TextAreaAttributeModifier::SetInputFilterImpl,
         TextAreaAttributeModifier::SetShowCounterImpl,
         TextAreaAttributeModifier::SetMaxLinesImpl,

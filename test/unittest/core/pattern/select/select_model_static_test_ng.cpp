@@ -987,4 +987,110 @@ HWTEST_F(SelectModelStaticTestNg, SetArrowModifierApply, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     SelectModelStatic::SetArrowModifierApply(select, nullptr);
 }
+
+/**
+ * @tc.name: SetSpaceLpx001
+ * @tc.desc: Test SetSpace registers LPX attribute when dimension unit is LPX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModelStaticTestNg, SetSpaceLpx001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    /**
+     * @tc.steps: step2. Set space with LPX dimension, then with VP dimension.
+     */
+    SelectModelStatic::SetSpace(select, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(select->lpxAttributes_.count(LpxAttribute::LPX_SPACE), 0);
+
+    SelectModelStatic::SetSpace(select, Dimension(16.0, DimensionUnit::VP));
+    EXPECT_EQ(select->lpxAttributes_.count(LpxAttribute::LPX_SPACE), 0);
+}
+
+/**
+ * @tc.name: SetSpaceLpx002
+ * @tc.desc: Test SetSpace unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModelStaticTestNg, SetSpaceLpx002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    /**
+     * @tc.steps: step2. Set space with LPX dimension, then with nullopt.
+     */
+    SelectModelStatic::SetSpace(select, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(select->lpxAttributes_.count(LpxAttribute::LPX_SPACE), 0);
+
+    SelectModelStatic::SetSpace(select, std::nullopt);
+    EXPECT_EQ(select->lpxAttributes_.count(LpxAttribute::LPX_SPACE), 0);
+}
+
+/**
+ * @tc.name: SetFontSizeLpx001
+ * @tc.desc: Test SetFontSize registers LPX attribute when dimension unit is LPX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModelStaticTestNg, SetFontSizeLpx001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select and get text child node.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->text_, nullptr);
+    /**
+     * @tc.steps: step2. Set font size with LPX dimension, then with VP dimension.
+     */
+    SelectModelStatic::SetFontSize(select, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(pattern->text_->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+
+    SelectModelStatic::SetFontSize(select, Dimension(16.0, DimensionUnit::VP));
+    EXPECT_EQ(pattern->text_->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+}
+
+/**
+ * @tc.name: SetFontSizeLpx002
+ * @tc.desc: Test SetFontSize unregisters LPX attribute when optional is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModelStaticTestNg, SetFontSizeLpx002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select and get text child node.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->text_, nullptr);
+    /**
+     * @tc.steps: step2. Set font size with LPX dimension, then with nullopt.
+     */
+    SelectModelStatic::SetFontSize(select, Dimension(16.0, DimensionUnit::LPX));
+    EXPECT_GT(pattern->text_->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+
+    SelectModelStatic::SetFontSize(select, std::nullopt);
+    EXPECT_EQ(pattern->text_->lpxAttributes_.count(LpxAttribute::LPX_FONT_SIZE), 0);
+}
 } // namespace OHOS::Ace::NG

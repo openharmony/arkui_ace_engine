@@ -6,5 +6,5 @@
 #include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
-bool ResourceParseUtils::needReload_ = false;
+bool ResourceParseUtilsBase::needReload_ = false;
 } // namespace OHOS::Ace

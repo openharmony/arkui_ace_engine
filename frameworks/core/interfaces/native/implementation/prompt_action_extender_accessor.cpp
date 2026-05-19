@@ -498,7 +498,21 @@ void updatePopupCommonParamPart1(const Ark_PopupCommonOptions& src, RefPtr<Popup
     }
 }
 
-void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+template<typename T>
+void UpdateLifecycleCallback(const T& arkCallback, std::function<void(std::function<void()>&&)> setter)
+{
+    auto optCallback = GetOpt(arkCallback);
+    if (!optCallback.has_value()) {
+        return;
+    }
+
+    auto callback = [helper = CallbackHelper(*optCallback)]() {
+        helper.InvokeSync();
+    };
+    setter(std::move(callback));
+}
+
+void UpdatePopupOffset(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
 {
     auto offsetVal = src.offset.value;
     auto x = Converter::OptConvert<Dimension>(offsetVal.x);
@@ -509,28 +523,39 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
         popupOffset.SetY(y.value().ConvertToPx());
         popupParam->SetTargetOffset(popupOffset);
     }
+}
+
+void UpdatePopupSizeOptions(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
     auto widthOpt = Converter::OptConvert<CalcDimension>(src.width);
     Validator::ValidatePositive(widthOpt);
     if (widthOpt.has_value()) {
         popupParam->SetChildWidth(widthOpt.value());
     }
+
     auto arrowWidthOpt = Converter::OptConvert<CalcDimension>(src.arrowWidth);
     Validator::ValidatePositive(arrowWidthOpt);
     Validator::ValidateNonPercent(arrowWidthOpt);
     if (arrowWidthOpt.has_value()) {
         popupParam->SetArrowWidth(arrowWidthOpt.value());
     }
+
     auto arrowHeightOpt = Converter::OptConvert<CalcDimension>(src.arrowHeight);
     Validator::ValidatePositive(arrowHeightOpt);
     Validator::ValidateNonPercent(arrowHeightOpt);
     if (arrowHeightOpt.has_value()) {
         popupParam->SetArrowHeight(arrowHeightOpt.value());
     }
+
     auto radiusOpt = Converter::OptConvert<CalcDimension>(src.radius);
     Validator::ValidateNonNegative(radiusOpt);
     if (radiusOpt.has_value()) {
         popupParam->SetRadius(radiusOpt.value());
     }
+}
+
+void UpdatePopupShadowOptions(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
     auto shadowOpt = Converter::OptConvert<Shadow>(src.shadow);
     if (shadowOpt.has_value()) {
         popupParam->SetShadow(shadowOpt.value());
@@ -544,63 +569,86 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
         popupParam->SetShadow(shadow);
         popupParam->SetIsShadowStyle(true);
     }
+}
+
+void UpdatePopupBlurOptions(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
     auto popupBackgroundBlurStyleOpt = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle);
     if (popupBackgroundBlurStyleOpt.has_value()) {
         popupParam->SetBlurStyle(popupBackgroundBlurStyleOpt.value());
     } else {
         g_setPopupDefaultBlurStyle(popupParam);
     }
+}
+
+void UpdatePopupBehaviorOptions(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
     popupParam->SetFocusable(Converter::OptConvert<bool>(src.focusable).value_or(popupParam->GetFocusable()));
+
     auto popupTransitionEffectsOpt = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition);
     if (popupTransitionEffectsOpt.has_value()) {
         popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
+
     g_onWillDismissPopup(src.onWillDismiss, popupParam);
+
     popupParam->SetEnableHoverMode(Converter::OptConvert<bool>(src.enableHoverMode)
         .value_or(popupParam->EnableHoverMode()));
     popupParam->SetFollowTransformOfTarget(Converter::OptConvert<bool>(src.followTransformOfTarget)
         .value_or(popupParam->IsFollowTransformOfTarget()));
+}
 
-    // Parse lifecycle callbacks
-    auto arkOnWillAppear = GetOpt(src.onWillAppear);
-    if (arkOnWillAppear.has_value()) {
-        auto onWillAppearCallback = [arkCallback = CallbackHelper(*arkOnWillAppear)]() {
-            arkCallback.InvokeSync();
-        };
-        popupParam->SetOnWillAppear(std::move(onWillAppearCallback));
+void UpdatePopupBackgroundEffects(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
+    auto effectOptionOpt = Converter::OptConvert<EffectOption>(src.backgroundEffect);
+    if (effectOptionOpt.has_value()) {
+        popupParam->SetEffectOption(effectOptionOpt.value());
     }
 
-    auto arkOnDidAppear = GetOpt(src.onDidAppear);
-    if (arkOnDidAppear.has_value()) {
-        auto onDidAppearCallback = [arkCallback = CallbackHelper(*arkOnDidAppear)]() {
-            arkCallback.InvokeSync();
-        };
-        popupParam->SetOnDidAppear(std::move(onDidAppearCallback));
+    auto blurStyleOption = Converter::OptConvert<BlurStyleOption>(src.backgroundBlurStyleOptions);
+    if (blurStyleOption.has_value()) {
+        popupParam->SetBlurStyleOption(blurStyleOption.value());
     }
+}
 
-    auto arkOnWillDisappear = GetOpt(src.onWillDisappear);
-    if (arkOnWillDisappear.has_value()) {
-        auto onWillDisappearCallback = [arkCallback = CallbackHelper(*arkOnWillDisappear)]() {
-            arkCallback.InvokeSync();
-        };
-        popupParam->SetOnWillDisappear(std::move(onWillDisappearCallback));
-    }
+void UpdatePopupLifecycleCallbacks(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
+    UpdateLifecycleCallback(src.onWillAppear, [&popupParam](auto callback) {
+        popupParam->SetOnWillAppear(std::move(callback));
+    });
 
-    auto arkOnDidDisappear = GetOpt(src.onDidDisappear);
-    if (arkOnDidDisappear.has_value()) {
-        auto onDidDisappearCallback = [arkCallback = CallbackHelper(*arkOnDidDisappear)]() {
-            arkCallback.InvokeSync();
-        };
-        popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
-    }
+    UpdateLifecycleCallback(src.onDidAppear, [&popupParam](auto callback) {
+        popupParam->SetOnDidAppear(std::move(callback));
+    });
 
+    UpdateLifecycleCallback(src.onWillDisappear, [&popupParam](auto callback) {
+        popupParam->SetOnWillDisappear(std::move(callback));
+    });
+
+    UpdateLifecycleCallback(src.onDidDisappear, [&popupParam](auto callback) {
+        popupParam->SetOnDidDisappear(std::move(callback));
+    });
+}
+
+void UpdatePopupColorMode(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
     auto colorModeOpt = GetOpt(src.colorMode);
-    if (colorModeOpt.has_value()) {
-        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
-            popupParam->SetColorMode(false);
-        }
+    if (colorModeOpt.has_value() && colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+        popupParam->SetColorMode(false);
     }
+}
+
+void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
+    UpdatePopupOffset(src, popupParam);
+    UpdatePopupSizeOptions(src, popupParam);
+    UpdatePopupShadowOptions(src, popupParam);
+    UpdatePopupBlurOptions(src, popupParam);
+    UpdatePopupBehaviorOptions(src, popupParam);
+    UpdatePopupBackgroundEffects(src, popupParam);
+    UpdatePopupLifecycleCallbacks(src, popupParam);
+    UpdatePopupColorMode(src, popupParam);
 }
 
 void updatePopupCommonParam(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)

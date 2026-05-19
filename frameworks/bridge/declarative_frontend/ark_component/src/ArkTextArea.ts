@@ -1654,6 +1654,64 @@ class TextAreaDirectionModifier extends ModifierWithKey<TextDirection> {
   }
 }
 
+class TextAreaStrokeJoinStyleModifier extends ModifierWithKey<JoinStyle>{
+  constructor(value: JoinStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaStrokeJoinStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeJoinStyle(node);
+    }
+    else {
+      getUINativeModule().textArea.setStrokeJoinStyle(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ 
+class TextAreaShaderStyleModifier extends ModifierWithKey<{
+  center: Array<any>;
+  radius: number | string;
+  angle?: number | string;
+  direction?: GradientDirection;
+  colors: Array<[ ResourceColor, number ]>;
+  repeating?: boolean;
+  color: ResourceColor;
+}> {
+  constructor(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+    color: ResourceColor;
+  }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaShaderStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetShaderStyle(node, this.value);
+    }
+    else {
+      if (this.value.options) {
+        getUINativeModule().textArea.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+          this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+      } else {
+        getUINativeModule().textArea.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+          this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2083,6 +2141,23 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   textDirection(value: TextDirection): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaDirectionModifier.identity, TextAreaDirectionModifier, value);
+    return this;
+  }
+  strokeJoinStyle(value: JoinStyle): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaStrokeJoinStyleModifier.identity,
+      TextAreaStrokeJoinStyleModifier, value);
+    return this;
+  }
+  shaderStyle(value: {
+    center: Array<any>;
+    radius: number | string;
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+  }): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaShaderStyleModifier.identity,
+      TextAreaShaderStyleModifier, value);
     return this;
   }
 }

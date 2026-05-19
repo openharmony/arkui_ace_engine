@@ -493,6 +493,14 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (keyboardAvoidMode.has_value()) {
         popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
     }
+    auto effectOptionOpt = Converter::OptConvert<EffectOption>(src.backgroundEffect);
+    if (effectOptionOpt.has_value()) {
+        popupParam->SetEffectOption(effectOptionOpt.value());
+    }
+    auto blurStyleOption = Converter::OptConvert<BlurStyleOption>(src.backgroundBlurStyleOptions);
+    if (blurStyleOption.has_value()) {
+        popupParam->SetBlurStyleOption(blurStyleOption.value());
+    }
 
     // Parse lifecycle callbacks
     auto arkOnWillAppear = GetOpt(src.onWillAppear);
@@ -5376,16 +5384,17 @@ void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 void SetShouldRecognizerParallelWithImpl(Ark_NativePointer node,
-                                         const ShouldRecognizerParallelWithCallback* value)
+                                         const Opt_ShouldRecognizerParallelWithCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!value || !CallbackHelper(*value).IsValid()) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
         ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*value), node = weakNode](
+    auto shouldRecognizerParallelWithFunc = [callback = CallbackHelper(*optValue), node = weakNode](
         const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
     ) -> RefPtr<NG::NGGestureRecognizer> {
         PipelineContext::SetCallBackNode(node);
@@ -5625,6 +5634,14 @@ void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
             .value_or(false);
     };
     ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onEvent));
+}
+void SetDoubleSidedImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstract::SetDoubleSided(frameNode, convValue.value_or(true));
 }
 void SetExpandSafeAreaImpl(Ark_NativePointer node,
                            const Opt_Array_SafeAreaType* types,
@@ -7213,6 +7230,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
         CommonMethodModifier::SetSmartGestureShortcutImpl,
         CommonMethodModifier::SetInspectorLabelImpl,
+        CommonMethodModifier::SetDoubleSidedImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

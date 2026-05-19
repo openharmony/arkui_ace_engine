@@ -2780,7 +2780,7 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetOptions();
-    if (options.empty()) {
+    if (options.empty() || menuPattern->GetIsGridMenu()) {
         return;
     }
     auto optionConstraint = constraint;

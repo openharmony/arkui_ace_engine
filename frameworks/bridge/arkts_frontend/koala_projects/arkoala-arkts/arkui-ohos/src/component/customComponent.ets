@@ -593,6 +593,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     getName(): string {
         return transferTypeName(Class.of(this.instance).getName());
     }
+
+    getCanUpdateStateVars(): boolean {
+        return this.canUpdateStateVars_;
+    }
 }
 
 function createInstance<T extends ExtendableComponent, T_Options>(
@@ -636,7 +640,7 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
             () => createInstance<S, S_Options>(uiContext, factory, initializers), content, initializers);
     }
 }
@@ -682,7 +686,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
             () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
@@ -732,7 +736,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
             () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
@@ -786,7 +790,7 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
             }
             return undefined;
         });
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+        ArkStructBase._instantiate<CustomDelegate<S, S_Options>, S_Options>(
             () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKeyValue);
     }
 

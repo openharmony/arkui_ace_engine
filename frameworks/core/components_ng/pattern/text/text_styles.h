@@ -18,6 +18,7 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/image/drawing_color_filter.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
@@ -262,6 +263,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSizeScale, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeJoinStyle, StrokeJoinStyle);
 
     TextDecoration GetTextDecorationFirst() const
     {
@@ -381,8 +383,46 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OrphanCharOptimization, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CompressLeadingPunctuation, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PunctuationOverflow, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextContentAlign, TextContentAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDirection, TextDirection);
+    ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorShaderStyle, Color);
+ 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, TextLineStyle&)>&& updateFunc)
+    {
+        CHECK_NULL_VOID(resObj && updateFunc);
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+ 
+    size_t RemoveResource(const std::string& key)
+    {
+        return resMap_.erase(key);
+    }
+ 
+    void CopyResource(const std::unique_ptr<TextLineStyle>& source)
+    {
+        resMap_ = source->resMap_;
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+        if (propGradient && propGradient->GetGradient().has_value()) {
+            propGradient->GetGradient().value().ReloadResources();
+        }
+    }
+
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, TextLineStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
 };
 
 struct HandleInfoNG {
@@ -417,17 +457,18 @@ struct HandleInfoNG {
 PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign);
 
 ACE_FORCE_EXPORT TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false,
+    const RefPtr<Pattern>& pattern = nullptr);
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol = false);
+    TextStyle& textStyle, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
 
 ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false,
-    const std::unique_ptr<SymbolStyle>& symbolStyle = nullptr);
+    const std::unique_ptr<SymbolStyle>& symbolStyle = nullptr, const RefPtr<Pattern>& pattern = nullptr);
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false, const RefPtr<Pattern>& pattern = nullptr);
 void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme);
 
@@ -441,6 +482,7 @@ std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrateg
 std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value);
 std::unique_ptr<JsonValue> GetSymbolShadowInJson(const std::optional<SymbolShadow>& value);
 std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<SymbolGradient>>& value);
+std::string GetFontVariationsInJson(const FONT_VARIATIONS_LIST& fontVariations);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

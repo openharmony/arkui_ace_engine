@@ -1819,20 +1819,30 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
     pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
 }
 
+void TabsModelNG::SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, parameters, frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        ProcessDimensionWithResourceObj(frameNode, "smallBarWidth", parameters.smallBarWidthObject);
+        ProcessDimensionWithResourceObj(frameNode, "mediumBarWidth", parameters.mediumBarWidthObject);
+        ProcessDimensionWithResourceObj(frameNode, "largeBarWidth", parameters.largeBarWidthObject);
+        ProcessDimensionWithResourceObj(frameNode, "barSideMargin", parameters.barSideMarginObject);
+        ProcessDimensionWithResourceObj(frameNode, "barBottomMargin", parameters.barBottomMarginObject);
+        ProcessColorWithResourceObj(frameNode, "maskColor", parameters.maskColorObject);
+        ProcessDimensionWithResourceObj(frameNode, "maskHeight", parameters.maskHeightObject);
+    }
+}
+
 void TabsModelNG::SetBarFloatingStyle(const BarFloatingStyleParameters& parameters)
 {
-    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(tabsNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, parameters);
-    if (SystemProperties::ConfigChangePerform()) {
-        ProcessDimensionWithResourceObj(tabsNode, "smallBarWidth", parameters.smallBarWidthObject);
-        ProcessDimensionWithResourceObj(tabsNode, "mediumBarWidth", parameters.mediumBarWidthObject);
-        ProcessDimensionWithResourceObj(tabsNode, "largeBarWidth", parameters.largeBarWidthObject);
-        ProcessDimensionWithResourceObj(tabsNode, "barSideMargin", parameters.barSideMarginObject);
-        ProcessDimensionWithResourceObj(tabsNode, "barBottomMargin", parameters.barBottomMarginObject);
-        ProcessColorWithResourceObj(tabsNode, "maskColor", parameters.maskColorObject);
-        ProcessDimensionWithResourceObj(tabsNode, "maskHeight", parameters.maskHeightObject);
-    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarFloatingStyle(frameNode, parameters);
+}
+
+void TabsModelNG::ResetBarFloatingStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarFloatingStyle, frameNode);
 }
 
 void TabsModelNG::ResetBarFloatingStyle()

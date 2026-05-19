@@ -55,6 +55,21 @@ void WithEnvModelNG::Create()
     auto nodeId = stack->ClaimNodeId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(nodeId);
     stack->Push(withEnvNode);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetUseEnvManager(true);
+}
+
+void WithEnvModelNG::RemoveEnvProperty(const std::string& key)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<WithEnvNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    auto envManager = GetEnvironmentManager();
+    if (envManager && envManager->RemoveValue(node, EnvironmentPropertyKind::ENV, key)) {
+        return;
+    }
+    node->RemoveEnvProperty(key);
 }
 
 void WithEnvModelNG::SetEnvProperty(const std::string& key, const std::string& value)

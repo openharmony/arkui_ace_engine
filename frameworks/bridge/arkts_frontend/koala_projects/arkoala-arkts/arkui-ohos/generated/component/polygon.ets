@@ -163,6 +163,18 @@ export function PolygonImpl(
     })
 }
 
+@memo
+export function Polygon(
+    @memo @memo_skip
+    style: ((attributes: PolygonAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkPolygonComponent>((): ArkPolygonComponent => {
+        return new ArkPolygonComponent()
+    })
+    NodeAttach<ArkPolygonPeer>((): ArkPolygonPeer => ArkPolygonPeer.create(receiver), (_: ArkPolygonPeer): void => {
+        style?.(receiver)
+    })
+}
 export class PolygonOptions_serializer {
     public static write(buffer: SerializerBase, value: PolygonOptions): void {
         let valueSerializer: SerializerBase = buffer

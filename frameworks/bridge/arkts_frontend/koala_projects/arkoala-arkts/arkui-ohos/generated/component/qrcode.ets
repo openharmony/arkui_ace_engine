@@ -208,3 +208,15 @@ export function QRCodeImpl(
     })
 }
 
+@memo
+export function QRCode(
+    @memo @memo_skip
+    style: ((attributes: QRCodeAttribute) => void) | undefined,
+): void {
+    const receiver = remember<ArkQRCodeComponent>((): ArkQRCodeComponent => {
+        return new ArkQRCodeComponent()
+    })
+    NodeAttach<ArkQRCodePeer>((): ArkQRCodePeer => ArkQRCodePeer.create(receiver), (_: ArkQRCodePeer): void => {
+        style?.(receiver)
+    })
+}

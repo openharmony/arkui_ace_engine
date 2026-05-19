@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -211,6 +212,7 @@ void SearchModelNG::SetCaretWidth(const Dimension& value)
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorWidth(value);
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_CARET_WIDTH, textFrameNode);
 }
 
 void SearchModelNG::SetCaretColor(const Color& color)
@@ -274,6 +276,7 @@ void SearchModelNG::SetSearchIconSize(const Dimension& value)
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchIconSize(value);
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ICON_SIZE);
 }
 
 void SearchModelNG::SetSearchIconColor(const Color& color)
@@ -313,6 +316,7 @@ void SearchModelNG::SetSearchImageIcon(IconOptions &iconOptions)
     ACE_UPDATE_LAYOUT_PROPERTY(
         SearchLayoutProperty, SearchIconUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)));
+    ACE_CHECK_LPX_ATTRIBUTE(iconOptions.GetSize().value_or(ICON_HEIGHT), LpxAttribute::LPX_ICON_SIZE);
 }
 
 void SearchModelNG::SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
@@ -371,6 +375,8 @@ void SearchModelNG::SetCancelImageIcon(IconOptions &iconOptions)
     ACE_UPDATE_LAYOUT_PROPERTY(
         SearchLayoutProperty, CancelButtonUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)));
+    ACE_CHECK_LPX_ATTRIBUTE(
+        iconOptions.GetSize().value_or(ICON_HEIGHT), LpxAttribute::LPX_CANCEL_ICON_SIZE);
 }
 
 void SearchModelNG::SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
@@ -399,6 +405,7 @@ void SearchModelNG::SetSearchButtonFontSize(const Dimension& value)
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButtonFontSize, value);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, buttonFrameNode);
 }
 
 void SearchModelNG::SetSearchButtonFontColor(const Color& color, bool isTheme)
@@ -473,6 +480,8 @@ void SearchModelNG::SetPlaceholderFont(const Font& font)
     if (font.fontSize) {
         textFieldLayoutProperty->UpdatePlaceholderFontSize(font.fontSize.value());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        font.fontSize.value_or(Dimension()), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE, textFieldChild);
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdatePlaceholderItalicFontStyle(font.fontStyle.value());
     }
@@ -521,6 +530,7 @@ void SearchModelNG::SetTextFont(const Font& font)
     if (font.fontSize) {
         textFieldLayoutProperty->UpdateFontSize(font.fontSize.value());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(font.fontSize.value_or(Dimension()), LpxAttribute::LPX_FONT_SIZE, textFieldChild);
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdateItalicFontStyle(font.fontStyle.value());
     }
@@ -638,6 +648,7 @@ void SearchModelNG::SetTextIndent(const Dimension& value)
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateTextIndent(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_INDENT, textFieldChild);
 }
 
 void SearchModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
@@ -649,6 +660,7 @@ void SearchModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateTextIndent(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_INDENT, textFieldChild);
 }
 
 void SearchModelNG::SetTextAlign(const TextAlign& textAlign)
@@ -681,6 +693,7 @@ void SearchModelNG::SetCopyOption(const CopyOptions& copyOptions)
 void SearchModelNG::SetHeight(const Dimension& height)
 {
     NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+    ACE_CHECK_LPX_ATTRIBUTE(height, LpxAttribute::LPX_SEARCH_HEIGHT);
 }
 
 void SearchModelNG::SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit)
@@ -1471,6 +1484,8 @@ void SearchModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& font)
     if (font.fontSize) {
         textFieldLayoutProperty->UpdatePlaceholderFontSize(font.fontSize.value());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        font.fontSize.value_or(Dimension()), LpxAttribute::LPX_PLACEHOLDER_FONT_SIZE, textFieldChild);
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdatePlaceholderItalicFontStyle(font.fontStyle.value());
     }
@@ -1491,6 +1506,7 @@ void SearchModelNG::SetSearchIconSize(FrameNode* frameNode, const Dimension& val
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchIconSize(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, value, frameNode);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ICON_SIZE);
 }
 
 void SearchModelNG::SetSearchSrcPath(FrameNode* frameNode, const std::string& src)
@@ -1515,6 +1531,7 @@ void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOp
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(iconOptions.GetSize().value_or(ICON_HEIGHT), LpxAttribute::LPX_ICON_SIZE, frameNode);
 }
 
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text, bool isJsView)
@@ -1558,6 +1575,7 @@ void SearchModelNG::SetSearchButtonFontSize(FrameNode* frameNode, const Dimensio
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButtonFontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, buttonFrameNode);
 }
 
 void SearchModelNG::SetSearchButtonFontColor(FrameNode* frameNode, const Color& color, bool isTheme)
@@ -1638,6 +1656,7 @@ void SearchModelNG::SetTextFont(FrameNode* frameNode, const Font& font)
     if (font.fontSize) {
         textFieldLayoutProperty->UpdateFontSize(font.fontSize.value());
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(font.fontSize.value_or(Dimension()), LpxAttribute::LPX_FONT_SIZE, textFieldChild);
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdateItalicFontStyle(font.fontStyle.value());
     }
@@ -1714,6 +1733,7 @@ void SearchModelNG::SetCaretWidth(FrameNode* frameNode, const Dimension& value)
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorWidth(value);
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_CARET_WIDTH, textFrameNode);
 }
 
 void SearchModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
@@ -1794,6 +1814,8 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, IconOptions &iconOp
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
+    ACE_CHECK_LPX_ATTRIBUTE(
+        iconOptions.GetSize().value_or(ICON_HEIGHT), LpxAttribute::LPX_CANCEL_ICON_SIZE);
 }
 
 void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value)
@@ -1812,6 +1834,7 @@ void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction 
 void SearchModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
 {
     NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(height, LpxAttribute::LPX_SEARCH_HEIGHT, frameNode);
 }
 
 void SearchModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
@@ -1840,6 +1863,7 @@ void SearchModelNG::SetLetterSpacing(const Dimension& value)
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateLetterSpacing(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LETTER_SPACING, textFieldChild);
 }
 
 void SearchModelNG::SetDividerColor(const Color& color)
@@ -1895,6 +1919,7 @@ void SearchModelNG::SetAdaptMinFontSize(const Dimension& value)
     textFieldLayoutProperty->UpdateAdaptMinFontSize(value);
     textFieldLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, textFieldChild);
 }
 
 void SearchModelNG::SetAdaptMaxFontSize(const Dimension& value)
@@ -1908,6 +1933,7 @@ void SearchModelNG::SetAdaptMaxFontSize(const Dimension& value)
     textFieldLayoutProperty->UpdateAdaptMaxFontSize(value);
     textFieldLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, textFieldChild);
 }
 
 void SearchModelNG::SetMinFontScale(const float value)
@@ -1966,6 +1992,7 @@ void SearchModelNG::SetLineHeight(const Dimension& value)
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateLineHeight(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_HEIGHT, textFieldChild);
 }
 
 void SearchModelNG::SetHalfLeading(bool value)
@@ -1990,6 +2017,7 @@ void SearchModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& v
     textFieldLayoutProperty->UpdateAdaptMinFontSize(value);
     textFieldLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, textFieldChild);
 }
 
 void SearchModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
@@ -2002,6 +2030,7 @@ void SearchModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& v
     textFieldLayoutProperty->UpdateAdaptMaxFontSize(value);
     textFieldLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, textFieldChild);
 }
 
 void SearchModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
@@ -2013,6 +2042,7 @@ void SearchModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& valu
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateLetterSpacing(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LETTER_SPACING, textFieldChild);
 }
 void SearchModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
@@ -2023,6 +2053,7 @@ void SearchModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateLineHeight(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_HEIGHT, textFieldChild);
 }
 
 void SearchModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
@@ -2637,6 +2668,7 @@ void SearchModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearan
 void SearchModelNG::SetStrokeWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeWidth, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STROKE_WIDTH);
 }
 
 Dimension SearchModelNG::GetStrokeWidth(FrameNode* frameNode)
@@ -2666,6 +2698,7 @@ void SearchModelNG::ResetStrokeColor()
 void SearchModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeWidth, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void SearchModelNG::SetStrokeColor(FrameNode* frameNode, const Color& value)
@@ -2704,6 +2737,150 @@ bool SearchModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextFieldLayoutProperty, EnableAutoSpacing, value, textFieldChild, value);
     return value;
+}
+
+void SearchModelNG::SetStrokeJoinStyle(StrokeJoinStyle style)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeJoinStyle, style, textFieldChild);
+}
+ 
+void SearchModelNG::SetStrokeJoinStyle(FrameNode* frameNode, StrokeJoinStyle style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeJoinStyle, style, textFieldChild);
+}
+ 
+void SearchModelNG::RemoveResObj(FrameNode* frameNode, const std::string& key)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ViewAbstractModelNG::RemoveResObj(frameNode, key);
+}
+ 
+void SearchModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+ 
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+ 
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UINODE_TRACE(textFieldChild);
+ 
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<SearchPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(AceType::RawPtr(textFieldChild))]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        pattern->AddResObj("TextFieldGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradient, textFieldChild);
+}
+ 
+void SearchModelNG::SetColorShaderStyle(const Color& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, value, textFieldChild);
+}
+ 
+void SearchModelNG::ResetGradientShaderStyle()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF,
+        textFieldChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF,
+        textFieldChild);
+    auto layoutProperty = textFieldChild->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
+}
+ 
+void SearchModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_UINODE_TRACE(textFieldChild);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<SearchPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [gradient, weak = AceType::WeakClaim(AceType::RawPtr(textFieldChild))]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            Gradient& gradientValue = const_cast<Gradient &>(gradient);
+            gradientValue.ReloadResources();
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, frameNode);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradientValue, frameNode);
+        };
+        pattern->AddResObj("TextFieldGradient.gradient", resObj, std::move(updateFunc));
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, gradient, textFieldChild);
+}
+ 
+void SearchModelNG::SetColorShaderStyle(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, GradientShaderStyle, textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ColorShaderStyle, value, textFieldChild);
+}
+ 
+ 
+void SearchModelNG::ResetSearchGradient(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF,
+        textFieldChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF,
+        textFieldChild);
+    auto layoutProperty = textFieldChild->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void SearchModelNG::SetCompressLeadingPunctuation(bool enabled)

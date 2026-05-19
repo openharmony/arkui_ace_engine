@@ -71,6 +71,7 @@ const char PAGE_NODE_TAG[] = "page";
 const char CHILD_NODE_TAG[] = "child";
 const char FREE_NODE_TAG[] = "free_node";
 const char MAIN_TREE_NODE_TAG[] = "main_tree_node";
+constexpr int32_t EMPTY_OTHER_CONTENTS_SIZE = 0;
 
 class InspectorTestNode : public UINode {
     DECLARE_ACE_TYPE(InspectorTestNode, UINode);
@@ -936,6 +937,50 @@ HWTEST_F(InspectorTestNg, InspectorTestNg033, TestSize.Level1)
 
     EXPECT_TRUE(foundFreeNode);
     EXPECT_FALSE(foundMainTreeNode);
+    context->stageManager_ = nullptr;
+    context->rootNode_ = nullptr;
+}
+
+/**
+ * @tc.name: InspectorTestNg034
+ * @tc.desc: Test that querying subtree with free nodes enabled still returns empty other_contents.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg034, TestSize.Level1)
+{
+    ElementRegister::GetInstance()->Clear();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    auto targetNode = FrameNode::CreateFrameNode(
+        CHILD_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    std::string id = "query_target_node";
+    targetNode->UpdateInspectorId(id);
+    stageNode->AddChild(pageNode);
+    pageNode->AddChild(targetNode);
+
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    context->rootNode_ = stageNode;
+
+    bool needThrow = false;
+    InspectorFilter filter;
+    filter.SetFilterID(id);
+    filter.EnableFreeNodes();
+    auto result = Inspector::GetInspector(true, filter, needThrow);
+
+    EXPECT_FALSE(needThrow);
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+    EXPECT_TRUE(jsonValue->Contains(INSPECTOR_OTHER_CONTENTS));
+    auto otherContents = jsonValue->GetValue(INSPECTOR_OTHER_CONTENTS);
+    ASSERT_NE(otherContents, nullptr);
+    EXPECT_TRUE(otherContents->IsArray());
+    EXPECT_EQ(otherContents->GetArraySize(), EMPTY_OTHER_CONTENTS_SIZE);
+
     context->stageManager_ = nullptr;
     context->rootNode_ = nullptr;
 }

@@ -21,6 +21,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -39,18 +40,21 @@ constexpr int32_t TWENTY = 20;
 
 uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
 {
-    double minTextSizeHeight = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    double minTextSizeHeight = textStyle.GetAdaptMinFontSize().ConvertToPxDistributeWithEnv(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     if (LessOrEqual(minTextSizeHeight, 0.0)) {
-        minTextSizeHeight = textStyle.GetFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        minTextSizeHeight = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
     double lineHeight = minTextSizeHeight;
     if (textStyle.HasHeightOverride()) {
         lineHeight = textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT
                             ? textStyle.GetLineHeight().ConvertToPxWithSize(contentConstraint.maxSize.Height())
-                            : textStyle.GetLineHeight().ConvertToPxDistribute(
-                                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+                            : textStyle.GetLineHeight().ConvertToPxDistributeWithEnv(
+                                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                                textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
     // plus extraLine to ensure maxlines -1 is the next maxline to try for layout
     uint32_t maxLines = contentConstraint.maxSize.Height() / (lineHeight) + 1;
@@ -136,8 +140,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         }
     }
     UpdateRelayoutShaderStyle(layoutWrapper);
-    baselineOffset_ = textStyle_.GetBaselineOffset().ConvertToPxDistribute(
-        textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(), textStyle_.IsAllowScale());
+    baselineOffset_ = textStyle_.GetBaselineOffset().ConvertToPxDistributeWithEnv(
+        textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(),
+        textStyle_.IsAllowScale(), textStyle_.GetEnvFontScale());
     if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width()) ||
         IsParentSizeNearZero(contentConstraint, layoutWrapper)) {
         return SizeF {};
@@ -168,8 +173,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (host->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or(u"").empty() &&
         NonPositive(longestLine)) {
         ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]", heightFinal, maxWidth,
-            textStyle_.GetFontSize().ConvertToPxDistribute(
-                textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(), textStyle_.IsAllowScale()));
+            textStyle_.GetFontSize().ConvertToPxDistributeWithEnv(
+                textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(),
+                textStyle_.IsAllowScale(), textStyle_.GetEnvFontScale()));
         return SizeF {};
     }
     return SizeF(maxWidth, heightFinal);
@@ -183,49 +189,8 @@ void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(pattern);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph()) {
+    if (!pattern->GetExternalParagraph()) {
         RelayoutShaderStyle(textLayoutProperty);
-    }
-}
-
-void TextLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty)
-{
-    CHECK_NULL_VOID(paragraphManager_);
-    auto paragraphs = paragraphManager_->GetParagraphs();
-    if (spans_.empty()) {
-        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
-            auto paragraph = pIter->paragraph;
-            if (!paragraph) {
-                continue;
-            }
-            auto textStyle = textStyle_;
-            textStyle.SetForeGroundBrushBitMap();
-            paragraph->ReLayoutForeground(textStyle);
-        }
-        return;
-    }
-    if (!spans_.empty()) {
-        size_t itemIndex = -1;
-        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
-            ++itemIndex;
-            auto paragraph = pIter->paragraph;
-            if (!paragraph) {
-                continue;
-            }
-            if (itemIndex >= spans_.size()) {
-                return;
-            }
-            auto spans = spans_[itemIndex];
-            TextStyle textStyle;
-            if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
-                spans.front()->GetTextStyle()->GetGradient().has_value()) {
-                textStyle = spans.front()->GetTextStyle().value();
-            } else {
-                textStyle = textStyle_;
-            }
-            textStyle.SetForeGroundBrushBitMap();
-            paragraph->ReLayoutForeground(textStyle);
-        }
     }
 }
 
@@ -396,8 +361,9 @@ bool TextLayoutAlgorithm::CreateParagraph(
         }
     }
     if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
-        paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     }
     paraStyle.leadingMarginAlign = Alignment::CENTER;
     paraStyle.textStyleUid = frameNode->GetId();
@@ -487,8 +453,9 @@ bool TextLayoutAlgorithm::ReLayoutParagraphs(
         textStyles.emplace_back(tempTextStyle);
         parStyle = ParagraphUtil::GetParagraphStyle(textStyle);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            parStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            parStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistributeWithEnv(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+                textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
         }
     }
     auto frameNode = layoutWrapper->GetHostNode();
@@ -615,8 +582,8 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyl
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
-    double stepSize = step.ConvertToPxDistribute(textStyle.GetMinFontScale(),
-        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    double stepSize = step.ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
     if (NearEqual(stepSize, 0.0)) {
         return {false, 0.0};
     }
@@ -927,7 +894,8 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     auto height = static_cast<float>(paragraph->GetHeight());
     baselineOffset_ = static_cast<float>(
         layoutProperty->GetBaselineOffsetValue(Dimension())
-            .ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()));
+            .ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
+            textStyle.IsAllowScale(), textStyle.GetEnvFontScale()));
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset_)), contentConstraint.maxSize.Height());
 

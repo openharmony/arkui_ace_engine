@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/draw_delegate.h"
 #include "core/components_ng/pattern/model/model_pattern.h"
 
 #include "core/common/window.h"
