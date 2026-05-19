@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/container_reader/container_reader_layout_property.h"
 #include "core/components_ng/pattern/container_reader/container_reader_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::NG {
 
