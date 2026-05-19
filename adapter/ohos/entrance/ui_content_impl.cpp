@@ -68,6 +68,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/container_window_manager.h"
 
@@ -2939,6 +2940,10 @@ void UIContentImpl::Foreground()
     if (!isDynamicRender_) {
         ContainerScope::UpdateRecentForeground(instanceId_);
     }
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Unregister instanceId for pre-freeze flush. Exclude form/dc (dynamic render) instances.
+        PostPreFreezeRegisterTask(false);
+    }
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2957,11 +2962,41 @@ void UIContentImpl::Background()
     LOGI("[%{public}s][%{public}s][%{public}d]: window background", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
     PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsEnd();
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Register instanceId from pre-freeze flush when app goes to background.
+        PostPreFreezeRegisterTask(true);
+    }
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
+}
+
+// Posts a task to UI thread to register/unregister the instance for pre-freeze flush.
+// Uses ContainerScope to ensure correct engine context and WillRunOnCurrentThread optimization.
+void UIContentImpl::PostPreFreezeRegisterTask(bool needRegister)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto task = [instanceId = instanceId_, needRegister]() {
+        ContainerScope scope(instanceId);
+        if (needRegister) {
+            DetachedRsNodeManager::GetInstance().RegisterPreFreezeInstance(instanceId);
+        } else {
+            DetachedRsNodeManager::GetInstance().UnregisterPreFreezeInstance(instanceId);
+        }
+    };
+
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        task();
+    } else {
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI,
+            needRegister ? "RegisterPreFreeze" : "UnregisterPreFreeze");
+    }
 }
 
 void UIContentImpl::ReloadForm(const std::string& url)
@@ -3029,6 +3064,10 @@ void UIContentImpl::Destroy()
     LOGI("[%{public}s][%{public}s][%{public}d]: window destroy", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    if (!isFormRender_ && !isDynamicRender_) {
+        // Unregister instanceId for pre-freeze flush.
+        PostPreFreezeRegisterTask(false);
+    }
     // stop performance check and output json file
     AcePerformanceCheck::Stop();
     if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
