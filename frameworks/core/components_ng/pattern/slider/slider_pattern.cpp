@@ -3675,7 +3675,7 @@ void SliderPattern::UpdateSelectedTrackFrameNode()
     ViewAbstract::SetLightIlluminated(AceType::RawPtr(selectedTrackFrameNode_), 3u);
     ViewAbstract::SetIlluminatedBorderWidth(AceType::RawPtr(selectedTrackFrameNode_), Dimension(1, DimensionUnit::PX));
     
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    selectedTrackFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SliderPattern::UpdateParticleFrameNode()
@@ -3751,8 +3751,6 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
     
     UpdateSelectedTrackFrameNode();
     UpdateParticleFrameNode();
-    
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void SliderPattern::RegisterMaterialNodePositionCallback()
@@ -4173,6 +4171,7 @@ void SliderPattern::HandleHighGradeLongPress()
             }
         },
         nullptr, host->GetContextRefPtr());
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void SliderPattern::HandleMiddleGradeLongPress()
@@ -4215,6 +4214,7 @@ void SliderPattern::HandleMiddleGradeLongPress()
             }
         },
         nullptr, host->GetContextRefPtr());
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void SliderPattern::HandleLowGradeLongPress()
