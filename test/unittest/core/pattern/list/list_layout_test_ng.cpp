@@ -755,6 +755,52 @@ HWTEST_F(ListLayoutTestNg, ContentOffsetStackFromEnd001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContentOffsetStackFromEnd002
+ * @tc.desc: Test ListItemGroup sticky header/footer position when List sets stackFromEnd and content offsets.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ContentOffsetStackFromEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create stackFromEnd List with ListItemGroup and content offsets.
+     */
+    const int32_t groupNumber = 5;
+    const int32_t groupIndex = groupNumber - 2;
+    const int32_t footerIndex = GROUP_ITEM_NUMBER + 1;
+    const float contentStartOffset = 40.0f;
+    const float contentEndOffset = 50.0f;
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    model.SetSticky(V2::StickyStyle::BOTH);
+    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. jump to the first item in a non-tail group.
+     * @tc.expected: sticky header position is affected by contentStartOffset, not contentEndOffset.
+     */
+    JumpToItemInGroup(groupIndex, 0, false, ScrollAlign::START);
+    auto group = GetChildFrameNode(frameNode_, groupIndex);
+    ASSERT_NE(group, nullptr);
+    auto groupPos = group->GetGeometryNode()->GetFrameRect().Top();
+    auto headerRect = GetChildRect(group, 0);
+    EXPECT_EQ(headerRect.Top() + groupPos, contentStartOffset);
+
+    /**
+     * @tc.steps: step3. jump to the last item in the same group.
+     * @tc.expected: sticky footer position is affected by contentEndOffset, not contentStartOffset.
+     */
+    JumpToItemInGroup(groupIndex, GROUP_ITEM_NUMBER - 1, false, ScrollAlign::END);
+    group = GetChildFrameNode(frameNode_, groupIndex);
+    ASSERT_NE(group, nullptr);
+    groupPos = group->GetGeometryNode()->GetFrameRect().Top();
+    auto footerRect = GetChildRect(group, footerIndex);
+    EXPECT_EQ(footerRect.Bottom() + groupPos, HEIGHT - contentEndOffset);
+}
+
+/**
  * @tc.name: ContentOffset006
  * @tc.desc: Test top content offset and bottom end offset
  * @tc.type: FUNC
