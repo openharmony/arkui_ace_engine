@@ -293,6 +293,7 @@ const GENERATED_ArkUILayoutableAccessor* GetLayoutableAccessor();
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
 const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor();
+const GENERATED_ArkUILazyColumnLayoutExtenderAccessor* GetLazyColumnLayoutExtenderAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor* GetLazyWaterFlowLayoutExtenderAccessor();
 const GENERATED_ArkUILeadingMarginSpanAccessor* GetLeadingMarginSpanAccessor();
@@ -645,6 +646,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLayoutManagerAccessor,
         GetLayoutPolicyAccessor,
         GetLazyBuildAccessor,
+        GetLazyColumnLayoutExtenderAccessor,
         GetLazyForEachOpsAccessor,
         GetLazyWaterFlowLayoutExtenderAccessor,
         GetLeadingMarginSpanAccessor,

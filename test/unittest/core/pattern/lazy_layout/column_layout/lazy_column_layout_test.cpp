@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -172,6 +173,12 @@ void LazyColumnLayoutTest::CreateWaterFlow(WaterFlowLayoutMode mode)
     model.SetLayoutMode(mode);
     scrollableFrameNode_ = GetMainFrameNode();
     scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
+}
+
+void LazyColumnLayoutTest::CreateFlowItem()
+{
+    WaterFlowItemModelNG itemModel;
+    itemModel.Create();
 }
 
 void LazyColumnLayoutTest::CreateList()
@@ -1002,6 +1009,45 @@ HWTEST_F(LazyColumnLayoutTest, LazyColumnInScrollWithScrollDirection001, TestSiz
 }
 
 /**
+ * @tc.name: LazyColumnInScrollWithInitialOffset001
+ * @tc.desc: Verify Scroll with initialOffset affects LazyColumnLayout startIndex/endIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, LazyColumnInScrollWithInitialOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll with initialOffset and LazyColumnLayout
+     * @tc.expected: LazyColumnLayout starts from offset position with correct indexes
+     */
+    CreateScroll();
+    ScrollModelNG::SetInitialOffset(
+        AceType::RawPtr(scrollableFrameNode_),
+        OffsetT<CalcDimension>(CalcDimension(0), CalcDimension(200)));
+    CreateLazyColumnLayout();
+    CreateContent(10);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 1);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 6);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 8);
+
+    /**
+     * @tc.steps: step2. Scroll down further
+     * @tc.expected: start and end index updated correctly
+     */
+    EXPECT_NE(scrollablePattern_, nullptr);
+    scrollablePattern_->UpdateCurrentOffset(-200, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 8);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedStartIndex_, 1);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 9);
+}
+
+/**
  * @tc.name: LazyColumnInList001
  * @tc.desc: Verify List with LazyColumnLayout startIndex/endIndex and cached range
  * @tc.type: FUNC
@@ -1569,4 +1615,74 @@ HWTEST_F(LazyColumnLayoutTest, RepeatVirtualScrollTest001, TestSize.Level1)
     EXPECT_EQ(repeat->prevActiveRangeStart_, 0);
     EXPECT_EQ(repeat->prevActiveRangeEnd_, 8);
 }
+
+/**
+ * @tc.name: LazyColumnInFlowItem001
+ * @tc.desc: Verify LazyColumnLayout inside WaterFlow FlowItem works with lazy loading
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, LazyColumnInFlowItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with 4 FlowItems, each containing LazyColumnLayout
+     *           with 5 child items. This tests the nested scenario where LazyColumnLayout
+     *           acts as the content of WaterFlow FlowItems.
+     * @tc.expected: WaterFlow created with 4 FlowItems, each containing a LazyColumnLayout child
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::TOP_DOWN);
+    for (int32_t i = 0; i < 4; i++) {
+        CreateFlowItem();
+        CreateLazyColumnLayout();
+        CreateContent(5);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
+
+    EXPECT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_GE(scrollableFrameNode_->GetChildren().size(), 1u);
+
+    /**
+     * @tc.steps: step2. Check first FlowItem's LazyColumnLayout visible range.
+     *           Verify that only the first FlowItem is laid out with all 5 items visible.
+     * @tc.expected: First LazyColumnLayout visible range is [0, 4]
+     */
+    auto flowItem0 = GetChildFrameNode(scrollableFrameNode_, 0);
+    ASSERT_NE(flowItem0, nullptr);
+    auto lazyColumn0 = GetChildFrameNode(flowItem0, 0);
+    ASSERT_NE(lazyColumn0, nullptr);
+    auto pattern0 = lazyColumn0->GetPattern<LazyColumnLayoutPattern>();
+    ASSERT_NE(pattern0, nullptr);
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 4);
+
+    /**
+     * @tc.steps: step3. Scroll WaterFlow down by 200px to reveal the second FlowItem.
+     *           The first LazyColumnLayout loses its first item from viewport,
+     *           the second LazyColumnLayout becomes partially visible.
+     * @tc.expected: First LazyColumnLayout visible range shifts to [1, 4],
+     *               second LazyColumnLayout visible range is [0, 1].
+     *               After idle task, cache coverage extends:
+     *               first [0, 4], second [0, 3].
+     */
+    scrollablePattern_->UpdateCurrentOffset(-200, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    auto flowItem1 = GetChildFrameNode(scrollableFrameNode_, 1);
+    ASSERT_NE(flowItem1, nullptr);
+    auto lazyColumn1 = GetChildFrameNode(flowItem1, 0);
+    ASSERT_NE(lazyColumn1, nullptr);
+    auto pattern1 = lazyColumn1->GetPattern<LazyColumnLayoutPattern>();
+    ASSERT_NE(pattern1, nullptr);
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 1);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 4);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 1);
+    FlushIdleTask(pattern0);
+    FlushIdleTask(pattern1);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedStartIndex_, 0);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedEndIndex_, 4);
+    EXPECT_EQ(pattern1->layoutInfo_->cachedStartIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->cachedEndIndex_, 3);
+}
+
 } // namespace OHOS::Ace::NG

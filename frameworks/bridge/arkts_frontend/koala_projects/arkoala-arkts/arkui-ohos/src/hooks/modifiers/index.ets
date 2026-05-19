@@ -93,6 +93,8 @@ import { BaseSpan } from "./../../component/span"
 import { ImageSpanModifier } from "./../../ImageSpanModifier"
 import { ArkLazyVGridLayoutComponent, LazyVGridLayoutAttribute, LazyGridLayoutAttribute } from "./../../component/lazyGridLayout"
 import { LazyVGridLayoutModifier } from "./../../LazyVGridLayoutModifier"
+import { ArkLazyColumnLayoutComponent, LazyColumnLayoutAttribute } from "@ohos.arkui.components.ArkLazyColumnLayout"
+import { LazyColumnLayoutModifier } from "./../../LazyColumnLayoutModifier"
 import { ArkLazyWaterFlowLayoutAttributeComponent, ArkLazyVWaterFlowLayoutComponent, LazyWaterFlowLayoutAttribute, LazyVWaterFlowLayoutAttribute } from '@ohos.arkui.components.ArkLazyWaterFlowLayout'
 import { LazyVWaterFlowLayoutModifier } from './../../LazyVWaterFlowLayoutModifier'
 import { ArkIndicatorComponentComponent, IndicatorComponentAttribute } from "./../../component/indicatorcomponent"
@@ -2690,6 +2692,38 @@ export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayo
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<LazyVGridLayoutAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookLazyColumnLayoutAttributeModifier(component: ArkLazyColumnLayoutComponent,
+    modifier: AttributeModifier<LazyColumnLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return
+    }
+    const isCommonModifier: boolean = modifier instanceof CommonModifier
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>)
+        return
+    }
+    const attributeSet = (): LazyColumnLayoutModifier => {
+        const isLazyColumnLayoutModifier: boolean = modifier instanceof LazyColumnLayoutModifier
+        const initModifier = component.getPeer().lazyColumnLayoutAttributeSet ?
+            component.getPeer().lazyColumnLayoutAttributeSet! : new LazyColumnLayoutModifier()
+        if (isLazyColumnLayoutModifier) {
+            const lazyColumnLayoutModifier = modifier as object as LazyColumnLayoutModifier
+            initModifier.mergeModifier(lazyColumnLayoutModifier)
+        }
+        component.getPeer().lazyColumnLayoutAttributeSet = initModifier
+        return initModifier
+    }
+    const constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    }
+    const updaterReceiver = (): ArkLazyColumnLayoutComponent => {
+        const componentNew: ArkLazyColumnLayoutComponent = new ArkLazyColumnLayoutComponent()
+        componentNew.setPeer(component.getPeer())
+        return componentNew
+    }
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<LazyColumnLayoutAttribute>,
+        attributeSet, constructParam, updaterReceiver, component.getPeer())
 }
 
 export function hookLazyWaterFlowLayoutAttributeAttributeModifier(component: ArkLazyWaterFlowLayoutAttributeComponent,

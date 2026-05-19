@@ -3262,6 +3262,7 @@ frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkweb-committer-group
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.ArcList.ets @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.ArcScrollBar.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.components.ArkLazyColumnLayout.ets @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.UIContext.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @ArkUI_Event
@@ -3524,6 +3525,7 @@ frameworks/core/interfaces/native/implementation/grid_item_ops_accessor.cpp @ark
 frameworks/core/interfaces/native/implementation/grid_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/lazy_grid_layout_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/lazyv_grid_layout_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/lazy_column_layout_extender_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_group_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_swipe_action_manager_accessor.cpp @arkuiscroll
@@ -3967,6 +3969,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generat
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/flowItem.ets @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/list/ @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/water_flow/ @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/LazyColumnLayoutModifier.ets @arkuiscroll
 
 [Claude]
 .claude/ @arkui_architecture

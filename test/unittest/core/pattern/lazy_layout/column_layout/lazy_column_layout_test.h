@@ -57,6 +57,7 @@ public:
         const CalcLength& height = CalcLength(ITEM_HEIGHT));
     void CreateScroll();
     void CreateWaterFlow(WaterFlowLayoutMode mode = WaterFlowLayoutMode::TOP_DOWN);
+    void CreateFlowItem();
     void CreateList();
     void CreateListItems();
     void CreateListWithLazyColumnLayout(int32_t initialIndex = 0, bool stackFromEnd = false);
