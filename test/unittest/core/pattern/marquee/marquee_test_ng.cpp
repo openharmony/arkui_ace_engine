@@ -1619,13 +1619,13 @@ HWTEST_F(MarqueeTestNg, MarqueeTest023, TestSize.Level1)
     marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::DEFAULT);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::DEFAULT);
     pattern->StartMarqueeAnimation();
-    auto offset = pattern->GetTextOffset();
+    auto offset = pattern->GetTextOffset(true);
     EXPECT_EQ(offset, 0.0f);
     pattern->StopMarqueeAnimation(false);
     marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     pattern->StartMarqueeAnimation();
-    offset = pattern->GetTextOffset();
+    offset = pattern->GetTextOffset(true);
     EXPECT_EQ(offset, 0.0f);
 }
 
@@ -2315,9 +2315,9 @@ HWTEST_F(MarqueeTestNg, MarqueeTest028, TestSize.Level1)
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     pattern->StartMarqueeAnimation();
     float offset = 0.0f;
-    offset = pattern->GetTextOffsetOnly();
+    offset = pattern->GetTextOffset(false);
     EXPECT_EQ(offset, 0.0f);
-    offset = pattern->GetTextOffset();
+    offset = pattern->GetTextOffset(true);
     EXPECT_EQ(offset, 0.0f);
 }
 } // namespace OHOS::Ace::NG

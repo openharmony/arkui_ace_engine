@@ -159,8 +159,7 @@ private:
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
-    float GetTextOffset();
-    float GetTextOffsetOnly();
+    float GetTextOffset(bool needResetOffset = false);
     std::pair<float, float> GetDoubleTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
