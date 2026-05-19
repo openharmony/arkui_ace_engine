@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
 build_component_ng("lazy_column_layout_pattern_ng") {
   sources = [
