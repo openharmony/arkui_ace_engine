@@ -3460,8 +3460,8 @@ bool MenuPattern::UpdateMenuBackBlurStyle(bool userSetBgColor)
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(wrapperPattern, false);
     auto menuParams = wrapperPattern->GetMenuParam();
- 
-    if (renderContext->IsUniRenderEnabled() && (!renderContext->HasBackgroundColor() || !userSetBgColor)) {
+    if (renderContext->IsUniRenderEnabled() && (!renderContext->HasBackgroundColor() || !userSetBgColor) &&
+        (!MaterialUtils::IsEnableMaterialParam(menuParams.systemMaterial))) {
         BlurStyleOption styleOption;
         MenuView::UpdateStyleOptionColorMode(host->GetLocalColorMode(), styleOption, isColorModeFollowTarget_);
         if (!MaterialUtils::IsMaterialDisabled()) {
@@ -3473,6 +3473,9 @@ bool MenuPattern::UpdateMenuBackBlurStyle(bool userSetBgColor)
         } else {
             styleOption.blurStyle = static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle());
             renderContext->UpdateBackgroundColor(menuParams.backgroundColor.value_or(Color::TRANSPARENT));
+        }
+        if (IsSelectOverlayRightClickMenu() || IsExtensionInnerMenu() || IsSelectOverlayExtensionMenu()) {
+            styleOption.blurStyle = BlurStyle::NO_MATERIAL;
         }
         renderContext->UpdateBackBlurStyle(menuParams.blurStyleOption.value_or(styleOption));
     }

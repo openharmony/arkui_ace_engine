@@ -1829,6 +1829,10 @@ RefPtr<FrameNode> GetRightClickMenuWrapper(std::vector<OptionParam>& params,
     auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto innerMenuNode = CreateInnerMenuWithItems(params, targetNodeId, true, false, themeScopeId);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
+    auto innerMenuNodePattern = AceType::DynamicCast<MenuPattern>(innerMenuNode->GetPattern());
+    if (innerMenuNodePattern) {
+        innerMenuNodePattern->SetExtensionInnerMenu(true);
+    }
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     CHECK_NULL_RETURN(menuViewModifier, nullptr);
     menuWrapper = menuViewModifier->createWithCustomNode(innerMenuNode, targetNodeId, "SelectOverlayMenuByRightClick",
@@ -2692,7 +2696,10 @@ RefPtr<FrameNode> SelectOverlayNode::GetExtensionMenuOutterrMenu(std::vector<Opt
     auto themeScopeId = caller ? caller->GetThemeScopeId() : GetThemeScopeId();
     auto innerMenuNode = CreateInnerMenuWithItems(params, nodeId, false, false, themeScopeId);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
-
+    auto innerMenuNodePattern = AceType::DynamicCast<MenuPattern>(innerMenuNode->GetPattern());
+    if (innerMenuNodePattern) {
+        innerMenuNodePattern->SetExtensionInnerMenu(true);
+    }
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_RETURN(menuModifier, nullptr);
     menuModifier->setWidth(innerMenuNode.GetRawPtr(), EXTENSION_MENU_DEFAULT_WIDTH);

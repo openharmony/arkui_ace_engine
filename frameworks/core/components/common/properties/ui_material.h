@@ -108,9 +108,9 @@ public:
     static bool IsEnableMaterialParam(const RefPtr<UiMaterial>& material);
     static const UiMaterial* PreProcessMaterial(const UiMaterial* material);
     static std::shared_ptr<Rosen::Filter> CreateRosenFilter(const ImmersiveMaterialConfig& params);
+    static ColorMode GetNodeColorMode(const RefPtr<NG::FrameNode>& node);
 
 private:
-    static ColorMode GetNodeColorMode(const RefPtr<NG::FrameNode>& node);
     static bool ValidColorInvert(const std::shared_ptr<ImmersiveOptions>& options, UiMaterialLevel systemLevel,
         UiMaterialTransparency systemTransparency);
     static MaterialState ParseMaterialState(const std::string& value);

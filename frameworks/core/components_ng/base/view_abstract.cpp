@@ -6027,18 +6027,16 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        auto pipeline = frameNode->GetContextWithCheck();
-        CHECK_NULL_VOID(pipeline);
         if (materialType == MaterialType::IMMERSIVE) {
             SetImmersiveOptions(frameNode, immersiveOptionsPtr);
             return;
         }
-        auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+        auto materialTheme = frameNode->GetTheme<UiMaterialTheme>(true);
         if (!materialTheme) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
             return;
         }
-        auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
+        auto params = materialTheme->GetUiMaterialParam(materialType, frameNode);
         if (!params) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
             return;
