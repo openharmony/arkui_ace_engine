@@ -30,6 +30,8 @@ npm_run_op("npm_build_ark_component") {
 
     # Source files
     "src/ArkLog.ts",
+    "src/ArkComponent.ts",
+    "src/arkComponent.js",
 
     # Type definition files
     "types/ace_console.native.d.ts",
