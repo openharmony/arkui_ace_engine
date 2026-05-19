@@ -720,11 +720,8 @@ void MenuManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, c
         overlayManager->FocusOverlayNode(menu);
     }
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    menuWrapperPattern->CallMenuAppearCallback();
-    menuWrapperPattern->CallMenuOnDidAppearCallback();
-    if (!menuWrapperPattern->IsHide()) {
-        menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
-    }
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
     overlayManager->ContentChangeReport(menu, true);
 }
 
@@ -750,12 +747,11 @@ void MenuManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu,
     CHECK_NULL_VOID(overlayManager);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    // delay until end of target hoverScale for interruption
-    if (!wrapperPattern->GetHoverScaleInterruption()) {
-        wrapperPattern->CallMenuAboutToAppearCallback();
-    }
 
-    wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
+    MenuStatus initialStatus = wrapperPattern->GetHoverScaleInterruption()
+        ? MenuStatus::ON_HOVER_SCALE
+        : MenuStatus::ON_SHOW_ANIMATION;
+    wrapperPattern->SetMenuStatus(initialStatus);
     SetIsMenuShow(true, menu);
     PublishMenuStatus(true, menu);
     overlayManager->ResetContextMenuDragHideFinished();
@@ -886,11 +882,6 @@ void MenuManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, co
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (MenuView::GetMenuHoverScaleStatus(menuWrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT &&
-        menuWrapperPattern->GetMenuStatus() != MenuStatus::HIDE) {
-        menuWrapperPattern->CallMenuDisappearCallback();
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    }
     HandleMenuDisappearCallback(menu);
     // clear contextMenu then return
     auto pipeline = GetPipelineContext();
@@ -986,12 +977,6 @@ void MenuManager::PopMenuAnimation(const RefPtr<FrameNode>& menu,
     auto eventHub = menuNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabledInternal(false);
-
-    if (MenuView::GetMenuHoverScaleStatus(wrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT &&
-        wrapperPattern->GetMenuStatus() != MenuStatus::HIDE) {
-        wrapperPattern->CallMenuAboutToDisappearCallback();
-        wrapperPattern->CallMenuOnWillDisappearCallback();
-    }
 
     wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
     wrapperPattern->SetOnMenuDisappear(true);
@@ -1199,16 +1184,18 @@ bool MenuManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, cons
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu helper enter");
     if (!menu) {
-        // get existing menuNode
         auto it = menuMap_.find(targetId);
         if (it != menuMap_.end()) {
             menu = it->second;
         }
     } else {
-        // creating new menu
         menuMap_[targetId] = menu;
     }
     CHECK_NULL_RETURN(menu, false);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    if (menuWrapperPattern) {
+        menuWrapperPattern->ResetMenuStatus();
+    }
     ResetMenuWrapperVisibility(menu);
     RefPtr<FrameNode> menuFrameNode = menu;
     if (menu->GetTag() != MENU_ETS_TAG) {
@@ -1978,17 +1965,7 @@ void MenuManager::CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& men
     CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuWrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
-        // When the menu is forcibly removed during the disappearing process, the onDidDisappear life cycle needs to be
-        // called back to the user.
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    } else if (menuWrapperPattern->IsShow()) {
-        // When the menu is forcibly removed during display, the life cycle of onWillDisappear and
-        // onDidDisappear needs to be called back to the user.
-        menuWrapperPattern->CallMenuOnWillDisappearCallback();
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    }
-    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE, true);
 }
 
 void MenuManager::CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode)
@@ -1996,20 +1973,6 @@ void MenuManager::CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapp
     CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-
-    if (menuWrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
-        // When the menu is forcibly removed during the disappearing process, the onDisappear life cycle needs to be
-        // called back to the user.
-        menuWrapperPattern->CallMenuDisappearCallback();
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    } else if (menuWrapperPattern->IsShow()) {
-        // When the menu is forcibly removed during display, the life cycle of aboutToDisappear and
-        // onDisappear needs to be called back to the user.
-        menuWrapperPattern->CallMenuAboutToDisappearCallback();
-        menuWrapperPattern->CallMenuOnWillDisappearCallback();
-        menuWrapperPattern->CallMenuDisappearCallback();
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    }
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
 }
 

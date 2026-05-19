@@ -1801,7 +1801,9 @@
       "OHOS::Ace::NG::MenuWrapperPattern::HideSubMenuByDepth(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::MenuWrapperPattern::IsContextMenu() const";
       "OHOS::Ace::NG::MenuWrapperPattern::RequestPathRender()";
+      "OHOS::Ace::NG::MenuWrapperPattern::ResetMenuStatus()";
       "OHOS::Ace::NG::MenuWrapperPattern::SetAniamtinOption(OHOS::Ace::AnimationOption const&)";
+      "OHOS::Ace::NG::MenuWrapperPattern::SetMenuStatus(OHOS::Ace::NG::MenuStatus, bool)";
       "OHOS::Ace::NG::MenuWrapperPattern::UpdateFilterMaskType()";
       "OHOS::Ace::NG::MenuWrapperPattern::UpdateMenuAnimation(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::MinusPaddingToNonNegativeSize(OHOS::Ace::NG::PaddingPropertyF const&, OHOS::Ace::NG::SizeT<float>&)";

@@ -708,7 +708,7 @@ HWTEST_F(MenuPatternTwoTestNg, NeedHoldTargetOffsetTest, TestSize.Level1)
      * @tc.steps: step4. Test NeedHoldTargetOffset when target is null.
      * @tc.expected: step4. NeedHoldTargetOffset will return true.
      */
-    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    wrapperPattern->ForceSetMenuStatus(MenuStatus::SHOW);
     EXPECT_TRUE(layoutAlgorithm->NeedHoldTargetOffset(nullptr, menuPattern));
     /**
      * @tc.steps: step5. Test NeedHoldTargetOffset when opacity zero.
