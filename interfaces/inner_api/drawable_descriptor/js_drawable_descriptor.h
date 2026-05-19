@@ -66,6 +66,10 @@ private:
     static void LoadComplete(napi_env env, napi_status status, void* data);
     static napi_value LoadSync(napi_env env, napi_callback_info info);
 
+    // release methods
+    static napi_value Release(napi_env env, napi_callback_info info);
+    static napi_value IsReleased(napi_env env, napi_callback_info info);
+
     // animated drawable descriptor methods
     static napi_value GetAnimationController(napi_env env, napi_callback_info info);
     static napi_value GetStatus(napi_env env, napi_callback_info info);

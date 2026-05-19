@@ -25,6 +25,7 @@
 
 #include "drawable_bridge.h"
 #include "drawable_descriptor.h"
+#include "base/error/error_code.h"
 
 #include "drawable_log.h"
 
@@ -99,6 +100,21 @@ void GetStringFromNapiValue(napi_env env, napi_value value, std::string& result)
         result.clear();
     }
 }
+
+bool CheckReleased(napi_env env, void* native, napi_escapable_handle_scope scope)
+{
+    if (native == nullptr) {
+        HILOGW("CheckReleased: native is nullptr, throwing 111002");
+        napi_throw_error(env, std::to_string(ERROR_CODE_DRAWABLE_RELEASED).c_str(),
+            "The native memory referenced by the drawableDescriptor has been released.");
+        if (scope != nullptr) {
+            napi_close_escapable_handle_scope(env, scope);
+        }
+        return true;
+    }
+    return false;
+}
+
 } // namespace
 
 thread_local napi_ref JsDrawableDescriptor::baseConstructor_;
@@ -334,6 +350,9 @@ napi_value JsDrawableDescriptor::GetForeground(napi_env env, napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
         napi_close_escapable_handle_scope(env, scope);
@@ -354,6 +373,9 @@ napi_value JsDrawableDescriptor::GetBackground(napi_env env, napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
         napi_close_escapable_handle_scope(env, scope);
@@ -374,6 +396,9 @@ napi_value JsDrawableDescriptor::GetMask(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
         napi_close_escapable_handle_scope(env, scope);
@@ -451,6 +476,9 @@ napi_value JsDrawableDescriptor::GetPixelMap(napi_env env, napi_callback_info in
     }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     napi_value typeName;
     napi_get_named_property(env, thisVar, "typeName", &typeName);
     std::string type;
@@ -565,6 +593,9 @@ napi_value JsDrawableDescriptor::Load(napi_env env, napi_callback_info info)
     }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     napi_value typeName;
     napi_get_named_property(env, thisVar, "typeName", &typeName);
     std::string type;
@@ -607,6 +638,9 @@ napi_value JsDrawableDescriptor::LoadSync(napi_env env, napi_callback_info info)
     }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (CheckReleased(env, native, scope)) {
+        return nullptr;
+    }
     napi_value typeName;
     napi_get_named_property(env, thisVar, "typeName", &typeName);
     std::string type;
@@ -657,6 +691,10 @@ napi_value JsDrawableDescriptor::GetAnimationController(napi_env env, napi_callb
     }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
+    if (native == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
     std::string id {};
     if (argc == 1) {
         GetStringFromNapiValue(env, argv[0], id);
@@ -825,8 +863,73 @@ napi_value JsDrawableDescriptor::GetStatus(napi_env env, napi_callback_info info
     return result;
 }
 
+napi_value JsDrawableDescriptor::Release(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    napi_value thisVar = nullptr;
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+
+    // Check _released flag to prevent repeated release
+    napi_value internalReleased;
+    status = napi_get_named_property(env, thisVar, "_released", &internalReleased);
+    if (status == napi_ok) {
+        bool released = false;
+        napi_get_value_bool(env, internalReleased, &released);
+        if (released) {
+            HILOGW("JsDrawableDescriptor::Release already released, skip");
+            napi_close_escapable_handle_scope(env, scope);
+            return nullptr;
+        }
+    }
+
+    // Unbind JS ↔ native: napi_remove_wrap detaches the native pointer,
+    // subsequent napi_unwrap will return nullptr
+    void* native = nullptr;
+    if (napi_remove_wrap(env, thisVar, &native) != napi_ok || native == nullptr) {
+        HILOGE("JsDrawableDescriptor::Release napi_remove_wrap failed");
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+
+    // Mark released on JS object
+    napi_value trueValue;
+    napi_get_boolean(env, true, &trueValue);
+    napi_set_named_property(env, thisVar, "_released", trueValue);
+
+    napi_close_escapable_handle_scope(env, scope);
+    HILOGI("JsDrawableDescriptor::Release done");
+    return nullptr;
+}
+
+napi_value JsDrawableDescriptor::IsReleased(napi_env env, napi_callback_info info)
+{
+    napi_value thisVar = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+
+    // Check _released flag on JS object
+    napi_value internalReleased;
+    bool isReleased = false;
+    napi_status status = napi_get_named_property(env, thisVar, "_released", &internalReleased);
+    if (status == napi_ok) {
+        napi_get_value_bool(env, internalReleased, &isReleased);
+    }
+
+    napi_value result = nullptr;
+    napi_get_boolean(env, isReleased, &result);
+    return result;
+}
+
 void JsDrawableDescriptor::Destructor(napi_env /* env */, void* nativeObject, void* /* finalize */)
 {
+    if (nativeObject == nullptr) {
+        return;
+    }
     auto* field = reinterpret_cast<DrawableDescriptor*>(nativeObject);
     delete field;
 }
@@ -1141,6 +1244,8 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetBaseDrawableDescr
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1152,6 +1257,8 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetPixelMapDrawableD
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1168,6 +1275,8 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetLayeredDrawableDe
         DECLARE_NAPI_FUNCTION("getMask", GetMask),
         DECLARE_NAPI_STATIC_FUNCTION("getMaskClipPath", GetMaskClipPath),
         DECLARE_NAPI_FUNCTION("setBlendMode", SetBlendMode),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
@@ -1180,6 +1289,8 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetAnimatedDrawableD
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
         DECLARE_NAPI_FUNCTION("getAnimationController", GetAnimationController),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
