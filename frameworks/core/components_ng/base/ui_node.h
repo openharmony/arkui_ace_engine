@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_UI_NODE_H
 
 #include <cstdint>
+#include <functional>
 #include <list>
 #include <memory>
 #include <set>
@@ -26,7 +27,7 @@
 #include "ui/base/versions.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/log/ace_performance_check.h"
+#include "base/log/performance_check_types.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
+#include "interfaces/inner_api/ace_kit/include/json/json_util.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
 namespace OHOS::Ace {
@@ -676,78 +678,17 @@ public:
     // --------------------------------------------------------------------------------
     // performance check get child count, depth, flex layout times and layout time
     void GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap);
-    void SetLayoutTime(int64_t time)
-    {
-        if (nodeInfo_) {
-            nodeInfo_->layoutTime = time;
-        }
-    }
-    int64_t GetLayoutTime()
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->layoutTime;
-        }
-        return 0;
-    }
-    int32_t GetFlexLayouts()
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->flexLayouts;
-        }
-        return 0;
-    }
-    int32_t GetRow() const
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->codeRow;
-        }
-        return 0;
-    }
-    int32_t GetCol() const
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->codeCol;
-        }
-        return 0;
-    }
-    void SetRow(const int32_t row)
-    {
-        if (nodeInfo_) {
-            nodeInfo_->codeRow = row;
-        }
-    }
-    void SetCol(const int32_t col)
-    {
-        if (nodeInfo_) {
-            nodeInfo_->codeCol = col;
-        }
-    }
-    void SetFilePath(const std::string& sources)
-    {
-        if (nodeInfo_) {
-            nodeInfo_->pagePath = sources;
-        }
-    }
-
-    std::string GetFilePath() const
-    {
-        if (nodeInfo_) {
-            return nodeInfo_->pagePath;
-        }
-        return "";
-    }
-    void SetForeachItem()
-    {
-        if (nodeInfo_) {
-            nodeInfo_->isForEachItem = true;
-        }
-    }
-    void AddFlexLayouts()
-    {
-        if (nodeInfo_) {
-            nodeInfo_->flexLayouts++;
-        }
-    }
+    void SetLayoutTime(int64_t time);
+    int64_t GetLayoutTime();
+    int32_t GetFlexLayouts();
+    int32_t GetRow() const;
+    int32_t GetCol() const;
+    void SetRow(const int32_t row);
+    void SetCol(const int32_t col);
+    void SetFilePath(const std::string& sources);
+    std::string GetFilePath() const;
+    void SetForeachItem();
+    void AddFlexLayouts();
     virtual std::string GetCustomTag()
     {
         return GetTag();

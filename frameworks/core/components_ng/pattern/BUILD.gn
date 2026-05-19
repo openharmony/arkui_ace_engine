@@ -429,6 +429,7 @@ build_component_ng("pattern_ng") {
     "scrollable/scrollable_paint_property.cpp",
     "scrollable/scrollable_pattern.cpp",
     "scrollable/scrollable_pattern_multi_thread.cpp",
+    "scrollable/scrollable_properties.cpp",
     "scrollable/scrollable_utils.cpp",
     "scrollable/scroller_observer_manager.cpp",
     "scrollable/selectable_container_pattern.cpp",

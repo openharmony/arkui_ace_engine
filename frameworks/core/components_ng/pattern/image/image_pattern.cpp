@@ -34,6 +34,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/clipboard/clipboard.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/image/image_theme.h"

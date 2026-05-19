@@ -17,11 +17,11 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/property/accessibility_property.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -204,5 +204,176 @@ void Pattern::CheckLocalized()
 RefPtr<VerticalOverflowHandler> Pattern::GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
 {
     return nullptr;
+}
+
+void Pattern::PropagateForegroundColorToChildren()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    const auto& children = frameNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    const auto& renderContext = frameNode->GetRenderContext();
+    if (!renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
+        return;
+    }
+    std::list<RefPtr<FrameNode>> childrenList {};
+    std::queue<RefPtr<FrameNode>> queue {};
+    queue.emplace(frameNode);
+    RefPtr<FrameNode> parentNode;
+    while (!queue.empty()) {
+        parentNode = queue.front();
+        queue.pop();
+        auto childs = parentNode->GetChildren();
+        if (childs.empty()) {
+            continue;
+        }
+        for (auto child : childs) {
+            if (!AceType::InstanceOf<NG::FrameNode>(child)) {
+                continue;
+            }
+            auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+            auto childRenderContext = childFrameNode->GetRenderContext();
+            if (childRenderContext->HasForegroundColorFlag() && childRenderContext->GetForegroundColorFlagValue()) {
+                continue;
+            }
+            queue.emplace(childFrameNode);
+            childrenList.emplace_back(childFrameNode);
+        }
+    }
+    UpdateChildRenderContext(renderContext, childrenList);
+}
+
+void Pattern::UpdateChildRenderContext(
+    const RefPtr<RenderContext>& renderContext, std::list<RefPtr<FrameNode>>& childrenList)
+{
+    bool isForegroundColor = renderContext->HasForegroundColor();
+    for (auto child : childrenList) {
+        auto childRenderContext = child->GetRenderContext();
+        if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
+            if (isForegroundColor) {
+                childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                childRenderContext->ResetForegroundColorStrategy();
+                childRenderContext->UpdateForegroundColorFlag(false);
+            } else {
+                childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                childRenderContext->ResetForegroundColor();
+                childRenderContext->UpdateForegroundColorFlag(false);
+            }
+        } else {
+            if (!childRenderContext->HasForegroundColorFlag()) {
+                continue;
+            }
+            if (childRenderContext->GetForegroundColorFlagValue()) {
+                continue;
+            }
+            if (isForegroundColor) {
+                childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                childRenderContext->ResetForegroundColorStrategy();
+                childRenderContext->UpdateForegroundColorFlag(false);
+            } else {
+                childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                childRenderContext->ResetForegroundColor();
+                childRenderContext->UpdateForegroundColorFlag(false);
+            }
+        }
+    }
+}
+
+std::optional<SizeF> Pattern::GetHostFrameSize() const
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    return frameNode->GetGeometryNode()->GetMarginFrameSize();
+}
+
+std::optional<OffsetF> Pattern::GetHostFrameOffset() const
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    return frameNode->GetGeometryNode()->GetFrameOffset();
+}
+
+std::optional<OffsetF> Pattern::GetHostFrameGlobalOffset() const
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    return frameNode->GetGeometryNode()->GetFrameOffset() + frameNode->GetGeometryNode()->GetParentGlobalOffset();
+}
+
+std::optional<SizeF> Pattern::GetHostContentSize() const
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        return std::nullopt;
+    }
+    const auto& content = frameNode->GetGeometryNode()->GetContent();
+    if (!content) {
+        return std::nullopt;
+    }
+    return content->GetRect().GetSize();
+}
+
+int32_t Pattern::GetHostInstanceId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, INSTANCE_ID_UNDEFINED);
+    return host->GetInstanceId();
+}
+
+PipelineContext* Pattern::GetContext() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetContext();
+}
+
+RenderContext* Pattern::GetRenderContext() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetRenderContext().GetRawPtr();
+}
+
+void Pattern::MarkDirty(PropertyChangeFlag flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
+}
+
+bool Pattern::IsNeedAdjustByAspectRatio()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(host, false);
+    return layoutProperty->HasAspectRatio();
+}
+
+int32_t Pattern::GetThemeScopeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    return host->GetThemeScopeId();
+}
+
+bool Pattern::HandleTextBoxComponentCommand(
+    const std::string& command, std::string& cmd, std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& params)
+{
+    json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json && !json->IsNull(), false);
+    cmd = json->GetString("cmd");
+    CHECK_NULL_RETURN(!cmd.empty(), false);
+    params = json->GetValue("params");
+    CHECK_NULL_RETURN(params && params->IsObject(), false);
+    return true;
 }
 } // namespace OHOS::Ace::NG

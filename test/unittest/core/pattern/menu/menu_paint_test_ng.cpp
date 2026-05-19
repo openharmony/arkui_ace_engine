@@ -18,6 +18,7 @@
 
 #define private public
 #define protected public
+#include "bridge/common/utils/source_map.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 
 using namespace testing;
