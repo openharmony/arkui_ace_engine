@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/interfaces/native/utility/validators.h"
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 namespace OHOS::Ace::NG {
 struct OptRequestFormInfo {
     std::optional<int64_t> id = std::nullopt;
@@ -147,6 +151,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = FormModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::FORM_ETS_TAG, id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

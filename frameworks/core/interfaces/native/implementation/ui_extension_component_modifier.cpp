@@ -22,6 +22,10 @@
 #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "want.h"
 #endif //WINDOW_SCENE_SUPPORTED
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -38,6 +42,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = UIExtensionStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::UI_EXTENSION_COMPONENT_ETS_TAG, id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
