@@ -18,6 +18,11 @@ declare class SystemEnvKey {
     constructor(keyId: string);
 }
 
+declare class CustomEnvKey<T> {
+    _internal_id: number;
+    static create<T>(): CustomEnvKey<T>;
+}
+
 class WritableSystemEnvKey<T> extends SystemEnvKey {}
 
 class ReadonlySystemEnvKey<T> extends SystemEnvKey {}
@@ -34,7 +39,7 @@ class WithEnvAttribute {
         return this;
     }
 
-    customEnv(key: string, value: any): WithEnvAttribute {
+    customEnv<T>(key: CustomEnvKey<T>, value: T): WithEnvAttribute {
         globalThis.WithEnv.setCustomEnvProperty(key, value);
         return this;
     }

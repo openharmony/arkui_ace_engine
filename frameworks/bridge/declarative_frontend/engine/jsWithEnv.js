@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+/// <reference path="../state_mgmt/src/lib/env_base/customEnv_key.ts" />
+
 /**
  * @typedef {Object} SystemEnvKey
  * @property {string} keyId

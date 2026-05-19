@@ -76,12 +76,16 @@ void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
 
 void JSWithEnv::SetCustomEnvProperty(const JSCallbackInfo& info)
 {
-    if (info.Length() < NUM_SECOND || !info[0]->IsString()) {
+    if (info.Length() < NUM_SECOND || !info[0]->IsObject()) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetCustomEnvProperty invalid args");
         return;
     }
-    auto key = info[0]->ToString();
-    // customEnv<T>(key: string, value: T) — value is generic, handle by JS type
+    std::string key;
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto keyIdVal = obj->GetProperty("_internal_id");
+    if (keyIdVal->IsNumber()) {
+        key = std::to_string(keyIdVal->ToNumber<int32_t>());
+    }
     WithEnvModel::GetInstance()->SetCustomEnvProperty(key, std::any(info[1]));
 }
 
