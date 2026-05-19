@@ -1591,6 +1591,29 @@ HWTEST_F(TextTestThreeNg, TextCompressLeadingPunctuation002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextCompressLeadingPunctuation003
+ * @tc.desc: Test TextCompressLeadingPunctuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextCompressLeadingPunctuation003, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetCompressLeadingPunctuation(false);
+    EXPECT_EQ(textLayoutProperty->GetCompressLeadingPunctuation().value(), false);
+    textLayoutProperty->UpdateCompressLeadingPunctuation(true);
+    EXPECT_EQ(textLayoutProperty->GetCompressLeadingPunctuation().value(), true);
+}
+
+/**
  * @tc.name: UpdateLpxUnitFlag001
  * @tc.desc: Test UpdateLpxUnitFlag with no LPX unit styles — flag stays false, attribute not registered.
  * @tc.type: FUNC
