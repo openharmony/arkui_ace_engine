@@ -616,6 +616,8 @@ public:
 
     void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) override;
 
+    void OnDoubleSidedUpdate(bool doubleSided) override;
+
 #ifdef RENDER_EXTRACT_SUPPORTED
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.
     void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);

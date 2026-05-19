@@ -6084,6 +6084,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnNeedSoftkeyboard));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNeedSoftkeyboard"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnNeedSoftkeyboard));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDoubleSided"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDoubleSided));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDoubleSided"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDoubleSided));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 }
 

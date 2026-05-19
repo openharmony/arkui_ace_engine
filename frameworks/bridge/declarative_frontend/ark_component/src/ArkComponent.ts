@@ -4093,6 +4093,20 @@ class ChainWeightModifier extends ModifierWithKey<ChainWeightOptions> {
   }
 }
 
+class DoubleSidedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('doubleSided');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetDoubleSided(node);
+    } else {
+      getUINativeModule().common.setDoubleSided(node, this.value);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -6153,6 +6167,10 @@ class ArkComponent {
   }
   useUnionEffect(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, UseUnionEffectModifier.identity, UseUnionEffectModifier, value);
+    return this;
+  }
+  doubleSided(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, DoubleSidedModifier.identity, DoubleSidedModifier, value);
     return this;
   }
 }

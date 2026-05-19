@@ -5855,6 +5855,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setSmartGestureShortcut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDoubleSidedAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDoubleSided(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (types !== undefined) {
@@ -10838,6 +10850,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method smartGestureShortcut')
     }
+    doubleSided(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.doubleSided(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method doubleSided can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method doubleSided')
+    }
     customProperty(name: string, value: CustomProperty): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -12945,6 +12969,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public smartGestureShortcut(value: SmartGestureShortcutOptions): this {
         const value_casted = value as (SmartGestureShortcutOptions)
         this.getPeer()?.setSmartGestureShortcutAttribute(value_casted)
+        return this
+    }
+    public doubleSided(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setDoubleSidedAttribute(value_casted)
         return this
     }
     public customProperty(name: string, value: CustomProperty): this {

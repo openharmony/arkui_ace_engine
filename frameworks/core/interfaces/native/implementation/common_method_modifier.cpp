@@ -5635,6 +5635,14 @@ void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onEvent));
 }
+void SetDoubleSidedImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstract::SetDoubleSided(frameNode, convValue.value_or(true));
+}
 void SetExpandSafeAreaImpl(Ark_NativePointer node,
                            const Opt_Array_SafeAreaType* types,
                            const Opt_Array_SafeAreaEdge* edges)
@@ -7222,6 +7230,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
         CommonMethodModifier::SetSmartGestureShortcutImpl,
         CommonMethodModifier::SetInspectorLabelImpl,
+        CommonMethodModifier::SetDoubleSidedImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

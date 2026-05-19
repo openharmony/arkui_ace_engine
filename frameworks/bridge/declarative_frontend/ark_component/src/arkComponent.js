@@ -4938,6 +4938,9 @@ class ArkSpanComponent {
   accessibilityGroup(value) {
     throw new BusinessError(100201, 'accessibilityGroup function not supported in attributeModifier scenario.');
   }
+  doubleSided(value) {
+    throw new BusinessError(100201, 'doubleSided function not supported in attributeModifier scenario.');
+  }
   accessibilityText(value) {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, SpanAccessibilityTextModifier.identity, SpanAccessibilityTextModifier, value);
