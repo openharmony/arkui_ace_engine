@@ -53,13 +53,63 @@ void GridRowModelNG::Create(const RefPtr<V2::GridContainerSize>& col, const RefP
         CHECK_NULL_VOID(frameNode);
         RefPtr<V2::Gutter> &value = const_cast<RefPtr<V2::Gutter> &>(gutter);
         value->ReloadResources(value);
+        CheckNodeGutterLPX(frameNode, value);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *value, frameNode);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     gridRowpattern->AddResObj("gridrow.gutter", resObj, std::move(updateFunc));
+    CheckGutterLPX(gutter);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction);
+}
+
+void GridRowModelNG::CheckGutterLPX(const RefPtr<V2::Gutter>& gutter)
+{
+    CHECK_NULL_VOID(gutter);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->xXs, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XS);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->xSm, LpxAttribute::LPX_GRID_ROW_GUTTER_X_SM);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->xMd, LpxAttribute::LPX_GRID_ROW_GUTTER_X_MD);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->xLg, LpxAttribute::LPX_GRID_ROW_GUTTER_X_LG);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->xXl, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XL);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->xXXl, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XXL);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->ySm, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_SM);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->yMd, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_MD);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->yLg, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_LG);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->yXl, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_XL);
+    ACE_CHECK_LPX_ATTRIBUTE(gutter->yXXl, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_XXL);
+}
+
+void GridRowModelNG::CheckNodeGutterLPX(FrameNode* frameNode, const RefPtr<V2::Gutter>& gutter)
+{
+    CHECK_NULL_VOID(gutter);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xXs, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XS, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xSm, LpxAttribute::LPX_GRID_ROW_GUTTER_X_SM, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xMd, LpxAttribute::LPX_GRID_ROW_GUTTER_X_MD, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xLg, LpxAttribute::LPX_GRID_ROW_GUTTER_X_LG, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xXl, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XL, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xXXl, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XXL, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->ySm, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_SM, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->yMd, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_MD, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->yLg, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_LG, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->yXl, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_XL, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->yXXl, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_XXL, frameNode);
+}
+
+void GridRowModelNG::CheckNodeGutterLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const RefPtr<V2::Gutter>& gutter)
+{
+    CHECK_NULL_VOID(gutter);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xXs, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XS, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xSm, LpxAttribute::LPX_GRID_ROW_GUTTER_X_SM, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xMd, LpxAttribute::LPX_GRID_ROW_GUTTER_X_MD, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xLg, LpxAttribute::LPX_GRID_ROW_GUTTER_X_LG, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xXl, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XL, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->xXXl, LpxAttribute::LPX_GRID_ROW_GUTTER_X_XXL, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->ySm, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_SM, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->yMd, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_MD, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->yLg, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_LG, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->yXl, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_XL, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(gutter->yXXl, LpxAttribute::LPX_GRID_ROW_GUTTER_Y_XXL, frameNode);
 }
 
 RefPtr<FrameNode> GridRowModelNG::CreateFrameNode(int32_t nodeId)
@@ -99,6 +149,7 @@ void GridRowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign alignItem)
 
 void GridRowModelNG::SetGutter(FrameNode* frameNode, const RefPtr<V2::Gutter>& gutter)
 {
+    CheckNodeGutterLPX(frameNode, gutter);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter, frameNode);
 }
 
