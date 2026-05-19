@@ -126,6 +126,9 @@ ArkUINativeModuleValue WebBridge::SetMixedMode(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setMixedMode(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -200,6 +203,9 @@ ArkUINativeModuleValue WebBridge::SetCacheMode(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setCacheMode(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -222,6 +228,9 @@ ArkUINativeModuleValue WebBridge::SetDarkMode(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setDarkMode(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -297,6 +306,9 @@ ArkUINativeModuleValue WebBridge::SetKeyboardAvoidMode(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setKeyboardAvoidMode(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
@@ -415,6 +427,9 @@ ArkUINativeModuleValue WebBridge::SetTextZoomRatio(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     int mode = secondArg->Int32Value(vm);
     GetArkUINodeModifiers()->getWebModifier()->setTextZoomRatio(nativeNode, mode);
     return panda::JSValueRef::Undefined(vm);
