@@ -933,6 +933,7 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_utils.cpp",
       "components/theme/ui_material_theme.cpp",
       "components/toggle/toggle_theme.cpp",
+      "components/text/text_theme.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",
