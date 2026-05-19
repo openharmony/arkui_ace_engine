@@ -1099,6 +1099,7 @@ private:
     void UpdateCaretInfoToController();
     IMEClient GetIMEClientInfo();
     void FireOnWillAttachIME(IMEClient& imeClient);
+    void ReportShiftAndDirectionEvent(const KeyEvent& keyEvent);
 #if defined(ENABLE_STANDARD_INPUT)
     bool EnableStandardInput(bool needShowSoftKeyboard, SourceType sourceType = SourceType::NONE);
     std::optional<MiscServices::TextConfig> GetMiscTextConfig();

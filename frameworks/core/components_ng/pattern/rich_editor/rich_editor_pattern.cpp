@@ -7927,17 +7927,9 @@ void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
     auto action = keyEvent.action;
     bool isShiftPressed = hasKeyShift &&
         (action == KeyAction::DOWN || action == KeyAction::UP || action == KeyAction::CANCEL);
-    bool shiftOldFlag = shiftFlag_;
     if (isShiftPressed != shiftFlag_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateShiftFlag:%{public}d by action:%{public}d", isShiftPressed, action);
         shiftFlag_ = isShiftPressed;
-        if (shiftOldFlag && !shiftFlag_) {
-            auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
-            auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
-        }
     }
 }
 
@@ -8349,7 +8341,25 @@ RefPtr<GestureEventHub> RichEditorPattern::GetGestureEventHub() {
 
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 {
+    ReportShiftAndDirectionEvent(keyEvent);
     return TextInputClient::HandleKeyEvent(keyEvent);
+}
+
+void RichEditorPattern::ReportShiftAndDirectionEvent(const KeyEvent& keyEvent)
+{
+    bool isDirectionalKey = keyEvent.HasKey(KeyCode::KEY_DPAD_UP) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_DOWN) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_LEFT) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_RIGHT);
+    auto action = keyEvent.action;
+    bool isDirectionPressed = (!isDirectionalKey) &&
+            (action == KeyAction::UP || action == KeyAction::CANCEL);
+    CHECK_NULL_VOID(isDirectionPressed && shiftFlag_);
+ 	auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
+ 	auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
+ 	auto host = GetHost();
+ 	CHECK_NULL_VOID(host);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
 }
 
 void RichEditorPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
