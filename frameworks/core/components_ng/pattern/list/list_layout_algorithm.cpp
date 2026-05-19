@@ -1256,9 +1256,8 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
                 AdjustStartPosition(wrapper, startPos);
             }
             CheckGroupMeasureBreak(wrapper);
-        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode())) {
-            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureLazyVGridLayout:%d, %f", currentIndex, startPos);
-            MeasureLazyVGridLayout(wrapper, startPos, true);
+        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
+            MeasureLazyChild(wrapper, currentIndex, startPos, true);
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, startPos);
             wrapper->Measure(childLayoutConstraint_);
@@ -1299,9 +1298,8 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d, %f", currentIndex, endPos);
             wrapper->Measure(childLayoutConstraint_);
             CheckGroupMeasureBreak(wrapper);
-        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode())) {
-            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureLazyVGridLayout:%d, %f", currentIndex, endPos);
-            MeasureLazyVGridLayout(wrapper, endPos, false);
+        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
+            MeasureLazyChild(wrapper, currentIndex, endPos, false);
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, endPos);
             wrapper->Measure(childLayoutConstraint_);
@@ -2170,9 +2168,10 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     layoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void ListLayoutAlgorithm::MeasureLazyVGridLayout(const RefPtr<LayoutWrapper>& wrapper, float& referencePos,
-    bool forward)
+void ListLayoutAlgorithm::MeasureLazyChild(const RefPtr<LayoutWrapper>& wrapper, int32_t index,
+    float& referencePos, bool forward)
 {
+    ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureLazyChild:%d, %f, forward:%d", index, referencePos, forward);
     ViewPosReference ref {
         .viewPosStart = startMainPos_,
         .viewPosEnd = endMainPos_,
@@ -2225,7 +2224,7 @@ void ListLayoutAlgorithm::ApplyLazyVGridAdjustOffset(
 }
 
 bool ListLayoutAlgorithm::CanSupportNestedLazy(
-    const RefPtr<FrameNode>& childNode, const RefPtr<FrameNode>& listNode)
+    const RefPtr<FrameNode>& childNode, const RefPtr<FrameNode>& listNode, int32_t lanes)
 {
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listLayoutProperty, false);
@@ -2236,8 +2235,7 @@ bool ListLayoutAlgorithm::CanSupportNestedLazy(
         return false;
     }
 
-    bool hasLanes = listLayoutProperty->GetLanes().has_value();
-    if (hasLanes) {
+    if (lanes > 1) {
         return false;
     }
 
@@ -2823,7 +2821,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
             break;
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-        if (CanSupportNestedLazy(wrapper->GetHostNode(), frameNode)) {
+        if (CanSupportNestedLazy(wrapper->GetHostNode(), frameNode, pattern->GetLanes())) {
             ProcessPredictBuildLazyVGrid(wrapper, index, pattern, param, listMainSizeValues, show);
         } else if (!isGroup) {
             auto frameNode = wrapper->GetHostNode();

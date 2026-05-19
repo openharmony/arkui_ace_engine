@@ -554,7 +554,8 @@ protected:
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
     void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
-    void MeasureLazyVGridLayout(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
+    void MeasureLazyChild(
+        const RefPtr<LayoutWrapper>& wrapper, int32_t index, float& referencePos, bool forward);
     void ApplyLazyVGridAdjustOffset(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
     AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
@@ -655,6 +656,9 @@ protected:
     virtual void CalcContentOffset(LayoutWrapper* layoutWrapper);
     virtual bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
     virtual void FixItemLayoutOffset(LayoutWrapper* layoutWrapper) {}
+    // Helper function for nested lazy loading support
+    static bool CanSupportNestedLazy(
+        const RefPtr<FrameNode>& childNode, const RefPtr<FrameNode>& listNode, int32_t lanes);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
@@ -711,9 +715,6 @@ private:
     void RecycleGroupItem(LayoutWrapper* layoutWrapper) const;
     void CheckAndMeasureStartItem(
         LayoutWrapper* layoutWrapper, int32_t startIndex, float& startPos, bool isGroup, bool forwardLayout);
-
-    // Helper function for nested lazy loading support (static, no instance state needed)
-    static bool CanSupportNestedLazy(const RefPtr<FrameNode>& childNode, const RefPtr<FrameNode>& listNode);
 
     static void ProcessPredictBuildLazyVGrid(
         const RefPtr<LayoutWrapper>& wrapper,
