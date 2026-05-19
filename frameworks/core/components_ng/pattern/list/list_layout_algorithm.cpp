@@ -114,8 +114,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     axis_ = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     isStackFromEnd_ = listLayoutProperty->GetStackFromEnd().value_or(false);
     isReverse_ = listLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    // Pre-recycle
-    ScrollableUtils::RecycleItemsOutOfBoundary(axis_, -currentDelta_, GetStartIndex(), GetEndIndex(), layoutWrapper);
 
     const auto& layoutConstraintOps = listLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraintOps);

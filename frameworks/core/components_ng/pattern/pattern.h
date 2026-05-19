@@ -887,6 +887,10 @@ public:
     virtual void OnBorderWidthReset() {}
     virtual void OnBorderColorReset() {}
     virtual void OnBackShadowReset() {}
+    virtual bool EnableCachePredictNodes() const
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

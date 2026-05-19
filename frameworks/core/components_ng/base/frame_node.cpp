@@ -414,13 +414,29 @@ public:
         return nullptr;
     }
 
+    bool EnableCachePredictNodes() const
+    {
+        CHECK_NULL_RETURN(hostNode_, false);
+        auto pattern = hostNode_->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->EnableCachePredictNodes();
+    }
+
     RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
             auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
-            if (child && !isCache) {
+            if (child && (!isCache || EnableCachePredictNodes())) {
+                partFrameNodeChildren_[index] = child;
+            }
+            return child;
+        } else if (!itor->second->IsActive() && !isCache && EnableCachePredictNodes()) {
+            // Re-acquire the node when entering the viewport.
+            // Pending analysis scenarios: cachedItems_ erase, but not notify partFrameNodeChildren_.
+            auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
+            if (child) {
                 partFrameNodeChildren_[index] = child;
             }
             return child;
@@ -473,7 +489,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index)
     {
         auto itor = partFrameNodeChildren_.find(index);
-        if (itor == partFrameNodeChildren_.end()) {
+        if (itor == partFrameNodeChildren_.end() ||
+            (!itor->second->IsActive() && EnableCachePredictNodes())) {
             return;
         }
         itor->second->SetActive(false);
@@ -497,8 +514,12 @@ public:
 
     void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false)
     {
-        int32_t startIndex = showCache ? start - cacheStart : start;
-        int32_t endIndex = showCache ? end + cacheEnd : end;
+        int32_t startIndex = start;
+        int32_t endIndex = end;
+        if (showCache || EnableCachePredictNodes()) {
+            startIndex = start - cacheStart;
+            endIndex = end + cacheEnd;
+        }
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
             if ((startIndex <= endIndex && index >= startIndex && index <= endIndex) ||
