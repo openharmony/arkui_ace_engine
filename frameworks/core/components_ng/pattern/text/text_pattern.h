@@ -736,6 +736,8 @@ private:
     RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
     std::u16string GetContentWithPlaceholderSpaceFillter() const;
     std::u16string TextHighlightSelectedContent(int32_t start, int32_t end) const;
+    void UpdateLpxUnitFlag();
+
     RefPtr<ParagraphManager> pManager_;
     RefPtr<TextEffect> textEffect_;
     RefPtr<PreviewMenuController> previewController_;
@@ -798,6 +800,7 @@ private:
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
     bool isMeasured_ = false;
+    bool hasLpxUnitStyle_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
     friend class OneStepDragController;
     std::unique_ptr<OneStepDragController> oneStepDragController_;

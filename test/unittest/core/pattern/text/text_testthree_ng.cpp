@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-#include "text_base.h"
-
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -81,8 +79,8 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
     host->AddChild(placeholderSpanNode);
     placeholderSpanNode->SetParent(host);
 
-    auto customSpanNode = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId());
+    auto customSpanNode = CustomSpanNode::GetOrCreateSpanNode(
+        V2::CUSTOM_SPAN_NODE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId());
     host->AddChild(customSpanNode);
     customSpanNode->SetParent(host);
 
@@ -451,7 +449,6 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
     pattern->dataDetectorAdapter_->InitTextDetect(0, "orange");
 }
 
-
 /**
  * @tc.name: SetTextDetectConfig001
  * @tc.desc: test test_pattern.h SetTextDetectTypes.
@@ -460,8 +457,8 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
 HWTEST_F(TextTestThreeNg, SetTextDetectConfig001, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create frameNode and pattern with child span node.
-    */
+     * @tc.steps: step1. create frameNode and pattern with child span node.
+     */
     TextModelNG textModelNG;
     textModelNG.Create(u"");
     TextDetectConfig textDetectConfig;
@@ -1161,7 +1158,6 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions001, TestSize.Level1)
     textPattern->pManager_->Reset();
 }
 
-
 /**
  * @tc.name: PrepareAIMenuOptions
  * @tc.desc: test test_pattern.h PrepareAIMenuOptions function with valid textSelector
@@ -1592,5 +1588,164 @@ HWTEST_F(TextTestThreeNg, TextCompressLeadingPunctuation002, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetCompressLeadingPunctuation().value(), true);
     textLayoutProperty->UpdateCompressLeadingPunctuation(false);
     EXPECT_EQ(textLayoutProperty->GetCompressLeadingPunctuation().value(), false);
+}
+
+/**
+ * @tc.name: UpdateLpxUnitFlag001
+ * @tc.desc: Test UpdateLpxUnitFlag with no LPX unit styles — flag stays false, attribute not registered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateLpxUnitFlag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text frameNode with spans having no LPX unit styles.
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. call UpdateLpxUnitFlag.
+     * @tc.expected: hasLpxUnitStyle_ stays false, LPX_TEXT_SPAN not registered on host.
+     */
+    pattern->UpdateLpxUnitFlag();
+    EXPECT_FALSE(pattern->hasLpxUnitStyle_);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TEXT_SPAN), 0);
+}
+
+/**
+ * @tc.name: UpdateLpxUnitFlag002
+ * @tc.desc: Test UpdateLpxUnitFlag with span having LPX unit style — flag becomes true, attribute registered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateLpxUnitFlag002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text frameNode with a span.
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. Add span with LPX flag set.
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"test";
+    spanItem->SetLpxFlag(1);
+    pattern->spans_.emplace_back(spanItem);
+
+    /**
+     * @tc.steps: step3. call UpdateLpxUnitFlag.
+     * @tc.expected: hasLpxUnitStyle_ becomes true, LPX_TEXT_SPAN registered on host.
+     */
+    pattern->UpdateLpxUnitFlag();
+    EXPECT_TRUE(pattern->hasLpxUnitStyle_);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TEXT_SPAN), 1);
+}
+
+/**
+ * @tc.name: UpdateLpxUnitFlag003
+ * @tc.desc: Test UpdateLpxUnitFlag transitions from true back to false when LPX spans removed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateLpxUnitFlag003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text frameNode, add span with LPX flag.
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"lpx";
+    spanItem->SetLpxFlag(1);
+    pattern->spans_.emplace_back(spanItem);
+    pattern->UpdateLpxUnitFlag();
+    EXPECT_TRUE(pattern->hasLpxUnitStyle_);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TEXT_SPAN), 1);
+
+    /**
+     * @tc.steps: step2. Clear LPX flag and call UpdateLpxUnitFlag again.
+     * @tc.expected: hasLpxUnitStyle_ becomes false, LPX_TEXT_SPAN unregistered.
+     */
+    spanItem->ClearAllLpxFlags();
+    pattern->UpdateLpxUnitFlag();
+    EXPECT_FALSE(pattern->hasLpxUnitStyle_);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TEXT_SPAN), 0);
+}
+
+/**
+ * @tc.name: UpdateLpxUnitFlag004
+ * @tc.desc: Test UpdateLpxUnitFlag skips redundant updates when flag unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateLpxUnitFlag004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text frameNode with no LPX spans, call UpdateLpxUnitFlag twice.
+     * @tc.expected: second call is a no-op (flag already false).
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    pattern->UpdateLpxUnitFlag();
+    EXPECT_FALSE(pattern->hasLpxUnitStyle_);
+    pattern->UpdateLpxUnitFlag();
+    EXPECT_FALSE(pattern->hasLpxUnitStyle_);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_TEXT_SPAN), 0);
+}
+
+/**
+ * @tc.name: InitSpanItemTriggersUpdateLpxUnitFlag001
+ * @tc.desc: Test that InitSpanItem calls UpdateLpxUnitFlag and sets hasLpxUnitStyle_ correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, InitSpanItemTriggersUpdateLpxUnitFlag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text frameNode with spans (no LPX).
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(u"spannode");
+    host->AddChild(spanNode);
+    spanNode->SetParent(host);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Measure triggers InitSpanItem which calls UpdateLpxUnitFlag.
+     * @tc.expected: hasLpxUnitStyle_ is false since no span has LPX unit style.
+     */
+    LayoutConstraintF layoutConstraintF;
+    frameNode->Measure(layoutConstraintF);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    EXPECT_FALSE(textPattern->hasLpxUnitStyle_);
 }
 } // namespace OHOS::Ace::NG

@@ -47,6 +47,7 @@ void ImageSpanViewStatic::SetBaselineOffset(FrameNode* frameNode, const std::opt
         ImageSpanView::SetBaselineOffset(frameNode, value.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_BASE_LINE_OFFSET, frameNode);
     }
 }
 
