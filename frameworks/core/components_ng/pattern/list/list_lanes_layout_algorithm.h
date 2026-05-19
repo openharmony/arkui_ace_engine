@@ -71,7 +71,8 @@ private:
     bool CheckCurRowMeasureFinished(LayoutWrapper* layoutWrapper, int32_t curIndex, bool isGroup);
     void LayoutCachedALine(LayoutWrapper* layoutWrapper, std::pair<const int, ListItemInfo>& pos,
         int32_t startIndex, float crossSize);
-    std::pair<bool, bool> CheckACachedItem(const RefPtr<LayoutWrapper>& wrapper, int32_t cnt, bool& isGroup) const;
+    std::pair<bool, bool> CheckACachedItem(
+        const RefPtr<LayoutWrapper>& wrapper, int32_t cnt, bool& isGroup, float ref, bool forward) const;
     int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount,
         int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show) override;
     int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount,

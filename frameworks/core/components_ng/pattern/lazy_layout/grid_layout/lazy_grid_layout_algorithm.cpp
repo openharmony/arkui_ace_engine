@@ -477,7 +477,7 @@ void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
         pos = 0;
         return;
     } else if (GreatNotEqual(startPos_, totalMainSize_)) {
-        index = layoutInfo_->totalItemCount_;
+        index = totalItemCount_;
         pos = totalMainSize_;
         return;
     } else if (GreatOrEqual(endPos_, totalMainSize_) || layoutInfo_->endIndex_ >= layoutInfo_->totalItemCount_) {
@@ -657,7 +657,7 @@ void LazyGridLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper, int3
     float currentEndPos = endPos;
     float currentStartPos = endPos;
     int32_t curIndex = std::min(endIndex, totalItemCount_ - 1);
-    while (curIndex >= 0 && GreatNotEqual(currentStartPos, startPos_)) {
+    while (curIndex >= 0 && GreatOrEqual(currentStartPos, startPos_)) {
         currentEndPos = currentStartPos;
         float lineSize = 0.0f;
         int32_t laneIdx = curIndex % lanes_;
