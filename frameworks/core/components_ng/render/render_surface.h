@@ -165,6 +165,7 @@ public:
 
     virtual std::shared_ptr<Media::PixelMap> SurfaceCapture() { return nullptr; }
 #endif
+    virtual void UpdateBufferTypeLeak(const std::string& bufferTypeLeak) {}
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

@@ -192,6 +192,8 @@ public:
 
     void SetSurfaceBufferOpaque(bool isOpaque) override;
 
+    void UpdateBufferTypeLeak(const std::string& bufferTypeLeak) override;
+
 private:
     void MarkDirtyIfNeeded();
 

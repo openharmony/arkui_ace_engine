@@ -172,6 +172,22 @@ void XComponentPattern::InitXComponent()
     }
 }
 
+std::string XComponentPattern::GetLeakType()
+{
+    auto xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
+    if (id_.has_value() && !id_.value().empty()) {
+        return BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + id_.value();
+    }
+    std::string defaultLeakType = BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + "nodeId_" + nodeId_;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, defaultLeakType);
+    auto inspectorKey = host->GetInspectorId().value_or("");
+    if (!inspectorKey.empty()) {
+        return BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + inspectorKey;
+    }
+    return defaultLeakType;
+}
+
 void XComponentPattern::InitSurface()
 {
     auto host = GetHost();
@@ -334,8 +350,10 @@ void XComponentPattern::OnAttachToMainTree()
     }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     SendStatisticEvent(host, statisticEventTypes_);
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
-    ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
+    auto leakType = GetLeakType();
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree, leaktype: %{public}s",
+        GetId().c_str(), leakType.c_str());
+    ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree, leaktype: %s", GetId().c_str(), leakType.c_str());
     isOnTree_ = true;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
@@ -352,6 +370,7 @@ void XComponentPattern::OnAttachToMainTree()
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId());
     CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->UpdateBufferTypeLeak(leakType);
     auto customNode = host->GetParentCustomNode();
     CHECK_NULL_VOID(customNode);
     auto pipelineContext = host->GetContextRefPtr();
