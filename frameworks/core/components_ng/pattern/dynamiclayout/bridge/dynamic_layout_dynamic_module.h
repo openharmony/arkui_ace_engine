@@ -31,6 +31,7 @@ public:
     const void* GetCjModifier() override;
     void* GetModel() override;
     const void* GetCustomModifier(const std::string& name = "") override;
+    const void* GetAniModifier() override;
 };
 
 } // namespace OHOS::Ace

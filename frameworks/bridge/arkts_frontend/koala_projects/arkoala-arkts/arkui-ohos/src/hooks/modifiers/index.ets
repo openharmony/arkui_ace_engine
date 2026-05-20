@@ -267,6 +267,9 @@ import { ParticleModifier } from './../../ParticleModifier';
 import { ArkLazyGridLayoutAttributeComponent } from '#generated';
 import { ArkUnionEffectContainerComponent, UnionEffectContainerAttribute } from './../../component/unionEffectContainer';
 import { UnionEffectContainerModifier } from './../../UnionEffectContainerModifier';
+import { DynamicLayoutModifier } from './../../DynamicLayoutModifierHandWritten'
+import { ArkDynamicLayoutComponent as ArkDynamicLayoutComponentImpl,
+    DynamicLayoutAttribute as DynamicLayoutAttributeImpl} from '@ohos.arkui.components.ArkDynamicLayout'
 import { ArkDepthComponentComponent, DepthComponentAttribute } from '../../component/depthComponent'
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
@@ -3391,6 +3394,41 @@ export function hookParticleAttributeModifier(component: ArkParticleComponent, m
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ParticleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookDynamicLayoutAttributeModifierForHandWritten(component: ArkDynamicLayoutComponentImpl,
+    modifier: AttributeModifier<DynamicLayoutAttributeImpl> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): DynamicLayoutModifier => {
+        let isDynamicLayoutModifier: boolean = modifier instanceof DynamicLayoutModifier;
+        let initModifier = component.getPeer().dynamicLayoutAttributeSet ?
+            component.getPeer().dynamicLayoutAttributeSet! : new DynamicLayoutModifier();
+        if (isDynamicLayoutModifier) {
+            let dynamicLayoutModifier = modifier as object as DynamicLayoutModifier;
+            initModifier.mergeModifier(dynamicLayoutModifier);
+            component.getPeer().dynamicLayoutAttributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().dynamicLayoutAttributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkDynamicLayoutComponentImpl => {
+        let componentNew: ArkDynamicLayoutComponentImpl = new ArkDynamicLayoutComponentImpl();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<DynamicLayoutAttributeImpl>, attributeSet,
+        constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookDepthComponentAttributeModifier(
