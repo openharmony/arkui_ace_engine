@@ -6030,6 +6030,7 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
         auto pipeline = frameNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         if (materialType == MaterialType::IMMERSIVE) {
+            pattern->ProcessDefaultImmersiveOptions(immersiveOptionsPtr);
             SetImmersiveOptions(frameNode, immersiveOptionsPtr);
             return;
         }
