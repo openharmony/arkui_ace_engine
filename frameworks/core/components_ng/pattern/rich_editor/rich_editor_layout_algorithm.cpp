@@ -201,7 +201,7 @@ uint64_t RichEditorLayoutAlgorithm::Hash(const std::list<RefPtr<SpanItem>>& span
 }
 
 RefPtr<Paragraph> RichEditorLayoutAlgorithm::GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
-    const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap)
+    const ParagraphStyle& paraStyle)
 {
     if (!paraMapPtr_) {
         useParagraphCache_ = false;
@@ -804,8 +804,7 @@ void RichEditorLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& child
         return;
     }
     spanTextLength += static_cast<int32_t>(child->content.length());
-    child->placeholderIndex = currentParagraphPlaceholderCount_++;
-    child->placeholderIndex += preParagraphsPlaceholderCount_;
+    child->placeholderIndex = preParagraphsPlaceholderCount_++;
 }
 
 void RichEditorLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& child,
@@ -816,8 +815,7 @@ void RichEditorLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpan
         return;
     }
     spanTextLength += static_cast<int32_t>(child->content.length());
-    child->placeholderIndex = currentParagraphPlaceholderCount_++;
-    child->placeholderIndex += preParagraphsPlaceholderCount_;
+    child->placeholderIndex = preParagraphsPlaceholderCount_++;
 }
 
 void RichEditorLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& child,
@@ -829,8 +827,7 @@ void RichEditorLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<CustomSpanIte
         return;
     }
     spanTextLength += static_cast<int32_t>(child->content.length());
-    child->placeholderIndex = currentParagraphPlaceholderCount_++;
-    child->placeholderIndex += preParagraphsPlaceholderCount_;
+    child->placeholderIndex = preParagraphsPlaceholderCount_++;
     if (child->onDraw.has_value()) {
         customSpanPlaceholder.onDraw = child->onDraw.value();
     }

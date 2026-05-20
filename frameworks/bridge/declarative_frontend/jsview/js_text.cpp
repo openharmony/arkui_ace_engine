@@ -1531,6 +1531,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("includeFontPadding", &JSText::SetIncludeFontPadding);
     JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
     JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);
+    JSClass<JSText>::StaticMethod("incrementalUpdatePolicy", &JSText::SetIncrementalUpdatePolicy);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1872,5 +1873,23 @@ void JSText::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
         RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
     }
     TextModel::GetInstance()->SetSelectedDragPreviewStyle(color);
+}
+
+void JSText::SetIncrementalUpdatePolicy(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextModel::GetInstance()->ResetIncrementalUpdatePolicy();
+        return;
+    }
+    int32_t policyValue = args->ToNumber<int32_t>();
+    auto isNormalValue =
+        policyValue >= 0 && policyValue <= static_cast<int32_t>(IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+    if (!isNormalValue) {
+        TextModel::GetInstance()->ResetIncrementalUpdatePolicy();
+        return;
+    }
+    auto policy = static_cast<IncrementalUpdatePolicy>(policyValue);
+    TextModel::GetInstance()->SetIncrementalUpdatePolicy(policy);
 }
 } // namespace OHOS::Ace::Framework

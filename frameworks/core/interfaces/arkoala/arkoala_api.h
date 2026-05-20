@@ -4086,6 +4086,8 @@ struct ArkUITextModifier {
     void (*setStyledString)(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor);
     void (*setFontVariations)(ArkUINodeHandle node, ArkUIFontVariation* value, ArkUI_Int32 length);
     void (*resetFontVariations)(ArkUINodeHandle node);
+    void (*setIncrementalUpdatePolicy)(ArkUINodeHandle node, ArkUI_Int32 policy);
+    void (*resetIncrementalUpdatePolicy)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

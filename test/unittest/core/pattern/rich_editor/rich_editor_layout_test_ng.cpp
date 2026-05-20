@@ -1091,7 +1091,6 @@ HWTEST_F(RichEditorLayoutTestNg, AddImageToParagraphTest001, TestSize.Level2)
 
     // Set useParagraphCache_ to true
     layoutAlgorithm->useParagraphCache_ = true;
-    layoutAlgorithm->currentParagraphPlaceholderCount_ = 0;
     layoutAlgorithm->preParagraphsPlaceholderCount_ = 10;
 
     /**
@@ -1142,8 +1141,7 @@ HWTEST_F(RichEditorLayoutTestNg, AddPlaceHolderToParagraphTest001, TestSize.Leve
 
     // Set useParagraphCache_ to true
     layoutAlgorithm->useParagraphCache_ = true;
-    layoutAlgorithm->currentParagraphPlaceholderCount_ = 3;
-    layoutAlgorithm->preParagraphsPlaceholderCount_ = 7;
+    layoutAlgorithm->preParagraphsPlaceholderCount_ = 10;
 
     /**
      * @tc.steps: step3. Prepare test parameters
@@ -1237,8 +1235,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateParagraphByCustomSpanTest002, TestSize.Le
 
     // Set useParagraphCache_ to true
     layoutAlgorithm->useParagraphCache_ = true;
-    layoutAlgorithm->currentParagraphPlaceholderCount_ = 2;
-    layoutAlgorithm->preParagraphsPlaceholderCount_ = 8;
+    layoutAlgorithm->preParagraphsPlaceholderCount_ = 10;
 
     /**
      * @tc.steps: step3. Prepare test parameters without onDraw

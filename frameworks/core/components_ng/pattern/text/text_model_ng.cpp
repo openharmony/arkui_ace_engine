@@ -2111,6 +2111,26 @@ void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, frameNode);
 }
 
+void TextModelNG::SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, IncrementalUpdatePolicy, policy);
+}
+
+void TextModelNG::ResetIncrementalUpdatePolicy()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, IncrementalUpdatePolicy, PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextModelNG::SetIncrementalUpdatePolicy(FrameNode* frameNode, IncrementalUpdatePolicy policy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IncrementalUpdatePolicy, policy, frameNode);
+}
+
+void TextModelNG::ResetIncrementalUpdatePolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IncrementalUpdatePolicy, frameNode);
+}
+
 void TextModelNG::SetExternalDrawCallback(
     FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback)
 {

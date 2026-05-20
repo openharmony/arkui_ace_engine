@@ -79,7 +79,7 @@ protected:
     std::string SpansToString();
 
     virtual RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
-        const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) {
+        const ParagraphStyle& paraStyle) {
         useParagraphCache_ = false;
         return Paragraph::Create(paraStyle, FontCollection::Current());
     }
@@ -92,7 +92,7 @@ protected:
         }
         return paragraphInfo;
     }
-
+    void InheritParentTextStyle(const TextStyle& textStyle);
     ACE_FORCE_EXPORT virtual void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
         const RefPtr<LayoutWrapper>& iterItem, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);
     ACE_FORCE_EXPORT virtual void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
@@ -142,7 +142,6 @@ protected:
     bool needReCreateParagraph_ = true;
     bool useParagraphCache_ = false;
     int32_t preParagraphsPlaceholderCount_ = 0;
-    int32_t currentParagraphPlaceholderCount_ = 0;
     float contentHeight_ = 0.0f;
 
 private:
@@ -166,7 +165,6 @@ private:
         const RefPtr<TextContentModifier>&, const TextStyle& textStyle);
 
     void GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex);
-    void InheritParentTextStyle(const TextStyle& textStyle);
     bool ImageSpanMeasure(const RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& layoutWrapper,
         const LayoutConstraintF& layoutConstrain, const TextStyle& textStyle);
     bool CustomSpanMeasure(const RefPtr<CustomSpanItem>& customSpanItem, const LayoutConstraintF& contentConstraint,

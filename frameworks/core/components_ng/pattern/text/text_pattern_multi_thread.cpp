@@ -181,6 +181,7 @@ void TextPattern::SetStyledStringMultiThread(const RefPtr<SpanString>& value, bo
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     AllocStyledString();
+    InitParagraphCache();
     isSpanStringMode_ = true;
     host->PostAfterAttachMainTreeTask([
         spanString = WeakClaim(RawPtr(value)), closeSelectOverlay, weakPtr = WeakClaim(this)]() {
@@ -197,8 +198,9 @@ void TextPattern::SetStyledStringMultiThread(const RefPtr<SpanString>& value, bo
         pattern->styledString_->RemoveCustomSpan();
         pattern->styledString_->ReplaceSpanString(0, length, value);
         pattern->spans_ = pattern->styledString_->GetSpanItems();
+        pattern->UpdateSpanGroupHash(value->GetSpanItems());
         pattern->ProcessSpanString();
-        pattern->styledString_->AddCustomSpan();
+                pattern->styledString_->AddCustomSpan();
         pattern->styledString_->SetFramNode(WeakClaim(Referenced::RawPtr(host)));
         host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
     });

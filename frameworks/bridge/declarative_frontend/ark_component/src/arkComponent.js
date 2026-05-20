@@ -6395,6 +6395,24 @@ class TextDirectionModifier extends ModifierWithKey {
 }
 TextDirectionModifier.identity = Symbol('textDirection');
 
+class TextIncrementalUpdatePolicyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetIncrementalUpdatePolicy(node);
+    }
+    else {
+      getUINativeModule().text.setIncrementalUpdatePolicy(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextIncrementalUpdatePolicyModifier.identity = Symbol('textIncrementalUpdatePolicy');
+
 class TextSelectedDragPreviewStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6727,6 +6745,11 @@ class ArkTextComponent extends ArkComponent {
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextSelectedDragPreviewStyleModifier.identity,
         TextSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  incrementalUpdatePolicy(value) {
+    modifierWithKey(this._modifiersWithKeys, TextIncrementalUpdatePolicyModifier.identity,
+        TextIncrementalUpdatePolicyModifier, value);
     return this;
   }
 }

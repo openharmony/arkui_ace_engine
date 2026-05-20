@@ -19,92 +19,10 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
+#include "core/components_ng/pattern/rich_editor/lru_cache.h"
 
 namespace OHOS::Ace::NG {
 class StyleManager;
-template<typename KeyType, typename ValueType>
-class LRUMap {
-public:
-    using Iterator = typename std::list<std::pair<KeyType, ValueType>>::iterator;
- 
-    LRUMap() {}
-    LRUMap(size_t initialCapacity) : capacity(initialCapacity) {}
- 
-    Iterator Get(const KeyType& key)
-    {
-        auto it = cacheMap.find(key);
-        if (it == cacheMap.end()) {
-            return cacheList.end(); // Return end iterator if not found
-        }
-
-        // Move the accessed item to the front of the list
-        cacheList.splice(cacheList.begin(), cacheList, it->second);
- 
-        return it->second;
-    }
-
-    Iterator End()
-    {
-        return cacheList.end();
-    }
-
-    size_t Size()
-    {
-        return cacheMap.size();
-    }
-
-    void Erase(const KeyType& key)
-    {
-        auto it = cacheMap.find(key);
-        if (it != cacheMap.end()) {
-            cacheList.erase(it->second);
-            cacheMap.erase(it);
-        }
-    }
- 
-    void Clear()
-    {
-        cacheList.clear();
-        cacheMap.clear();
-    }
- 
-    void Put(const KeyType& key, const ValueType& value)
-    {
-        auto it = cacheMap.find(key);
-        if (it != cacheMap.end()) {
-            // Update existing item and move to front
-            cacheList.splice(cacheList.begin(), cacheList, it->second);
-            it->second->second = value;
-        } else {
-            // Insert new item
-            if (cacheList.size() >= capacity) {
-                // Remove least recently used item
-                auto last = cacheList.end();
-                last--;
-                cacheMap.erase(last->first);
-                cacheList.pop_back();
-            }
-            cacheList.emplace_front(key, value);
-            cacheMap[key] = cacheList.begin();
-        }
-    }
- 
-    void SetCapacity(size_t newCapacity)
-    {
-        capacity = newCapacity;
-        while (cacheList.size() > capacity) {
-            auto last = cacheList.end();
-            last--;
-            cacheMap.erase(last->first);
-            cacheList.pop_back();
-        }
-    }
-
-private:
-    size_t capacity = SIZE_MAX;
-    std::list<std::pair<KeyType, ValueType>> cacheList;
-    std::unordered_map<KeyType, Iterator> cacheMap;
-};
 
 struct AISpanLayoutInfo {
     const std::map<int32_t, AISpan>& aiSpanMap;
@@ -197,7 +115,7 @@ private:
     inline uint64_t Hash(uint64_t hash, const RefPtr<SpanItem>& span);
     uint64_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
     RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
-        const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) override;
+        const ParagraphStyle& paraStyle) override;
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const AISpanLayoutInfo& aiSpanLayoutInfo);
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap);
     void HandleTextSizeWhenEmpty(LayoutWrapper* layoutWrapper, SizeF& textSize);

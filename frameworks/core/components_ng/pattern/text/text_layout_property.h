@@ -103,6 +103,7 @@ public:
         ResetSelectedBackgroundColor();
         ResetTextColorFlagByUser();
         ResetClipEdge();
+        ResetIncrementalUpdatePolicy();
         propNeedReCreateParagraph_ = true;
     }
 
@@ -183,6 +184,8 @@ public:
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(TextEffectStrategy, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(
+        IncrementalUpdatePolicy, IncrementalUpdatePolicy, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinLines, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipDirection, TextFlipDirection, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextFlipEnableBlur, bool, PROPERTY_UPDATE_NORMAL);
@@ -294,7 +297,6 @@ public:
 
     std::string GetTextMarqueeOptionsString() const;
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
-
     void SetIsNewMaterial(bool isNewMaterial)
     {
         isNewMaterial_ = isNewMaterial;
