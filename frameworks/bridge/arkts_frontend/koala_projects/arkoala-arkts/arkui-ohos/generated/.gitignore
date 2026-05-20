@@ -13,6 +13,7 @@
 !WebModifier.ets
 !component/common.ets
 !component/contentSlot.ets
+!component/distortionComponent.ets
 !component/lazyGridLayout.ets
 !component/navigation.ets
 !component/styledString.ets

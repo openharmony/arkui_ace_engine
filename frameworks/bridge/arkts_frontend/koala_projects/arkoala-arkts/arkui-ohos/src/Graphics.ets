@@ -52,6 +52,12 @@ export interface Vector2 {
     x: double;
     y: double;
 }
+export interface Vector4 {
+    x: double;
+    y: double;
+    z: double;
+    w: double;
+}
 export enum LengthMetricsUnit {
     DEFAULT = 0,
     PX = 1
