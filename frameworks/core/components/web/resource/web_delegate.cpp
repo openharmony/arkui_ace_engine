@@ -3398,33 +3398,6 @@ void WebDelegate::UpdateWebLtpoInfo()
     }
 }
 
-void LtpoDisplayInfoListener::OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes)
-{
-    auto context = context_.Upgrade();
-    if (!context) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "LtpoDisplayInfoListener context is null.");
-        return;
-    }
-    std::string changedAttributes;
-    for (const auto &s : attributes) {
-        changedAttributes += s + ";";
-    }
-    TAG_LOGI(AceLogTag::ACE_WEB, "Ltpo info changed, changedAttributes:%{public}s", changedAttributes.c_str());
-    auto taskExecutor = context->GetTaskExecutor();
-    if (!taskExecutor) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "LtpoDisplayInfoListener taskExecutor is null.");
-        return;
-    }
-    taskExecutor->PostTask(
-        [weak = delegate_]() {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                delegate->UpdateWebLtpoInfo();
-            }
-        },
-        TaskExecutor::TaskType::UI, "LtpoDisplayInfoListenerOnAttributeChange");
-}
-
 void WebDelegate::RegisterDisplayInfoChange()
 {
     if (displayListener_) {

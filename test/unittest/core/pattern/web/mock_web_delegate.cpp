@@ -629,6 +629,9 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio) {}
 void WebDelegate::ratioStrToFloat(const std::string& str) {}
 void WebDelegate::ratioStrToFloatV2(const std::string& str) {}
 void WebDelegate::RegisterSurfaceOcclusionChangeFun() {}
+void WebDelegate::UpdateWebLtpoInfo() {}
+void WebDelegate::UnRegisterDisplayInfoChange() {}
+void WebDelegate::RegisterDisplayInfoChange() {}
 void WebDelegate::SetPartitionPoints(std::vector<float>& partition) {}
 void WebDelegate::RegisterAvoidAreaChangeListener(int32_t) {}
 class NWebAutoFillCallbackImpl : public OHOS::NWeb::NWebMessageValueCallback {
