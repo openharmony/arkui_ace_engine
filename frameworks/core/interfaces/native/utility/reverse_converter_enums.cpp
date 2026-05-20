@@ -201,7 +201,6 @@ void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src)
 void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src)
 {
     switch (src) {
-        case CrownAction::BEGIN: dst = ARK_CROWN_ACTION_BEGIN; break;
         case CrownAction::UPDATE: dst = ARK_CROWN_ACTION_UPDATE; break;
         case CrownAction::END: dst = ARK_CROWN_ACTION_END; break;
         default:

@@ -1114,9 +1114,9 @@ export struct ArcSlider {
 
   onDigitalCrownEvent(event: CrownEvent) {
     this.timeCur = systemDateTime.getTime(false);
-    const isVibEnabled: boolean = this.isEnlarged && (event.action === CrownAction.BEGIN ||
+    const isVibEnabled: boolean = this.isEnlarged && (
       this.isTouchAnimatorFinished && event.action === CrownAction.UPDATE);
-    if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
+    if (!this.isEnlarged) {
       this.clearTimeout();
       this.isEnlarged = true;
       this.startTouchAnimator();
