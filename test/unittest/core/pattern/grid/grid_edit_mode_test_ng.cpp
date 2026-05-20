@@ -21,6 +21,8 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -594,6 +596,264 @@ HWTEST_F(GridEditModeTestNg, EnableEditModeChangeEventViaModelNGStatic001, TestS
     GridModelNG::SetEnableEditMode(AceType::RawPtr(frameNode_), true);
     EXPECT_TRUE(callbackFired);
     EXPECT_TRUE(callbackValue);
+}
+
+// ============================================================
+// Step 4: editModeChanged_ flag — OnModifyDone guard
+// ============================================================
+
+/**
+ * @tc.name: EditModeChangedFlagDefaultFalse001
+ * @tc.desc: Test editModeChanged_ defaults to false after creation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedFlagDefaultFalse001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+}
+
+/**
+ * @tc.name: EditModeChangedFlagSetOnValueChange001
+ * @tc.desc: Test editModeChanged_ becomes true when SetEnableEditMode changes the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedFlagSetOnValueChange001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    EXPECT_FALSE(pattern_->editModeChanged_);
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+}
+
+/**
+ * @tc.name: EditModeChangedFlagNotSetOnSameValue001
+ * @tc.desc: Test editModeChanged_ remains false when SetEnableEditMode is called with the same value
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedFlagNotSetOnSameValue001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+    pattern_->ResetEditModeChanged();
+    EXPECT_FALSE(pattern_->editModeChanged_);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_FALSE(pattern_->editModeChanged_);
+}
+
+/**
+ * @tc.name: EditModeChangedFlagReset001
+ * @tc.desc: Test ResetEditModeChanged resets the flag to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedFlagReset001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->IsEditModeChanged());
+
+    pattern_->ResetEditModeChanged();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+}
+
+/**
+ * @tc.name: EditModeChangedFlagToggleOff001
+ * @tc.desc: Test editModeChanged_ becomes true when toggling edit mode off
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedFlagToggleOff001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->ResetEditModeChanged();
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+}
+
+/**
+ * @tc.name: EditModeChangedOnModifyDoneAppliesToItems001
+ * @tc.desc: Test OnModifyDone applies edit mode to visible items when editModeChanged_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedOnModifyDoneAppliesToItems001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->IsEditModeChanged());
+
+    pattern_->OnModifyDone();
+
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+    for (int32_t i = 0; i < 6; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_NE(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i;
+        }
+    }
+}
+
+/**
+ * @tc.name: EditModeChangedOnModifyDoneSkipsWhenFalse001
+ * @tc.desc: Test OnModifyDone skips ApplyEditModeToVisibleItems when editModeChanged_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedOnModifyDoneSkipsWhenFalse001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->ResetEditModeChanged();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+
+    pattern_->OnModifyDone();
+
+    for (int32_t i = 0; i < 6; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i;
+        }
+    }
+}
+
+/**
+ * @tc.name: EditModeChangedOnModifyDoneRemovesFromItems001
+ * @tc.desc: Test OnModifyDone removes edit mode from items when toggled off
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedOnModifyDoneRemovesFromItems001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->OnModifyDone();
+
+    for (int32_t i = 0; i < 6; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_NE(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i << " should have CheckBox";
+        }
+    }
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_TRUE(pattern_->IsEditModeChanged());
+    pattern_->OnModifyDone();
+
+    for (int32_t i = 0; i < 6; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i << " should have no CheckBox";
+        }
+    }
+}
+
+/**
+ * @tc.name: EditModeChangedOnModifyDoneNoDefaultMultiSelectStyle001
+ * @tc.desc: Test OnModifyDone calls RemoveEditModeFromItems when useDefaultMultiSelectStyle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedOnModifyDoneNoDefaultMultiSelectStyle001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    EditModeOptions options;
+    options.useDefaultMultiSelectStyle = false;
+    pattern_->SetEditModeOptions(options);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->IsEditModeChanged());
+
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+
+    for (int32_t i = 0; i < 6; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i;
+        }
+    }
+}
+
+/**
+ * @tc.name: EditModeChangedMultipleToggleCycle001
+ * @tc.desc: Test editModeChanged_ flag correctness across multiple toggle cycles
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedMultipleToggleCycle001, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(5);
+
+    EXPECT_FALSE(pattern_->editModeChanged_);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+    pattern_->ResetEditModeChanged();
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+    pattern_->ResetEditModeChanged();
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_FALSE(pattern_->editModeChanged_);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+}
+
+/**
+ * @tc.name: EditModeChangedOnModifyDoneRepeatedCalls001
+ * @tc.desc: Test that repeated OnModifyDone calls without value change do not re-apply edit mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, EditModeChangedOnModifyDoneRepeatedCalls001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
 }
 
 } // namespace OHOS::Ace::NG

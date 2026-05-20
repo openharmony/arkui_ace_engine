@@ -781,7 +781,8 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     backgroundColor(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): this {
         if (value != null) {
-            this.getPeer().setBackgroundColorAttribute(value as ResourceColor);
+            const value_casted = value as (ResourceColor | arkui_component_units_ColorMetrics | undefined);
+            this.getPeer().setBackgroundColorAttribute(value_casted);
         }
         return this;
     }
