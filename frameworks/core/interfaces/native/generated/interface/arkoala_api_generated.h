@@ -1172,9 +1172,9 @@ typedef struct Opt_WindowFeatures Opt_WindowFeatures;
 typedef struct WrappedBuilderPeer WrappedBuilderPeer;
 typedef struct WrappedBuilderPeer* Ark_WrappedBuilder;
 typedef struct Opt_WrappedBuilder Opt_WrappedBuilder;
-typedef struct XComponentControllerPeer XComponentControllerPeer;
-typedef struct XComponentControllerPeer* Ark_XComponentController;
-typedef struct Opt_XComponentController Opt_XComponentController;
+typedef struct XComponentControllerNativePeer XComponentControllerNativePeer;
+typedef struct XComponentControllerNativePeer* Ark_XComponentControllerNative;
+typedef struct Opt_XComponentControllerNative Opt_XComponentControllerNative;
 typedef struct arkui_component_common_Callback_Boolean_Void arkui_component_common_Callback_Boolean_Void;
 typedef struct Opt_arkui_component_common_Callback_Boolean_Void Opt_arkui_component_common_Callback_Boolean_Void;
 typedef struct arkui_component_common_Callback_F64_Void arkui_component_common_Callback_F64_Void;
@@ -1735,8 +1735,6 @@ typedef struct Callback_String_Boolean Callback_String_Boolean;
 typedef struct Opt_Callback_String_Boolean Opt_Callback_String_Boolean;
 typedef struct Callback_String_PasteEvent_Void Callback_String_PasteEvent_Void;
 typedef struct Opt_Callback_String_PasteEvent_Void Opt_Callback_String_PasteEvent_Void;
-typedef struct Callback_String_SurfaceRect_Void Callback_String_SurfaceRect_Void;
-typedef struct Opt_Callback_String_SurfaceRect_Void Opt_Callback_String_SurfaceRect_Void;
 typedef struct Callback_String_Void Callback_String_Void;
 typedef struct Opt_Callback_String_Void Opt_Callback_String_Void;
 typedef struct Callback_StyledStringChangeValue_Boolean Callback_StyledStringChangeValue_Boolean;
@@ -1973,6 +1971,12 @@ typedef struct OnSslErrorEventCallback OnSslErrorEventCallback;
 typedef struct Opt_OnSslErrorEventCallback Opt_OnSslErrorEventCallback;
 typedef struct OnSubmitCallback OnSubmitCallback;
 typedef struct Opt_OnSubmitCallback Opt_OnSubmitCallback;
+typedef struct OnSurfaceChangedCb OnSurfaceChangedCb;
+typedef struct Opt_OnSurfaceChangedCb Opt_OnSurfaceChangedCb;
+typedef struct OnSurfaceCreatedCb OnSurfaceCreatedCb;
+typedef struct Opt_OnSurfaceCreatedCb Opt_OnSurfaceCreatedCb;
+typedef struct OnSurfaceDestroyedCb OnSurfaceDestroyedCb;
+typedef struct Opt_OnSurfaceDestroyedCb Opt_OnSurfaceDestroyedCb;
 typedef struct OnSwiperAnimationEndCallback OnSwiperAnimationEndCallback;
 typedef struct Opt_OnSwiperAnimationEndCallback Opt_OnSwiperAnimationEndCallback;
 typedef struct OnSwiperAnimationStartCallback OnSwiperAnimationStartCallback;
@@ -2935,8 +2939,8 @@ typedef struct Ark_window_SystemBarStyle Ark_window_SystemBarStyle;
 typedef struct Opt_window_SystemBarStyle Opt_window_SystemBarStyle;
 typedef struct Ark_WorkerOptions Ark_WorkerOptions;
 typedef struct Opt_WorkerOptions Opt_WorkerOptions;
-typedef struct Ark_XComponentParameters Ark_XComponentParameters;
-typedef struct Opt_XComponentParameters Opt_XComponentParameters;
+typedef struct Ark_XComponentControllerWrapper Ark_XComponentControllerWrapper;
+typedef struct Opt_XComponentControllerWrapper Opt_XComponentControllerWrapper;
 typedef struct Ark_AccessibilityCustomAction Ark_AccessibilityCustomAction;
 typedef struct Opt_AccessibilityCustomAction Opt_AccessibilityCustomAction;
 typedef struct Ark_AccessibilitySpanOptions Ark_AccessibilitySpanOptions;
@@ -3279,6 +3283,8 @@ typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
 typedef struct Opt_WithThemeOptions Opt_WithThemeOptions;
 typedef struct Ark_XComponentOptions Ark_XComponentOptions;
 typedef struct Opt_XComponentOptions Opt_XComponentOptions;
+typedef struct Ark_XComponentParameters Ark_XComponentParameters;
+typedef struct Opt_XComponentParameters Opt_XComponentParameters;
 typedef struct Ark_arkui_component_units_Font Ark_arkui_component_units_Font;
 typedef struct Opt_arkui_component_units_Font Opt_arkui_component_units_Font;
 typedef struct Ark_ArrowStyle Ark_ArrowStyle;
@@ -10151,10 +10157,10 @@ typedef struct Opt_WrappedBuilder {
     Ark_Tag tag;
     Ark_WrappedBuilder value;
 } Opt_WrappedBuilder;
-typedef struct Opt_XComponentController {
+typedef struct Opt_XComponentControllerNative {
     Ark_Tag tag;
-    Ark_XComponentController value;
-} Opt_XComponentController;
+    Ark_XComponentControllerNative value;
+} Opt_XComponentControllerNative;
 typedef struct arkui_component_common_Callback_Boolean_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -12845,16 +12851,6 @@ typedef struct Opt_Callback_String_PasteEvent_Void {
     Ark_Tag tag;
     Callback_String_PasteEvent_Void value;
 } Opt_Callback_String_PasteEvent_Void;
-typedef struct Callback_String_SurfaceRect_Void {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect);
-} Callback_String_SurfaceRect_Void;
-typedef struct Opt_Callback_String_SurfaceRect_Void {
-    Ark_Tag tag;
-    Callback_String_SurfaceRect_Void value;
-} Opt_Callback_String_SurfaceRect_Void;
 typedef struct Callback_String_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14035,6 +14031,36 @@ typedef struct Opt_OnSubmitCallback {
     Ark_Tag tag;
     OnSubmitCallback value;
 } Opt_OnSubmitCallback;
+typedef struct OnSurfaceChangedCb {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect);
+} OnSurfaceChangedCb;
+typedef struct Opt_OnSurfaceChangedCb {
+    Ark_Tag tag;
+    OnSurfaceChangedCb value;
+} Opt_OnSurfaceChangedCb;
+typedef struct OnSurfaceCreatedCb {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String surfaceId);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String surfaceId);
+} OnSurfaceCreatedCb;
+typedef struct Opt_OnSurfaceCreatedCb {
+    Ark_Tag tag;
+    OnSurfaceCreatedCb value;
+} Opt_OnSurfaceCreatedCb;
+typedef struct OnSurfaceDestroyedCb {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String surfaceId);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String surfaceId);
+} OnSurfaceDestroyedCb;
+typedef struct Opt_OnSurfaceDestroyedCb {
+    Ark_Tag tag;
+    OnSurfaceDestroyedCb value;
+} Opt_OnSurfaceDestroyedCb;
 typedef struct OnSwiperAnimationEndCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -19089,17 +19115,18 @@ typedef struct Opt_WorkerOptions {
     Ark_Tag tag;
     Ark_WorkerOptions value;
 } Opt_WorkerOptions;
-typedef struct Ark_XComponentParameters {
+typedef struct Ark_XComponentControllerWrapper {
     /* kind: Interface */
-    Ark_String id;
-    Ark_XComponentType type;
-    arkui_component_common_Callback_I64_Void nativeXComponentHandler;
-    Opt_XComponentController controller;
-} Ark_XComponentParameters;
-typedef struct Opt_XComponentParameters {
+    Ark_Object managed;
+    Ark_XComponentControllerNative nativeObj;
+    OnSurfaceCreatedCb onSurfaceCreated;
+    OnSurfaceChangedCb onSurfaceChanged;
+    OnSurfaceDestroyedCb onSurfaceDestroyed;
+} Ark_XComponentControllerWrapper;
+typedef struct Opt_XComponentControllerWrapper {
     Ark_Tag tag;
-    Ark_XComponentParameters value;
-} Opt_XComponentParameters;
+    Ark_XComponentControllerWrapper value;
+} Opt_XComponentControllerWrapper;
 typedef struct Ark_AccessibilityCustomAction {
     /* kind: Interface */
     Ark_ResourceStr name;
@@ -20978,7 +21005,7 @@ typedef struct Opt_WithThemeOptions {
 typedef struct Ark_XComponentOptions {
     /* kind: Interface */
     Ark_XComponentType type;
-    Ark_XComponentController controller;
+    Ark_XComponentControllerWrapper controller;
     Opt_ImageAIOptions imageAIOptions;
     Opt_Int64 screenId;
 } Ark_XComponentOptions;
@@ -20986,6 +21013,17 @@ typedef struct Opt_XComponentOptions {
     Ark_Tag tag;
     Ark_XComponentOptions value;
 } Opt_XComponentOptions;
+typedef struct Ark_XComponentParameters {
+    /* kind: Interface */
+    Ark_String id;
+    Ark_XComponentType type;
+    arkui_component_common_Callback_I64_Void nativeXComponentHandler;
+    Opt_XComponentControllerWrapper controller;
+} Ark_XComponentParameters;
+typedef struct Opt_XComponentParameters {
+    Ark_Tag tag;
+    Ark_XComponentParameters value;
+} Opt_XComponentParameters;
 typedef struct Ark_arkui_component_units_Font {
     /* kind: Interface */
     Opt_Length size;
@@ -22843,6 +22881,7 @@ typedef struct Ark_CustomDialogControllerOptions {
     Opt_uiMaterial_Material systemMaterial;
     Opt_DistortionMode distortionMode;
     Opt_EdgeLightMode edgeLightMode;
+    Opt_ExtendableComponent baseComponent;
 } Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
@@ -24088,7 +24127,7 @@ typedef struct GENERATED_ArkUIAlphabetIndexerModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setAlphabetIndexerOptions)(Ark_NativePointer node,
-                                      const Ark_AlphabetIndexerOptions* options);
+                                      const Ark_AlphabetIndexerOptions* info);
     void (*setColor)(Ark_NativePointer node,
                      const Opt_ResourceColor* value);
     void (*setSelectedColor)(Ark_NativePointer node,
@@ -25188,7 +25227,7 @@ typedef struct GENERATED_ArkUIGridColModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setGridColOptions)(Ark_NativePointer node,
-                              const Opt_GridColOptions* option);
+                              const Opt_GridColOptions* options);
     void (*setSpan)(Ark_NativePointer node,
                     const Opt_Union_I32_GridColColumnOption* value);
     void (*setGridColOffset)(Ark_NativePointer node,
@@ -25222,7 +25261,7 @@ typedef struct GENERATED_ArkUIGridRowModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setGridRowOptions)(Ark_NativePointer node,
-                              const Opt_GridRowOptions* option);
+                              const Opt_GridRowOptions* options);
     void (*setOnBreakpointChange)(Ark_NativePointer node,
                                   const Opt_synthetic_Callback_String_Void* value);
     void (*setAlignItems)(Ark_NativePointer node,
@@ -25933,7 +25972,7 @@ typedef struct GENERATED_ArkUIRefreshModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setRefreshOptions)(Ark_NativePointer node,
-                              const Ark_RefreshOptions* value);
+                              const Ark_RefreshOptions* options);
     void (*setOnStateChange)(Ark_NativePointer node,
                              const Opt_Callback_RefreshStatus_Void* value);
     void (*setOnRefreshing)(Ark_NativePointer node,
@@ -26501,7 +26540,7 @@ typedef struct GENERATED_ArkUISelectModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setSelectOptions)(Ark_NativePointer node,
-                             const Array_SelectOption* options);
+                             const Array_SelectOption* optionArray);
     void (*setSelected)(Ark_NativePointer node,
                         const Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource* value);
     void (*setValue)(Ark_NativePointer node,
@@ -32217,41 +32256,32 @@ typedef struct GENERATED_ArkUIWebResourceResponseAccessor {
     Ark_Boolean (*getResponseIsReady)(Ark_WebResourceResponse peer);
 } GENERATED_ArkUIWebResourceResponseAccessor;
 
-typedef struct GENERATED_ArkUIXComponentControllerAccessor {
-    void (*destroyPeer)(Ark_XComponentController peer);
-    Ark_XComponentController (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    Ark_String (*getXComponentSurfaceId)(Ark_XComponentController peer);
-    void (*setXComponentSurfaceRect)(Ark_XComponentController peer,
-                                     const Ark_SurfaceRect* rect);
-    Ark_SurfaceRect (*getXComponentSurfaceRect)(Ark_XComponentController peer);
-    void (*setXComponentSurfaceRotation)(Ark_XComponentController peer,
-                                         const Ark_SurfaceRotationOptions* rotationOptions);
-    Ark_SurfaceRotationOptions (*getXComponentSurfaceRotation)(Ark_XComponentController peer);
-    void (*stopImageAnalyzer)(Ark_XComponentController peer);
-    Opt_drawing_Canvas (*lockCanvas)(Ark_XComponentController peer);
-    void (*unlockCanvasAndPost)(Ark_XComponentController peer,
-                                Ark_drawing_Canvas canvas);
-    void (*setXComponentSurfaceConfig)(Ark_XComponentController peer,
-                                       const Ark_SurfaceConfig* config);
-    synthetic_Callback_String_Void (*getOnSurfaceCreated)(Ark_XComponentController peer);
-    void (*setOnSurfaceCreated)(Ark_XComponentController peer,
-                                const synthetic_Callback_String_Void* onSurfaceCreated);
-    Callback_String_SurfaceRect_Void (*getOnSurfaceChanged)(Ark_XComponentController peer);
-    void (*setOnSurfaceChanged)(Ark_XComponentController peer,
-                                const Callback_String_SurfaceRect_Void* onSurfaceChanged);
-    synthetic_Callback_String_Void (*getOnSurfaceDestroyed)(Ark_XComponentController peer);
-    void (*setOnSurfaceDestroyed)(Ark_XComponentController peer,
-                                  const synthetic_Callback_String_Void* onSurfaceDestroyed);
-} GENERATED_ArkUIXComponentControllerAccessor;
-
 typedef struct GENERATED_ArkUIXComponentControllerExtenderAccessor {
     void (*startImageAnalyzer)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
-                               Ark_XComponentController peer,
+                               const Ark_XComponentControllerWrapper* peer,
                                const Ark_ImageAnalyzerConfig* config,
                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
 } GENERATED_ArkUIXComponentControllerExtenderAccessor;
+
+typedef struct GENERATED_ArkUIXComponentControllerNativeAccessor {
+    void (*destroyPeer)(Ark_XComponentControllerNative peer);
+    Ark_XComponentControllerNative (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_String (*getXComponentSurfaceId)(Ark_XComponentControllerNative peer);
+    void (*setXComponentSurfaceRect)(Ark_XComponentControllerNative peer,
+                                     const Ark_SurfaceRect* rect);
+    Ark_SurfaceRect (*getXComponentSurfaceRect)(Ark_XComponentControllerNative peer);
+    void (*setXComponentSurfaceRotation)(Ark_XComponentControllerNative peer,
+                                         const Ark_SurfaceRotationOptions* rotationOptions);
+    Ark_SurfaceRotationOptions (*getXComponentSurfaceRotation)(Ark_XComponentControllerNative peer);
+    void (*stopImageAnalyzer)(Ark_XComponentControllerNative peer);
+    Opt_drawing_Canvas (*lockCanvas)(Ark_XComponentControllerNative peer);
+    void (*unlockCanvasAndPost)(Ark_XComponentControllerNative peer,
+                                Ark_drawing_Canvas canvas);
+    void (*setXComponentSurfaceConfig)(Ark_XComponentControllerNative peer,
+                                       const Ark_SurfaceConfig* config);
+} GENERATED_ArkUIXComponentControllerNativeAccessor;
 
 typedef struct GENERATED_ArkUIGlobalScopeAccessor {
     Ark_Resource (*$r)(const Ark_String* value,
@@ -32620,8 +32650,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIWebResourceErrorAccessor* (*getWebResourceErrorAccessor)();
     const GENERATED_ArkUIWebResourceRequestAccessor* (*getWebResourceRequestAccessor)();
     const GENERATED_ArkUIWebResourceResponseAccessor* (*getWebResourceResponseAccessor)();
-    const GENERATED_ArkUIXComponentControllerAccessor* (*getXComponentControllerAccessor)();
     const GENERATED_ArkUIXComponentControllerExtenderAccessor* (*getXComponentControllerExtenderAccessor)();
+    const GENERATED_ArkUIXComponentControllerNativeAccessor* (*getXComponentControllerNativeAccessor)();
     const GENERATED_ArkUIGlobalScopeAccessor* (*getGlobalScopeAccessor)();
 } GENERATED_ArkUIAccessors;
 
@@ -32674,12 +32704,8 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_IMAGE_ANIMATOR,
     GENERATED_ARKUI_IMAGE_SPAN,
     GENERATED_ARKUI_INDICATOR_COMPONENT,
-    GENERATED_ARKUI_LAZY_COLUMN_LAYOUT_ATTRIBUTE,
-    GENERATED_ARKUI_LAZY_COLUMN_LAYOUT,
     GENERATED_ARKUI_LAZY_GRID_LAYOUT_ATTRIBUTE,
     GENERATED_ARKUI_LAZY_VGRID_LAYOUT,
-    GENERATED_ARKUI_LAZY_VWATER_FLOW_LAYOUT,
-    GENERATED_ARKUI_LAZY_WATER_FLOW_LAYOUT_ATTRIBUTE,
     GENERATED_ARKUI_LINE,
     GENERATED_ARKUI_LIST,
     GENERATED_ARKUI_LIST_ITEM,

@@ -116,6 +116,9 @@ import { PanGestureOptionsProxy } from '../component/idlize'
 import { ShaderStyleProxy } from '../component/idlize'
 import { ShaderStyle, LinearGradientStyle, RadialGradientStyle, ColorShaderStyle } from '../component/textCommon'
 import { GestureControl, GestureRecognizer, TapRecognizerInternal, LongPressRecognizerInternal, PanRecognizerInternal, PinchRecognizerInternal, SwipeRecognizerInternal, RotationRecognizerInternal, TapGestureEventInternal, LongPressGestureEventInternal, PanGestureEventInternal, PinchGestureEventInternal, SwipeGestureEventInternal, RotationGestureEventInternal, BaseGestureEventInternal, EventTargetInfo, ScrollableTargetInfo } from '../component/gesture'
+import { XComponentController } from '../component/xcomponent'
+import { XComponentControllerWrapper } from '../component/idlize'
+
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
     return ArkUIAniModule._Extractors_ToImagePixelMapPtr(value);
@@ -692,6 +695,23 @@ export namespace extractors {
   export function fromArcSwiperContentTransitionProxyPtr(ptr: KPointer): ArcSwiperContentTransitionProxy {
     let proxy = ArcSwiperContentTransitionProxyInternal.fromPtr(ptr);
     return proxy as ArcSwiperContentTransitionProxy;
+  }
+
+  export function transform_Ark_XComponentController_to_Ark_XComponentControllerWrapper(value:XComponentController):XComponentControllerWrapper {
+    return {
+        managed: value,
+        nativeObj: value.nativeObj,
+        onSurfaceCreated: value.onSurfaceCreated,
+        onSurfaceChanged: value.onSurfaceChanged,
+        onSurfaceDestroyed: value.onSurfaceDestroyed,
+    }
+  }
+
+  export function transform_Ark_XComponentControllerWrapper_to_Ark_XComponentController(value:XComponentControllerWrapper):XComponentController {
+      if (!(value.managed instanceof XComponentController)) {
+        throw new Error("Invalid managed object type in XComponentControllerWrapper");
+      }
+      return value.managed as XComponentController
   }
 
   export function transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(colorMetrics: ColorMetrics): ColorMetricsExt {

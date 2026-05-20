@@ -533,6 +533,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setAccessibilityActionOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setAccessibilityCustomActions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setSmartGestureShortcut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setInspectorLabel(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -1715,6 +1717,8 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorAttribute_setOrphanCharOptimization(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setHorizontalScrolling(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _RichEditorAttribute_setPunctuationOverflow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setBindSelectionMenu(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -7339,41 +7343,29 @@ export class ArkUIGeneratedNativeModule {
     native static _WebResourceResponse_setResponseIsReady(ptr: KPointer, IsReady: boolean): void
     @ani.unsafe.Direct
     native static _WebResourceResponse_getResponseIsReady(ptr: KPointer): boolean
+    native static _XComponentControllerExtender_startImageAnalyzer(thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _XComponentController_construct(): KPointer
+    native static _XComponentControllerNative_construct(): KPointer
     @ani.unsafe.Direct
-    native static _XComponentController_getFinalizer(): KPointer
+    native static _XComponentControllerNative_getFinalizer(): KPointer
     @ani.unsafe.Quick
-    native static _XComponentController_getXComponentSurfaceId(ptr: KPointer): KInteropReturnBuffer
+    native static _XComponentControllerNative_getXComponentSurfaceId(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _XComponentController_setXComponentSurfaceRect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _XComponentControllerNative_setXComponentSurfaceRect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
-    native static _XComponentController_getXComponentSurfaceRect(ptr: KPointer): KInteropReturnBuffer
+    native static _XComponentControllerNative_getXComponentSurfaceRect(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _XComponentController_setXComponentSurfaceRotation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _XComponentControllerNative_setXComponentSurfaceRotation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
-    native static _XComponentController_getXComponentSurfaceRotation(ptr: KPointer): KInteropReturnBuffer
+    native static _XComponentControllerNative_getXComponentSurfaceRotation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _XComponentController_stopImageAnalyzer(ptr: KPointer): void
+    native static _XComponentControllerNative_stopImageAnalyzer(ptr: KPointer): void
     @ani.unsafe.Quick
-    native static _XComponentController_lockCanvas(ptr: KPointer): KInteropReturnBuffer
+    native static _XComponentControllerNative_lockCanvas(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _XComponentController_unlockCanvasAndPost(ptr: KPointer, canvas: KPointer): void
+    native static _XComponentControllerNative_unlockCanvasAndPost(ptr: KPointer, canvas: KPointer): void
     @ani.unsafe.Direct
-    native static _XComponentController_setXComponentSurfaceConfig(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Quick
-    native static _XComponentController_getOnSurfaceCreated(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _XComponentController_setOnSurfaceCreated(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Quick
-    native static _XComponentController_getOnSurfaceChanged(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _XComponentController_setOnSurfaceChanged(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Quick
-    native static _XComponentController_getOnSurfaceDestroyed(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _XComponentController_setOnSurfaceDestroyed(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    native static _XComponentControllerExtender_startImageAnalyzer(peer: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _XComponentControllerNative_setXComponentSurfaceConfig(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
     native static _GlobalScope_$r(value: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
