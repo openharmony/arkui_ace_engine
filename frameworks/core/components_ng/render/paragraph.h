@@ -385,6 +385,14 @@ public:
     {
         return 0;
     }
+    virtual size_t GetParagraphLength() const
+    {
+        return 0;
+    }
+    // WARNING: The return value is NOT reliable for styled strings (SpanString/StyledString).
+    // When the styled string ends with '\n', the '\n' may be removed during paragraph building,
+    // causing GetParagraphLength() to return a smaller value than expected.
+    // For plain text, this method returns accurate length.
 };
 } // namespace OHOS::Ace::NG
 

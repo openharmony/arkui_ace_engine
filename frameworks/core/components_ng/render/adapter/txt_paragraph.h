@@ -140,6 +140,10 @@ public:
     {
         return placeholderCnt_;
     }
+    size_t GetParagraphLength() const override
+    {
+        return text_.length() + placeholderCnt_;
+    }
 
 protected:
     ParagraphStyle paraStyle_;
@@ -155,10 +159,6 @@ protected:
 private:
     void CreateBuilder();
     bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);
-    inline size_t GetParagraphLength() const
-    {
-        return text_.length() + placeholderCnt_;
-    }
     float MakeEmptyOffsetX(bool isLtr);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
