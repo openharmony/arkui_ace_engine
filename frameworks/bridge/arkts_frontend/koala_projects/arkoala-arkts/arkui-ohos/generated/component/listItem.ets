@@ -363,6 +363,22 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         super.applyOptionsFinish(traceName)
     }
 }
+
+@memo
+export function ListItem(
+    @memo @memo_skip
+    style: ((attributes: ListItemAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkListItemComponent>((): ArkListItemComponent => {
+        return new ArkListItemComponent()
+    })
+    NodeAttach<ArkListItemPeer>((): ArkListItemPeer => ArkListItemPeer.create(receiver), (_: ArkListItemPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class ListItemSwipeActionManager_serializer {
     public static write(buffer: SerializerBase, value: ListItemSwipeActionManager): void {
         let valueSerializer: SerializerBase = buffer
