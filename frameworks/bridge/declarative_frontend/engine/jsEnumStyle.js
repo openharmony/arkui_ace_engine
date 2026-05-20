@@ -916,6 +916,13 @@ let FormRenderingMode;
   FormRenderingMode.SINGLE_COLOR = 1;
 })(FormRenderingMode || (FormRenderingMode = {}));
 
+let FormColorMode;
+(function (FormColorMode) {
+  FormColorMode.MODE_AUTO = -1;
+  FormColorMode.MODE_DARK = 0;
+  FormColorMode.MODE_LIGHT = 1;
+})(FormColorMode || (FormColorMode = {}));
+
 let TransitionType;
 (function (TransitionType) {
   TransitionType.All = 'All';
