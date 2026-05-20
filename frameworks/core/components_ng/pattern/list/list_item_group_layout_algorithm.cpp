@@ -1329,7 +1329,8 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterRTL(LayoutWrapper* layoutWr
         float footerPos = 0.0f;
         if (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER) {
             contentStartOffset_ = std::max(contentStartOffset_, 0.0f);
-            float stickyPos = contentStartOffset_ - mainPos;
+            auto contentStartOffset = isStackFromEnd_ ? contentEndOffset_ : contentStartOffset_;
+            float stickyPos = contentStartOffset - mainPos;
             stickyPos = std::min(stickyPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
             footerPos = std::max(footerPos, stickyPos);
             footerPos = std::min(footerPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
@@ -1344,7 +1345,8 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterRTL(LayoutWrapper* layoutWr
         float const listMainSize = endPos_ - startPos_ - startFixOffset_ - endFixOffset_;
         if (Positive(listMainSize) && (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER)) {
             auto headerMainSize = headerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
-            float stickyPos = listMainSize - contentEndOffset_ - mainPos - headerMainSize;
+            auto contentEndOffset = isStackFromEnd_ ? contentStartOffset_ : contentEndOffset_;
+            float stickyPos = listMainSize - contentEndOffset - mainPos - headerMainSize;
             if (stickyPos < footerMainSize) {
                 stickyPos = footerMainSize;
             }

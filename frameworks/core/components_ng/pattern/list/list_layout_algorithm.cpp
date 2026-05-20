@@ -2207,11 +2207,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     itemGroup->SetFixOffset(startFixOffset_, endFixOffset_);
     itemGroup->SetNeedSyncLoad(syncLoad_);
     if (scrollSnapAlign_ != ScrollSnapAlign::CENTER) {
-        if (isStackFromEnd_) {
-            itemGroup->SetContentOffset(contentEndOffset_, contentStartOffset_);
-        } else {
-            itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
-        }
+        itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
     }
     SetListItemGroupJumpIndex(itemGroup, forwardLayout, index);
 
