@@ -1264,7 +1264,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg036, TestSize.L
     std::shared_ptr<Rosen::RSTransaction> sharedTransaction = std::make_shared<Rosen::RSTransaction>();
     sessionWrapper->transaction_ = sharedTransaction;
     sessionWrapper->NotifyDisplayArea(displayArea);
-    EXPECT_EQ(transaction, sessionWrapper->transaction_.lock());
+    EXPECT_NE(transaction, sessionWrapper->transaction_.lock());
 
     transactionController->Destroy();
     sessionWrapper->NotifyDisplayArea(displayArea);
@@ -1413,5 +1413,40 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg042, TestSize.L
     SUCCEED();
 
     GTEST_LOG_(INFO) << "SessionWrapperImplNewTestNg-end SessionWrapperImplNewTestNg042";
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg043
+ * @tc.desc: Test NotifyDisplayArea with pipeline SizeChangeReason override
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg043, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    RectF displayArea(100.0, 100.0, 100.0, 100.0);
+
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    
+    auto pipeline = PipelineBase::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+
+    // Set pipeline reason to UNDEFINED, while session says ROTATION
+    pipeline->SetWindowSizeChangeReason(WindowSizeChangeReason::UNDEFINED);
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
+    
+    sessionWrapper->NotifyDisplayArea(displayArea);
+    
+    // Result should be overridden to UNDEFINED in sessionWrapper->reason_
+    EXPECT_EQ(sessionWrapper->reason_, static_cast<uint32_t>(Rosen::SizeChangeReason::UNDEFINED));
+
+    // Set pipeline reason to ROTATION, session also says ROTATION
+    pipeline->SetWindowSizeChangeReason(WindowSizeChangeReason::ROTATION);
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
+    
+    sessionWrapper->NotifyDisplayArea(displayArea);
+    
+    // Result should remain ROTATION
+    EXPECT_EQ(sessionWrapper->reason_, static_cast<uint32_t>(Rosen::SizeChangeReason::ROTATION));
 }
 } // namespace OHOS::Ace::NG

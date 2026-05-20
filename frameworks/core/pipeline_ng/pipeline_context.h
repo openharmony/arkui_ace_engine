@@ -1362,6 +1362,10 @@ public:
     void MarkLpxDirtyNodes();
     void SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager);
     RefPtr<DynamicComponentSafeManager> GetDynamicComponentSafeManager();
+    WindowSizeChangeReason GetWindowSizeChangeReason() const override
+    {
+        return windowSizeChangeReason_;
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
