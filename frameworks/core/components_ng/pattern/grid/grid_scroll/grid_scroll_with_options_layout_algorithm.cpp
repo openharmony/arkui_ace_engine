@@ -271,6 +271,10 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
     int32_t itemIndex, const GridLayoutOptions& options, int32_t firstIrregularIndex)
 {
     auto crossCount = info_.crossCount_;
+    if (crossCount == 0) {
+        TAG_LOGW(AceLogTag::ACE_GRID, "crossCount is zero");
+        return std::make_pair(-1, 1);
+    }
     InitIrregularItemsPosition(
         info_.irregularItemsPosition_, options, firstIrregularIndex, info_.axis_, crossCount);
     auto sum = firstIrregularIndex;

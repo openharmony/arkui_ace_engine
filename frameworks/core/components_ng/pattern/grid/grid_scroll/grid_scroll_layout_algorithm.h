@@ -294,7 +294,7 @@ private:
     std::map<int32_t, float> itemsCrossPosition_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
-    GridReloadReason reason_;
+    GridReloadReason reason_ = GridReloadReason::INIT;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };
