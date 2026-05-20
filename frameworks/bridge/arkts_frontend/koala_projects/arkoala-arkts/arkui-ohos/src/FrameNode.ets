@@ -182,7 +182,8 @@ export enum UIState {
     PRESSED = 1 << 0,
     FOCUSED = 1 << 1,
     DISABLED = 1 << 2,
-    SELECTED = 1 << 3
+    SELECTED = 1 << 3,
+    HOVERED = 1 << 4,
 }
 export type UIStatesChangeHandler = (node: FrameNode, currentUIStates: int) => void;
 export class FrameNodeFinalizationRegisterProxy {

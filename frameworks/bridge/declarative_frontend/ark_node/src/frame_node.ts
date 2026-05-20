@@ -57,6 +57,7 @@ enum UIState {
   FOCUSED = 1 << 1,
   DISABLED = 1 << 2,
   SELECTED = 1 << 3,
+  HOVERED = 1 << 4,
 }
 
 declare enum EventQueryType {
