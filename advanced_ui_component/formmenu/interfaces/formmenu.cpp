@@ -38,7 +38,7 @@ static napi_module FormMenuModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_modname = "arkui.advanced.FormMenu",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = { 0 },
 };
 
