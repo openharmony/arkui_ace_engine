@@ -255,7 +255,8 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 #else
     std::string str("arkui_binary_stateMgmt_abc_loadFile");
     return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start, str);
+        reinterpret_cast<const uint8_t*>(_binary_stateMgmt_abc_start),
+        _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start, str);
 #endif
 }
 
