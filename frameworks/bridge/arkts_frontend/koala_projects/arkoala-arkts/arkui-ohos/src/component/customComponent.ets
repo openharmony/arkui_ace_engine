@@ -41,6 +41,7 @@ import { ArkCustomComponentRootPeer } from './staticComponents';
 import { ArkUIObjectFinalizationRegisterProxy } from '../base/ArkUIObjectFinalizationRegisterProxy';
 import { ActiveAndInactiveCallbackType, CustomComponentContext, IReusePool } from '../stateManagement/utils';
 import { IVariableOwner } from '../stateManagement/decorator';
+import { EnvUtils } from '../stateManagement/decoratorImpl/decoratorEnv';
 import { GlobalReusePool } from '../stateManagement/tools/globalReusePool';
 
 // GlobalReuse pool ownership type
@@ -49,6 +50,7 @@ export enum ReusePoolOwnership {
   PER_INSTANCE = 'perInstance',
   OFF = 'off',
 }
+
 
 /** @custom_components_common_method_imports */
 
@@ -301,7 +303,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             ArkUIObjectFinalizationRegisterProxy.call(new WeakRef<object>(this.instance),
                 `${Class.of(this.instance).getName()}[${this.getUniqueId()}] is in process of destruction`);
         }
-        this.instance.__clearStateVariables__Internal();
+        const envSet = this.instance.getEnvSet();
+        if (envSet.size > 0) {
+            for (const envItem of envSet) {
+                envItem.unRegisterEnv();
+            }
+            envSet.clear();
+        }
+        const dispatchFuncs = this.instance.__getSimpleEnvDispatchFuncs__Internal();
+        const instanceId = this.instance.getEnvInstance();
+        if (instanceId !== undefined && dispatchFuncs.size > 0) {
+            dispatchFuncs.forEach((dispatchFunc: (value: Any) => void, envKey: string) => {
+                const env = EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
+                EnvUtils.unregisterCallbackFromWindowStaticEnv(env, envKey, dispatchFunc);
+            });
+        }
+        this.instance.__clearAllSimpleEnvRegistrations__Internal();
     }
     onDidBuild(): void {
         this.instance.onDidBuild();

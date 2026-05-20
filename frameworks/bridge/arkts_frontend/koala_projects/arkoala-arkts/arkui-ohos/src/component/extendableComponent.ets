@@ -126,6 +126,8 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private ownedStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
     private envPropertySet: Set<IEnvVariable> = new Set<IEnvVariable>();
     private envInstanceId: int32 | undefined;
+    private simpleEnvCallbackSets_: Map<string, Set<(value: Any) => void>> = new Map<string, Set<(value: Any) => void>>();
+    private simpleEnvDispatchFuncs_: Map<string, (value: Any) => void> = new Map<string, (value: Any) => void>();
 
     private __activeFunc__Internal?: ActiveAndInactiveCallbackType;
     private __inactiveFunc__Internal?: ActiveAndInactiveCallbackType;
@@ -341,6 +343,51 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     setEnvInstance(newInstanceId: int32 | undefined) {
         this.envInstanceId = newInstanceId;
     }
+
+    __addSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean {
+        let callbackSet = this.simpleEnvCallbackSets_.get(envKey);
+        if (callbackSet === undefined) {
+            callbackSet = new Set<(value: Any) => void>();
+            this.simpleEnvCallbackSets_.set(envKey, callbackSet);
+        }
+        callbackSet.add(callback);
+        return callbackSet.size === 1;
+    }
+ 
+    __getSimpleEnvCallbackSet__Internal(envKey: string): (Set<(value: Any) => void>) | undefined {
+        return this.simpleEnvCallbackSets_.get(envKey);
+    } 
+ 
+    __removeSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean {
+        const callbackSet = this.simpleEnvCallbackSets_.get(envKey);
+        if (callbackSet !== undefined) {
+            callbackSet.delete(callback);
+            if (callbackSet.size === 0) {
+                this.simpleEnvCallbackSets_.delete(envKey);
+                return true;
+            }
+        }
+        return false;
+    }
+ 
+    __setSimpleEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void {
+        this.simpleEnvDispatchFuncs_.set(envKey, dispatchFunc);
+    }
+ 
+    __getAndClearSimpleEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined {
+        const dispatchFunc = this.simpleEnvDispatchFuncs_.get(envKey);
+        this.simpleEnvDispatchFuncs_.delete(envKey);
+        return dispatchFunc;
+    }
+ 
+    __getSimpleEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void> {
+        return this.simpleEnvDispatchFuncs_;
+    }
+ 
+    __clearAllSimpleEnvRegistrations__Internal(): void {
+        this.simpleEnvCallbackSets_.clear();
+        this.simpleEnvDispatchFuncs_.clear();
+    }    
 
     __getDelegate__Internal<T extends ExtendableComponent, T_Options>(): CustomDelegate<T, T_Options> | undefined {
         if (this.delegate_ instanceof CustomDelegate) {
