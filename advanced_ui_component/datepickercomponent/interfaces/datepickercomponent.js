@@ -49,6 +49,8 @@ class DatePickerConstant {
 }
 DatePickerConstant.MIN_YEAR = 0;
 DatePickerConstant.MAX_YEAR = 10000;
+DatePickerConstant.DEFAULT_START_YEAR = 1970;
+DatePickerConstant.DEFAULT_END_YEAR = 2100;
 DatePickerConstant.MIN_MONTH = 0;
 DatePickerConstant.MAX_MONTH = 11;
 DatePickerConstant.MIN_DAY = 1;
@@ -74,8 +76,8 @@ export class DatePickerComponent extends ViewPU {
         this.__selectedHour = new ObservedPropertySimplePU(0, this, "selectedHour");
         this.__selectedMinute = new ObservedPropertySimplePU(0, this, "selectedMinute");
         this.__selectedSecond = new ObservedPropertySimplePU(0, this, "selectedSecond");
-        this.__startYear = new ObservedPropertySimplePU(DatePickerConstant.MIN_YEAR, this, "startYear");
-        this.__endYear = new ObservedPropertySimplePU(DatePickerConstant.MAX_YEAR, this, "endYear");
+        this.__startYear = new ObservedPropertySimplePU(DatePickerConstant.DEFAULT_START_YEAR, this, "startYear");
+        this.__endYear = new ObservedPropertySimplePU(DatePickerConstant.DEFAULT_END_YEAR, this, "endYear");
         this.__dateMode = new ObservedPropertySimplePU(DateMode.DATE, this, "dateMode");
         this.__timeFormat = new ObservedPropertySimplePU(TimeFormat.HOUR_MINUTE, this, "timeFormat");
         this.__useMilitaryTime = new ObservedPropertySimplePU(false, this, "useMilitaryTime");
@@ -465,7 +467,7 @@ export class DatePickerComponent extends ViewPU {
             let month1Start = null;
             let month2Start = null;
             for (let month = 0; month < 12; month++) {
-                for (let day = 1; day <= 28; day++) {
+                for (let day = 1; day <= 31; day++) {
                     const testDate = new Date(gregorianYear, month, day);
                     this.lunarCalendar.setTime(testDate);
                     const currentLunarMonth = this.lunarCalendar.get('month');
@@ -559,8 +561,8 @@ export class DatePickerComponent extends ViewPU {
         }
         this.periodArray = [];
         if (!this.useMilitaryTime) {
-            this.periodArray.push('AM');
-            this.periodArray.push('PM');
+            this.periodArray.push(this.formatPeriod(true));
+            this.periodArray.push(this.formatPeriod(false));
             this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
         }
     }
@@ -624,6 +626,40 @@ export class DatePickerComponent extends ViewPU {
     formatSecond(second) {
         return second.toString().padStart(2, '0');
     }
+    formatPeriod(isAM) {
+        try {
+            const localeStr = this.locale.toString();
+            if (!localeStr || localeStr.length === 0) {
+                return isAM ? 'AM' : 'PM';
+            }
+            if (this.isChineseLocale()) {
+                return isAM ? '上午' : '下午';
+            }
+            const hour = isAM ? 10 : 22;
+            const dateFormat = new Intl.DateTimeFormat(localeStr, {
+                hour: 'numeric',
+                hour12: true
+            });
+            const date = new Date(2026, 0, 1, hour, 0, 0);
+            const formatted = dateFormat.format(date);
+            if (formatted.includes('上午')) {
+                return isAM ? '上午' : '下午';
+            }
+            else if (formatted.includes('下午')) {
+                return isAM ? '上午' : '下午';
+            }
+            else if (formatted.includes('AM') || formatted.includes('am')) {
+                return isAM ? 'AM' : 'PM';
+            }
+            else if (formatted.includes('PM') || formatted.includes('pm')) {
+                return isAM ? 'AM' : 'PM';
+            }
+            return isAM ? 'AM' : 'PM';
+        }
+        catch (error) {
+            return isAM ? 'AM' : 'PM';
+        }
+    }
     getDaysInMonth(year, month) {
         const monthsWith31Days = [0, 2, 4, 6, 7, 9, 11];
         const monthsWith30Days = [3, 5, 8, 10];
@@ -671,24 +707,28 @@ export class DatePickerComponent extends ViewPU {
             this.hapticFeedback = dateOptions.enableHapticFeedback;
         }
         if (dateOptions.start !== undefined) {
-            this.startYear = dateOptions.start.getFullYear();
+            const year = dateOptions.start.getFullYear();
+            this.startYear = Math.max(DatePickerConstant.MIN_YEAR, Math.min(DatePickerConstant.MAX_YEAR, year));
         }
         if (dateOptions.end !== undefined) {
-            this.endYear = dateOptions.end.getFullYear();
+            const year = dateOptions.end.getFullYear();
+            this.endYear = Math.max(DatePickerConstant.MIN_YEAR, Math.min(DatePickerConstant.MAX_YEAR, year));
+        }
+        if (this.startYear > this.endYear) {
+            const temp = this.startYear;
+            this.startYear = this.endYear;
+            this.endYear = temp;
         }
         if (dateOptions.selected !== undefined) {
             if (this.initFlag) {
                 this.initFlag = false;
                 if (this.lunar && this.lunarCalendar !== null) {
                     this.lunarCalendar.setTime(dateOptions.selected);
-                    const lunarYear = this.lunarCalendar.get('year');
                     const lunarMonth = this.lunarCalendar.get('month');
                     const lunarDay = this.lunarCalendar.get('date');
-                    const cyclicalYear = this.lunarCalendar.get('year');
-                    const baseYear = 1984;
-                    const baseCyclical = 1;
-                    const gregorianYear = baseYear + ((cyclicalYear - baseCyclical + 60) % 60);
-                    this.selectedYear = gregorianYear;
+                    // Use Gregorian year from Date object directly, do not reverse derive from sexagenary cycle
+                    // lunarCalendar.get('year') returns sexagenary cycle (1-60 cycle), cannot accurately derive Gregorian year
+                    this.selectedYear = dateOptions.selected.getFullYear();
                     this.selectedMonth = lunarMonth;
                     this.selectedDay = lunarDay;
                 }
@@ -707,11 +747,8 @@ export class DatePickerComponent extends ViewPU {
                     this.lunarCalendar.setTime(now);
                     const lunarMonth = this.lunarCalendar.get('month');
                     const lunarDay = this.lunarCalendar.get('date');
-                    const cyclicalYear = this.lunarCalendar.get('year');
-                    const baseYear = 1984;
-                    const baseCyclical = 1;
-                    const gregorianYear = baseYear + ((cyclicalYear - baseCyclical + 60) % 60);
-                    this.selectedYear = gregorianYear;
+                    // Use Gregorian year from Date object directly
+                    this.selectedYear = now.getFullYear();
                     this.selectedMonth = lunarMonth;
                     this.selectedDay = lunarDay;
                 }

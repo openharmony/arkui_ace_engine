@@ -20,6 +20,7 @@ generate_static_abc("assembled_advanced_ets_abc") {
   files = [
     "./@ohos.arkui.advanced.Dialog.ets",
     "./@ohos.arkui.advanced.DialogV2.ets",
+    "./@ohos.arkui.advanced.DatePickerComponent.ets"
   ]
   if (!ace_engine_feature_wearable) {
     files += [
