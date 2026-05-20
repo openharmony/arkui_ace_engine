@@ -118,4 +118,6 @@ void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
 
 void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) {}
 
+void RosenRenderSurface::UpdateBufferTypeLeak(const std::string& bufferTypeLeak) {}
+
 } // namespace OHOS::Ace::NG

@@ -125,6 +125,9 @@ void XComponentPatternV2::OnAttachToMainTree()
     if (autoInitialize_) {
         HandleSurfaceCreated();
     }
+    if (renderSurface_) {
+        renderSurface_->UpdateBufferTypeLeak(GetLeakType());
+    }
     CHECK_NULL_VOID(displaySync_);
     if (needRecoverDisplaySync_  && !displaySync_->IsOnPipeline()) {
         TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "

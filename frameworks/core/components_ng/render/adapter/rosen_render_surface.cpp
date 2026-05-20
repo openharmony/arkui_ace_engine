@@ -197,6 +197,12 @@ void RosenRenderSurface::Disconnect() const
     producerSurface_->Disconnect();
 }
 
+void RosenRenderSurface::UpdateBufferTypeLeak(const std::string& bufferTypeLeak)
+{
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->SetBufferTypeLeak(bufferTypeLeak);
+}
+
 void RosenRenderSurface::RegisterSurface() const
 {
     CHECK_NULL_VOID(producerSurface_);
