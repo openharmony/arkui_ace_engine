@@ -126,6 +126,7 @@ bool TaihangOptimizer::CheckSwiperPathValid(const std::string& bundleName, const
 
 void TaihangOptimizer::ComponentPreMake(const std::unordered_map<std::string, std::string> extInfo)
 {
+    CHECK_EQUAL_VOID(isInited_, false);
     auto iter = extInfo.find("componentType");
     CHECK_EQUAL_VOID(iter, extInfo.end());
     auto componentType = StringUtils::StringToInt(iter->second);

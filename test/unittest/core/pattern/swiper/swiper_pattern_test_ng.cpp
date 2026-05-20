@@ -2961,6 +2961,19 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent001, TestSize.Level
     CreateSwiperItems(4);
     CreateSwiperDone();
 
+    auto host = pattern_->GetHost();
+    auto geometryNode = host->GetGeometryNode();
+    auto frame = geometryNode->frame_;
+    auto rect = frame.rect_;
+    rect.width_ = 100.0;
+    rect.height = 100.0;
+
+    auto context = pattern_->GetContext();
+    CHECK_NULL_VOID(context);
+    
+    context->rootWidth_ = 180.0;
+    context->rootWidth_ = 180.0;
+
     /**
      * @tc.steps: step2. Call ReportSwiperChangeContent.
      * @tc.expected: Method executes without crash.
@@ -2984,9 +2997,94 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent002, TestSize.Level
     CreateSwiperItems(4);
     CreateSwiperDone();
 
+    auto host = pattern_->GetHost();
+    auto geometryNode = host->GetGeometryNode();
+    auto frame = geometryNode->frame_;
+    auto rect = frame.rect_;
+    rect.width_ = 100.0;
+    rect.height = 100.0;
+
+    auto context = pattern_->GetContext();
+    CHECK_NULL_VOID(context);
+    
+    context->rootWidth_ = 180.0;
+    context->rootWidth_ = 180.0;
+
     /**
      * @tc.steps: step2. Set auto play and call ReportSwiperChangeContent.
      * @tc.expected: Method skips upload when in auto play.
+     */
+    pattern_->isInAutoPlay_ = true;
+    pattern_->ReportSwiperChangeContent(1);
+    EXPECT_TRUE(pattern_->isInAutoPlay_);
+}
+
+/**
+ * @tc.name: SwiperReportSwiperChangeContent003
+ * @tc.desc: test ReportSwiperChangeContent when size is small
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    auto host = pattern_->GetHost();
+    auto geometryNode = host->GetGeometryNode();
+    auto frame = geometryNode->frame_;
+    auto rect = frame.rect_;
+    rect.width_ = 100.0;
+    rect.height = 100.0;
+
+    auto context = pattern_->GetContext();
+    CHECK_NULL_VOID(context);
+    
+    context->rootWidth_ = 300.0;
+    context->rootWidth_ = 300.0;
+
+    /**
+     * @tc.steps: step2. Set auto play and call ReportSwiperChangeContent.
+     * @tc.expected: Method skips upload when size is small
+     */
+    pattern_->isInAutoPlay_ = true;
+    pattern_->ReportSwiperChangeContent(1);
+    EXPECT_TRUE(pattern_->isInAutoPlay_);
+}
+
+/**
+ * @tc.name: SwiperReportSwiperChangeContent004
+ * @tc.desc: test ReportSwiperChangeContent when size is small
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    auto host = pattern_->GetHost();
+    auto geometryNode = host->GetGeometryNode();
+    auto frame = geometryNode->frame_;
+    auto rect = frame.rect_;
+    rect.width_ = 100.0;
+    rect.height = 100.0;
+
+    auto context = pattern_->GetContext();
+    CHECK_NULL_VOID(context);
+    
+    context->rootWidth_ = 180.0;
+    context->rootWidth_ = 300.0;
+
+    /**
+     * @tc.steps: step2. Set auto play and call ReportSwiperChangeContent.
+     * @tc.expected: Method skips upload when size is small
      */
     pattern_->isInAutoPlay_ = true;
     pattern_->ReportSwiperChangeContent(1);
@@ -3012,7 +3110,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel001, TestSize.Level1)
      * @tc.expected: Method returns early.
      */
     pattern_->premakeItems_.clear();
-    pattern_->OnNotifyMemoryLevel(0);
+    pattern_->OnNotifyMemoryLevel(2);
     EXPECT_TRUE(pattern_->premakeItems_.empty());
 }
 
@@ -3036,8 +3134,31 @@ HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel002, TestSize.Level1)
      */
     pattern_->premakeItems_.emplace(0);
     pattern_->premakeItems_.emplace(1);
-    pattern_->OnNotifyMemoryLevel(1);
+    pattern_->OnNotifyMemoryLevel(2);
     EXPECT_FALSE(pattern_->premakeItems_.empty());
+}
+
+/**
+ * @tc.name: SwiperOnNotifyMemoryLevel003
+ * @tc.desc: test OnNotifyMemoryLevel with error level
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with premakeItems populated.
+     * @tc.expected:  Method returns early.
+     */
+    pattern_->premakeItems_.clear();
+    pattern_->OnNotifyMemoryLevel(1);
+    EXPECT_TRUE(pattern_->premakeItems_.empty());
 }
 
 /**

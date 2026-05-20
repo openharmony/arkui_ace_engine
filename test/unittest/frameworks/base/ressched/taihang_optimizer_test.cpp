@@ -183,8 +183,9 @@ HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest001, TestSize.Level1)
     extInfo["componentType"] = "1";
     extInfo["path"] = "test";
     extInfo["index"] = "0";
+    optimizer_->isInited = true;
     optimizer_->ComponentPreMake(extInfo);
-    EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
+    EXPECT_TRUE(optimizer_->IsInited());
 }
 
 HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest002, TestSize.Level1)
@@ -193,8 +194,9 @@ HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest002, TestSize.Level1)
     extInfo["componentType"] = "0";
     extInfo["path"] = "test";
     extInfo["index"] = "0";
+    optimizer_->isInited = true;
     optimizer_->ComponentPreMake(extInfo);
-    EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
+    EXPECT_TRUE(optimizer_->IsInited());
 }
 
 HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest003, TestSize.Level1)
@@ -203,15 +205,25 @@ HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest003, TestSize.Level1)
     extInfo["componentType"] = "2";
     extInfo["path"] = "test";
     extInfo["index"] = "0";
+    optimizer_->isInited = true;
     optimizer_->ComponentPreMake(extInfo);
-    EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
+    EXPECT_TRUE(optimizer_->IsInited());
 }
 
 HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest004, TestSize.Level1)
 {
     std::unordered_map<std::string, std::string> extInfo;
+    optimizer_->isInited = true;
     optimizer_->ComponentPreMake(extInfo);
-    EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
+    EXPECT_TRUE(optimizer_->IsInited());
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest005, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    optimizer_->isInited = false;
+    optimizer_->ComponentPreMake(extInfo);
+    EXPECT_FALSE(optimizer_->IsInited());
 }
 
 HWTEST_F(TaihangOptimizerTest, InitTest001, TestSize.Level1)

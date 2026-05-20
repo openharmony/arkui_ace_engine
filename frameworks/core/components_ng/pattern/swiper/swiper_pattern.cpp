@@ -1750,14 +1750,29 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
 
 void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto paddingSize = geometryNode->GetPaddingSize();
+    auto swiperWidth = paddingSize.Width();
+    auto swiperHeight = paddingSize.Height();
+
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto width = pipeline->GetRootWidth();
+    auto height = pipeline->GetRootHeight();
+
+    if (0.5 * width > swiperWidth || 0.5 * height > swiperHeight) {
+        return;
+    }
+
+    CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
     auto curPageName = pipeline->GetCurrentPageName();
     auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-    CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
     if (pipeline->GetTaihangOptimizer()->CheckSwiperPathValid(bundleName, curPageName) && !isInAutoPlay_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         RefPtr<NG::UINode> curUINode = host;
         std::string path = curUINode->GetPath();
         std::unordered_map<std::string, std::string> payload;
@@ -6014,6 +6029,7 @@ void SwiperPattern::OnWindowHide()
     }
 
     StopSpringAnimationAndFlushImmediately();
+    CleanPreMakeNode();
 }
 
 void SwiperPattern::ArrowHover(bool isHover, SwiperHoverFlag flag)
@@ -8377,6 +8393,11 @@ void SwiperPattern::OnNotifyMemoryLevel(int32_t level)
     if (level != MEMORY_LEVEL_CRITICAL) {
         return;
     }
+    CleanPreMakeNode();
+}
+
+void SwiperPattern::CleanPreMakeNode()
+{
     if (premakeItems_.empty()) {
         return;
     }
