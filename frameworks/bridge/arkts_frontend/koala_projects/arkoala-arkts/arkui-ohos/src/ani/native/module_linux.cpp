@@ -36,6 +36,11 @@
 
 namespace {
 namespace Stubs {
+ani_long ExtractorsToScenePtr([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
+    [[maybe_unused]] ani_object object)
+{
+    return 0L;
+}
 ani_long VideoSetVoidCallback([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
     [[maybe_unused]] ani_object callback)
 {
@@ -407,6 +412,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ForEachNode_Construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
+        },
+        ani_native_function {
+            "_Extractors_ToScenePtr",
+            nullptr,
+            reinterpret_cast<void*>(Stubs::ExtractorsToScenePtr)
         },
         ani_native_function {
             "_SetCustomCallbackWithCheck",
