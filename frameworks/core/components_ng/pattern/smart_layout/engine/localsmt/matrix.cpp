@@ -99,8 +99,8 @@ void MergeRows(std::vector<RationNum>& upperRow, const std::vector<RationNum>& l
 
 void ToUpperTriangle(std::vector<std::vector<RationNum>>& matrix)
 {
-    int32_t rowNum = matrix.size();
-    int32_t colNum = matrix[0].size();
+    int32_t rowNum = static_cast<int32_t>(matrix.size());
+    int32_t colNum = static_cast<int32_t>(matrix[0].size());
 
     for (int32_t i = 0; i < rowNum && i < colNum; ++i) {
         int32_t pivotRow = FindPivot(matrix, i, i);

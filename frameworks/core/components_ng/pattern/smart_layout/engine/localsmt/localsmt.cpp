@@ -211,9 +211,9 @@ Expr Engine::Var(const std::string& name, double lo, double hi, double initial)
     return Expr(name, this);
 }
 
-void Engine::SetInitVar(const std::string& name, double initalValue)
+void Engine::SetInitVar(const std::string& name, double initialValue)
 {
-    varInitial_[name] = initalValue;
+    varInitial_[name] = initialValue;
 }
 
 LitRef Engine::Add(const Constraint& c, int strength)
@@ -375,7 +375,7 @@ static NormExpr NormalizeExprs(const std::vector<Expr::Term>& lhsTerms, double l
     double c = lhsConst - rhsConst;
 
     result.terms.reserve(combined.size());
-    for (auto& kv : combined) {
+    for (const auto& kv : combined) {
         RationNum rc = RationNum::FromDouble(kv.second);
         if (rc != 0) {
             result.terms.push_back({ kv.first, rc });
@@ -393,7 +393,7 @@ bool Engine::BuildAndSolve(int width, int height)
     int nextLit = 1;
 
     CollectActiveConstraints(active, boundLits, nextLit);
-    AllocateSolverLits(solver, active);
+    AllocateSolverLits(solver);
     BuildConstraintLiterals(solver, active);
     BuildBoundLiterals(solver, boundLits);
 
@@ -419,7 +419,7 @@ void Engine::CollectActiveConstraints(
         active.push_back({ i, constraints_[i].litId, nextLit++ });
     }
 
-    for (auto& kv : varBounds_) {
+    for (const auto& kv : varBounds_) {
         if (kv.second.lo > -1e17) {
             boundLits.push_back({ kv.first, false, RationNum::FromDouble(kv.second.lo), nextLit++ });
         }
@@ -429,7 +429,7 @@ void Engine::CollectActiveConstraints(
     }
 }
 
-void Engine::AllocateSolverLits(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active)
+void Engine::AllocateSolverLits(niaOverall::LsSolver& solver)
 {
     int totalLits = 0;
     for (size_t i = 0; i < constraints_.size(); i++) {
@@ -437,7 +437,7 @@ void Engine::AllocateSolverLits(niaOverall::LsSolver& solver, const std::vector<
             totalLits++;
         }
     }
-    for (auto& kv : varBounds_) {
+    for (const auto& kv : varBounds_) {
         if (kv.second.lo > -1e17) {
             totalLits++;
         }
@@ -497,7 +497,7 @@ void Engine::BuildConstraintLiterals(niaOverall::LsSolver& solver, const std::ve
     }
 }
 
-void Engine::BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<BoundLit>& boundLits)
+void Engine::BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<BoundLit>& boundLits) const
 {
     for (auto& bl : boundLits) {
         niaOverall::Lit& l = solver.lits[bl.solverLitId];
@@ -565,12 +565,12 @@ void Engine::BuildClauses(niaOverall::LsSolver& solver, const std::vector<Active
     }
 }
 
-void Engine::FinalizeSolver(niaOverall::LsSolver& solver)
+void Engine::FinalizeSolver(niaOverall::LsSolver& solver) const
 {
     solver.basicComponentName = "BC";
     solver.bcWidthIdx = static_cast<int>(solver.name2var[".w"]);
     solver.bcHeightIdx = static_cast<int>(solver.name2var["BC_height"]);
-    solver.numVars = static_cast<int>(solver.vars.size());
+    solver.numVars = static_cast<uint64_t>(solver.vars.size());
     solver.litAppear.resize(solver.numLits);
     solver.litsInCls = new Array(solver.numLits);
     solver.PrepareComponentsIdx();
