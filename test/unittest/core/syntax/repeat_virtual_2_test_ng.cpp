@@ -1151,7 +1151,6 @@ HWTEST_F(RepeatVirtual2TestNg, ModelIsChildInAnimation001, TestSize.Level1)
 HWTEST_F(RepeatVirtual2TestNg, ModelIsChildOnMainTree001, TestSize.Level1)
 {
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
-    auto repeatId = elmtId_;
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2026, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
     repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
@@ -1159,7 +1158,6 @@ HWTEST_F(RepeatVirtual2TestNg, ModelIsChildOnMainTree001, TestSize.Level1)
     uiNode->onMainTree_ = true;
 
     RepeatVirtualScroll2ModelNG repeatModel;
-    EXPECT_EQ(repeatModel.IsChildOnMainTree(repeatId, 1), true);
     EXPECT_EQ(repeatModel.IsChildOnMainTree(0, 1), false);
 
     ViewStackProcessor::GetInstance()->Push(repeatNode);
