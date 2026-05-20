@@ -537,5 +537,33 @@ HWTEST_F(GridScrollLayoutTestNg, BigItemWithZeroHeight, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_EQ(pattern_->info_.endIndex_, 12);
 }
+
+/**
+ * @tc.name: GridScrollWithOptionsCrossCountZero
+ * @tc.desc: Test GetCrossStartAndSpanWithUserFunction returns (-1, 1) when crossCount is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GridScrollWithOptionsCrossCountZero, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 1, 3 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) {
+        GridItemSize gridItemSize { 1, 2 };
+        return gridItemSize;
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateFixedItems(10);
+    CreateDone();
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto layoutAlgorithm =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    layoutAlgorithm->info_.crossCount_ = 0;
+    EXPECT_EQ(layoutAlgorithm->GetCrossStartAndSpanWithUserFunction(1, option, 0), std::make_pair(-1, 1));
+}
 } // namespace OHOS::Ace::NG
  
