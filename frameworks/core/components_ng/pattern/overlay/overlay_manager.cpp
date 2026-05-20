@@ -5998,13 +5998,18 @@ void OverlayManager::MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard
     customKeyboardMap_[targetId] = customKeyboard;
     customKeyboardNode_ = WeakClaim(RawPtr(customKeyboard));
     oldTargetId_ = targetId;
-    if (!isKeyBoardContinue_) {
-        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard] {
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard, isKeyBoardContinue = isKeyBoardContinue_] {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        if (!isKeyBoardContinue) {
             overlayManager->PlayKeyboardTransition(customKeyboard, true);
-        });
-    }
+            return;
+        }
+        auto renderContext = customKeyboard->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto keyboardOffsetInfo = overlayManager->CalcCustomKeyboardOffset(customKeyboard);
+        renderContext->OnTransformTranslateUpdate({ 0.0f, keyboardOffsetInfo.finalOffset, 0.0f });
+    });
 }
 
 void OverlayManager::CloseKeyboard(int32_t targetId)
