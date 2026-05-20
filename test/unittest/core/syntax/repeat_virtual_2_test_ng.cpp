@@ -981,7 +981,7 @@ HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation001, TestSize.Level1)
 {
     auto listNode = CreateNode(V2::LIST_ETS_TAG);
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
-    
+
     listNode->AddChild(repeatNode);
     EXPECT_EQ(repeatNode->IsAllowAnimation(), true);
 }
@@ -995,8 +995,19 @@ HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation002, TestSize.Level1)
 {
     auto gridNode = CreateNode(V2::GRID_ETS_TAG);
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
-    
+
     gridNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+}
+
+/**
+ * @tc.name: IsAllowAnimation003
+ * @tc.desc: Test node.IsAllowAnimation when parent is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation003, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
     EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
 }
 
