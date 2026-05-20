@@ -14,7 +14,6 @@
  */
 
 #include "custom_layout_options.h"
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #define protected public
 #define private public

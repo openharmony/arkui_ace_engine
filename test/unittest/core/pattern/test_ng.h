@@ -25,15 +25,13 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/pattern//linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
-#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
-#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

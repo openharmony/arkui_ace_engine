@@ -21,7 +21,6 @@
 #define protected public
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

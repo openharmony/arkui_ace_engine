@@ -14,6 +14,8 @@
  */
 
 #include "scroll_bar_test_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 #include "gtest/gtest.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
