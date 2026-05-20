@@ -69,6 +69,7 @@ void BlankModelNG::SetBlankMin(const Dimension& blankMin)
     if (blankMin.IsNegative()) {
         result = Dimension(0.0, DimensionUnit::VP);
     }
+    ACE_CHECK_LPX_ATTRIBUTE(result, LpxAttribute::LPX_BLANK_MIN);
     ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result);
@@ -81,6 +82,7 @@ void BlankModelNG::SetHeight(const Dimension& height)
     CHECK_NULL_VOID(blankNode);
     auto layoutProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_LPX_ATTRIBUTE(height, LpxAttribute::LPX_BLANK_HEIGHT);
     layoutProperty->UpdateHeight(height);
 }
 
@@ -163,6 +165,7 @@ void BlankModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(height, LpxAttribute::LPX_BLANK_HEIGHT, frameNode);
     layoutProperty->UpdateHeight(height);
 }
 
@@ -175,6 +178,7 @@ void BlankModelNG::SetBlankMin(FrameNode* frameNode, const Dimension& blankMin)
     if (blankMin.IsNegative()) {
         result = Dimension(0.0, DimensionUnit::VP);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(result, LpxAttribute::LPX_BLANK_MIN, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result, frameNode);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result, frameNode);

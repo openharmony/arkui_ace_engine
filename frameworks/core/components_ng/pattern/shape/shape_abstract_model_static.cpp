@@ -48,6 +48,7 @@ void ShapeAbstractModelStatic::SetHeight(FrameNode* frameNode, const std::option
 
 void ShapeAbstractModelStatic::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dashOffset, LpxAttribute::LPX_SHAPE_STROKE_DASH_OFFSET, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset, frameNode);
 }
 
