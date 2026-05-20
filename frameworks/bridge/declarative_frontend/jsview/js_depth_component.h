@@ -31,8 +31,6 @@ public:
     static void SetDepthMap(const JSCallbackInfo& info);
     static void SetCamera(const JSCallbackInfo& info);
     static void SetLight(const JSCallbackInfo& info);
-    static void SetBackgroundOffset(const JSCallbackInfo& info);
-    static void SetBackgroundScale(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
 private:
@@ -40,11 +38,11 @@ private:
     static bool IsGltfSource(const std::string& src);
     static bool SetOhosPath(const std::string& uri, std::string& ohosPath);
     static void ParseAndSetDepthSpace(const JSRef<JSVal>& optionsValue);
+    static OHOS::Ace::CropOffset ParseCropOffset(const JSRef<JSVal>& offsetValue);
+    static OHOS::Ace::CameraBufferCrop ParseCameraBufferCrop(const JSRef<JSVal>& cropValue);
     static OHOS::Ace::DepthVector3 ParseVector3(const JSRef<JSVal>& vectorValue);
     static OHOS::Ace::DepthVector4 ParseVector4(const JSRef<JSVal>& vectorValue);
     static OHOS::Ace::DepthColorRGB ParseLightColor(const JSRef<JSVal>& colorValue);
-    static DepthBackgroundOffset ParseBackgroundOffset(const JSRef<JSVal>& offsetValue);
-    static std::optional<NG::VectorF> ParseBackgroundScale(const JSRef<JSVal>& scaleValue);
 };
 
 } // namespace OHOS::Ace::Framework
