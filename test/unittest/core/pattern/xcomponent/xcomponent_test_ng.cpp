@@ -1581,4 +1581,23 @@ HWTEST_F(XComponentTestNg, UpdateSdrRatioIfNeed001, TestSize.Level1)
     EXPECT_EQ((pattern->xcomponentTouchSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
 }
 
+/**
+ * @tc.name: HandleSurfaceDestroyed001
+ * @tc.desc: LayoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, HandleSurfaceDestroyed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_COMPONENT_TYPE_VALUE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->HandleSurfaceDestroyed(frameNode.GetRawPtr());
+}
+
 } // namespace OHOS::Ace::NG
