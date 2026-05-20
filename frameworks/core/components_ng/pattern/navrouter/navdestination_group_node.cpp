@@ -1251,6 +1251,7 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
             auto destinationPattern = navDestination->GetPattern<NavDestinationPattern>();
             CHECK_NULL_VOID(destinationPattern);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s transition finish", destinationPattern->GetName().c_str());
+            navDestination->GetRenderContext()->SetLayerMark(false);
             // do extraOption first
             if (extraOption) {
                 extraOption();

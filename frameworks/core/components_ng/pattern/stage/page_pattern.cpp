@@ -1061,7 +1061,12 @@ void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish
     isCustomTransition_ = onFinish ? false : true;
     auto removeCallback = std::make_shared<std::function<void()>>();
     auto wrappedOnFinish = option.GetOnFinishEvent();
-    auto finishWithRemove = [wrappedOnFinish, removeCallback]() {
+    hostNode->GetRenderContext()->SetLayerMark(true);
+    auto finishWithRemove = [wrappedOnFinish, removeCallback, weakNode = WeakPtr<FrameNode>(hostNode)]() {
+        auto node = weakNode.Upgrade();
+        if (node) {
+            node->GetRenderContext()->SetLayerMark(false);
+        }
         if (*removeCallback) {
             (*removeCallback)();
         }

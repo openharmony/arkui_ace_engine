@@ -503,6 +503,7 @@ public:
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface(int width, int height) override;
     void SetMarkNodeGroup(bool isNodeGroup) override;
+    void SetLayerMark(bool isLayer) override;
     int32_t GetRotateDegree() override;
     void PaintDebugBoundary(bool flag) override;
     void PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info) override;

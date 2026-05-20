@@ -7861,6 +7861,13 @@ void RosenRenderContext::SetMarkNodeGroup(bool isNodeGroup)
     rsNode_->MarkNodeGroup(isNodeGroup);
 }
 
+void RosenRenderContext::SetLayerMark(bool isLayer)
+{
+    FREE_RS_CONTEXT_CHECK(SetLayerMark, isLayer);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkLayer(isLayer);
+}
+
 int32_t RosenRenderContext::GetRotateDegree()
 {
     CHECK_NULL_RETURN(rsNode_, 0);
