@@ -45,7 +45,6 @@ TextTimerOptions Convert(const Ark_TextTimerOptions& src)
     dst.count = Converter::OptConvert<int64_t>(src.count);
     dst.controller = Converter::OptConvert<Ark_TextTimerController>(src.controller);
     dst.startTime = Converter::OptConvert<int32_t>(src.startTime);
-    Validator::ValidateNonNegative(dst.startTime);
     return dst;
 }
 } // namespace Converter

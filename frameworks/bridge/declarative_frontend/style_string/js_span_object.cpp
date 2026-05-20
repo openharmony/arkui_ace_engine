@@ -499,9 +499,7 @@ void JSFontSpan::ParseJsFontVariations(const JSRef<JSObject>& obj, Font& font)
         }
         fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
     }
-    if (!fontVariations.empty()) {
-        font.fontVariations = fontVariations;
-    }
+    font.fontVariations = fontVariations;
 }
 
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)

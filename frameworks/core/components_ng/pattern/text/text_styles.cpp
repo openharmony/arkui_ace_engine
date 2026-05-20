@@ -404,4 +404,28 @@ PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign vert
     }
     return alignment;
 }
+
+std::string GetFontVariationsInJson(const FONT_VARIATIONS_LIST& fontVariations)
+{
+    if (fontVariations.empty()) {
+        return "[]";
+    }
+    std::string result = "[";
+    for (size_t i = 0; i < fontVariations.size(); ++i) {
+        const auto& item = fontVariations[i];
+        result.append("{axis:")
+            .append(item.axis)
+            .append(", value:")
+            .append(std::to_string(item.value));
+        if (item.isNormalized.has_value()) {
+            result.append(", isNormalized:").append(item.isNormalized.value() ? "true" : "false");
+        }
+        result.append("}");
+        if (i + 1 < fontVariations.size()) {
+            result.append(", ");
+        }
+    }
+    result.append("]");
+    return result;
+}
 } // namespace OHOS::Ace::NG
