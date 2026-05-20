@@ -1291,7 +1291,12 @@ void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(letterLayoutProperty);
 
     int32_t focusIndex = GetFocusIndex(selected_);
-    auto contenStr = arcArrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : focusIndex].first;
+    int32_t index = childPressIndex_ >= 0 ? childPressIndex_ : focusIndex;
+    if (index < 0 || index >= static_cast<int32_t>(arcArrayValue_.size())) {
+        TAG_LOGE(AceLogTag::ACE_ALPHABET_INDEXER, "index out of range, index:%{public}d", index);
+        return;
+    }
+    auto contenStr = arcArrayValue_[index].first;
     letterLayoutProperty->UpdateContent(contenStr);
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
     letterLayoutProperty->UpdateMaxLines(ARC_INDEXER_BUBBLE_MAX_TEXT_LINE);
