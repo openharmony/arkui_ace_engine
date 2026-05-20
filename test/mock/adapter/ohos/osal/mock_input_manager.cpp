@@ -37,4 +37,10 @@ bool InputManager::IsKeyboardConnected()
 {
     return true;
 }
+
+size_t InputManager::GetApproximatePointerEventSize()
+{
+    return 0;
+}
+
 } // namespace OHOS::Ace

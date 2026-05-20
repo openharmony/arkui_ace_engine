@@ -357,6 +357,19 @@ MouseEvent MouseInfo::ConvertToMouseEventForStatic() const
     return mouseEvent;
 }
 
+size_t MouseInfo::GetApproximateSize() const
+{
+    constexpr size_t PRESSED_BUTTONS = 3;
+    constexpr size_t HISTORY_COUNT = 5;
+    constexpr size_t LIST_NODE = sizeof(void*) * 2;
+
+    constexpr size_t buttonsSize = PRESSED_BUTTONS * sizeof(MouseButton);
+    constexpr size_t historySize = HISTORY_COUNT * (sizeof(MouseHistoricalPoint) + LIST_NODE);
+
+    return sizeof(*this) + GetApproximateBaseEventSize() + buttonsSize + historySize +
+           InputManager::GetApproximatePointerEventSize();
+}
+
 void HoverEffectTarget::SetHoverNode(const WeakPtr<NG::FrameNode>& node)
 {
     hoverNode_ = node;

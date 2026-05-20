@@ -1019,6 +1019,24 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
     return touchEvent;
 }
 
+size_t TouchEventInfo::GetApproximateSize() const
+{
+    constexpr size_t TOUCH_COUNT = 5;
+    constexpr size_t HISTORY_COUNT = 5;
+    constexpr size_t LIST_NODE = sizeof(void*) * 2;
+
+    constexpr size_t touchNodeSize = sizeof(TouchLocationInfo) + LIST_NODE;
+    constexpr size_t touchesSize = TOUCH_COUNT * touchNodeSize * 2; // covers touches_ and changedTouches_
+    constexpr size_t historyTouchesSize = HISTORY_COUNT * touchNodeSize;
+
+    constexpr size_t sharedPtrNodeSize = sizeof(std::shared_ptr<MMI::PointerEvent>) + LIST_NODE;
+    static const size_t historyEventsSize =
+        HISTORY_COUNT * (sharedPtrNodeSize + InputManager::GetApproximatePointerEventSize());
+
+    return sizeof(*this) + GetApproximateBaseEventSize() + touchesSize + historyTouchesSize +
+           InputManager::GetApproximatePointerEventSize() + historyEventsSize;
+}
+
 const std::string& NativeEmbeadTouchInfo::GetEmbedId() const
 {
     return embedId_;
