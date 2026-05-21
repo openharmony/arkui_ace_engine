@@ -169,6 +169,28 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         this.backing_.fireChange();
     }
 
+     
+    public resetOnReuse(newValue: T): void {
+        console.log(`GlobalReuse: Reset.PROBE @State ${this.varName}`);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`State resetOnReuse ${this.setTraceInfo()}`);
+        const oldValue = this.backing_.get(false);
+        this.checkValueIsNotFunction(newValue);
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        let value: T;
+        if (isDynamicObject(newValue)) {
+            value = getObservedObject(newValue);
+        } else {
+            value = uiUtils.makeV1Observed(newValue);
+        }
+        this.backing_.set(value);
+        if (this.setProxyValue) {
+            this.setProxyValue!(value);
+        }
+        this.registerWatchForObservedObjectChanges(value);
+        this.updateObservedObjectRegistration(oldValue, value);
+        // intentionally do not execWatchFuncs() — reuse is silent
+    }
+
     public aboutToBeDeletedInternal(): void {
         // Unregister from the observed object before deletion
         const currentValue = this.backing_.get(false);
