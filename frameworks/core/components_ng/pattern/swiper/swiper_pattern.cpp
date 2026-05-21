@@ -1752,10 +1752,8 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-
     auto paddingSize = geometryNode->GetPaddingSize();
     auto swiperWidth = paddingSize.Width();
     auto swiperHeight = paddingSize.Height();
@@ -1764,8 +1762,8 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
     CHECK_NULL_VOID(pipeline);
     auto width = pipeline->GetRootWidth();
     auto height = pipeline->GetRootHeight();
-
-    if (0.5 * width > swiperWidth || 0.5 * height > swiperHeight) {
+    constexpr float half = 0.5f;
+    if (half * width > swiperWidth || half * height > swiperHeight) {
         return;
     }
 

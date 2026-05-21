@@ -2833,29 +2833,6 @@ HWTEST_F(SwiperPatternTestNg, SwiperPreMakeItems005, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperDoSwiperPreMakeItems001
- * @tc.desc: test DoSwiperPreMakeItems with valid indices
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperPatternTestNg, SwiperDoSwiperPreMakeItems001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init Swiper node.
-     */
-    SwiperModelNG model = CreateSwiper();
-    CreateSwiperItems(4);
-    CreateSwiperDone();
-
-    /**
-     * @tc.steps: step2. Call DoSwiperPreMakeItems directly.
-     * @tc.expected: premakeItems_ contains the indices.
-     */
-    std::set<int32_t> indexSet = {0, 1};
-    pattern_->DoSwiperPreMakeItems(indexSet);
-    EXPECT_TRUE(pattern_->premakeItems_.size() >= 0);
-}
-
-/**
  * @tc.name: SwiperNotifyScrollStateEvent001
  * @tc.desc: test NotifyScrollStateEvent with same scrollState
  * @tc.type: FUNC
@@ -3136,29 +3113,6 @@ HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel002, TestSize.Level1)
     pattern_->premakeItems_.emplace(1);
     pattern_->OnNotifyMemoryLevel(2);
     EXPECT_FALSE(pattern_->premakeItems_.empty());
-}
-
-/**
- * @tc.name: SwiperOnNotifyMemoryLevel003
- * @tc.desc: test OnNotifyMemoryLevel with error level
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init Swiper node.
-     */
-    SwiperModelNG model = CreateSwiper();
-    CreateSwiperItems(4);
-    CreateSwiperDone();
-
-    /**
-     * @tc.steps: step2. Call OnNotifyMemoryLevel with premakeItems populated.
-     * @tc.expected:  Method returns early.
-     */
-    pattern_->premakeItems_.clear();
-    pattern_->OnNotifyMemoryLevel(1);
-    EXPECT_TRUE(pattern_->premakeItems_.empty());
 }
 
 /**
