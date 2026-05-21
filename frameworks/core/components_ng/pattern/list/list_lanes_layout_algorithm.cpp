@@ -158,6 +158,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         ++currentIndex;
         if (isGroup) {
             MeasureGroup(layoutWrapper, wrapper, currentIndex, startPos, true);
+        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
+            MeasureLazyChild(wrapper, currentIndex, startPos, true);
         } else if (CheckNeedMeasure(wrapper)) {
             MeasureItem(wrapper, currentIndex, true);
         }
@@ -213,6 +215,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         cnt++;
         if (isGroup) {
             MeasureGroup(layoutWrapper, wrapper, currentIndex, endPos, false);
+        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
+            MeasureLazyChild(wrapper, currentIndex, endPos, false);
         } else if (CheckNeedMeasure(wrapper)) {
             MeasureItem(wrapper, currentIndex, false);
         }
