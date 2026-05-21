@@ -253,6 +253,9 @@ void FrameNodeFinder::CleanResult(const TouchTestResult& touchTestResult, int32_
     GetFrameNodes(relaxedInteractionFrameNodes, hitTestRecognizers);
 
     auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
     auto eventManager = context->GetEventManager();
     auto ref = eventManager->GetGestureRefereeNG(nullptr);
     if (!ref) {
