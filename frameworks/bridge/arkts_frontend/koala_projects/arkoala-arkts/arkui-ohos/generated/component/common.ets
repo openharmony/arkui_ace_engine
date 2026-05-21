@@ -3328,9 +3328,18 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
 }
 export class ArkCommonMethodPeer extends PeerNode {
     commonMethodAttributeSet?: CommonMethodModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+    // instructive change start
+    // REASON: there is possibly bug in panda and vendor tests can not be launched with joined constructor declaration
+    public constructor(peerPtr: KPointer, id: int32) {
+        this(peerPtr, id, '', 0)
+    }
+    public constructor(peerPtr: KPointer, id: int32, name: string) {
+        this(peerPtr, id, name, 0)
+    }
+    public constructor(peerPtr: KPointer, id: int32, name: string, flags: int32) {
         super(peerPtr, id, name, flags)
     }
+    // instructive change end
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCommonMethodPeer {
         const peerId = PeerNode.nextId()
         const _peerPtr = ArkUIGeneratedNativeModule._CommonMethod_construct(peerId, flags)

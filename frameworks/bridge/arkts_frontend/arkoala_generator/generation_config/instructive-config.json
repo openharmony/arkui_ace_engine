@@ -8,6 +8,8 @@
             "SymbolGlyphModifier.ets",
             "component/common.ets",
             "component/contentSlot.ets",
+            "component/idlize.ets",
+            "component/image.ets",
             "component/lazyGridLayout.ets",
             "component/navigation.ets",
             "component/styledString.ets",

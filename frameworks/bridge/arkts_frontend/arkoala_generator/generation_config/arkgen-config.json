@@ -1321,5 +1321,10 @@
         "idlize.stdlib",
         "org.openharmony.idlize.predefined",
         "org.openharmony.arkui"
+    ],
+    "handwrittenDeserializers": [
+        "arkui.component.gesture.GestureRecognizer",
+        "arkui.component.gesture.BaseGestureEvent",
+        "arkui.component.gesture.EventTargetInfo"
     ]
 }
