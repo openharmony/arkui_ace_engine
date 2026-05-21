@@ -325,7 +325,7 @@ export struct ArcSlider {
   private normalEndAngle: number = 0;
   private activeStartAngle: number = 0;
   private activeEndAngle: number = 0;
-  private selectedMaxOrMin: number = AnimatorStatus.NORMAL;
+  private selectedMaxOrMin: AnimatorStatus = AnimatorStatus.NORMAL;
   private needVibrate: boolean = true;
   private crownEventCounter: number = 0;
   private diameter: number = 0;

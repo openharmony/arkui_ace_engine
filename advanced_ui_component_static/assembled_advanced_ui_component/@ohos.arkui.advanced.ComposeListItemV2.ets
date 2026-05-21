@@ -1436,7 +1436,7 @@ export struct ComposeListItemV2 {
     if (this.containerDirection === FlexDirection.Row) {
       return LengthMetrics.vp(0);
     }
-    let iconStyleVal: number | undefined = this.contentItemV2?.iconStyle;
+    let iconStyleVal: IconTypeV2 | undefined = this.contentItemV2?.iconStyle;
     let iconSize: number = iconStyleVal !== undefined ? (ICON_SIZE_MAP.get(iconStyleVal) as number ?? 0) : 0;
     if (this.contentItemV2?.icon && iconSize && (iconSize as number) <= HEADSCULPTURE_SIZE) {
       return LengthMetrics.vp(iconSize + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);

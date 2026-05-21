@@ -55,7 +55,7 @@ enum FontSizeScaleLevel {
   LEVEL3 = 320
 }
 
-enum ItemHeight {
+export enum ItemHeight {
   FIRST_HEIGHT = 48,
   SECOND_HEIGHT = 56,
   THIRD_HEIGHT = 64,
@@ -1176,7 +1176,7 @@ export struct ComposeListItem {
   @State canTouch: boolean = true;
   @State canHover: boolean = true;
   @State isHover: boolean = false;
-  @State itemHeight: number = ItemHeight.FIRST_HEIGHT;
+  @State itemHeight: ItemHeight = ItemHeight.FIRST_HEIGHT;
   @State isActive: boolean = false;
   @State hoveringColor: ResourceColor = '#0d000000';
   @State touchDownColor: ResourceColor = '#1a000000';
@@ -1218,7 +1218,7 @@ export struct ComposeListItem {
         this.operateItem?.symbolStyle !== undefined ||
         this.operateItem?.icon !== undefined ||
         this.operateItem?.subIcon !== undefined) {
-        this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING;
+        this.itemHeight = ItemHeight.fromValue((OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING).toInt());
       }
       return;
     }
@@ -1231,7 +1231,7 @@ export struct ComposeListItem {
           LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value as number;
         this.itemHeight =
           (this.contentItem?.iconStyle as IconType) <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT :
-            systemIconLineHeight as number;
+            ItemHeight.fromValue(systemIconLineHeight.toInt());
       }
     } else if (this.contentItem?.description === undefined) {
       let iconStyle: IconType = (this.contentItem?.iconStyle as IconType);
@@ -1242,7 +1242,7 @@ export struct ComposeListItem {
         if (iconStyle === IconType.HEAD_SCULPTURE) {
           this.itemHeight = ItemHeight.FOURTH_HEIGHT;
         } else {
-          this.itemHeight = APPICON_ITEMLENGTH;
+          this.itemHeight = ItemHeight.fromValue(APPICON_ITEMLENGTH.toInt());
         }
       }
     } else {
@@ -1252,7 +1252,7 @@ export struct ComposeListItem {
     if (iconStyle !== undefined) {
       const iconSize = ICON_SIZE_MAP.get(iconStyle);
       if (iconSize !== undefined && iconSize >= this.itemHeight) {
-        this.itemHeight = iconSize + SAFE_LIST_PADDING;
+        this.itemHeight = ItemHeight.fromValue((iconSize + SAFE_LIST_PADDING).toInt());
       }
     }
     if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
