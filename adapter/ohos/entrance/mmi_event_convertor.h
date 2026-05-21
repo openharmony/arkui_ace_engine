@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,6 +144,9 @@ AxisAction GetAxisActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent
 MouseAction GetMouseActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 bool ProcessMouseToTouchEvent(const MouseEvent& event, TouchEvent& touchEvent, int32_t pointerAction);
+
+int64_t GetPointerDownTimeDiffMs(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId0,
+    int32_t fingerId1);
 
 } // namespace OHOS::Ace::Platform
 

@@ -17,7 +17,6 @@
 
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/pattern/scrollable/selectable_theme.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/pipeline/base/element_register.h"
@@ -54,14 +53,6 @@ void SelectableItemPattern::CreateEditModeCheckBox()
     };
     checkboxModifier->setCheckboxOnChange(checkboxHandle, reinterpret_cast<void*>(&onChange));
     checkboxModifier->setSelect(checkboxHandle, isSelected_);
-
-    auto theme = host->GetTheme<SelectableTheme>(true);
-    if (theme) {
-        auto checkboxShapeModifier = NodeModifier::GetCheckboxModifier();
-        if (checkboxShapeModifier) {
-            checkboxShapeModifier->setCheckboxShape(checkboxHandle, theme->GetEditModeCheckBoxShape());
-        }
-    }
 
     editModeCheckBoxNode_ = AceType::Claim(reinterpret_cast<FrameNode*>(checkboxHandle));
     auto checkboxLayoutProperty = editModeCheckBoxNode_->GetLayoutProperty<LayoutProperty>();
