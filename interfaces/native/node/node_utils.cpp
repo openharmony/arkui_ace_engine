@@ -190,8 +190,6 @@ int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
     ArkUI_NodeHandle node, void* userData, void (*onLayoutCompleted)(void* userData))
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
-    CHECK_NULL_RETURN_WITH_MESSAGE(onLayoutCompleted, OHOS::Ace::ERROR_CODE_PARAM_INVALID,
-        __FUNCTION__, "Layout callback is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
