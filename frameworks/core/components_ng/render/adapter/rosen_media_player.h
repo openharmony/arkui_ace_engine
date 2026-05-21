@@ -52,6 +52,7 @@ public:
     int32_t GetVideoHeight() override;
     int32_t SetLooping(bool loop) override;
     int32_t SetPlaybackSpeed(float speed) override;
+    int32_t SetPlaybackRate(float speed, int32_t& errorCode, std::string& errorMsg) override;
     int32_t SetSurface() override;
     int32_t SetRenderFirstFrame(bool display) override;
     int32_t PrepareAsync() override;

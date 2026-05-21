@@ -29,6 +29,14 @@
 #endif
 
 namespace OHOS::Ace {
+constexpr double DEFAULT_PROGRESS_RATE = 1.0;
+constexpr double VALID_SPEEDS[] = { 0.125, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 3.00 };
+
+bool IsValidSpeed(double speed)
+{
+    return std::find(std::begin(VALID_SPEEDS), std::end(VALID_SPEEDS), speed) != std::end(VALID_SPEEDS);
+}
+
 VideoModel* VideoModel::GetInstance()
 {
 #ifdef NG_BUILD
@@ -90,7 +98,11 @@ void JSVideo::Create(const JSCallbackInfo& info)
     // Parse the rate, if it is invalid, set it as 1.0.
     double currentProgressRate = 1.0;
     ParseJsDouble(currentProgressRateValue, currentProgressRate);
-    VideoModel::GetInstance()->SetProgressRate(currentProgressRate);
+    if (currentProgressRateValue->IsNumber() || IsValidSpeed(currentProgressRate)) {
+        VideoModel::GetInstance()->SetProgressRate(currentProgressRate);
+    } else {
+        VideoModel::GetInstance()->SetProgressRate(DEFAULT_PROGRESS_RATE);
+    }
 
     auto aiOptions = videoObj->GetProperty("imageAIOptions");
     if (aiOptions->IsObject()) {

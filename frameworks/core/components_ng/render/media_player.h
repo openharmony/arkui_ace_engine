@@ -106,6 +106,13 @@ public:
         return -1;
     }
 
+    virtual int32_t SetPlaybackRate(float speed, int32_t& errorCode, std::string& errorMsg)
+    {
+        errorCode = -1;
+        errorMsg = "NULL";
+        return -1;
+    }
+
     virtual int32_t SetSurface()
     {
         return -1;
