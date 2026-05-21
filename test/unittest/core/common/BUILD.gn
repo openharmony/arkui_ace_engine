@@ -41,6 +41,7 @@ ace_unittest("common_test") {
     "transform/input_compatible_manager_test_ng.cpp",
     "vibrator/vibrator_test.cpp",
     "task_runner_adapter_impl/task_runner_adapter_test.cpp",
+    "visual_effect/transparency_utils_test_ng.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
