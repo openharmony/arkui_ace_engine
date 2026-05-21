@@ -34,20 +34,20 @@ public:
 HWTEST_F(TextFieldTestNgTwo, testCaretPosition001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node
-     * @tc.expected: caretPosition is 10
+     * @tc.steps: Create Text filed node.
+     * @tc.expected: caretPosition is 10.
      */
     CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.step: step2. Set caretPosition
+     * @tc.step: step2. Set caretPosition.
      */
     pattern_->SetCaretPosition(10);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 10);
 
     /**
-     * @tc.step: step3. Set caretPosition
+     * @tc.step: step3. Set caretPosition.
      */
     pattern_->SetCaretPosition(5);
     TextEditingValue value;
@@ -61,7 +61,7 @@ HWTEST_F(TextFieldTestNgTwo, testCaretPosition001, TestSize.Level1)
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), value.text.length());
 
     /** 
-     * @tc.step: step4. Set value
+     * @tc.step: step4. Set value.
      */
     value.text = "12345678";
     selection.baseOffset = value.text.length();

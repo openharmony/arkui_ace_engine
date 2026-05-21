@@ -526,7 +526,7 @@ ArkUINativeModuleValue SearchBridge::JsCreate(ArkUIRuntimeCallInfo* runtimeCallI
     if (changeEventValIsValid) {
         ParseSearchValueObject(vm, changeEventVal);
     }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         Framework::JSSearchTheme::ApplyTheme();
     }
     return panda::JSValueRef::Undefined(vm);

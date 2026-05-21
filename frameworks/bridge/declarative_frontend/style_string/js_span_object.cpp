@@ -211,7 +211,7 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
         auto hasJsColor = JSViewAbstract::ParseJsColor(colorObj, color, resObj);
         if (!colorObj->IsNull() && !hasJsColor) {
             // From version 26 and above, styledString's withTheme takes effect.
-            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
                 auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(context);
                 auto theme = context->GetTheme<TextTheme>();

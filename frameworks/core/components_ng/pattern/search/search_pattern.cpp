@@ -2337,7 +2337,7 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return result;
     }
 
