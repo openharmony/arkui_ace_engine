@@ -58,9 +58,13 @@
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
-#include "core/components_ng/property/particle_property.h"
 
 namespace OHOS::Ace::NG {
+struct EmitterOption;
+struct VelocityProperty;
+struct AccelerationProperty;
+struct ParticleColorPropertyOption;
+struct ParticleFloatPropertyOption;
 class BackgroundModifier;
 class TransitionModifier;
 class BorderImageModifier;

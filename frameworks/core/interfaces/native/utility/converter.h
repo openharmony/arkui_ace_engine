@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/particle_enum.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 
 #include "converter_union.h"
@@ -102,10 +103,6 @@ namespace NG {
 enum class BindSheetDismissReason;
 enum class ContentClipMode;
 enum class DataPanelType;
-enum DistributionType;
-enum ParticleEmitterShape;
-enum ParticleType;
-enum UpdaterType;
 enum class KeyboardFluidLightMode;
 enum class KeyboardGradientMode;
 enum class LaunchMode;
