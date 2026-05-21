@@ -2949,7 +2949,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent001, TestSize.Level
     CHECK_NULL_VOID(context);
     
     context->rootWidth_ = 180.0;
-    context->rootWidth_ = 180.0;
+    context->rootHeight_ = 180.0;
 
     /**
      * @tc.steps: step2. Call ReportSwiperChangeContent.
@@ -2985,7 +2985,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent002, TestSize.Level
     CHECK_NULL_VOID(context);
     
     context->rootWidth_ = 180.0;
-    context->rootWidth_ = 180.0;
+    context->rootHeight_ = 180.0;
 
     /**
      * @tc.steps: step2. Set auto play and call ReportSwiperChangeContent.
