@@ -111,6 +111,7 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
         auto infoPtr = new KeyEventInfo(info);
         auto eventObj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnKeyEvent_end type:%d", infoPtr->GetKeyType());
         auto ret = func->Call(vm, func.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
         return ret->IsBoolean() ? ret->ToBoolean(vm)->Value() : false;
@@ -213,6 +214,7 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
         auto infoPtr = new HoverInfo(hoverInfo);
         auto eventObj = NG::CommonBridge::CreateHoverInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[2] = { panda::BooleanRef::New(vm, isHover), eventObj };
+        ACE_BENCH_MARK_TRACE("OnHoverEvent_end isHover:%d", isHover);
         func->Call(vm, func.ToLocal(), params, 2);
         hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
