@@ -2635,6 +2635,36 @@ export class SegmentButton extends ViewPU {
     }
     return false;
   }
+  isMultiplyCapsule() {
+    return this.options !== undefined &&
+      this.options.type === 'capsule' && (this.options.multiply ?? false);
+  }
+
+  shouldShowBackground() {
+    return !this.isMultiplyCapsule() && this.isBackgroundSystemMaterialEnabled();
+  }
+
+  getButtonBackgroundColor() {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
+  }
+
+  getButtonBorderRadius() {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return getBackgroundBorderRadius(this.options, this.componentSize.height / 2);
+  }
+
+  getButtonSystemMaterial() {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.options.backgroundSystemMaterial;
+  }
+
   isSegmentFocusStyleCustomized() {
     if (this.isCustomizedCache === undefined) {
       this.isCustomizedCache = resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED, 1.0) < 0.1;
@@ -2645,6 +2675,10 @@ export class SegmentButton extends ViewPU {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
       Stack.direction(this.options ? this.options.direction : undefined);
+      Stack.backgroundColor(this.getButtonBackgroundColor());
+      Stack.borderRadius(this.getButtonBorderRadius());
+      Stack.clip(false);
+      Stack.systemMaterial(this.getButtonSystemMaterial());
       Stack.onBlur(() => {
         this.focusIndex = -1;
       });
