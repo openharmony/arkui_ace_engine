@@ -141,6 +141,7 @@ public:
     virtual void SetHomePathInfoWithCallback(
         std::function<void(const RefPtr<NG::NavigationStack>&)>&& setHomePathInfoCallback) {}
     virtual void SetEnableVisibilityLifecycleWithContentCover(bool isEnable) {}
+    virtual void SetNavigationConfiguration(const NG::NavigationConfiguration& config) {}
 
     virtual void UpdateDividerColor(const Color& color, const RefPtr<ResourceObject>& res) {}
 

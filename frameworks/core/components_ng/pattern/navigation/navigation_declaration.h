@@ -334,9 +334,15 @@ struct NavigationOptions {
     bool animated = true;
 };
 
+struct NavigationConfiguration {
+    int32_t stackSizeLimit = 0;
+};
+
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(
     NavigationOperation operation, bool isEnter)>;
 using NavDestinationOnNewParamCallback = std::function<void(napi_value param)>;
+using NavDestinationSaveStateCallback = std::function<std::string()>;
+using NavDestinationRestoreStateCallback = std::function<void(const std::string& state)>;
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

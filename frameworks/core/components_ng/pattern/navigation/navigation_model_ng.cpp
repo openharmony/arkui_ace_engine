@@ -3297,6 +3297,20 @@ void NavigationModelNG::SetEnableVisibilityLifecycleWithContentCover(FrameNode* 
     pattern->SetEnableVisibilityLifecycleWithContentCover(isEnable);
 }
 
+void NavigationModelNG::SetNavigationConfiguration(const NavigationConfiguration& config)
+{
+    NavigationModelNG::SetNavigationConfiguration(ViewStackProcessor::GetInstance()->GetMainFrameNode(), config);
+}
+
+void NavigationModelNG::SetNavigationConfiguration(FrameNode* frameNode, const NavigationConfiguration& config)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigation);
+    auto pattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationConfiguration(config);
+}
+
 void NavigationModelNG::SetBackButtonTitleResource(FrameNode* frameNode, std::string text,
                                                    const RefPtr<ResourceObject>& resObj)
 {

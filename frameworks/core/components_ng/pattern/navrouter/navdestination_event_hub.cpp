@@ -64,6 +64,17 @@ void NavDestinationEventHub::FireAutoSave()
     container->RequestAutoSave(node);
 }
 
+void NavDestinationEventHub::FireOnSaveState()
+{
+    if (onSaveState_) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+        CHECK_NULL_VOID(navDestination);
+        auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->CallSavedStateToJS(onSaveState_());
+    }
+}
+
 void NavDestinationEventHub::FireOnShownEvent(
     const std::string& name, const std::string& param, NavDestVisibilityChangeReason reason)
 {
@@ -131,6 +142,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name, NavDestV
         builder.SetId(id).SetNavDst(name).SetHost(host).SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
     }
+    FireOnSaveState();
 }
 
 void NavDestinationEventHub::FireOnAppear()

@@ -294,6 +294,12 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     preLastStandardIndex_ = lastStandardIndex_;
     bool hasFullScreenOverlay = false;
     UpdateLastStandardIndex(hasFullScreenOverlay);
+    if (pattern->ProcessAutoCleanAndRestore(lastStandardIndex_)) {
+        // Auto clean may restore nullptr entries or clear old nodes, so refresh the standard
+        // boundary and effective overlay flags before reorder uses them.
+        hasFullScreenOverlay = false;
+        UpdateLastStandardIndex(hasFullScreenOverlay);
+    }
     if (hasFullScreenOverlay && !overlayNode) {
         overlayNode = GetOrCreateOverlayNode();
         CHECK_NULL_VOID(overlayNode);
@@ -353,7 +359,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
         if (navDestination == nullptr) {
-            if (stack && (stack->IsFromRecovery(i) || stack->GetIsForceSet(i))) {
+            if (stack && (stack->IsFromRecovery(i) || stack->GetIsForceSet(i) || stack->IsAutoCleaned(i))) {
                 continue;
             }
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get destination node failed");

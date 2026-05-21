@@ -82,6 +82,7 @@ constexpr bool ENABLE_TOOLBAR_ADAPTATION_DEFULT = true;
 constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
 constexpr char HOME_DESTINATION_INFO_NAME[] = "name";
 constexpr char HOME_DESTINATION_INFO_PARAM[] = "param";
+constexpr char STACK_SIZE_LIMIT_PROPERTY[] = "stackSizeLimit";
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
@@ -441,6 +442,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("enableVisibilityLifecycleWithContentCover",
         &JSNavigation::SetEnableVisibilityLifecycleWithContentCover);
     JSClass<JSNavigation>::StaticMethod("divider", &JSNavigation::SetDivider);
+    JSClass<JSNavigation>::StaticMethod("configuration", &JSNavigation::SetNavigationConfiguration);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -454,6 +456,21 @@ void JSNavigation::SetEnableVisibilityLifecycleWithContentCover(const JSCallback
         isEnable = info[0]->ToBoolean();
     }
     NavigationModel::GetInstance()->SetEnableVisibilityLifecycleWithContentCover(isEnable);
+}
+
+void JSNavigation::SetNavigationConfiguration(const JSCallbackInfo& info)
+{
+    NG::NavigationConfiguration config;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        NavigationModel::GetInstance()->SetNavigationConfiguration(config);
+        return;
+    }
+    auto configObj = JSRef<JSObject>::Cast(info[0]);
+    auto stackSizeLimit = configObj->GetProperty(STACK_SIZE_LIMIT_PROPERTY);
+    if (stackSizeLimit->IsNumber()) {
+        config.stackSizeLimit = stackSizeLimit->ToNumber<int32_t>();
+    }
+    NavigationModel::GetInstance()->SetNavigationConfiguration(config);
 }
 
 void JSNavigation::SetTitle(const JSCallbackInfo& info)

@@ -1430,6 +1430,10 @@ void NavigationPattern::UpdateNavPathList()
         auto pathName = pathNames[index];
         RefPtr<UINode> uiNode = nullptr;
         int32_t arrayIndex = index - removeSize;
+        if (navigationStack_->IsAutoCleaned(arrayIndex)) {
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            continue;
+        }
         if (navigationStack_->IsFromRecovery(arrayIndex)) {
             if (navigationStack_->GetRecoveredDestinationMode(arrayIndex) ==
                 static_cast<int32_t>(NavDestinationMode::STANDARD)) {
@@ -1536,6 +1540,120 @@ void NavigationPattern::UpdateNavPathList()
     navigationStack_->UpdatePreTopInfo();
 }
 
+int32_t NavigationPattern::GetAutoCleanRestoreMinIndex(int32_t lastStandardIndex, int32_t stackSize) const
+{
+    if (stackSize <= 0 || config_.stackSizeLimit <= 0) {
+        return 0;
+    }
+    return std::max(0, std::min(lastStandardIndex, stackSize - config_.stackSizeLimit));
+}
+
+bool NavigationPattern::NeedRestoreOrAutoClean(const NavPathList& navPathList, int32_t restoreMinIndex) const
+{
+    if (config_.stackSizeLimit <= 0) {
+        return false;
+    }
+    int32_t stackSize = static_cast<int32_t>(navPathList.size());
+    if (config_.stackSizeLimit > 0 && config_.stackSizeLimit < stackSize) {
+        return true;
+    }
+    CHECK_NULL_RETURN(navigationStack_, false);
+    for (int32_t index = restoreMinIndex; index < stackSize; ++index) {
+        if (navigationStack_->IsAutoCleaned(index)) {
+            // need restore navDestination from autoClean
+            return true;
+        }
+    }
+    for (int32_t index = 0; index < restoreMinIndex; ++index) {
+        if (navPathList[index].second) {
+            // need process autoClean
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NavigationPattern::RestoreAutoCleanedDestination(NavPathList& navPathList, int32_t index, int32_t stackIndex)
+{
+    CHECK_NULL_RETURN(navigationStack_, false);
+    if (stackIndex < 0) {
+        stackIndex = index;
+    }
+    if (index < 0 || index >= static_cast<int32_t>(navPathList.size()) ||
+        !navigationStack_->IsAutoCleaned(stackIndex)) {
+        return false;
+    }
+    if (!navPathList[index].second && !GenerateUINodeByIndex(stackIndex, navPathList[index].second)) {
+        return false;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+    CHECK_NULL_RETURN(navDestination, false);
+    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    // todo: check which is earlier, onRestore or onWillAppear?
+    eventHub->FireOnRestoreState(navigationStack_->GetAutoCleanedState(stackIndex));
+    navigationStack_->ClearAutoCleanedState(stackIndex);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    if (pattern) {
+        pattern->SetPendingToClean(false);
+    }
+    return true;
+}
+
+bool NavigationPattern::ProcessAutoCleanAndRestore(int32_t lastStandardIndex)
+{
+    CHECK_NULL_RETURN(navigationStack_, false);
+    auto& navPathList = navigationStack_->GetAllNavDestinationNodes();
+    int32_t stackSize = static_cast<int32_t>(navPathList.size());
+    int32_t restoreMinIndex = GetAutoCleanRestoreMinIndex(lastStandardIndex, stackSize);
+    if (!NeedRestoreOrAutoClean(navPathList, restoreMinIndex)) {
+        return false;
+    }
+
+    bool changed = false;
+    // handle restore from auto clean
+    for (int32_t index = restoreMinIndex; index < stackSize; ++index) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+        if (navigationStack_->IsAutoCleaned(index) && !navDestination) {
+            changed = RestoreAutoCleanedDestination(navPathList, index) || changed;
+            continue;
+        }
+        auto pattern = navDestination ? navDestination->GetPattern<NavDestinationPattern>() : nullptr;
+        if (pattern && pattern->GetPendingToClean()) {
+            pattern->SetPendingToClean(false);
+        }
+    }
+
+    RefPtr<UINode> remainDestination = nullptr;
+    if (preTopNavPath_.has_value()) {
+        remainDestination = NavigationGroupNode::GetNavDestinationNode(preTopNavPath_->second);
+    }
+    for (int32_t index = restoreMinIndex - 1; index >= 0; --index) {
+        if (!navPathList[index].second) {
+            continue;
+        }
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+        if (!navDestination) {
+            continue;
+        }
+        auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_CONTINUE(pattern);
+        if (navDestination == remainDestination || navDestination->IsOnAnimation()) {
+            pattern->SetPendingToClean(true);
+            continue;
+        }
+        pattern->SetPendingToClean(false);
+        navPathList[index].second = nullptr;
+        navigationStack_->MarkAutoCleanedFlag(pattern->GetNavDestinationId());
+        changed = true;
+    }
+    navigationStack_->SetNavPathList(navPathList);
+    return changed;
+}
+
 void NavigationPattern::RefreshNavDestination()
 {
     isChanged_ = false;
@@ -1578,11 +1696,13 @@ void NavigationPattern::RefreshNavDestination()
 #endif
 
     /* if first navDestination is removed, the new one will be refreshed */
-    if (!navPathList.empty()) {
+    for (const auto& path : navPathList) {
         auto firstNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(navPathList.front().second));
-        CHECK_NULL_VOID(firstNavDesNode);
-        firstNavDesNode->MarkModifyDone();
+            NavigationGroupNode::GetNavDestinationNode(path.second));
+        if (firstNavDesNode) {
+            firstNavDesNode->MarkModifyDone();
+            break;
+        }
     }
 
     std::string navDestinationName = newTopNavPath.has_value() ? newTopNavPath->first : "";
@@ -5937,6 +6057,31 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
 {
     ShowOrRestoreSystemBarIfNeeded();
     SetRequestedOrientationIfNeeded();
+    HandleAllPendingToClean();
+}
+
+void NavigationPattern::HandleAllPendingToClean()
+{
+    if (pendingToCleanCount_ == 0) {
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    CHECK_NULL_VOID(contentNode);
+    int32_t index = static_cast<int32_t>(contentNode->GetChildren().size());
+    for (; index > 0; index--) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(contentNode->GetChildAtIndex(index));
+        CHECK_NULL_CONTINUE(navDestination);
+        auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_CONTINUE(pattern);
+        if (!pattern->GetPendingToClean()) {
+            continue;
+        }
+        navDestination->CleanContent();
+        contentNode->RemoveChild(navDestination, true);
+        contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void NavigationPattern::SetRequestedOrientationIfNeeded()
@@ -7916,5 +8061,18 @@ std::string NavigationPattern::GetNavDestinationJsViewName(RefPtr<UINode> uiNode
     }
     TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get navDestination component name failed. no navDestination node");
     return "";
+}
+
+void NavigationPattern::SetNavigationConfiguration(const NavigationConfiguration& config)
+{
+    if (!configInitialed_) {
+        config_ = config;
+        configInitialed_ = true;
+        return;
+    }
+    // once initialed, only allow reset stackSizeLimit
+    if (config.stackSizeLimit <= 0) {
+        config_.stackSizeLimit = config.stackSizeLimit;
+    }
 }
 } // namespace OHOS::Ace::NG
