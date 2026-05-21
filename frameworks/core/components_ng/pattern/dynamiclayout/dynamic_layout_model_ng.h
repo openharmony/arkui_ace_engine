@@ -41,7 +41,7 @@ private:
         const RefPtr<AlgorithmParamBase>& algorithmParams, NG::DynamicLayoutType type);
     static void UpdatePropertyFromDefaultParam(
         const RefPtr<NG::FrameNode> &frameNode, const RefPtr<AlgorithmParamBase>& params);
-    static std::unordered_map<DynamicLayoutType, UpdateLayoutPropertyFunc> updateLayoutPropertyFuncMap_;
+    static const std::unordered_map<DynamicLayoutType, UpdateLayoutPropertyFunc> updateLayoutPropertyFuncMap_;
 };
 } // namespace OHOS::Ace::NG
 
