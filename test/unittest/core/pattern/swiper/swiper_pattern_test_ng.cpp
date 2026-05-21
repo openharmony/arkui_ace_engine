@@ -3021,7 +3021,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent003, TestSize.Level
     CHECK_NULL_VOID(context);
     
     context->rootWidth_ = 300.0;
-    context->rootWidth_ = 300.0;
+    context->rootHeight_ = 300.0;
 
     /**
      * @tc.steps: step2. Set auto play and call ReportSwiperChangeContent.
@@ -3030,40 +3030,13 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent003, TestSize.Level
     pattern_->isInAutoPlay_ = true;
     pattern_->ReportSwiperChangeContent(1);
     EXPECT_TRUE(pattern_->isInAutoPlay_);
-}
-
-/**
- * @tc.name: SwiperReportSwiperChangeContent004
- * @tc.desc: test ReportSwiperChangeContent when size is small
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init Swiper node.
-     */
-    SwiperModelNG model = CreateSwiper();
-    CreateSwiperItems(4);
-    CreateSwiperDone();
-
-    auto host = pattern_->GetHost();
-    auto geometryNode = host->GetGeometryNode();
-    auto frame = geometryNode->frame_;
-    auto rect = frame.rect_;
-    rect.width_ = 100.0;
-    rect.height = 100.0;
-
-    auto context = pattern_->GetContext();
-    CHECK_NULL_VOID(context);
-    
-    context->rootWidth_ = 180.0;
-    context->rootWidth_ = 300.0;
 
     /**
-     * @tc.steps: step2. Set auto play and call ReportSwiperChangeContent.
+     * @tc.steps: step3. Set auto play and call ReportSwiperChangeContent.
      * @tc.expected: Method skips upload when size is small
      */
-    pattern_->isInAutoPlay_ = true;
+    context->rootWidth_ = 180.0;
+    context->rootHeight_ = 300.0;
     pattern_->ReportSwiperChangeContent(1);
     EXPECT_TRUE(pattern_->isInAutoPlay_);
 }
@@ -3135,13 +3108,6 @@ HWTEST_F(SwiperPatternTestNg, SwiperPremakeItemsEraseOnIndexChange001, TestSize.
     pattern_->premakeItems_.emplace(0);
     pattern_->premakeItems_.emplace(1);
     EXPECT_EQ(pattern_->premakeItems_.size(), 2);
-
-    /**
-     * @tc.steps: step3. Trigger index change.
-     * @tc.expected: premakeItems_ is modified.
-     */
-    pattern_->oldIndex_ = 0;
-    pattern_->currentIndex_ = 1;
 }
 
 /**
