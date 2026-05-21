@@ -10,6 +10,10 @@
       "bool OHOS::Ace::SvgAnimate::CreatePropertyAnimate<OHOS::Ace::Dimension>(std::__h::function<void (OHOS::Ace::Dimension)>&&, OHOS::Ace::Dimension const&, OHOS::Ace::RefPtr<OHOS::Ace::Animator> const&)";
       "double OHOS::Ace::NG::Converter::Convert<double, double>(double const&)";
       "float OHOS::Ace::NG::Converter::Convert<float, double>(double const&)";
+      "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, Ark_Resource>(Ark_Resource const&)";
+      "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, Ark_FontWeight>(Ark_FontWeight const&)";
+      "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, InteropString>(InteropString const&)";
+      "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, int>(int const&)";
       "OHOS::Ace::AccessibilityNode::AddSupportAction(OHOS::Ace::AceAction)";
       "OHOS::Ace::AccessibilityNode::GetChildList() const";
       "OHOS::Ace::AccessibilityNode::GetCollectionInfo() const";

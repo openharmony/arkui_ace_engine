@@ -125,151 +125,7 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
 }
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
-namespace {
-constexpr int32_t MIN_VARIABLE_FONT_WEIGHT = 100;
-constexpr int32_t MAX_VARIABLE_FONT_WEIGHT = 900;
 constexpr float COLOR_COEFFICIENT = 100.0f;
-
-int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
-{
-    OHOS::Ace::FontWeight convertValue;
-    switch (fontWeight) {
-        case OHOS::Ace::FontWeight::W100:
-        case OHOS::Ace::FontWeight::LIGHTER:
-            convertValue = OHOS::Ace::FontWeight::W100;
-            break;
-        case OHOS::Ace::FontWeight::W200:
-            convertValue = OHOS::Ace::FontWeight::W200;
-            break;
-        case OHOS::Ace::FontWeight::W300:
-            convertValue = OHOS::Ace::FontWeight::W300;
-            break;
-        case OHOS::Ace::FontWeight::W400:
-        case OHOS::Ace::FontWeight::NORMAL:
-        case OHOS::Ace::FontWeight::REGULAR:
-            convertValue = OHOS::Ace::FontWeight::W400;
-            break;
-        case OHOS::Ace::FontWeight::W500:
-        case OHOS::Ace::FontWeight::MEDIUM:
-            convertValue = OHOS::Ace::FontWeight::W500;
-            break;
-        case OHOS::Ace::FontWeight::W600:
-            convertValue = OHOS::Ace::FontWeight::W600;
-            break;
-        case OHOS::Ace::FontWeight::W700:
-        case OHOS::Ace::FontWeight::BOLD:
-            convertValue = OHOS::Ace::FontWeight::W700;
-            break;
-        case OHOS::Ace::FontWeight::W800:
-            convertValue = OHOS::Ace::FontWeight::W800;
-            break;
-        case OHOS::Ace::FontWeight::W900:
-        case OHOS::Ace::FontWeight::BOLDER:
-            convertValue = OHOS::Ace::FontWeight::W900;
-            break;
-        default:
-            convertValue = OHOS::Ace::FontWeight::W400;
-            break;
-    }
-    return (static_cast<int32_t>(convertValue) + 1) * DEFAULT_MULTIPLE;
-}
-
-std::optional<int32_t> ParseVariableFontWeightFromInt(int32_t weight)
-{
-    if (weight >= MIN_VARIABLE_FONT_WEIGHT && weight <= MAX_VARIABLE_FONT_WEIGHT) {
-        return weight;
-    }
-    return std::nullopt;
-}
-
-std::optional<int32_t> ParseVariableFontWeightFromString(const Ark_String& str)
-{
-    char* endptr = nullptr;
-    errno = 0;
-    long value = std::strtol(str.chars, &endptr, 10);
-    if ((errno == ERANGE && (value == LONG_MAX || value == LONG_MIN)) ||
-        (errno != 0 && value == 0) || (endptr == str.chars) || (*endptr != '\0')) {
-        return std::nullopt;
-    }
-    return ParseVariableFontWeightFromInt(static_cast<int32_t>(value));
-}
-
-struct FontWeightResult {
-    std::optional<Ace::FontWeight> fixed;
-    std::optional<int32_t> variable;
-};
-
-FontWeightResult ConvertFontWeightFromInt(const Opt_Union_I32_FontWeight_ResourceStr* value)
-{
-    FontWeightResult result = {};
-    Opt_Union_I32_FontWeight_String intUnion = {};
-    intUnion.tag = value->tag;
-    intUnion.value.selector = SELECTOR_ID_0;
-    intUnion.value.value0 = value->value.value0;
-    auto convValue = Converter::OptConvertPtr<TextFontWeight>(&intUnion);
-    if (convValue.has_value()) {
-        result.fixed = static_cast<Ace::FontWeight>(convValue.value());
-    }
-    result.variable = ParseVariableFontWeightFromInt(value->value.value0);
-    return result;
-}
-
-FontWeightResult ConvertFontWeightFromEnum(const Opt_Union_I32_FontWeight_ResourceStr* value)
-{
-    FontWeightResult result = {};
-    Opt_Union_I32_FontWeight_String enumUnion = {};
-    enumUnion.tag = value->tag;
-    enumUnion.value.selector = SELECTOR_ID_1;
-    enumUnion.value.value1 = value->value.value1;
-    auto convValue = Converter::OptConvertPtr<TextFontWeight>(&enumUnion);
-    if (convValue.has_value()) {
-        result.fixed = static_cast<Ace::FontWeight>(convValue.value());
-        result.variable = ConvertToVariableFontWeight(result.fixed.value());
-    }
-    return result;
-}
-
-FontWeightResult ConvertFontWeightFromResourceStr(const Opt_Union_I32_FontWeight_ResourceStr* value)
-{
-    FontWeightResult result = {};
-    auto& resStr = value->value.value2;
-    if (resStr.selector == SELECTOR_ID_0) {
-        Opt_Union_I32_FontWeight_String strUnion = {};
-        strUnion.tag = value->tag;
-        strUnion.value.selector = SELECTOR_ID_2;
-        strUnion.value.value2 = resStr.value0;
-        auto convValue = Converter::OptConvertPtr<TextFontWeight>(&strUnion);
-        if (convValue.has_value()) {
-            result.fixed = static_cast<Ace::FontWeight>(convValue.value());
-            result.variable = ConvertToVariableFontWeight(result.fixed.value());
-        }
-        auto parsedVar = ParseVariableFontWeightFromString(resStr.value0);
-        if (parsedVar.has_value()) {
-            result.variable = parsedVar;
-        }
-    }
-    // Resource case (resStr.selector == SELECTOR_ID_1): not handled, consistent
-    // with arkts_native_symbol_glyph_bridge.cpp which resets for non-string/non-number
-    return result;
-}
-
-FontWeightResult ConvertFontWeight(const Opt_Union_I32_FontWeight_ResourceStr* value)
-{
-    if (!value || value->tag == INTEROP_TAG_UNDEFINED) {
-        return {};
-    }
-    switch (value->value.selector) {
-        case SELECTOR_ID_0:
-            return ConvertFontWeightFromInt(value);
-        case SELECTOR_ID_1:
-            return ConvertFontWeightFromEnum(value);
-        case SELECTOR_ID_2:
-            return ConvertFontWeightFromResourceStr(value);
-        default:
-            return {};
-    }
-}
-} // namespace
 
 void SetFontSizeImpl(Ark_NativePointer node,
                      const Opt_Union_F64_String_Resource* value)
@@ -583,7 +439,8 @@ void SetFontWeight1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convertedWeight = ConvertFontWeight(value);
+    Converter::FontWeightInt defaultWeight = {};
+    auto convertedWeight = Converter::OptConvertPtr<Converter::FontWeightInt>(value).value_or(defaultWeight);
     if (!convertedWeight.fixed.has_value()) {
         convertedWeight.fixed = Ace::FontWeight::NORMAL;
     }
