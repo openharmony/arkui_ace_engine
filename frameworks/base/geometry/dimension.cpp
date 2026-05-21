@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <array>
 #include "base/geometry/dimension.h"
 
 #include "core/pipeline/pipeline_base.h"
