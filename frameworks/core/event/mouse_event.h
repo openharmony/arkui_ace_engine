@@ -69,6 +69,7 @@ struct MouseEvent final : public PointerEvent {
     WeakPtr<NG::FrameNode> node;
     bool isInjected = false;
     bool isPrivacyMode = false;
+    bool isStylusMouseMode = false;
     bool isMockWindowTransFlag = false;
     TimeStamp pressedTime;
     bool isRightButtonEventFromDoulbeTap = false;

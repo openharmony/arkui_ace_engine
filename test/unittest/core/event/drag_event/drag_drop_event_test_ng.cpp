@@ -666,7 +666,7 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue022, TestSize.Level1)
      * @tc.steps: step2. call onActionStart_ function.
      * @tc.expected: step2. onActionStart_ exit.
      */
-    dragDropEventActuator->InitPanAction();
+    dragDropEventActuator->InitPanAction(false);
     GestureEvent gestureEvent;
     gestureEvent.SetPassThrough(false);
     auto callback = *(dragDropEventActuator->panRecognizer_->onActionStart_);
@@ -1040,7 +1040,7 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue033, TestSize.Level1)
      * @tc.steps: step2. call onActionEnd_ function.
      * @tc.expected: step2. onActionEnd_ exit.
      */
-    dragDropEventActuator->InitPanAction();
+    dragDropEventActuator->InitPanAction(false);
     GestureEvent gestureEvent;
     auto callback = *(dragDropEventActuator->panRecognizer_->onActionEnd_);
     if (callback) {
@@ -1087,7 +1087,7 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue034, TestSize.Level1)
      * @tc.steps: step2. call onActionEnd_ function.
      * @tc.expected: step2. onActionEnd_ exit.
      */
-    dragDropEventActuator->InitPanAction();
+    dragDropEventActuator->InitPanAction(false);
     GestureEvent gestureEvent;
     auto callback = *(dragDropEventActuator->panRecognizer_->onActionEnd_);
     if (callback) {
@@ -1129,6 +1129,37 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue035, TestSize.Level1)
     EXPECT_FALSE(dragDropEventActuator->isExecCallback_);
     EXPECT_FALSE(dragDropEventActuator->isDragUserReject_);
     EXPECT_FALSE(dragDropEventActuator->isThumbnailCallbackTriggered_);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue036
+ * @tc.desc: Test InitPanAction with isStylusMouseMode, verify mouse distance equals touch drag distance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    /**
+     * @tc.steps: step2. call InitPanAction with isStylusMouseMode=true.
+     * @tc.expected: step2. panRecognizer mouse distance equals DEFAULT_DRAG_DISTANCE (10.0_vp).
+     */
+    dragDropEventActuator->InitPanAction(true);
+    ASSERT_NE(dragDropEventActuator->panRecognizer_, nullptr);
+    auto expectedDistance = Dimension(10.0, DimensionUnit::VP).ConvertToPx();
+    EXPECT_DOUBLE_EQ(dragDropEventActuator->panRecognizer_->mouseDistance_, expectedDistance);
 }
 
 /**
