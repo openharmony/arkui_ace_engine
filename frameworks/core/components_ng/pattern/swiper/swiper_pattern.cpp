@@ -1762,6 +1762,10 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
     CHECK_NULL_VOID(pipeline);
     auto width = pipeline->GetRootWidth();
     auto height = pipeline->GetRootHeight();
+    if (width <= 0.0f || height <= 0.0f) {
+        return;
+    }
+
     constexpr float half = 0.5f;
     if (half * width > swiperWidth || half * height > swiperHeight) {
         return;
