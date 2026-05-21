@@ -1313,7 +1313,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
         const params = param ? param : this.paramsGenerator_();
-        if (this.resetStateVarsOnReuse !== ViewPU.prototype.resetStateVarsOnReuse) {
+        if (this.resetStateVarsOnReuse !== ViewPU.prototype.resetStateVarsOnReuse && this.getReusePoolInternal()) {
           this.resetStateVarsOnReuse(params);
         }
         this.updateStateVars(params);
