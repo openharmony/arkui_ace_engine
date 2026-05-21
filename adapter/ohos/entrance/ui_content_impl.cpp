@@ -1323,7 +1323,12 @@ void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config, sptr<I
     LOGI("[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
          ": %{public}s, entryPoint: %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str(), entryPoint.c_str());
-    Platform::AceContainer::RunDynamicPage(instanceId_, startUrl_, "", entryPoint);
+    DynamicOptions options;
+    options.content = startUrl_;
+    options.params = "";
+    options.entryPoint = entryPoint;
+    options.hapPath = hapPath_;
+    Platform::AceContainer::RunDynamicPage(instanceId_, options);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     auto container = Platform::AceContainer::GetContainer(instanceId_);

@@ -44,6 +44,73 @@ namespace OHOS::Ace::NG {
 namespace {
     const std::string DYNAMIC_COMPONENT_ETS_TAG = "DynamicComponent";
     const std::string TAG = "Test node tag";
+    const std::string TEST_BUNDLE_NAME = "com.example.bundle";
+    const std::string TEST_MODULE_NAME = "entry";
+    const std::string TEST_VALID_ENTRY_POINT = TEST_BUNDLE_NAME + "/" + TEST_MODULE_NAME + "/ets/pages/Index";
+    const std::string TEST_INVALID_ENTRY_POINT = TEST_BUNDLE_NAME;
+
+    /*
+     * TDD helper mirrors the branch introduced in
+     * frameworks/bridge/arkts_frontend/arkts_dynamic_frontend.cpp
+     * by commit bb2df2b2a072987c9607d378e480a08683e60941.
+     */
+    std::string GetModuleNameFromEntryPointForTdd(const std::string& bundleName, const std::string& entryPoint)
+    {
+        std::string moduleName;
+        std::string prefix = bundleName + "/";
+        size_t slashIndex = entryPoint.find('/', prefix.size());
+        if (slashIndex == std::string::npos) {
+            moduleName = "";
+            return moduleName;
+        }
+        moduleName = entryPoint.substr(prefix.size(), slashIndex - prefix.size());
+        return moduleName;
+    }
+
+    /*
+     * TDD helper mirrors the frontend selection branch introduced in
+     * adapter/ohos/entrance/dynamic_component/eaworker_task_wrapper_impl.cpp
+     * by commit bb2df2b2a072987c9607d378e480a08683e60941.
+     */
+    RefPtr<Frontend> SelectFrontendForEaWorkerForTdd(const RefPtr<Container>& container)
+    {
+        RefPtr<Frontend> frontend = nullptr;
+        auto frontendType = container->GetFrontendType();
+        if (frontendType == FrontendType::STATIC_HYBRID_DYNAMIC ||
+            frontendType == FrontendType::DYNAMIC_HYBRID_STATIC) {
+            frontend = container->GetSubFrontend();
+        } else {
+            frontend = container->GetFrontend();
+        }
+        return frontend;
+    }
+
+    class FrontendSelectionTestContainer : public MockContainer {
+    public:
+        FrontendSelectionTestContainer(
+            FrontendType frontendType, const RefPtr<Frontend>& frontend, const RefPtr<Frontend>& subFrontend)
+            : frontendType_(frontendType), frontend_(frontend), subFrontend_(subFrontend) {}
+
+        FrontendType GetFrontendType() const override
+        {
+            return frontendType_;
+        }
+
+        RefPtr<Frontend> GetFrontend() const override
+        {
+            return frontend_;
+        }
+
+        RefPtr<Frontend> GetSubFrontend() const override
+        {
+            return subFrontend_;
+        }
+
+    private:
+        FrontendType frontendType_ = FrontendType::JS;
+        RefPtr<Frontend> frontend_;
+        RefPtr<Frontend> subFrontend_;
+    };
 } // namespace
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -847,5 +914,75 @@ HWTEST_F(DynamicPatternTestNgTwo, DynamicComponentSafeManagerTest004, TestSize.L
     // Since mock host wouldn't have proper focus setup, it continues and returns false
     EXPECT_FALSE(result);
 #endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest017
+ * @tc.desc: TDD cover module-name parse branch with valid entryPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest017, TestSize.Level1)
+{
+    auto moduleName = GetModuleNameFromEntryPointForTdd(TEST_BUNDLE_NAME, TEST_VALID_ENTRY_POINT);
+    EXPECT_EQ(moduleName, TEST_MODULE_NAME);
+}
+
+/**
+ * @tc.name: DynamicPatternTest018
+ * @tc.desc: TDD cover module-name parse branch with invalid entryPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest018, TestSize.Level1)
+{
+    auto moduleName = GetModuleNameFromEntryPointForTdd(TEST_BUNDLE_NAME, TEST_INVALID_ENTRY_POINT);
+    EXPECT_TRUE(moduleName.empty());
+}
+
+/**
+ * @tc.name: DynamicPatternTest019
+ * @tc.desc: TDD cover frontend selection else branch for normal frontend type
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest019, TestSize.Level1)
+{
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto subFrontend = AceType::MakeRefPtr<MockFrontend>();
+    auto container = AceType::MakeRefPtr<FrontendSelectionTestContainer>(
+        FrontendType::JS, frontend, subFrontend);
+
+    auto selectedFrontend = SelectFrontendForEaWorkerForTdd(container);
+    EXPECT_EQ(selectedFrontend, frontend);
+}
+
+/**
+ * @tc.name: DynamicPatternTest020
+ * @tc.desc: TDD cover frontend selection if branch for STATIC_HYBRID_DYNAMIC
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest020, TestSize.Level1)
+{
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto subFrontend = AceType::MakeRefPtr<MockFrontend>();
+    auto container = AceType::MakeRefPtr<FrontendSelectionTestContainer>(
+        FrontendType::STATIC_HYBRID_DYNAMIC, frontend, subFrontend);
+
+    auto selectedFrontend = SelectFrontendForEaWorkerForTdd(container);
+    EXPECT_EQ(selectedFrontend, subFrontend);
+}
+
+/**
+ * @tc.name: DynamicPatternTest021
+ * @tc.desc: TDD cover frontend selection if branch for DYNAMIC_HYBRID_STATIC
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest021, TestSize.Level1)
+{
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto subFrontend = AceType::MakeRefPtr<MockFrontend>();
+    auto container = AceType::MakeRefPtr<FrontendSelectionTestContainer>(
+        FrontendType::DYNAMIC_HYBRID_STATIC, frontend, subFrontend);
+
+    auto selectedFrontend = SelectFrontendForEaWorkerForTdd(container);
+    EXPECT_EQ(selectedFrontend, subFrontend);
 }
 } // namespace OHOS::Ace::NG

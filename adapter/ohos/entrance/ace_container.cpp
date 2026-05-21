@@ -1793,15 +1793,14 @@ UIContentErrorCode AceContainer::RunPage(
     return front->RunPage(content, params);
 }
 
-bool AceContainer::RunDynamicPage(
-    int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint)
+bool AceContainer::RunDynamicPage(int32_t instanceId, const DynamicOptions& options)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, false);
-    front->RunDynamicPage(content, params, entryPoint);
+    front->RunDynamicPage(options);
     return true;
 }
 
