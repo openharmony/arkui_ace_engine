@@ -154,7 +154,7 @@ bool ListItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (listItemStyle_ != V2::ListItemStyle::CARD ||
-        host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        !host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
     auto layoutProperty = host->GetLayoutProperty<ListItemLayoutProperty>();
