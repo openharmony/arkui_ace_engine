@@ -1345,10 +1345,18 @@ export struct ChipComponent {
     if (deviceInfo.sdkApiVersion < 26) {
       return undefined;
     }
-    if (this.isChipActivated()) {
-      return this.activatedBackgroundSystemMaterial;
+    let info = uiMaterial.getMaterialInfo();
+    if (info.state === uiMaterial.MaterialState.DISABLE) {
+      return undefined;
     }
-    return this.backgroundSystemMaterial;
+    if (this.isChipActivated()) {
+      return info.state === uiMaterial.MaterialState.ENABLE && !this.activatedBackgroundSystemMaterial ?
+        new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) :
+        this.activatedBackgroundSystemMaterial;
+    }
+    return info.state === uiMaterial.MaterialState.ENABLE && !this.backgroundSystemMaterial ?
+      new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) :
+      this.backgroundSystemMaterial;
   }
 
   getColor(color: ResourceColor | undefined, defaultColor: ResourceColor): ResourceColor {
