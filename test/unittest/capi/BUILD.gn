@@ -272,6 +272,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_drawing_painter.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_matrix2d.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_calendar_picker_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/grid_col/bridge/grid_col_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/grid_row/bridge/grid_row_static_modifier.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources

@@ -26,6 +26,8 @@ component_modules = [
   "counter",
   "data_panel",
   "gauge",
+  "grid_col",
+  "grid_row",
   "hyperlink",
   "text_clock",
   "text_field",

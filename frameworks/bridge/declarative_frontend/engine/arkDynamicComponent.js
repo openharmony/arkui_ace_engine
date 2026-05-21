@@ -315,6 +315,34 @@ if (globalThis.QRCode === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.GridRow === undefined) {
+  globalThis.GridRow = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('GridRow');
+      let module = globalThis.requireNapi('arkui.components.arkgridrow');
+      module.exportView();
+      module.loadComponent();
+      globalThis.GridRow.create(params);
+    },
+    name: 'JSGridRow'
+  }
+}
+
+// @ts-ignore
+if (globalThis.GridCol === undefined) {
+  globalThis.GridCol = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('GridCol');
+      let module = globalThis.requireNapi('arkui.components.arkgridcol');
+      module.exportView();
+      module.loadComponent();
+      globalThis.GridCol.create(params);
+    },
+    name: 'JSGridCol'
+  }
+}
+
+// @ts-ignore
 if (globalThis.FolderStack === undefined) {
   globalThis.FolderStack = {
     create: function(params) {

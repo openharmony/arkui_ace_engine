@@ -273,8 +273,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_container_span_bridge.cpp",
       "nativeModule/arkts_native_flex_bridge.cpp",
       "nativeModule/arkts_native_frame_node_bridge.cpp",
-      "nativeModule/arkts_native_grid_col_bridge.cpp",
-      "nativeModule/arkts_native_grid_row_bridge.cpp",
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_line_bridge.cpp",
       "nativeModule/arkts_native_linear_indicator.cpp",

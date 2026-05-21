@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,46 @@
  * limitations under the License.
  */
 
-class GridColModifier extends ArkGridColComponent implements AttributeModifier<GridColAttribute> {
+class LazyArkGridColComponent extends ArkComponent {
+  static module: any | undefined = undefined;
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
+    if (LazyArkGridColComponent.module === undefined) {
+      LazyArkGridColComponent.module = globalThis.requireNapi('arkui.components.arkgridcol');
+    }
+    this.lazyComponent = LazyArkGridColComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  span(value: any): this {
+    this.lazyComponent.span(value);
+    return this;
+  }
+
+  gridColOffset(value: any): this {
+    this.lazyComponent.gridColOffset(value);
+    return this;
+  }
+
+  order(value: any): this {
+    this.lazyComponent.order(value);
+    return this;
+  }
+}
+
+class GridColModifier extends LazyArkGridColComponent implements AttributeModifier<GridColAttribute> {
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: GridColAttribute): void {
     ModifierUtils.applySetOnChange(this);
-    ModifierUtils.applyAndMergeModifier<GridColAttribute, ArkGridColComponent, ArkComponent>(instance, this);
+    ModifierUtils.applyAndMergeModifier<GridColAttribute, LazyArkGridColComponent, ArkComponent>(instance, this);
   }
 }

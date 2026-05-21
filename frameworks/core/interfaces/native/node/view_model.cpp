@@ -91,8 +91,6 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/interfaces/native/node/node_relative_container_modifier.h"
-#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
-#include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
@@ -565,18 +563,20 @@ void* createSearchNode(ArkUI_Int32 nodeId)
 
 void* createGridRowNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = GridRowModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto gridRowModifier = nodeModifier->getGridRowModifier();
+    CHECK_NULL_RETURN(gridRowModifier, nullptr);
+    return gridRowModifier->createFrameNode(nodeId);
 }
 
 void* createGridColNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = GridColModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto gridColModifier = nodeModifier->getGridColModifier();
+    CHECK_NULL_RETURN(gridColModifier, nullptr);
+    return gridColModifier->createFrameNode(nodeId);
 }
 
 void* createImageAnimatorNode(ArkUI_Int32 nodeId)

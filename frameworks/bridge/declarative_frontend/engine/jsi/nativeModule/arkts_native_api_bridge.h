@@ -99,8 +99,6 @@ private:
     static void RegisterRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterBlankAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterGridColAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterGridRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectionContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     // ArkTSCard start
     static void RegisterFrameNodeAttributesForm(Local<panda::ObjectRef> object, EcmaVM* vm);

@@ -235,6 +235,8 @@ if (is_ohos_standard_system) {
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextinput",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextarea",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkpanel",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgridrow",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgridcol",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
@@ -263,6 +265,8 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkcheckboxgroup.abc",
       "${out_path}/arkui/ace_engine/arkpatternlock.abc",
       "${out_path}/arkui/ace_engine/arkqrcode.abc",
+      "${out_path}/arkui/ace_engine/arkgridrow.abc",
+      "${out_path}/arkui/ace_engine/arkgridcol.abc",
       "${out_path}/arkui/ace_engine/arkrating.abc",
       "${out_path}/arkui/ace_engine/arkwaterflow.abc",
       "${out_path}/arkui/ace_engine/arklazywaterflowlayout.abc",

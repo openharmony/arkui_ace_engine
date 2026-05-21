@@ -16,10 +16,23 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_grid_row_ffi.h"
 
 #include "cj_lambda.h"
+#include "base/log/log_wrapper.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 
 using namespace OHOS::Ace;
+
+namespace OHOS::Ace {
+NG::GridRowModelNG* GetGridRowModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridRow");
+    if (module == nullptr) {
+        LOGF_ABORT("Can't find gridrow dynamic module");
+    }
+    return reinterpret_cast<NG::GridRowModelNG*>(module->GetModel());
+}
+} // namespace OHOS::Ace
 
 namespace {
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
@@ -161,7 +174,7 @@ V2::GridRowDirection ParserDirection(int32_t direction)
 extern "C" {
 void FfiOHOSAceFrameworkGridRowCreate()
 {
-    GridRowModel::GetInstance()->Create();
+    GetGridRowModel()->Create();
 }
 
 void FfiOHOSAceFrameworkGridRowCreateWithFloat64Int32(GridRowCreateWithFloat64Int32 createOption)
@@ -172,7 +185,7 @@ void FfiOHOSAceFrameworkGridRowCreateWithFloat64Int32(GridRowCreateWithFloat64In
     auto parsedBreakpoints =
         ParserBreakpoints(createOption.breakpointVals, createOption.breakpointUnits, createOption.breakpointReference);
     auto parsedDirection = ParserDirection(createOption.direction);
-    GridRowModel::GetInstance()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
+    GetGridRowModel()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
 }
 
 void FfiOHOSAceFrameworkGridRowCreateWithFloat64ColumnOption(GridRowCreateWithFloat64ColumnOption createOption)
@@ -184,7 +197,7 @@ void FfiOHOSAceFrameworkGridRowCreateWithFloat64ColumnOption(GridRowCreateWithFl
         ParserBreakpoints(createOption.breakpointVals, createOption.breakpointUnits, createOption.breakpointReference);
     auto parsedDirection = ParserDirection(createOption.direction);
 
-    GridRowModel::GetInstance()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
+    GetGridRowModel()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
 }
 
 void FfiOHOSAceFrameworkGridRowCreateWithFloat64OptionColumnOption(
@@ -196,7 +209,7 @@ void FfiOHOSAceFrameworkGridRowCreateWithFloat64OptionColumnOption(
         ParserBreakpoints(createOption.breakpointVals, createOption.breakpointUnits, createOption.breakpointReference);
     auto parsedDirection = ParserDirection(createOption.direction);
 
-    GridRowModel::GetInstance()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
+    GetGridRowModel()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
 }
 
 void FfiOHOSAceFrameworkGridRowCreateWithSizeOptionColumnOption(GridRowCreateWithSizeOptionColumnOption createOption)
@@ -207,7 +220,7 @@ void FfiOHOSAceFrameworkGridRowCreateWithSizeOptionColumnOption(GridRowCreateWit
         ParserBreakpoints(createOption.breakpointVals, createOption.breakpointUnits, createOption.breakpointReference);
     auto parsedDirection = ParserDirection(createOption.direction);
 
-    GridRowModel::GetInstance()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
+    GetGridRowModel()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
 }
 
 void FfiOHOSAceFrameworkGridRowCreateWithFloat64OptionInt32(GridRowCreateWithFloat64OptionInt32 createOption)
@@ -218,7 +231,7 @@ void FfiOHOSAceFrameworkGridRowCreateWithFloat64OptionInt32(GridRowCreateWithFlo
         ParserBreakpoints(createOption.breakpointVals, createOption.breakpointUnits, createOption.breakpointReference);
     auto parsedDirection = ParserDirection(createOption.direction);
 
-    GridRowModel::GetInstance()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
+    GetGridRowModel()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
 }
 
 void FfiOHOSAceFrameworkGridRowCreateWithSizeOptionInt32(GridRowCreateWithSizeOptionInt32 createOption)
@@ -229,20 +242,20 @@ void FfiOHOSAceFrameworkGridRowCreateWithSizeOptionInt32(GridRowCreateWithSizeOp
         ParserBreakpoints(createOption.breakpointVals, createOption.breakpointUnits, createOption.breakpointReference);
     auto parsedDirection = ParserDirection(createOption.direction);
 
-    GridRowModel::GetInstance()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
+    GetGridRowModel()->Create(parsedColumns, parsedGutter, parsedBreakpoints, parsedDirection);
 }
 
 void FfiOHOSAceFrameworkGridRowSetHeight(double height, int32_t heightUnit)
 {
     FfiOHOSAceFrameworkViewAbstractSetHeight(height, heightUnit);
-    GridRowModel::GetInstance()->SetHeight();
+    GetGridRowModel()->SetHeight();
 }
 
 void FfiOHOSAceFrameworkGridRowBreakpointEvent(void (*callback)(const char*))
 {
     auto onHover = CJLambda::Create(callback);
     auto onBreakpointChange = [func = std::move(onHover)](const std::string& value) { func(value.c_str()); };
-    GridRowModel::GetInstance()->SetOnBreakPointChange(onBreakpointChange);
+    GetGridRowModel()->SetOnBreakPointChange(onBreakpointChange);
 }
 
 void FfiOHOSAceFrameworkGridRowAlignItem(int32_t alignItem)
@@ -250,9 +263,9 @@ void FfiOHOSAceFrameworkGridRowAlignItem(int32_t alignItem)
     if (alignItem == static_cast<int32_t>(FlexAlign::FLEX_START) ||
         alignItem == static_cast<int32_t>(FlexAlign::FLEX_END) ||
         alignItem == static_cast<int32_t>(FlexAlign::CENTER) || alignItem == static_cast<int32_t>(FlexAlign::STRETCH)) {
-        GridRowModel::GetInstance()->SetAlignItems(static_cast<FlexAlign>(alignItem));
+        GetGridRowModel()->SetAlignItems(static_cast<FlexAlign>(alignItem));
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        GridRowModel::GetInstance()->SetAlignItems(FlexAlign::FLEX_START);
+        GetGridRowModel()->SetAlignItems(FlexAlign::FLEX_START);
     }
 }
 }

@@ -84,6 +84,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Gauge", "gauge" },
         { "Grid", "grid" },
         { "GridItem", "grid" },
+        { "GridCol", "gridcol" },
+        { "GridRow", "gridrow" },
         { "Hyperlink", "hyperlink" },
         { "Indexer", "indexer" },
         { "Badge", "badge" },

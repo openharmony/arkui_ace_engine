@@ -26,7 +26,6 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT GridRowModel {
 public:
-    static GridRowModel* GetInstance();
     virtual ~GridRowModel() = default;
 
     virtual void Create() = 0;

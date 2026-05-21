@@ -126,6 +126,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Indexer", "indexer"},
         { "Badge", "badge" },
         { "Hyperlink", "hyperlink" },
+        { "GridCol", "gridcol" },
+        { "GridRow", "gridrow" },
         {"SymbolGlyph", "symbol"},
         {"Richeditor", "richeditor"},
         { "LoadingProgress", "loadingprogress" },

@@ -8855,15 +8855,18 @@ struct ArkUIAny {
 };
 
 struct ArkUIGridColModifier {
+    void (*create)(void* span, void* offset, void* order);
     void (*setSpan)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
     void (*resetSpan)(ArkUINodeHandle node);
     void (*setGridColOffset)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
     void (*resetGridColOffset)(ArkUINodeHandle node);
     void (*setOrder)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
     void (*resetOrder)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIGridRowModifier {
+    void (*create)(void* columns, void* gutter, void* breakpoints, ArkUI_Int32 direction);
     void (*setAlignItems)(ArkUINodeHandle node, ArkUI_Int32 alignItems);
     void (*resetAlignItems)(ArkUINodeHandle node);
     void (*setDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
@@ -8877,6 +8880,8 @@ struct ArkUIGridRowModifier {
     void (*resetGutter)(ArkUINodeHandle node);
     void (*setOnBreakpointChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnBreakpointChange)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*setHeight)(ArkUINodeHandle node);
 };
 
 struct ArkUIPanelModifier {

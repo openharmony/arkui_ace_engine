@@ -61,9 +61,6 @@
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
-#include "bridge/declarative_frontend/jsview/js_grid_col.h"
-#include "bridge/declarative_frontend/jsview/js_grid_container.h"
-#include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
@@ -442,8 +439,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ForEach", JSForEach::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
-    { "GridRow", JSGridRow::JSBind },
-    { "GridCol", JSGridCol::JSBind },
     { "Calendar", JSCalendar::JSBind },
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
@@ -523,8 +518,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
     { "ScrollBar", JSScrollBar::JSBind },
-    { "GridRow", JSGridRow::JSBind },
-    { "GridCol", JSGridCol::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Calendar", JSCalendar::JSBind },
     { "Rect", JSRect::JSBind },

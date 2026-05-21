@@ -1310,7 +1310,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['GridRow', (context: UIContext): FrameNode => {
       let node = new TypedFrameNode(context, 'GridRow', (node: NodePtr, type: ModifierType): ArkGridRowComponent => {
-        return new ArkGridRowComponent(node, type);
+        getUINativeModule().loadNativeModule('GridRow');
+        let module = globalThis.requireNapi('arkui.components.arkgridrow');
+        return module.createComponent(node, type);
       });
       node.initialize();
       return node;
@@ -1327,7 +1329,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['GridCol', (context: UIContext): FrameNode => {
       let node = new TypedFrameNode(context, 'GridCol', (node: NodePtr, type: ModifierType): ArkGridColComponent => {
-        return new ArkGridColComponent(node, type);
+        getUINativeModule().loadNativeModule('GridCol');
+        let module = globalThis.requireNapi('arkui.components.arkgridcol');
+        return module.createComponent(node, type);
       });
       node.initialize();
       return node;
