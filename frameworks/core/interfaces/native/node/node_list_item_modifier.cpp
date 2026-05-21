@@ -19,6 +19,7 @@
 #include "base/error/error_code.h"
 #include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -198,6 +199,29 @@ ArkUI_Int32 Collapse(ArkUINodeHandle node)
     return ERROR_CODE_NO_ERROR;
 }
 
+void SetAutoScale(ArkUINodeHandle node, ArkUI_Bool autoScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetAutoScale(frameNode, autoScale);
+}
+
+ArkUI_Bool GetAutoScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<ArcListItemLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    return layoutProperty->GetAutoScale().value_or(true);
+}
+
+void ResetAutoScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetAutoScale(frameNode, true);
+}
+
 namespace NodeModifier {
 const ArkUIListItemModifier* GetListItemModifier()
 {
@@ -215,6 +239,9 @@ const ArkUIListItemModifier* GetListItemModifier()
         .resetListItemStyle = ResetListItemStyle,
         .expand = Expand,
         .collapse = Collapse,
+        .setAutoScale = SetAutoScale,
+        .getAutoScale = GetAutoScale,
+        .resetAutoScale = ResetAutoScale,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

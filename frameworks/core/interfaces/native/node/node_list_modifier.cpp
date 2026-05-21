@@ -18,7 +18,9 @@
 #include "interfaces/native/node/node_model.h"
 
 #include "core/components/list/list_theme.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -186,6 +188,15 @@ void ResetChainAnimation(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetChainAnimation(frameNode, false);
+}
+
+ArkUI_Bool GetChainAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetChainAnimation().value_or(false);
 }
 
 void SetCachedCount(ArkUINodeHandle node, ArkUI_Int32 cachedCount)
@@ -485,6 +496,15 @@ void ResetListScrollBarWidth(ArkUINodeHandle node)
     ListModelNG::CreateWithResourceObjScrollBarWidth(frameNode, nullptr);
 }
 
+void ResetArcListScrollBarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto theme = GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(theme);
+    ListModelNG::SetListScrollBarWidth(frameNode, theme->GetNormalWidth().ToString());
+}
+
 ArkUI_Uint32 GetListScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -781,6 +801,63 @@ void ResetListFlingSpeedLimit(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
+}
+
+void SetDigitalCrownSensitivity(ArkUINodeHandle node, ArkUI_Int32 sensitivity)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetDigitalCrownSensitivity(frameNode, static_cast<CrownSensitivity>(sensitivity));
+#endif
+}
+
+ArkUI_Int32 GetDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<ArkUI_Int32>(CrownSensitivity::MEDIUM));
+    return static_cast<ArkUI_Int32>(ListModelNG::GetDigitalCrownSensitivity(frameNode));
+#else
+    return static_cast<ArkUI_Int32>(CrownSensitivity::MEDIUM);
+#endif
+}
+
+void ResetDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity::MEDIUM);
+#endif
+}
+
+void SetArcListHeader(ArkUINodeHandle node, ArkUINodeHandle header)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* headerNode = reinterpret_cast<FrameNode*>(header);
+    CHECK_NULL_VOID(headerNode);
+    ListModelNG::SetHeader(frameNode, headerNode);
+}
+
+ArkUINodeHandle GetArcListHeader(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ArcListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto header = pattern->GetHeader();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(header));
+}
+
+void ResetArcListHeader(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ArcListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetHeader();
 }
 
 ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
@@ -1136,6 +1213,7 @@ const ArkUIListModifier* GetListModifier()
         .getListScrollBarWidth = GetListScrollBarWidth,
         .setListScrollBarWidth = SetListScrollBarWidth,
         .resetListScrollBarWidth = ResetListScrollBarWidth,
+        .resetArcListScrollBarWidth = ResetArcListScrollBarWidth,
         .getListScrollBarColor = GetListScrollBarColor,
         .setListScrollBarColor = SetListScrollBarColor,
         .resetListScrollBarColor = ResetListScrollBarColor,
@@ -1239,6 +1317,13 @@ const ArkUIListModifier* GetListModifier()
         .setBackPressCloseSwipeAction = SetBackPressCloseSwipeAction,
         .resetBackPressCloseSwipeAction = ResetBackPressCloseSwipeAction,
         .getBackPressCloseSwipeAction = GetBackPressCloseSwipeAction,
+        .setDigitalCrownSensitivity = SetDigitalCrownSensitivity,
+        .getDigitalCrownSensitivity = GetDigitalCrownSensitivity,
+        .resetDigitalCrownSensitivity = ResetDigitalCrownSensitivity,
+        .setArcListHeader = SetArcListHeader,
+        .getArcListHeader = GetArcListHeader,
+        .resetArcListHeader = ResetArcListHeader,
+        .getChainAnimation = GetChainAnimation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1826,6 +1911,175 @@ void ResetOnListReachEnd(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetOnReachEnd(frameNode, nullptr);
+}
+
+void SetOnArcListScrollIndex(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollIndex = [nodeId, node, extraParam](int32_t first, int32_t last, int32_t center) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ARC_LIST_SCROLL_INDEX;
+        event.componentAsyncEvent.data[0].i32 = first;
+        event.componentAsyncEvent.data[1].i32 = last;
+        event.componentAsyncEvent.data[2].i32 = center;
+        SendArkUISyncEvent(&event);
+    };
+    ListModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
+}
+
+void ResetOnArcListScrollIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScrollIndex(frameNode, nullptr);
+}
+
+void SetOnArcListReachStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onReachStart = [node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ARC_LIST_REACH_START;
+        SendArkUISyncEvent(&event);
+    };
+    ListModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+}
+
+void ResetOnArcListReachStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnReachStart(frameNode, nullptr);
+}
+
+void SetOnArcListReachEnd(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onReachEnd = [node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ARC_LIST_REACH_END;
+        SendArkUISyncEvent(&event);
+    };
+    ListModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
+}
+
+void ResetOnArcListReachEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnReachEnd(frameNode, nullptr);
+}
+
+void SetOnArcListScrollStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollStart = [nodeId, node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ARC_LIST_SCROLL_START;
+        SendArkUISyncEvent(&event);
+    };
+    ListModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
+}
+
+void ResetOnArcListScrollStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScrollStart(frameNode, nullptr);
+}
+
+void SetOnArcListScrollStop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollStop = [nodeId, node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ARC_LIST_SCROLL_STOP;
+        SendArkUISyncEvent(&event);
+    };
+    ListModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
+}
+
+void ResetOnArcListScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScrollStop(frameNode, nullptr);
+}
+
+void SetOnArcListWillScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onWillScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state,
+                             ScrollSource source) -> ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
+        ArkUINodeEvent event;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ARC_LIST_WILL_SCROLL;
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
+        SendArkUISyncEvent(&event);
+        scrollRes.offset =
+            Dimension(event.componentAsyncEvent.data[0].f32, usePx ? DimensionUnit::PX : DimensionUnit::VP);
+        return scrollRes;
+    };
+    ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
+}
+
+void ResetOnArcListWillScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+}
+
+void SetOnArcListDidScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onDidScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.componentAsyncEvent.subKind = ON_ARC_LIST_DID_SCROLL;
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int32_t>(state);
+        SendArkUISyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(onDidScroll));
+}
+
+void ResetOnArcListDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
 }
 
 void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)

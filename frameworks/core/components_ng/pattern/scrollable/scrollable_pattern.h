@@ -414,13 +414,7 @@ public:
 
     void SetMaxFlingVelocity(double max);
 
-    double GetMaxFlingVelocity() const
-    {
-        CHECK_NULL_RETURN(scrollableEvent_, 0.0);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_RETURN(scrollable, 0.0);
-        return scrollable->GetMaxFlingVelocity();
-    }
+    double GetMaxFlingVelocity() const;
 
     virtual void StopAnimate();
     bool AnimateRunning() const
