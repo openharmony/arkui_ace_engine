@@ -66,6 +66,11 @@ public:
         remainChildOnResetStatus_ = true;
     }
 
+    bool IsRemainChildOnResetStatus() const
+    {
+        return remainChildOnResetStatus_;
+    }
+
     virtual void SetInnerFlag(bool value) override {
         NGGestureRecognizer::SetInnerFlag(value);
         for (auto& recognizer : recognizers_) {

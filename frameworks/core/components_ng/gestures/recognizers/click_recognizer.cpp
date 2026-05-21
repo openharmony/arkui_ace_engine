@@ -68,6 +68,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
             "distanceThreshold_ is %{public}f", distanceThreshold);
             extraInfo_ += "move distance out of distanceThreshold.";
+            LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::CLICK_MOVE_OUT_REGION);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
         } else {
@@ -91,6 +92,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
                 "InputTracking id:%{public}d, this MOVE/UP event is out of region, try to reject click gesture",
                 event.touchEventId);
             extraInfo_ += "move/up event out of region.";
+            LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::CLICK_MOVE_OUT_REGION);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
         }
@@ -212,7 +214,14 @@ void ClickRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "CLK RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
+    
     auto lastRefereeState = refereeState_;
+    
+    StateChangeReason reason = (count_ == 1) ? StateChangeReason::CLICK_SINGLE_TAP :
+                               (tappedCount_ == 1) ? StateChangeReason::CLICK_DOUBLE_TAP_FIRST :
+                               StateChangeReason::CLICK_DOUBLE_TAP_SECOND;
+    LogStateChange(refereeState_, RefereeState::SUCCEED, reason);
+    
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     if (backupTouchPointsForSucceedBlock_.has_value()) {
@@ -261,6 +270,13 @@ void ClickRecognizer::OnAccepted()
 void ClickRecognizer::OnRejected()
 {
     SendRejectMsg();
+    
+    StateChangeReason reason = StateChangeReason::REJECTED_BY_REFEREE;
+    if (tappedCount_ > 0 && tappedCount_ < count_) {
+        reason = StateChangeReason::CLICK_TIMEOUT;
+    }
+    LogStateChange(refereeState_, RefereeState::FAIL, reason);
+    
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
@@ -460,6 +476,7 @@ void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
+    LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::SYSTEM_CANCEL);
     Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
 }
 
@@ -488,6 +505,7 @@ void ClickRecognizer::ResetStatusInHandleOverdueDeadline()
 void ClickRecognizer::HandleOverdueDeadline()
 {
     if (currentTouchPointsNum_ < fingers_ || tappedCount_ < count_) {
+        LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::CLICK_TIMEOUT);
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         ResetStatusInHandleOverdueDeadline();
     }
