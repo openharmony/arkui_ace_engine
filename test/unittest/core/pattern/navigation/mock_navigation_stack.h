@@ -20,6 +20,7 @@
 
 #define protected public
 #define private public
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"

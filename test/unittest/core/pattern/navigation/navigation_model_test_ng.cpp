@@ -44,6 +44,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
+#include "core/components_ng/pattern/navigation/navigation_model_static.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2751,5 +2753,1772 @@ HWTEST_F(NavigationModelTestNg, SetSplitPlaceholder001, TestSize.Level1)
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     navigationModel.SetSplitPlaceholder(splitPlaceholder);
     ASSERT_NE(navigationGroupNode, nullptr);
+}
+
+/**
+ * @tc.name: StaticCreateFrameNode001
+ * @tc.desc: Test NavigationModelStatic::CreateFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticCreateFrameNode001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto node = NavigationModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(node);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    EXPECT_NE(navigationGroupNode->GetNavBarNode(), nullptr);
+    EXPECT_NE(navigationGroupNode->GetContentNode(), nullptr);
+    EXPECT_NE(navigationGroupNode->GetDividerNode(), nullptr);
+}
+
+/**
+ * @tc.name: StaticCreateFrameNode002
+ * @tc.desc: Test NavigationModelStatic::CreateFrameNode called twice keeps children
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticCreateFrameNode002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = NavigationModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(node, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(node);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = navigationGroupNode->GetNavBarNode();
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarNodeFrame = AceType::DynamicCast<NavBarNode>(navBarNode);
+    ASSERT_NE(navBarNodeFrame, nullptr);
+    auto navBarLayoutProperty = navBarNodeFrame->GetLayoutProperty<NavBarLayoutProperty>();
+    ASSERT_NE(navBarLayoutProperty, nullptr);
+    navBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto node2 = NavigationModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(node2, nullptr);
+    EXPECT_NE(AceType::DynamicCast<NavigationGroupNode>(node2)->GetNavBarNode(), nullptr);
+}
+
+/**
+ * @tc.name: StaticSetUseHomeDestination001
+ * @tc.desc: Test SetUseHomeDestination with useHomeDestination=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetUseHomeDestination001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->useHomeDestination_ = std::nullopt;
+    EXPECT_FALSE(navigationGroupNode->GetUseHomeDestination().has_value());
+    NavigationModelStatic::SetUseHomeDestination(frameNode, true);
+    auto useHomeDest = navigationGroupNode->GetUseHomeDestination();
+    EXPECT_TRUE(useHomeDest.has_value());
+    EXPECT_TRUE(useHomeDest.value());
+}
+
+/**
+ * @tc.name: StaticSetUseHomeDestination002
+ * @tc.desc: Test SetUseHomeDestination with useHomeDestination=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetUseHomeDestination002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->useHomeDestination_ = std::nullopt;
+    NavigationModelStatic::SetUseHomeDestination(frameNode, false);
+    auto useHomeDest = navigationGroupNode->GetUseHomeDestination();
+    EXPECT_TRUE(useHomeDest.has_value());
+    EXPECT_FALSE(useHomeDest.value());
+}
+
+/**
+ * @tc.name: StaticSetUseHomeDestination003
+ * @tc.desc: Test SetUseHomeDestination already set, should return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetUseHomeDestination003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->useHomeDestination_ = true;
+    EXPECT_TRUE(navigationGroupNode->GetUseHomeDestination().has_value());
+    auto navBar = navigationGroupNode->GetNavBarNode();
+    ASSERT_NE(navBar, nullptr);
+    NavigationModelStatic::SetUseHomeDestination(frameNode, false);
+    EXPECT_NE(navigationGroupNode->GetNavBarNode(), nullptr);
+}
+
+/**
+ * @tc.name: StaticSetUseHomeDestination004
+ * @tc.desc: Test SetUseHomeDestination with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetUseHomeDestination004, TestSize.Level1)
+{
+    NavigationModelStatic::SetUseHomeDestination(nullptr, true);
+}
+
+/**
+ * @tc.name: StaticSetNavBarWidth001
+ * @tc.desc: Test SetNavBarWidth with positive value
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetNavBarWidth001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    Dimension value = 300.0_vp;
+    NavigationModelStatic::SetNavBarWidth(frameNode, value);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    EXPECT_TRUE(navigationPattern->GetUserSetNavBarWidthFlag());
+}
+
+/**
+ * @tc.name: StaticSetNavBarWidth002
+ * @tc.desc: Test SetNavBarWidth with non-positive value
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetNavBarWidth002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    Dimension value = -1.0_vp;
+    NavigationModelStatic::SetNavBarWidth(frameNode, value);
+    auto layoutProp = AceType::DynamicCast<NavigationGroupNode>(frameNode)
+                          ->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    EXPECT_TRUE(layoutProp->GetNavBarWidth().has_value());
+}
+
+/**
+ * @tc.name: StaticSetNavBarWidth003
+ * @tc.desc: Test SetNavBarWidth with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetNavBarWidth003, TestSize.Level1)
+{
+    Dimension value = 300.0_vp;
+    NavigationModelStatic::SetNavBarWidth(nullptr, value);
+}
+
+/**
+ * @tc.name: StaticSetMinNavBarWidth001
+ * @tc.desc: Test SetMinNavBarWidth basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMinNavBarWidth001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    Dimension value = 200.0_vp;
+    NavigationModelStatic::SetMinNavBarWidth(frameNode, value);
+    auto layoutProp = AceType::DynamicCast<NavigationGroupNode>(frameNode)
+                          ->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+}
+
+/**
+ * @tc.name: StaticSetMinNavBarWidth002
+ * @tc.desc: Test SetMinNavBarWidth with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMinNavBarWidth002, TestSize.Level1)
+{
+    Dimension value = 200.0_vp;
+    NavigationModelStatic::SetMinNavBarWidth(nullptr, value);
+}
+
+/**
+ * @tc.name: StaticSetMaxNavBarWidth001
+ * @tc.desc: Test SetMaxNavBarWidth basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMaxNavBarWidth001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    Dimension value = 500.0_vp;
+    NavigationModelStatic::SetMaxNavBarWidth(frameNode, value);
+}
+
+/**
+ * @tc.name: StaticSetMaxNavBarWidth002
+ * @tc.desc: Test SetMaxNavBarWidth with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMaxNavBarWidth002, TestSize.Level1)
+{
+    Dimension value = 500.0_vp;
+    NavigationModelStatic::SetMaxNavBarWidth(nullptr, value);
+}
+
+/**
+ * @tc.name: StaticSetNavBarPosition001
+ * @tc.desc: Test SetNavBarPosition with valid mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetNavBarPosition001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    std::optional<NG::NavBarPosition> mode = NG::NavBarPosition::END;
+    NavigationModelStatic::SetNavBarPosition(frameNode, mode);
+    auto layoutProp = AceType::DynamicCast<NavigationGroupNode>(frameNode)
+                          ->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    EXPECT_TRUE(layoutProp->GetNavBarPosition().has_value());
+}
+
+/**
+ * @tc.name: StaticSetNavBarPosition002
+ * @tc.desc: Test SetNavBarPosition with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetNavBarPosition002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    std::optional<NG::NavBarPosition> mode = NG::NavBarPosition::START;
+    NavigationModelStatic::SetNavBarPosition(frameNode, mode);
+    std::optional<NG::NavBarPosition> resetMode;
+    NavigationModelStatic::SetNavBarPosition(frameNode, resetMode);
+}
+
+/**
+ * @tc.name: StaticSetNavBarPosition003
+ * @tc.desc: Test SetNavBarPosition with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetNavBarPosition003, TestSize.Level1)
+{
+    std::optional<NG::NavBarPosition> mode = NG::NavBarPosition::END;
+    NavigationModelStatic::SetNavBarPosition(nullptr, mode);
+}
+
+/**
+ * @tc.name: StaticSetMinContentWidth001
+ * @tc.desc: Test SetMinContentWidth basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMinContentWidth001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    Dimension value = 300.0_vp;
+    NavigationModelStatic::SetMinContentWidth(frameNode, value);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto layoutProp = navigationGroupNode->GetLayoutPropertyPtr<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+}
+
+/**
+ * @tc.name: StaticSetMinContentWidth002
+ * @tc.desc: Test SetMinContentWidth with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMinContentWidth002, TestSize.Level1)
+{
+    Dimension value = 300.0_vp;
+    NavigationModelStatic::SetMinContentWidth(nullptr, value);
+}
+
+/**
+ * @tc.name: StaticSetSystemBarStyle001
+ * @tc.desc: Test SetSystemBarStyle basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetSystemBarStyle001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    Color color(0xFF000000);
+    NavigationModelStatic::SetSystemBarStyle(frameNode, color);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: StaticSetSystemBarStyle002
+ * @tc.desc: Test SetSystemBarStyle with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetSystemBarStyle002, TestSize.Level1)
+{
+    Color color(0xFF000000);
+    NavigationModelStatic::SetSystemBarStyle(nullptr, color);
+}
+
+/**
+ * @tc.name: StaticSetUsrNavigationMode001
+ * @tc.desc: Test SetUsrNavigationMode with valid mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetUsrNavigationMode001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    std::optional<NavigationMode> mode = NavigationMode::SPLIT;
+    NavigationModelStatic::SetUsrNavigationMode(frameNode, mode);
+    auto layoutProp = AceType::DynamicCast<NavigationGroupNode>(frameNode)
+                          ->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    EXPECT_TRUE(layoutProp->GetUsrNavigationMode().has_value());
+}
+
+/**
+ * @tc.name: StaticSetUsrNavigationMode002
+ * @tc.desc: Test SetUsrNavigationMode with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetUsrNavigationMode002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    std::optional<NavigationMode> mode = NavigationMode::STACK;
+    NavigationModelStatic::SetUsrNavigationMode(frameNode, mode);
+    std::optional<NavigationMode> resetMode;
+    NavigationModelStatic::SetUsrNavigationMode(frameNode, resetMode);
+}
+
+/**
+ * @tc.name: StaticSetOnNavBarWidthChangeEvent001
+ * @tc.desc: Test SetOnNavBarWidthChangeEvent basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetOnNavBarWidthChangeEvent001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    bool called = false;
+    OnNavBarWidthChangeEvent event = [&called](const Dimension width) { called = true; };
+    NavigationModelStatic::SetOnNavBarWidthChangeEvent(frameNode, std::move(event));
+}
+
+/**
+ * @tc.name: StaticSetOnNavBarWidthChangeEvent002
+ * @tc.desc: Test SetOnNavBarWidthChangeEvent with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetOnNavBarWidthChangeEvent002, TestSize.Level1)
+{
+    OnNavBarWidthChangeEvent event = [](const Dimension width) {};
+    NavigationModelStatic::SetOnNavBarWidthChangeEvent(nullptr, std::move(event));
+}
+
+/**
+ * @tc.name: StaticSetHideTitleBar001
+ * @tc.desc: Test SetHideTitleBar basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideTitleBar001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetHideTitleBar(frameNode, true, true);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    ASSERT_NE(navBarLayoutProperty, nullptr);
+    EXPECT_TRUE(navBarLayoutProperty->GetHideTitleBarValue(false));
+}
+
+/**
+ * @tc.name: StaticSetHideTitleBar002
+ * @tc.desc: Test SetHideTitleBar with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideTitleBar002, TestSize.Level1)
+{
+    NavigationModelStatic::SetHideTitleBar(nullptr, true, false);
+}
+
+/**
+ * @tc.name: StaticSetHideBackButton001
+ * @tc.desc: Test SetHideBackButton basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideBackButton001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetHideBackButton(frameNode, true);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    ASSERT_NE(navBarLayoutProperty, nullptr);
+    EXPECT_TRUE(navBarLayoutProperty->GetHideBackButtonValue(false));
+}
+
+/**
+ * @tc.name: StaticSetHideBackButton002
+ * @tc.desc: Test SetHideBackButton with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideBackButton002, TestSize.Level1)
+{
+    NavigationModelStatic::SetHideBackButton(nullptr, true);
+}
+
+/**
+ * @tc.name: StaticSetMenuItems001
+ * @tc.desc: Test SetMenuItems basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMenuItems001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->UpdatePrevMenuIsCustom(false);
+    std::vector<NG::BarItem> menuItems;
+    NG::BarItem bar;
+    bar.text = "menu";
+    bar.icon = "icon";
+    menuItems.push_back(bar);
+    NavigationModelStatic::SetMenuItems(frameNode, std::move(menuItems));
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarPattern, nullptr);
+    EXPECT_FALSE(navBarNode->GetPrevMenuIsCustom().value_or(false));
+}
+
+/**
+ * @tc.name: StaticSetMenuItems002
+ * @tc.desc: Test SetMenuItems with prevMenuIsCustom=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMenuItems002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->UpdatePrevMenuIsCustom(true);
+    std::vector<NG::BarItem> menuItems;
+    NG::BarItem bar;
+    bar.text = "menu2";
+    menuItems.push_back(bar);
+    NavigationModelStatic::SetMenuItems(frameNode, std::move(menuItems));
+    EXPECT_FALSE(navBarNode->GetPrevMenuIsCustom().value_or(true));
+}
+
+/**
+ * @tc.name: StaticSetMenuItems003
+ * @tc.desc: Test SetMenuItems with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMenuItems003, TestSize.Level1)
+{
+    std::vector<NG::BarItem> menuItems;
+    NavigationModelStatic::SetMenuItems(nullptr, std::move(menuItems));
+}
+
+/**
+ * @tc.name: StaticSetMenuOptions001
+ * @tc.desc: Test SetMenuOptions basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMenuOptions001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NG::NavigationMenuOptions opt;
+    NavigationModelStatic::SetMenuOptions(frameNode, std::move(opt));
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarPattern, nullptr);
+}
+
+/**
+ * @tc.name: StaticSetMenuOptions002
+ * @tc.desc: Test SetMenuOptions with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMenuOptions002, TestSize.Level1)
+{
+    NG::NavigationMenuOptions opt;
+    NavigationModelStatic::SetMenuOptions(nullptr, std::move(opt));
+}
+
+/**
+ * @tc.name: StaticSetHideToolBar001
+ * @tc.desc: Test SetHideToolBar basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideToolBar001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetHideToolBar(frameNode, true, true);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    ASSERT_NE(navBarLayoutProperty, nullptr);
+    EXPECT_TRUE(navBarLayoutProperty->GetHideToolBarValue(false));
+}
+
+/**
+ * @tc.name: StaticSetHideToolBar002
+ * @tc.desc: Test SetHideToolBar with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideToolBar002, TestSize.Level1)
+{
+    NavigationModelStatic::SetHideToolBar(nullptr, true, false);
+}
+
+/**
+ * @tc.name: StaticSetTitlebarOptions001
+ * @tc.desc: Test SetTitlebarOptions basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetTitlebarOptions001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationTitlebarOptions opt;
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
+    NavigationModelStatic::SetTitlebarOptions(frameNode, std::move(opt));
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+}
+
+/**
+ * @tc.name: StaticSetCustomMenu001
+ * @tc.desc: Test SetCustomMenu with no existing menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomMenu001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    EXPECT_EQ(navBarNode->GetMenu(), nullptr);
+    auto customNode = FrameNode::CreateFrameNode("menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    NavigationModelStatic::SetCustomMenu(frameNode, customNode);
+    EXPECT_NE(navBarNode->GetMenu(), nullptr);
+    EXPECT_TRUE(navBarNode->GetPrevMenuIsCustom().value_or(false));
+}
+
+/**
+ * @tc.name: StaticSetCustomMenu002
+ * @tc.desc: Test SetCustomMenu with existing menu same id
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomMenu002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto customNode = FrameNode::CreateFrameNode("menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    navBarNode->SetMenu(customNode);
+    navBarNode->UpdatePrevMenuIsCustom(true);
+    EXPECT_EQ(navBarNode->GetMenu(), customNode);
+    NavigationModelStatic::SetCustomMenu(frameNode, customNode);
+}
+
+/**
+ * @tc.name: StaticSetCustomMenu003
+ * @tc.desc: Test SetCustomMenu with existing menu different id
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomMenu003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto oldMenu = FrameNode::CreateFrameNode("menu", 102, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    navBarNode->SetMenu(oldMenu);
+    auto customNode = FrameNode::CreateFrameNode("menu", 103, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    NavigationModelStatic::SetCustomMenu(frameNode, customNode);
+    EXPECT_EQ(navBarNode->GetMenu(), customNode);
+}
+
+/**
+ * @tc.name: StaticSetIsCustomAnimation001
+ * @tc.desc: Test SetIsCustomAnimation basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetIsCustomAnimation001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetIsCustomAnimation(frameNode, true);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->isCustomAnimation_);
+}
+
+/**
+ * @tc.name: StaticSetIsCustomAnimation002
+ * @tc.desc: Test SetIsCustomAnimation with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetIsCustomAnimation002, TestSize.Level1)
+{
+    NavigationModelStatic::SetIsCustomAnimation(nullptr, true);
+}
+
+/**
+ * @tc.name: StaticSetCustomTransition001
+ * @tc.desc: Test SetCustomTransition basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomTransition001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto transition = [](RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to,
+                          NG::NavigationOperation operation) -> NG::NavigationTransition { return {}; };
+    NavigationModelStatic::SetCustomTransition(frameNode, std::move(transition));
+}
+
+/**
+ * @tc.name: StaticSetCustomTransition002
+ * @tc.desc: Test SetCustomTransition with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomTransition002, TestSize.Level1)
+{
+    auto transition = [](RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to,
+                          NG::NavigationOperation operation) -> NG::NavigationTransition { return {}; };
+    NavigationModelStatic::SetCustomTransition(nullptr, std::move(transition));
+}
+
+/**
+ * @tc.name: StaticSetCustomTitle001
+ * @tc.desc: Test SetCustomTitle with prev not custom
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomTitle001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->propPrevTitleIsCustom_ = false;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto customNode = FrameNode::CreateFrameNode("customTitle", 101, AceType::MakeRefPtr<TextPattern>());
+    NavigationModelStatic::SetCustomTitle(frameNode, customNode);
+    EXPECT_TRUE(navBarNode->GetPrevTitleIsCustomValue(false));
+}
+
+/**
+ * @tc.name: StaticSetCustomTitle002
+ * @tc.desc: Test SetCustomTitle with same id
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomTitle002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->propPrevTitleIsCustom_ = true;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto customNode = FrameNode::CreateFrameNode("customTitle", 101, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->SetTitle(customNode);
+    NavigationModelStatic::SetCustomTitle(frameNode, customNode);
+}
+
+/**
+ * @tc.name: StaticSetCustomTitle003
+ * @tc.desc: Test SetCustomTitle with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomTitle003, TestSize.Level1)
+{
+    auto customNode = FrameNode::CreateFrameNode("customTitle", 101, AceType::MakeRefPtr<TextPattern>());
+    NavigationModelStatic::SetCustomTitle(nullptr, customNode);
+    NavigationModelStatic::SetCustomTitle(nullptr, nullptr);
+}
+
+/**
+ * @tc.name: StaticSetCustomToolBar001
+ * @tc.desc: Test SetCustomToolBar basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomToolBar001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto customNode = FrameNode::CreateFrameNode("toolbar", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    NavigationModelStatic::SetCustomToolBar(frameNode, customNode);
+}
+
+/**
+ * @tc.name: StaticSetCustomToolBar002
+ * @tc.desc: Test SetCustomToolBar with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetCustomToolBar002, TestSize.Level1)
+{
+    auto customNode = FrameNode::CreateFrameNode("toolbar", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    NavigationModelStatic::SetCustomToolBar(nullptr, customNode);
+}
+
+/**
+ * @tc.name: StaticSetEnableDragBar001
+ * @tc.desc: Test SetEnableDragBar basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetEnableDragBar001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetEnableDragBar(frameNode, true);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: StaticSetEnableDragBar002
+ * @tc.desc: Test SetEnableDragBar with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetEnableDragBar002, TestSize.Level1)
+{
+    NavigationModelStatic::SetEnableDragBar(nullptr, true);
+}
+
+/**
+ * @tc.name: StaticSetEnableModeChangeAnimation001
+ * @tc.desc: Test SetEnableModeChangeAnimation basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetEnableModeChangeAnimation001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetEnableModeChangeAnimation(frameNode, true);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto layoutProp = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+}
+
+/**
+ * @tc.name: StaticSetEnableModeChangeAnimation002
+ * @tc.desc: Test SetEnableModeChangeAnimation with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetEnableModeChangeAnimation002, TestSize.Level1)
+{
+    NavigationModelStatic::SetEnableModeChangeAnimation(nullptr, true);
+}
+
+/**
+ * @tc.name: StaticSetEnableVisibilityLifecycleWithContentCover001
+ * @tc.desc: Test SetEnableVisibilityLifecycleWithContentCover basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetEnableVisibilityLifecycleWithContentCover001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetEnableVisibilityLifecycleWithContentCover(frameNode, true);
+}
+
+/**
+ * @tc.name: StaticSetEnableVisibilityLifecycleWithContentCover002
+ * @tc.desc: Test SetEnableVisibilityLifecycleWithContentCover with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetEnableVisibilityLifecycleWithContentCover002, TestSize.Level1)
+{
+    NavigationModelStatic::SetEnableVisibilityLifecycleWithContentCover(nullptr, true);
+}
+
+/**
+ * @tc.name: StaticSetRecoverable001
+ * @tc.desc: Test SetRecoverable with value
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetRecoverable001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    std::optional<bool> recoverable = true;
+    NavigationModelStatic::SetRecoverable(frameNode, recoverable);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    EXPECT_TRUE(navigationGroupNode->recoverable_);
+}
+
+/**
+ * @tc.name: StaticSetRecoverable002
+ * @tc.desc: Test SetRecoverable with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetRecoverable002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    std::optional<bool> recoverable;
+    NavigationModelStatic::SetRecoverable(frameNode, recoverable);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    EXPECT_FALSE(navigationGroupNode->recoverable_);
+}
+
+/**
+ * @tc.name: StaticSetRecoverable003
+ * @tc.desc: Test SetRecoverable with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetRecoverable003, TestSize.Level1)
+{
+    std::optional<bool> recoverable = true;
+    NavigationModelStatic::SetRecoverable(nullptr, recoverable);
+}
+
+/**
+ * @tc.name: StaticSetEnableToolBarAdaptation001
+ * @tc.desc: Test SetEnableToolBarAdaptation basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetEnableToolBarAdaptation001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetEnableToolBarAdaptation(frameNode, false);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto layoutProp = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+}
+
+/**
+ * @tc.name: StaticUpdateDefineColor001
+ * @tc.desc: Test UpdateDefineColor basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticUpdateDefineColor001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::UpdateDefineColor(frameNode, true);
+}
+
+/**
+ * @tc.name: StaticUpdateDividerColor001
+ * @tc.desc: Test UpdateDividerColor basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticUpdateDividerColor001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::UpdateDividerColor(frameNode, Color(0xFF000000));
+}
+
+/**
+ * @tc.name: StaticSetSplitPlaceholder001
+ * @tc.desc: Test SetSplitPlaceholder with null splitPlaceholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetSplitPlaceholder001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetSplitPlaceholder(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: StaticSetSplitPlaceholder002
+ * @tc.desc: Test SetSplitPlaceholder with valid splitPlaceholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetSplitPlaceholder002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto splitPlaceholder = FrameNode::CreateFrameNode("placeholder", 101, AceType::MakeRefPtr<Pattern>());
+    NavigationModelStatic::SetSplitPlaceholder(frameNode, splitPlaceholder);
+}
+
+/**
+ * @tc.name: StaticSetSplitPlaceholder003
+ * @tc.desc: Test SetSplitPlaceholder with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetSplitPlaceholder003, TestSize.Level1)
+{
+    auto splitPlaceholder = FrameNode::CreateFrameNode("placeholder", 101, AceType::MakeRefPtr<Pattern>());
+    NavigationModelStatic::SetSplitPlaceholder(nullptr, splitPlaceholder);
+}
+
+/**
+ * @tc.name: StaticSetHideNavBar003
+ * @tc.desc: Test SetHideNavBar with lastHideNavBar has_value and different
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideNavBar003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->propHideNavBar_ = false;
+    NavigationModelStatic::SetHideNavBar(frameNode, true);
+}
+
+/**
+ * @tc.name: StaticSetHideNavBar004
+ * @tc.desc: Test SetHideNavBar with lastHideNavBar same value
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideNavBar004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->propHideNavBar_ = true;
+    NavigationModelStatic::SetHideNavBar(frameNode, true);
+}
+
+/**
+ * @tc.name: StaticSetHideNavBar005
+ * @tc.desc: Test SetHideNavBar with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideNavBar005, TestSize.Level1)
+{
+    NavigationModelStatic::SetHideNavBar(nullptr, true);
+}
+
+/**
+ * @tc.name: StaticSetIgnoreLayoutSafeArea001
+ * @tc.desc: Test SetIgnoreLayoutSafeArea basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetIgnoreLayoutSafeArea001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NG::IgnoreLayoutSafeAreaOpts opts;
+    opts.type = SAFE_AREA_TYPE_SYSTEM;
+    opts.edges = SAFE_AREA_EDGE_TOP;
+    NavigationModelStatic::SetIgnoreLayoutSafeArea(frameNode, opts);
+}
+
+/**
+ * @tc.name: StaticSetIgnoreLayoutSafeArea002
+ * @tc.desc: Test SetIgnoreLayoutSafeArea with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetIgnoreLayoutSafeArea002, TestSize.Level1)
+{
+    NG::IgnoreLayoutSafeAreaOpts opts;
+    NavigationModelStatic::SetIgnoreLayoutSafeArea(nullptr, opts);
+}
+
+/**
+ * @tc.name: StaticSetBackButtonIcon001
+ * @tc.desc: Test SetBackButtonIcon with userDefinedAccessibilityText=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetBackButtonIcon001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("button", 101, AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->SetBackButton(backButton);
+    ImageOption imageOption;
+    imageOption.noPixMap = false;
+    imageOption.isValidImage = true;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::vector<std::string> nameList = { BUNDLE_NAME, MODULE_NAME };
+    NavigationModelStatic::SetBackButtonIcon(frameNode, nullptr, "", imageOption, pixMap,
+        nameList, true, "back_accessibility");
+}
+
+/**
+ * @tc.name: StaticSetBackButtonIcon002
+ * @tc.desc: Test SetBackButtonIcon with userDefinedAccessibilityText=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetBackButtonIcon002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("button", 101, AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->SetBackButton(backButton);
+    ImageOption imageOption;
+    imageOption.noPixMap = false;
+    imageOption.isValidImage = true;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::vector<std::string> nameList = { BUNDLE_NAME, MODULE_NAME };
+    NavigationModelStatic::SetBackButtonIcon(frameNode, nullptr, "", imageOption, pixMap,
+        nameList, false, "");
+}
+
+/**
+ * @tc.name: StaticSetBackButtonIcon003
+ * @tc.desc: Test SetBackButtonIcon with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetBackButtonIcon003, TestSize.Level1)
+{
+    ImageOption imageOption;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::vector<std::string> nameList = { BUNDLE_NAME, MODULE_NAME };
+    NavigationModelStatic::SetBackButtonIcon(nullptr, nullptr, "", imageOption, pixMap, nameList, false, "");
+}
+
+/**
+ * @tc.name: StaticCreateBackButtonNode001
+ * @tc.desc: Test CreateBackButtonNode basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticCreateBackButtonNode001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    RefPtr<FrameNode> backButtonNode;
+    bool result = NavigationModelStatic::CreateBackButtonNode(backButtonNode);
+    EXPECT_TRUE(result);
+    EXPECT_NE(backButtonNode, nullptr);
+}
+
+/**
+ * @tc.name: StaticUpdateBackButtonProperty001
+ * @tc.desc: Test UpdateBackButtonProperty basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticUpdateBackButtonProperty001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
+    ASSERT_NE(backButtonNode, nullptr);
+    bool result = NavigationModelStatic::UpdateBackButtonProperty(backButtonNode);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: StaticParseCommonTitle001
+ * @tc.desc: Test ParseCommonTitle with no title info
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticParseCommonTitle001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NG::NavigationTitleInfo titleInfo = { false, false, "", "" };
+    NavigationModelStatic::ParseCommonTitle(frameNode, titleInfo, false);
+}
+
+/**
+ * @tc.name: StaticParseCommonTitle002
+ * @tc.desc: Test ParseCommonTitle with main title only
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticParseCommonTitle002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NG::NavigationTitleInfo titleInfo = { false, true, "", "MainTitle" };
+    NavigationModelStatic::ParseCommonTitle(frameNode, titleInfo, false);
+}
+
+/**
+ * @tc.name: StaticParseCommonTitle003
+ * @tc.desc: Test ParseCommonTitle with subtitle only
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticParseCommonTitle003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NG::NavigationTitleInfo titleInfo = { true, false, "SubTitle", "" };
+    NavigationModelStatic::ParseCommonTitle(frameNode, titleInfo, false);
+}
+
+/**
+ * @tc.name: StaticParseCommonTitle004
+ * @tc.desc: Test ParseCommonTitle with both titles and prevTitleIsCustom
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticParseCommonTitle004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->propPrevTitleIsCustom_ = true;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->propTitleHeight_ = Dimension(56.0_vp);
+    NG::NavigationTitleInfo titleInfo = { true, true, "SubTitle", "MainTitle" };
+    NavigationModelStatic::ParseCommonTitle(frameNode, titleInfo, false);
+}
+
+/**
+ * @tc.name: StaticParseCommonTitle005
+ * @tc.desc: Test ParseCommonTitle with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticParseCommonTitle005, TestSize.Level1)
+{
+    NG::NavigationTitleInfo titleInfo = { true, true, "", "" };
+    NavigationModelStatic::ParseCommonTitle(nullptr, titleInfo, false);
+}
+
+/**
+ * @tc.name: StaticSetTitleHeight001
+ * @tc.desc: Test SetTitleHeight with isValid=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetTitleHeight001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetTitleHeight(frameNode, Dimension(56.0_vp), false);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    EXPECT_FALSE(titleBarLayoutProperty->HasTitleHeight());
+}
+
+/**
+ * @tc.name: StaticSetTitleHeight002
+ * @tc.desc: Test SetTitleHeight with isValid=true and hideBackButton not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetTitleHeight002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetTitleHeight(frameNode, Dimension(56.0_vp), true);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    EXPECT_TRUE(titleBarLayoutProperty->HasTitleHeight());
+}
+
+/**
+ * @tc.name: StaticSetTitleHeight003
+ * @tc.desc: Test SetTitleHeight with isValid=true and hideBackButton already true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetTitleHeight003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    ASSERT_NE(navBarLayoutProperty, nullptr);
+    navBarLayoutProperty->UpdateHideBackButton(true);
+    NavigationModelStatic::SetTitleHeight(frameNode, Dimension(56.0_vp), true);
+}
+
+/**
+ * @tc.name: StaticSetTitleMode001
+ * @tc.desc: Test SetTitleMode with MINI and no backButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetTitleMode001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetTitleMode(frameNode, NavigationTitleMode::MINI);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    EXPECT_NE(titleBarNode->GetBackButton(), nullptr);
+}
+
+/**
+ * @tc.name: StaticSetTitleMode002
+ * @tc.desc: Test SetTitleMode with MINI and existing backButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetTitleMode002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetTitleMode(frameNode, NavigationTitleMode::MINI);
+    NavigationModelStatic::SetTitleMode(frameNode, NavigationTitleMode::MINI);
+}
+
+/**
+ * @tc.name: StaticSetTitleMode003
+ * @tc.desc: Test SetTitleMode with FREE mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetTitleMode003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetTitleMode(frameNode, NavigationTitleMode::MINI);
+    NavigationModelStatic::SetTitleMode(frameNode, NavigationTitleMode::FREE);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    EXPECT_EQ(titleBarNode->GetBackButton(), nullptr);
+}
+
+/**
+ * @tc.name: StaticSetTitleMode004
+ * @tc.desc: Test SetTitleMode with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetTitleMode004, TestSize.Level1)
+{
+    NavigationModelStatic::SetTitleMode(nullptr, NavigationTitleMode::MINI);
+}
+
+/**
+ * @tc.name: StaticSetToolBarItems001
+ * @tc.desc: Test SetToolBarItems with prev custom toolbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetToolBarItems001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->UpdatePrevToolBarIsCustom(true);
+    std::vector<NG::BarItem> toolBarItems;
+    NG::BarItem bar;
+    bar.text = "tool1";
+    toolBarItems.push_back(bar);
+    NavigationModelStatic::SetToolBarItems(frameNode, std::move(toolBarItems));
+}
+
+/**
+ * @tc.name: StaticSetToolBarItems002
+ * @tc.desc: Test SetToolBarItems with non-custom toolbar and children exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetToolBarItems002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->UpdatePrevToolBarIsCustom(false);
+    auto preToolBarNode = navBarNode->GetPreToolBarNode();
+    ASSERT_NE(preToolBarNode, nullptr);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 101, []() { return AceType::MakeRefPtr<Pattern>(); });
+    preToolBarNode->AddChild(barItemNode);
+    std::vector<NG::BarItem> toolBarItems;
+    NG::BarItem bar;
+    bar.text = "tool1";
+    toolBarItems.push_back(bar);
+    NavigationModelStatic::SetToolBarItems(frameNode, std::move(toolBarItems));
+}
+
+/**
+ * @tc.name: StaticSetToolBarItems003
+ * @tc.desc: Test SetToolBarItems with empty items
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetToolBarItems003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->UpdatePrevToolBarIsCustom(false);
+    std::vector<NG::BarItem> toolBarItems;
+    NavigationModelStatic::SetToolBarItems(frameNode, std::move(toolBarItems));
+}
+
+/**
+ * @tc.name: StaticSetToolbarConfiguration001
+ * @tc.desc: Test SetToolbarConfiguration basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetToolbarConfiguration001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    std::vector<NG::BarItem> toolBarItems;
+    NG::BarItem bar;
+    bar.text = "tool";
+    bar.icon = "icon";
+    bar.action = []() {};
+    toolBarItems.push_back(bar);
+    NavigationModelStatic::SetToolbarConfiguration(frameNode, std::move(toolBarItems));
+}
+
+/**
+ * @tc.name: StaticSetToolbarConfiguration002
+ * @tc.desc: Test SetToolbarConfiguration with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetToolbarConfiguration002, TestSize.Level1)
+{
+    std::vector<NG::BarItem> toolBarItems;
+    NavigationModelStatic::SetToolbarConfiguration(nullptr, std::move(toolBarItems));
+}
+
+/**
+ * @tc.name: StaticSetHideItemText001
+ * @tc.desc: Test SetHideItemText basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetHideItemText001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationModelStatic::SetHideItemText(frameNode, true);
+}
+
+/**
+ * @tc.name: StaticSetToolbarOptions001
+ * @tc.desc: Test SetToolbarOptions basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetToolbarOptions001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    NavigationToolbarOptions opt;
+    NavigationModelStatic::SetToolbarOptions(frameNode, std::move(opt));
+}
+
+/**
+ * @tc.name: StaticSetToolbarMorebuttonOptions001
+ * @tc.desc: Test SetToolbarMorebuttonOptions basic
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetToolbarMorebuttonOptions001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    MoreButtonOptions opt;
+    NavigationModelStatic::SetToolbarMorebuttonOptions(frameNode, std::move(opt));
+}
+
+/**
+ * @tc.name: StaticSetToolbarMorebuttonOptions002
+ * @tc.desc: Test SetToolbarMorebuttonOptions with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetToolbarMorebuttonOptions002, TestSize.Level1)
+{
+    MoreButtonOptions opt;
+    NavigationModelStatic::SetToolbarMorebuttonOptions(nullptr, std::move(opt));
+}
+
+/**
+ * @tc.name: StaticSetNavBarWidthDoubleBind001
+ * @tc.desc: Test SetNavBarWidth with double bind and in divider drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetNavBarWidthDoubleBind001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->isInDividerDrag_ = true;
+    auto navBarWidthDoubleBind = NavigationModelStatic::navBarWidthDoubleBind_;
+    NavigationModelStatic::navBarWidthDoubleBind_ = true;
+    Dimension value = 300.0_vp;
+    NavigationModelStatic::SetNavBarWidth(frameNode, value);
+    NavigationModelStatic::navBarWidthDoubleBind_ = navBarWidthDoubleBind;
+}
+
+/**
+ * @tc.name: StaticSetMinNavBarWidthDoubleBind001
+ * @tc.desc: Test SetMinNavBarWidth with double bind and in divider drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMinNavBarWidthDoubleBind001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->isInDividerDrag_ = true;
+    auto navBarWidthDoubleBind = NavigationModelStatic::navBarWidthDoubleBind_;
+    NavigationModelStatic::navBarWidthDoubleBind_ = true;
+    Dimension value = 200.0_vp;
+    NavigationModelStatic::SetMinNavBarWidth(frameNode, value);
+    NavigationModelStatic::navBarWidthDoubleBind_ = navBarWidthDoubleBind;
+}
+
+/**
+ * @tc.name: StaticSetMaxNavBarWidthDoubleBind001
+ * @tc.desc: Test SetMaxNavBarWidth with double bind and in divider drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, StaticSetMaxNavBarWidthDoubleBind001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->isInDividerDrag_ = true;
+    auto navBarWidthDoubleBind = NavigationModelStatic::navBarWidthDoubleBind_;
+    NavigationModelStatic::navBarWidthDoubleBind_ = true;
+    Dimension value = 500.0_vp;
+    NavigationModelStatic::SetMaxNavBarWidth(frameNode, value);
+    NavigationModelStatic::navBarWidthDoubleBind_ = navBarWidthDoubleBind;
 }
 } // namespace OHOS::Ace::NG

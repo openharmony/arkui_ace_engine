@@ -634,8 +634,8 @@ HWTEST_F(NavdestinationTestNg, MenuHandleLongPressTest001, TestSize.Level1)
      * @tc.expected: dialog_ != nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
@@ -678,8 +678,8 @@ HWTEST_F(NavdestinationTestNg, MenuHandleLongPressTest002, TestSize.Level1)
      * @tc.expected: dialog_ != nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
@@ -723,8 +723,8 @@ HWTEST_F(NavdestinationTestNg, MenuHandleLongPressTest003, TestSize.Level1)
      * @tc.expected: dialog_ != nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
@@ -777,8 +777,8 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest004, TestSi
      * @tc.expected: dialog_ == nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 
@@ -839,8 +839,8 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest005, TestSi
      * @tc.expected: dialog_ == nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 
@@ -901,8 +901,8 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest006, TestSi
      * @tc.expected: dialog_ == nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 
@@ -963,8 +963,8 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest007, TestSi
      * @tc.expected: dialog_ == nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 
@@ -1025,8 +1025,8 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest008, TestSi
      * @tc.expected: dialog_ == nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 
@@ -1087,8 +1087,8 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest009, TestSi
      * @tc.expected: dialog_ == nullptr
      */
     GestureEvent info;
-    info.globalLocation_.deltaX_ = 0.0f;
-    info.globalLocation_.deltaY_ = 0.0f;
+    info.globalLocation_.SetX(0.0);
+    info.globalLocation_.SetY(0.0);
     ui.titleBarPattern->HandleMenuLongPress(info, navDestinationMenuItems, menuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 
