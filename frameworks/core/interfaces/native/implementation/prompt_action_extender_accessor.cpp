@@ -639,6 +639,17 @@ void UpdatePopupColorMode(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>&
     }
 }
 
+void UpdatePopupLevelMode(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
+    auto showInSubWindow = Converter::OptConvert<bool>(src.showInSubWindow).value_or(false);
+    if (!showInSubWindow) {
+        auto levelModeOpt = Converter::OptConvert<LevelMode>(src.levelMode);
+        if (levelModeOpt.has_value()) {
+            popupParam->SetLevelMode(levelModeOpt.value());
+        }
+    }
+}
+
 void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
 {
     UpdatePopupOffset(src, popupParam);
@@ -649,6 +660,7 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
     UpdatePopupBackgroundEffects(src, popupParam);
     UpdatePopupLifecycleCallbacks(src, popupParam);
     UpdatePopupColorMode(src, popupParam);
+    UpdatePopupLevelMode(src, popupParam);
 }
 
 void updatePopupCommonParam(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)

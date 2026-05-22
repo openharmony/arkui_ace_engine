@@ -4301,6 +4301,12 @@ void ViewAbstract::BindPopup(
         }
     }
     param->SetShowInSubWindow(showInSubWindow);
+    if (!param->IsShowInSubWindow() && param->GetLevelMode() == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = DialogManager::GetEmbeddedOverlay(targetId, AceType::Claim(context));
+        if (embeddedOverlay) {
+            popupInfo.embeddedOveraly = embeddedOverlay;
+        }
+    }
     if (popupInfo.popupNode && popupInfo.isTips) {
         // subwindow need to handle
         overlayManager->ErasePopup(targetId);

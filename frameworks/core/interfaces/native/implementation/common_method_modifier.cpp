@@ -545,6 +545,13 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
             popupParam->SetColorMode(false);
         }
     }
+    auto showInSubWindow = OptConvert<bool>(src.showInSubWindow).value_or(false);
+    if (!showInSubWindow) {
+        auto levelModeOpt = OptConvert<LevelMode>(src.levelMode);
+        if (levelModeOpt.has_value()) {
+            popupParam->SetLevelMode(levelModeOpt.value());
+        }
+    }
 };
 
 auto g_getPopupDefaultShadow = []() -> ShadowStyle {
