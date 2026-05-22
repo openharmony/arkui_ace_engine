@@ -472,6 +472,7 @@ void SelectableContainerPattern::SetEnableEditMode(bool enable)
     bool changed = (enableEditMode_ != enable);
     enableEditMode_ = enable;
     if (changed) {
+        editModeChanged_ = true;
         FireEnableEditModeChangeEvent(enable);
     }
 }
