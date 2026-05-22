@@ -897,7 +897,7 @@ const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::ResetSwiperOnContentDidScroll,
     nullptr,
     nullptr,
     nullptr,
