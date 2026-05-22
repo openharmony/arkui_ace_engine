@@ -909,7 +909,7 @@ int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_Gesture
     }
     recognizer->extraData = new GestureInnerData { targetReceiver, extraParam, recognizer };
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->registerGestureEvent(
-        recognizer->gesture, mask, recognizer->extraData);
+        recognizer->gesture, mask, recognizer->extraData,  reinterpret_cast<ArkUIGestureRecognizer*>(recognizer));
     return 0;
 }
 
@@ -917,6 +917,9 @@ int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recogni
     ArkUI_GestureMask mask)
 {
     recognizer->attachNode = node;
+    recognizer->attachNodeId =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(
+            node->uiNodeHandle);
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNode(
         node->uiNodeHandle, recognizer->gesture, priorityNum, mask);
     recognizer->targetInfo.uiNode = reinterpret_cast<void*>(node->uiNodeHandle);
@@ -927,6 +930,7 @@ int32_t RemoveGestureFromNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* re
 {
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->removeGestureFromNode(
         node->uiNodeHandle, recognizer->gesture);
+    recognizer->attachNodeId = -1;
     recognizer->targetInfo.uiNode = nullptr;
     return 0;
 }

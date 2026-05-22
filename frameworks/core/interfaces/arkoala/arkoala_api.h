@@ -5415,6 +5415,7 @@ struct ArkUIGestureRecognizer {
     bool capi = true;
     void* recognizer = nullptr;
     ArkUIGestureEventTargetInfo targetInfo = {};
+    ArkUI_Int32 attachNodeId = -1;
 };
 
 struct ArkUIGestureEvent {
@@ -5481,7 +5482,8 @@ struct ArkUIGestureModifier {
     void (*removeGestureFromGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
-    void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
+    void (*registerGestureEvent)(
+        ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam, const ArkUIGestureRecognizer* recognizer);
     void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
     void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
     void (*removeGestureFromNodeByTag)(ArkUINodeHandle node, ArkUI_CharPtr gestureTag);

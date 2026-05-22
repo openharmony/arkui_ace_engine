@@ -35,6 +35,7 @@ struct ArkUI_GestureRecognizer {
     bool capi = true;
     void* recognizer = nullptr;
     ArkUIGestureEventTargetInfo targetInfo = {};
+    int32_t attachNodeId = -1;
 };
 
 struct ArkUI_GestureEventTargetInfo {
