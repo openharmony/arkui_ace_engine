@@ -38,4 +38,6 @@ const char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
 const char MENU_ETS_TAG[] = "Menu";
 const char SHEET_WRAPPER_TAG[] = "SheetWrapper";
 const char JS_WITH_ENV_ETS_TAG[] = "WithEnv";
+const char OVERLAY_ETS_TAG[] = "overlay";
+const char ORDER_OVERLAY_ETS_TAG[] = "OrderOverlay";
 } // namespace OHOS::Ace::V2
