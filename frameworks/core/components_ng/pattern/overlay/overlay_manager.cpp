@@ -4911,15 +4911,17 @@ void OverlayManager::UpdateSheetRender(
     if (sheetStyle.borderColor.has_value()) {
         sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
     }
-    if (sheetStyle.shadow.has_value()) {
-        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-    } else if (sheetTheme->IsOuterBorderEnable()) {
-        auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
-        auto shadow = sheetNodePattern->GetShadowFromTheme(style);
-        sheetRenderContext->UpdateBackShadow(shadow);
-    } else if (!isPartialUpdate) {
-        auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
-        sheetRenderContext->UpdateBackShadow(shadow);
+    if (!(sheetStyle.systemMaterial && sheetStyle.systemMaterial->IsForceShadow())) {
+        if (sheetStyle.shadow.has_value()) {
+            sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+        } else if (sheetTheme->IsOuterBorderEnable()) {
+            auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
+            auto shadow = sheetNodePattern->GetShadowFromTheme(style);
+            sheetRenderContext->UpdateBackShadow(shadow);
+        } else if (!isPartialUpdate) {
+            auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
+            sheetRenderContext->UpdateBackShadow(shadow);
+        }
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 
