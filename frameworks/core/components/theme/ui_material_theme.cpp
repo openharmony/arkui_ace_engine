@@ -19,6 +19,8 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
 
 namespace OHOS::Ace {
 
@@ -104,6 +106,105 @@ std::optional<UiMaterialParam> UiMaterialTheme::GetUiMaterialParam(MaterialType 
     }
     UiMaterialParam param;
     auto success = ParseUiMaterialParam(type, pipeline, colorMode, param);
+    if (success) {
+        materialParams_.emplace(key, param);
+        return param;
+    }
+    return std::nullopt;
+}
+
+bool UiMaterialTheme::GetThemeColor(
+    const RefPtr<NG::FrameNode>& node, const ColorMode& colorMode, int32_t resId, Color& color)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto container = Container::GetContainer(node->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto bundleName = container->GetBundleName();
+    auto moudleName = container->GetModuleName();
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName, node->GetInstanceId());
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        CHECK_NULL_RETURN(adapterInCache, false);
+        ResourceConfiguration resConfig;
+        resConfig.SetColorMode(colorMode);
+        ConfigurationChange configChange { .colorModeUpdate = true };
+        resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+    } else {
+        auto pipeline = node->GetContextWithCheck();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, false);
+        themeConstants = themeManager->GetThemeConstants();
+        CHECK_NULL_RETURN(themeConstants, false);
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    color = resourceWrapper->GetColor(resId);
+    return true;
+}
+
+bool UiMaterialTheme::ParseUiMaterialParam(
+    MaterialType type, const RefPtr<NG::FrameNode>& node, const ColorMode& colorMode, UiMaterialParam& result)
+{
+    if (type == MaterialType::NONE) {
+        // MaterialType::NONE
+        result.backgroundColor = Color::TRANSPARENT;
+        result.borderColor.SetColor(Color::TRANSPARENT);
+        result.borderWidth.SetBorderWidth(Dimension(0));
+        return true;
+    }
+    auto pipeline = node->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, false);
+    if (type == MaterialType::SEMI_TRANSPARENT) {
+        auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+        CHECK_NULL_RETURN(shadowTheme, false);
+        auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_FOREGROUND_PRIMARY);
+        Color color;
+        if (!GetThemeColor(node, colorMode, resId, color)) {
+            return false;
+        }
+        color = color.ChangeOpacity(MATERIAL_SEMI_TRANSPARENT_BORDER_ALPHA);
+        result.borderColor.SetColor(color);
+        result.borderWidth.SetBorderWidth(MATERIAL_SEMI_TRANSPARENT_BORDER_WIDTH);
+        result.backgroundColor =
+            colorMode == ColorMode::DARK ? MATERIAL_SEMI_TRANSPARENT_COLOR_DARK : MATERIAL_SEMI_TRANSPARENT_COLOR_LIGHT;
+        result.shadow = shadowTheme->GetShadow(MATERIAL_SEMI_TRANSPARENT_SHADOW_STYLE, colorMode);
+        return true;
+    }
+    if (type == MaterialType::IMMERSIVE) {
+        // MaterialType::IMMERSIVE
+        auto dipScale = pipeline->GetDipScale();
+        auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_FOREGROUND_PRIMARY);
+        auto color = themeConstants->GetColor(resId);
+        color = color.ChangeOpacity(MATERIAL_SEMI_TRANSPARENT_BORDER_ALPHA);
+        result.borderColor.SetColor(color);
+        result.borderWidth.SetBorderWidth(MATERIAL_SEMI_TRANSPARENT_BORDER_WIDTH);
+        result.backgroundColor =
+            colorMode == ColorMode::DARK ? MATERIAL_SEMI_TRANSPARENT_COLOR_DARK : MATERIAL_SEMI_TRANSPARENT_COLOR_LIGHT;
+        result.shadow = MaterialUtils::GetImmersiveShadow(dipScale);
+        return true;
+    }
+    return false;
+}
+
+std::optional<UiMaterialParam> UiMaterialTheme::GetUiMaterialParam(MaterialType type, const RefPtr<NG::FrameNode>& node)
+{
+    if (!node || type > MaterialType::MAX || type < MaterialType::NONE) {
+        return std::nullopt;
+    }
+    auto colorMode = MaterialUtils::GetNodeColorMode(node);
+    auto key = GetKeyOfUiMaterial(type, colorMode);
+    auto iter = materialParams_.find(key);
+    if (iter != materialParams_.end()) {
+        return std::optional<UiMaterialParam>(iter->second);
+    }
+    UiMaterialParam param;
+    auto success = ParseUiMaterialParam(type, node, colorMode, param);
     if (success) {
         materialParams_.emplace(key, param);
         return param;

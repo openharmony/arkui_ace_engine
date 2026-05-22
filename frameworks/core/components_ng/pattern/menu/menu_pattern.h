@@ -790,6 +790,16 @@ public:
         isColorModeFollowTarget_ = isColorModeFollowTarget;
     }
 
+    bool IsExtensionInnerMenu()
+    {
+        return isExtensionInnerMenu_;
+    }
+
+    void SetExtensionInnerMenu(bool isExtensionInnerMenu)
+    {
+        isExtensionInnerMenu_ = isExtensionInnerMenu;
+    }
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -915,6 +925,7 @@ private:
     bool isShowHoverImage_ = false;
     bool isFirstShow_ = false;
     bool isExtensionMenuShow_ = false;
+    bool isExtensionInnerMenu_ = false;
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
