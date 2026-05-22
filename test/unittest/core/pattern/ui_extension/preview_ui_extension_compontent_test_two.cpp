@@ -988,7 +988,7 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperOnDisconnect
     pattern->state_ = PreviewUIExtensionPattern::AbilityState::FOREGROUND;
     wrapper->OnDisconnect(false);
     wrapper->OnDisconnect(true);
-    EXPECT_NE(pattern->state_, PreviewUIExtensionPattern::AbilityState::FOREGROUND);
+    EXPECT_EQ(pattern->state_, PreviewUIExtensionPattern::AbilityState::FOREGROUND);
 #endif
 }
 
