@@ -496,6 +496,7 @@ void SelectableContainerPattern::TryEnterEditModeForSwipeSelect()
         return;
     }
     enableEditMode_ = true;
+    editModeChanged_ = true;
     if (IsDefaultMultiSelectStyleEnabled()) {
         ApplyEditModeToVisibleItems();
     }
