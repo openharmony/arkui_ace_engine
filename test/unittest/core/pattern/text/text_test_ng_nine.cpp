@@ -1532,6 +1532,43 @@ HWTEST_F(TextTestNgNine, BindPreviewMenu002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OneStepDragParamSetEnableEventResponse001
+ * @tc.desc: test one_step_drag_controller.cpp SetEnableEventResponse function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, OneStepDragParamSetEnableEventResponse001, TestSize.Level1)
+{
+    Builder builder = []() {};
+    SelectMenuParam menuParam;
+    ImageOneStepDragParam imageDragParam(builder, menuParam);
+
+    std::list<WeakPtr<ImageSpanNode>> invalidImageNodes;
+    invalidImageNodes.emplace_back(WeakPtr<ImageSpanNode>());
+    imageDragParam.SetEnableEventResponse(0, 1, invalidImageNodes);
+    EXPECT_TRUE(invalidImageNodes.empty());
+
+    auto imageNode = CreateImageSpanNode({});
+    ASSERT_NE(imageNode, nullptr);
+    auto imageSpanItem = imageNode->GetSpanItem();
+    ASSERT_NE(imageSpanItem, nullptr);
+    imageSpanItem->rangeStart = -1;
+    imageSpanItem->position = 6;
+    std::list<WeakPtr<ImageSpanNode>> imageNodes { AceType::WeakClaim(AceType::RawPtr(imageNode)) };
+
+    imageDragParam.SetEnableEventResponse(-1, -1, imageNodes);
+    EXPECT_EQ(imageNode->GetOrCreateGestureEventHub()->GetHitTestMode(), HitTestMode::HTMDEFAULT);
+
+    imageDragParam.SetEnableEventResponse(5, 6, imageNodes);
+    EXPECT_EQ(imageNode->GetOrCreateGestureEventHub()->GetHitTestMode(), HitTestMode::HTMNONE);
+
+    imageDragParam.SetEnableEventResponse(0, 5, imageNodes);
+    EXPECT_EQ(imageNode->GetOrCreateGestureEventHub()->GetHitTestMode(), HitTestMode::HTMDEFAULT);
+
+    imageDragParam.SetEnableEventResponse(6, 11, imageNodes);
+    EXPECT_EQ(imageNode->GetOrCreateGestureEventHub()->GetHitTestMode(), HitTestMode::HTMDEFAULT);
+}
+
+/**
  * @tc.name: ShowAIEntityMenu
  * @tc.desc: test test_pattern.h ShowAIEntityMenu function with valid textSelector
  * @tc.type: FUNC
