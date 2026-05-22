@@ -92,13 +92,13 @@ std::pair<int32_t, int32_t> LazyColumnLayoutPattern::GetVisibleIndexesRangeForCa
     if (totalItemCount <= 0) {
         return { -1, -1 };
     }
-    if (layoutInfo_->startIndex_ < 0 || layoutInfo_->endIndex_ < 0) {
+    if (layoutInfo_->visibleStartIndex_ < 0 || layoutInfo_->visibleEndIndex_ < 0) {
         return { -1, -1 };
     }
-    if (layoutInfo_->startIndex_ >= totalItemCount || layoutInfo_->endIndex_ >= totalItemCount) {
+    if (layoutInfo_->visibleStartIndex_ >= totalItemCount || layoutInfo_->visibleEndIndex_ >= totalItemCount) {
         return { -1, -1 };
     }
-    return { layoutInfo_->startIndex_, layoutInfo_->endIndex_ };
+    return { layoutInfo_->visibleStartIndex_, layoutInfo_->visibleEndIndex_ };
 }
 
 void LazyColumnLayoutPattern::FireOnVisibleIndexesChange()
