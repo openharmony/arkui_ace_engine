@@ -471,7 +471,7 @@ void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDi
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT,
             "XComponent[%{public}s]'s can not get rotation FoldDisplayMode %{public}s angleConfig %{public}s",
             xcomponentId.c_str(), displyMode.c_str(), angleConfigJson->ToString().c_str());
-        return;
+        rotation = Rosen::ScreenRotation::ROTATION_0;
     }
     TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s set rotation %{public}d",
         xcomponentId.c_str(), rotationInt);
