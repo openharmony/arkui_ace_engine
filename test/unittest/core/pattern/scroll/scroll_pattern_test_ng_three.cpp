@@ -99,19 +99,19 @@ HWTEST_F(ScrollPatternThreeTestNg, CalcPredictNextSnapOffset003, TestSize.Level1
     ASSERT_NE(scrollPattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set currentOffset_ to -1 and scrollableDistance_ to -2
-     * and set snapOffsets_ to { 2.0f, 3.0f, 4.0f }
+     * @tc.steps: step2. Set currentOffset_ to -1 and scrollableDistance_ to 5
+     * and set snapOffsets_ to { -2.0f, -3.0f, -4.0f }
      */
-    scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f };
+    scrollPattern->snapOffsets_ = { -2.0f, -3.0f, -4.0f };
     scrollPattern->currentOffset_ = -1.0f;
-    scrollPattern->scrollableDistance_ = -2.0f;
+    scrollPattern->scrollableDistance_ = 5.0f;
 
     /**
-     * @tc.steps: step3. Set delta to 2 and snapDirection to FORWARD
-     * @tc.expected: The value of the result returned by the function is 4
+     * @tc.steps: step3. Set delta to 1 and snapDirection to FORWARD
+     * @tc.expected: The value of the result returned by the function is 1
      */
-    auto result = scrollPattern->CalcPredictNextSnapOffset(2.0f, SnapDirection::FORWARD);
-    EXPECT_EQ(result.value(), 4.0f);
+    auto result = scrollPattern->CalcPredictNextSnapOffset(1.0f, SnapDirection::FORWARD);
+    EXPECT_EQ(result.value(), 1.0f);
 }
 
 /**

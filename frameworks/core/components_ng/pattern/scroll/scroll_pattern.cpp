@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
@@ -44,10 +45,11 @@ constexpr int32_t CROWN_EVENT_NUN_THRESH_MIN = 5;
 constexpr int64_t CROWN_VIBRATOR_INTERVAL_TIME = 30 * 1000 * 1000;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
 #endif
+
 } // namespace
 
 std::optional<float> GetScrollAccessibilityCenterLimitMoveOffset(
-    const RefPtr<FrameNode>& parentFrameNode, float rawMoveOffset)
+    const RefPtr<FrameNode>& parentFrameNode, float moveOffset)
 {
     CHECK_NULL_RETURN(parentFrameNode, std::nullopt);
     auto scrollPattern = parentFrameNode->GetPattern<ScrollPattern>();
@@ -57,8 +59,14 @@ std::optional<float> GetScrollAccessibilityCenterLimitMoveOffset(
     }
     if (scrollPattern->GetSnapOffsets().empty()) {
         scrollPattern->CaleSnapOffsets(parentFrameNode);
+    };
+    auto snapDirection = SnapDirection::NONE;
+    if (GreatNotEqual(moveOffset, 0.0f)) {
+        snapDirection = SnapDirection::FORWARD;
+    } else if (LessNotEqual(moveOffset, 0.0f)) {
+        snapDirection = SnapDirection::BACKWARD;
     }
-    return scrollPattern->CalcPredictSnapOffset(rawMoveOffset);
+    return scrollPattern->CalcPredictSnapOffset(moveOffset, 0.0f, 0.0f, snapDirection);
 }
 
 void ScrollPattern::OnModifyDone()
@@ -186,7 +194,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto onScrollStop = eventHub->GetOnScrollStop();
     auto onJSFrameNodeScrollStop = eventHub->GetJSFrameNodeOnScrollStop();
     OnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
-    ScrollSnapTrigger();
+    if (!(AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled() && IsAccessibilityFocusScroll())) {
+        ScrollSnapTrigger();
+    }
     CheckScrollable();
     prevOffset_ = currentOffset_;
     auto geometryNode = host->GetGeometryNode();
@@ -197,6 +207,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     isInitialized_ = true;
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
+    SetAccessibilityFocusScroll(false);
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE && AnimateStoped()) {
@@ -767,6 +778,9 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    if (source != SCROLL_FROM_FOCUS_JUMP) {
+        SetAccessibilityFocusScroll(false);
+    }
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1094,11 +1108,17 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 
 ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
-    (void)isAccessibility;
-    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+    return { [wp = WeakClaim(this), isAccessibility](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
-                return pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
+                if (isAccessibility) {
+                    pattern->SetAccessibilityFocusScroll(true);
+                }
+                auto ret = pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
+                if (isAccessibility && !ret) {
+                    pattern->SetAccessibilityFocusScroll(false);
+                }
+                return ret;
             },
         GetAxis() };
 }
@@ -1154,16 +1174,22 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
     return predictSnapOffset;
 }
 
-std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(float delta, SnapDirection snapDirection)
+std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(
+    float delta, SnapDirection snapDirection)
 {
     std::optional<float> predictSnapOffset;
     int32_t start = 0;
     int32_t end = static_cast<int32_t>(snapOffsets_.size()) - 1;
     int32_t mid = 0;
     auto targetOffset = currentOffset_ + delta;
-    if (LessOrEqual(targetOffset, snapOffsets_[end]) && snapDirection == SnapDirection::BACKWARD) {
-        predictSnapOffset = -scrollableDistance_ - currentOffset_;
-        return predictSnapOffset;
+    if (LessOrEqual(targetOffset, snapOffsets_[end])) {
+        if (snapDirection == SnapDirection::BACKWARD) {
+            predictSnapOffset = -scrollableDistance_ - currentOffset_;
+            return predictSnapOffset;
+        } else if (snapDirection == SnapDirection::FORWARD && !NearEqual(targetOffset,  snapOffsets_[end])) {
+            predictSnapOffset = snapOffsets_[end] - currentOffset_;
+            return predictSnapOffset;
+        }
     } else if (GreatOrEqual(targetOffset, snapOffsets_[start]) && snapDirection == SnapDirection::FORWARD) {
         predictSnapOffset = -currentOffset_;
         return predictSnapOffset;
