@@ -172,7 +172,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level0)
      */
     EXPECT_EQ(json->GetString("colorBlend"), "#FFFFFFFF");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("radius"),
-        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? "0.000000" : "-1.000000");
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? "-1.000000" : "0.000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "#FF000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetX"), "0.000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetY"), "0.000000");
@@ -607,7 +607,8 @@ HWTEST_F(RenderPropertyTestNg, RenderPropertyTest002, TestSize.Level1)
      * @tc.steps: step2. call ToJsonValue.
      */
     graphicsProperty.ToJsonValue(jsonValue, testFilter);
-    EXPECT_EQ(jsonValue->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
+    EXPECT_EQ(jsonValue->GetValue(SHADOW_TEST)->GetString("color"),
+        "ColoringStrategy.AVERAGE");
     blurPara.direction_ = static_cast<NG::GradientDirection>(11); // 11 is not a valid GradientDirection.
     graphicsProperty.propLinearGradientBlur = blurPara;
     graphicsProperty.ToJsonValue(jsonValue, testFilter);
