@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
@@ -227,16 +228,17 @@ PaddingProperty LazyColumnLayoutTest::CreatePadding(float left, float top, float
     return padding;
 }
 
-void LazyColumnLayoutTest::AddChild()
+void LazyColumnLayoutTest::AddChildAtIndex(int32_t index)
 {
     CreateStack();
     RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
-    currentFrameNode->MountToParent(frameNode_);
+    frameNode_->AddChild(currentFrameNode, index);
 }
 
 void LazyColumnLayoutTest::FlushIdleTask(const RefPtr<LazyColumnLayoutPattern>& pattern)
 {
+    CHECK_NULL_VOID(pattern);
     int32_t tryCount = 10;
     auto needPredict = pattern->layoutInfo_->NeedPredict();
     while (needPredict && tryCount > 0) {
@@ -246,6 +248,22 @@ void LazyColumnLayoutTest::FlushIdleTask(const RefPtr<LazyColumnLayoutPattern>& 
         auto host = pattern->GetHost();
         FlushUITasks(host);
         needPredict = pattern->layoutInfo_->NeedPredict();
+        tryCount--;
+    }
+}
+
+void LazyColumnLayoutTest::FlushListIdleTask(const RefPtr<ListPattern>& listPattern)
+{
+    CHECK_NULL_VOID(listPattern);
+    int32_t tryCount = 10;
+    auto predictParam = listPattern->GetPredictLayoutParamV2();
+    while (predictParam && tryCount > 0) {
+        const int64_t time = GetSysTimestamp();
+        auto pipeline = listPattern->GetContext();
+        pipeline->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
+        auto host = listPattern->GetHost();
+        FlushUITasks(host);
+        predictParam = listPattern->GetPredictLayoutParamV2();
         tryCount--;
     }
 }
@@ -715,7 +733,7 @@ HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest001, TestSize.Level1)
      * @tc.expected: totalMainSize and totalItemCount updated
      */
     for (int32_t i = 0; i < 6; i++) {
-        AddChild();
+        AddChildAtIndex(0);
     }
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(frameNode_);
@@ -745,7 +763,7 @@ HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest002, TestSize.Level1)
      * @tc.expected: totalMainSize and totalItemCount updated
      */
     for (int32_t i = 0; i < 6; i++) {
-        AddChild();
+        AddChildAtIndex(0);
     }
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(frameNode_);
@@ -782,7 +800,7 @@ HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest003, TestSize.Level1)
     };
 
     /**
-     * @tc.steps: step1. Create lazy column layout with 10 items and onVisibleIndexesChange callback
+     * @tc.steps: step1. Create WaterFlow > LazyColumnLayout with 10 items and onVisibleIndexesChange callback
      * @tc.expected: callback fires with range 0-4
      */
     CreateWaterFlow();
@@ -794,49 +812,112 @@ HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest003, TestSize.Level1)
     EXPECT_EQ(indexEnd, 4);
 
     /**
-     * @tc.steps: step2. Scroll down 150
-     * @tc.expected: visible range updated to 1-5
+     * @tc.steps: step2. Scroll down 150px
+     * @tc.expected: visible range updated to 1-6, scroll offset is -150
      */
     scrollablePattern_->UpdateCurrentOffset(-150, SCROLL_FROM_UPDATE);
     FlushUITasks(scrollableFrameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 10);
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 1);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 6);
+    EXPECT_EQ(indexStart, 1);
+    EXPECT_EQ(indexEnd, 6);
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -150);
 
     /**
-     * @tc.steps: step3. Delete child at index 0
-     * @tc.expected: totalItemCount decreases to 9, visible range unchanged
+     * @tc.steps: step3. Delete child at index 0 (above visible area)
+     * @tc.expected: totalItemCount decreases to 9, visible range and scroll offset unchanged
      */
     frameNode_->RemoveChildAtIndex(0);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(scrollableFrameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 9);
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 1);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 6);
+    EXPECT_EQ(indexStart, 1);
+    EXPECT_EQ(indexEnd, 6);
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -150);
 
     /**
-     * @tc.steps: step4. Scroll to bottom
-     * @tc.expected: visible range updated
+     * @tc.steps: step4. Scroll to bottom by additional -300px (total -450px)
+     * @tc.expected: visible range updated to 4-8
      */
     scrollablePattern_->UpdateCurrentOffset(-300, SCROLL_FROM_UPDATE);
     FlushUITasks(scrollableFrameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 4);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 8);
+    EXPECT_EQ(indexStart, 4);
+    EXPECT_EQ(indexEnd, 8);
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -450);
 
     /**
-     * @tc.steps: step6. Delete child at index 0
-     * @tc.expected: totalItemCount decreases to 7, visible range recalculated
+     * @tc.steps: step5. Delete child at index 0 (above visible area) again
+     * @tc.expected: totalItemCount decreases to 8, visible range recalculated to 3-7,
+     *               scroll offset adjusted from -450 to -350
      */
     frameNode_->RemoveChildAtIndex(0);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(scrollableFrameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 8);
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(indexStart, 3);
+    EXPECT_EQ(indexEnd, 7);
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -350);
+}
+
+/**
+ * @tc.name: AddDelChildrenTest004
+ * @tc.desc: Test onVisibleIndexesChange when add items while scrolled
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest004, TestSize.Level1)
+{
+    int32_t indexStart = -2;
+    int32_t indexEnd = -2;
+    auto callback = [&indexStart, &indexEnd](int32_t start, int32_t end) {
+        indexStart = start;
+        indexEnd = end;
+    };
+
+    /**
+     * @tc.steps: step1. Create WaterFlow > LazyColumnLayout with 10 items and onVisibleIndexesChange callback
+     * @tc.expected: callback fires with range 0-4
+     */
+    CreateWaterFlow();
+    CreateLazyColumnLayout(std::move(callback));
+    CreateContent(10);
+    CreateDone();
+
+    EXPECT_EQ(indexStart, 0);
+    EXPECT_EQ(indexEnd, 4);
+
+    /**
+     * @tc.steps: step2. Scroll down 150px
+     * @tc.expected: visible range updated to 1-6, child 1 relative y offset is -50
+     */
+    scrollablePattern_->UpdateCurrentOffset(-150, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 10);
+    EXPECT_EQ(indexStart, 1);
+    EXPECT_EQ(indexEnd, 6);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 1), -50);
+
+    /**
+     * @tc.steps: step3. Add child at the top (index 0, above visible area)
+     * @tc.expected: totalItemCount increases to 11, visible range and child 1 relative position unchanged
+     */
+    AddChildAtIndex(0);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 11);
+    EXPECT_EQ(indexStart, 1);
+    EXPECT_EQ(indexEnd, 6);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 1), -50);
+
+    /**
+     * @tc.steps: step4. Add child at the end (index 11, below visible area)
+     * @tc.expected: totalItemCount increases to 12, visible range and child 1 relative position unchanged
+     */
+    AddChildAtIndex(11);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 12);
+    EXPECT_EQ(indexStart, 1);
+    EXPECT_EQ(indexEnd, 6);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 1), -50);
 }
 
 /**
@@ -847,7 +928,7 @@ HWTEST_F(LazyColumnLayoutTest, AddDelChildrenTest003, TestSize.Level1)
 HWTEST_F(LazyColumnLayoutTest, UpdateChildSizeTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create lazy column layout with 10 items
+     * @tc.steps: step1. Create WaterFlow > LazyColumnLayout with 10 items (each 100px height)
      */
     CreateWaterFlow();
     CreateLazyColumnLayout();
@@ -855,16 +936,16 @@ HWTEST_F(LazyColumnLayoutTest, UpdateChildSizeTest001, TestSize.Level1)
     CreateDone();
 
     /**
-     * @tc.steps: step2. Scroll down 150
-     * @tc.expected: second child at y = -50
+     * @tc.steps: step2. Scroll down 150px (child 0 partially visible, child 1 visible)
+     * @tc.expected: child 1 relative y offset (WaterFlow y + LazyColumnLayout y) is -50
      */
     scrollablePattern_->UpdateCurrentOffset(-150, SCROLL_FROM_UPDATE);
     FlushUITasks(scrollableFrameNode_);
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 1), -50);
 
     /**
-     * @tc.steps: step3. Modify child 0 height from 100 to 50
-     * @tc.expected: second child y unchanged
+     * @tc.steps: step3. Shrink child 0 height from 100 to 50 (above visible area)
+     * @tc.expected: child 1 relative y offset unchanged (-50), position is stable
      */
     auto child0 = GetChildFrameNode(frameNode_, 0);
     auto child0LayoutProp = child0->GetLayoutProperty();
@@ -874,8 +955,17 @@ HWTEST_F(LazyColumnLayoutTest, UpdateChildSizeTest001, TestSize.Level1)
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 1), -50);
 
     /**
-     * @tc.steps: step4. Modify child 2 height from 100 to 200
-     * @tc.expected: second child y unchanged
+     * @tc.steps: step4. Grow child 0 height from 50 to 200 (above visible area)
+     * @tc.expected: child 1 relative y offset unchanged (-50), position is stable
+     */
+    child0LayoutProp->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1, DimensionUnit::PERCENT), CalcLength(200)));
+    child0->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 1), -50);
+
+    /**
+     * @tc.steps: step5. Grow child 2 height from 100 to 200 (within visible area)
+     * @tc.expected: child 1 relative y offset unchanged (-50), position is stable
      */
     auto child2 = GetChildFrameNode(frameNode_, 2);
     auto child2LayoutProp = child2->GetLayoutProperty();
@@ -1137,10 +1227,45 @@ HWTEST_F(LazyColumnLayoutTest, LazyColumnInListWithInitialIndex002, TestSize.Lev
 {
     /**
      * @tc.steps: step1. Create List with initialIndex=1
-     * @tc.expected: List scrolls to child 1 (first ListItem, 50px) at y=0
+     * @tc.expected: child 1 at y=0
      */
     CreateListWithLazyColumnLayout(1);
     EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 0);
+
+    /**
+     * @tc.steps: step2. Flush List idle task and check child 0's lazy layout range
+     * @tc.expected: child 0's startIndex=-1, endIndex=-1 (not in viewport)
+     */
+    FlushListIdleTask(scrollableFrameNode_->GetPattern<ListPattern>());
+    auto child0 = GetChildFrameNode(scrollableFrameNode_, 0);
+    auto pattern0 = child0->GetPattern<LazyColumnLayoutPattern>();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, -1);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, -1);
+
+    /**
+     * @tc.steps: step3. Flush child 0's idle task to trigger cache layout
+     * @tc.expected: child 0's cachedStartIndex=7, cachedEndIndex=9
+     */
+    FlushIdleTask(pattern0);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedStartIndex_, 7);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedEndIndex_, 9);
+
+    /**
+     * @tc.steps: step4. Check child 4's lazy layout range
+     * @tc.expected: child 4's startIndex=0, endIndex=3
+     */
+    auto child4 = GetChildFrameNode(scrollableFrameNode_, 4);
+    auto pattern4 = child4->GetPattern<LazyColumnLayoutPattern>();
+    EXPECT_EQ(pattern4->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern4->layoutInfo_->endIndex_, 3);
+
+    /**
+     * @tc.steps: step5. Flush child 4's idle task to trigger cache layout
+     * @tc.expected: child 4's cachedStartIndex=0, cachedEndIndex=5
+     */
+    FlushIdleTask(pattern4);
+    EXPECT_EQ(pattern4->layoutInfo_->cachedStartIndex_, 0);
+    EXPECT_EQ(pattern4->layoutInfo_->cachedEndIndex_, 5);
 }
 
 /**
@@ -1685,4 +1810,105 @@ HWTEST_F(LazyColumnLayoutTest, LazyColumnInFlowItem001, TestSize.Level1)
     EXPECT_EQ(pattern1->layoutInfo_->cachedEndIndex_, 3);
 }
 
+/**
+ * @tc.name: VisibleIndexWithBoundaryPadding001
+ * @tc.desc: Test List with LazyColumnLayout, ContentClip BOUNDARY mode and scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, VisibleIndexWithBoundaryPadding001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyColumnLayout, content clip and top/bottom padding
+     */
+    int32_t visibleStart = -1;
+    int32_t visibleEnd = -1;
+
+    CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(scrollableFrameNode_), ContentClipMode::BOUNDARY, nullptr);
+    auto listLayoutProperty = scrollableFrameNode_->GetLayoutProperty();
+    ASSERT_NE(listLayoutProperty, nullptr);
+    PaddingProperty padding = CreatePadding(0, 100, 0, 150);
+    listLayoutProperty->UpdatePadding(padding);
+
+    auto callback = [&visibleStart, &visibleEnd](int32_t start, int32_t end) {
+        visibleStart = start;
+        visibleEnd = end;
+    };
+    CreateLazyColumnLayout(std::move(callback));
+    CreateContent(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Check visible indexes
+     * @tc.expected: visible indexes should exclude safe area padding
+     */
+    EXPECT_EQ(visibleStart, 0);
+    EXPECT_EQ(visibleEnd, 2);
+    EXPECT_EQ(visibleStart, pattern_->layoutInfo_->startIndex_);
+    EXPECT_LE(visibleEnd, pattern_->layoutInfo_->endIndex_);
+
+    /**
+     * @tc.steps: step3. Scroll and check visible indexes
+     * @tc.expected: visible indexes should update correctly after scroll
+     */
+    scrollablePattern_->UpdateCurrentOffset(-210, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+
+    EXPECT_EQ(visibleStart, 2);
+    EXPECT_EQ(visibleEnd, 4);
+    EXPECT_GT(visibleStart, pattern_->layoutInfo_->startIndex_);
+    EXPECT_LE(visibleEnd, pattern_->layoutInfo_->endIndex_);
+}
+
+/**
+ * @tc.name: VisibleIndexWithSafeAreaPadding001
+ * @tc.desc: Test List with LazyColumnLayout and ContentClip SAFE_AREA mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, VisibleIndexWithSafeAreaPadding001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with LazyColumnLayout and SAFE_AREA content clip
+     */
+    int32_t visibleStart = -1;
+    int32_t visibleEnd = -1;
+
+    CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(scrollableFrameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    auto listLayoutProperty = scrollableFrameNode_->GetLayoutProperty();
+    ASSERT_NE(listLayoutProperty, nullptr);
+    PaddingProperty safeAreaPadding;
+    safeAreaPadding.top = std::make_optional<CalcLength>(100);
+    safeAreaPadding.bottom = std::make_optional<CalcLength>(150);
+    listLayoutProperty->UpdateSafeAreaPadding(safeAreaPadding);
+
+    auto callback = [&visibleStart, &visibleEnd](int32_t start, int32_t end) {
+        visibleStart = start;
+        visibleEnd = end;
+    };
+    CreateLazyColumnLayout(std::move(callback));
+    CreateContent(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Check visible indexes
+     * @tc.expected: visible indexes should exclude safe area padding
+     */
+    EXPECT_EQ(visibleStart, 0);
+    EXPECT_EQ(visibleEnd, 2);
+    EXPECT_EQ(visibleStart, pattern_->layoutInfo_->startIndex_);
+    EXPECT_LE(visibleEnd, pattern_->layoutInfo_->endIndex_);
+
+    /**
+     * @tc.steps: step3. Scroll and check visible indexes
+     * @tc.expected: visible indexes should update correctly after scroll
+     */
+    scrollablePattern_->UpdateCurrentOffset(-210, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+
+    EXPECT_EQ(visibleStart, 2);
+    EXPECT_EQ(visibleEnd, 4);
+    EXPECT_GT(visibleStart, pattern_->layoutInfo_->startIndex_);
+    EXPECT_LE(visibleEnd, pattern_->layoutInfo_->endIndex_);
+}
 } // namespace OHOS::Ace::NG

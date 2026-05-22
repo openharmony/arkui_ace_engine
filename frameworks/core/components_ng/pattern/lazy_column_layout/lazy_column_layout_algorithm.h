@@ -54,7 +54,10 @@ private:
     void ApplyLazyNodeAdjustOffset(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
     void MeasureForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
     void MeasureBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
+    bool MeasureItem(LayoutWrapper* layoutWrapper, int32_t curIndex, float currentPos, bool forward, float& mainSize);
     void CheckRecycle();
+    void CalculateVisibleStartIndex();
+    void CalculateVisibleEndIndex();
     void CheckCacheRecycle();
     void MeasureItemsLazy(LayoutWrapper* layoutWrapper);
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
@@ -81,6 +84,8 @@ private:
     float referencePos_ = 0.0f;
     float startPos_ = 0.0f;
     float endPos_ = 0.0f;
+    float viewExtStart_ = 0.0f;
+    float viewExtEnd_ = 0.0f;
     float space_ = 0.0f;
     LayoutConstraintF childLayoutConstraint_;
     HorizontalAlign horizontalAlign_ = HorizontalAlign::CENTER;

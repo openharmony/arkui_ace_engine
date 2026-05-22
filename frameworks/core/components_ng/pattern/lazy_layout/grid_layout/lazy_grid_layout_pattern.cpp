@@ -159,7 +159,6 @@ void LazyGridLayoutPattern::ProcessIdleTask(int64_t deadline)
     host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     layoutInfo_->deadline_ = deadline;
     FrameNode::ProcessOffscreenNode(GetHost(), true);
-    layoutInfo_->deadline_.reset();
 }
 
 bool LazyGridLayoutPattern::IsDynamicLayout() const

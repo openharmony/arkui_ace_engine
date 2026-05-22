@@ -21,15 +21,16 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-void LazyColumnLayoutInfo::EstimateItemSize()
+float LazyColumnLayoutInfo::GetEstimateItemSize()
 {
     if (!posMap_.empty()) {
         float totalSize = posMap_.rbegin()->second.endPos + space_ - posMap_.begin()->second.startPos;
         int32_t totalCount = static_cast<int32_t>(posMap_.size());
         if (totalCount > 0) {
-            estimateItemSize_ = totalSize / totalCount - space_;
+            return totalSize / totalCount - space_;
         }
     }
+    return 0.0f;
 }
 
 float LazyColumnLayoutInfo::UpdatePosMapStart(int32_t updatedStart, int32_t updatedEnd)
@@ -143,7 +144,10 @@ void LazyColumnLayoutInfo::UpdatePosMap()
 {
     float prevTotalMainSize_ = totalMainSize_;
     if (!Positive(estimateItemSize_)) {
-        EstimateItemSize();
+        auto estimateItemSize = GetEstimateItemSize();
+        if (Positive(estimateItemSize)) {
+            estimateItemSize_ = estimateItemSize;
+        }
     }
     if (updatedStart_ < INT_MAX) {
         if (cachedUpdatedStart_ < updatedStart_) {
@@ -200,9 +204,11 @@ void LazyColumnLayoutInfo::SetTotalItemCount(int32_t count)
         updatedStart_ = INT_MAX;
         updatedEnd_ = -1;
         startIndex_ = -1;
+        endIndex_ = -1;
+        visibleStartIndex_ = -1;
+        visibleEndIndex_ = -1;
         cachedUpdatedStart_ = INT_MAX;
         cachedUpdatedEnd_ = -1;
-        endIndex_ = -1;
         totalMainSize_ = 0.0f;
     }
 }

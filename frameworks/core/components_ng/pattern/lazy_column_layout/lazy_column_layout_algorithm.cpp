@@ -79,23 +79,27 @@ void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
     }
     forwardLayout_ = posRef.value().referenceEdge == ReferenceEdge::START;
     referencePos_ = posRef.value().referencePos;
+    viewExtStart_ = posRef.value().viewExtStart;
+    viewExtEnd_ = posRef.value().viewExtEnd;
     if (forwardLayout_) {
-        startPos_ = posRef.value().viewPosStart - referencePos_;
-        endPos_ = posRef.value().viewPosEnd - referencePos_;
+        startPos_ = posRef.value().viewPosStart - viewExtStart_ - referencePos_;
+        endPos_ = posRef.value().viewPosEnd + viewExtEnd_ - referencePos_;
     } else {
         auto geometryNode = layoutWrapper->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto realMainSize = geometryNode->GetPaddingSize().Height();
         referencePos_ += totalMainSize_ - realMainSize;
-        startPos_ = posRef.value().viewPosStart - (referencePos_ - totalMainSize_);
-        endPos_ = posRef.value().viewPosEnd - (referencePos_ - totalMainSize_);
+        startPos_ = posRef.value().viewPosStart - viewExtStart_ - (referencePos_ - totalMainSize_);
+        endPos_ = posRef.value().viewPosEnd + viewExtEnd_ - (referencePos_ - totalMainSize_);
     }
     float viewSize = posRef.value().viewPosEnd - posRef.value().viewPosStart;
     cacheStartPos_ = startPos_ - viewSize * cacheSize_;
     cacheEndPos_ = endPos_ + viewSize * cacheSize_;
     needAllLayout_ = false;
-    if (!layoutInfo_->deadline_.has_value()) {
-        layoutInfo_->deadline_ = posRef.value().deadline;
+    // When not in own idle task but parent is doing predictive layout in idle,
+    // inherit deadline and cache positions
+    if (!layoutInfo_->deadline_.has_value() && posRef.value().deadline.has_value()) {
+        layoutInfo_->deadline_ = posRef.value().deadline.value();
         layoutInfo_->cacheStartPos_ = cacheStartPos_;
         layoutInfo_->cacheEndPos_ = cacheEndPos_;
     }
@@ -167,6 +171,8 @@ void LazyColumnLayoutAlgorithm::MeasureAllItems(LayoutWrapper* layoutWrapper)
     }
     layoutInfo_->startIndex_ = 0;
     layoutInfo_->endIndex_ = totalItemCount_ - 1;
+    layoutInfo_->visibleStartIndex_ = 0;
+    layoutInfo_->visibleEndIndex_ = totalItemCount_ - 1;
     layoutInfo_->totalMainSize_ = totalSize;
     layoutInfo_->totalItemCount_ = totalItemCount_;
     totalMainSize_ = totalSize;
@@ -316,28 +322,47 @@ void LazyColumnLayoutAlgorithm::ApplyLazyNodeAdjustOffset(
     }
 }
 
+bool LazyColumnLayoutAlgorithm::MeasureItem(
+    LayoutWrapper* layoutWrapper, int32_t curIndex, float currentPos, bool forward, float& mainSize)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex);
+    if (!wrapper) {
+        return false;
+    }
+    if (NeedLazyLayout(wrapper)) {
+        wrapper->Measure(GetLazyLayoutConstraint(currentPos, forward));
+        ApplyLazyNodeAdjustOffset(wrapper, currentPos, forward);
+    } else if (CheckNeedMeasure(wrapper)) {
+        wrapper->Measure(childLayoutConstraint_);
+    }
+    auto geometryNode = wrapper->GetGeometryNode();
+    if (!geometryNode) {
+        return false;
+    }
+    mainSize = geometryNode->GetMarginFrameSize().Height();
+    return true;
+}
+
 void LazyColumnLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos)
 {
     float currentPos = startPos;
     int32_t curIndex = startIndex;
+    auto estimateItemSize = layoutInfo_->GetEstimateItemSize();
     while (LessOrEqual(currentPos, endPos_) && curIndex < totalItemCount_) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex);
-        if (!wrapper) {
+        auto mainSize = 0.0f;
+        auto iter = layoutInfo_->posMap_.find(curIndex);
+        if (iter != layoutInfo_->posMap_.end()) {
+            mainSize = iter->second.endPos - iter->second.startPos;
+        }
+        if (!Positive(mainSize)) {
+            // Use estimated size for items far outside viewport to avoid jank during large scroll jumps
+            mainSize = estimateItemSize;
+        }
+        bool skipMeasure = Positive(mainSize) && LessNotEqual(currentPos + mainSize, cacheStartPos_);
+        if (!skipMeasure && !MeasureItem(layoutWrapper, curIndex, currentPos, true, mainSize)) {
             curIndex++;
             continue;
         }
-        if (NeedLazyLayout(wrapper)) {
-            wrapper->Measure(GetLazyLayoutConstraint(currentPos, true));
-            ApplyLazyNodeAdjustOffset(wrapper, currentPos, true);
-        } else if (CheckNeedMeasure(wrapper)) {
-            wrapper->Measure(childLayoutConstraint_);
-        }
-        auto geometryNode = wrapper->GetGeometryNode();
-        if (!geometryNode) {
-            curIndex++;
-            continue;
-        }
-        float mainSize = geometryNode->GetMarginFrameSize().Height();
         layoutInfo_->SetPosMap(curIndex, { currentPos, currentPos + mainSize });
         currentPos += mainSize;
         layoutInfo_->endIndex_ = curIndex;
@@ -352,24 +377,22 @@ void LazyColumnLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper, in
 {
     float currentPos = endPos;
     int32_t curIndex = std::min(endIndex, totalItemCount_ - 1);
-    while (curIndex >= 0 && GreatNotEqual(currentPos, startPos_)) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex);
-        if (!wrapper) {
+    auto estimateItemSize = layoutInfo_->GetEstimateItemSize();
+    while (curIndex >= 0 && GreatOrEqual(currentPos, startPos_)) {
+        auto mainSize = 0.0f;
+        auto iter = layoutInfo_->posMap_.find(curIndex);
+        if (iter != layoutInfo_->posMap_.end()) {
+            mainSize = iter->second.endPos - iter->second.startPos;
+        }
+        if (!Positive(mainSize)) {
+            // Use estimated size for items far outside viewport to avoid jank during large scroll jumps
+            mainSize = estimateItemSize;
+        }
+        bool skipMeasure = Positive(mainSize) && GreatNotEqual(currentPos - mainSize, cacheEndPos_);
+        if (!skipMeasure && !MeasureItem(layoutWrapper, curIndex, currentPos, false, mainSize)) {
             curIndex--;
             continue;
         }
-        if (NeedLazyLayout(wrapper)) {
-            wrapper->Measure(GetLazyLayoutConstraint(currentPos, false));
-            ApplyLazyNodeAdjustOffset(wrapper, currentPos, false);
-        } else if (CheckNeedMeasure(wrapper)) {
-            wrapper->Measure(childLayoutConstraint_);
-        }
-        auto geometryNode = wrapper->GetGeometryNode();
-        if (!geometryNode) {
-            curIndex++;
-            continue;
-        }
-        float mainSize = geometryNode->GetMarginFrameSize().Height();
         layoutInfo_->SetPosMap(curIndex, { currentPos - mainSize, currentPos });
         currentPos -= mainSize;
         layoutInfo_->startIndex_ = curIndex;
@@ -406,11 +429,54 @@ void LazyColumnLayoutAlgorithm::CheckRecycle()
     }
 }
 
+void LazyColumnLayoutAlgorithm::CalculateVisibleStartIndex()
+{
+    layoutInfo_->visibleStartIndex_ = layoutInfo_->startIndex_;
+    if (LessOrEqual(viewExtStart_, 0.0f)) {
+        return;
+    }
+    auto iter = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
+    if (iter == layoutInfo_->posMap_.end()) {
+        return;
+    }
+    float visibleStartPos = startPos_ + viewExtStart_;
+    while (iter != layoutInfo_->posMap_.end()) {
+        if (LessNotEqual(iter->second.endPos, visibleStartPos)) {
+            layoutInfo_->visibleStartIndex_ = iter->first + 1;
+            ++iter;
+        } else {
+            break;
+        }
+    }
+}
+
+void LazyColumnLayoutAlgorithm::CalculateVisibleEndIndex()
+{
+    layoutInfo_->visibleEndIndex_ = layoutInfo_->endIndex_;
+    if (LessOrEqual(viewExtEnd_, 0.0f)) {
+        return;
+    }
+    auto iter = layoutInfo_->posMap_.find(layoutInfo_->endIndex_);
+    if (iter == layoutInfo_->posMap_.end()) {
+        return;
+    }
+    float visibleEndPos = endPos_ - viewExtEnd_;
+    std::reverse_iterator<std::map<int32_t, ColumnItemMainPos>::iterator> riter(++iter);
+    while (riter != layoutInfo_->posMap_.rend()) {
+        if (GreatNotEqual(riter->second.startPos, visibleEndPos)) {
+            layoutInfo_->visibleEndIndex_ = riter->first - 1;
+            ++riter;
+        } else {
+            break;
+        }
+    }
+}
+
 void LazyColumnLayoutAlgorithm::CheckCacheRecycle()
 {
     auto it = layoutInfo_->posMap_.find(layoutInfo_->cachedStartIndex_);
     while (it != layoutInfo_->posMap_.end()) {
-        if (LessNotEqual(it->second.endPos, cacheStartPos_)) {
+        if (LessNotEqual(it->second.endPos, layoutInfo_->cacheStartPos_)) {
             layoutedStartIndex_ = it->first + 1;
             layoutedStart_ = it->second.endPos;
             cachedStartIndex_ = layoutedStartIndex_;
@@ -425,7 +491,7 @@ void LazyColumnLayoutAlgorithm::CheckCacheRecycle()
     }
     std::reverse_iterator<std::map<int32_t, ColumnItemMainPos>::iterator> rit(++it);
     while (rit != layoutInfo_->posMap_.rend()) {
-        if (GreatNotEqual(rit->second.startPos, cacheEndPos_)) {
+        if (GreatNotEqual(rit->second.startPos, layoutInfo_->cacheEndPos_)) {
             layoutedEndIndex_ = rit->first - 1;
             layoutedEnd_ = rit->second.startPos;
             cachedEndIndex_ = layoutedEndIndex_;
@@ -472,6 +538,8 @@ void LazyColumnLayoutAlgorithm::MeasureItemsLazy(LayoutWrapper* layoutWrapper)
     cacheStartPos_ += delta;
     cacheEndPos_ += delta;
     totalMainSize_ = layoutInfo_->totalMainSize_;
+    CalculateVisibleStartIndex();
+    CalculateVisibleEndIndex();
 }
 
 void LazyColumnLayoutAlgorithm::SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize)
@@ -584,6 +652,8 @@ void LazyColumnLayoutAlgorithm::PredictLayoutForward(
     LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset)
 {
     int32_t currIndex = layoutInfo_->layoutedEndIndex_;
+    // Allow forward prediction when not yet laid out (currIndex<0) with forward layout,
+    // or when already laid out (currIndex>=0) with item in posMap
     if ((currIndex < 0 && !forwardLayout_) ||
         (currIndex >= 0 && layoutInfo_->posMap_.find(currIndex) == layoutInfo_->posMap_.end())) {
         return;
@@ -625,6 +695,8 @@ void LazyColumnLayoutAlgorithm::PredictLayoutBackward(
     LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset)
 {
     int32_t currIndex = layoutInfo_->layoutedStartIndex_;
+    // Allow backward prediction when not yet laid out (currIndex<0) with backward layout,
+    // or when already laid out (currIndex>=0) with item in posMap
     if ((currIndex < 0 && forwardLayout_) ||
         (currIndex >= 0 && layoutInfo_->posMap_.find(currIndex) == layoutInfo_->posMap_.end())) {
         return;
@@ -679,14 +751,19 @@ void LazyColumnLayoutAlgorithm::FixIndexRange(int32_t& startIndex, int32_t& endI
 
 void LazyColumnLayoutAlgorithm::SyncPredictLayoutInfo(LayoutWrapper* layoutWrapper)
 {
+    // Recycle items outside visible and cache range
     CheckRecycle();
     CheckCacheRecycle();
+    CalculateVisibleStartIndex();
+    CalculateVisibleEndIndex();
     FixIndexRange(cachedStartIndex_, cachedEndIndex_);
     FixIndexRange(layoutedStartIndex_, layoutedEndIndex_);
+    // Update active child range if cache boundaries changed
     if ((layoutInfo_->cachedStartIndex_ != cachedStartIndex_) ||
         (layoutInfo_->cachedEndIndex_ != cachedEndIndex_)) {
         layoutWrapper->SetActiveChildRange(cachedStartIndex_, cachedEndIndex_);
     }
+    // Sync prediction results back to layoutInfo
     layoutInfo_->layoutedStartIndex_ = layoutedStartIndex_;
     layoutInfo_->cachedStartIndex_ = cachedStartIndex_;
     layoutInfo_->layoutedStart_ = layoutedStart_;
@@ -695,6 +772,8 @@ void LazyColumnLayoutAlgorithm::SyncPredictLayoutInfo(LayoutWrapper* layoutWrapp
     layoutInfo_->cachedEndIndex_ = cachedEndIndex_;
     layoutInfo_->layoutedEnd_ = layoutedEnd_;
 
+    // Skip posMap update if only self measure changed,
+    // as child positions remain valid
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_MEASURE_SELF) {
@@ -823,12 +902,7 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItems(
 {
     LayoutCachedItemsForward(layoutWrapper, crossSize, paddingOffset);
     LayoutCachedItemsBackward(layoutWrapper, crossSize, paddingOffset);
-    if (cachedStartIndex_ < 0 && cachedEndIndex_ >= 0) {
-        cachedStartIndex_ = 0;
-    }
-    if (cachedEndIndex_ >= totalItemCount_ && cachedStartIndex_ <= totalItemCount_ - 1) {
-        cachedEndIndex_ = totalItemCount_ - 1;
-    }
+    FixIndexRange(cachedStartIndex_, cachedEndIndex_);
     layoutWrapper->SetActiveChildRange(cachedStartIndex_, cachedEndIndex_, 0, 0);
     layoutInfo_->layoutedStart_ = layoutedStart_;
     layoutInfo_->layoutedEnd_ = layoutedEnd_;

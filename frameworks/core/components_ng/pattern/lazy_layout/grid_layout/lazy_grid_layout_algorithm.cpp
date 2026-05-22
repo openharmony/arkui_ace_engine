@@ -67,11 +67,17 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    if (layoutInfo_->deadline_) {
-        return;
-    } else if (totalItemCount_ == 0) {
+    if (totalItemCount_ == 0) {
         layoutInfo_->SetTotalItemCount(0);
         totalMainSize_ = 0.0f;
+    } else if (layoutInfo_->deadline_) {
+        layoutInfo_->SetTotalItemCount(totalItemCount_);
+        layoutInfo_->SetLanes(lanes_);
+        layoutInfo_->SetSpace(spaceWidth_);
+        auto paddingOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
+        PredictLayoutForward(layoutWrapper, crossSize_, paddingOffset);
+        PredictLayoutBackward(layoutWrapper, crossSize_, paddingOffset);
+        SyncPredictLayoutInfo(layoutWrapper);
     } else if (needAllLayout_) {
         MeasureGridItemAll(layoutWrapper);
     } else {
@@ -151,9 +157,7 @@ void LazyGridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     if (layoutInfo_->deadline_) {
-        PredictLayoutForward(layoutWrapper, crossSize, paddingOffset);
-        PredictLayoutBackward(layoutWrapper, crossSize, paddingOffset);
-        SyncPredictLayoutInfo(layoutWrapper);
+        layoutInfo_->deadline_.reset();
         return;
     }
     LayoutGridItems(layoutWrapper, crossSize, paddingOffset);
@@ -276,6 +280,13 @@ void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper, s
     cacheStartPos_ = startPos_ - viewSize * cacheSize_;
     cacheEndPos_ = endPos_ + viewSize * cacheSize_;
     needAllLayout_ = false;
+    // When not in own idle task but parent is doing predictive layout in idle,
+    // inherit deadline and cache positions
+    if (!layoutInfo_->deadline_.has_value() && posRef.value().deadline.has_value()) {
+        layoutInfo_->deadline_ = posRef.value().deadline.value();
+        layoutInfo_->cacheStartPos_ = cacheStartPos_;
+        layoutInfo_->cacheEndPos_ = cacheEndPos_;
+    }
 }
 
 void LazyGridLayoutAlgorithm::MeasureGridItemAll(LayoutWrapper* layoutWrapper)
@@ -465,51 +476,86 @@ void LazyGridLayoutAlgorithm::CheckRecycle()
     }
 }
 
-void LazyGridLayoutAlgorithm::CalculateVisibleStartIndex()
+void LazyGridLayoutAlgorithm::CheckCacheRecycle()
 {
-    if (LessOrEqual(viewExtStart_, 0.0f)) {
-        layoutInfo_->visibleStartIndex_ = layoutInfo_->startIndex_;
+    auto it = layoutInfo_->posMap_.find(layoutInfo_->cachedStartIndex_);
+    while (it != layoutInfo_->posMap_.end()) {
+        if (LessNotEqual(it->second.endPos, layoutInfo_->cacheStartPos_)) {
+            layoutedStartIndex_ = it->first + 1;
+            layoutedStart_ = it->second.endPos;
+            cachedStartIndex_ = layoutedStartIndex_;
+            ++it;
+        } else {
+            break;
+        }
+    }
+    it = layoutInfo_->posMap_.find(layoutInfo_->cachedEndIndex_);
+    if (it == layoutInfo_->posMap_.end()) {
         return;
     }
+    std::reverse_iterator<std::map<int, GridItemMainPos>::iterator> rit(++it);
+    while (rit != layoutInfo_->posMap_.rend()) {
+        if (GreatNotEqual(rit->second.startPos, layoutInfo_->cacheEndPos_)) {
+            layoutedEndIndex_ = rit->first - 1;
+            layoutedEnd_ = rit->second.startPos;
+            cachedEndIndex_ = layoutedEndIndex_;
+            ++rit;
+        } else {
+            break;
+        }
+    }
+}
 
-    float visibleStartPos = startPos_ + viewExtStart_;
+void LazyGridLayoutAlgorithm::FixIndexRange(int32_t& startIndex, int32_t& endIndex)
+{
+    if (startIndex < 0 && endIndex >= 0 && endIndex < totalItemCount_) {
+        startIndex = 0;
+    }
+    if ((endIndex < 0 || endIndex >= totalItemCount_) && startIndex >= 0 && startIndex < totalItemCount_) {
+        endIndex = totalItemCount_ - 1;
+    }
+}
+
+void LazyGridLayoutAlgorithm::CalculateVisibleStartIndex()
+{
     layoutInfo_->visibleStartIndex_ = layoutInfo_->startIndex_;
-    
+    if (LessOrEqual(viewExtStart_, 0.0f)) {
+        return;
+    }
     auto iter = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
     if (iter == layoutInfo_->posMap_.end()) {
         return;
     }
-
+    float visibleStartPos = startPos_ + viewExtStart_;
     while (iter != layoutInfo_->posMap_.end()) {
-        if (GreatOrEqual(iter->second.endPos, visibleStartPos)) {
-            layoutInfo_->visibleStartIndex_ = iter->first;
+        if (LessNotEqual(iter->second.endPos, visibleStartPos)) {
+            layoutInfo_->visibleStartIndex_ = iter->first + 1;
+            ++iter;
+        } else {
             break;
         }
-        ++iter;
     }
 }
 
 void LazyGridLayoutAlgorithm::CalculateVisibleEndIndex()
 {
+    layoutInfo_->visibleEndIndex_ = layoutInfo_->endIndex_;
     if (LessOrEqual(viewExtEnd_, 0.0f)) {
-        layoutInfo_->visibleEndIndex_ = layoutInfo_->endIndex_;
         return;
     }
-
-    float visibleEndPos = endPos_ - viewExtEnd_;
-    layoutInfo_->visibleEndIndex_ = layoutInfo_->endIndex_;
-
     auto iter = layoutInfo_->posMap_.find(layoutInfo_->endIndex_);
     if (iter == layoutInfo_->posMap_.end()) {
         return;
     }
-
-    while (iter != layoutInfo_->posMap_.begin()) {
-        if (LessOrEqual(iter->second.startPos, visibleEndPos)) {
-            layoutInfo_->visibleEndIndex_ = iter->first;
+    float visibleEndPos = endPos_ - viewExtEnd_;
+    std::reverse_iterator<std::map<int32_t, GridItemMainPos>::iterator> riter(++iter);
+    while (riter != layoutInfo_->posMap_.rend()) {
+        if (GreatNotEqual(riter->second.startPos, visibleEndPos)) {
+            layoutInfo_->visibleEndIndex_ = riter->first - 1;
+            ++riter;
+        } else {
             break;
         }
-        --iter;
     }
 }
 
@@ -690,12 +736,7 @@ void LazyGridLayoutAlgorithm::LayoutCachedItems(LayoutWrapper* layoutWrapper, fl
 {
     LayoutCachedItemsForward(layoutWrapper, crossSize, paddingOffset);
     LayoutCachedItemsBackward(layoutWrapper, crossSize, paddingOffset);
-    if (cachedStartIndex_ < 0 && cachedEndIndex_ >= 0) {
-        cachedStartIndex_ = 0;
-    }
-    if (cachedEndIndex_ >= totalItemCount_ && cachedStartIndex_ <= totalItemCount_ - 1) {
-        cachedEndIndex_ = totalItemCount_ - 1;
-    }
+    FixIndexRange(cachedStartIndex_, cachedEndIndex_);
     layoutWrapper->SetActiveChildRange(cachedStartIndex_, cachedEndIndex_, 0, 0);
     layoutInfo_->layoutedStart_ = layoutedStart_;
     layoutInfo_->layoutedEnd_ = layoutedEnd_;
@@ -798,19 +839,43 @@ void LazyGridLayoutAlgorithm::LayoutCachedItemsBackward(LayoutWrapper* layoutWra
     }
 }
 
+bool LazyGridLayoutAlgorithm::InitPredictForwardState(int32_t& currIndex, int32_t& currLane,
+    float& currPos, float& mainSize, float& layoutedEnd)
+{
+    currIndex = layoutInfo_->layoutedEndIndex_;
+    layoutedEnd = layoutInfo_->layoutedEnd_;
+    currLane = 0;
+    currPos = layoutedEnd;
+    mainSize = 0.0f;
+    // Allow forward prediction when not yet laid out (currIndex<0) and forward layout,
+    // or when already laid out (currIndex>=0) and item exists in posMap
+    if (currIndex < 0 && forwardLayout_) {
+        currIndex = -1;
+        return true;
+    } else if (currIndex >= 0 && layoutInfo_->posMap_.find(currIndex) != layoutInfo_->posMap_.end()) {
+        auto iter = layoutInfo_->posMap_.find(currIndex);
+        currLane = iter->second.laneIdx;
+        currPos = iter->second.startPos;
+        mainSize = iter->second.endPos - currPos;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void LazyGridLayoutAlgorithm::PredictLayoutForward(LayoutWrapper* layoutWrapper, float crossSize,
     const OffsetF& paddingOffset)
 {
-    int32_t currIndex = layoutInfo_->layoutedEndIndex_;
-    auto iter = layoutInfo_->posMap_.find(currIndex);
-    if (iter == layoutInfo_->posMap_.end()) {
+    int32_t currIndex;
+    int32_t currLane;
+    float currPos;
+    float mainSize;
+    float layoutedEnd;
+    if (!InitPredictForwardState(currIndex, currLane, currPos, mainSize, layoutedEnd)) {
         return;
     }
-    float layoutedEnd = layoutInfo_->layoutedEnd_;
-    int32_t currLane = iter->second.laneIdx;
-    float currPos = iter->second.startPos;
+
     auto deadline = layoutInfo_->deadline_.value();
-    float mainSize = iter->second.endPos - currPos;
     bool needFix = false;
     while (currIndex < totalItemCount_ - 1 && LessNotEqual(layoutedEnd, layoutInfo_->cacheEndPos_)) {
         if (GetSysTimestamp() > deadline) {
@@ -850,19 +915,43 @@ void LazyGridLayoutAlgorithm::PredictLayoutForward(LayoutWrapper* layoutWrapper,
     layoutedEnd_ = layoutedEnd;
 }
 
+bool LazyGridLayoutAlgorithm::InitPredictBackwardState(int32_t& currIndex, int32_t& currLane,
+    float& currPos, float& mainSize, float& layoutedStart)
+{
+    currIndex = layoutInfo_->layoutedStartIndex_;
+    layoutedStart = layoutInfo_->layoutedStart_;
+    currLane = lanes_ - 1;
+    currPos = layoutedStart;
+    mainSize = 0.0f;
+    // Allow backward prediction when not yet laid out (currIndex<0) and backward layout,
+    // or when already laid out (currIndex>=0) and item exists in posMap
+    if (currIndex < 0 && !forwardLayout_) {
+        currIndex = totalItemCount_;
+        return true;
+    } else if (currIndex >= 0 && layoutInfo_->posMap_.find(currIndex) != layoutInfo_->posMap_.end()) {
+        auto iter = layoutInfo_->posMap_.find(currIndex);
+        currLane = iter->second.laneIdx;
+        currPos = iter->second.endPos;
+        mainSize = currPos - iter->second.startPos;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void LazyGridLayoutAlgorithm::PredictLayoutBackward(LayoutWrapper* layoutWrapper, float crossSize,
     const OffsetF& paddingOffset)
 {
-    int32_t currIndex = layoutInfo_->layoutedStartIndex_;
-    auto iter = layoutInfo_->posMap_.find(currIndex);
-    if (iter == layoutInfo_->posMap_.end()) {
+    int32_t currIndex;
+    int32_t currLane;
+    float currPos;
+    float mainSize;
+    float layoutedStart;
+    if (!InitPredictBackwardState(currIndex, currLane, currPos, mainSize, layoutedStart)) {
         return;
     }
-    float layoutedStart = layoutInfo_->layoutedStart_;
-    int32_t currLane = iter->second.laneIdx;
-    float currPos = iter->second.endPos;
+
     auto deadline = layoutInfo_->deadline_.value();
-    float mainSize = currPos - iter->second.startPos;
     bool needFix = false;
     while (currIndex > 0 && (GreatNotEqual(layoutedStart, layoutInfo_->cacheStartPos_))) {
         if (GetSysTimestamp() > deadline) {
@@ -898,21 +987,33 @@ void LazyGridLayoutAlgorithm::PredictLayoutBackward(LayoutWrapper* layoutWrapper
         FixPosMapForward(currIndex, layoutWrapper, crossSize, paddingOffset);
     }
     layoutedStartIndex_ = currIndex;
-    cachedStartIndex_ = std::max(layoutInfo_->cachedStartIndex_, currIndex);
+    cachedStartIndex_ = layoutInfo_->cachedStartIndex_ >= 0
+        ? std::min(layoutInfo_->cachedStartIndex_, currIndex)
+        : currIndex;
     layoutedStart_ = layoutedStart;
 }
 
 void LazyGridLayoutAlgorithm::SyncPredictLayoutInfo(LayoutWrapper* layoutWrapper)
 {
+    // Recycle items outside visible and cache range
+    CheckRecycle();
+    CheckCacheRecycle();
+    CalculateVisibleStartIndex();
+    CalculateVisibleEndIndex();
+    // Expand cached range to cover the full predicted area
     if (LessOrEqual(layoutedStart_, layoutInfo_->cacheStartPos_) || layoutedStartIndex_ <= 0) {
         cachedStartIndex_ = layoutedStartIndex_;
     }
     if (GreatOrEqual(layoutedEnd_, layoutInfo_->cacheEndPos_) || layoutedEndIndex_ >= totalItemCount_ - 1) {
         cachedEndIndex_ = layoutedEndIndex_;
     }
+    FixIndexRange(cachedStartIndex_, cachedEndIndex_);
+    FixIndexRange(layoutedStartIndex_, layoutedEndIndex_);
+    // Update active child range if cache boundaries changed
     if ((layoutInfo_->cachedStartIndex_ != cachedStartIndex_) || (layoutInfo_->cachedEndIndex_ != cachedEndIndex_)) {
         layoutWrapper->SetActiveChildRange(cachedStartIndex_, cachedEndIndex_);
     }
+    // Sync prediction results back to layoutInfo
     layoutInfo_->layoutedStartIndex_ = layoutedStartIndex_;
     layoutInfo_->cachedStartIndex_ = cachedStartIndex_;
     layoutInfo_->layoutedStart_ = layoutedStart_;
@@ -920,6 +1021,15 @@ void LazyGridLayoutAlgorithm::SyncPredictLayoutInfo(LayoutWrapper* layoutWrapper
     layoutInfo_->layoutedEndIndex_ = layoutedEndIndex_;
     layoutInfo_->cachedEndIndex_ = cachedEndIndex_;
     layoutInfo_->layoutedEnd_ = layoutedEnd_;
+
+    // Skip posMap update if only self measure changed, as child positions remain valid
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_MEASURE_SELF) {
+        return;
+    }
+    layoutInfo_->UpdatePosMap();
+    totalMainSize_ = layoutInfo_->totalMainSize_;
 }
 
 void LazyGridLayoutAlgorithm::FixPosMapBackward(int32_t index)

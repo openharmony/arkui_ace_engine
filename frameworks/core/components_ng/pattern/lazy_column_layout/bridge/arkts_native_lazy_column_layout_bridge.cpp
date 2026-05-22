@@ -134,7 +134,14 @@ ArkUINativeModuleValue LazyColumnLayoutBridge::SetAlignItems(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     auto nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
     auto valueArg = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
-    auto align = valueArg->Int32Value(vm);
+    auto align = static_cast<int32_t>(HorizontalAlign::CENTER);
+    if (valueArg->IsNumber()) {
+        align = valueArg->Int32Value(vm);
+        if (align < static_cast<int32_t>(HorizontalAlign::START) ||
+            align > static_cast<int32_t>(HorizontalAlign::END)) {
+            align = static_cast<int32_t>(HorizontalAlign::CENTER);
+        }
+    }
     if (IsStackNodeArg(vm, nodeArg)) {
         LazyColumnLayoutModel::SetAlignItems(static_cast<HorizontalAlign>(align));
     } else {

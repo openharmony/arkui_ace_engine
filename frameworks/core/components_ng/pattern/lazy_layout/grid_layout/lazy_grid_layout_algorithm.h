@@ -80,6 +80,8 @@ private:
     void GetStartIndexInfo(int32_t& index, float& pos);
     void GetEndIndexInfo(int32_t& index, float& pos);
     void CheckRecycle();
+    void CheckCacheRecycle();
+    void FixIndexRange(int32_t& startIndex, int32_t& endIndex);
     void CalculateVisibleStartIndex();
     void CalculateVisibleEndIndex();
     void MeasureForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
@@ -93,7 +95,11 @@ private:
     void LayoutCachedItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void LayoutCachedItemsForward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void LayoutCachedItemsBackward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
+    bool InitPredictForwardState(int32_t& currIndex, int32_t& currLane,
+        float& currPos, float& mainSize, float& layoutedEnd);
     void PredictLayoutForward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
+    bool InitPredictBackwardState(int32_t& currIndex, int32_t& currLane,
+        float& currPos, float& mainSize, float& layoutedStart);
     void PredictLayoutBackward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void SyncPredictLayoutInfo(LayoutWrapper* layoutWrapper);
     void FixPosMapBackward(int32_t index);
