@@ -48,6 +48,8 @@ struct ImmersiveOptions {
     // "std::nullopt and disableLightEffect==false" means follow the behavior of component, otherwise is set by user.
     std::optional<LightEffectOptions> lightEffectOptions = std::nullopt;
     RefPtr<ResourceObject> colorResObj = nullptr;
+    ColorMode colorMode = ColorMode::COLOR_MODE_UNDEFINED; // options' colorMode will override GetNodeColorMode
+
     bool HasLightEffect() const
     {
         return !disableLightEffect && lightEffectOptions.has_value();
