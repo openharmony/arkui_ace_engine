@@ -352,7 +352,8 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
     // disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved until the
     // transition has finished. We can then perform the necessary cleanup after the transition is complete.
-    if ((*iter)->OnRemoveFromParent(allowTransition)) {
+    auto removeImmediately = (*iter)->OnRemoveFromParent(allowTransition);
+    if (removeImmediately) {
         // OnRemoveFromParent returns true means the child can be removed from tree immediately.
         RemoveDisappearingChild(child);
     } else {
@@ -367,6 +368,9 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         return children_.end();
     }
     TraversingCheck(*iter);
+    if (removeImmediately) {
+        OnMixedMountChildRemoved(child);
+    }
     (*iter)->SetAncestor(nullptr);
     auto result = children_.erase(iter);
     MarkNodeTreeFree();
@@ -380,6 +384,7 @@ bool UINode::RemoveChildSilently(const RefPtr<UINode>& child)
     if (IsDestroyingState() || iter == children_.end()) {
         return false;
     }
+    OnMixedMountChildRemoved(child);
     children_.erase(iter);
     return true;
 }
@@ -454,7 +459,6 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 
 void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
 {
-    bool needSyncRenderTree = false;
     bool isNotV2IfNode = (tag_ != V2::JS_IF_ELSE_ETS_TAG);
     int32_t index = 0;
 
@@ -471,7 +475,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
         if (child->OnRemoveFromParent(allowTransition)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
-            needSyncRenderTree = true;
+            OnMixedMountChildRemoved(child);
         } else {
             // else move child into disappearing children, skip syncing render tree
             AddDisappearingChild(child, index, branchId);
@@ -780,6 +784,7 @@ void UINode::DoAddChild(
     if (!silently && onMainTree_) {
         child->AttachToMainTree(!addDefaultTransition, context_);
     }
+    OnMixedMountChildAdded(child);
     MarkNeedSyncRenderTree(true);
     ProcessIsInDestroyingForReuseableNode(child);
     UpdateForceDarkAllowedNode(child);
@@ -812,14 +817,19 @@ void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& 
 
 void UINode::RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent)
 {
-    if (!parent->RemoveDisappearingChild(child)) {
+    bool removed = parent->RemoveDisappearingChild(child);
+    if (!removed) {
         auto& children = parent->ModifyChildren();
         auto iter = std::find(children.begin(), children.end(), child);
         if (iter != children.end()) {
             parent->TraversingCheck(*iter);
             (*iter)->SetAncestor(nullptr);
             children.erase(iter);
+            removed = true;
         }
+    }
+    if (removed) {
+        parent->OnMixedMountChildRemoved(child);
     }
     auto frameChild = DynamicCast<FrameNode>(child);
     if (frameChild->GetRenderContext()->HasTransitionOutAnimation()) {
@@ -831,7 +841,9 @@ void UINode::RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<U
             // Result of RemoveImmediately of the breakPointChild is true and
             // result of RemoveImmediately of the child is false,
             // so breakPointChild must be different from child in this branch.
-            breakPointParent->RemoveDisappearingChild(breakPointChild);
+            if (breakPointParent->RemoveDisappearingChild(breakPointChild)) {
+                breakPointParent->OnMixedMountChildRemoved(breakPointChild);
+            }
             breakPointParent->MarkNeedSyncRenderTree();
         }
     }
@@ -1168,6 +1180,7 @@ void UINode::MovePosition(int32_t slot)
         children.remove(self);
     }
     children.insert(it, self);
+    parentNode->OnMixedMountChildAdded(self);
     parentNode->MarkNeedSyncRenderTree(true);
 }
 
@@ -1609,17 +1622,13 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
     }
 }
 
-void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+std::list<RefPtr<UINode>> UINode::MergeChildrenWithDisappearingChildren()
 {
+    auto allChildren = GetChildren();
     if (disappearingChildren_.empty()) {
-        // normal child
-        for (const auto& child : GetChildren()) {
-            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
-        }
-        return;
+        return allChildren;
     }
     // generate the merged list of children_ and disappearingChildren_
-    auto allChildren = GetChildren();
     for (auto iter = disappearingChildren_.rbegin(); iter != disappearingChildren_.rend(); ++iter) {
         auto& [disappearingChild, index, _] = *iter;
         if (index >= allChildren.size()) {
@@ -1631,6 +1640,19 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
         }
         disappearingChild->SetAncestor(WeakClaim(this));
     }
+    return allChildren;
+}
+
+void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    if (disappearingChildren_.empty()) {
+        // normal child
+        for (const auto& child : GetChildren()) {
+            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+        }
+        return;
+    }
+    auto allChildren = MergeChildrenWithDisappearingChildren();
     for (const auto& child : allChildren) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     }

@@ -160,6 +160,7 @@
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/base/mount_policy.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -690,6 +691,7 @@ FrameNode::FrameNode(
 #endif
     }
     uiNodeType_ = UINodeType::FRAME_NODE;
+    mountPolicy_ = MountPolicy::SINGLE_IF_RENDER_NODE;
 }
 
 bool FrameNode::ZIndexComparator::operator()(
@@ -3205,17 +3207,7 @@ void FrameNode::RebuildRenderContextTree()
     auto oldFrameChildren = std::move(frameChildren_);
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
-    // generate full children list, including disappear children.
-    GenerateOneDepthVisibleFrameWithTransition(children);
-    if (overlayNode_) {
-        auto property = overlayNode_->GetLayoutProperty();
-        if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
-            children.push_back(overlayNode_);
-        }
-    }
-    if (accessibilityFocusPaintNode_) {
-        children.push_back(accessibilityFocusPaintNode_);
-    }
+    GenerateRenderTreeFrameChildren(children);
     for (const auto& child : children) {
         frameChildren_.emplace(child);
     }
@@ -3234,6 +3226,21 @@ void FrameNode::RebuildRenderContextTree()
         }
     }
     needSyncRenderTree_ = false;
+}
+
+void FrameNode::GenerateRenderTreeFrameChildren(std::list<RefPtr<FrameNode>>& children)
+{
+    // generate full children list, including disappear children.
+    GenerateOneDepthVisibleFrameWithTransition(children);
+    if (overlayNode_) {
+        auto property = overlayNode_->GetLayoutProperty();
+        if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            children.push_back(overlayNode_);
+        }
+    }
+    if (accessibilityFocusPaintNode_) {
+        children.push_back(accessibilityFocusPaintNode_);
+    }
 }
 
 void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
@@ -6682,6 +6689,11 @@ void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
     needSyncRenderTree_ = true;
 }
 
+void FrameNode::ClearNeedSyncRenderTree()
+{
+    needSyncRenderTree_ = false;
+}
+
 RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     if (index != 0) {
@@ -8650,6 +8662,12 @@ void FrameNode::SetIsFree(bool isFree)
     SetOverlayNodeIsFree(isFree);
 }
 
+void FrameNode::SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
+{
+    overlayNode_ = overlayNode;
+    SetOverlayNodeIsFree(IsFree());
+}
+
 void FrameNode::SetOverlayNodeIsFree(bool isFree)
 {
     if (!overlayNode_) {
@@ -8660,6 +8678,11 @@ void FrameNode::SetOverlayNodeIsFree(bool isFree)
     } else {
         overlayNode_->MarkNodeTreeNotFree();
     }
+}
+
+void FrameNode::SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode)
+{
+    accessibilityFocusPaintNode_ = accessibilityFocusPaintNode;
 }
 
 std::vector<std::pair<float, float>> FrameNode::GetSpecifiedContentOffsets(const std::string& content)
@@ -8736,6 +8759,42 @@ RefPtr<SmartGestureProperty> FrameNode::GetOrCreateSmartGestureProperty()
 RefPtr<SmartGestureProperty> FrameNode::GetSmartGestureProperty() const
 {
     return smartGestureProperty_;
+}
+
+MountPolicy FrameNode::GetMountPolicy()
+{
+    return mountPolicy_;
+}
+
+void FrameNode::SetMountPolicy(MountPolicy mountPolicy)
+{
+    mountPolicy_ = mountPolicy;
+}
+
+void FrameNode::OnMixedMountChildAdded(const RefPtr<UINode>& child)
+{
+    if (mountPolicy_ != MountPolicy::MIXED || !renderContext_ || !child) {
+        return;
+    }
+    RefPtr<UINode> nextSibling;
+    bool foundChild = false;
+    auto children = MergeChildrenWithDisappearingChildren();
+    for (const auto& node : children) {
+        if (foundChild) {
+            nextSibling = node;
+            break;
+        }
+        foundChild = node == child;
+    }
+    renderContext_->InsertMixedFrameChild(this, child, nextSibling);
+}
+
+void FrameNode::OnMixedMountChildRemoved(const RefPtr<UINode>& child)
+{
+    if (mountPolicy_ != MountPolicy::MIXED || !renderContext_ || !child) {
+        return;
+    }
+    renderContext_->RemoveMixedFrameChild(this, child);
 }
 
 void FrameNode::RegisterLpxAttribute(LpxAttribute attribute)

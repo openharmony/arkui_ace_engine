@@ -73,6 +73,7 @@ build_component_ng("render_ng") {
     "adapter/rosen_effect_converter.cpp",
     "adapter/rosen_luminance_sampling_helper.cpp",
     "adapter/rosen_media_player.cpp",
+    "adapter/rosen_mixed_render_child_list.cpp",
     "adapter/rosen_modifier_adapter.cpp",
     "adapter/rosen_particle_context.cpp",
     "adapter/rosen_render_context.cpp",

@@ -50,6 +50,31 @@ int32_t OH_ArkUI_RenderNodeUtils_AddRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
     return result;
 }
 
+ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(
+    ArkUI_NodeHandle node, ArkUI_RenderNodeHandle child, int32_t position)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        child, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child node is null");
+    if (position < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child position is invalid");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NOT_CUSTOM_NODE, __FUNCTION__, "Node is not a custom node");
+        return ARKUI_ERROR_CODE_NOT_CUSTOM_NODE;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->insertRenderNodeAt(
+        node->uiNodeHandle, child->renderNodeHandle, position);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return static_cast<ArkUI_ErrorCode>(result);
+}
+
 int32_t OH_ArkUI_RenderNodeUtils_RemoveRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle child)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -2206,6 +2231,52 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
         *renderNode = new ArkUI_RenderNode({ renderNodeHandle });
     }
     return result;
+}
+
+ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(ArkUI_NodeHandle node, int32_t* count)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(count, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Count is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNodeChildrenCount(
+        node->uiNodeHandle, count);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return static_cast<ArkUI_ErrorCode>(result);
+}
+
+ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(
+    ArkUI_NodeHandle node, int32_t position, ArkUI_RenderNodeHandle* child)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(child, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child node is null");
+    if (position < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render child position is invalid");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    ArkUIRenderNodeHandle renderNode;
+    int32_t nodeId = 0;
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNodeAt(
+        node->uiNodeHandle, position, &renderNode, &nodeId);
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    if (result == ARKUI_ERROR_CODE_NO_ERROR) {
+        auto iter = g_renderNodeMap.find(nodeId);
+        if (iter != g_renderNodeMap.end()) {
+            renderNode = iter->second;
+        } else {
+            g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(nodeId, renderNode));
+        }
+        *child = new ArkUI_RenderNode({ renderNode });
+    }
+    return static_cast<ArkUI_ErrorCode>(result);
 }
 
 ArkUI_RenderBlurStyleOption* OH_ArkUI_RenderNodeUtils_CreateBlurStyleOption()

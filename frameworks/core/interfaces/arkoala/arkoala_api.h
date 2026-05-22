@@ -8831,6 +8831,11 @@ struct ArkUIRenderNodeModifier {
     void (*setRenderNodeForegroundBlur)(ArkUINodeHandle node, ArkUI_Float32 radius);
 };
 
+enum class ArkUINodeMountPolicy : ArkUI_Int32 {
+    SINGLE_IF_RENDER_NODE = 0,
+    MIXED = 1,
+};
+
 struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*isModifiable)(ArkUINodeHandle node);
     ArkUINodeHandle (*createFrameNode)();
@@ -9144,6 +9149,7 @@ struct ArkUIMatrix4Modifier {
 
 struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*addRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle child);
+    ArkUI_Int32 (*insertRenderNodeAt)(ArkUINodeHandle node, ArkUIRenderNodeHandle child, ArkUI_Int32 position);
     ArkUI_Int32 (*removeRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle child);
     ArkUI_Int32 (*clearRenderNodeChildren)(ArkUINodeHandle node);
     ArkUIRenderNodeHandle (*createNode)(ArkUI_Int32* nodeId);
@@ -9159,8 +9165,8 @@ struct ArkUINDKRenderNodeModifier {
         ArkUI_Int32* count);
     ArkUI_Int32 (*getFirstChild)(
         ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* child, ArkUI_Int32* childId);
-    ArkUI_Int32 (*getNextSibling)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, ArkUI_Int32* childId);
-    ArkUI_Int32 (*getPreviousSibling)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, ArkUI_Int32* childId);
+    ArkUI_Int32 (*getNextSibling)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* sibling, ArkUI_Int32* childId);
+    ArkUI_Int32 (*getPreviousSibling)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* sibling, ArkUI_Int32* childId);
     ArkUI_Int32 (*getChildrenCount)(ArkUIRenderNodeHandle node, ArkUI_Int32* count);
     ArkUI_Int32 (*setBackgroundColor)(ArkUIRenderNodeHandle handle, ArkUI_Uint32 backgroundColor);
     ArkUI_Int32 (*getBackgroundColor)(ArkUIRenderNodeHandle node, uint32_t* color);
@@ -9253,7 +9259,12 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*setCommandPathClip)(ArkUIRenderNodeHandle node, ArkUI_CharPtr commands);
     ArkUI_Int32 (*adoptChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     ArkUI_Int32 (*getRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId);
+    ArkUI_Int32 (*getRenderNodeChildrenCount)(ArkUINodeHandle node, ArkUI_Int32* count);
+    ArkUI_Int32 (*getRenderNodeAt)(
+        ArkUINodeHandle node, ArkUI_Int32 position, ArkUIRenderNodeHandle* child, ArkUI_Int32* childId);
     ArkUI_Int32 (*removeAdoptedChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    ArkUI_Int32 (*setNodeMountPolicy)(ArkUINodeHandle node, ArkUINodeMountPolicy policy);
+    ArkUI_Int32 (*getNodeMountPolicy)(ArkUINodeHandle node, ArkUINodeMountPolicy* policy);
     void (*deleteInnerRenderNodeStruct)(ArkUIRenderNodeHandle node);
     ArkUI_Int32 (*setBackgroundBlurOption)(ArkUIRenderNodeHandle node, ArkUI_Float32 blurRadius);
     ArkUI_Int32 (*resetBackgroundBlurOption)(ArkUIRenderNodeHandle node);

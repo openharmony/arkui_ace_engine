@@ -952,11 +952,29 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 {
 }
 
+void FrameNode::SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
+{
+    overlayNode_ = overlayNode;
+}
+
+void FrameNode::SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode)
+{
+    accessibilityFocusPaintNode_ = accessibilityFocusPaintNode;
+}
+
 void FrameNode::SetOverlayNodeIsFree(bool isFree)
 {
 }
 
 void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear, int32_t isVisibleChangeMinDepth)
+{
+}
+
+void FrameNode::OnMixedMountChildAdded(const RefPtr<UINode>& child)
+{
+}
+
+void FrameNode::OnMixedMountChildRemoved(const RefPtr<UINode>& child)
 {
 }
 

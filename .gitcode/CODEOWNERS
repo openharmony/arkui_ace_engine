@@ -2423,6 +2423,8 @@ frameworks/core/components_ng/base/inspector_filter.cpp @ArkUI_ability_group
 frameworks/core/components_ng/base/inspector_filter.h @ArkUI_ability_group
 frameworks/core/components_ng/base/inspector.h @ArkUI_ability_group
 frameworks/core/components_ng/base/linear_vector.h @arkui_framework_xnode
+frameworks/core/components_ng/base/mixed_mount_registry.cpp @arkui_framework_xnode
+frameworks/core/components_ng/base/mixed_mount_registry.h @arkui_framework_xnode
 frameworks/core/components_ng/base/modifier.cpp @arkui_framework_xnode
 frameworks/core/components_ng/base/modifier.h @arkui_framework_xnode
 frameworks/core/components_ng/base/node_flag.h @arkui_framework_xnode
@@ -2452,6 +2454,7 @@ frameworks/core/components_ng/base/view_stack_processor.cpp @arkui_statemgmt
 frameworks/core/components_ng/base/view_stack_processor.h @arkui_statemgmt
 frameworks/core/components_ng/base/transparent_node_detector.cpp @arkui_framework_xnode
 frameworks/core/components_ng/base/transparent_node_detector.h @arkui_framework_xnode
+frameworks/core/components_ng/base/mount_policy.h @arkui_framework_xnode
 frameworks/core/components_ng/common_napi_utils/BUILD.gn @arkui_framework_xnode
 frameworks/core/components_ng/common_napi_utils/common_napi_utils.cpp @arkui_framework_xnode
 frameworks/core/components_ng/common_napi_utils/common_napi_utils.h @arkui_framework_xnode
@@ -2760,6 +2763,8 @@ frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp @arkui_f
 frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.h @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_modifier_property.cpp @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_modifier_property.h @arkui_framework_xnode
+frameworks/core/components_ng/render/adapter/rosen_mixed_render_child_list.cpp @arkui_framework_xnode
+frameworks/core/components_ng/render/adapter/rosen_mixed_render_child_list.h @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_particle_context.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_particle_context.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_render_context_multi_thread.cpp @arkui_framework_xnode

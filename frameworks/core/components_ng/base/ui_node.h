@@ -154,6 +154,9 @@ public:
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
+    virtual void OnMixedMountChildAdded(const RefPtr<UINode>& child) {}
+    virtual void OnMixedMountChildRemoved(const RefPtr<UINode>& child) {}
+
     void AdoptChild(const RefPtr<FrameNode>& child, bool silently = false, bool addDefaultTransition = false);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
@@ -287,7 +290,12 @@ public:
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+    std::list<RefPtr<UINode>> MergeChildrenWithDisappearingChildren();
     void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateSelfVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+    {
+        OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+    }
     void GenerateOneDepthVisibleFrameWithOffset(
         std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);

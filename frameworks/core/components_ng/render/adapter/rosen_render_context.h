@@ -17,9 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_CONTEXT_H
 
 #include <cstdint>
+#include <list>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
@@ -55,6 +58,7 @@
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/sidebar_content_mask_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
+#include "core/components_ng/render/adapter/rosen_mixed_render_child_list.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
@@ -76,6 +80,8 @@ class PageTransitionEffect;
 class OverlayTextModifier;
 class GradientStyleModifier;
 class PipelineContext;
+class UINode;
+
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext);
 public:
@@ -154,6 +160,11 @@ public:
     void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) override;
+
+    void InsertMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child,
+        const RefPtr<UINode>& nextSibling) override;
+
+    void RemoveMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child) override;
 
     void OnModifyDone() override;
 
@@ -313,6 +324,21 @@ public:
 
     static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap);
+
+    bool IsMixedFrameRenderChild(const std::shared_ptr<Rosen::RSNode>& rsNode);
+    void RemoveMixedRenderChild(const std::shared_ptr<Rosen::RSNode>& childRSNode);
+    bool CanSwitchToSingleIfRenderNode();
+    void ResetMixedRenderChildren();
+    void ClearMixedPureRenderChildren();
+    int32_t GetMixedRenderChildCount();
+    int32_t GetMixedRenderChildIndexByRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
+    std::shared_ptr<Rosen::RSNode> GetMixedRenderChildAt(int32_t index);
+    std::shared_ptr<Rosen::RSNode> GetMixedRenderSibling(
+        const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t offset);
+    bool GetMixedRenderChildInsertIndexAfterRSNode(
+        const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t& mixedIndex);
+    void InsertPureRenderChildAt(const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index);
+    void SyncMixedFrameChildren(const std::list<RefPtr<UINode>>& children);
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
@@ -722,6 +748,7 @@ protected:
     void OnNodeNameUpdate(const std::string& id) override;
     void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
+    void ReCreateMixedRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void SyncAdditionalGeometryProperties(const RectF& paintRect);
     void SetChildBounds(const RectF& paintRect) const;
@@ -1001,8 +1028,15 @@ protected:
 private:
     void ModifyCustomBackground();
     bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode>& rsNode);
+    void InsertFrameChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling);
+    void RemoveMixedFrameChild(const RefPtr<UINode>& child);
+    void NotifyMixedListChanged();
+    std::vector<std::shared_ptr<Rosen::RSNode>> BuildMixedTargetRSNodes(FrameNode* frameNode);
+    void ReCreateRsNodeTreeByTargetList(const std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
+        std::unordered_map<Rosen::RSNode::SharedPtr, bool>& childNodeMap);
 
     uint32_t backgroundTaskId_ = 0;
+    RosenMixedRenderChildList mixedRenderChildList_;
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;

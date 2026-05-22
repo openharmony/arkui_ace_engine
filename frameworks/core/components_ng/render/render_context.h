@@ -81,6 +81,7 @@ struct ShapeMaskProperty;
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class UINode;
 class InspectorFilter;
 class Modifier;
 class OverlayModifier;
@@ -143,6 +144,11 @@ public:
     virtual void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
+
+    virtual void InsertMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child,
+        const RefPtr<UINode>& nextSibling) {}
+
+    virtual void RemoveMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child) {}
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) {}
 

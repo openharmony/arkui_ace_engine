@@ -708,13 +708,52 @@ int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
-        __FUNCTION__, "Native module not initialized");
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Native module not initialized");
     auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(
         node->uiNodeHandle, position, expandMode);
     CHECK_NULL_RETURN_WITH_MESSAGE(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Child node not found");
     *subnode = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_SetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy policy)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is not a custom node");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        (OH_ArkUI_NodeMountPolicy::OH_ARKUI_NODE_MOUNT_POLICY_SINGLE_IF_RENDER_NODE == policy ||
+            OH_ArkUI_NodeMountPolicy::OH_ARKUI_NODE_MOUNT_POLICY_MIXED == policy),
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Policy parameter is out of valid range");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto res = impl->getNodeModifiers()->getNDKRenderNodeModifier()->
+        setNodeMountPolicy(node->uiNodeHandle, static_cast<ArkUINodeMountPolicy>(policy));
+    if (res != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return static_cast<ArkUI_ErrorCode>(res);
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_GetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy* policy)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(policy, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Policy parameter is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__,
+        "Native module not initialized");
+    ArkUINodeMountPolicy NodeMountPolicy;
+    auto res = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getNodeMountPolicy(
+        node->uiNodeHandle, &NodeMountPolicy);
+    if (res != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+        return static_cast<ArkUI_ErrorCode>(res);
+    }
+    *policy = static_cast<OH_ArkUI_NodeMountPolicy>(NodeMountPolicy);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 

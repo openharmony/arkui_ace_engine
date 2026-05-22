@@ -47,6 +47,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/mount_policy.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/native_curve_helper.h"
@@ -358,6 +359,7 @@ RosenRenderContext::~RosenRenderContext()
     auto host = GetHost();
     if (host) {
         host->RemoveExtraCustomProperty("RS_NODE");
+        mixedRenderChildList_.Reset(host);
     }
     DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode_);
 }
@@ -4924,9 +4926,13 @@ const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
     return rsNode_;
 }
 
-void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children)
 {
-    ReCreateRsNodeTree(children);
+    if (self && self->GetMountPolicy() == MountPolicy::MIXED) {
+        ReCreateMixedRsNodeTree(children);
+    } else {
+        ReCreateRsNodeTree(children);
+    }
     RequestNextFrame();
 }
 
@@ -4952,6 +4958,133 @@ std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNod
         }
     }
     return rsNodes;
+}
+
+bool RosenRenderContext::IsMixedFrameRenderChild(const std::shared_ptr<Rosen::RSNode>& rsNode)
+{
+    return mixedRenderChildList_.IsFrameRenderChild(rsNode);
+}
+
+void RosenRenderContext::NotifyMixedListChanged()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedSyncRenderTree(true);
+    RequestNextFrame();
+}
+
+int32_t RosenRenderContext::GetMixedRenderChildCount()
+{
+    return mixedRenderChildList_.GetChildCount();
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetMixedRenderChildAt(int32_t index)
+{
+    return mixedRenderChildList_.GetChildAt(index);
+}
+
+int32_t RosenRenderContext::GetMixedRenderChildIndexByRSNode(
+    const std::shared_ptr<Rosen::RSNode>& rsNode)
+{
+    return mixedRenderChildList_.GetChildIndexByRSNode(rsNode);
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetMixedRenderSibling(
+    const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t offset)
+{
+    return mixedRenderChildList_.GetSibling(rsNode, offset);
+}
+
+bool RosenRenderContext::GetMixedRenderChildInsertIndexAfterRSNode(
+    const std::shared_ptr<Rosen::RSNode>& rsNode, int32_t& mixedIndex)
+{
+    return mixedRenderChildList_.GetInsertIndexAfterRSNode(rsNode, mixedIndex);
+}
+
+void RosenRenderContext::InsertPureRenderChildAt(
+    const std::shared_ptr<Rosen::RSNode>& childRSNode, int32_t index)
+{
+    if (mixedRenderChildList_.InsertPureRenderChildAt(GetHost(), childRSNode, index)) {
+        NotifyMixedListChanged();
+    }
+}
+
+void RosenRenderContext::InsertFrameChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling)
+{
+    if (mixedRenderChildList_.InsertFrameChildBefore(GetHost(), child, nextSibling)) {
+        NotifyMixedListChanged();
+    }
+}
+
+void RosenRenderContext::RemoveMixedRenderChild(const std::shared_ptr<Rosen::RSNode>& childRSNode)
+{
+    if (mixedRenderChildList_.RemovePureRenderChild(childRSNode)) {
+        NotifyMixedListChanged();
+    }
+}
+
+void RosenRenderContext::RemoveMixedFrameChild(const RefPtr<UINode>& child)
+{
+    if (mixedRenderChildList_.RemoveFrameChild(child)) {
+        NotifyMixedListChanged();
+    }
+}
+
+bool RosenRenderContext::CanSwitchToSingleIfRenderNode()
+{
+    return mixedRenderChildList_.CanSwitchToSingleIfRenderNode();
+}
+
+void RosenRenderContext::ResetMixedRenderChildren()
+{
+    mixedRenderChildList_.Reset(GetHost());
+}
+
+void RosenRenderContext::ClearMixedPureRenderChildren()
+{
+    if (mixedRenderChildList_.ClearPureRenderChildren()) {
+        NotifyMixedListChanged();
+    }
+}
+
+void RosenRenderContext::SyncMixedFrameChildren(const std::list<RefPtr<UINode>>& children)
+{
+    if (mixedRenderChildList_.SyncFrameChildren(GetHost(), children)) {
+        NotifyMixedListChanged();
+    }
+}
+
+std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::BuildMixedTargetRSNodes(FrameNode* frameNode)
+{
+    auto addRSNodeIfAbsent = [](std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
+                                 std::unordered_map<Rosen::RSNode::SharedPtr, bool>& targetNodeMap,
+                                 const std::shared_ptr<Rosen::RSNode>& rsNode) {
+        if (!rsNode) {
+            return;
+        }
+        auto result = targetNodeMap.try_emplace(rsNode, false);
+        if (result.second) {
+            targetRSNodes.emplace_back(rsNode);
+        }
+    };
+
+    auto targetRSNodes = mixedRenderChildList_.BuildTargetRSNodes(GetHost());
+    std::unordered_map<Rosen::RSNode::SharedPtr, bool> targetNodeMap;
+    for (const auto& childRSNode : targetRSNodes) {
+        if (childRSNode) {
+            targetNodeMap.try_emplace(childRSNode, false);
+        }
+    }
+    CHECK_NULL_RETURN(frameNode, targetRSNodes);
+    auto overlayNode = frameNode->GetOverlayNode();
+    if (overlayNode) {
+        auto property = overlayNode->GetLayoutProperty();
+        if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            addRSNodeIfAbsent(targetRSNodes, targetNodeMap, GetRsNodeByFrame(overlayNode));
+        }
+    }
+    addRSNodeIfAbsent(targetRSNodes, targetNodeMap, GetRsNodeByFrame(frameNode->GetFocusPaintNode()));
+    return targetRSNodes;
 }
 
 void RosenRenderContext::SetDrawNode()
@@ -5131,6 +5264,35 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     // now rsNode's children, key is id of rsNode, value means whether the node exists in previous children of rsNode.
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
     auto nowRSNodes = GetChildrenRSNodes(childNodesNew, childNodeMap);
+    ReCreateRsNodeTreeByTargetList(nowRSNodes, childNodeMap);
+}
+
+void RosenRenderContext::ReCreateMixedRsNodeTree(const std::list<RefPtr<FrameNode>>& /*children*/)
+{
+    if (!rsNode_ || !isNeedRebuildRSTree_) {
+        return;
+    }
+    auto frameNode = GetHost();
+    if (!frameNode || frameNode->GetMountPolicy() != MountPolicy::MIXED) {
+        return;
+    }
+    auto targetRSNodes = BuildMixedTargetRSNodes(AceType::RawPtr(frameNode));
+    std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
+    for (const auto& childRSNode : targetRSNodes) {
+        if (childRSNode) {
+            childNodeMap.try_emplace(childRSNode, false);
+        }
+    }
+    ReCreateRsNodeTreeByTargetList(targetRSNodes, childNodeMap);
+}
+
+void RosenRenderContext::ReCreateRsNodeTreeByTargetList(
+    const std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
+    std::unordered_map<Rosen::RSNode::SharedPtr, bool>& childNodeMap)
+{
+    if (!rsNode_ || !isNeedRebuildRSTree_) {
+        return;
+    }
     std::vector<Rosen::RSNode::SharedPtr> childNodes;
     for (auto&& child : rsNode_->GetChildren()) {
         auto childSptr = child.lock();
@@ -5138,10 +5300,10 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
             childNodes.emplace_back(childSptr);
         }
     }
-    if (nowRSNodes == childNodes) {
+    if (targetRSNodes == childNodes) {
         return;
     }
-    if (nowRSNodes.empty()) {
+    if (targetRSNodes.empty()) {
         rsNode_->ClearChildren();
         return;
     }
@@ -5159,9 +5321,9 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
             iter->second = true;
         }
     }
-    for (size_t index = 0; index != nowRSNodes.size(); ++index) {
+    for (size_t index = 0; index != targetRSNodes.size(); ++index) {
         auto node = rsNode_->GetChildByIndex(index);
-        const auto& newNode = nowRSNodes[index];
+        const auto& newNode = targetRSNodes[index];
         if (node != newNode) {
             auto iter = childNodeMap.find(newNode);
             if (iter == childNodeMap.end()) {
@@ -5225,6 +5387,23 @@ void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>&
     auto rsNode = rosenRenderContext->GetRSNode();
     // no need to check nullptr since MoveChild will take care of it
     rsNode_->MoveChild(rsNode, index);
+}
+
+void RosenRenderContext::InsertMixedFrameChild(
+    FrameNode* self, const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling)
+{
+    if (!self || self->GetMountPolicy() != MountPolicy::MIXED) {
+        return;
+    }
+    InsertFrameChildBefore(child, nextSibling);
+}
+
+void RosenRenderContext::RemoveMixedFrameChild(FrameNode* self, const RefPtr<UINode>& child)
+{
+    if (!self || self->GetMountPolicy() != MountPolicy::MIXED) {
+        return;
+    }
+    RemoveMixedFrameChild(child);
 }
 
 void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
@@ -7171,7 +7350,10 @@ void RosenRenderContext::OnTransitionOutFinish()
     if (breakPointChild->RemoveImmediately()) {
         breakPointChild->OnRemoveFromParent(false);
         // remove breakPoint
-        breakPointParent->RemoveDisappearingChild(breakPointChild);
+        if (breakPointParent->RemoveDisappearingChild(breakPointChild)) {
+            // keep mixed list in sync for delayed-remove path
+            breakPointParent->OnMixedMountChildRemoved(breakPointChild);
+        }
         breakPointParent->MarkNeedSyncRenderTree();
         breakPointParent->RebuildRenderContextTree();
     }

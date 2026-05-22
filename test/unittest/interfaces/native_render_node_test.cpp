@@ -31,6 +31,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/error/error_code.h"
+#include "frameworks/core/components_ng/base/mixed_mount_registry.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 
 using namespace testing;
@@ -1662,6 +1663,430 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest010, TestSize.Level1)
     ArkUI_RenderNodeHandle renderNode;
     auto result = OH_ArkUI_RenderNodeUtils_GetRenderNode(rootCustomNode, &renderNode);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest001
+ * @tc.desc: Test mixed mount policy set and get on custom node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto columnNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    ASSERT_NE(rootCustomNode, nullptr);
+    ASSERT_NE(columnNode, nullptr);
+
+    OH_ArkUI_NodeMountPolicy policy = OH_ARKUI_NODE_MOUNT_POLICY_MIXED;
+    EXPECT_EQ(OH_ArkUI_NativeModule_GetChildMountPolicy(rootCustomNode, &policy), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(policy, OH_ARKUI_NODE_MOUNT_POLICY_SINGLE_IF_RENDER_NODE);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(rootCustomNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NativeModule_GetChildMountPolicy(rootCustomNode, &policy), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(policy, OH_ARKUI_NODE_MOUNT_POLICY_MIXED);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(columnNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(rootCustomNode,
+        static_cast<OH_ArkUI_NodeMountPolicy>(-1)), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest002
+ * @tc.desc: Test mixed parent stores pure render children in mixList order.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest002, TestSize.Level1)
+{
+    constexpr int32_t firstSize = 100;
+    constexpr int32_t secondSize = 200;
+    constexpr int32_t thirdSize = 300;
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(rootCustomNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto firstRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto secondRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto thirdRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(firstRenderNode, nullptr);
+    ASSERT_NE(secondRenderNode, nullptr);
+    ASSERT_NE(thirdRenderNode, nullptr);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(firstRenderNode, firstSize, firstSize),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(secondRenderNode, secondSize, secondSize),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_SetSize(thirdRenderNode, thirdSize, thirdSize),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, firstRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(rootCustomNode, secondRenderNode, 0),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(rootCustomNode, thirdRenderNode, 2),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t count = 0;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(rootCustomNode, &count),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(count, 3);
+
+    ArkUI_RenderNodeHandle queryNode = nullptr;
+    int32_t width = 0;
+    int32_t height = 0;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 0, &queryNode), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(queryNode, nullptr);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(queryNode, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, secondSize);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 1, &queryNode), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(queryNode, nullptr);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(queryNode, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, firstSize);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 2, &queryNode), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(queryNode, nullptr);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetSize(queryNode, &width, &height), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(width, thirdSize);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_RemoveRenderNode(rootCustomNode, firstRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(rootCustomNode, &count),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(count, 2);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren(rootCustomNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(rootCustomNode, &count),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(count, 0);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest003
+ * @tc.desc: Test frame render child query requires mixed parent node API.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+
+    int32_t count = -1;
+    ArkUI_RenderNodeHandle childRenderNode = nullptr;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(rootCustomNode, &count),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 0, &childRenderNode),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(rootCustomNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 0, &childRenderNode),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest004
+ * @tc.desc: Test switching mixed to single keeps one pure render node in real RS tree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto firstRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto secondRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(firstRenderNode, nullptr);
+    ASSERT_NE(secondRenderNode, nullptr);
+
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(rootCustomNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, firstRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(
+        rootCustomNode, OH_ARKUI_NODE_MOUNT_POLICY_SINGLE_IF_RENDER_NODE), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, secondRenderNode), ERROR_CODE_CHILD_EXISTED);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_RemoveRenderNode(rootCustomNode, firstRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, secondRenderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest005
+ * @tc.desc: Test render child from mixed parent cannot be implicitly moved by render node APIs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest005, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto mixedChildRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto normalParentRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto siblingRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(mixedChildRenderNode, nullptr);
+    ASSERT_NE(normalParentRenderNode, nullptr);
+    ASSERT_NE(siblingRenderNode, nullptr);
+
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(rootCustomNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, mixedChildRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(normalParentRenderNode, siblingRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(normalParentRenderNode, mixedChildRenderNode),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_InsertChildAfter(
+        normalParentRenderNode, mixedChildRenderNode, siblingRenderNode), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest006
+ * @tc.desc: Test frame children from mixed parent support query and sibling APIs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest006, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto firstChildNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto secondChildNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    ASSERT_NE(firstChildNode, nullptr);
+    ASSERT_NE(secondChildNode, nullptr);
+    auto firstLeafRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto firstSecondLeafRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto secondLeafRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(firstLeafRenderNode, nullptr);
+    ASSERT_NE(firstSecondLeafRenderNode, nullptr);
+    ASSERT_NE(secondLeafRenderNode, nullptr);
+
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(rootCustomNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(firstChildNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(secondChildNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(firstChildNode, firstLeafRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(firstChildNode, firstSecondLeafRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(secondChildNode, secondLeafRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->addChild(rootCustomNode, firstChildNode), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->addChild(rootCustomNode, secondChildNode), ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t rootCount = 0;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(rootCustomNode, &rootCount),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(rootCount, 2);
+
+    ArkUI_RenderNodeHandle firstChildRenderNode = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(rootCustomNode, 0, &firstChildRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(firstChildRenderNode, nullptr);
+    int32_t childCount = 0;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetChildrenCount(firstChildRenderNode, &childCount),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(childCount, 2);
+    float opacity = 0.0f;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetOpacity(firstChildRenderNode, &opacity), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_RemoveRenderNode(rootCustomNode, firstChildRenderNode),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, firstChildRenderNode),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(rootCustomNode, firstChildRenderNode, 0),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_RenderNodeHandle nextSibling = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetNextSibling(firstChildRenderNode, &nextSibling),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(nextSibling, nullptr);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetChildrenCount(nextSibling, &childCount), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(childCount, 1);
+
+    ArkUI_RenderNodeHandle previousSibling = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetPreviousSibling(nextSibling, &previousSibling),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(previousSibling, nullptr);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetChildrenCount(previousSibling, &childCount), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(childCount, 2);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest007
+ * @tc.desc: Test removing adopted child clears its mixed parent render record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest007, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto adoptParentNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto mixedParentNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto adoptedChildNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(adoptParentNode, nullptr);
+    ASSERT_NE(mixedParentNode, nullptr);
+    ASSERT_NE(adoptedChildNode, nullptr);
+
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(mixedParentNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_NativeModule_AdoptChild(adoptParentNode, adoptedChildNode), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_RenderNodeHandle adoptedRenderNode = nullptr;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNode(adoptedChildNode, &adoptedRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(adoptedRenderNode, nullptr);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(mixedParentNode, adoptedRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t count = 0;
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(mixedParentNode, &count),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(count, 1);
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_RemoveAdoptedChild(adoptParentNode, adoptedChildNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(mixedParentNode, &count),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(count, 0);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest008
+ * @tc.desc: Test mixed parent rejects switching to single when mixed children cannot be represented by single policy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest008, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto multiPureParentNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto mixedFrameParentNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto frameChildNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(multiPureParentNode, nullptr);
+    ASSERT_NE(mixedFrameParentNode, nullptr);
+    ASSERT_NE(frameChildNode, nullptr);
+    auto firstRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto secondRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto frameMixedRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(firstRenderNode, nullptr);
+    ASSERT_NE(secondRenderNode, nullptr);
+    ASSERT_NE(frameMixedRenderNode, nullptr);
+
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(multiPureParentNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(multiPureParentNode, firstRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(multiPureParentNode, secondRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_NodeMountPolicy policy = OH_ARKUI_NODE_MOUNT_POLICY_SINGLE_IF_RENDER_NODE;
+    EXPECT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(
+        multiPureParentNode, OH_ARKUI_NODE_MOUNT_POLICY_SINGLE_IF_RENDER_NODE), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_GetChildMountPolicy(multiPureParentNode, &policy), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(policy, OH_ARKUI_NODE_MOUNT_POLICY_MIXED);
+
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(mixedFrameParentNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->addChild(mixedFrameParentNode, frameChildNode), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(mixedFrameParentNode, frameMixedRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    policy = OH_ARKUI_NODE_MOUNT_POLICY_SINGLE_IF_RENDER_NODE;
+    EXPECT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(
+        mixedFrameParentNode, OH_ARKUI_NODE_MOUNT_POLICY_SINGLE_IF_RENDER_NODE), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_GetChildMountPolicy(mixedFrameParentNode, &policy), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(policy, OH_ARKUI_NODE_MOUNT_POLICY_MIXED);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest009
+ * @tc.desc: Test mixed parent render node insertion rejects children that already have a real RS parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest009, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto mixedParentNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(mixedParentNode, nullptr);
+    auto realParentRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto addChildRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto insertChildRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(realParentRenderNode, nullptr);
+    ASSERT_NE(addChildRenderNode, nullptr);
+    ASSERT_NE(insertChildRenderNode, nullptr);
+
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(mixedParentNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(realParentRenderNode, addChildRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddChild(realParentRenderNode, insertChildRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(mixedParentNode, addChildRenderNode),
+        ERROR_CODE_RENDER_PARENT_EXISTED);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(mixedParentNode, insertChildRenderNode, 0),
+        ERROR_CODE_RENDER_PARENT_EXISTED);
+}
+
+/**
+ * @tc.name: NativeRenderNodeMixedMountTest010
+ * @tc.desc: Test sibling fallback keeps RS tree compatibility when mixed registry is unavailable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeMixedMountTest010, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto singleParentNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    auto mixedParentNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(singleParentNode, nullptr);
+    ASSERT_NE(mixedParentNode, nullptr);
+    auto singleChildRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    auto mixedChildRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(singleChildRenderNode, nullptr);
+    ASSERT_NE(mixedChildRenderNode, nullptr);
+
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(singleParentNode, singleChildRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_RenderNodeHandle sibling = nullptr;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetNextSibling(singleChildRenderNode, &sibling),
+        ERROR_CODE_CHILD_RENDER_NOT_EXIST);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetPreviousSibling(singleChildRenderNode, &sibling),
+        ERROR_CODE_CHILD_RENDER_NOT_EXIST);
+
+    ASSERT_EQ(OH_ArkUI_RenderNodeUtils_AddRenderNode(mixedParentNode, mixedChildRenderNode),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(OH_ArkUI_NativeModule_SetChildMountPolicy(mixedParentNode, OH_ARKUI_NODE_MOUNT_POLICY_MIXED),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    const auto* impl = NodeModel::GetFullImpl();
+    ASSERT_NE(impl, nullptr);
+    auto mixedChildId = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getId(
+        mixedChildRenderNode->renderNodeHandle);
+    ASSERT_NE(mixedChildId, 0);
+    NG::MixedMountRegistry::UnregisterChild(static_cast<uint64_t>(mixedChildId));
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetNextSibling(mixedChildRenderNode, &sibling),
+        ERROR_CODE_CHILD_RENDER_NOT_EXIST);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetPreviousSibling(mixedChildRenderNode, &sibling),
+        ERROR_CODE_CHILD_RENDER_NOT_EXIST);
 }
 
 /**

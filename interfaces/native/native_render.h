@@ -1166,7 +1166,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderColor(ArkUI_RenderNodeHandle node, Ark
  *
  * @param node Handle to the target render node.
  * @param borderRadius Handle to border radius option.
- * @r eturn Error code.
+ * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
@@ -2146,6 +2146,54 @@ void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionValue(
 void OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue(
     ArkUI_RectShapeOption* option, float x, float y, float width, float height);
 
+/**
+ * @brief Insert a child render node at the specified position in the parent node.
+ *
+ * @param node the target parent node. Only customNode type parent nodes are supported.
+ * @param child the child RenderNode to insert.
+ * @param position the index at which to insert the child node.
+ *         The position must be within the range [0, currentChildCount].
+ *         If the position equals currentChildCount, it is equivalent to an add operation.
+ * @return Error code.
+ *         <ul><li>{@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         </li><li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         </li><li>{@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
+ *         </li><li>{@link ARKUI_ERROR_CODE_NOT_CUSTOM_NODE} The node is not a customNode.
+ *         </li><li>{@link ARKUI_ERROR_CODE_RENDER_PARENT_EXISTED} The child already has a parent node.
+ *         </li><li>{@link ARKUI_ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE} if the child is obtained from a FrameNode,
+ *         and its corresponding FrameNode is no longer in the adopted state.</li></ul>
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_InsertRenderNodeAt(
+    ArkUI_NodeHandle node, ArkUI_RenderNodeHandle child, int32_t position);
+
+/**
+ * @brief Get the number of child render nodes of the specified parent node.
+ *
+ * @param node the parent node to query.
+ * @param count the count of the child render node.
+ * @return Error code.
+ *         <ul><li>{@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         </li><li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         </li><li>{@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.</li></ul>
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeChildrenCount(ArkUI_NodeHandle node, int32_t* count);
+
+/**
+ * @brief Get the child render node at the specified position from the parent node.
+ *
+ * @param node Indicates the target parent node.
+ * @param position Index location. The position must be in the range [0, childCount-1].
+ * @param child the output parameter that will receive the child render node handle. Cannot be null.
+ * @return Error code.
+ *         <ul><li>{@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         </li><li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         </li><li>{@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.</li></ul>
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_RenderNodeUtils_GetRenderNodeAt(
+    ArkUI_NodeHandle node, int32_t position, ArkUI_RenderNodeHandle* child);
 #ifdef __cplusplus
 };
 #endif
