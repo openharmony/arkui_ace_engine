@@ -1,0 +1,1 @@
+export { hvigorProcess, hvigorBuild } from '@ohos/hvigor';
