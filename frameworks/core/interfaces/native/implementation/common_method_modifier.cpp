@@ -5641,12 +5641,11 @@ void SetSmartGestureShortcutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
     auto optAction = Converter::OptConvert<Ark_GestureShortcut>(value->action);
     if (!optAction.has_value() || optAction.value() != ARK_GESTURE_SHORTCUT_PRIMARY) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return;
+        config.action = NG::SmartGestureShortcutAction::PRIMARY;
     }
-    NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
     ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
 #endif
 }

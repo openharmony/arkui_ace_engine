@@ -107,27 +107,40 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetFirstVisiblePrimaryNod
 
 /**
  * @tc.name: SmartGestureDeciderGetFirstVisiblePrimaryNode002
- * @tc.desc: GetFirstVisiblePrimaryNode returns the first node in a non-empty visible list.
+ * @tc.desc: GetFirstVisiblePrimaryNode returns the first clickable node in a non-empty visible list.
  * @tc.type: FUNC
  */
 HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetFirstVisiblePrimaryNode002, TestSize.Level1)
 {
-    const auto firstNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto secondNode = CreateNode(AceType::MakeRefPtr<Pattern>());
+    const auto firstNode = CreateClickableNode();
+    const auto secondNode = CreateClickableNode();
     const std::vector<RefPtr<FrameNode>> visibleNodes { firstNode, secondNode };
 
     EXPECT_EQ(SmartGestureDecider::GetFirstVisiblePrimaryNode(visibleNodes), firstNode);
 }
 
 /**
+ * @tc.name: SmartGestureDeciderGetFirstVisiblePrimaryNode003
+ * @tc.desc: GetFirstVisiblePrimaryNode returns nullptr when no node in the list is clickable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetFirstVisiblePrimaryNode003, TestSize.Level1)
+{
+    const auto node = CreateNode(AceType::MakeRefPtr<Pattern>());
+    const std::vector<RefPtr<FrameNode>> visibleNodes { node };
+
+    EXPECT_EQ(SmartGestureDecider::GetFirstVisiblePrimaryNode(visibleNodes), nullptr);
+}
+
+/**
  * @tc.name: SmartGestureDeciderGetNextVisiblePrimaryNode001
- * @tc.desc: GetNextVisiblePrimaryNode returns the first node when no node is selected.
+ * @tc.desc: GetNextVisiblePrimaryNode returns the first clickable node when no node is selected.
  * @tc.type: FUNC
  */
 HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetNextVisiblePrimaryNode001, TestSize.Level1)
 {
-    const auto firstNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto secondNode = CreateNode(AceType::MakeRefPtr<Pattern>());
+    const auto firstNode = CreateClickableNode();
+    const auto secondNode = CreateClickableNode();
     const std::vector<RefPtr<FrameNode>> visibleNodes { firstNode, secondNode };
 
     EXPECT_EQ(SmartGestureDecider::GetNextVisiblePrimaryNode(visibleNodes, nullptr), firstNode);
@@ -147,14 +160,14 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetNextVisiblePrimaryNode
 
 /**
  * @tc.name: SmartGestureDeciderGetNextVisiblePrimaryNode002
- * @tc.desc: GetNextVisiblePrimaryNode returns the next node after the selected node.
+ * @tc.desc: GetNextVisiblePrimaryNode returns the next clickable node after the selected node.
  * @tc.type: FUNC
  */
 HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetNextVisiblePrimaryNode002, TestSize.Level1)
 {
-    const auto firstNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto secondNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto thirdNode = CreateNode(AceType::MakeRefPtr<Pattern>());
+    const auto firstNode = CreateClickableNode();
+    const auto secondNode = CreateClickableNode();
+    const auto thirdNode = CreateClickableNode();
     const std::vector<RefPtr<FrameNode>> visibleNodes { firstNode, secondNode, thirdNode };
 
     EXPECT_EQ(SmartGestureDecider::GetNextVisiblePrimaryNode(visibleNodes, secondNode), thirdNode);
@@ -162,14 +175,14 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetNextVisiblePrimaryNode
 
 /**
  * @tc.name: SmartGestureDeciderGetNextVisiblePrimaryNode003
- * @tc.desc: GetNextVisiblePrimaryNode falls back to the first node when selection is not visible.
+ * @tc.desc: GetNextVisiblePrimaryNode falls back to first clickable when selected node is not in the visible list.
  * @tc.type: FUNC
  */
 HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderGetNextVisiblePrimaryNode003, TestSize.Level1)
 {
-    const auto firstNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto secondNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto selectedNode = CreateNode(AceType::MakeRefPtr<Pattern>());
+    const auto firstNode = CreateClickableNode();
+    const auto secondNode = CreateClickableNode();
+    const auto selectedNode = CreateClickableNode();
     const std::vector<RefPtr<FrameNode>> visibleNodes { firstNode, secondNode };
 
     EXPECT_EQ(SmartGestureDecider::GetNextVisiblePrimaryNode(visibleNodes, selectedNode), firstNode);
@@ -199,8 +212,8 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal001, 
     const auto clickableNode = CreateClickableNode();
     const std::vector<RefPtr<FrameNode>> visibleNodes { clickableNode };
 
-    auto proposal = SmartGestureDecider::BuildDefaultProposal(
-        SmartGestureTrigger::TAP, visibleNodes, clickableNode, {});
+    auto proposal =
+        SmartGestureDecider::BuildDefaultProposal(SmartGestureTrigger::TAP, visibleNodes, clickableNode, {});
 
     ASSERT_TRUE(proposal.has_value());
     EXPECT_EQ(proposal->type, SmartGestureProposalType::CLICK);
@@ -224,13 +237,13 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal004, 
 
 /**
  * @tc.name: SmartGestureDeciderBuildDefaultProposal002
- * @tc.desc: BuildDefaultProposal selects the first visible node for tap without a selection.
+ * @tc.desc: BuildDefaultProposal selects the first clickable visible node for tap without a selection.
  * @tc.type: FUNC
  */
 HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal002, TestSize.Level1)
 {
-    const auto firstNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto secondNode = CreateNode(AceType::MakeRefPtr<Pattern>());
+    const auto firstNode = CreateClickableNode();
+    const auto secondNode = CreateClickableNode();
     const std::vector<RefPtr<FrameNode>> visibleNodes { firstNode, secondNode };
 
     auto proposal = SmartGestureDecider::BuildDefaultProposal(SmartGestureTrigger::TAP, visibleNodes, nullptr, {});
@@ -251,8 +264,7 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal005, 
     const auto selectedNode = CreateNode(AceType::MakeRefPtr<Pattern>());
     const std::vector<RefPtr<FrameNode>> visibleNodes { selectedNode };
 
-    auto proposal = SmartGestureDecider::BuildDefaultProposal(
-        SmartGestureTrigger::TAP, visibleNodes, selectedNode, {});
+    auto proposal = SmartGestureDecider::BuildDefaultProposal(SmartGestureTrigger::TAP, visibleNodes, selectedNode, {});
 
     ASSERT_TRUE(proposal.has_value());
     EXPECT_EQ(proposal->type, SmartGestureProposalType::NONE_ACTION);
@@ -269,8 +281,8 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal008, 
     const auto onlyNode = CreateNode(AceType::MakeRefPtr<Pattern>());
     const std::vector<RefPtr<FrameNode>> visibleNodes { onlyNode };
 
-    auto proposal = SmartGestureDecider::BuildDefaultProposal(
-        SmartGestureTrigger::SLIDE_FORWARD, visibleNodes, onlyNode, {});
+    auto proposal =
+        SmartGestureDecider::BuildDefaultProposal(SmartGestureTrigger::SLIDE_FORWARD, visibleNodes, onlyNode, {});
 
     ASSERT_TRUE(proposal.has_value());
     EXPECT_EQ(proposal->type, SmartGestureProposalType::NONE_ACTION);
@@ -279,17 +291,17 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal008, 
 
 /**
  * @tc.name: SmartGestureDeciderBuildDefaultProposal006
- * @tc.desc: BuildDefaultProposal selects the next visible node for slide forward.
+ * @tc.desc: BuildDefaultProposal selects the next clickable visible node for slide forward.
  * @tc.type: FUNC
  */
 HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal006, TestSize.Level1)
 {
-    const auto firstNode = CreateNode(AceType::MakeRefPtr<Pattern>());
-    const auto secondNode = CreateNode(AceType::MakeRefPtr<Pattern>());
+    const auto firstNode = CreateClickableNode();
+    const auto secondNode = CreateClickableNode();
     const std::vector<RefPtr<FrameNode>> visibleNodes { firstNode, secondNode };
 
-    auto proposal = SmartGestureDecider::BuildDefaultProposal(
-        SmartGestureTrigger::SLIDE_FORWARD, visibleNodes, firstNode, {});
+    auto proposal =
+        SmartGestureDecider::BuildDefaultProposal(SmartGestureTrigger::SLIDE_FORWARD, visibleNodes, firstNode, {});
 
     ASSERT_TRUE(proposal.has_value());
     EXPECT_EQ(proposal->type, SmartGestureProposalType::SELECT);
@@ -307,8 +319,8 @@ HWTEST_F(SmartGestureDeciderTestNg, SmartGestureDeciderBuildDefaultProposal007, 
     const auto scrollableNode = CreateScrollableNode(true, CreateScrollingConfig());
     const std::vector<RefPtr<FrameNode>> centerHitPath { scrollableNode };
 
-    auto proposal = SmartGestureDecider::BuildDefaultProposal(
-        SmartGestureTrigger::SLIDE_FORWARD, {}, nullptr, centerHitPath);
+    auto proposal =
+        SmartGestureDecider::BuildDefaultProposal(SmartGestureTrigger::SLIDE_FORWARD, {}, nullptr, centerHitPath);
 
     ASSERT_TRUE(proposal.has_value());
     EXPECT_EQ(proposal->type, SmartGestureProposalType::SCROLL);
