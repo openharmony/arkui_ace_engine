@@ -1112,9 +1112,10 @@ void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper)
 
     auto columnProperty = lastColumnNode->GetLayoutProperty();
     CHECK_NULL_VOID(columnProperty);
-    columnProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth_)), NG::CalcLength(Dimension(popupMaxHeight_))));
-
+    if (GreatNotEqual(popupMaxWidth_, 0.0f) && GreatNotEqual(popupMaxHeight_, 0.0f)) {
+        columnProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth_)), NG::CalcLength(Dimension(popupMaxHeight_))));
+    }
     if (buttonRowNode->GetChildren().empty()) {
         return;
     }
