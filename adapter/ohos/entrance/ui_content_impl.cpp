@@ -1730,6 +1730,11 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* wind
 #endif
     if (isDynamicRender_) {
         ContainerScope::UpdateLocalCurrent(instanceId_);
+        // Mark this thread as isolated (dc scenario) so that base query functions
+        // (ContainerCount, SingletonId, RecentActiveId, etc.) return thread-local values,
+        // preventing cross-thread instance ID confusion.
+        ContainerScope::MarkIsolatedThread();
+        ContainerScope::AddLocal(instanceId_);
     }
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
@@ -3076,6 +3081,8 @@ void UIContentImpl::Destroy()
         Platform::AceContainer::DestroyContainer(instanceId_);
     }
     ContainerScope::RemoveAndCheck(instanceId_);
+    // Remove instance from thread-local set and clean up local active/foreground cache.
+    ContainerScope::RemoveLocal(instanceId_);
     UnregisterDisplayManagerCallback();
     SubwindowManager::GetInstance()->OnDestroyContainer(instanceId_);
 
