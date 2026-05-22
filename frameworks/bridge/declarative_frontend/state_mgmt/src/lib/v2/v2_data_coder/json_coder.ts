@@ -19,6 +19,8 @@ type JSONAny = object | number | string | boolean | undefined | null;
 
 const V2_STATE_PREFIX = '__ob_';
 const V2_PREFIX_LENGTH = V2_STATE_PREFIX.length;
+const JSON_CODER_CIRCULAR_SKIP = Symbol('JSONCoderCircularSkip');
+const CIRCULAR_OBJECT_SYMBOL = '[Circular]';
 
 interface TransformOptions<T> {
   factory?: FactoryConstructor<T>;
@@ -151,6 +153,26 @@ class JSONCoder {
   }
 
   /**
+   * Serializes an object while skipping properties that point to already visited objects.
+   * This is used as a fallback for circular-reference scenarios where regular stringify fails.
+   *
+   * @template T - The type of the object being serialized.
+   * @param { T } value - The object to serialize.
+   * @param { (this: JSONAny, key: string, value: JSONAny) => JSONAny } [replacer] - A function that alters the behavior when stringify
+   * @param { string | number } [space] - For format
+   * @returns { string } The serialized string representation of the object.
+   */
+  public static stringifyCircular<T>(value: T, replacer?: (this: JSONAny, key: string, value: JSONAny) => JSONAny,
+    space?: string | number): string {
+    const normalized = JSONCoder.cloneWithoutVisited(value, new Set<object>());
+    return JSON.stringify(
+      normalized === JSON_CODER_CIRCULAR_SKIP ? CIRCULAR_OBJECT_SYMBOL : normalized,
+      ObservedReplacer(replacer),
+      space
+    );
+  }
+
+  /**
    * Parses a JSON string or object and applies the nested key-values to a class object.
    * The main usage scenario is to convert JSON data received from a network or database
    * to a state management observable view model.
@@ -212,6 +234,109 @@ class JSONCoder {
       options.alias = type as string;
     }
     return options;
+  }
+
+  public static cloneWithoutVisited(value: any, visited: Set<object>): any {
+    if (typeof value === 'bigint') {
+      return `${value.toString()}`;
+    }
+
+    if (typeof value !== 'object' || value === null) {
+      return value;
+    }
+
+    if (visited.has(value)) {
+      return JSON_CODER_CIRCULAR_SKIP;
+    }
+    visited.add(value);
+
+    if (value.constructor && [Boolean, Number, String].includes(value.constructor)) {
+      return value.toString();
+    }
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    if (value instanceof Array) {
+      const ret: Array<any> = [];
+      value.forEach(item => {
+        const next = JSONCoder.cloneWithoutVisited(item, visited);
+        ret.push(next !== JSON_CODER_CIRCULAR_SKIP ? next : CIRCULAR_OBJECT_SYMBOL);
+      });
+      return ret;
+    }
+
+    if (value instanceof SendableArray) {
+      const ret: Array<any> = [];
+      for (const item of value) {
+        const next = JSONCoder.cloneWithoutVisited(item, visited);
+        ret.push(next !== JSON_CODER_CIRCULAR_SKIP ? next : CIRCULAR_OBJECT_SYMBOL);
+      }
+      return ret;
+    }
+
+    if (value instanceof Set) {
+      const ret: Array<any> = [];
+      for (const item of value) {
+        const next = JSONCoder.cloneWithoutVisited(item, visited);
+        ret.push(next !== JSON_CODER_CIRCULAR_SKIP ? next : CIRCULAR_OBJECT_SYMBOL);
+      }
+      return ret;
+    }
+
+    if (value instanceof SendableSet) {
+      const ret: Array<any> = [];
+      for (const item of value) {
+        const next = JSONCoder.cloneWithoutVisited(item, visited);
+        ret.push(next !== JSON_CODER_CIRCULAR_SKIP ? next : CIRCULAR_OBJECT_SYMBOL);
+      }
+      return ret;
+    }
+
+    if (value instanceof Map) {
+      const ret: Array<any> = [];
+      for (const [key, item] of value.entries()) {
+        const nextKey = JSONCoder.cloneWithoutVisited(key, visited);
+        const nextValue = JSONCoder.cloneWithoutVisited(item, visited);
+        ret.push([
+          nextKey !== JSON_CODER_CIRCULAR_SKIP ? nextKey : CIRCULAR_OBJECT_SYMBOL,
+          nextValue !== JSON_CODER_CIRCULAR_SKIP ? nextValue: CIRCULAR_OBJECT_SYMBOL
+        ]);
+      }
+      return ret;
+    }
+
+    if (value instanceof SendableMap) {
+      const ret: Array<any> = [];
+      for (const [key, item] of value) {
+        const nextKey = JSONCoder.cloneWithoutVisited(key, visited);
+        const nextValue = JSONCoder.cloneWithoutVisited(item, visited);
+        ret.push([
+          nextKey !== JSON_CODER_CIRCULAR_SKIP ? nextKey : CIRCULAR_OBJECT_SYMBOL,
+          nextValue !== JSON_CODER_CIRCULAR_SKIP ? nextValue: CIRCULAR_OBJECT_SYMBOL
+        ]);
+      }
+      return ret;
+    }
+
+    const ret: any = {};
+    const meta = Meta.gets(value);
+    Object.keys(value).forEach(key => {
+      const saveKey = key.startsWith(V2_STATE_PREFIX) ? key.substring(V2_PREFIX_LENGTH) : key;
+      const options = meta && meta[saveKey];
+      if (options && options.disabled) {
+        return;
+      }
+
+      const nextValue = JSONCoder.cloneWithoutVisited(value[saveKey], visited);
+      if (nextValue !== JSON_CODER_CIRCULAR_SKIP && nextValue !== undefined) {
+        ret[(options && options.alias) || saveKey] = nextValue;
+      } else if (nextValue === JSON_CODER_CIRCULAR_SKIP) {
+        ret[(options && options.alias) || saveKey] = CIRCULAR_OBJECT_SYMBOL;
+      }
+    });
+    return ret;
   }
 
   private static getAlias2Prop(meta: any, target: any): Map<string, string> {
