@@ -27,7 +27,9 @@
 #include "test/mock/frameworks/core/common/mock_window.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
