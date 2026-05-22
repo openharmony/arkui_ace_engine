@@ -191,14 +191,10 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
         if (context->GetInstanceId() == triggerId) {
             return;
         }
+        context->PrepareCloseImplicitAnimation();
         auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
-        if (multiInstanceEnabled) {
-            if (tokenOut != tokenIn) {
-                context->PrepareCloseImplicitAnimation();
-                AnimationUtils::CloseImplicitAnimation(context);
-            }
-        } else {
-            context->PrepareCloseImplicitAnimation();
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
+            AnimationUtils::CloseImplicitAnimation(context);
         }
     });
     pipelineContext->CloseImplicitAnimation();
@@ -259,14 +255,10 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         if (context->GetInstanceId() == triggerId) {
             return;
         }
+        context->PrepareOpenImplicitAnimation();
         auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
-        if (multiInstanceEnabled) {
-            if (tokenOut != tokenIn) {
-                context->PrepareOpenImplicitAnimation();
-                AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
-            }
-        } else {
-            context->PrepareOpenImplicitAnimation();
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
+            AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
         }
     });
     pipelineContext->PrepareOpenImplicitAnimation();
