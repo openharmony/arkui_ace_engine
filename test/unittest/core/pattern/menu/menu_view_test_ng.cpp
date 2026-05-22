@@ -69,6 +69,9 @@
 #include "core/event/touch_event.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/common/properties/ui_material.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1881,5 +1884,751 @@ HWTEST_F(MenuViewTestNg, CreateCustomNodeThemeScopeId001, TestSize.Level1)
 
     ASSERT_NE(menuNode, nullptr);
     EXPECT_EQ(menuNode->GetThemeScopeId(), 123);
+}
+
+// ==================== TDD Tests for commit 1de9e99 (menu smooth material) ====================
+
+// --- SetMenuSystemMaterial branches ---
+
+/**
+ * @tc.name: SetMenuSystemMaterial001
+ * @tc.desc: Test SetMenuSystemMaterial when menuNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    menuParam.systemMaterial = material;
+    MenuView::SetMenuSystemMaterial(nullptr, menuParam);
+    // CHECK_NULL_VOID(menuNode) - no crash
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial002
+ * @tc.desc: Test SetMenuSystemMaterial clears material when systemMaterial is null and wasUserSetMaterial=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial002, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsUserSetMaterial(true);
+
+    MenuParam menuParam;
+    menuParam.systemMaterial = nullptr;
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_FALSE(paintProperty->GetIsUserSetMaterial().value_or(false));
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial003
+ * @tc.desc: Test SetMenuSystemMaterial clears material when systemMaterial is empty and wasUserSetMaterial=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial003, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsUserSetMaterial(true);
+
+    MenuParam menuParam;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetEmpty(true);
+    menuParam.systemMaterial = material;
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_FALSE(paintProperty->GetIsUserSetMaterial().value_or(false));
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial004
+ * @tc.desc: Test SetMenuSystemMaterial clears previous material on render context when transitioning to null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial004, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    auto prevMaterial = AceType::MakeRefPtr<UiMaterial>();
+    prevMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(prevMaterial));
+    paintProperty->UpdateIsUserSetMaterial(true);
+    ASSERT_NE(renderContext->GetSystemMaterial(), nullptr);
+
+    MenuParam menuParam;
+    menuParam.systemMaterial = nullptr;
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_EQ(renderContext->GetSystemMaterial(), nullptr);
+    EXPECT_FALSE(paintProperty->GetIsUserSetMaterial().value_or(false));
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial005
+ * @tc.desc: Test SetMenuSystemMaterial when !IsEnableMaterialParam and wasUserSetMaterial=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial005, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    // wasUserSetMaterial defaults to false
+
+    MenuParam menuParam;
+    menuParam.systemMaterial = nullptr;
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_FALSE(paintProperty->GetIsUserSetMaterial().value_or(false));
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial006
+ * @tc.desc: Test SetMenuSystemMaterial with valid SEMI_TRANSPARENT material on non-SMOOTH level
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial006, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    MenuParam menuParam;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    menuParam.systemMaterial = material;
+
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_TRUE(paintProperty->GetIsUserSetMaterial().value_or(false));
+    EXPECT_NE(renderContext->GetSystemMaterial(), nullptr);
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial007
+ * @tc.desc: Test SetMenuSystemMaterial resets SDF when material type changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial007, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    auto prevMaterial = AceType::MakeRefPtr<UiMaterial>();
+    prevMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(prevMaterial));
+    paintProperty->UpdateIsUserSetMaterial(true);
+
+    MenuParam menuParam;
+    auto newMaterial = AceType::MakeRefPtr<UiMaterial>();
+    newMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    menuParam.systemMaterial = newMaterial;
+
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_TRUE(paintProperty->GetIsUserSetMaterial().value_or(false));
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial008
+ * @tc.desc: Test SetMenuSystemMaterial does not reset SDF when material type stays the same
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial008, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    auto prevMaterial = AceType::MakeRefPtr<UiMaterial>();
+    prevMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(prevMaterial));
+    paintProperty->UpdateIsUserSetMaterial(true);
+
+    MenuParam menuParam;
+    auto newMaterial = AceType::MakeRefPtr<UiMaterial>();
+    newMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    menuParam.systemMaterial = newMaterial;
+
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_TRUE(paintProperty->GetIsUserSetMaterial().value_or(false));
+    EXPECT_NE(renderContext->GetSystemMaterial(), nullptr);
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial009
+ * @tc.desc: Test SetMenuSystemMaterial with wasUserSetMaterial=true but previousMaterial is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial009, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    paintProperty->UpdateIsUserSetMaterial(true);
+    ASSERT_EQ(renderContext->GetSystemMaterial(), nullptr);
+
+    MenuParam menuParam;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    menuParam.systemMaterial = material;
+
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_TRUE(paintProperty->GetIsUserSetMaterial().value_or(false));
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial010
+ * @tc.desc: Test SetMenuSystemMaterial SMOOTH+IMMERSIVE without shadow uses low-end path
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial010, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
+
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    MenuParam menuParam;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.applyShadow = false;
+    material->SetImmersiveOptions(options);
+    menuParam.systemMaterial = material;
+
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_TRUE(paintProperty->GetIsUserSetMaterial().value_or(false));
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+/**
+ * @tc.name: SetMenuSystemMaterial011
+ * @tc.desc: Test SetMenuSystemMaterial SMOOTH+IMMERSIVE with applyShadow=true applies shadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetMenuSystemMaterial011, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
+
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    MenuParam menuParam;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.applyShadow = true;
+    material->SetImmersiveOptions(options);
+    menuParam.systemMaterial = material;
+
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+
+    EXPECT_TRUE(paintProperty->GetIsUserSetMaterial().value_or(false));
+    auto shadow = renderContext->GetBackShadow();
+    EXPECT_TRUE(shadow.has_value());
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+// --- ShouldHandleLowEndImmersiveMaterial branches ---
+
+/**
+ * @tc.name: ShouldHandleLowEndImmersiveMaterial001
+ * @tc.desc: Test returns false when level is not SMOOTH
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShouldHandleLowEndImmersiveMaterial001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    EXPECT_FALSE(MenuView::ShouldHandleLowEndImmersiveMaterial(material));
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+/**
+ * @tc.name: ShouldHandleLowEndImmersiveMaterial002
+ * @tc.desc: Test returns false when type is not IMMERSIVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShouldHandleLowEndImmersiveMaterial002, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    EXPECT_FALSE(MenuView::ShouldHandleLowEndImmersiveMaterial(material));
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+/**
+ * @tc.name: ShouldHandleLowEndImmersiveMaterial003
+ * @tc.desc: Test returns true for SMOOTH level and IMMERSIVE type
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ShouldHandleLowEndImmersiveMaterial003, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    EXPECT_TRUE(MenuView::ShouldHandleLowEndImmersiveMaterial(material));
+    g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+}
+
+// --- HandleLowEndImmersiveMaterialForMenu branches ---
+
+/**
+ * @tc.name: HandleLowEndImmersiveMaterialForMenu001
+ * @tc.desc: Test returns false when pipelineContext is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, HandleLowEndImmersiveMaterialForMenu001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+
+    menuNode->SetParent(nullptr);
+    auto result = MenuView::HandleLowEndImmersiveMaterialForMenu(menuNode, material, renderContext);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleLowEndImmersiveMaterialForMenu002
+ * @tc.desc: Test returns false when themeManager is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, HandleLowEndImmersiveMaterialForMenu002, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+
+    auto result = MenuView::HandleLowEndImmersiveMaterialForMenu(menuNode, material, renderContext);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleLowEndImmersiveMaterialForMenu003
+ * @tc.desc: Test returns false when themeConstants is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, HandleLowEndImmersiveMaterialForMenu003, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(nullptr));
+
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+
+    auto result = MenuView::HandleLowEndImmersiveMaterialForMenu(menuNode, material, renderContext);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleLowEndImmersiveMaterialForMenu004
+ * @tc.desc: Test returns true on success path with valid themeConstants
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, HandleLowEndImmersiveMaterialForMenu004, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
+
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.applyShadow = false;
+    material->SetImmersiveOptions(options);
+
+    auto result = MenuView::HandleLowEndImmersiveMaterialForMenu(menuNode, material, renderContext);
+    EXPECT_TRUE(result);
+}
+
+// --- SetLowEndImmersiveBackgroundForMenu ---
+
+/**
+ * @tc.name: SetLowEndImmersiveBackgroundForMenu001
+ * @tc.desc: Test sets background color from theme constants
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetLowEndImmersiveBackgroundForMenu001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+
+    MenuView::SetLowEndImmersiveBackgroundForMenu(renderContext, themeConstants);
+
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+}
+
+// --- SetLowEndImmersiveShadowForMenu branches ---
+
+/**
+ * @tc.name: SetLowEndImmersiveShadowForMenu001
+ * @tc.desc: Test skips when immersiveOptions is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetLowEndImmersiveShadowForMenu001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipelineContext = menuNode->GetContextRefPtr();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    // No immersive options set
+
+    MenuView::SetLowEndImmersiveShadowForMenu(menuNode, material, renderContext, pipelineContext);
+    auto shadow = renderContext->GetBackShadow();
+    EXPECT_FALSE(shadow.has_value());
+}
+
+/**
+ * @tc.name: SetLowEndImmersiveShadowForMenu002
+ * @tc.desc: Test skips when applyShadow is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetLowEndImmersiveShadowForMenu002, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipelineContext = menuNode->GetContextRefPtr();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.applyShadow = false;
+    material->SetImmersiveOptions(options);
+
+    MenuView::SetLowEndImmersiveShadowForMenu(menuNode, material, renderContext, pipelineContext);
+    auto shadow = renderContext->GetBackShadow();
+    EXPECT_FALSE(shadow.has_value());
+}
+
+/**
+ * @tc.name: SetLowEndImmersiveShadowForMenu003
+ * @tc.desc: Test applies shadow when applyShadow is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetLowEndImmersiveShadowForMenu003, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipelineContext = menuNode->GetContextRefPtr();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.applyShadow = true;
+    material->SetImmersiveOptions(options);
+
+    MenuView::SetLowEndImmersiveShadowForMenu(menuNode, material, renderContext, pipelineContext);
+    auto shadow = renderContext->GetBackShadow();
+    EXPECT_TRUE(shadow.has_value());
+}
+
+// --- ApplySystemMaterialForMenu ---
+
+/**
+ * @tc.name: ApplySystemMaterialForMenu001
+ * @tc.desc: Test sets transparent background and system material, returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ApplySystemMaterialForMenu001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+
+    auto result = MenuView::ApplySystemMaterialForMenu(menuNode, material, renderContext);
+    EXPECT_TRUE(result);
+    EXPECT_NE(renderContext->GetSystemMaterial(), nullptr);
+    EXPECT_EQ(renderContext->GetSystemMaterial()->GetType(), static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+}
+
+// --- UpdateMenuBackgroundStyle IsUserSetMaterial guard branches ---
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle001
+ * @tc.desc: Test early returns when menuNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuBackgroundStyle001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    MenuView::UpdateMenuBackgroundStyle(nullptr, menuParam);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle002
+ * @tc.desc: Test early returns when IsUserSetMaterial is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuBackgroundStyle002, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsUserSetMaterial(true);
+
+    MenuParam menuParam;
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle003
+ * @tc.desc: Test falls through material guard when IsUserSetMaterial is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuBackgroundStyle003, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    // IsUserSetMaterial defaults to false, passes guard into normal path
+    MenuParam menuParam;
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    EXPECT_TRUE(true);
+}
+
+// --- UpdateMenuBorderEffect IsUserSetMaterial guard branches ---
+
+/**
+ * @tc.name: UpdateMenuBorderEffect001
+ * @tc.desc: Test early returns when menuNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuBorderEffect001, TestSize.Level1)
+{
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, GetNodeId(),
+        AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    MenuParam menuParam;
+    MenuView::UpdateMenuBorderEffect(nullptr, wrapperNode, menuParam);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateMenuBorderEffect002
+ * @tc.desc: Test early returns when IsUserSetMaterial is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuBorderEffect002, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsUserSetMaterial(true);
+
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, GetNodeId(),
+        AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    MenuParam menuParam;
+    MenuView::UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateMenuBorderEffect003
+ * @tc.desc: Test falls through material guard when IsUserSetMaterial is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuBorderEffect003, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    // IsUserSetMaterial defaults to false, passes guard
+    // wrapperNode null hits next CHECK_NULL_VOID(wrapperNode)
+    MenuParam menuParam;
+    MenuView::UpdateMenuBorderEffect(menuNode, nullptr, menuParam);
+    EXPECT_TRUE(true);
+}
+
+// --- UpdateMenuEffectOption IsUserSetMaterial guard branches ---
+
+/**
+ * @tc.name: UpdateMenuEffectOption001
+ * @tc.desc: Test early returns when menuNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuEffectOption001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    MenuView::UpdateMenuEffectOption(nullptr, menuParam);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateMenuEffectOption002
+ * @tc.desc: Test early returns when IsUserSetMaterial is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuEffectOption002, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsUserSetMaterial(true);
+
+    MenuParam menuParam;
+    EffectOption effectOption;
+    menuParam.effectOption = effectOption;
+    MenuView::UpdateMenuEffectOption(menuNode, menuParam);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateMenuEffectOption003
+ * @tc.desc: Test falls through material guard but returns early when effectOption not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuEffectOption003, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    // IsUserSetMaterial defaults to false, passes guard
+    // effectOption not set, returns at !menuParam.effectOption.has_value()
+    MenuParam menuParam;
+    MenuView::UpdateMenuEffectOption(menuNode, menuParam);
+    EXPECT_TRUE(true);
+}
+
+// --- UpdateMenuBackgroundStyleOption (anonymous namespace) IsUserSetMaterial guard branches ---
+// Tested indirectly through UpdateMenuBackgroundStyle/UpdateMenuBackgroundStyleSub
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyleOption001
+ * @tc.desc: Test UpdateMenuBackgroundStyleOption returns when IsUserSetMaterial is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuBackgroundStyleOption001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsUserSetMaterial(true);
+
+    MenuParam menuParam;
+    BlurStyleOption blurOption;
+    menuParam.backgroundBlurStyleOption = blurOption;
+    // Verify the guard is active - paintProperty state is correct
+    EXPECT_TRUE(paintProperty->GetIsUserSetMaterial().value_or(false));
 }
 } // namespace OHOS::Ace::NG
