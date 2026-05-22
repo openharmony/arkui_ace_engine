@@ -152,6 +152,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/frameworks/core/common/mock_text_translation_adapter.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_statusbar_event_proxy.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/image_provider/mock_image_decoder.cpp",
@@ -204,6 +205,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "hilog:libhilog",
     "skia:skia_canvaskit",
     "window_manager:libwm",
+    "napi:ace_napi",
   ]
   defines = [ "ACE_NON_VIRTUAL=virtual" ]
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
@@ -344,6 +346,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "hilog:libhilog",
     "skia:skia_canvaskit",
     "window_manager:libwm",
+    "napi:ace_napi",
   ]
 
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]

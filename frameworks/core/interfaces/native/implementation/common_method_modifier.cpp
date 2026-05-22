@@ -5603,6 +5603,37 @@ void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityActionOptions(frameNode, actions);
 }
+void SetAccessibilityCustomActionsImpl(Ark_NativePointer node,
+                                       const Opt_Array_AccessibilityCustomAction* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstractModelNG::ResetAccessibilityCustomActions(frameNode);
+        return;
+    }
+    auto& arr = *optValue;
+    std::vector<NG::AccessibilityCustomAction> actions;
+    for (int32_t i = 0; i < arr.length; i++) {
+        auto& item = arr.array[i];
+        NG::AccessibilityCustomAction action;
+        action.actionName = Converter::OptConvert<std::string>(item.name).value_or("");
+        if (item.onAction.callSync) {
+            auto weakNode = AceType::WeakClaim(frameNode);
+            auto cb = item.onAction;
+            action.customActionCallback =
+                [cbHolder = CallbackHelper(cb), node = weakNode]() {
+                    PipelineContext::SetCallBackNode(node);
+                    cbHolder.InvokeSync();
+                };
+        }
+        if (!action.actionName.empty() && action.customActionCallback) {
+            actions.push_back(std::move(action));
+        }
+    }
+    ViewAbstractModelNG::SetAccessibilityCustomActions(frameNode, actions);
+}
 void SetSmartGestureShortcutImpl(Ark_NativePointer node,
                                  const Ark_SmartGestureShortcutOptions* value)
 {
@@ -5610,12 +5641,11 @@ void SetSmartGestureShortcutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
     auto optAction = Converter::OptConvert<Ark_GestureShortcut>(value->action);
     if (!optAction.has_value() || optAction.value() != ARK_GESTURE_SHORTCUT_PRIMARY) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return;
+        config.action = NG::SmartGestureShortcutAction::PRIMARY;
     }
-    NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
     ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
 #endif
 }
@@ -5634,6 +5664,14 @@ void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
             .value_or(false);
     };
     ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onEvent));
+}
+void SetDoubleSidedImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstract::SetDoubleSided(frameNode, convValue.value_or(true));
 }
 void SetExpandSafeAreaImpl(Ark_NativePointer node,
                            const Opt_Array_SafeAreaType* types,
@@ -7220,8 +7258,10 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
+        CommonMethodModifier::SetAccessibilityCustomActionsImpl,
         CommonMethodModifier::SetSmartGestureShortcutImpl,
         CommonMethodModifier::SetInspectorLabelImpl,
+        CommonMethodModifier::SetDoubleSidedImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

@@ -92,6 +92,7 @@ const SMALLEST_MAX_FONT_SCALE: number = 1;
 const LARGEST_MAX_FONT_SCALE: number = 2;
 const SMALLEST_MIN_FONT_SCALE: number = 0;
 const LARGEST_MIN_FONT_SCALE: number = 1;
+const COLOR_RESOURCE_TYPE: number = 10001;
 
 const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
   buttonBackgroundColor: $r('sys.color.segment_button_v2_tab_button_background'),
@@ -1755,15 +1756,28 @@ struct SegmentButtonV2ItemContent {
     return this.hasHybrid ? this.theme.hybridItemMinHeight : this.theme.itemMinHeight;
   }
 
+  private getColorMetricsResourceColor(colorMetrics: ColorMetrics): ResourceColor {
+    const resourceId = colorMetrics.getResourceId();
+    if (resourceId !== undefined && resourceId !== -1) {
+      const abilityContext = this.getUIContext().getHostContext();
+      return {
+        id: resourceId, type: COLOR_RESOURCE_TYPE,
+        bundleName: abilityContext?.abilityInfo?.bundleName ?? '',
+        moduleName: abilityContext?.abilityInfo?.moduleName ?? ''
+      } as Resource;
+    }
+    return colorMetrics.color;
+  }
+
   private getItemFontColor(): ResourceColor {
     if (this.selected) {
       if (this.itemSelectedFontColor) {
-        return this.itemSelectedFontColor.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedFontColor);
       }
       return this.theme.itemSelectedFontColor;
     }
     if (this.itemFontColor) {
-      return this.itemFontColor.color;
+      return this.getColorMetricsResourceColor(this.itemFontColor);
     }
     return this.theme.itemFontColor;
   }
@@ -1800,12 +1814,12 @@ struct SegmentButtonV2ItemContent {
   private getItemIconFillColor(): ResourceColor {
     if (this.selected) {
       if (this.itemSelectedIconFillColor) {
-        return this.itemSelectedIconFillColor.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedIconFillColor);
       }
       return this.theme.itemSelectedIconFillColor;
     }
     if (this.itemIconFillColor) {
-      return this.itemIconFillColor.color;
+      return this.getColorMetricsResourceColor(this.itemIconFillColor);
     }
     return this.theme.itemIconFillColor;
   }

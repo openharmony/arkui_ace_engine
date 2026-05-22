@@ -3919,6 +3919,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetEditModeOptions));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditModeOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetEditModeOptions));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnEditModeChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetOnEditModeChange));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnEditModeChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetOnEditModeChange));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListNestedScroll));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListNestedScroll"),
@@ -6080,6 +6084,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnNeedSoftkeyboard));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNeedSoftkeyboard"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnNeedSoftkeyboard));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDoubleSided"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDoubleSided));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDoubleSided"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDoubleSided));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 }
 
@@ -6398,6 +6406,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectedDragPreviewStyle));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectedDragPreviewStyle));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncrementalUpdatePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetIncrementalUpdatePolicy));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncrementalUpdatePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetIncrementalUpdatePolicy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 }
 

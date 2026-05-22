@@ -26,8 +26,10 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 #include "base/geometry/rect.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
@@ -810,4 +812,135 @@ HWTEST_F(SheetPresentationTestEightNg, ComputeMaxHeight004, TestSize.Level1)
     SheetPresentationTestEightNg::TearDownTestCase();
 }
 
+/**
+ * @tc.name: SetSheetBackgroundColor001
+ * @tc.desc: Test SetSheetBackgroundColor with API >= 12, no systemMaterial, backgroundColor has value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, SetSheetBackgroundColor001, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+    SheetPresentationTestEightNg::SetApiVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    SheetStyle sheetStyle;
+    sheetStyle.backgroundColor = Color::BLUE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetBackgoundColor_ = Color::WHITE;
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(sheetNode);
+    overlayManager->SetSheetBackgroundColor(sheetNode, sheetTheme, sheetStyle, true);
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    EXPECT_EQ(backgroundColor, Color::BLUE);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetBackgroundColor002
+ * @tc.desc: Test SetSheetBackgroundColor with API >= 12, no systemMaterial, no backgroundColor, isPartialUpdate=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, SetSheetBackgroundColor002, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+    SheetPresentationTestEightNg::SetApiVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    SheetStyle sheetStyle;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetBackgoundColor_ = Color::WHITE;
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(sheetNode);
+    overlayManager->SetSheetBackgroundColor(sheetNode, sheetTheme, sheetStyle, false);
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    EXPECT_EQ(backgroundColor, Color::WHITE);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetBackgroundColor003
+ * @tc.desc: Test SetSheetBackgroundColor with API >= 12, systemMaterial, UiMaterialLevel::SMOOTH
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, SetSheetBackgroundColor003, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+    SheetPresentationTestEightNg::SetApiVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    SheetStyle sheetStyle;
+    sheetStyle.backgroundColor = Color::BLUE;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    sheetStyle.systemMaterial = material;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetBackgoundColor_ = Color::WHITE;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(sheetNode);
+    overlayManager->SetSheetBackgroundColor(sheetNode, sheetTheme, sheetStyle, true);
+
+    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    EXPECT_EQ(backgroundColor, Color::WHITE);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateSheetBackgroundColor002
+ * @tc.desc: Test UpdateSheetBackgroundColor with systemMaterial and UiMaterialLevel != SMOOTH, returns early
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, UpdateSheetBackgroundColor002, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("sheetNode", 001,
+        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    sheetStyle.systemMaterial = material;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    g_uiMaterialLevel = UiMaterialLevel::GENTLE;
+    sheetPattern->UpdateSheetBackgroundColor();
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_FALSE(renderContext->HasBackgroundColor());
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

@@ -90,7 +90,7 @@ void DynamicLayoutModelNG::UpdatePropertyFromAlgorithmParams(const RefPtr<FrameN
     const RefPtr<AlgorithmParamBase>& algorithmParams, NG::DynamicLayoutType type)
 {
     if (updateLayoutPropertyFuncMap_.find(type) != updateLayoutPropertyFuncMap_.end()) {
-        updateLayoutPropertyFuncMap_[type](frameNode, algorithmParams);
+        updateLayoutPropertyFuncMap_.at(type)(frameNode, algorithmParams);
     }
 }
 
@@ -100,7 +100,8 @@ void DynamicLayoutModelNG::UpdatePropertyFromDefaultParam(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(StackLayoutProperty, Alignment, Alignment::CENTER, frameNode);
 }
 
-std::unordered_map<DynamicLayoutType, UpdateLayoutPropertyFunc> DynamicLayoutModelNG::updateLayoutPropertyFuncMap_ = {
+const std::unordered_map<DynamicLayoutType, UpdateLayoutPropertyFunc>
+    DynamicLayoutModelNG::updateLayoutPropertyFuncMap_ = {
     { DynamicLayoutType::COLUMN_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromLinearParam },
     { DynamicLayoutType::ROW_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromLinearParam },
     { DynamicLayoutType::STACK_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromStackParam },
@@ -108,6 +109,42 @@ std::unordered_map<DynamicLayoutType, UpdateLayoutPropertyFunc> DynamicLayoutMod
     { DynamicLayoutType::DEFAULT_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromDefaultParam },
     { DynamicLayoutType::GRID_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromGridParam },
 };
+
+void DynamicLayoutModelNG::SetParams(
+    const RefPtr<NG::FrameNode> &frameNode, const RefPtr<AlgorithmParamBase>& params, NG::DynamicLayoutType type)
+{
+    auto dynamicLayoutNode = AceType::DynamicCast<DynamicLayoutNode>(frameNode);
+    CHECK_NULL_VOID(dynamicLayoutNode);
+    auto patternGenerator =
+        [layoutType = type, params = AceType::DynamicCast<CustomLayoutAlgorithmParam>(params)]() -> RefPtr<Pattern> {
+        switch (layoutType) {
+            case DynamicLayoutType::COLUMN_LAYOUT:
+                return AceType::MakeRefPtr<LinearLayoutPattern>(true);
+            case DynamicLayoutType::ROW_LAYOUT:
+                return AceType::MakeRefPtr<LinearLayoutPattern>(false);
+            case DynamicLayoutType::STACK_LAYOUT:
+                return AceType::MakeRefPtr<StackPattern>();
+            case DynamicLayoutType::CUSTOM_LAYOUT: {
+                return AceType::MakeRefPtr<DynamicLayoutPattern>(params);
+            }
+            case DynamicLayoutType::GRID_LAYOUT: {
+                auto pattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
+                // Set DynamicLayout flag
+                pattern->SetDynamicLayoutOptions(true);
+                return pattern;
+            }
+            default:
+                return AceType::MakeRefPtr<StackPattern>();
+        }
+    };
+    auto pattern = patternGenerator();
+    if (dynamicLayoutNode->GetLayoutType() != type && pattern) {
+        dynamicLayoutNode->ReplacePattern(pattern);
+    }
+    UpdatePropertyFromAlgorithmParams(dynamicLayoutNode, params, type);
+    dynamicLayoutNode->SetLayoutType(type);
+    dynamicLayoutNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 
 void DynamicLayoutModelNG::Create(
     const RefPtr<AlgorithmParamBase>& params, NG::DynamicLayoutType type)

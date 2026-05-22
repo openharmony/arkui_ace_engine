@@ -132,10 +132,7 @@ public:
         return flexItemProperty_;
     }
 
-    TextDirection GetLayoutDirection() const
-    {
-        return layoutDirection_.value_or(TextDirection::AUTO);
-    }
+    TextDirection GetLayoutDirection() const;
 
     TextDirection GetNonAutoLayoutDirection() const;
 

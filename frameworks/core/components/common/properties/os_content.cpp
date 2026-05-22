@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#if !defined(_WIN32) && !defined(PREVIEW)
+#if defined(BACK_TO_TOP_TIPS_SUPPORT)
 #include <mutex>
 
 #include "base/log/log_wrapper.h"
@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-#if defined(_WIN32) || defined(PREVIEW)
+#if !defined(BACK_TO_TOP_TIPS_SUPPORT)
 bool OsContent::CallSendAction(const std::string&, const std::string&, const std::string&)
 {
     return false;

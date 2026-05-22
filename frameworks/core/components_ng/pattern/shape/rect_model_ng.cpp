@@ -45,6 +45,7 @@ void RectModelNG::SetRadiusWidth(const Dimension& value)
     Radius radius;
     value.IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetX(value);
     radius.SetY(DEFAULT_RADIUS_INVALID);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_RECT_RADIUS_WIDTH);
     RectModelNG::UpdateRadius(radius);
 }
 
@@ -53,6 +54,7 @@ void RectModelNG::SetRadiusHeight(const Dimension& value)
     Radius radius;
     value.IsNegative() ? radius.SetY(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetY(value);
     radius.SetX(DEFAULT_RADIUS_INVALID);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_RECT_RADIUS_HEIGHT);
     RectModelNG::UpdateRadius(radius);
 }
 
@@ -84,6 +86,9 @@ void RectModelNG::SetRadiusWidth(FrameNode* frameNode, const RefPtr<ResourceObje
         Radius radius;
         value.IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetX(value);
         radius.SetY(DEFAULT_RADIUS_INVALID);
+        if (!value.IsNegative()) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_RECT_RADIUS_WIDTH, frameNode);
+        }
         property->UpdateRadius(radius);
         if (frameNode->GetRerenderable()) {
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -120,6 +125,9 @@ void RectModelNG::SetRadiusHeight(FrameNode* frameNode, const RefPtr<ResourceObj
         Radius radius;
         value.IsNegative() ? radius.SetY(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetY(value);
         radius.SetX(DEFAULT_RADIUS_INVALID);
+        if (!value.IsNegative()) {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_RECT_RADIUS_HEIGHT, frameNode);
+        }
         property->UpdateRadius(radius);
         if (frameNode->GetRerenderable()) {
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -158,6 +166,8 @@ void RectModelNG::SetRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& 
             radius.SetY(Dimension(DEFAULT_RADIUS_VALUE));
             radius.SetX(Dimension(DEFAULT_RADIUS_VALUE));
         } else {
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_RECT_RADIUS_WIDTH, frameNode);
+            ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_RECT_RADIUS_HEIGHT, frameNode);
             radius.SetX(value);
             radius.SetY(value);
         }

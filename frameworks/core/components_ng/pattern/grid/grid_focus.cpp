@@ -112,7 +112,7 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
             ctx->FlushUITaskWithSingleDirtyNode(host);
         }
         auto next = host->GetChildByIndex(idx);
-        if (!next) {
+        if (!next || !(next->GetHostNode())) {
             break;
         }
         auto nextFocus = next->GetHostNode()->GetFocusHub();

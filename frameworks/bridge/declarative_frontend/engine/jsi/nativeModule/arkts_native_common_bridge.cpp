@@ -5098,15 +5098,14 @@ ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInf
     auto actionVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "action"));
     auto enabledVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enabled"));
     auto selectableVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selectable"));
-    if (!actionVal->IsNumber() || !enabledVal->IsBoolean()) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return panda::JSValueRef::Undefined(vm);
+    config.action = SmartGestureShortcutAction::PRIMARY;
+    if (actionVal->IsNumber()) {
+        config.action = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
     }
-    if (actionVal->Int32Value(vm) != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return panda::JSValueRef::Undefined(vm);
+    config.enabled = false;
+    if (enabledVal->IsBoolean()) {
+        config.enabled = enabledVal->BooleaValue(vm);
     }
-    config.enabled = enabledVal->BooleaValue(vm);
     config.selectable = config.enabled;
     if (!selectableVal->IsUndefined() && selectableVal->IsBoolean()) {
         config.selectable = selectableVal->BooleaValue(vm);
@@ -12225,6 +12224,33 @@ ArkUINativeModuleValue CommonBridge::ResetOnNeedSoftkeyboard(ArkUIRuntimeCallInf
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstract::ResetOnNeedSoftkeyboard(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetDoubleSided(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto doubleSided = true;
+    if (secondArg->IsBoolean()) {
+        doubleSided = secondArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setDoubleSided(nativeNode, doubleSided);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetDoubleSided(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getCommonModifier()->resetDoubleSided(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

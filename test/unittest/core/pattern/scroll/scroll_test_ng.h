@@ -22,11 +22,9 @@
 #define protected public
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
-#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 
 namespace OHOS::Ace::NG {
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;

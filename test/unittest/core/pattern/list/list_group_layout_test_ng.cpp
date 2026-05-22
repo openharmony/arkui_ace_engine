@@ -17,6 +17,8 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"

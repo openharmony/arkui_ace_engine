@@ -101,6 +101,7 @@ class DynamicComponentSafeManager;
 class EnvironmentManager;
 enum class FocusActiveReason : int32_t;
 
+constexpr char ENV_KEY_DIRECTION[] = "system.arkui.layout.direction";
 constexpr char ENV_KEY_FONT_SCALE[] = "system.arkui.fontScale";
 
 enum class MockFlushEventType : int32_t {
@@ -240,6 +241,8 @@ public:
     std::optional<float> ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host);
 
     float GetFontScaleFromEnv(const RefPtr<FrameNode>& host = nullptr);
+
+    std::optional<TextDirection> ResolveDirectionFromEnv(const RefPtr<FrameNode>& host);
 
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
@@ -1265,7 +1268,14 @@ public:
     {
         rotationEndCallbackMap_.erase(callbackId);
     }
-
+    void SetUseEnvManager(bool isEnable)
+    {
+        isUseEnvManager_ = isEnable;
+    }
+    bool GetUseEnvManager()
+    {
+        return isUseEnvManager_;
+    }
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
     void NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void NotifyDragMouseEvent(const MouseEvent& event);
@@ -1352,6 +1362,10 @@ public:
     void MarkLpxDirtyNodes();
     void SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager);
     RefPtr<DynamicComponentSafeManager> GetDynamicComponentSafeManager();
+    WindowSizeChangeReason GetWindowSizeChangeReason() const override
+    {
+        return windowSizeChangeReason_;
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1642,6 +1656,7 @@ private:
     bool isDensityChanged_ = false;
     bool isNeedReloadDensity_ = false;
     bool isBeforeDragHandleAxis_ = false;
+    bool isUseEnvManager_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool isWindowSizeDragging_ = false;

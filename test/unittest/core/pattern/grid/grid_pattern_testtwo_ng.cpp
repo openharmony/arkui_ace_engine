@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"

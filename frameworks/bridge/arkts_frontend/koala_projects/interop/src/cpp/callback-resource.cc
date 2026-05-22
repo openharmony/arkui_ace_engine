@@ -43,8 +43,9 @@ static KVMDeferred* takeCurrent(KNativePointer waitContext) {
 
 void notifyWaiter() {
     auto current = takeCurrent(nullptr);
-    if (current)
+    if (current) {
         current->resolve(current, nullptr, 0);
+    }
 }
 
 KVMObjectHandle impl_CallbackAwait(KVMContext vmContext, KNativePointer waitContext) {
@@ -62,7 +63,9 @@ KOALA_INTEROP_CTX_1(CallbackAwait, KVMObjectHandle, KNativePointer)
 
 void impl_UnblockCallbackWait(KNativePointer waitContext) {
     auto current = takeCurrent(waitContext);
-    if (current) current->resolve(current, nullptr, 0);
+    if (current) {
+        current->resolve(current, nullptr, 0);
+    }
 }
 KOALA_INTEROP_V1(UnblockCallbackWait, KNativePointer)
 

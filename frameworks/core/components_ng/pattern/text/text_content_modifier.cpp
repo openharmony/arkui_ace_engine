@@ -452,8 +452,8 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto contentRect = geometryNode->GetContentRect();
-    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
-        paintOffset_.GetY(), contentRect.ToString().c_str());
+    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s][paragraphs:%zu]", host->GetId(),
+        paintOffset_.GetX(), paintOffset_.GetY(), contentRect.ToString().c_str(), pManager->GetParagraphs().size());
 
     SetHybridRenderTypeIfNeeded(drawingContext, textPattern, pManager, host);
     PropertyChangeFlag flag = 0;
@@ -932,6 +932,7 @@ void TextContentModifier::ModifyLineHeightInTextStyle(TextStyle& textStyle)
 
 void TextContentModifier::ModifyFontVariationsInTextStyle(TextStyle& textStyle)
 {
+    CHECK_NULL_VOID(!fontVariations_.empty());
     auto fontVariations = textStyle.GetFontVariations();
     for (auto& item : fontVariations) {
         auto iter = fontVariations_.find(item.axis);
@@ -941,6 +942,7 @@ void TextContentModifier::ModifyFontVariationsInTextStyle(TextStyle& textStyle)
         auto fontVariation = iter->second;
         CHECK_NULL_VOID(fontVariation);
         item.value = fontVariation->Get();
+        lastFontVariationMeasureValues_[item.axis] = fontVariation->Get();
     }
     textStyle.SetFontVariations(fontVariations);
 }
@@ -1160,6 +1162,7 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
 
 void TextContentModifier::UpdateFontVariationsMeasureFlag(PropertyChangeFlag& flag)
 {
+    CHECK_NULL_VOID(!fontVariations_.empty());
     for (const auto& item : fontVariations_) {
         const auto& axis = item.first;
         const auto& property = item.second;

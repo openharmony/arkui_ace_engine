@@ -1272,6 +1272,9 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    auto windowSizeChangeReason = pipeline->GetWindowSizeChangeReason();
+    reason = windowSizeChangeReason == WindowSizeChangeReason::UNDEFINED ?
+        Rosen::SizeChangeReason::UNDEFINED : reason;
     reason_ = (uint32_t)reason;
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     int32_t duration = 0;

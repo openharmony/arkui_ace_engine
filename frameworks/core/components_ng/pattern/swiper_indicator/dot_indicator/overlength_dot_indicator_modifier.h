@@ -186,6 +186,11 @@ public:
         isSwiperTouchDown_ = isSwiperTouchDown;
     }
 
+    void SetIsDraggingIndicator(bool isDraggingIndicator)
+    {
+        isDraggingIndicator_ = isDraggingIndicator;
+    }
+
     void SetIsHorizontalAndRTL(bool isHorizontalAndRTL)
     {
         isHorizontalAndRTL_ = isHorizontalAndRTL;
@@ -288,6 +293,7 @@ private:
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     bool isCustomSizeValue_ = false;
     bool isSwiperTouchDown_ = false;
+    bool isDraggingIndicator_ = false;
     bool keepStatus_ = false;
     bool blackPointsAnimEnd_ = true;
     bool isHorizontalAndRTL_ = false;

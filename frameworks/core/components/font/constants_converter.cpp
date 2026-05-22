@@ -957,6 +957,28 @@ float GetVariableFontWeight(FontWeight fontWeight)
     return (static_cast<int32_t>(ConvertTxtFontWeight(fontWeight)) + 1) * DEFAULT_MULTIPLE;
 }
 
+void SetFontWeightVariations(Rosen::TextStyle& txtStyle, float fontWeightScale, const TextStyle& textStyle)
+{
+    auto fontWeightValue = GetVariableFontWeight(textStyle.GetFontWeight());
+    if (textStyle.GetEnableVariableFontWeight()) {
+        fontWeightValue = textStyle.GetVariableFontWeight();
+        if (LessNotEqual(fontWeightValue, MIN_FONT_WEIGHT) || GreatNotEqual(fontWeightValue, MAX_FONT_WEIGHT)) {
+            fontWeightValue = DEFAULT_FONT_WEIGHT;
+        }
+    }
+    auto enableDeviceFontWeightCategory = textStyle.GetEnableDeviceFontWeightCategory();
+    if (enableDeviceFontWeightCategory.has_value()) {
+        if (enableDeviceFontWeightCategory.value()) {
+            fontWeightValue = fontWeightValue * fontWeightScale;
+        }
+    } else {
+        if (!textStyle.GetEnableVariableFontWeight()) {
+            fontWeightValue = fontWeightValue * fontWeightScale;
+        }
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+}
+
 std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShadow& shadow)
 {
     if (shadow.IsDefault()) {

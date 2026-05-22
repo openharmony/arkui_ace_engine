@@ -1442,6 +1442,22 @@ HWTEST_F(PostEventManagerTestNg, PostMouseEventTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostMouseEventWithStrategy002
+ * @tc.desc: test PostMouseEvent with non-FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMouseEventWithStrategy002, TestSize.Level1)
+{
+    Init();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    MouseEvent mouseEvent;
+    auto result = postEventManager_->PostMouseEventWithStrategy(uiNode, std::move(mouseEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: PostAxisEventTest002
  * @tc.desc: test PostAxisEvent with null uiNode
  * @tc.type: FUNC

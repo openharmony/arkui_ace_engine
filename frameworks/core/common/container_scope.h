@@ -101,6 +101,16 @@ public:
     static void RegisterThreadCheckFunc(CheckRunOnUIThreadFunc checkFunc);
     static void CheckIdChange(int32_t id);
 
+    // Isolated thread management for dc/card scenarios.
+    // In these scenarios, each thread maintains its own local container set to avoid
+    // cross-thread instance ID confusion. Base query functions (ContainerCount, SingletonId,
+    // RecentActiveId, RecentForegroundId, DefaultId) check isIsolatedThread_ internally
+    // and return thread-local values when true.
+    static void MarkIsolatedThread();
+    static void AddLocal(int32_t id);
+    static void RemoveLocal(int32_t id);
+    static void ResetIsolatedThread();
+
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
     static uint64_t PushCurrent(int32_t id, const char* fileId, int32_t line, int32_t sourceType);
     static void PopCurrent(uint64_t uid, int32_t restoreId, const char* fileId, int32_t line, int32_t sourceType);

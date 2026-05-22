@@ -99,6 +99,7 @@ ohos_shared_library("arkoala_native_ani") {
     "web/web_module_methods.cpp",
     "xbar/xbar_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
+    "dynamiclayout/dynamiclayout_module.cpp",
   ]
 
   external_deps = [
@@ -167,6 +168,7 @@ if (use_linux) {
       "utils/ani_utils.cpp",
       "water_flow/water_flow_module.cpp",
       "xcomponent/xcomponent_module_methods.cpp",
+      "dynamiclayout/dynamiclayout_module.cpp",
     ]
 
     external_deps = [

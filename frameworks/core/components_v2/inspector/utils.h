@@ -798,6 +798,17 @@ inline bool IsEqualTextDecorations(
     }
     return true;
 }
+
+inline std::string ConvertWrapIncrementalUpdatePolicyToString(IncrementalUpdatePolicy policy)
+{
+    static const LinearEnumMapNode<IncrementalUpdatePolicy, std::string> policyTable[] = {
+        { IncrementalUpdatePolicy::NONE, "IncrementalUpdatePolicy.NONE" },
+        { IncrementalUpdatePolicy::PARAGRAPH_CACHE, "IncrementalUpdatePolicy.PARAGRAPH_CACHE" },
+    };
+
+    auto index = BinarySearchFindIndex(policyTable, ArraySize(policyTable), policy);
+    return index < 0 ? "IncrementalUpdatePolicy.NONE" : policyTable[index].value;
+}
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_UTILS_H

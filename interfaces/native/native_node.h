@@ -2333,6 +2333,32 @@ typedef enum {
      */
     NODE_INSPECTOR_LABEL = 126,
     /**
+     * @brief Defines the system material attribute, which can be set, reset, and obtained as required through APIs.
+     * Only devices that support systemMaterial can use this attribute. Otherwise, when setting this attribute,
+     * the error code {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} will be returned.
+     * Whether a device supports materials can be determined by calling
+     * {@link OH_ArkUI_NativeModule_GetSystemMaterialSupported}.
+     * The material effect behaves differently on devices with different level of computing powers.
+     * The level is defined by {@link ArkUI_MaterialLevel}, which can be obtained by
+     * {@link OH_ArkUI_NativeModule_GetGlobalMaterialLevel}.
+     * On devices with the computing power level of ARKUI_MATERIAL_LEVEL_SMOOTH, it affects attributes such as the
+     * backgroundColor, borderWidth, borderColor, shadow.
+     * On devices with the computing power levels of ARKUI_MATERIAL_LEVEL_EXQUISITE or ARKUI_MATERIAL_LEVEL_GENTLE,
+     * it affects shadow attribute and adds a filter effect at the system material layer, which can produce an effect
+     * similar to glass.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: system material object. The parameter type is {@link ArkUI_ImmersiveMaterialHandle}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: system material object. The parameter type is {@link ArkUI_ImmersiveMaterialHandle}.\n
+     * The ArkUI_ImmersiveMaterialHandle object of the return value is a pointer to static member, so do not release
+     * the return object by calling {@link OH_ArkUI_NativeModule_ImmersiveMaterial_Destroy}.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_SYSTEM_MATERIAL = 127,
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -10914,7 +10940,27 @@ typedef enum {
      * @since 15
      */
     NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE,
-    
+
+    /**
+     * @brief Defines the edit mode state change event of the <b>List</b> component.
+     *
+     * This event is triggered when the edit mode state changes, which occurs in the following cases:
+     * 1. The {@link NODE_LIST_ENABLE_EDIT_MODE} attribute is set to change the edit mode state.
+     * 2. When {@link NODE_LIST_EDIT_MODE_OPTIONS} has two-finger sliding multi-selection enabled,
+     * a two-finger sliding gesture triggers the change to multi-selection state.
+     * Registering this event callback is a prerequisite for entering multi-selection state via
+     * two-finger sliding. If this callback is not registered, two-finger sliding will not enter
+     * multi-selection state.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: edit mode state. <b>0</b>: not in edit mode. <b>1</b>: in edit mode. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_LIST_ON_EDIT_MODE_CHANGE,
+
     /**
      * @brief Defines the event triggered when the refresh state of the <b>ARKUI_NODE_REFRESH</b> object changes.
      *

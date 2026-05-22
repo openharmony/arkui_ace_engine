@@ -45,7 +45,7 @@ type SystemEnvRegistry = { number?: EnvRegistry };
 // key -> [ varName0, varName1, ..., varNameN ]
 interface EnvMeta {
   // varName -> envKey
-  varToKey: Record<string, keyof EnvTypeMap>;
+  varToKey: Record<string, string>;
   // key -> [ varName0, varName1, ..., varNameN ]
   keyToVars: Record<string, string[]>;
 }
@@ -67,7 +67,7 @@ class EnvV2 {
   public static readonly ENV_KEY_PREFIX: string = '__env_key__';
 
 
-  public static addEnvKeyVariableDecoMeta<K extends keyof EnvTypeMap>(proto: Object, varName: string, key: K): void {
+  public static addEnvKeyVariableDecoMeta<K extends string>(proto: Object, varName: string, key: K): void {
     // add decorator meta data to prototype
   const meta = proto[EnvV2.ENV_DECO_META] ??= {
     varToKey: {},
@@ -80,7 +80,7 @@ class EnvV2 {
     (meta.keyToVars[prefixKey] ??= []).push(varName);
   }
 
-  public static getEnvVarNameFromView<K extends keyof EnvTypeMap>(key: K, view: ViewBuildNodeBase): Array<string> | undefined {
+  public static getEnvVarNameFromView<K extends string>(key: K, view: ViewBuildNodeBase): Array<string> | undefined {
     const meta = view[EnvV2.ENV_DECO_META];
     if (!meta) {
       return undefined;
@@ -154,6 +154,10 @@ class EnvV2 {
     stateMgmtConsole.debug(`findEnvRecursively: view ${view.debugInfo__()} cannot find @Env(${key}) return undefined`);
     return undefined;
   }
+
+  public static isDirectQuerySystemEnvKey(key: string): boolean {
+  return key === 'system.arkui.layout.direction' || key === 'system.arkui.fontScale';
+}
 
   public static registerSimpleTypeMonitorFunc<K extends SimpleTypeEnvKey>(key: K, envValue: IEnvironmentValue<EnvTypeMap[K]>, view: PUV2ViewBase, varName: string): void {
     stateMgmtConsole.debug(`registerSimpleTypeMonitorFunc: Env ${key} ${varName} ${view.debugInfo__()}.`);

@@ -23,8 +23,13 @@ const ArkUIDynamicLayoutModifier* GetDynamicLayoutModifier()
     static const ArkUIDynamicLayoutModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DynamicLayout");
-        CHECK_NULL_RETURN(module, nullptr);
+        if (!module) {
+            LOGF_ABORT("Cannot get dynamiclayout module!");
+        }
         cachedModifier = reinterpret_cast<const ArkUIDynamicLayoutModifier*>(module->GetDynamicModifier());
+        if (!cachedModifier) {
+            LOGF_ABORT("Cannot get dynamiclayout modifier!");
+        }
     }
     return cachedModifier;
 }

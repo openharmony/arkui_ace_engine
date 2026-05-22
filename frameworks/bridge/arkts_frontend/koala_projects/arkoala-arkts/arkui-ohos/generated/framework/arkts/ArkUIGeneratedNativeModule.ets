@@ -535,6 +535,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setInspectorLabel(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setDoubleSided(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setExpandSafeArea(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setIgnoreLayoutSafeArea(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -790,6 +792,10 @@ export class ArkUIGeneratedNativeModule {
     native static _DepthComponentAttribute_setBackgroundOffset(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _DepthComponentAttribute_setBackgroundScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _DistortionComponent_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _DistortionComponentInterface_setDistortionComponentOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _Divider_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -1203,6 +1209,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ListAttribute_setEditModeOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ListAttribute_setEnableEditMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ListAttribute_setOnEditModeChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ListAttribute_setFocusWrapMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2583,6 +2591,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextAttribute_setOrphanCharOptimization(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextAttribute_setFontVariations(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setIncrementalUpdatePolicy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextAttribute_setFont(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -5381,6 +5391,16 @@ export class ArkUIGeneratedNativeModule {
     native static _LazyBuild_SetListItemLazyBuilder(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _LazyBuild_SetTabContentLazyBuilder(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyColumnLayoutExtender_lazyColumnLayoutConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _LazyColumnLayoutExtender_setLazyColumnLayoutOptions(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _LazyColumnLayoutExtender_space(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyColumnLayoutExtender_alignItems(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyColumnLayoutExtender_onVisibleIndexesChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     native static _LazyForEachOps_NotifyChange(node: KPointer, startIndex: KInt, endIndex: KInt, count: KInt): void
     @ani.unsafe.Direct
     native static _LazyForEachOps_Sync(node: KPointer, totalCount: KInt, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -5388,6 +5408,18 @@ export class ArkUIGeneratedNativeModule {
     native static _LazyForEachOps_SyncOnMoveOps(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _LazyForEachOps_SetOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_lazyVWaterFlowLayoutConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_setLazyVWaterFlowLayoutOptions(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_rowsGap(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_columnsGap(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_columnsTemplate(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_onVisibleIndexesChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _LeadingMarginSpan_construct(): KPointer
     @ani.unsafe.Direct

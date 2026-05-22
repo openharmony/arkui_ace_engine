@@ -1125,6 +1125,8 @@ typedef struct Ark_Vector2F64 Ark_Vector2F64;
 typedef struct Opt_Vector2F64 Opt_Vector2F64;
 typedef struct Ark_Vector3 Ark_Vector3;
 typedef struct Opt_Vector3 Opt_Vector3;
+typedef struct Ark_Vector4 Ark_Vector4;
+typedef struct Opt_Vector4 Opt_Vector4;
 typedef struct Ark_VelocityOptions Ark_VelocityOptions;
 typedef struct Opt_VelocityOptions Opt_VelocityOptions;
 typedef struct VerifyPinHandlerPeer VerifyPinHandlerPeer;
@@ -1185,6 +1187,8 @@ typedef struct arkui_component_idlize_Callback_I32_Void arkui_component_idlize_C
 typedef struct Opt_arkui_component_idlize_Callback_I32_Void Opt_arkui_component_idlize_Callback_I32_Void;
 typedef struct Array_AcceptableFileType Array_AcceptableFileType;
 typedef struct Opt_Array_AcceptableFileType Opt_Array_AcceptableFileType;
+typedef struct Array_AccessibilityCustomAction Array_AccessibilityCustomAction;
+typedef struct Opt_Array_AccessibilityCustomAction Opt_Array_AccessibilityCustomAction;
 typedef struct Array_AISessionEvent Array_AISessionEvent;
 typedef struct Opt_Array_AISessionEvent Opt_Array_AISessionEvent;
 typedef struct Array_AlertDialogButtonOptions Array_AlertDialogButtonOptions;
@@ -2289,6 +2293,8 @@ typedef struct Ark_DepthVector4 Ark_DepthVector4;
 typedef struct Opt_DepthVector4 Opt_DepthVector4;
 typedef struct Ark_DirectionalEdgesT_F64 Ark_DirectionalEdgesT_F64;
 typedef struct Opt_DirectionalEdgesT_F64 Opt_DirectionalEdgesT_F64;
+typedef struct Ark_DistortionParam Ark_DistortionParam;
+typedef struct Opt_DistortionParam Opt_DistortionParam;
 typedef struct Ark_DisturbanceFieldOptionsInner Ark_DisturbanceFieldOptionsInner;
 typedef struct Opt_DisturbanceFieldOptionsInner Opt_DisturbanceFieldOptionsInner;
 typedef struct Ark_DoubleAnimationParam Ark_DoubleAnimationParam;
@@ -2923,6 +2929,8 @@ typedef struct Ark_WorkerOptions Ark_WorkerOptions;
 typedef struct Opt_WorkerOptions Opt_WorkerOptions;
 typedef struct Ark_XComponentParameters Ark_XComponentParameters;
 typedef struct Opt_XComponentParameters Opt_XComponentParameters;
+typedef struct Ark_AccessibilityCustomAction Ark_AccessibilityCustomAction;
+typedef struct Opt_AccessibilityCustomAction Opt_AccessibilityCustomAction;
 typedef struct Ark_AccessibilitySpanOptions Ark_AccessibilitySpanOptions;
 typedef struct Opt_AccessibilitySpanOptions Opt_AccessibilitySpanOptions;
 typedef struct Ark_ActionSheetButtonOptions Ark_ActionSheetButtonOptions;
@@ -2987,6 +2995,8 @@ typedef struct Ark_DepthLightParams Ark_DepthLightParams;
 typedef struct Opt_DepthLightParams Opt_DepthLightParams;
 typedef struct Ark_Dimension Ark_Dimension;
 typedef struct Opt_Dimension Opt_Dimension;
+typedef struct Ark_DistortionComponentOptions Ark_DistortionComponentOptions;
+typedef struct Opt_DistortionComponentOptions Opt_DistortionComponentOptions;
 typedef struct Ark_DividerStyleOptions Ark_DividerStyleOptions;
 typedef struct Opt_DividerStyleOptions Opt_DividerStyleOptions;
 typedef struct Ark_EdgeColors Ark_EdgeColors;
@@ -4540,7 +4550,6 @@ typedef struct Opt_CredentialType {
     Ark_CredentialType value;
 } Opt_CredentialType;
 typedef enum Ark_CrownAction {
-    ARK_CROWN_ACTION_BEGIN = 0,
     ARK_CROWN_ACTION_UPDATE = 1,
     ARK_CROWN_ACTION_END = 2,
 } Ark_CrownAction;
@@ -5455,6 +5464,14 @@ typedef struct Opt_ImmersiveMode {
     Ark_Tag tag;
     Ark_ImmersiveMode value;
 } Opt_ImmersiveMode;
+typedef enum Ark_IncrementalUpdatePolicy {
+    ARK_INCREMENTAL_UPDATE_POLICY_NONE = 0,
+    ARK_INCREMENTAL_UPDATE_POLICY_PARAGRAPH_CACHE = 1,
+} Ark_IncrementalUpdatePolicy;
+typedef struct Opt_IncrementalUpdatePolicy {
+    Ark_Tag tag;
+    Ark_IncrementalUpdatePolicy value;
+} Opt_IncrementalUpdatePolicy;
 typedef enum Ark_IndexerAlign {
     ARK_INDEXER_ALIGN_LEFT = 0,
     ARK_INDEXER_ALIGN_RIGHT = 1,
@@ -9986,6 +10003,17 @@ typedef struct Opt_Vector3 {
     Ark_Tag tag;
     Ark_Vector3 value;
 } Opt_Vector3;
+typedef struct Ark_Vector4 {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+    Ark_Float64 z;
+    Ark_Float64 w;
+} Ark_Vector4;
+typedef struct Opt_Vector4 {
+    Ark_Tag tag;
+    Ark_Vector4 value;
+} Opt_Vector4;
 typedef struct Ark_VelocityOptions {
     /* kind: Interface */
     Ark_Tuple_F64_F64 speed;
@@ -10153,6 +10181,15 @@ typedef struct Opt_Array_AcceptableFileType {
     Ark_Tag tag;
     Array_AcceptableFileType value;
 } Opt_Array_AcceptableFileType;
+typedef struct Array_AccessibilityCustomAction {
+    /* kind: ContainerType */
+    Ark_AccessibilityCustomAction* array;
+    Ark_Int32 length;
+} Array_AccessibilityCustomAction;
+typedef struct Opt_Array_AccessibilityCustomAction {
+    Ark_Tag tag;
+    Array_AccessibilityCustomAction value;
+} Opt_Array_AccessibilityCustomAction;
 typedef struct Array_AISessionEvent {
     /* kind: ContainerType */
     Ark_AISessionEvent* array;
@@ -15540,6 +15577,18 @@ typedef struct Opt_DirectionalEdgesT_F64 {
     Ark_Tag tag;
     Ark_DirectionalEdgesT_F64 value;
 } Opt_DirectionalEdgesT_F64;
+typedef struct Ark_DistortionParam {
+    /* kind: Interface */
+    Ark_Vector2 topLeft;
+    Ark_Vector2 topRight;
+    Ark_Vector2 bottomLeft;
+    Ark_Vector2 bottomRight;
+    Ark_Vector4 barrelDistortion;
+} Ark_DistortionParam;
+typedef struct Opt_DistortionParam {
+    Ark_Tag tag;
+    Ark_DistortionParam value;
+} Opt_DistortionParam;
 typedef struct Ark_DisturbanceFieldOptionsInner {
     /* kind: Interface */
     Opt_Float64 strength;
@@ -18975,6 +19024,15 @@ typedef struct Opt_XComponentParameters {
     Ark_Tag tag;
     Ark_XComponentParameters value;
 } Opt_XComponentParameters;
+typedef struct Ark_AccessibilityCustomAction {
+    /* kind: Interface */
+    Ark_ResourceStr name;
+    VoidCallback onAction;
+} Ark_AccessibilityCustomAction;
+typedef struct Opt_AccessibilityCustomAction {
+    Ark_Tag tag;
+    Ark_AccessibilityCustomAction value;
+} Opt_AccessibilityCustomAction;
 typedef struct Ark_AccessibilitySpanOptions {
     /* kind: Interface */
     Opt_ResourceStr accessibilityText;
@@ -19349,6 +19407,14 @@ typedef struct Opt_Dimension {
     Ark_Tag tag;
     Ark_Dimension value;
 } Opt_Dimension;
+typedef struct Ark_DistortionComponentOptions {
+    /* kind: Interface */
+    Opt_DistortionParam distortion;
+} Ark_DistortionComponentOptions;
+typedef struct Opt_DistortionComponentOptions {
+    Ark_Tag tag;
+    Ark_DistortionComponentOptions value;
+} Opt_DistortionComponentOptions;
 typedef struct Ark_DividerStyleOptions {
     /* kind: Interface */
     Opt_LengthMetrics strokeWidth;
@@ -24477,10 +24543,14 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                              const Opt_Union_String_Resource* value);
     void (*setAccessibilityActionOptions)(Ark_NativePointer node,
                                           const Opt_AccessibilityActionOptions* value);
+    void (*setAccessibilityCustomActions)(Ark_NativePointer node,
+                                          const Opt_Array_AccessibilityCustomAction* value);
     void (*setSmartGestureShortcut)(Ark_NativePointer node,
                                     const Ark_SmartGestureShortcutOptions* value);
     void (*setInspectorLabel)(Ark_NativePointer node,
                               const Opt_String* value);
+    void (*setDoubleSided)(Ark_NativePointer node,
+                           const Opt_Boolean* value);
     void (*setExpandSafeArea)(Ark_NativePointer node,
                               const Opt_Array_SafeAreaType* types,
                               const Opt_Array_SafeAreaEdge* edges);
@@ -24779,6 +24849,13 @@ typedef struct GENERATED_ArkUIDepthComponentModifier {
     void (*setBackgroundScale)(Ark_NativePointer node,
                                const Ark_ScaleOptions* value);
 } GENERATED_ArkUIDepthComponentModifier;
+
+typedef struct GENERATED_ArkUIDistortionComponentModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setDistortionComponentOptions)(Ark_NativePointer node,
+                                          const Opt_DistortionComponentOptions* options);
+} GENERATED_ArkUIDistortionComponentModifier;
 
 typedef struct GENERATED_ArkUIDividerModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
@@ -25267,6 +25344,8 @@ typedef struct GENERATED_ArkUIListModifier {
                                const Ark_EditModeOptions* value);
     void (*setEnableEditMode)(Ark_NativePointer node,
                               const Opt_Union_Boolean_Bindable_Boolean* value);
+    void (*setOnEditModeChange)(Ark_NativePointer node,
+                                const Opt_arkui_component_common_Callback_Boolean_Void* value);
     void (*setFocusWrapMode)(Ark_NativePointer node,
                              const Opt_FocusWrapMode* value);
     void (*setSyncLoad)(Ark_NativePointer node,
@@ -26920,6 +26999,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                       const Opt_Boolean* value);
     void (*setFontVariations)(Ark_NativePointer node,
                               const Opt_Array_text_FontVariation* value);
+    void (*setIncrementalUpdatePolicy)(Ark_NativePointer node,
+                                       const Opt_IncrementalUpdatePolicy* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_arkui_component_units_Font* fontValue,
                     const Opt_FontSettingOptions* options);
@@ -29829,6 +29910,17 @@ typedef struct GENERATED_ArkUILazyBuildAccessor {
                                      const CustomNodeBuilder* builder);
 } GENERATED_ArkUILazyBuildAccessor;
 
+typedef struct GENERATED_ArkUILazyColumnLayoutExtenderAccessor {
+    Ark_NativePointer (*lazyColumnLayoutConstructor)(Ark_Int32 id);
+    void (*setLazyColumnLayoutOptions)(Ark_NativePointer node);
+    void (*space)(Ark_NativePointer node,
+                  const Opt_LengthMetrics* space);
+    void (*alignItems)(Ark_NativePointer node,
+                       const Opt_HorizontalAlign* value);
+    void (*onVisibleIndexesChange)(Ark_NativePointer node,
+                                   const Opt_OnVisibleIndexesChangeCallback* callback_);
+} GENERATED_ArkUILazyColumnLayoutExtenderAccessor;
+
 typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
     void (*NotifyChange)(Ark_VMContext vmContext,
                          Ark_NativePointer node,
@@ -29846,6 +29938,19 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
     void (*SetOptions)(Ark_NativePointer node,
                        const Ark_LazyForEachOptions* options);
 } GENERATED_ArkUILazyForEachOpsAccessor;
+
+typedef struct GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor {
+    Ark_NativePointer (*lazyVWaterFlowLayoutConstructor)(Ark_Int32 id);
+    void (*setLazyVWaterFlowLayoutOptions)(Ark_NativePointer node);
+    void (*rowsGap)(Ark_NativePointer node,
+                    const Opt_LengthMetrics* value);
+    void (*columnsGap)(Ark_NativePointer node,
+                       const Opt_LengthMetrics* value);
+    void (*columnsTemplate)(Ark_NativePointer node,
+                            const Opt_Union_String_ItemFillPolicy* value);
+    void (*onVisibleIndexesChange)(Ark_NativePointer node,
+                                   const Opt_OnVisibleIndexesChangeCallback* callback_);
+} GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor;
 
 typedef struct GENERATED_ArkUILeadingMarginSpanAccessor {
     void (*destroyPeer)(Ark_LeadingMarginSpan peer);
@@ -32078,6 +32183,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIDataPanelModifier* (*getDataPanelModifier)();
     const GENERATED_ArkUIDatePickerModifier* (*getDatePickerModifier)();
     const GENERATED_ArkUIDepthComponentModifier* (*getDepthComponentModifier)();
+    const GENERATED_ArkUIDistortionComponentModifier* (*getDistortionComponentModifier)();
     const GENERATED_ArkUIDividerModifier* (*getDividerModifier)();
     const GENERATED_ArkUIEffectComponentModifier* (*getEffectComponentModifier)();
     const GENERATED_ArkUIEllipseModifier* (*getEllipseModifier)();
@@ -32272,7 +32378,9 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILayoutManagerAccessor* (*getLayoutManagerAccessor)();
     const GENERATED_ArkUILayoutPolicyAccessor* (*getLayoutPolicyAccessor)();
     const GENERATED_ArkUILazyBuildAccessor* (*getLazyBuildAccessor)();
+    const GENERATED_ArkUILazyColumnLayoutExtenderAccessor* (*getLazyColumnLayoutExtenderAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
+    const GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor* (*getLazyWaterFlowLayoutExtenderAccessor)();
     const GENERATED_ArkUILeadingMarginSpanAccessor* (*getLeadingMarginSpanAccessor)();
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
     const GENERATED_ArkUILevelOrderExtenderAccessor* (*getLevelOrderExtenderAccessor)();
@@ -32431,6 +32539,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_DATA_PANEL,
     GENERATED_ARKUI_DATE_PICKER,
     GENERATED_ARKUI_DEPTH_COMPONENT,
+    GENERATED_ARKUI_DISTORTION_COMPONENT,
     GENERATED_ARKUI_DIVIDER,
     GENERATED_ARKUI_EFFECT_COMPONENT,
     GENERATED_ARKUI_ELLIPSE,
@@ -32450,8 +32559,12 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_IMAGE_ANIMATOR,
     GENERATED_ARKUI_IMAGE_SPAN,
     GENERATED_ARKUI_INDICATOR_COMPONENT,
+    GENERATED_ARKUI_LAZY_COLUMN_LAYOUT_ATTRIBUTE,
+    GENERATED_ARKUI_LAZY_COLUMN_LAYOUT,
     GENERATED_ARKUI_LAZY_GRID_LAYOUT_ATTRIBUTE,
     GENERATED_ARKUI_LAZY_VGRID_LAYOUT,
+    GENERATED_ARKUI_LAZY_VWATER_FLOW_LAYOUT,
+    GENERATED_ARKUI_LAZY_WATER_FLOW_LAYOUT_ATTRIBUTE,
     GENERATED_ARKUI_LINE,
     GENERATED_ARKUI_LIST,
     GENERATED_ARKUI_LIST_ITEM,

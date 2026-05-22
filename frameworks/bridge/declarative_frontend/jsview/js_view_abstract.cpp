@@ -6306,6 +6306,19 @@ void JSViewAbstract::JSEdgeLight(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetEdgeLightParam(param);
 }
 
+void JSViewAbstract::JSDoubleSided(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> argDoubleSided = info[0];
+    bool doubleSided = true;
+    if (argDoubleSided->IsBoolean()) {
+        doubleSided = argDoubleSided->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetDoubleSided(doubleSided);
+}
+
 bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
     std::string& resName, bool isParseType)
 {
@@ -10437,6 +10450,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
 
     JSClass<JSViewAbstract>::StaticMethod("edgeLight", &JSViewAbstract::JSEdgeLight);
+    JSClass<JSViewAbstract>::StaticMethod("doubleSided", &JSViewAbstract::JSDoubleSided);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -12090,17 +12104,14 @@ void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
     auto options = JSRef<JSObject>::Cast(info[0]);
     auto actionValue = options->GetProperty("action");
     auto enabledValue = options->GetProperty("enabled");
-    if (!actionValue->IsNumber() || !enabledValue->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
-        return;
+    int32_t action = SMART_GESTURE_SHORTCUT_PRIMARY;
+    if (actionValue->IsNumber()) {
+        action = actionValue->ToNumber<int32_t>();
     }
-
-    int32_t action = actionValue->ToNumber<int32_t>();
-    if (action != SMART_GESTURE_SHORTCUT_PRIMARY) {
-        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
-        return;
+    bool enabled = false;
+    if (enabledValue->IsBoolean()) {
+        enabled = enabledValue->ToBoolean();
     }
-    bool enabled = enabledValue->ToBoolean();
     bool selectable = enabled;
     auto selectableValue = options->GetProperty("selectable");
     if (selectableValue->IsBoolean()) {

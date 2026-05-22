@@ -4938,6 +4938,9 @@ class ArkSpanComponent {
   accessibilityGroup(value) {
     throw new BusinessError(100201, 'accessibilityGroup function not supported in attributeModifier scenario.');
   }
+  doubleSided(value) {
+    throw new BusinessError(100201, 'doubleSided function not supported in attributeModifier scenario.');
+  }
   accessibilityText(value) {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, SpanAccessibilityTextModifier.identity, SpanAccessibilityTextModifier, value);
@@ -6392,6 +6395,24 @@ class TextDirectionModifier extends ModifierWithKey {
 }
 TextDirectionModifier.identity = Symbol('textDirection');
 
+class TextIncrementalUpdatePolicyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetIncrementalUpdatePolicy(node);
+    }
+    else {
+      getUINativeModule().text.setIncrementalUpdatePolicy(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextIncrementalUpdatePolicyModifier.identity = Symbol('textIncrementalUpdatePolicy');
+
 class TextSelectedDragPreviewStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6724,6 +6745,11 @@ class ArkTextComponent extends ArkComponent {
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextSelectedDragPreviewStyleModifier.identity,
         TextSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  incrementalUpdatePolicy(value) {
+    modifierWithKey(this._modifiersWithKeys, TextIncrementalUpdatePolicyModifier.identity,
+        TextIncrementalUpdatePolicyModifier, value);
     return this;
   }
 }
@@ -22757,6 +22783,20 @@ class ListEnableEditModeModifier extends ModifierWithKey {
   }
 }
 ListEnableEditModeModifier.identity = Symbol('listEnableEditMode');
+class ListOnEditModeChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetOnEditModeChange(node);
+    }
+    else {
+      getUINativeModule().list.setOnEditModeChange(node, this.value);
+    }
+  }
+}
+ListOnEditModeChangeModifier.identity = Symbol('listOnEditModeChange');
 class ListMultiSelectableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -23487,6 +23527,10 @@ class ArkListComponent extends ArkScrollable {
   }
   enableEditMode(value) {
     modifierWithKey(this._modifiersWithKeys, ListEnableEditModeModifier.identity, ListEnableEditModeModifier, value);
+    return this;
+  }
+  onEditModeChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, ListOnEditModeChangeModifier.identity, ListOnEditModeChangeModifier, callback);
     return this;
   }
   multiSelectable(value) {

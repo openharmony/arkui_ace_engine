@@ -53,4 +53,25 @@ HWTEST_F(PerfMonitorTest, PerfMonitorTest001, TestSize.Level1)
     PerfMonitor::GetPerfMonitor()->SetSubHealthInfo(info, reson, duration);
 }
 
+/**
+ * @tc.name: PerfMonitorTest002
+ * @tc.desc: RecordInputEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerfMonitorTest, PerfMonitorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get currentId from initial env
+     * @tc.expected: CurrentId equals the value in initial env
+     */
+    std::string info = "testSubHealthInfo";
+    std::string reson = "testSubHealthReason";
+    PerfActionType inputType = UNKNOWN_ACTION;
+    PerfSourceType sourceType = UNKNOWN_SOURCE;
+    uint64_t inputTime = 0;
+    uint32_t xPos = 0;
+    uint32_t yPos = 0;
+    EXPECT_NE(PerfMonitor::GetPerfMonitor(), nullptr);
+    PerfMonitor::GetPerfMonitor()->RecordInputEvent(inputType, sourceType, inputTime, xPos, yPos);
+}
 } // namespace OHOS::Ace

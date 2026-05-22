@@ -65,6 +65,7 @@ void GaugeModelStatic::SetGaugeStrokeWidth(FrameNode* frameNode, const std::opti
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GaugeLayoutProperty, StrokeWidth, PROPERTY_UPDATE_RENDER, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(strokeWidth.value_or(Dimension()), LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void GaugeModelStatic::SetIndicatorSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
@@ -74,6 +75,7 @@ void GaugeModelStatic::SetIndicatorSpace(FrameNode* frameNode, const std::option
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorSpace, PROPERTY_UPDATE_RENDER, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(space.value_or(Dimension()), LpxAttribute::LPX_GAUGE_INDICATOR_SPACE, frameNode);
 }
 
 void GaugeModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)

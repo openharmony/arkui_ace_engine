@@ -62,6 +62,10 @@ void ShapeModelNG::SetViewPort(
     shapeViewBox.SetTop(dimTop);
     shapeViewBox.SetWidth(dimWidth);
     shapeViewBox.SetHeight(dimHeight);
+    ACE_CHECK_LPX_ATTRIBUTE(dimLeft, LpxAttribute::LPX_SHAPE_LEFT);
+    ACE_CHECK_LPX_ATTRIBUTE(dimTop, LpxAttribute::LPX_SHAPE_TOP);
+    ACE_CHECK_LPX_ATTRIBUTE(dimWidth, LpxAttribute::LPX_WIDTH);
+    ACE_CHECK_LPX_ATTRIBUTE(dimHeight, LpxAttribute::LPX_HEIGHT);
     ACE_UPDATE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox);
 }
 
@@ -105,6 +109,10 @@ void ShapeModelNG::SetViewPort(FrameNode* frameNode, const std::vector<Dimension
         shapeViewBox.SetTop(result[SHAPE_VIEW_BOX_TOP]);
         shapeViewBox.SetWidth(result[SHAPE_VIEW_BOX_WIDTH]);
         shapeViewBox.SetHeight(result[SHAPE_VIEW_BOX_HEIGHT]);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result[SHAPE_VIEW_BOX_LEFT], LpxAttribute::LPX_SHAPE_LEFT, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result[SHAPE_VIEW_BOX_TOP], LpxAttribute::LPX_SHAPE_TOP, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result[SHAPE_VIEW_BOX_WIDTH], LpxAttribute::LPX_WIDTH, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(result[SHAPE_VIEW_BOX_HEIGHT], LpxAttribute::LPX_HEIGHT, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
     };
     ACE_UINODE_TRACE(frameNode);
@@ -238,6 +246,10 @@ void ShapeModelNG::SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, c
     shapeViewBox.SetTop(dimTop);
     shapeViewBox.SetWidth(dimWidth);
     shapeViewBox.SetHeight(dimHeight);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimLeft, LpxAttribute::LPX_SHAPE_LEFT, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimTop, LpxAttribute::LPX_SHAPE_TOP, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimWidth, LpxAttribute::LPX_WIDTH, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(dimHeight, LpxAttribute::LPX_HEIGHT, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
 }
 

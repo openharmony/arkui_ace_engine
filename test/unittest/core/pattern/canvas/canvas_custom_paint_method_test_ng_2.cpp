@@ -81,16 +81,33 @@ HWTEST_F(CanvasCustomPaintMethodTestNg2, CanvasCustomPaintMethodTest037, TestSiz
     paintMethod->state_.strokeState.SetLineDashOffset(1.0);
     paintMethod->UpdateLineDash(pen);
 
+    /**
+     * @tc.steps2: Test SetFilterParam with "none" parameter.
+     * @tc.expected: colorFilter_ is not nullptr after setting filter to "none".
+     */
     paintMethod->SetFilterParam("none");
     EXPECT_NE(paintMethod->colorFilter_, nullptr);
 
+    /**
+     * @tc.steps3: Test SetHueRotateFilter with "hue-rotate(90deg)" parameter (degree unit).
+     * @tc.expected: colorFilter_ is successfully created with degree angle unit.
+     */
     paintMethod->SetFilterParam("hue-rotate(90deg)");
     paintMethod->SetHueRotateFilter("hue-rotate(90deg)");
     EXPECT_NE(paintMethod->colorFilter_, nullptr);
 
+    /**
+     * @tc.steps4: Test SetHueRotateFilter with "hue-rotate(90turn)" parameter (turn unit).
+     * @tc.expected: colorFilter_ is successfully created with turn angle unit.
+     */
     paintMethod->SetFilterParam("hue-rotate(90turn)");
     paintMethod->SetHueRotateFilter("hue-rotate(90turn)");
     EXPECT_NE(paintMethod->colorFilter_, nullptr);
+
+    /**
+     * @tc.steps5: Test SetHueRotateFilter with "hue-rotate(90rad)" parameter (radian unit).
+     * @tc.expected: colorFilter_ is successfully created with radian angle unit.
+     */
     paintMethod->SetFilterParam("hue-rotate(90rad)");
     paintMethod->SetHueRotateFilter("hue-rotate(90rad)");
     EXPECT_NE(paintMethod->colorFilter_, nullptr);

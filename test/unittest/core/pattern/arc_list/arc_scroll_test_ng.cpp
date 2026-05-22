@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"

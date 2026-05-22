@@ -112,16 +112,19 @@ void PatternLockModelNG::SetRegularColorByUser(bool isByuserSet)
 void PatternLockModelNG::SetCircleRadius(const Dimension& radius)
 {
     ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, radius);
+    ACE_CHECK_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_PATTERNLOCK_CIRCLE_RADIUS);
 }
 
 void PatternLockModelNG::SetSideLength(const Dimension& sideLength)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(PatternLockLayoutProperty, SideLength, sideLength);
+    ACE_CHECK_LPX_ATTRIBUTE(sideLength, LpxAttribute::LPX_PATTERNLOCK_SIDE_LENGTH);
 }
 
 void PatternLockModelNG::SetStrokeWidth(const Dimension& lineWidth)
 {
     ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, PathStrokeWidth, lineWidth);
+    ACE_CHECK_LPX_ATTRIBUTE(lineWidth, LpxAttribute::LPX_STROKE_WIDTH);
 }
 
 void PatternLockModelNG::SetActiveCircleColor(const Color& activeCircleColor)
@@ -139,6 +142,7 @@ void PatternLockModelNG::SetActiveCircleColorByUser(bool isByuserSet)
 void PatternLockModelNG::SetActiveCircleRadius(const Dimension& activeCircleRadius)
 {
     ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleRadius, activeCircleRadius);
+    ACE_CHECK_LPX_ATTRIBUTE(activeCircleRadius, LpxAttribute::LPX_PATTERNLOCK_ACTIVE_CIRCLE_RADIUS);
 }
 
 void PatternLockModelNG::SetEnableWaveEffect(bool enableWaveEffect)
@@ -170,6 +174,7 @@ void PatternLockModelNG::SetActiveColorByUser(FrameNode* frameNode, bool isByuse
 void PatternLockModelNG::SetCircleRadius(FrameNode* frameNode, const Dimension& radius)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, radius, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(radius, LpxAttribute::LPX_PATTERNLOCK_CIRCLE_RADIUS, frameNode);
 }
 
 void PatternLockModelNG::SetSelectedColor(FrameNode* frameNode, const Color& selectedColor)
@@ -186,6 +191,7 @@ void PatternLockModelNG::SetSelectedColorByUser(FrameNode* frameNode, bool isByu
 void PatternLockModelNG::SetSideLength(FrameNode* frameNode, const Dimension& sideLength)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(PatternLockLayoutProperty, SideLength, sideLength, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(sideLength, LpxAttribute::LPX_PATTERNLOCK_SIDE_LENGTH, frameNode);
 }
 
 void PatternLockModelNG::SetAutoReset(FrameNode* frameNode, bool isAutoReset)
@@ -196,6 +202,7 @@ void PatternLockModelNG::SetAutoReset(FrameNode* frameNode, bool isAutoReset)
 void PatternLockModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathStrokeWidth, lineWidth, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(lineWidth, LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void PatternLockModelNG::SetRegularColor(FrameNode* frameNode, const Color& regularColor)
@@ -235,6 +242,7 @@ void PatternLockModelNG::SetActiveCircleColorByUser(FrameNode* frameNode, bool i
 void PatternLockModelNG::SetActiveCircleRadius(FrameNode* frameNode, const Dimension& activeCircleRadius)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleRadius, activeCircleRadius, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(activeCircleRadius, LpxAttribute::LPX_PATTERNLOCK_ACTIVE_CIRCLE_RADIUS, frameNode);
 }
 
 void PatternLockModelNG::SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect)

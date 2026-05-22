@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/particle_enum.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 
 #include "converter_union.h"
@@ -102,10 +103,6 @@ namespace NG {
 enum class BindSheetDismissReason;
 enum class ContentClipMode;
 enum class DataPanelType;
-enum DistributionType;
-enum ParticleEmitterShape;
-enum ParticleType;
-enum UpdaterType;
 enum class KeyboardFluidLightMode;
 enum class KeyboardGradientMode;
 enum class LaunchMode;
@@ -692,11 +689,11 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT FontFamilies Convert(const Ark_String& src);
     template<> FontInfo Convert(const Ark_font_FontInfo& src);
     template<> FontMetaData Convert(const Ark_arkui_component_units_Font& src);
-    template<> FontWeightInt Convert(const Ark_FontWeight& src);
-    template<> FontWeightInt Convert(const Ark_Int32& src);
-    template<> FontWeightInt Convert(const Ark_String& src);
-    template<> FontWeightInt Convert(const Ark_Resource& src);
-    template<> FontWeightInt Convert(const Ark_ResourceStr& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_FontWeight& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Int32& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_String& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Resource& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_ResourceStr& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> ACE_FORCE_EXPORT Gradient Convert(const Ark_RadialGradientOptions& value);

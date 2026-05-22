@@ -584,7 +584,7 @@ HWTEST_F(TextTestNgThree, TextOrphanCharOptimizationTest003, TestSize.Level1)
 HWTEST_F(TextTestNgThree, TextLayoutTest001, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(TEXT_WIDTH));
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(LARGE_WIDTH));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(150));
     EXPECT_CALL(*paragraph, Layout);
     /**

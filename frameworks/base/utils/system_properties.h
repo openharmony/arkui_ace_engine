@@ -784,6 +784,7 @@ public:
     }
 
     static UiMaterialLevel GetUiMaterialLevel();
+    static bool IsDeviceSystemMaterialSupported();
 
     static void ReadSystemParametersCallOnce();
 	

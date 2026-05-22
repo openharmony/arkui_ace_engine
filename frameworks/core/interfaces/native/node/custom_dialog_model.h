@@ -37,6 +37,7 @@ struct _ArkUIDialog {
     ArkUI_Int32 enableCustomStyle;
     ArkUI_Int32 showInSubWindow;
     ArkUI_Int32 displayModeInSubWindow = 0;
+    ArkUI_ImmersiveMaterial* material;
     ArkUI_Bool enableCustomAnimation;
     bool (*onWillDismissCall)(ArkUI_Int32);
     void (*onWillDismissCallByNDK)(ArkUI_DialogDismissEvent*);
@@ -119,6 +120,7 @@ ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId);
 ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
 ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, bool showInSubWindow);
 ArkUI_Int32 SetDialogDisplayModeInSubWindow(ArkUIDialogHandle handle, ArkUI_Int32 displayModeInSubWindow);
+ArkUI_Int32 SetSystemMaterial(ArkUIDialogHandle controllerHandler, ArkUI_ImmersiveMaterial* material);
 ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom,
     ArkUI_Float32 left, ArkUI_Int32 unit);
 ArkUI_Int32 SetDialogBorderColor(

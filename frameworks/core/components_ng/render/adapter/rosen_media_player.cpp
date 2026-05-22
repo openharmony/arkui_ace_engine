@@ -490,6 +490,19 @@ int32_t RosenMediaPlayer::SetPlaybackSpeed(float speed)
     return mediaPlayer_->SetPlaybackSpeed(ConvertToMediaPlaybackSpeed(static_cast<float>(speed)));
 }
 
+int32_t RosenMediaPlayer::SetPlaybackRate(float speed, int32_t& errorCode, std::string& errorMsg)
+{
+    if (!mediaPlayer_ || !std::isfinite(speed)) {
+        errorCode = -1;
+        errorMsg = "NULL";
+        return -1;
+    }
+    int32_t ret = mediaPlayer_->SetPlaybackRate(speed);
+    errorCode = OHOS::Media::MSErrorToExtErrorAPI9(static_cast<Media::MediaServiceErrCode>(ret));
+    errorMsg = OHOS::Media::MSExtAVErrorToString(static_cast<OHOS::Media::MediaServiceExtErrCodeAPI9>(errorCode));
+    return ret;
+}
+
 int32_t RosenMediaPlayer::SetSurface()
 {
     CHECK_NULL_RETURN(mediaPlayer_, -1);

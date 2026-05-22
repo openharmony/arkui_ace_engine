@@ -2817,6 +2817,21 @@ ArkUI_Uint32 GetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
     return TextModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
 }
 
+void SetIncrementalUpdatePolicy(ArkUINodeHandle node, ArkUI_Int32 policy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto updatePolicy = static_cast<IncrementalUpdatePolicy>(policy);
+    TextModelNG::SetIncrementalUpdatePolicy(frameNode, updatePolicy);
+}
+
+void ResetIncrementalUpdatePolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetIncrementalUpdatePolicy(frameNode);
+}
+
 void SetFontColorWithPlaceholder(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorPlaceholder)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3109,6 +3124,8 @@ const ArkUITextModifier* GetTextModifier()
         .setTextSelectedDragPreviewStyle = SetTextSelectedDragPreviewStyle,
         .resetTextSelectedDragPreviewStyle = ResetTextSelectedDragPreviewStyle,
         .getTextSelectedDragPreviewStyle = GetTextSelectedDragPreviewStyle,
+        .setIncrementalUpdatePolicy = SetIncrementalUpdatePolicy,
+        .resetIncrementalUpdatePolicy = ResetIncrementalUpdatePolicy,
         .setFontColorWithPlaceholder = SetFontColorWithPlaceholder,
         .setFontColorPtr = SetFontColorPtr,
         .getCharacterPositionAtCoordinate = GetCharacterPositionAtCoordinate,

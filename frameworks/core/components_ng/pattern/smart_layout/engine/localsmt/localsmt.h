@@ -249,12 +249,12 @@ private:
     };
     void CollectActiveConstraints(
         std::vector<ActiveConstraint>& active, std::vector<BoundLit>& boundLits, int& nextLit);
-    void AllocateSolverLits(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active);
+    void AllocateSolverLits(niaOverall::LsSolver& solver);
     void BuildConstraintLiterals(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active);
-    void BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<BoundLit>& boundLits);
+    void BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<BoundLit>& boundLits) const;
     void BuildClauses(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active,
         const std::vector<BoundLit>& boundLits);
-    void FinalizeSolver(niaOverall::LsSolver& solver);
+    void FinalizeSolver(niaOverall::LsSolver& solver) const;
     bool SolveAndExtract(niaOverall::LsSolver& solver, int width, int height);
 };
 

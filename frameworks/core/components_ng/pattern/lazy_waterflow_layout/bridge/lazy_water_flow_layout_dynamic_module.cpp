@@ -23,6 +23,10 @@
 
 #include "base/log/log_wrapper.h"
 
+#ifdef INCLUDE_GENERATED_SOURCES
+#include "arkoala_api_generated.h"
+#endif
+
 struct ArkUILazyWaterFlowLayoutModifier;
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_LazyVWaterFlowLayout()
@@ -47,6 +51,12 @@ public:
 namespace NodeModifier {
 const ArkUILazyWaterFlowLayoutModifier* GetLazyWaterFlowLayoutDynamicModifier();
 } // namespace NodeModifier
+#ifdef INCLUDE_GENERATED_SOURCES
+namespace GeneratedModifier {
+constexpr const char* EXTENDER_ACCESSOR = "ExtenderAccessor";
+const GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor* GetLazyWaterFlowLayoutStaticAccessor();
+} // namespace GeneratedModifier
+#endif
 } // namespace NG
 
 void LazyWaterFlowLayoutDynamicModule::RegisterAttributes(
@@ -83,6 +93,16 @@ const void* LazyWaterFlowLayoutDynamicModule::GetCjModifier()
 void* LazyWaterFlowLayoutDynamicModule::GetModel()
 {
     return NG::GetLazyVWaterFlowLayoutModel();
+}
+
+const void* LazyWaterFlowLayoutDynamicModule::GetCustomModifier(const std::string& name)
+{
+#ifdef INCLUDE_GENERATED_SOURCES
+    if (name == NG::GeneratedModifier::EXTENDER_ACCESSOR) {
+        return NG::GeneratedModifier::GetLazyWaterFlowLayoutStaticAccessor();
+    }
+#endif
+    return nullptr;
 }
 
 } // namespace OHOS::Ace

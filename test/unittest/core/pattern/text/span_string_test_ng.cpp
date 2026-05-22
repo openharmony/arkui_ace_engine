@@ -998,6 +998,64 @@ HWTEST_F(SpanStringTestNg, MutableSpanString010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MutableSpanStringTextWatcher001
+ * @tc.desc: Test TextPattern updates content when mutable styled string is set again after content change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanStringTextWatcher001, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"hello");
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+    textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    textPattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    textPattern->GetTextController()->SetStyledString(spanString);
+
+    EXPECT_EQ(textPattern->GetTextForDisplay(), u"hello");
+
+    spanString->ReplaceString(0, 5, u"world");
+    textPattern->GetTextController()->SetStyledString(spanString);
+
+    EXPECT_EQ(textPattern->GetTextForDisplay(), u"world");
+}
+
+/**
+ * @tc.name: MutableSpanStringTextStyleHash001
+ * @tc.desc: Test TextPattern updates style hash when mutable styled string style changes and is set again.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanStringTextStyleHash001, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"hello");
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 5));
+
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIncrementalUpdatePolicy(IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+    textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    textPattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    textPattern->GetTextController()->SetStyledString(spanString);
+
+    auto hashResult = textPattern->GetSpanGroupHashResult();
+    ASSERT_NE(hashResult, nullptr);
+    auto firstStyleHash = hashResult->styleHashes;
+    ASSERT_EQ(firstStyleHash.size(), 1);
+
+    Font updatedFont = testFont1;
+    updatedFont.fontColor = Color::BLUE;
+    spanString->ReplaceSpan(0, 5, AceType::MakeRefPtr<FontSpan>(updatedFont, 0, 5));
+    textPattern->GetTextController()->SetStyledString(spanString);
+
+    hashResult = textPattern->GetSpanGroupHashResult();
+    ASSERT_NE(hashResult, nullptr);
+    auto secondStyleHash = hashResult->styleHashes;
+    ASSERT_EQ(secondStyleHash.size(), 1);
+    EXPECT_NE(firstStyleHash[0], secondStyleHash[0]);
+}
+
+/**
  * @tc.name: MutableSpanString011
  * @tc.desc: Test the insertSpanString in the case of imageSpan
  * @tc.type: FUNC

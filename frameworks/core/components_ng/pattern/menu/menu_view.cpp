@@ -1150,15 +1150,12 @@ void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const Me
 {
     CHECK_NULL_VOID(menuNode);
     bool isSetMenuSystemMaterial = false;
-    auto renderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial)) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);
         isSetMenuSystemMaterial = true;
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(menuParam.systemMaterial));
-    } else if (renderContext->GetSystemMaterial()) {
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), nullptr);
-        UpdateMenuBackgroundStyle(menuNode, menuParam);
     }
     auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
     CHECK_NULL_VOID(paintProperty);

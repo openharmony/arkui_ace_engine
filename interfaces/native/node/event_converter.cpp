@@ -350,6 +350,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_LIST_SCROLL_INDEX;
         case NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE:
             return ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE;
+        case NODE_LIST_ON_EDIT_MODE_CHANGE:
+            return ON_LIST_EDIT_MODE_CHANGE;
         case NODE_WATER_FLOW_ON_SCROLL_INDEX:
             return ON_WATER_FLOW_SCROLL_INDEX;
         case NODE_TEXT_ON_DETECT_RESULT_UPDATE:
@@ -674,6 +676,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_LIST_ON_SCROLL_INDEX;
         case ON_LIST_DID_SCROLL:
             return NODE_LIST_ON_DID_SCROLL;
+        case ON_LIST_EDIT_MODE_CHANGE:
+            return NODE_LIST_ON_EDIT_MODE_CHANGE;
         case ON_WATER_FLOW_SCROLL_INDEX:
             return NODE_WATER_FLOW_ON_SCROLL_INDEX;
         case ON_WATER_FLOW_REACH_START:

@@ -21,11 +21,14 @@ arkui_files = [
   "arkui-preprocessed/@ohos.arkui.ArcList.ets",
   "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
   "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkLazyColumnLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkLazyWaterFlowLayout.ets",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
   "arkui-preprocessed/@ohos.arkui.Prefetcher.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.arkui.componentUtils.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkDynamicLayout.ets",
   "arkui-preprocessed/@ohos.arkui.dragController.ets",
   "arkui-preprocessed/@ohos.arkui.drawableDescriptor.ets",
   "arkui-preprocessed/@ohos.arkui.focusController.ets",
@@ -82,6 +85,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/DatePickerModifier.ets",
   "arkui-preprocessed/arkui/DepthComponentModifier.ets",
   "arkui-preprocessed/arkui/DividerModifier.ets",
+  "arkui-preprocessed/arkui/DynamicLayoutModifierHandWritten.ets",
   "arkui-preprocessed/arkui/EffectComponentModifier.ets",
   "arkui-preprocessed/arkui/EllipseModifier.ets",
   "arkui-preprocessed/arkui/EmbeddedComponentModifier.ets",
@@ -103,8 +107,11 @@ arkui_files = [
   "arkui-preprocessed/arkui/ImageModifier.ets",
   "arkui-preprocessed/arkui/ImageSpanModifier.ets",
   "arkui-preprocessed/arkui/IndicatorComponentModifier.ets",
+  "arkui-preprocessed/arkui/LayoutAlgorithm.ets",
   "arkui-preprocessed/arkui/LazyGridLayoutModifier.ets",
+  "arkui-preprocessed/arkui/LazyColumnLayoutModifier.ets",
   "arkui-preprocessed/arkui/LazyVGridLayoutModifier.ets",
+  "arkui-preprocessed/arkui/LazyVWaterFlowLayoutModifier.ets",
   "arkui-preprocessed/arkui/LineModifier.ets",
   "arkui-preprocessed/arkui/ListItemGroupModifier.ets",
   "arkui-preprocessed/arkui/ListItemModifier.ets",
@@ -409,6 +416,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/WebTransfer.ets",
   "arkui-preprocessed/arkui/hooks/CanvasOpsHandWritten.ets",
+  "arkui-preprocessed/arkui/hooks/DynamicLayoutHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/ImageOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/ListHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/ListItemGroupHandWritten.ets",
@@ -610,6 +618,8 @@ arkui_path_keys = [
   "@ohos.arkui.ArcList",
   "@ohos.arkui.ArcScrollBar",
   "@ohos.arkui.ArcSwiper",
+  "@ohos.arkui.components.ArkLazyColumnLayout",
+  "@ohos.arkui.components.ArkLazyWaterFlowLayout",
   "#arktheme",
   "arkui/base/ArkUIObjectFinalizationRegisterProxy",
   "@component/customComponent",
@@ -618,6 +628,7 @@ arkui_path_keys = [
   "@peerNode",
   "@aceTrace",
   "@decoratorEnv",
+  "@ohos.arkui.components.ArkDynamicLayout",
 ]
 
 arkui_path_values = [
@@ -673,6 +684,8 @@ arkui_path_values = [
   "arkui-preprocessed/@ohos.arkui.ArcList.ets",
   "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
   "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkLazyColumnLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkLazyWaterFlowLayout.ets",
   "arkui-preprocessed/arkui/theme",
   "arkui-preprocessed/arkui/base/ArkUIObjectFinalizationRegisterProxy.ets",
   "arkui-preprocessed/arkui/component/customComponent.ets",
@@ -681,11 +694,13 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/PeerNode.ets",
   "arkui-preprocessed/arkui/base/AceTrace.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ArkDynamicLayout.ets",
 ]
 
 if (defined(ace_engine_feature_enable_smart_gesture) &&
     !ace_engine_feature_enable_smart_gesture) {
   arkui_files -= [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
   arkui_names -= [ "@ohos/arkui/smartGestureController" ]
-  arkui_path_values -= [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
+  arkui_path_values -=
+      [ "arkui-preprocessed/@ohos.arkui.smartGestureController.ets" ]
 }

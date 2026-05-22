@@ -1676,7 +1676,10 @@ public:
     {
         return false;
     }
-
+    virtual WindowSizeChangeReason GetWindowSizeChangeReason() const
+    {
+        return WindowSizeChangeReason::UNDEFINED;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

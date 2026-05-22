@@ -16,6 +16,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
+#include "core/components_ng/property/particle_property.h"
 
 #include <memory>
 
@@ -5409,9 +5410,10 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
         rsNode_->SetShadowElevation(shadow.IsValid() ? shadow.GetElevation() : 0.0);
     } else {
         auto radius = shadow.GetBlurRadius();
-        rsNode_->SetShadowRadius(
-            (!shadow.IsValid() || (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
-            && NearZero(radius))) ? -1.0 : DrawingDecorationPainter::ConvertRadiusToSigma(radius));
+        auto isNeedNotConvert = !shadow.IsValid() ||
+            (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) && NearZero(radius));
+        rsNode_->SetShadowRadius(isNeedNotConvert ?
+            -1.0 : DrawingDecorationPainter::ConvertRadiusToSigma(radius));
     }
     RequestNextFrame();
 }
@@ -7605,7 +7607,7 @@ void RosenRenderContext::SetShadowRadius(float radius)
     FREE_RS_CONTEXT_CHECK(SetShadowRadius, radius);
     CHECK_NULL_VOID(rsNode_);
     if (LessOrEqual(radius, 0.0f) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         rsNode_->SetShadowRadius(-1.0f);
         return;
     }
@@ -7861,6 +7863,13 @@ void RosenRenderContext::SetMarkNodeGroup(bool isNodeGroup)
     rsNode_->MarkNodeGroup(isNodeGroup);
 }
 
+void RosenRenderContext::SetLayerMark(bool isLayer)
+{
+    FREE_RS_CONTEXT_CHECK(SetLayerMark, isLayer);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkLayer(isLayer);
+}
+
 int32_t RosenRenderContext::GetRotateDegree()
 {
     CHECK_NULL_RETURN(rsNode_, 0);
@@ -7955,12 +7964,12 @@ void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<
     // the drawRegion of this index has changed
     drawRegionRects_[index] = rect;
     std::shared_ptr<Rosen::RectF> result;
-    for (size_t index = 0; index < DRAW_REGION_RECT_COUNT; ++index) {
-        if (drawRegionRects_[index]) {
+    for (size_t idx = 0; idx < DRAW_REGION_RECT_COUNT; ++idx) {
+        if (drawRegionRects_[idx]) {
             if (result) {
-                *result = result->JoinRect(*drawRegionRects_[index]);
+                *result = result->JoinRect(*drawRegionRects_[idx]);
             } else {
-                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[index]);
+                result = std::make_shared<Rosen::RectF>(*drawRegionRects_[idx]);
             }
         }
     }
@@ -9052,5 +9061,13 @@ void RosenRenderContext::ResetEdgeLightFilter()
     rsNode_->SetOverlayNGShader(nullptr);
     RequestNextFrame();
 #endif
+}
+
+void RosenRenderContext::OnDoubleSidedUpdate(bool doubleSided)
+{
+    FREE_RS_CONTEXT_CHECK(OnDoubleSidedUpdate, doubleSided);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetDoubleSidedEnabled(doubleSided);
+    RequestNextFrame();
 }
 } // namespace OHOS::Ace::NG

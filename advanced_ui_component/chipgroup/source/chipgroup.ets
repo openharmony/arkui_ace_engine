@@ -308,7 +308,7 @@ export struct IconGroupSuffix {
         }
         .systemMaterial(createECMaterial(this.iconBackgroundSystemMaterial))
       } else {
-        this.IconButtonsBuilder(this.iconBackgroundSystemMaterial)
+        this.IconButtonsBuilder(resolveSystemMaterial(this.iconBackgroundSystemMaterial))
       }
     } else {
       this.IconButtonsBuilder(undefined)
@@ -601,7 +601,7 @@ export struct ChipGroup {
             enabled: true,
             activated: this.isSelected(index),
             backgroundColor: this.getBackgroundColor(),
-            backgroundSystemMaterial: createSubECMaterial(this.backgroundSystemMaterial),
+            backgroundSystemMaterial: createSubECMaterial(material),
             size: this.getChipSize(),
             activatedBackgroundColor: this.getSelectedBackgroundColor(),
             accessibilitySelectedType:
@@ -647,7 +647,7 @@ export struct ChipGroup {
               }
               .systemMaterial(createECMaterial(this.backgroundSystemMaterial))
             } else {
-              this.ChipItemsBuilder(this.backgroundSystemMaterial)
+              this.ChipItemsBuilder(resolveSystemMaterial(this.backgroundSystemMaterial))
             }
 
           } else {
@@ -726,6 +726,15 @@ export struct ChipGroup {
   }
 }
 
+function resolveSystemMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
+  let info = uiMaterial.getMaterialInfo();
+  if (info.state === uiMaterial.MaterialState.DISABLE) {
+    return undefined;
+  }
+  return info.state === uiMaterial.MaterialState.ENABLE && !material ?
+    new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) : material;
+}
+
 function enableEffectComponent(material: uiMaterial.Material | undefined) {
   return false;
 }
@@ -735,7 +744,7 @@ function createECMaterial(material: uiMaterial.Material | undefined): uiMaterial
 }
 
 function createSubECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
-  return material;
+  return resolveSystemMaterial(material);
 }
 
 

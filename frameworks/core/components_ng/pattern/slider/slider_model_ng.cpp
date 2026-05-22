@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/slider/slider_theme.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
@@ -27,6 +29,21 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<FrameNode> GetOrCreateSliderFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetFrameNode(V2::SLIDER_ETS_TAG, nodeId);
+    if (!frameNode) {
+        frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, nodeId, AceType::MakeRefPtr<SliderPattern>());
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            MaterialUtils::IsMaterialEnabled()) {
+            auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THIN);
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(frameNode), AceType::RawPtr(material));
+        }
+    }
+    return frameNode;
+}
+}
 const float DEFAULT_STEP = 1.0f;
 const float DEFAULT_MIN_VALUE = 0.0f;
 const float DEFAULT_MAX_VALUE = 100.0f;
@@ -37,8 +54,7 @@ void SliderModelNG::Create(float value, float step, float min, float max)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SLIDER_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SLIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SliderPattern>(); });
+    auto frameNode = GetOrCreateSliderFrameNode(nodeId);
     stack->Push(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, step, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Min, min, frameNode);
@@ -622,8 +638,7 @@ void SliderModelNG::ResetSuffix(FrameNode* frameNode)
 
 RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SLIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SliderPattern>(); });
+    auto frameNode = GetOrCreateSliderFrameNode(nodeId);
 
     SetMinLabel(AceType::RawPtr(frameNode), DEFAULT_MIN_VALUE);
     SetMaxLabel(AceType::RawPtr(frameNode), DEFAULT_MAX_VALUE);

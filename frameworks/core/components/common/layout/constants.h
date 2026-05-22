@@ -223,6 +223,11 @@ enum class MarqueeUpdatePolicy {
     PRESERVE_POSITION,
 };
 
+enum class IncrementalUpdatePolicy {
+    NONE = 0,
+    PARAGRAPH_CACHE,
+};
+
 enum class TextDataDetectType {
     INVALID = -1,
     PHONE_NUMBER = 0,

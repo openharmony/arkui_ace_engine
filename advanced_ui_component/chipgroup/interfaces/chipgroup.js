@@ -24,6 +24,7 @@ const ChipSize = requireNapi('arkui.advanced.Chip').ChipSize;
 const AccessibilitySelectedType = requireNapi('arkui.advanced.Chip').AccessibilitySelectedType;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 const deviceInfo = requireNapi('deviceInfo');
+const uiMaterial = requireNapi('arkui.uiMaterial');
 const noop = selectedIndexes => {};
 const colorStops = [
   ['rgba(0, 0, 0, 1)', 0],
@@ -338,7 +339,7 @@ export class IconGroupSuffix extends ViewPU {
               });
             } else {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.IconButtonsBuilder.bind(this)(ObservedObject.GetRawObject(this.iconBackgroundSystemMaterial));
+                this.IconButtonsBuilder.bind(this)(resolveSystemMaterial(this.iconBackgroundSystemMaterial));
               });
             }
           }, If);
@@ -787,7 +788,7 @@ export class ChipGroup extends ViewPU {
                   enabled: () => true,
                   activated: () => this.isSelected(index),
                   backgroundColor: () => this.getBackgroundColor(),
-                  backgroundSystemMaterial: () => createSubECMaterial(this.backgroundSystemMaterial),
+                  backgroundSystemMaterial: () => createSubECMaterial(material),
                   size: () => this.getChipSize(),
                   activatedBackgroundColor: () => this.getSelectedBackgroundColor(),
                   accessibilitySelectedType: () =>
@@ -886,7 +887,7 @@ export class ChipGroup extends ViewPU {
               });
             } else {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.ChipItemsBuilder.bind(this)(ObservedObject.GetRawObject(this.backgroundSystemMaterial));
+                this.ChipItemsBuilder.bind(this)(resolveSystemMaterial(this.backgroundSystemMaterial));
               });
             }
           }, If);
@@ -976,6 +977,14 @@ export class ChipGroup extends ViewPU {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
+function resolveSystemMaterial(material) {
+  let info = uiMaterial.getMaterialInfo();
+  if (info.state === uiMaterial.MaterialState.DISABLE) {
+    return undefined;
+  }
+  return info.state === uiMaterial.MaterialState.ENABLE && !material ?
+    new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) : material;
+}
 function enableEffectComponent(material) {
   return false;
 }
@@ -983,7 +992,7 @@ function createECMaterial(material) {
   return undefined;
 }
 function createSubECMaterial(material) {
-  return material;
+  return resolveSystemMaterial(material);
 }
 
 export default {

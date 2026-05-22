@@ -51,11 +51,20 @@ import { int32 } from '@koalaui/compat';
 import { SaveButtonCallback, PasteButtonCallback } from '#generated';
 import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
 import { default as text } from '@ohos.graphics.text'
+import { StackLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { RowLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { ColumnLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { CustomLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
+    native static _DynamicLayout_construct(id: KInt, flags: KInt): KPointer;
+    native static _SetDynamicLayoutStackLayoutAlgorithm(ptr: KPointer, value: StackLayoutAlgorithm): void;
+    native static _SetDynamicLayoutRowLayoutAlgorithm(ptr: KPointer, value: RowLayoutAlgorithm): void;
+    native static _SetDynamicLayoutColumnLayoutAlgorithm(ptr: KPointer, value: ColumnLayoutAlgorithm): void;
+    native static _SetDynamicLayoutCustomLayoutAlgorithm(ptr: KPointer, value: CustomLayoutAlgorithm, frameNode: FrameNode): void;
     native static _Extractors_ToDrawableDescriptorPtr(value: DrawableDescriptor): KPointer;
     native static _Extractors_ToDrawingColorFilterPtr(drawingColorFilter: drawing.ColorFilter): KPointer;
     native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;

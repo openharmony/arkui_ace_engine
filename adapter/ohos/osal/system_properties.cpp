@@ -579,6 +579,16 @@ UiMaterialLevel ReadUiMaterialLevel()
     return result;
 }
 
+bool ReadUiMaterialEnabled()
+{
+    bool result = true;
+    if (MaterialUtils::GetDeviceUiMaterialEnabled(result)) {
+        return result;
+    }
+    result = system::GetBoolParameter("const.support_immersive", true);
+    return result;
+}
+
 bool IsAscending(const std::vector<double>& nums)
 {
     for (size_t i = 1; i < nums.size(); ++i) {
@@ -1600,6 +1610,12 @@ UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
     static auto uiMaterialLevel = ReadUiMaterialLevel();
     return uiMaterialLevel;
+}
+
+bool SystemProperties::IsDeviceSystemMaterialSupported()
+{
+    static auto enabled = ReadUiMaterialEnabled();
+    return enabled;
 }
 
 int32_t SystemProperties::GetFormTaskPriority()

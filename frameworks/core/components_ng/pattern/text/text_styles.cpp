@@ -41,6 +41,21 @@ namespace OHOS::Ace::NG {
     } while (false)
 
 namespace {
+#define UPDATE_DIMENSION_STYLE_TO_PX(group, name, styleName)                                          \
+    do {                                                                                               \
+        Dimension value;                                                                               \
+        if (group && (group)->prop##name.has_value()) {                                                \
+            value = (group)->prop##name.value();                                                       \
+        } else if (textTheme) {                                                                        \
+            value = textTheme->GetTextStyle().Get##styleName();                                        \
+        } else {                                                                                       \
+            break;                                                                                     \
+        }                                                                                              \
+        auto px = value.ConvertToPxDistribute(                                                         \
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());       \
+        textStyle.Set##styleName(Dimension(px, DimensionUnit::PX));                                    \
+    } while (false)
+
 void UpdateSymbolTextStyleWithTheme(const std::unique_ptr<SymbolStyle>& symbolStyle, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme)
 {
@@ -60,6 +75,90 @@ void UpdateSymbolTextStyleWithTheme(const std::unique_ptr<SymbolStyle>& symbolSt
         textStyle.SetShaderStyle(textTheme->GetTextStyle().GetShaderStyle());
     }
 }
+
+void UpdateFontStyleWithTheme(const std::unique_ptr<FontStyle>& fontStyle, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme, bool convertOtherDimensionToPx)
+{
+    if (convertOtherDimensionToPx) {
+        UPDATE_DIMENSION_STYLE_TO_PX(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
+        UPDATE_DIMENSION_STYLE_TO_PX(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
+        UPDATE_DIMENSION_STYLE_TO_PX(fontStyle, LetterSpacing, LetterSpacing);
+    } else {
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, LetterSpacing, LetterSpacing);
+    }
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextShadow, TextShadows);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ItalicFontStyle, FontStyle);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontWeight, FontWeight);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontFeature, FontFeatures);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontVariations, FontVariations);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecoration, TextDecoration);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationColor, TextDecorationColor);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationStyle, TextDecorationStyle);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextCase, TextCase);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableDeviceFontWeightCategory, EnableDeviceFontWeightCategory);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, StrokeJoinStyle, StrokeJoinStyle);
+}
+
+void UpdateTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme, bool convertOtherDimensionToPx)
+{
+    if (convertOtherDimensionToPx) {
+        UPDATE_DIMENSION_STYLE_TO_PX(textLineStyle, LineHeight, LineHeight);
+        UPDATE_DIMENSION_STYLE_TO_PX(textLineStyle, BaselineOffset, BaselineOffset);
+        UPDATE_DIMENSION_STYLE_TO_PX(textLineStyle, TextIndent, TextIndent);
+        UPDATE_DIMENSION_STYLE_TO_PX(textLineStyle, LineSpacing, LineSpacing);
+        UPDATE_DIMENSION_STYLE_TO_PX(textLineStyle, ParagraphSpacing, ParagraphSpacing);
+    } else {
+        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
+        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
+        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
+        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineSpacing, LineSpacing);
+        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ParagraphSpacing, ParagraphSpacing);
+    }
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeightMultiply, LineHeightMultiply);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextBaseline, TextBaseline);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextOverflow, TextOverflow);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextAlign, TextAlign);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextVerticalAlign, ParagraphVerticalAlign);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, MaxLines, MaxLines);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, WordBreak, WordBreak);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, EllipsisMode, EllipsisMode);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineBreakStrategy, LineBreakStrategy);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, PunctuationOverflow, PunctuationOverflow);
+    if (textLineStyle && (textLineStyle)->GetGradient().has_value()) {
+        textStyle.SetGradient(GradientConvert::ToGradient((textLineStyle)->GetGradient()));
+    } else if (textTheme) {
+        textStyle.SetGradient(textTheme->GetTextStyle().GetGradient());
+    }
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ColorShaderStyle, ColorShaderStyle);
+}
+
+void UpdateTextStyleFromFontAndTextLine(const std::unique_ptr<FontStyle>& fontStyle,
+    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme,
+    bool convertFontSizeToPx, bool convertOtherDimensionToPx, const RefPtr<Pattern>& pattern)
+{
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, AllowScale, AllowScale);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
+    if (pattern) {
+        textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+    }
+    if (convertFontSizeToPx) {
+        UPDATE_DIMENSION_STYLE_TO_PX(fontStyle, FontSize, FontSize);
+    } else {
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
+    }
+    UpdateFontStyleWithTheme(fontStyle, textStyle, textTheme, convertOtherDimensionToPx);
+    UpdateTextLineStyleWithTheme(textLineStyle, textStyle, textTheme, convertOtherDimensionToPx);
+}
 } // namespace
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
@@ -78,101 +177,28 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
     TextStyle& textStyle, bool isSymbol, const RefPtr<Pattern>& pattern)
 {
-    UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol, pattern);
-}
-
-void UpdateFontSizeWithPxUnit(
-    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme)
-{
-    auto& fontStyle = property->GetFontStyle();
-    Dimension fontSize;
-    if (fontStyle && fontStyle->HasFontSize()) {
-        fontSize = fontStyle->GetFontSizeValue();
-    } else {
-        fontSize = textTheme->GetTextStyle().GetFontSize();
-    }
-    auto fontSizePx = fontSize.ConvertToPxDistributeWithEnv(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(),
-        textStyle.IsAllowScale(), textStyle.GetEnvFontScale());
-    textStyle.SetFontSize(Dimension(fontSizePx, DimensionUnit::PX));
-}
-
-void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol, const RefPtr<Pattern>& pattern)
-{
     CHECK_NULL_VOID(textTheme);
     auto& fontStyle = property->GetFontStyle();
     auto& textLineStyle = property->GetTextLineStyle();
     auto& symbolStyle = property->GetSymbolStyle();
-    // The setting of AllowScale, MinFontScale, MaxFontScale must be done before any Dimension-type properties that
-    // depend on its value.
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, AllowScale, AllowScale);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
 
-    if (pattern) {
-        textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
-    }
-
-    if (property->IsNewMaterial()) {
-        UpdateFontSizeWithPxUnit(property, textStyle, textTheme);
-    } else {
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
-    }
-
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, LetterSpacing, LetterSpacing);
-
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextShadow, TextShadows);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ItalicFontStyle, FontStyle);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontWeight, FontWeight);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontFeature, FontFeatures);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontVariations, FontVariations);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecoration, TextDecoration);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationColor, TextDecorationColor);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationStyle, TextDecorationStyle);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextCase, TextCase);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableDeviceFontWeightCategory, EnableDeviceFontWeightCategory);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, StrokeJoinStyle, StrokeJoinStyle);
+    bool convertFontSizeToPx = property->IsNewMaterial();
+    UpdateTextStyleFromFontAndTextLine(
+        fontStyle, textLineStyle, textStyle, textTheme, convertFontSizeToPx, false, pattern);
 
     if (isSymbol) {
         UpdateSymbolTextStyleWithTheme(symbolStyle, textStyle, textTheme);
     }
-
-    UseSelfTextLineStyleWithTheme(textLineStyle, textStyle, textTheme);
 }
 
-void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme)
+void UpdateTextStyleFromProperty(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
+    TextStyle& textStyle, const RefPtr<Pattern>& pattern)
 {
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeightMultiply, LineHeightMultiply);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineSpacing, LineSpacing);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextBaseline, TextBaseline);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextOverflow, TextOverflow);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextAlign, TextAlign);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextVerticalAlign, ParagraphVerticalAlign);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, MaxLines, MaxLines);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, WordBreak, WordBreak);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, EllipsisMode, EllipsisMode);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineBreakStrategy, LineBreakStrategy);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ParagraphSpacing, ParagraphSpacing);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, PunctuationOverflow, PunctuationOverflow);
-    if (textLineStyle && (textLineStyle)->GetGradient().has_value()) {
-        textStyle.SetGradient(GradientConvert::ToGradient((textLineStyle)->GetGradient()));
-    } else if (textTheme) {
-        textStyle.SetGradient(textTheme->GetTextStyle().GetGradient());
-    }
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ColorShaderStyle, ColorShaderStyle);
+    CHECK_NULL_VOID(textTheme);
+    auto& fontStyle = property->GetFontStyle();
+    auto& textLineStyle = property->GetTextLineStyle();
+
+    UpdateTextStyleFromFontAndTextLine(fontStyle, textLineStyle, textStyle, textTheme, true, true, pattern);
 }
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
@@ -429,5 +455,29 @@ PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign vert
             alignment = PlaceholderAlignment::BOTTOM;
     }
     return alignment;
+}
+
+std::string GetFontVariationsInJson(const FONT_VARIATIONS_LIST& fontVariations)
+{
+    if (fontVariations.empty()) {
+        return "[]";
+    }
+    std::string result = "[";
+    for (size_t i = 0; i < fontVariations.size(); ++i) {
+        const auto& item = fontVariations[i];
+        result.append("{axis:")
+            .append(item.axis)
+            .append(", value:")
+            .append(std::to_string(item.value));
+        if (item.isNormalized.has_value()) {
+            result.append(", isNormalized:").append(item.isNormalized.value() ? "true" : "false");
+        }
+        result.append("}");
+        if (i + 1 < fontVariations.size()) {
+            result.append(", ");
+        }
+    }
+    result.append("]");
+    return result;
 }
 } // namespace OHOS::Ace::NG

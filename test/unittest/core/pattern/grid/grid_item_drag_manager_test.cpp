@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_ng/pattern/grid/grid_item_drag_manager.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 

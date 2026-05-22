@@ -225,6 +225,7 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
         BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
+        return;
     }
     for (const auto& child : childList) {
         if (pattern->IsImageBlockNode(child->GetHostNode())) {

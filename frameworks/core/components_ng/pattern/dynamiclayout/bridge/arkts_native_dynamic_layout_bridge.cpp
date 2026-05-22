@@ -62,7 +62,7 @@ void ParseLinearMainAxisAlignment(EcmaVM* vm, const Local<JSValueRef>& justifyVa
 void ParseSpace(EcmaVM* vm, const Local<JSValueRef>& spaceVal, CalcDimension &result)
 {
     if (spaceVal->IsObject(vm) && (!ArkTSUtils::ParseJsLengthMetrics(vm, spaceVal, result) || result.IsNegative())) {
-        result = CalcDimension(0);
+        result = CalcDimension(0, DimensionUnit::VP);
     }
 }
 
@@ -84,7 +84,7 @@ void ParseLinearAlgorithmOption(
     auto reverseVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isReverse"));
     FlexAlign crossAxisAlign = FlexAlign::CENTER;
     FlexAlign justifyContent = FlexAlign::FLEX_START;
-    CalcDimension space;
+    CalcDimension space(0, DimensionUnit::VP);
     bool isReverse = false;
     ParseLinearCrossAxisAlignment(vm, alignItemVal, crossAxisAlign);
     ParseLinearMainAxisAlignment(vm, justifyVal, justifyContent);

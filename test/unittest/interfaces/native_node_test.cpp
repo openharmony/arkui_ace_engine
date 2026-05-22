@@ -7303,6 +7303,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest085, TestSize.Level1)
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     ret = OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(nullptr, nullptr, LayoutCallback);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(node, nullptr, nullptr);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+
 }
 
 /**
@@ -7319,6 +7322,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest086, TestSize.Level1)
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     ret = OH_ArkUI_RegisterDrawCallbackOnNodeHandle(nullptr, nullptr, LayoutCallback);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_RegisterDrawCallbackOnNodeHandle(node, nullptr, nullptr);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+
 }
 
 /**

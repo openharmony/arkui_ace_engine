@@ -14,6 +14,10 @@
  */
 
 #include "list_test_ng.h"
+#include "core/components_ng/pattern/list/list_item_layout_property.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"

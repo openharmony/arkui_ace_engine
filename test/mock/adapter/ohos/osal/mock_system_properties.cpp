@@ -518,4 +518,9 @@ UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
     return g_uiMaterialLevel;
 }
+
+bool SystemProperties::IsDeviceSystemMaterialSupported()
+{
+    return true;
+}
 } // namespace OHOS::Ace

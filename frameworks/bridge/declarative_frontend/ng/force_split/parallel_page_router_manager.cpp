@@ -465,7 +465,7 @@ bool ParallelPageRouterManager::CheckSecondaryPageNeedClear(bool isPush)
     CHECK_NULL_RETURN(pipelineContext, false);
     auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipelineContext->GetStageManager());
     CHECK_NULL_RETURN(stageManager, false);
-    if (pageRouterStack_.empty()) {
+    if (pageRouterStack_.empty() || !isPush) {
         stageManager->SetNeedClearSecondaryPage(false);
         return false;
     }

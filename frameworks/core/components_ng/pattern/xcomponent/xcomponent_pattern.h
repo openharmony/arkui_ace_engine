@@ -441,6 +441,7 @@ protected:
 
     OffsetF globalPosition_;
     void NativeXComponentOffset(double x, double y);
+    std::string GetLeakType();
 
 private:
     void OnAreaChangedInner() override;

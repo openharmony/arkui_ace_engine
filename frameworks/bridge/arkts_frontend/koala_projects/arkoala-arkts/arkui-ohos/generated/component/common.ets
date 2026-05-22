@@ -23,7 +23,7 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { unifiedDataChannel_UnifiedData_serializer } from './../framework/ohos.data.unifiedDataChannel'
 import { default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
-import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer } from './units'
+import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer, AccessibilityCustomAction, AccessibilityCustomAction_serializer } from './units'
 import { KeyType, KeySource, Color as arkui_component_enums_Color, TouchType, InteractionHand, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, UIMaterialAnimationMode, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, GestureCollectIntervention, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, GestureShortcut, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { global_resource_Resource_serializer } from './../framework/resource'
@@ -3328,9 +3328,18 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
 }
 export class ArkCommonMethodPeer extends PeerNode {
     commonMethodAttributeSet?: CommonMethodModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+    // instructive change start
+    // REASON: there is possibly bug in panda and vendor tests can not be launched with joined constructor declaration
+    public constructor(peerPtr: KPointer, id: int32) {
+        this(peerPtr, id, '', 0)
+    }
+    public constructor(peerPtr: KPointer, id: int32, name: string) {
+        this(peerPtr, id, name, 0)
+    }
+    public constructor(peerPtr: KPointer, id: int32, name: string, flags: int32) {
         super(peerPtr, id, name, flags)
     }
+    // instructive change end
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCommonMethodPeer {
         const peerId = PeerNode.nextId()
         const _peerPtr = ArkUIGeneratedNativeModule._CommonMethod_construct(peerId, flags)
@@ -5849,10 +5858,38 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityActionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setAccessibilityCustomActionsAttribute(value: Array<AccessibilityCustomAction> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement: AccessibilityCustomAction = valueTmpValue[valueTmpValueCounterI]
+                AccessibilityCustomAction_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityCustomActions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSmartGestureShortcutAttribute(value: SmartGestureShortcutOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         SmartGestureShortcutOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._CommonMethod_setSmartGestureShortcut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setDoubleSidedAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDoubleSided(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
@@ -10826,6 +10863,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method accessibilityActionOptions')
     }
+    accessibilityCustomActions(value: Array<AccessibilityCustomAction> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityCustomActions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method accessibilityCustomActions can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method accessibilityCustomActions')
+    }
     smartGestureShortcut(value: SmartGestureShortcutOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10837,6 +10886,18 @@ export interface CommonMethod {
             }
         }
         throw new Error('Unimplemented method smartGestureShortcut')
+    }
+    doubleSided(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.doubleSided(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method doubleSided can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method doubleSided')
     }
     customProperty(name: string, value: CustomProperty): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
@@ -12942,9 +13003,18 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setAccessibilityActionOptionsAttribute(value_casted)
         return this
     }
+    public accessibilityCustomActions(value: Array<AccessibilityCustomAction> | undefined): this {
+        this.getPeer()?.setAccessibilityCustomActionsAttribute(value)
+        return this
+    }
     public smartGestureShortcut(value: SmartGestureShortcutOptions): this {
         const value_casted = value as (SmartGestureShortcutOptions)
         this.getPeer()?.setSmartGestureShortcutAttribute(value_casted)
+        return this
+    }
+    public doubleSided(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setDoubleSidedAttribute(value_casted)
         return this
     }
     public customProperty(name: string, value: CustomProperty): this {

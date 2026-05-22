@@ -158,6 +158,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         ++currentIndex;
         if (isGroup) {
             MeasureGroup(layoutWrapper, wrapper, currentIndex, startPos, true);
+        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
+            MeasureLazyChild(wrapper, currentIndex, startPos, true);
         } else if (CheckNeedMeasure(wrapper)) {
             MeasureItem(wrapper, currentIndex, true);
         }
@@ -168,8 +170,10 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         endPos = startPos + mainLen;
         for (int32_t i = 0; i < cnt; i++) {
             auto wrap = GetListItem(layoutWrapper, currentIndex - i);
-            int32_t id = wrap->GetHostNode()->GetId();
-            SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
+            if (wrap && wrap->GetHostNode()) {
+                int32_t id = wrap->GetHostNode()->GetId();
+                SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
+            }
         }
     }
     return cnt;
@@ -211,6 +215,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         cnt++;
         if (isGroup) {
             MeasureGroup(layoutWrapper, wrapper, currentIndex, endPos, false);
+        } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
+            MeasureLazyChild(wrapper, currentIndex, endPos, false);
         } else if (CheckNeedMeasure(wrapper)) {
             MeasureItem(wrapper, currentIndex, false);
         }

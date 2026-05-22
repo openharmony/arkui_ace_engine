@@ -1524,7 +1524,7 @@ bool ContainerPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->SetNeedCallChildrenUpdate(false);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
     bool result = false;

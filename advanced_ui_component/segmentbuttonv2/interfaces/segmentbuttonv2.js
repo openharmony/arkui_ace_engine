@@ -43,6 +43,7 @@ const SMALLEST_MAX_FONT_SCALE = 1;
 const LARGEST_MAX_FONT_SCALE = 2;
 const SMALLEST_MIN_FONT_SCALE = 0;
 const LARGEST_MIN_FONT_SCALE = 1;
+const COLOR_RESOURCE_TYPE = 10001;
 const tabSimpleTheme = {
   buttonBackgroundColor: {
     id: -1,
@@ -3363,15 +3364,28 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     }
     return this.hasHybrid ? this.theme.hybridItemMinHeight : this.theme.itemMinHeight;
   }
+  getColorMetricsResourceColor(colorMetrics) {
+    const resourceId = colorMetrics.getResourceId();
+    if (resourceId !== undefined && resourceId !== -1) {
+      const abilityContext = this.getUIContext().getHostContext();
+      return {
+        id: resourceId, type: COLOR_RESOURCE_TYPE,
+        bundleName: abilityContext?.abilityInfo?.bundleName ?? '',
+        moduleName: abilityContext?.abilityInfo?.moduleName ?? ''
+      };
+    }
+    return colorMetrics.color;
+  }
+
   getItemFontColor() {
     if (this.selected) {
       if (this.itemSelectedFontColor) {
-        return this.itemSelectedFontColor.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedFontColor);
       }
       return this.theme.itemSelectedFontColor;
     }
     if (this.itemFontColor) {
-      return this.itemFontColor.color;
+      return this.getColorMetricsResourceColor(this.itemFontColor);
     }
     return this.theme.itemFontColor;
   }
@@ -3410,12 +3424,12 @@ class SegmentButtonV2ItemContent extends ViewV2 {
   getItemIconFillColor() {
     if (this.selected) {
       if (this.itemSelectedIconFillColor) {
-        return this.itemSelectedIconFillColor.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedIconFillColor);
       }
       return this.theme.itemSelectedIconFillColor;
     }
     if (this.itemIconFillColor) {
-      return this.itemIconFillColor.color;
+      return this.getColorMetricsResourceColor(this.itemIconFillColor);
     }
     return this.theme.itemIconFillColor;
   }

@@ -571,7 +571,6 @@ export enum PageFlipMode {
     SINGLE = 1
 }
 export enum CrownAction {
-    BEGIN = 0,
     UPDATE = 1,
     END = 2
 }

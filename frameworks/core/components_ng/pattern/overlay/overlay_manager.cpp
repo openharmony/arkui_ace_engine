@@ -4911,15 +4911,17 @@ void OverlayManager::UpdateSheetRender(
     if (sheetStyle.borderColor.has_value()) {
         sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
     }
-    if (sheetStyle.shadow.has_value()) {
-        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-    } else if (sheetTheme->IsOuterBorderEnable()) {
-        auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
-        auto shadow = sheetNodePattern->GetShadowFromTheme(style);
-        sheetRenderContext->UpdateBackShadow(shadow);
-    } else if (!isPartialUpdate) {
-        auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
-        sheetRenderContext->UpdateBackShadow(shadow);
+    if (!(sheetStyle.systemMaterial && sheetStyle.systemMaterial->IsForceShadow())) {
+        if (sheetStyle.shadow.has_value()) {
+            sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+        } else if (sheetTheme->IsOuterBorderEnable()) {
+            auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
+            auto shadow = sheetNodePattern->GetShadowFromTheme(style);
+            sheetRenderContext->UpdateBackShadow(shadow);
+        } else if (!isPartialUpdate) {
+            auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
+            sheetRenderContext->UpdateBackShadow(shadow);
+        }
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 
@@ -5464,8 +5466,15 @@ void OverlayManager::SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode,
             sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
         }
     } else if (sheetStyle.backgroundColor.has_value() || !isPartialUpdate) {
-        sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value_or(
-            sheetTheme->GetSheetBackgoundColor()));
+        // - has systemMaterial and not SMOOTH -> do not set backgroundColor
+        // - has systemMaterial and SMOOTH -> use default backgroundColor
+        // - no systemMaterial -> follow the normal backgroundColor setting logic
+        if (!sheetStyle.systemMaterial) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(
+                sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
+        } else if (sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+        }
     }
 }
 
@@ -5998,13 +6007,18 @@ void OverlayManager::MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard
     customKeyboardMap_[targetId] = customKeyboard;
     customKeyboardNode_ = WeakClaim(RawPtr(customKeyboard));
     oldTargetId_ = targetId;
-    if (!isKeyBoardContinue_) {
-        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard] {
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard, isKeyBoardContinue = isKeyBoardContinue_] {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        if (!isKeyBoardContinue) {
             overlayManager->PlayKeyboardTransition(customKeyboard, true);
-        });
-    }
+            return;
+        }
+        auto renderContext = customKeyboard->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto keyboardOffsetInfo = overlayManager->CalcCustomKeyboardOffset(customKeyboard);
+        renderContext->OnTransformTranslateUpdate({ 0.0f, keyboardOffsetInfo.finalOffset, 0.0f });
+    });
 }
 
 void OverlayManager::CloseKeyboard(int32_t targetId)

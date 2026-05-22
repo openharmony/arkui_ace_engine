@@ -1899,6 +1899,7 @@ void TextFieldPattern::InitFocusEvent()
     auto keyTask = [weak = WeakClaim(this)](const KeyEvent& keyEvent) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->ReportShiftAndDirectionEvent(keyEvent);
         return pattern->OnKeyEvent(keyEvent);
     };
     focusHub->SetOnKeyEventInternal(keyTask);
@@ -5698,6 +5699,24 @@ void TextFieldPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
     }
 }
 
+void TextFieldPattern::ReportShiftAndDirectionEvent(const KeyEvent& keyEvent)
+{
+    bool isDirectionalKey = keyEvent.HasKey(KeyCode::KEY_DPAD_UP) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_DOWN) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_LEFT) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_RIGHT);
+    auto action = keyEvent.action;
+    bool isDirectionPressed = (!isDirectionalKey) &&
+            (action == KeyAction::UP || action == KeyAction::CANCEL);
+    if (isDirectionPressed && shiftFlag_) {
+        auto selectStart = selectController_->GetStartIndex();
+ 	    auto selectEnd = selectController_->GetEndIndex();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
+    }
+}
+
 void TextFieldPattern::UpdateCaretByClick(const Offset& localOffset)
 {
     if (shiftFlag_) {
@@ -8012,9 +8031,6 @@ void TextFieldPattern::AfterSelection()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     showSelect_ = IsSelected();
     UpdateCaretInfoToController();
-    auto startIndex = selectController_->GetStartIndex();
-    auto endIndex = selectController_->GetEndIndex();
-    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", startIndex, endIndex);
 }
 
 void TextFieldPattern::HandleSelectionUp()

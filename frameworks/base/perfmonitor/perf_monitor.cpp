@@ -113,6 +113,12 @@ void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceTyp
     PerfInterfaces::RecordInputEvent(type, sourceType, time);
 }
 
+void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time,
+    int32_t xPos, int32_t yPos)
+{
+    PerfInterfaces::RecordInputEvent(type, sourceType, time, xPos, yPos);
+}
+
 void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName)
 {
     PerfInterfaces::SetFrameTime(vsyncTime, duration, jank, windowName);

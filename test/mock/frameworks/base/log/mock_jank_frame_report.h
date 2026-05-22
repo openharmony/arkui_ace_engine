@@ -41,6 +41,8 @@ public:
         note = std::nullopt;
         time = std::nullopt;
         isJsApi = std::nullopt;
+        xPos = std::nullopt;
+        yPos = std::nullopt;
     }
     void TearDown()
     {
@@ -54,6 +56,8 @@ public:
     std::optional<std::string> note = std::nullopt;
     std::optional<int64_t> time = std::nullopt;
     std::optional<bool> isJsApi = std::nullopt;
+    std::optional<int32_t> xPos = std::nullopt;
+    std::optional<int32_t> yPos = std::nullopt;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_JUNK_FRAME_H
