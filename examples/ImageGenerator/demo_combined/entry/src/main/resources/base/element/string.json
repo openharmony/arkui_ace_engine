@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Image Generator Demo Combined Module"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Image Generator Demo Combined Entry Ability"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "ImageGeneratorDemo"
+    }
+  ]
+}
