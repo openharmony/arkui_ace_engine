@@ -2425,6 +2425,11 @@ ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFl
     return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
 }
 
+ArkUI_Int32 SetSystemMaterial(ArkUIDialogHandle handle, ArkUI_ImmersiveMaterial* material)
+{
+    return CustomDialog::SetSystemMaterial(handle, material);
+}
+
 ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
 {
     return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
@@ -2542,6 +2547,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .closeCustomDialog = CloseCustomDialog,
         .setSubwindowMode = SetDialogSubwindowMode,
         .setDisplayModeInSubWindow = SetDialogDisplayModeInSubWindow,
+        .setSystemMaterial = SetSystemMaterial,
         .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
         .setBackgroundEffect = SetBackgroundEffect
     };

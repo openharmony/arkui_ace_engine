@@ -801,6 +801,16 @@ int32_t OH_ArkUI_CustomDialog_GetState(ArkUI_NativeDialogHandle handle, ArkUI_Di
     return result;
 }
 
+int32_t OH_ArkUI_NativeModule_CustomDialog_SetSystemMaterial(
+    ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMaterialHandle material)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setSystemMaterial(handle->controller, material);
+}
+
 #ifdef __cplusplus
 };
 #endif
