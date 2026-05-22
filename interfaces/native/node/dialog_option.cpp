@@ -458,6 +458,16 @@ int32_t OH_ArkUI_CustomDialog_SetDisplayModeInSubWindow(
         options->handle, static_cast<int32_t>(displayModeInSubWindow));
 }
 
+int32_t OH_ArkUI_NativeModule_CustomDialog_SetSystemMaterialInOptions(
+    ArkUI_CustomDialogOptions* options, ArkUI_ImmersiveMaterialHandle material)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !options) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setSystemMaterial(options->handle, material);
+}
+
 int32_t OH_ArkUI_CustomDialog_SetMask(
     ArkUI_CustomDialogOptions* options, uint32_t maskColor, const ArkUI_Rect* maskRect)
 {

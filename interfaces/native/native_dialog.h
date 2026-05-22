@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include "native_type.h"
 #include "native_node.h"
+#include "native_material.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -1226,6 +1227,34 @@ int32_t OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions(
  */
 int32_t OH_ArkUI_CustomDialog_SetBackgroundEffect(
     ArkUI_CustomDialogOptions* options, const ArkUI_AttributeItem* backgroundEffect);
+
+/**
+ * @brief Sets the system material of the dialog box.
+ *
+ * @param options Dialog box parameters.
+ * @param material Pointer to material object. The type is {@link ArkUI_ImmersiveMaterialHandle}.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
+ * @since 26.0.0
+ */
+int32_t OH_ArkUI_NativeModule_CustomDialog_SetSystemMaterialInOptions(
+    ArkUI_CustomDialogOptions* options, ArkUI_ImmersiveMaterialHandle material);
+
+ /**
+  * @brief Sets the system material of the dialog box.
+  *
+  * @param handle Indicates the pointer to the custom dialog box controller.
+  * @param material Pointer to material object. The type is {@link ArkUI_ImmersiveMaterialHandle}.
+  * @return <ul>
+  *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+  *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+  *         </ul>
+  * @since 26.0.0
+  */
+int32_t OH_ArkUI_NativeModule_CustomDialog_SetSystemMaterial(
+    ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMaterialHandle material);
 
 #ifdef __cplusplus
 };
