@@ -2116,6 +2116,7 @@ private:
     void HandleMouseEvent(MouseInfo& info);
     bool HandleMouseEventByScrollBar(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
+    void ReportShiftAndDirectionEvent(const KeyEvent& keyEvent);
     void UpdateShiftFlag(const KeyEvent& keyEvent) override;
     void UpdateCaretByClick(const Offset& localOffset);
     void HandleRightMouseEvent(MouseInfo& info);

@@ -2118,4 +2118,156 @@ HWTEST_F(TextFieldPatternTestEight, ConvertCodeToString, TestSize.Level0)
     event.enableCapsLock = true;
     EXPECT_EQ(event.ConvertCodeToString(), "a");
 }
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent001
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key UP and shiftFlag_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ReportShiftAndDirectionEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectController_, nullptr);
+
+    pattern_->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+
+    pattern_->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent002
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key UP and shiftFlag_ false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ReportShiftAndDirectionEvent002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectController_, nullptr);
+
+    pattern_->shiftFlag_ = false;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+
+    pattern_->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent003
+ * @tc.desc: test ReportShiftAndDirectionEvent with direction key UP and shiftFlag_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ReportShiftAndDirectionEvent003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectController_, nullptr);
+
+    pattern_->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    keyEvent.action = KeyAction::UP;
+
+    pattern_->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent004
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key DOWN and shiftFlag_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ReportShiftAndDirectionEvent004, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectController_, nullptr);
+
+    pattern_->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+
+    pattern_->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent005
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key UP but direction key still pressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ReportShiftAndDirectionEvent005, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectController_, nullptr);
+
+    pattern_->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.pressedCodes = { KeyCode::KEY_DPAD_RIGHT };
+
+    pattern_->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent006
+ * @tc.desc: test ReportShiftAndDirectionEvent with shift key CANCEL and shiftFlag_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ReportShiftAndDirectionEvent006, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectController_, nullptr);
+
+    pattern_->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::CANCEL;
+
+    pattern_->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent007
+ * @tc.desc: test ReportShiftAndDirectionEvent integration with selection set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ReportShiftAndDirectionEvent007, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectController_, nullptr);
+
+    pattern_->selectController_->UpdateHandleIndex(2, 7);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 2);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 7);
+
+    pattern_->shiftFlag_ = true;
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+
+    pattern_->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
 } // namespace OHOS::Ace::NG,

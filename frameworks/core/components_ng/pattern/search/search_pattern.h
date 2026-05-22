@@ -256,6 +256,7 @@ private:
     void StopEditing();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void ReportShiftAndDirectionEvent(const KeyEvent& keyEvent);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(bool recoverFlag = false);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
