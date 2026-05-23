@@ -5376,7 +5376,6 @@ let HdrType;
 (function (HdrType) {
   HdrType[HdrType.DEFAULT = 0] = 'DEFAULT';
   HdrType[HdrType.AIHDR = 1] = 'AIHDR';
-  HdrType[HdrType.EDR = 2] = 'EDR';
 })(HdrType || (HdrType = {}));
 
 let MicrophoneCaptureState;
