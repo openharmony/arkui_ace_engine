@@ -55,11 +55,13 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_SCALE = 1.05f;
 constexpr int32_t DEFAULT_Z_INDEX = 100;
-constexpr float HOT_ZONE_SIZE_VP = 59.0f;
+constexpr Dimension HOT_ZONE_HEIGHT = 59.0_vp;
+constexpr Dimension HOT_ZONE_WIDTH = 26.0_vp;
 constexpr float DEFAULT_ITEM_SIZE = 100.0f;
 constexpr int32_t LONG_PRESS_ANIMATION_DURATION = 300;
 constexpr int32_t SWAP_ANIMATION_DURATION = 30;
 constexpr int32_t POWER_FOR_DISTANCE = 2;
+constexpr float NEARBY_SCALE_RATIO = 0.05f;
 
 int32_t GetForEachIndexInGrid(const RefPtr<ForEachBaseNode>& forEach)
 {
@@ -101,6 +103,7 @@ void GridItemDragManager::Reset()
     if (dragState_ != GridItemDragState::DRAGGING) {
         return;
     }
+    ResetPrevScaleNode();
     auto grid = gridNode_.Upgrade();
     if (!grid) {
         return;
@@ -361,7 +364,10 @@ void GridItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
         return;
     }
     PointF point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-    HandleAutoScroll(from, point, geometry->GetMarginFrameRect());
+    auto frameRect = geometry->GetMarginFrameRect();
+    HandleAutoScroll(from, point, frameRect);
+    auto paddingOffset = GetParentPaddingOffset();
+    ScaleNearbyItems(from, frameRect, realOffset_ - frameRect.GetOffset() + paddingOffset);
     ProcessSwap(from);
 }
 
@@ -437,6 +443,7 @@ void GridItemDragManager::HandleZIndexAndPosition()
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
+            manager->ResetPrevScaleNode();
             auto host = manager->GetHost();
             CHECK_NULL_VOID(host);
             auto renderContext = host->GetRenderContext();
@@ -563,6 +570,14 @@ GridItemDragManager::MovementBounds GridItemDragManager::ComputeMovementBounds(
     float singleColWidth = currentSpanInfo.colSpan > 0 ? crossItemSize / currentSpanInfo.colSpan : crossItemSize;
     int32_t rowMove = static_cast<int32_t>(std::round(mainDelta / singleRowHeight));
     int32_t colMove = static_cast<int32_t>(std::round(crossDelta / singleColWidth));
+    auto grid = gridNode_.Upgrade();
+    if (grid) {
+        auto layoutProperty = grid->GetLayoutProperty<GridLayoutProperty>();
+        if (axis_ == Axis::HORIZONTAL && layoutProperty &&
+            layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+            rowMove = -rowMove;
+        }
+    }
     if (rowMove == 0 && colMove == 0) {
         bounds.zeroMove = true;
         return bounds;
@@ -731,14 +746,6 @@ float GridItemDragManager::CalculateMainPosition(int32_t targetRow, float mainGa
     return mainPos;
 }
 
-std::optional<OffsetF> GridItemDragManager::CreatePositionFromCoords(float mainPos, float crossPos) const
-{
-    if (axis_ == Axis::VERTICAL) {
-        return OffsetF(crossPos, mainPos);
-    } else {
-        return OffsetF(mainPos, crossPos);
-    }
-}
 
 std::pair<std::vector<double>, float> GridItemDragManager::ResolveCrossLens(
     const RefPtr<GeometryNode>& gridGeometry,
@@ -823,12 +830,13 @@ std::optional<OffsetF> GridItemDragManager::ApplyAlignmentAndRTL(const RefPtr<Fr
     if (mainOffset + childMainSize <= 0.0f || mainOffset >= mainSize) {
         return std::nullopt;
     }
-    return CreatePositionFromCoords(offset.GetY(), offset.GetX());
+    return offset;
 }
 
 std::optional<OffsetF> GridItemDragManager::SearchRowForTarget(const std::map<int32_t, int32_t>& cols,
     int32_t targetIdx, int32_t row, const RefPtr<FrameNode>& node, int32_t colSpan,
-    float mainGap, float crossGap, const GridLayoutInfo& info) const
+    float mainGap, const std::vector<double>& crossLens, float adjustedCrossGap,
+    const GridLayoutInfo& info) const
 {
     for (const auto& [col, idx] : cols) {
         if (idx != targetIdx) {
@@ -837,7 +845,6 @@ std::optional<OffsetF> GridItemDragManager::SearchRowForTarget(const std::map<in
         auto grid = gridNode_.Upgrade();
         auto gridGeometry = grid ? grid->GetGeometryNode() : nullptr;
         auto layoutProperty = grid ? grid->GetLayoutProperty<GridLayoutProperty>() : nullptr;
-        auto [crossLens, adjustedCrossGap] = ResolveCrossLens(gridGeometry, layoutProperty, crossGap, info);
         float crossPos = CalculateCrossPosition(col, adjustedCrossGap, crossLens, gridGeometry);
         float mainPos = CalculateMainPosition(row, mainGap, info);
         bool hasPadding = gridGeometry && gridGeometry->GetPadding();
@@ -846,7 +853,7 @@ std::optional<OffsetF> GridItemDragManager::SearchRowForTarget(const std::map<in
         }
         OffsetF offset(crossPos, mainPos, axis_);
         if (!gridGeometry || !layoutProperty || !node || !node->GetGeometryNode()) {
-            return CreatePositionFromCoords(offset.GetY(), offset.GetX());
+            return offset;
         }
         return ApplyAlignmentAndRTL(node, row, col, offset, crossLens, gridGeometry, layoutProperty, info);
     }
@@ -855,10 +862,11 @@ std::optional<OffsetF> GridItemDragManager::SearchRowForTarget(const std::map<in
 
 std::optional<OffsetF> GridItemDragManager::FindItemPositionInMatrix(const SimMatrix& simMatrix,
     int32_t targetIdx, const RefPtr<FrameNode>& node, int32_t colSpan, float mainGap,
-    float crossGap, const GridLayoutInfo& info) const
+    const std::vector<double>& crossLens, float adjustedCrossGap, const GridLayoutInfo& info) const
 {
     for (const auto& [row, cols] : simMatrix) {
-        auto result = SearchRowForTarget(cols, targetIdx, row, node, colSpan, mainGap, crossGap, info);
+        auto result = SearchRowForTarget(cols, targetIdx, row, node, colSpan, mainGap,
+            crossLens, adjustedCrossGap, info);
         if (result.has_value()) {
             return result;
         }
@@ -867,7 +875,8 @@ std::optional<OffsetF> GridItemDragManager::FindItemPositionInMatrix(const SimMa
 }
 
 std::optional<OffsetF> GridItemDragManager::CalculateFromNewPosition(int32_t from, int32_t to,
-    const GridLayoutInfo& info) const
+    const GridLayoutInfo& info, std::vector<SimSpanInfo>& spans, float mainGap,
+    const std::vector<double>& crossLens, float adjustedCrossGap) const
 {
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_RETURN(forEach, std::nullopt);
@@ -877,15 +886,10 @@ std::optional<OffsetF> GridItemDragManager::CalculateFromNewPosition(int32_t fro
         return std::nullopt;
     }
 
-    auto spans = CollectSpanInfo(info);
-
     int32_t startRebuild = std::max(forEachStartIndex_ + std::min(from, to), info.startIndex_);
     int32_t endRebuild = std::min(forEachStartIndex_ + std::max(from, to), info.endIndex_);
 
     SimMatrix simMatrix;
-    float mainGap = 0.0f;
-    float crossGap = 0.0f;
-    CalculateGaps(mainGap, crossGap, info);
     auto grid = gridNode_.Upgrade();
     CHECK_NULL_RETURN(grid, std::nullopt);
     float mainSize = 0.0f;
@@ -923,7 +927,8 @@ std::optional<OffsetF> GridItemDragManager::CalculateFromNewPosition(int32_t fro
     int32_t fromColSpan = irregularInfo.has_value() ? irregularInfo->crossSpan : 1;
     int32_t targetIdx = forEachStartIndex_ + from;
 
-    return FindItemPositionInMatrix(simMatrix, targetIdx, fromNode, fromColSpan, mainGap, crossGap, info);
+    return FindItemPositionInMatrix(simMatrix, targetIdx, fromNode, fromColSpan, mainGap,
+        crossLens, adjustedCrossGap, info);
 }
 
 float GridItemDragManager::CalculateDistance(const OffsetF& pos1, const OffsetF& pos2) const
@@ -1010,10 +1015,18 @@ bool GridItemDragManager::IsCandidateValidForAutoScroll(int32_t candidate,
     if (candidateCol < 0 || candidateRow < 0) {
         return false;
     }
-    if (autoScrollForward_ && candidateRow < currentRow) {
+    bool isForwardScroll = autoScrollForward_;
+    auto grid = gridNode_.Upgrade();
+    if (grid && axis_ == Axis::HORIZONTAL) {
+        auto layoutProperty = grid->GetLayoutProperty<GridLayoutProperty>();
+        if (layoutProperty && layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+            isForwardScroll = !isForwardScroll;
+        }
+    }
+    if (isForwardScroll && candidateRow < currentRow) {
         return false;
     }
-    if (!autoScrollForward_ && candidateRow > endRow) {
+    if (!isForwardScroll && candidateRow > endRow) {
         return false;
     }
     return true;
@@ -1023,6 +1036,15 @@ int32_t GridItemDragManager::FindBestCandidate(int32_t currentIndex,
     const std::vector<int32_t>& candidates, const OffsetF& delta,
     int32_t currentRow, int32_t endRow, const GridLayoutInfo& info) const
 {
+    auto spans = CollectSpanInfo(info);
+    float mainGap = 0.0f;
+    float crossGap = 0.0f;
+    CalculateGaps(mainGap, crossGap, info);
+    auto grid = gridNode_.Upgrade();
+    auto gridGeometry = grid ? grid->GetGeometryNode() : nullptr;
+    auto layoutProperty = grid ? grid->GetLayoutProperty<GridLayoutProperty>() : nullptr;
+    auto [crossLens, adjustedCrossGap] = ResolveCrossLens(gridGeometry, layoutProperty, crossGap, info);
+
     OffsetF dragPosition = realOffset_ + GetParentPaddingOffset();
     int32_t bestCandidate = currentIndex;
     float minDistance = std::numeric_limits<float>::max();
@@ -1034,7 +1056,8 @@ int32_t GridItemDragManager::FindBestCandidate(int32_t currentIndex,
                 continue;
             }
         }
-        auto newPositionOpt = CalculateFromNewPosition(currentIndex, candidate, info);
+        auto newPositionOpt = CalculateFromNewPosition(currentIndex, candidate, info,
+            spans, mainGap, crossLens, adjustedCrossGap);
         if (!newPositionOpt.has_value()) {
             continue;
         }
@@ -1262,6 +1285,25 @@ int32_t GridItemDragManager::FindMaxIndexRow(const SimMatrix& matrix)
     return startRow;
 }
 
+void GridItemDragManager::PrintSimMatrix(const SimMatrix& matrix)
+{
+    TAG_LOGI(AceLogTag::ACE_GRID, "-----------start print simMatrix------------");
+    for (const auto& item : matrix) {
+        std::string res;
+        res.append(std::to_string(item.first));
+        res.append(": ");
+        for (const auto& index : item.second) {
+            res.append("[")
+                .append(std::to_string(index.first))
+                .append(",")
+                .append(std::to_string(index.second))
+                .append("] ");
+        }
+        TAG_LOGI(AceLogTag::ACE_GRID, "%{public}s", res.c_str());
+    }
+    TAG_LOGI(AceLogTag::ACE_GRID, "-----------end print simMatrix------------");
+}
+
 int32_t GridItemDragManager::FindPlacementStartRow(const SimMatrix& matrix,
     const GridLayoutInfo& info) const
 {
@@ -1407,7 +1449,7 @@ bool GridItemDragManager::IsInHotZone(int32_t index, const RectF& frameRect) con
 
     auto gridSize = gridGeometry->GetFrameSize();
 
-    float hotZone = Dimension(HOT_ZONE_SIZE_VP, DimensionUnit::VP).ConvertToPx();
+    float hotZone = axis_ == Axis::VERTICAL ? HOT_ZONE_HEIGHT.ConvertToPx() : HOT_ZONE_WIDTH.ConvertToPx();
 
     float startOffset = frameRect.GetOffset().GetMainOffset(axis_);
     float endOffset = startOffset + frameRect.GetSize().MainSize(axis_);
@@ -1435,7 +1477,7 @@ void GridItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, c
                 (axis_ == Axis::VERTICAL) ? gridGlobalOffset.GetY() : gridGlobalOffset.GetX();
             float gridMainSize = gridGeometry->GetFrameSize().MainSize(axis_);
             auto pointMain = (axis_ == Axis::VERTICAL) ? point.GetY() : point.GetX();
-            float hotZone = Dimension(HOT_ZONE_SIZE_VP, DimensionUnit::VP).ConvertToPx();
+            float hotZone = axis_ == Axis::VERTICAL ? HOT_ZONE_HEIGHT.ConvertToPx() : HOT_ZONE_WIDTH.ConvertToPx();
             float relativeMain = pointMain - gridMainOffset;
             if (relativeMain < hotZone && !pattern->IsAtTop()) {
                 inAutoScrollHotZone_ = true;
@@ -1511,7 +1553,216 @@ void GridItemDragManager::HandleScrollCallback()
         autoScrollForward_ = false;
         inAutoScrollHotZone_ = false;
     }
+    auto paddingOffset = GetParentPaddingOffset();
+    ScaleNearbyItems(from, frameRect, realOffset_ - frameRect.GetOffset() + paddingOffset);
     ProcessSwap(from);
+}
+
+void GridItemDragManager::SetNearbyNodeScale(RefPtr<FrameNode> node, float scale)
+{
+    CHECK_NULL_VOID(node);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto it = prevScaleNode_.find(renderContext);
+    VectorF prevScale = it != prevScaleNode_.end() ? it->second :
+        renderContext->GetTransformScaleValue({1.0f, 1.0f});
+    renderContext->UpdateTransformScale(prevScale * scale);
+    scaleNode_.emplace(renderContext, prevScale);
+}
+
+void GridItemDragManager::ResetPrevScaleNode()
+{
+    for (auto& [weakNode, scale] : prevScaleNode_) {
+        if (scaleNode_.find(weakNode) == scaleNode_.end()) {
+            auto node = weakNode.Upgrade();
+            if (node) {
+                node->UpdateTransformScale(scale);
+            }
+        }
+    }
+    prevScaleNode_.swap(scaleNode_);
+    scaleNode_.clear();
+}
+
+int32_t GridItemDragManager::FindNeighborIndex(int32_t row, int32_t col, const GridLayoutInfo& info) const
+{
+    auto rowIt = info.gridMatrix_.find(row);
+    if (rowIt == info.gridMatrix_.end()) {
+        return -1;
+    }
+    auto colIt = rowIt->second.find(col);
+    if (colIt == rowIt->second.end()) {
+        return -1;
+    }
+    return std::abs(colIt->second) - forEachStartIndex_;
+}
+
+bool GridItemDragManager::ScaleMainAxisNeighbor(int32_t currentIndex, int32_t currentRow, int32_t currentCol,
+    int32_t mainRowStep, int32_t colSpan, const RectF& rect, float mainDelta,
+    int32_t startIdx, int32_t endIdx, const GridLayoutInfo& info,
+    const RefPtr<ForEachBaseNode>& forEach)
+{
+    int32_t targetRow = currentRow + mainRowStep;
+    std::set<int32_t> scaledIndices;
+    bool anyScaled = false;
+    for (int32_t col = currentCol; col < currentCol + colSpan; ++col) {
+        int32_t mainIdx = FindNeighborIndex(targetRow, col, info);
+        if (mainIdx < 0 || mainIdx == currentIndex || mainIdx < startIdx || mainIdx > endIdx) {
+            continue;
+        }
+        if (scaledIndices.count(mainIdx)) {
+            continue;
+        }
+        scaledIndices.insert(mainIdx);
+        auto node = forEach->GetFrameNode(mainIdx);
+        if (!node) {
+            continue;
+        }
+        auto geometry = node->GetGeometryNode();
+        if (!geometry) {
+            continue;
+        }
+        auto nearRect = geometry->GetMarginFrameRect();
+        float c0 = rect.GetOffset().GetMainOffset(axis_) + rect.GetSize().MainSize(axis_) / 2;
+        float c1 = nearRect.GetOffset().GetMainOffset(axis_) + nearRect.GetSize().MainSize(axis_) / 2;
+        if (NearEqual(c0, c1)) {
+            continue;
+        }
+        float sharped = Curves::SHARP->MoveInternal(std::abs(mainDelta / (c1 - c0)));
+        float scale = 1 - sharped * NEARBY_SCALE_RATIO;
+        SetNearbyNodeScale(node, scale);
+        anyScaled = anyScaled || !NearEqual(scale, 1.0f);
+    }
+    return anyScaled;
+}
+
+bool GridItemDragManager::ScaleCrossAxisNeighbor(int32_t currentIndex, int32_t currentRow, int32_t currentCol,
+    int32_t crossColStep, int32_t rowSpan, const RectF& rect, float crossDelta,
+    int32_t startIdx, int32_t endIdx, const GridLayoutInfo& info,
+    const RefPtr<ForEachBaseNode>& forEach)
+{
+    int32_t targetCol = currentCol + crossColStep;
+    std::set<int32_t> scaledIndices;
+    bool anyScaled = false;
+    for (int32_t row = currentRow; row < currentRow + rowSpan; ++row) {
+        int32_t crossIdx = FindNeighborIndex(row, targetCol, info);
+        if (crossIdx < 0 || crossIdx == currentIndex || crossIdx < startIdx || crossIdx > endIdx) {
+            continue;
+        }
+        if (scaledIndices.count(crossIdx)) {
+            continue;
+        }
+        scaledIndices.insert(crossIdx);
+        auto node = forEach->GetFrameNode(crossIdx);
+        if (!node) {
+            continue;
+        }
+        auto geometry = node->GetGeometryNode();
+        if (!geometry) {
+            continue;
+        }
+        auto nearRect = geometry->GetMarginFrameRect();
+        float dragMainStart = rect.GetOffset().GetMainOffset(axis_);
+        float dragMainEnd = dragMainStart + rect.GetSize().MainSize(axis_);
+        float nearMainStart = nearRect.GetOffset().GetMainOffset(axis_);
+        float nearMainEnd = nearMainStart + nearRect.GetSize().MainSize(axis_);
+        if (nearMainEnd <= dragMainStart || nearMainStart >= dragMainEnd) {
+            continue;
+        }
+        Axis crossAxis = (axis_ == Axis::VERTICAL) ? Axis::HORIZONTAL : Axis::VERTICAL;
+        float c0 = rect.GetOffset().GetMainOffset(crossAxis) + rect.GetSize().MainSize(crossAxis) / 2;
+        float c1 = nearRect.GetOffset().GetMainOffset(crossAxis) + nearRect.GetSize().MainSize(crossAxis) / 2;
+        if (NearEqual(c0, c1)) {
+            continue;
+        }
+        float sharped = Curves::SHARP->MoveInternal(std::abs(crossDelta / (c1 - c0)));
+        float scale = 1 - sharped * NEARBY_SCALE_RATIO;
+        SetNearbyNodeScale(node, scale);
+        anyScaled = anyScaled || !NearEqual(scale, 1.0f);
+    }
+    return anyScaled;
+}
+
+void GridItemDragManager::ScaleDiagonalNeighbor(int32_t currentIndex, int32_t currentRow, int32_t currentCol,
+    int32_t mainRowStep, int32_t crossColStep, const RectF& rect, const OffsetF& delta,
+    int32_t startIdx, int32_t endIdx, const GridLayoutInfo& info,
+    const RefPtr<ForEachBaseNode>& forEach)
+{
+    int32_t diagIdx = FindNeighborIndex(currentRow + mainRowStep, currentCol + crossColStep, info);
+    if (diagIdx < 0 || diagIdx == currentIndex || diagIdx < startIdx || diagIdx > endIdx) {
+        return;
+    }
+    auto node = forEach->GetFrameNode(diagIdx);
+    CHECK_NULL_VOID(node);
+    auto geometry = node->GetGeometryNode();
+    CHECK_NULL_VOID(geometry);
+    auto nearRect = geometry->GetMarginFrameRect();
+    OffsetF c0 = rect.GetOffset() + OffsetF(rect.Width() / 2, rect.Height() / 2);
+    OffsetF c1 = nearRect.GetOffset() + OffsetF(nearRect.Width() / 2, nearRect.Height() / 2);
+    OffsetF c2 = c0 + delta;
+    float d0 = c0.GetDistance(c1);
+    if (NearZero(d0)) {
+        return;
+    }
+    float d1 = c2.GetDistance(c1);
+    float sharped = Curves::SHARP->MoveInternal(std::abs(1 - d1 / d0));
+    float scale = 1 - sharped * NEARBY_SCALE_RATIO;
+    SetNearbyNodeScale(node, scale);
+}
+
+void GridItemDragManager::ScaleNearbyItems(int32_t currentIndex, const RectF& rect, const OffsetF& delta)
+{
+    auto grid = gridNode_.Upgrade();
+    CHECK_NULL_VOID(grid);
+    auto pattern = grid->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto& info = pattern->GetMutableLayoutInfo();
+
+    int32_t globalIndex = forEachStartIndex_ + currentIndex;
+    auto [currentCol, currentRow] = info.GetItemPos(globalIndex);
+    if (currentCol < 0 || currentRow < 0) {
+        ResetPrevScaleNode();
+        return;
+    }
+
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
+
+    float mainDelta = delta.GetMainOffset(axis_);
+    float crossDelta = delta.GetCrossOffset(axis_);
+    auto spanInfo = GetIrregularItemInfoAndSpan(currentIndex);
+    int32_t mainRowStep = Positive(mainDelta) ? spanInfo.rowSpan : (Negative(mainDelta) ? -1 : 0);
+    int32_t crossColStep = Positive(crossDelta) ? spanInfo.colSpan : (Negative(crossDelta) ? -1 : 0);
+    auto layoutProperty = grid->GetLayoutProperty<GridLayoutProperty>();
+    if (layoutProperty && layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        if (axis_ == Axis::VERTICAL) {
+            crossColStep = -crossColStep;
+        } else {
+            mainRowStep = -mainRowStep;
+        }
+    }
+
+    int32_t startIdx = info.startIndex_ - forEachStartIndex_;
+    int32_t endIdx = info.endIndex_ - forEachStartIndex_;
+
+    bool mainScaled = false;
+    if (mainRowStep != 0) {
+        mainScaled = ScaleMainAxisNeighbor(currentIndex, currentRow, currentCol,
+            mainRowStep, spanInfo.colSpan, rect, mainDelta, startIdx, endIdx, info, forEach);
+    }
+
+    bool crossScaled = false;
+    if (crossColStep != 0) {
+        crossScaled = ScaleCrossAxisNeighbor(currentIndex, currentRow, currentCol,
+            crossColStep, spanInfo.rowSpan, rect, crossDelta, startIdx, endIdx, info, forEach);
+    }
+
+    if (mainScaled && crossScaled && mainRowStep != 0 && crossColStep != 0) {
+        ScaleDiagonalNeighbor(currentIndex, currentRow, currentCol,
+            mainRowStep, crossColStep, rect, delta, startIdx, endIdx, info, forEach);
+    }
+
+    ResetPrevScaleNode();
 }
 
 void GridItemDragManager::SetPosition(const OffsetF& offset)
