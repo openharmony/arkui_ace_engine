@@ -1198,26 +1198,20 @@ void PipelineContext::FlushMouseEventVoluntarily()
     CHECK_NULL_VOID(rootNode_);
     ACE_SCOPED_TRACE("FlushMouseEventVoluntarily x:%f y:%f", lastMouseEvent_->x, lastMouseEvent_->y);
 
-    MouseEvent event;
+    auto scaleEvent = lastMouseEvent_->CreateScaleEvent(viewScale_);
     if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT) {
-        event.mockFlushEvent = true;
+        scaleEvent.mockFlushEvent = true;
     }
-    event.x = lastMouseEvent_->x;
-    event.y = lastMouseEvent_->y;
-    event.time = lastMouseEvent_->time;
-    event.action = MouseAction::MOVE;
-    event.button = MouseButton::NONE_BUTTON;
-    event.sourceType = SourceType::MOUSE;
-    event.deviceId = lastMouseEvent_->deviceId;
-    event.sourceTool = SourceTool::MOUSE;
-    event.targetDisplayId = lastMouseEvent_->targetDisplayId;
+    scaleEvent.action = MouseAction::MOVE;
+    scaleEvent.button = MouseButton::NONE_BUTTON;
+    scaleEvent.sourceType = SourceType::MOUSE;
+    scaleEvent.sourceTool = SourceTool::MOUSE;
 
-    auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
-    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceType = scaleEvent.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    touchRestrict.sourceTool = event.sourceTool;
+    touchRestrict.sourceTool = scaleEvent.sourceTool;
 
     eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
@@ -4780,21 +4774,10 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
+    *lastMouseEvent_ = event;
     if (event.mockFlushEvent && event.action == MouseAction::WINDOW_LEAVE) {
         lastMouseEvent_->isMockWindowTransFlag = true;
     }
-    lastMouseEvent_->x = event.x;
-    lastMouseEvent_->y = event.y;
-    lastMouseEvent_->button = event.button;
-    lastMouseEvent_->action = event.action;
-    lastMouseEvent_->sourceType = event.sourceType;
-    lastMouseEvent_->time = event.time;
-    lastMouseEvent_->touchEventId = event.touchEventId;
-    lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
-    lastMouseEvent_->pointerEvent = event.pointerEvent;
-    lastMouseEvent_->deviceId = event.deviceId;
-    lastMouseEvent_->sourceTool = event.sourceTool;
-    lastMouseEvent_->targetDisplayId = event.targetDisplayId;
     lastSourceType_ = event.sourceType;
 }
 

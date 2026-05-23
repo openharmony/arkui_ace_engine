@@ -399,6 +399,11 @@ MouseEvent MouseEvent::CloneWith(float scale) const
     mouseEvent.pointerEvent = pointerEvent;
     mouseEvent.originalId = originalId;
     mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+    mouseEvent.touchEventId = touchEventId;
+    mouseEvent.eventHandleId = eventHandleId;
+    mouseEvent.isFalsifyCancel = isFalsifyCancel;
+    mouseEvent.isNewReferee = isNewReferee;
+    mouseEvent.eventType = eventType;
     mouseEvent.history.reserve(history.size());
     for (const auto& historyEvent : history) {
         auto clonedHistoryEvent = historyEvent.CloneWith(scale);
