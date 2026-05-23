@@ -422,14 +422,27 @@ void DialogPattern::InitDefaultSystemMaterial()
     }
 }
 
-void DialogPattern::SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode)
+bool DialogPattern::SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode)
 {
-    CHECK_NULL_VOID(contentRenderContext_);
+    CHECK_NULL_RETURN(contentRenderContext_, false);
     if (dialogProperties_.systemMaterial &&
         MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
         contentRenderContext_->UpdateBackBlurStyle(std::nullopt);
+        // Handle low-end devices with IMMERSIVE material
+        if (DialogManager::ShouldHandleSmoothImmersiveMaterial(dialogProperties_.systemMaterial)) {
+            DialogManager::HandleSmoothImmersiveMaterial(columnNode, dialogProperties_.systemMaterial);
+            return true;
+        }
+        // Normal processing for other cases
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties_.systemMaterial));
+        return true;
     }
+    return false;
+}
+
+bool DialogPattern::ShouldApplySystemMaterialShadow() const
+{
+    return DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial);
 }
 
 void DialogPattern::UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
@@ -460,14 +473,19 @@ void DialogPattern::UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>
         outerColorProp.SetColor(dialogTheme->GetDialogOuterBorderColor());
         contentRenderContext->UpdateOuterBorderColor(outerColorProp);
     }
-    if (props.shadow.has_value()) {
-        contentRenderContext->UpdateBackShadow(props.shadow.value());
-    } else {
-        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme->GetShadowDialog()));
-        contentRenderContext->UpdateBackShadow(shadow);
-    }
-    SetDialogSystemMaterial(contentNode);
+    UpdateDialogShadow(contentRenderContext, props);
     contentRenderContext->SetClipToBounds(true);
+}
+
+void DialogPattern::UpdateDialogShadow(const RefPtr<RenderContext>& renderContext, const DialogProperties& props)
+{
+    CHECK_NULL_VOID(renderContext);
+    if (props.shadow.has_value()) {
+        renderContext->UpdateBackShadow(props.shadow.value());
+    } else {
+        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme_->GetShadowDialog()));
+        renderContext->UpdateBackShadow(shadow);
+    }
 }
 
 // set render context properties of content frame
@@ -479,6 +497,14 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     contentRenderContext_ = contentRenderContext;
     auto pipeLineContext = contentNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
+    if (SetDialogSystemMaterial(contentNode)) {
+        UpdateContentBorderRadius(contentNode, props);
+        if (!DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial)) {
+            UpdateDialogShadow(contentRenderContext, props);
+        }
+        contentRenderContext->SetClipToBounds(true);
+        return;
+    }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         DialogView::IsSupportBlurStyle(contentNode, dialogProperties_.isShowInSubWindow) && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
@@ -513,22 +539,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     }
     bool isCustomBorder = props.borderWidth.has_value() ||
         props.borderStyle.has_value() || props.borderColor.has_value();
-    BorderRadiusProperty radius;
-    if (props.borderRadius.has_value()) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            radius = props.borderRadius.value();
-            ParseBorderRadius(radius);
-            contentRenderContext->UpdateBorderRadius(radius);
-        } else {
-            contentRenderContext->UpdateBorderRadius(props.borderRadius.value());
-        }
-    } else {
-        radius.SetRadius(dialogTheme_->GetRadius().GetX());
-        contentRenderContext->UpdateBorderRadius(radius);
-    }
-    if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
-        contentRenderContext->UpdateOuterBorderRadius(radius);
-    }
+    UpdateContentBorderRadius(contentNode, props);
     if (props.borderWidth.has_value()) {
         auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
@@ -574,6 +585,34 @@ void DialogPattern::ParseBorderRadius(BorderRadiusProperty& raidus)
     }
     if (!raidus.radiusBottomRight.has_value() || raidus.radiusBottomRight.value().Value() < 0) {
         raidus.radiusBottomRight = dialogTheme_->GetRadius().GetX();
+    }
+}
+
+void DialogPattern::UpdateContentBorderRadius(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
+{
+    CHECK_NULL_VOID(contentNode);
+    auto contentRenderContext = contentNode->GetRenderContext();
+    CHECK_NULL_VOID(contentRenderContext);
+
+    bool isCustomBorder = props.borderWidth.has_value() ||
+        props.borderStyle.has_value() || props.borderColor.has_value();
+
+    BorderRadiusProperty radius;
+    if (props.borderRadius.has_value()) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            radius = props.borderRadius.value();
+            ParseBorderRadius(radius);
+            contentRenderContext->UpdateBorderRadius(radius);
+        } else {
+            contentRenderContext->UpdateBorderRadius(props.borderRadius.value());
+        }
+    } else {
+        radius.SetRadius(dialogTheme_->GetRadius().GetX());
+        contentRenderContext->UpdateBorderRadius(radius);
+    }
+
+    if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+        contentRenderContext->UpdateOuterBorderRadius(radius);
     }
 }
 
@@ -1552,7 +1591,7 @@ void DialogPattern::HandleBlurEvent()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(
         contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-        !(contentRenderContext_->GetSystemMaterial() && contentRenderContext_->GetSystemMaterial()->IsForceShadow()));
+        !DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial));
     if (InvertShadowColor()) {
         return;
     }
@@ -1567,7 +1606,7 @@ void DialogPattern::HandleFocusEvent()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(
         contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-        !(contentRenderContext_->GetSystemMaterial() && contentRenderContext_->GetSystemMaterial()->IsForceShadow()));
+        !DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial));
     if (InvertShadowColor()) {
         return;
     }
@@ -1653,6 +1692,12 @@ void DialogPattern::UpdateResourceColors()
 
     CHECK_NULL_VOID(contentRenderContext_);
     // Also reload internal resources for complex properties
+    if (dialogProperties_.shadow.has_value() &&
+        !DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial)) {
+        dialogProperties_.shadow->ReloadResources();
+        contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
+    }
+    CHECK_NULL_VOID(!dialogProperties_.systemMaterial);
     if (dialogProperties_.backgroundColorResObj) {
         Color backgroundColor = dialogProperties_.backgroundColor.value();
         bool state = ResourceParseUtils::ParseResColor(dialogProperties_.backgroundColorResObj, backgroundColor);
@@ -1670,11 +1715,6 @@ void DialogPattern::UpdateResourceColors()
     if (dialogProperties_.borderColor.has_value()) {
         dialogProperties_.borderColor->ReloadResources();
         contentRenderContext_->UpdateBorderColor(dialogProperties_.borderColor.value());
-    }
-
-    if (dialogProperties_.shadow.has_value()) {
-        dialogProperties_.shadow->ReloadResources();
-        contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
     }
 }
 bool DialogPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -1792,7 +1832,8 @@ void DialogPattern::OnLanguageConfigurationUpdate()
         UpdateSheetIconAndText();
     }
 
-    if (dialogProperties_.shadow.has_value()) {
+    if (dialogProperties_.shadow.has_value() &&
+        !DialogManager::ShouldApplySystemMaterialShadow(dialogProperties_.systemMaterial)) {
         contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
     }
 

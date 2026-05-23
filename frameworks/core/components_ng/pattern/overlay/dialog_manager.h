@@ -21,6 +21,10 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/common/ace_engine.h"
 
+namespace OHOS::Ace {
+class UiMaterial;
+}
+
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT DialogManager : public Singleton<DialogManager> {
     DECLARE_SINGLETON(DialogManager);
@@ -32,6 +36,14 @@ public:
     static RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& currentNode);
 
     static RefPtr<PipelineContext> GetMainPipelineContext(const RefPtr<FrameNode>& frameNode);
+
+    static bool ShouldHandleSmoothImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial);
+    static bool ShouldApplySystemMaterialShadow(const RefPtr<UiMaterial>& systemMaterial);
+    static bool HandleSmoothImmersiveMaterial(
+        const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial);
+    static void SetSmoothImmersiveBackground(const RefPtr<RenderContext>& renderContext);
+    static void SetSmoothImmersiveShadow(
+        const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial);
 
     RefPtr<OverlayManager> GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode);
 
