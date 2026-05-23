@@ -731,6 +731,7 @@ export class ChipV2 extends ViewV2 {
                         Image.focusable(false);
                         Image.flexShrink(0);
                         Image.draggable(false);
+                        Image.attributeModifier.bind(this)(this.getPrefixImageIcon().modifier);
                     }, Image);
                 });
             }
@@ -758,6 +759,7 @@ export class ChipV2 extends ViewV2 {
             Text.margin(this.getLabelMargin());
             Text.includeFontPadding(this.useAdaptiveLineHeight);
             Text.fallbackLineSpacing(this.useAdaptiveLineHeight);
+            Text.attributeModifier.bind(this)(this.chipV2Options.label.modifier);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -816,6 +818,7 @@ export class ChipV2 extends ViewV2 {
                         Image.fillColor(this.getSuffixIconFilledColor());
                         Image.objectFit(ImageFit.Cover);
                         Image.draggable(false);
+                        Image.attributeModifier.bind(this)(this.getSuffixImageIcon().modifier);
                     }, Image);
                     Button.pop();
                 });

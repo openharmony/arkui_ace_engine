@@ -37,6 +37,7 @@ const ChipV2SuffixSymbolIcon = requireNapi('arkui.advanced.ChipV2').ChipV2Suffix
 const ChipV2 = requireNapi('arkui.advanced.ChipV2').ChipV2;
 const ChipV2Options = requireNapi('arkui.advanced.ChipV2').ChipV2Options;
 const ChipV2AccessibilitySelectedType = requireNapi('arkui.advanced.ChipV2').ChipV2AccessibilitySelectedType;
+const uiMaterial = requireNapi('arkui.uiMaterial');
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const deviceInfo = requireNapi('deviceInfo')
@@ -44,17 +45,15 @@ const noop = (selectedIndexes) => {
 };
 const colorStops = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]];
 const defaultTheme = {
-    itemStyle: {
-        size: ChipV2Size.NORMAL,
-        backgroundColor: ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        fontColor: ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        selectedFontColor: ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        selectedBackgroundColor: ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-    },
+    size: ChipV2Size.NORMAL,
+    backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    fontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    selectedFontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    selectedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
     chipGroupPadding: { top: 14, bottom: 14 },
-    itemFillColor: ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-    itemSelectedFillColor: ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
+    itemFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    itemSelectedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
 };
 const iconGroupSuffixTheme = {
     backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -135,6 +134,7 @@ let ChipGroupV2ItemStyle = class ChipGroupV2ItemStyle {
         this.selectedFontColor = config.selectedFontColor;
         this.selectedBackgroundColor = config.selectedBackgroundColor;
         this.backgroundSystemMaterial = config.backgroundSystemMaterial;
+        this.selectedBackgroundSystemMaterial = config.selectedBackgroundSystemMaterial;
     }
 };
 __decorate([
@@ -155,6 +155,9 @@ __decorate([
 __decorate([
     Trace
 ], ChipGroupV2ItemStyle.prototype, "backgroundSystemMaterial", void 0);
+__decorate([
+    Trace
+], ChipGroupV2ItemStyle.prototype, "selectedBackgroundSystemMaterial", void 0);
 ChipGroupV2ItemStyle = __decorate([
     ObservedV2
 ], ChipGroupV2ItemStyle);
@@ -404,16 +407,15 @@ export class ChipGroupV2 extends ViewV2 {
         super(parent, elmtId, extraInfo);
         this.initParam("items", (params && "items" in params) ? params.items : undefined);
         this.$items = "$items" in params ? params.$items : undefined;
-        this.initParam("itemStyle", (params && "itemStyle" in params) ? params.itemStyle : defaultTheme.itemStyle);
-        this.initParam("selectedIndexes", (params && "selectedIndexes" in params) ? params.selectedIndexes : [0]);
+        this.initParam("itemStyle", (params && "itemStyle" in params) ? params.itemStyle : undefined);
+        this.initParam("selectedIndexes", (params && "selectedIndexes" in params) ? params.selectedIndexes : undefined);
         this.$selectedIndexes = "$selectedIndexes" in params ? params.$selectedIndexes : undefined;
         this.initParam("multiple", (params && "multiple" in params) ? params.multiple : false);
         this.initParam("chipGroupSpace", (params && "chipGroupSpace" in params) ? params.chipGroupSpace : defaultTheme.chipGroupSpace);
         this.initParam("chipGroupPadding", (params && "chipGroupPadding" in params) ? params.chipGroupPadding : defaultTheme.chipGroupPadding);
-        this.initParam("backgroundSystemMaterial", (params && "backgroundSystemMaterial" in params) ? params.backgroundSystemMaterial : undefined);
         this.onChange = "onChange" in params ? params.onChange : () => { };
         this.suffix = "suffix" in params ? params.suffix : undefined;
-        this.chipSize = defaultTheme.itemStyle.size;
+        this.chipSize = defaultTheme.size;
         this.scroller = new Scroller();
         this.selectedIndexesInternal = [0];
         this.isReachEnd = this.scroller.isAtEnd();
@@ -423,16 +425,15 @@ export class ChipGroupV2 extends ViewV2 {
     resetStateVarsOnReuse(params) {
         this.resetParam("items", (params && "items" in params) ? params.items : undefined);
         this.$items = "$items" in params ? params.$items : undefined;
-        this.resetParam("itemStyle", (params && "itemStyle" in params) ? params.itemStyle : defaultTheme.itemStyle);
-        this.resetParam("selectedIndexes", (params && "selectedIndexes" in params) ? params.selectedIndexes : [0]);
+        this.resetParam("itemStyle", (params && "itemStyle" in params) ? params.itemStyle : undefined);
+        this.resetParam("selectedIndexes", (params && "selectedIndexes" in params) ? params.selectedIndexes : undefined);
         this.$selectedIndexes = "$selectedIndexes" in params ? params.$selectedIndexes : undefined;
         this.resetParam("multiple", (params && "multiple" in params) ? params.multiple : false);
         this.resetParam("chipGroupSpace", (params && "chipGroupSpace" in params) ? params.chipGroupSpace : defaultTheme.chipGroupSpace);
         this.resetParam("chipGroupPadding", (params && "chipGroupPadding" in params) ? params.chipGroupPadding : defaultTheme.chipGroupPadding);
-        this.resetParam("backgroundSystemMaterial", (params && "backgroundSystemMaterial" in params) ? params.backgroundSystemMaterial : undefined);
         this.onChange = "onChange" in params ? params.onChange : () => { };
         this.suffix = "suffix" in params ? params.suffix : undefined;
-        this.chipSize = defaultTheme.itemStyle.size;
+        this.chipSize = defaultTheme.size;
         this.selectedIndexesInternal = [0];
         this.isReachEnd = this.scroller.isAtEnd();
         this.isRefresh = true;
@@ -442,7 +443,9 @@ export class ChipGroupV2 extends ViewV2 {
         this.isRefresh = !this.isRefresh;
     }
     onMultipleChange() {
-        this.selectedIndexesOnChange();
+        if (this.selectedIndexes) {
+            this.selectedIndexesOnChange();
+        }
         this.selectedIndexesInternal = this.getSelectedIndexes();
     }
     itemStyleOnChange() {
@@ -462,42 +465,48 @@ export class ChipGroupV2 extends ViewV2 {
         if (this.itemStyle && this.itemStyle.size) {
             if (typeof this.itemStyle.size === 'object') {
                 if (!this.itemStyle.size.width?.value || !this.itemStyle.size.height?.value || !this.itemStyle.size) {
-                    return defaultTheme.itemStyle.size;
+                    return defaultTheme.size;
                 }
             }
             return this.itemStyle.size;
         }
-        return defaultTheme.itemStyle.size;
+        return defaultTheme.size;
     }
     getFontColor() {
         if (this.itemStyle && this.itemStyle.fontColor) {
             return this.itemStyle.fontColor;
         }
-        return defaultTheme.itemStyle.fontColor;
+        return ColorMetrics.resourceColor(defaultTheme.fontColor);
     }
     getSelectedFontColor() {
         if (this.itemStyle && this.itemStyle.selectedFontColor) {
             return this.itemStyle.selectedFontColor;
         }
-        return defaultTheme.itemStyle.selectedFontColor;
+        return ColorMetrics.resourceColor(defaultTheme.selectedFontColor);
     }
     getFillColor() {
         if (this.itemStyle && this.itemStyle.fontColor) {
             return this.itemStyle.fontColor;
         }
-        return defaultTheme.itemFillColor;
+        return ColorMetrics.resourceColor(defaultTheme.itemFillColor);
     }
     getSelectedFillColor() {
         if (this.itemStyle && this.itemStyle.selectedFontColor) {
             return this.itemStyle.selectedFontColor;
         }
-        return defaultTheme.itemSelectedFillColor;
+        return ColorMetrics.resourceColor(defaultTheme.itemSelectedFillColor);
     }
     getBackgroundColor() {
-        return this.itemStyle?.backgroundColor ?? defaultTheme.itemStyle.backgroundColor;
+        if (this.itemStyle?.backgroundColor) {
+            return this.itemStyle.backgroundColor;
+        }
+        return ColorMetrics.resourceColor(defaultTheme.backgroundColor);
     }
     getSelectedBackgroundColor() {
-        return this.itemStyle?.selectedBackgroundColor ?? defaultTheme.itemStyle.selectedBackgroundColor;
+        if (this.itemStyle?.selectedBackgroundColor) {
+            return this.itemStyle.selectedBackgroundColor;
+        }
+        return ColorMetrics.resourceColor(defaultTheme.selectedBackgroundColor);
     }
     getSelectedIndexes() {
         let temp = [];
@@ -597,12 +606,13 @@ export class ChipGroupV2 extends ViewV2 {
                                                 enabled: true,
                                                 activated: this.isSelected(index),
                                                 backgroundColor: this.getBackgroundColor(),
-                                                backgroundSystemMaterial: createSubECMaterial(this.backgroundSystemMaterial),
                                                 size: this.getChipSize(),
                                                 activatedBackgroundColor: this.getSelectedBackgroundColor(),
                                                 accessibilitySelectedType: this.multiple ? ChipV2AccessibilitySelectedType.CHECKED : ChipV2AccessibilitySelectedType.SELECTED,
                                                 accessibilityDescription: chipItem.accessibilityDescription,
                                                 accessibilityLevel: chipItem.accessibilityLevel,
+                                                backgroundSystemMaterial: createSubECMaterial(material),
+                                                activatedBackgroundSystemMaterial: resolveSystemMaterial(this.itemStyle?.selectedBackgroundSystemMaterial),
                                                 onClicked: () => {
                                                     if (this.isSelected(index)) {
                                                         if (!(!this.isMultiple())) {
@@ -636,7 +646,7 @@ export class ChipGroupV2 extends ViewV2 {
                                                         return element !== chipItem;
                                                     }));
                                                 }
-                                            }) }, undefined, elmtId, () => { }, { page: "components/src/main/ets/components/ChipGroupV2.ets", line: 575, col: 11 });
+                                            }) }, undefined, elmtId, () => { }, { page: "components/src/main/ets/components/ChipGroupV2.ets", line: 587, col: 11 });
                                         ViewV2.create(componentCall);
                                         let paramsLambda = () => {
                                             return {
@@ -649,12 +659,13 @@ export class ChipGroupV2 extends ViewV2 {
                                                     enabled: true,
                                                     activated: this.isSelected(index),
                                                     backgroundColor: this.getBackgroundColor(),
-                                                    backgroundSystemMaterial: createSubECMaterial(this.backgroundSystemMaterial),
                                                     size: this.getChipSize(),
                                                     activatedBackgroundColor: this.getSelectedBackgroundColor(),
                                                     accessibilitySelectedType: this.multiple ? ChipV2AccessibilitySelectedType.CHECKED : ChipV2AccessibilitySelectedType.SELECTED,
                                                     accessibilityDescription: chipItem.accessibilityDescription,
                                                     accessibilityLevel: chipItem.accessibilityLevel,
+                                                    backgroundSystemMaterial: createSubECMaterial(material),
+                                                    activatedBackgroundSystemMaterial: resolveSystemMaterial(this.itemStyle?.selectedBackgroundSystemMaterial),
                                                     onClicked: () => {
                                                         if (this.isSelected(index)) {
                                                             if (!(!this.isMultiple())) {
@@ -704,12 +715,13 @@ export class ChipGroupV2 extends ViewV2 {
                                                 enabled: true,
                                                 activated: this.isSelected(index),
                                                 backgroundColor: this.getBackgroundColor(),
-                                                backgroundSystemMaterial: createSubECMaterial(this.backgroundSystemMaterial),
                                                 size: this.getChipSize(),
                                                 activatedBackgroundColor: this.getSelectedBackgroundColor(),
                                                 accessibilitySelectedType: this.multiple ? ChipV2AccessibilitySelectedType.CHECKED : ChipV2AccessibilitySelectedType.SELECTED,
                                                 accessibilityDescription: chipItem.accessibilityDescription,
                                                 accessibilityLevel: chipItem.accessibilityLevel,
+                                                backgroundSystemMaterial: createSubECMaterial(material),
+                                                activatedBackgroundSystemMaterial: resolveSystemMaterial(this.itemStyle?.selectedBackgroundSystemMaterial),
                                                 onClicked: () => {
                                                     if (this.isSelected(index)) {
                                                         if (!(!this.isMultiple())) {
@@ -799,23 +811,23 @@ export class ChipGroupV2 extends ViewV2 {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (enableEffectComponent(this.backgroundSystemMaterial)) {
+                        if (enableEffectComponent(this.itemStyle?.backgroundSystemMaterial)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     EffectComponent.create();
-                                    EffectComponent.systemMaterial(createECMaterial(this.backgroundSystemMaterial));
+                                    EffectComponent.systemMaterial(createECMaterial(this.itemStyle?.backgroundSystemMaterial));
                                 }, EffectComponent);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create({ space: this.getChipGroupItemSpace() });
                                 }, Row);
-                                this.ChipItemsBuilder.bind(this)(createSubECMaterial(this.backgroundSystemMaterial));
+                                this.ChipItemsBuilder.bind(this)(createSubECMaterial(this.itemStyle?.backgroundSystemMaterial));
                                 Row.pop();
                                 EffectComponent.pop();
                             });
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.ChipItemsBuilder.bind(this)(this.backgroundSystemMaterial);
+                                this.ChipItemsBuilder.bind(this)(this.itemStyle?.backgroundSystemMaterial);
                             });
                         }
                     }, If);
@@ -936,9 +948,6 @@ export class ChipGroupV2 extends ViewV2 {
         if ("chipGroupPadding" in params) {
             this.updateParam("chipGroupPadding", params.chipGroupPadding);
         }
-        if ("backgroundSystemMaterial" in params) {
-            this.updateParam("backgroundSystemMaterial", params.backgroundSystemMaterial);
-        }
     }
     rerender() {
         this.updateDirtyElements();
@@ -968,9 +977,6 @@ __decorate([
 __decorate([
     Param
 ], ChipGroupV2.prototype, "chipGroupPadding", void 0);
-__decorate([
-    Param
-], ChipGroupV2.prototype, "backgroundSystemMaterial", void 0);
 __decorate([
     Event
 ], ChipGroupV2.prototype, "onChange", void 0);
@@ -1045,6 +1051,14 @@ function isValidDimensionString(dimension) {
 function isValidDimensionNoPercentageString(dimension) {
     return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$', 'i'));
 }
+function resolveSystemMaterial(material) {
+    let info = uiMaterial.getMaterialInfo();
+    if (info.state === uiMaterial.MaterialState.DISABLE) {
+        return undefined;
+    }
+    return info.state === uiMaterial.MaterialState.ENABLE && !material ?
+        new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) : material;
+}
 function enableEffectComponent(material) {
     return false;
 }
@@ -1052,7 +1066,7 @@ function createECMaterial(material) {
     return undefined;
 }
 function createSubECMaterial(material) {
-    return material;
+    return resolveSystemMaterial(material);
 }
 function lengthMetricsToLength(length) {
     if (length.unit === LengthUnit.PX) {

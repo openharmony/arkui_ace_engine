@@ -741,6 +741,7 @@ export struct ChipV2 {
             .focusable(false)
             .flexShrink(0)
             .draggable(false)
+            .attributeModifier(this.getPrefixImageIcon()!.modifier)
         }
 
         Text(this.chipV2Options.label.text)
@@ -760,6 +761,7 @@ export struct ChipV2 {
           .margin(this.getLabelMargin())
           .includeFontPadding(this.useAdaptiveLineHeight)
           .fallbackLineSpacing(this.useAdaptiveLineHeight)
+          .attributeModifier(this.chipV2Options.label.modifier)
 
         if (this.hasSuffixSymbolIcon()) {
           Button({ type: ButtonType.Normal }) {
@@ -792,6 +794,7 @@ export struct ChipV2 {
               .fillColor(this.getSuffixIconFilledColor())
               .objectFit(ImageFit.Cover)
               .draggable(false)
+              .attributeModifier(this.getSuffixImageIcon()!.modifier)
           }
           .backgroundColor(Color.Transparent)
           .borderRadius(0)
