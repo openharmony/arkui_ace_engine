@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_property.h"
 
@@ -37,6 +38,18 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    // Inject the header FrameNode (optional). Pattern calls it once in CreateLayoutAlgorithm.
+    void SetHeader(const RefPtr<FrameNode>& header)
+    {
+        header_ = header;
+    }
+
+    // Inject the footer FrameNode (optional). Pattern calls it once in CreateLayoutAlgorithm.
+    void SetFooter(const RefPtr<FrameNode>& footer)
+    {
+        footer_ = footer;
+    }
+
     int32_t GetTotalItemCount() const
     {
         return totalItemCount_;
@@ -47,6 +60,9 @@ public:
 private:
     struct PrevFrameSnapshot {
         LazyWaterFlowAnchorSnapshot anchor;
+        // Captured header main-axis size at Measure entry; used only by ShiftLanes to absorb header-size deltas
+        // (not needed by the pending baseline).
+        float headerMainSize = 0.0f;
     };
 
     struct LayoutRange {
@@ -67,7 +83,15 @@ private:
     void UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef);
     void UpdateGap(const RefPtr<LazyWaterFlowLayoutProperty>& layoutProperty, const OptionalSizeF& selfIdealSize);
     void UpdateItemConstraints(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
+    // Resolve the raw indices of header / footer in the child sequence into headerIndex_ / footerIndex_.
+    void UpdateHeaderFooterIndexes(LayoutWrapper* layoutWrapper);
+    // item index -> raw index: shift by +1 when a header is present.
+    int32_t GetRawIndexForItem(int32_t itemIndex) const;
+    // Subtract header / footer from the total child count and return the current content item count.
+    int32_t CalculateItemCount(LayoutWrapper* layoutWrapper) const;
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t laneIdx) const;
+    // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH) by reading from LayoutProperty.
+    StickyStyle ResolveStickyStyle(LayoutWrapper* layoutWrapper) const;
     float EstimateTotalMainSize(float maxMainSize) const;
     float EstimateBodyHeight(float maxMainSize) const;
     float ResolveFallbackMainSize(LayoutWrapper* layoutWrapper) const;
@@ -101,7 +125,7 @@ private:
     /**
      * @brief Decide how to handle a NotifyDataChange before this frame's fill.
      *
-     * @return -1 = preserve fast path (run normal Fill); >=0 = tail rebuild from this business index.
+     * @return -1 = preserve fast path (run normal Fill); >=0 = tail rebuild from this item index.
      */
     int32_t CheckReset();
 
@@ -131,6 +155,11 @@ private:
     bool CanRenderChildInDeadline(const RefPtr<LayoutWrapper>& child) const;
     void FinishMeasureItems(
         LayoutWrapper* layoutWrapper, const PrevFrameSnapshot& prevFrameSnapshot, float maxMainSize);
+    /**
+     * @brief After ShiftMeasureWindow moved the cache window to match the parent's post-adjust view,
+     * refill the new cache edges and refresh totalMainSize_ / maxHeight_ / measured ranges accordingly.
+     */
+    void ApplyAdjustedMeasureWindow(LayoutWrapper* layoutWrapper, float consumedOffset);
     void UpdateMeasuredRanges();
     /**
      * @brief Translate totalDelta into AdjustOffset. Prefer end-anchor when valid, else start-anchor.
@@ -145,15 +174,27 @@ private:
     bool NeedVisibleRangeForChild(const RefPtr<UINode>& child) const;
     bool NeedVisibleRangeForChildren(const RefPtr<FrameNode>& host) const;
     bool ShouldReuseCachedOffscreenSize(LayoutWrapper* layoutWrapper, bool maybeVisible, bool hasCachedSize) const;
-    void LayoutBusinessItems(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset,
+    // Generic header / footer layout; isSticky reports whether this edge currently participates in sticky
+    // layering, in which case its z-index is raised to the sticky default.
+    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
+        bool isSticky) const;
+    // Compute the header's sticky main-axis position then delegate to LayoutHeaderFooter.
+    void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, StickyStyle stickyStyle,
+        float stickyHeaderPos) const;
+    // Compute the footer's sticky main-axis position then delegate to LayoutHeaderFooter.
+    void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, StickyStyle stickyStyle,
+        float stickyFooterPos) const;
+    void LayoutContentItems(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset,
         const LayoutRange& range);
-    void LayoutBusinessItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, int32_t businessIndex);
+    void LayoutContentItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, int32_t itemIndex);
     bool IsValidItemPosition(const LazyWaterFlowItemMainPos* itemPos) const;
-    RefPtr<LayoutWrapper> GetLayoutChild(LayoutWrapper* layoutWrapper, int32_t businessIndex, bool isVisible) const;
-    void ClearUnlayoutedBusinessItems(LayoutWrapper* layoutWrapper, const LayoutRange& range) const;
+    RefPtr<LayoutWrapper> GetLayoutChild(LayoutWrapper* layoutWrapper, int32_t itemIndex, bool isVisible) const;
+    void ClearUnlayoutedContentItems(LayoutWrapper* layoutWrapper, const LayoutRange& range) const;
     void UpdateActiveChildRange(LayoutWrapper* layoutWrapper, int32_t visibleStart, int32_t visibleEnd,
         int32_t cachedStart, int32_t cachedEnd) const;
-    void UpdateBusinessActiveRangeOnChildren(const RefPtr<FrameNode>& host, int32_t activeStart, int32_t activeEnd,
+    // Explicitly mark header / footer as active so they are not collected by ActiveChildRange filtering.
+    void SetHeaderFooterActive(LayoutWrapper* layoutWrapper) const;
+    void UpdateItemActiveRangeOnChildren(const RefPtr<FrameNode>& host, int32_t activeStart, int32_t activeEnd,
         int32_t cacheStart, int32_t cacheEnd) const;
     ActiveChildSets BuildActiveChildSets(int32_t rawStart, int32_t rawEnd) const;
 
@@ -180,9 +221,19 @@ private:
     std::vector<double> crossLens_;
     std::vector<double> crossPos_;
     std::vector<float> laneEndPos_;
+    // Constraint used when measuring header / footer; full cross size, infinite main.
+    LayoutConstraintF edgeLayoutConstraint_;
     std::vector<LayoutConstraintF> childLayoutConstraints_;
     TextDirection layoutDirection_ = TextDirection::LTR;
     RefPtr<LazyWaterFlowLayoutInfo> layoutInfo_;
+    // Header / footer FrameNode weak refs to avoid retain cycles.
+    WeakPtr<FrameNode> header_;
+    WeakPtr<FrameNode> footer_;
+    // Raw indices of header / footer in the child sequence; -1 means not mounted.
+    // Raw host-child index of the mounted header / footer (-1 when absent). These live only in raw space —
+    // header and footer are not content items and have no item-space counterpart.
+    int32_t headerIndex_ = -1;
+    int32_t footerIndex_ = -1;
     ReferenceEdge referenceEdge_ = ReferenceEdge::START;
     bool isPredictPass_ = false;
     bool laneTopologyChanged_ = false;

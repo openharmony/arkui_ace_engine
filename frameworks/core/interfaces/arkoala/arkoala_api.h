@@ -4752,6 +4752,14 @@ struct ArkUILazyGridLayoutModifier {
     void (*resetRowsGap)(ArkUINodeHandle node);
     void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
+    void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
+    void (*resetSticky)(ArkUINodeHandle node);
+    void (*setHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
+    void (*resetHeader)(ArkUINodeHandle node);
+    void (*setFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
+    void (*resetFooter)(ArkUINodeHandle node);
+    void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* extraParam);
+    void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
 };
 
 struct ArkUILazyColumnLayoutModifier {
@@ -4760,6 +4768,12 @@ struct ArkUILazyColumnLayoutModifier {
     void (*resetSpace)(ArkUINodeHandle node);
     void (*setAlignItems)(ArkUINodeHandle node, ArkUI_Int32 align);
     void (*resetAlignItems)(ArkUINodeHandle node);
+    void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
+    void (*resetSticky)(ArkUINodeHandle node);
+    void (*setHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
+    void (*resetHeader)(ArkUINodeHandle node);
+    void (*setFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
+    void (*resetFooter)(ArkUINodeHandle node);
     void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
 };
@@ -9274,6 +9288,12 @@ struct ArkUILazyWaterFlowLayoutModifier {
     void (*resetRowsGap)(ArkUINodeHandle node);
     void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
+    void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
+    void (*resetSticky)(ArkUINodeHandle node);
+    void (*setHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
+    void (*resetHeader)(ArkUINodeHandle node);
+    void (*setFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
+    void (*resetFooter)(ArkUINodeHandle node);
     void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* extraParam);
     void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
     void (*setItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 policy);

@@ -31,6 +31,18 @@ class ArkLazyVWaterFlowLayoutComponent extends ArkComponent implements LazyVWate
     modifierWithKey(this._modifiersWithKeys, LazyWaterFlowColumnsTemplateModifier.identity, LazyWaterFlowColumnsTemplateModifier, value);
     return this;
   }
+  sticky(value: StickyStyle): this {
+    modifierWithKey(this._modifiersWithKeys, LazyWaterFlowStickyModifier.identity, LazyWaterFlowStickyModifier, value);
+    return this;
+  }
+  header(value: CustomBuilder | ComponentContent | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, LazyWaterFlowHeaderModifier.identity, LazyWaterFlowHeaderModifier, value);
+    return this;
+  }
+  footer(value: CustomBuilder | ComponentContent | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, LazyWaterFlowFooterModifier.identity, LazyWaterFlowFooterModifier, value);
+    return this;
+  }
   onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this {
     modifierWithKey(this._modifiersWithKeys, LazyWaterFlowOnVisibleIndexesChangeModifier.identity,
       LazyWaterFlowOnVisibleIndexesChangeModifier, callback);
@@ -87,6 +99,48 @@ class LazyWaterFlowRowsGapModifier extends ModifierWithKey<LengthMetrics> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class LazyWaterFlowStickyModifier extends ModifierWithKey<StickyStyle> {
+  constructor(value: StickyStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyVWaterFlowSticky');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !isNumber(this.value)) {
+      getUINativeModule().lazyVWaterFlowLayout.resetSticky(node);
+    } else {
+      getUINativeModule().lazyVWaterFlowLayout.setSticky(node, this.value);
+    }
+  }
+}
+
+class LazyWaterFlowHeaderModifier extends ModifierWithKey<CustomBuilder | ComponentContent | undefined> {
+  constructor(value: CustomBuilder | ComponentContent | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyVWaterFlowHeader');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVWaterFlowLayout.resetHeader(node);
+    } else {
+      getUINativeModule().lazyVWaterFlowLayout.setHeader(node, this.value);
+    }
+  }
+}
+
+class LazyWaterFlowFooterModifier extends ModifierWithKey<CustomBuilder | ComponentContent | undefined> {
+  constructor(value: CustomBuilder | ComponentContent | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyVWaterFlowFooter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVWaterFlowLayout.resetFooter(node);
+    } else {
+      getUINativeModule().lazyVWaterFlowLayout.setFooter(node, this.value);
+    }
   }
 }
 

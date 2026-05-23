@@ -22,6 +22,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_info.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,6 +33,18 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+
+    // Inject the header FrameNode (optional). Pattern calls it once in CreateLayoutAlgorithm.
+    void SetHeader(const RefPtr<FrameNode>& header)
+    {
+        header_ = header;
+    }
+
+    // Inject the footer FrameNode (optional). Pattern calls it once in CreateLayoutAlgorithm.
+    void SetFooter(const RefPtr<FrameNode>& footer)
+    {
+        footer_ = footer;
+    }
 
     int32_t GetTotalItemCount() const
     {
@@ -60,6 +73,10 @@ private:
     void CalculateVisibleEndIndex();
     void CheckCacheRecycle();
     void MeasureItemsLazy(LayoutWrapper* layoutWrapper);
+    // Measure the header (if mounted) and update layoutInfo_->headerMainSize_.
+    void MeasureHeader(LayoutWrapper* layoutWrapper);
+    // Measure the footer (if mounted) and update layoutInfo_->footerMainSize_.
+    void MeasureFooter(LayoutWrapper* layoutWrapper);
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
 
     void LayoutItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
@@ -75,6 +92,27 @@ private:
     void SyncPredictLayoutInfo(LayoutWrapper* layoutWrapper);
     float CalculateCrossOffset(float crossSize, float childCrossSize) const;
 
+    // Resolve the raw indices of header / footer in the child sequence into headerIndex_ / footerIndex_.
+    void UpdateHeaderFooterIndexes(LayoutWrapper* layoutWrapper);
+    // item index -> raw index: shift by +1 when a header is present.
+    int32_t GetRawIndexForItem(int32_t itemIndex) const;
+    // Subtract header / footer from the total child count and return the current content item count.
+    int32_t CalculateItemCount(LayoutWrapper* layoutWrapper) const;
+    // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH) by reading from LayoutProperty.
+    StickyStyle ResolveStickyStyle(LayoutWrapper* layoutWrapper) const;
+    // Generic header / footer layout; isSticky reports whether this edge currently participates in sticky
+    // layering, in which case its z-index is raised to the sticky default.
+    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
+        float crossSize, bool isSticky) const;
+    // Compute the header's sticky main-axis position then delegate to LayoutHeaderFooter.
+    void LayoutHeader(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset,
+        StickyStyle stickyStyle, float stickyHeaderPos) const;
+    // Compute the footer's sticky main-axis position then delegate to LayoutHeaderFooter.
+    void LayoutFooter(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset,
+        StickyStyle stickyStyle, float stickyFooterPos) const;
+    // Explicitly mark header / footer as active so they are not collected by ActiveChildRange filtering.
+    void SetHeaderFooterActive(LayoutWrapper* layoutWrapper) const;
+
     RefPtr<LazyColumnLayoutInfo> layoutInfo_;
 
     int32_t totalItemCount_ = 0;
@@ -88,8 +126,19 @@ private:
     float viewExtEnd_ = 0.0f;
     float space_ = 0.0f;
     LayoutConstraintF childLayoutConstraint_;
+    // Constraint used when measuring header / footer; full cross size, infinite main.
+    LayoutConstraintF edgeLayoutConstraint_;
     HorizontalAlign horizontalAlign_ = HorizontalAlign::CENTER;
     bool isRtl_ = false;
+
+    // Header / footer FrameNode weak refs to avoid retain cycles.
+    WeakPtr<FrameNode> header_;
+    WeakPtr<FrameNode> footer_;
+    // Raw indices of header / footer in the child sequence; -1 means not mounted.
+    // Raw host-child index of the mounted header / footer (-1 when absent). These live only in raw space —
+    // header and footer are not content items and have no item-space counterpart.
+    int32_t headerIndex_ = -1;
+    int32_t footerIndex_ = -1;
 
     // cache
     float cacheSize_ = 0.5f; // preload half-screen content above and below viewport

@@ -79,10 +79,10 @@ void LazyWaterFlowLayoutUtils::ShiftMeasureWindow(
     cacheEndPos += delta;
 }
 
-bool LazyWaterFlowLayoutUtils::IsBusinessItemVisible(
-    int32_t businessIndex, int32_t layoutedStartIndex, int32_t layoutedEndIndex)
+bool LazyWaterFlowLayoutUtils::IsItemVisible(
+    int32_t itemIndex, int32_t layoutedStartIndex, int32_t layoutedEndIndex)
 {
-    return businessIndex >= layoutedStartIndex && businessIndex <= layoutedEndIndex;
+    return itemIndex >= layoutedStartIndex && itemIndex <= layoutedEndIndex;
 }
 
 std::string LazyWaterFlowLayoutUtils::PreParseWaterFlowTemplate(const std::string& args)

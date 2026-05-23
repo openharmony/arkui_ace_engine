@@ -209,6 +209,7 @@ build_component_ng("pattern_ng") {
     "lazy_layout/grid_layout/lazy_grid_layout_model.cpp",
     "lazy_layout/grid_layout/lazy_grid_layout_model_static.cpp",
     "lazy_layout/grid_layout/lazy_grid_layout_pattern.cpp",
+    "lazy_layout/header_footer_utils.cpp",
     "lazy_layout/lazy_layout_utils.cpp",
     "linear_indicator/linear_indicator_accessibility_property.cpp",
     "linear_indicator/linear_indicator_controller.cpp",

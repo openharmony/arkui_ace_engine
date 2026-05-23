@@ -22,8 +22,11 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
 
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT LazyGridLayoutAlgorithm : public LayoutAlgorithm {
@@ -33,6 +36,18 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+
+    // Inject the header FrameNode (optional). Pattern calls it once in CreateLayoutAlgorithm.
+    void SetHeader(const RefPtr<FrameNode>& header)
+    {
+        header_ = header;
+    }
+
+    // Inject the footer FrameNode (optional). Pattern calls it once in CreateLayoutAlgorithm.
+    void SetFooter(const RefPtr<FrameNode>& footer)
+    {
+        footer_ = footer;
+    }
 
     float GetSpaceWidth() const
     {
@@ -70,11 +85,38 @@ public:
     void SetDynamicLayout(bool isDynamic) { isDynamicLayout_ = isDynamic; }
 
 private:
+    // DynamicLayout branch of Measure: measure all items (non-lazy) and finalize the frame size.
+    void MeasureDynamicLayout(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize,
+        const PaddingPropertyF& padding);
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize, const PaddingPropertyF& padding);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t laneIdx) const;
     void UpdateGridItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void UpdateGap(const RefPtr<LazyGridLayoutProperty>& layoutProperty, const OptionalSizeF& selfIdealSize);
     void UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef);
+    // Resolve the raw indices of header / footer in the child sequence into headerIndex_ / footerIndex_.
+    void UpdateHeaderFooterIndexes(LayoutWrapper* layoutWrapper);
+    // item index -> raw index: shift by +1 when a header is present.
+    int32_t GetRawIndexForItem(int32_t itemIndex) const;
+    // Subtract header / footer from the total child count and return the current content item count.
+    int32_t CalculateItemCount(LayoutWrapper* layoutWrapper) const;
+    // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH) by reading from LayoutProperty.
+    StickyStyle ResolveStickyStyle(LayoutWrapper* layoutWrapper) const;
+    // Measure the header into edgeLayoutConstraint_; updates layoutInfo_->headerMainSize_ and returns the size.
+    float MeasureHeader(LayoutWrapper* layoutWrapper);
+    // Measure the footer into edgeLayoutConstraint_; updates layoutInfo_->footerMainSize_ and returns the size.
+    float MeasureFooter(LayoutWrapper* layoutWrapper);
+    // Generic header / footer layout; isSticky reports whether this edge currently participates in sticky
+    // layering, in which case its z-index is raised to the sticky default.
+    void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
+        bool isSticky) const;
+    // Compute the header's sticky main-axis position then delegate to LayoutHeaderFooter.
+    void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, StickyStyle stickyStyle,
+        float stickyHeaderPos) const;
+    // Compute the footer's sticky main-axis position then delegate to LayoutHeaderFooter.
+    void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, StickyStyle stickyStyle,
+        float stickyFooterPos) const;
+    // Explicitly mark header / footer as active so they are not collected by ActiveChildRange filtering.
+    void SetHeaderFooterActive(LayoutWrapper* layoutWrapper, int32_t cachedStart, int32_t cachedEnd) const;
     void MeasureGridItemAll(LayoutWrapper* layoutWrapper);
     void MeasureGridItemLazy(LayoutWrapper* layoutWrapper);
     void GetStartIndexInfo(int32_t& index, float& pos);
@@ -139,8 +181,19 @@ private:
     int32_t cachedStartIndex_ = -1;
     int32_t cachedEndIndex_ = -1;
 
+    // Constraint used when measuring header / footer; full cross size, infinite main.
+    LayoutConstraintF edgeLayoutConstraint_;
     std::vector<LayoutConstraintF> childLayoutConstraints_;
     RefPtr<LazyGridLayoutInfo> layoutInfo_;
+
+    // Header / footer FrameNode weak refs to avoid retain cycles.
+    WeakPtr<FrameNode> header_;
+    WeakPtr<FrameNode> footer_;
+    // Raw indices of header / footer in the child sequence; -1 means not mounted.
+    // Raw host-child index of the mounted header / footer (-1 when absent). These live only in raw space —
+    // header and footer are not content items and have no item-space counterpart.
+    int32_t headerIndex_ = -1;
+    int32_t footerIndex_ = -1;
 
     // DynamicLayout 标识
     bool isDynamicLayout_ = false;

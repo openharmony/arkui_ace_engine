@@ -70,6 +70,9 @@ private:
     int32_t visibleEndIndex_ = -1;
     int32_t totalItemCount_ = 0;
     int32_t lanes_ = 1;
+    // Header / footer main-axis sizes; the header counts toward the lane internal coords' baseline at 0.
+    float headerMainSize_ = 0.0f;
+    float footerMainSize_ = 0.0f;
     float totalMainSize_ = 0.0f;
     float spaceWidth_ = 0.0f;
 
