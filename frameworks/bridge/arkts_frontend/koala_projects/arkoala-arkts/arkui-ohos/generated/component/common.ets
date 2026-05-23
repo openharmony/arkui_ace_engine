@@ -7840,6 +7840,18 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setBackToTop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setScrollBarHeightAttribute(value: arkui_Graphics_LengthMetrics | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setEdgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (edgeEffect !== undefined) {
@@ -12233,6 +12245,20 @@ export interface ScrollableCommonMethod extends CommonMethod {
         }
         throw new Error('Unimplemented method backToTop')
     }
+    scrollBarHeight(value: arkui_Graphics_LengthMetrics | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push(
+                (instance: CommonMethod): void => (instance as ScrollableCommonMethod).scrollBarHeight(value)
+            );
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Scrollable CommonMethod 'scrollBarHeight' can only be set when creating an extendable component.")
+            }
+        }
+        throw new Error('Unimplemented method scrollBarHeight')
+    }
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -13834,6 +13860,11 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public backToTop(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setBackToTopAttribute(value_casted)
+        return this
+    }
+    public scrollBarHeight(value: arkui_Graphics_LengthMetrics | undefined): this {
+        const value_casted = value as (arkui_Graphics_LengthMetrics | undefined)
+        this.getPeer()?.setScrollBarHeightAttribute(value_casted)
         return this
     }
     public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {

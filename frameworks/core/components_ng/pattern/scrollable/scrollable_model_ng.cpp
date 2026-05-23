@@ -28,6 +28,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -54,6 +55,41 @@ void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, const std::option
         auto defaultValue = pattern->GetDefaultScrollBarDisplayMode();
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, defaultValue, frameNode);
     }
+}
+
+void ScrollableModelNG::SetScrollBarHeight(const std::string& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(
+        ScrollablePaintProperty, ScrollBarHeight, StringUtils::StringToDimensionWithUnit(value));
+}
+
+void ScrollableModelNG::SetScrollBarHeight(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarHeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarHeight, PROPERTY_UPDATE_RENDER, frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        if (!scrollBar->GetUseInnerScrollBar()) {
+            return;
+        }
+        scrollBar->SetScrollBarHeight(scrollBarTheme->GetScrollBarHeight());
+        scrollBar->FlushBarWidth();
+    }
+}
+
+void ScrollableModelNG::ResetScrollBarHeight(FrameNode* frameNode)
+{
+    SetScrollBarHeight(frameNode, std::nullopt);
 }
 
 void ScrollableModelNG::SetScrollBarColor(const std::string& value)
@@ -539,6 +575,14 @@ bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
     return pattern->GetBackToTop();
 }
 
+float ScrollableModelNG::GetScrollBarHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, 0.0f);
+    return static_cast<float>(paintProperty->GetBarHeight().ConvertToVp());
+}
+
 void ScrollableModelNG::SetEnableScrollWithMouse(bool enableScrollWithMouse)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -644,6 +688,33 @@ void ScrollableModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode
         auto scrollBar = pattern->GetScrollBar();
         CHECK_NULL_VOID(scrollBar);
         scrollBar->SetForegroundColor(color);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ScrollableModelNG::CreateWithResourceObjScrollBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "ScrollableScrollBarHeight";
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension scrollBarHeight;
+        if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, scrollBarHeight, false) ||
+            LessNotEqual(scrollBarHeight.Value(), 0.0) || scrollBarHeight.Unit() == DimensionUnit::PERCENT) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+            CHECK_NULL_VOID(theme);
+            scrollBarHeight = theme->GetScrollBarHeight();
+        }
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            ScrollablePaintProperty, ScrollBarHeight, static_cast<Dimension>(scrollBarHeight), node);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }

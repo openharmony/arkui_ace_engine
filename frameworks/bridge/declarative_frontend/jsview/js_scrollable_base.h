@@ -28,6 +28,7 @@ public:
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void JSClipContent(const JSCallbackInfo& info);
     static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
+    static void SetScrollBarHeight(const JSCallbackInfo& info);
     static void SetScrollBarMargin(const JSCallbackInfo& info);
     static void JSBackToTop(const JSCallbackInfo& info);
     static void JSEnableScrollWithMouse(const JSCallbackInfo& info);

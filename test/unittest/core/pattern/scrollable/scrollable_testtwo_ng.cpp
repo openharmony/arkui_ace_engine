@@ -302,9 +302,10 @@ HWTEST_F(ScrollableTestNg, GetPaintPropertyDumpInfo002, TestSize.Level1)
     frameNode->paintProperty_ = paintProperty;
     scrollablePattern->frameNode_ = frameNode;
     scrollablePattern->GetPaintPropertyDumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 7);
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 8);
     EXPECT_EQ(DumpLog::GetInstance().description_[0], "innerScrollBarState: OFF\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[1], "scrollBarWidth: None\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[1], "scrollBarHeight: None\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[2], "scrollBarWidth: None\n");
 }
 
 /**

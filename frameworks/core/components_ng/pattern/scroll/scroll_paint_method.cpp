@@ -75,6 +75,9 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
             arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
             arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
     } else {
+        scrollBarOverlayModifier->SetNeedPaintTrack(scrollBar->GetUseInnerScrollBar());
+        scrollBarOverlayModifier->SetTrackRect(scrollBar->GetTrackRect());
+        scrollBarOverlayModifier->SetTrackColor(scrollBar->GetBackgroundColor());
         scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
         scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
             scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());

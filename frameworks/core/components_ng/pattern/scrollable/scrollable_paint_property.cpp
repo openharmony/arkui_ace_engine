@@ -50,6 +50,10 @@ void ScrollablePaintProperty::DumpInfo()
     } else if (scrollBarMode == DisplayMode::ON) {
         DumpLog::GetInstance().AddDesc("innerScrollBarState: ON");
     }
+    auto scrollBarHeight = GetScrollBarHeight();
+    scrollBarHeight.has_value() ? DumpLog::GetInstance().AddDesc(std::string("scrollBarHeight: ")
+        .append(scrollBarHeight.value().ToString()))
+        : DumpLog::GetInstance().AddDesc("scrollBarHeight: None");
     auto scrollBarWidth = GetScrollBarWidth();
     scrollBarWidth.has_value() ? DumpLog::GetInstance().AddDesc(std::string("scrollBarWidth: ")
         .append(scrollBarWidth.value().ToString()))
@@ -89,6 +93,9 @@ void ScrollablePaintProperty::DumpInfo(std::unique_ptr<JsonValue>& json)
     } else if (scrollBarMode == DisplayMode::ON) {
         json->Put("innerScrollBarState", "ON");
     }
+    auto scrollBarHeight = GetScrollBarHeight();
+    json->Put("scrollBarHeight",
+        scrollBarHeight.has_value() ? scrollBarHeight.value().ToString().c_str() : "None");
     auto scrollBarWidth = GetScrollBarWidth();
     json->Put("scrollBarWidth", scrollBarWidth.has_value() ? scrollBarWidth.value().ToString().c_str() : "None");
     auto scrollBarColor = GetScrollBarColor();
@@ -135,6 +142,7 @@ void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     }
     json->PutExtAttr("scrollBar", GetBarStateString().c_str(), filter);
     json->PutExtAttr("scrollBarColor", GetBarColor().ColorToString().c_str(), filter);
+    json->PutExtAttr("scrollBarHeight", GetBarHeight().ToString().c_str(), filter);
     json->PutExtAttr("scrollBarWidth", GetBarWidth().ToString().c_str(), filter);
     json->PutExtAttr("scrollBarMargin",
         propScrollBarProperty_
@@ -169,6 +177,19 @@ Color ScrollablePaintProperty::GetBarColor() const
     auto defaultScrollBarColor = scrollBarTheme->GetForegroundColor();
     return propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarColor.value_or(defaultScrollBarColor)
                                   : defaultScrollBarColor;
+}
+
+Dimension ScrollablePaintProperty::GetBarHeight() const
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, Dimension());
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, Dimension());
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_RETURN(scrollBarTheme, Dimension());
+    auto defaultScrollBarHeight = scrollBarTheme->GetScrollBarHeight();
+    return propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarHeight.value_or(defaultScrollBarHeight)
+                                  : defaultScrollBarHeight;
 }
 
 Dimension ScrollablePaintProperty::GetBarWidth() const

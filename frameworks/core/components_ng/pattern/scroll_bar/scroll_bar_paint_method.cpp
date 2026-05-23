@@ -30,6 +30,9 @@ void ScrollBarPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintProperty);
     auto barColor = paintProperty->GetBarColor();
     scrollBar->SetForegroundColor(barColor);
+    scrollBarOverlayModifier->SetNeedPaintTrack(scrollBar->GetUseInnerScrollBar());
+    scrollBarOverlayModifier->SetTrackRect(scrollBar->GetTrackRect());
+    scrollBarOverlayModifier->SetTrackColor(scrollBar->GetBackgroundColor());
 
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());

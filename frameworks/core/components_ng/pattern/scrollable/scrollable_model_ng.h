@@ -42,6 +42,8 @@ public:
 
     static void SetScrollBarMode(DisplayMode value);
     static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& value);
+    static void SetScrollBarHeight(const std::string& value);
+    static void SetScrollBarHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetScrollBarColor(const std::string& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetScrollBarWidth(const std::string& value);
@@ -105,6 +107,7 @@ public:
 #endif
 
     static void ResetScrollBarWidth(FrameNode* frameNode);
+    static void ResetScrollBarHeight(FrameNode* frameNode);
     static void ResetScrollBarColor(FrameNode* frameNode);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
@@ -116,6 +119,7 @@ public:
     static void ResetBackToTop(FrameNode* frameNode);
     static void ResetBackToTopMultiThread(FrameNode* frameNode);
     static bool GetBackToTop(FrameNode* frameNode);
+    static float GetScrollBarHeight(FrameNode* frameNode);
     static void SetEnableScrollWithMouse(bool enableScrollWithMouse);
     static void SetEnableScrollWithMouse(FrameNode* frameNode, bool enableScrollWithMouse);
     static void ResetEnableScrollWithMouse(FrameNode* frameNode);
@@ -140,6 +144,7 @@ public:
     static void CreateWithResourceObjContentEndOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjScrollBarHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetAutoAdjustScrollBarMargin(std::optional<bool> autoAdjust);
     static void SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust);
     static void ResetAutoAdjustScrollBarMargin(FrameNode* frameNode);

@@ -250,6 +250,7 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     // set the scroll bar style
     auto positionMode = GetPositionMode();
     scrollBar_->SetPositionMode(positionMode);
+    scrollBar_->SetUseInnerScrollBar(UseInnerScrollBar());
     if (scrollBarOverlayModifier_) {
         scrollBarOverlayModifier_->SetPositionMode(positionMode);
     }
@@ -308,6 +309,7 @@ void ScrollBarPattern::UpdateScrollBarRegion(
 {
     // outer scrollbar, viewOffset is padding offset
     if (scrollBar_) {
+        scrollBar_->SetUseInnerScrollBar(UseInnerScrollBar());
         auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
         bool scrollable = GreatNotEqual(estimatedHeight, mainSize);
         if (scrollBar_->IsScrollable() != scrollable) {

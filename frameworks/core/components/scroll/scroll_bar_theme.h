@@ -63,7 +63,8 @@ public:
                 return;
             }
             parseNormalThemeStyle(pattern, theme);
-            theme->arcNormalBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_background_width",
+            parseInnerScrollBarThemeStyle(pattern, theme);
+            theme->arcNormalBackgroundWidth_ = pattern->GetAttr<Dimension>("arc_scroll_bar_normal_background_width",
                 4.0_vp);
             theme->arcActiveBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_background_width",
                 24.0_vp);
@@ -108,6 +109,14 @@ public:
             theme->foregroundPressedBlendColor_ =
                 pattern->GetAttr<Color>("scroll_bar_foreground_pressed_blend_color", PRESSED_BLEND_COLOR);
         }
+
+        void parseInnerScrollBarThemeStyle(const RefPtr<ThemeStyle>& pattern, const RefPtr<ScrollBarTheme>& theme) const
+        {
+            theme->scrollBarHeight_ = pattern->GetAttr<Dimension>("scroll_bar_height", 1.0_pct);
+            theme->startMargin_ = pattern->GetAttr<Dimension>("scroll_bar_start_margin", 0.0_vp);
+            theme->scrollBarInteractive_ = pattern->GetAttr<int32_t>("scroll_bar_interactive", 1) != 0;
+            theme->normalBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_background_width", 0.0_vp);
+        }
     };
 
     ~ScrollBarTheme() override = default;
@@ -127,6 +136,11 @@ public:
         return minHeight_;
     }
 
+    const Dimension& GetScrollBarHeight() const
+    {
+        return scrollBarHeight_;
+    }
+
     const Dimension& GetMinDynamicHeight() const
     {
         return minDynamicHeight_;
@@ -135,6 +149,21 @@ public:
     const Dimension& GetReservedHeight() const
     {
         return reservedHeight_;
+    }
+
+    const Dimension& GetStartMargin() const
+    {
+        return startMargin_;
+    }
+
+    bool GetScrollBarInteractive() const
+    {
+        return scrollBarInteractive_;
+    }
+
+    const Dimension& GetNormalBackgroundWidth() const
+    {
+        return normalBackgroundWidth_;
     }
 
     const Dimension& GetTouchWidth() const
@@ -238,8 +267,12 @@ private:
     Dimension normalWidth_;
     Dimension activeWidth_;
     Dimension minHeight_;
+    Dimension scrollBarHeight_ = 1.0_pct;
     Dimension minDynamicHeight_;
     Dimension reservedHeight_;
+    Dimension startMargin_;
+    bool scrollBarInteractive_ = true;
+    Dimension normalBackgroundWidth_;
     Dimension touchWidth_;
     Dimension scrollBarMargin_;
     Dimension defaultWidth_;

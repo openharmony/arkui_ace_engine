@@ -30,6 +30,7 @@ class InspectorFilter;
 
 struct ScrollBarProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMode, DisplayMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarHeight, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMargin, ScrollBarMargin);
@@ -71,6 +72,7 @@ public:
 
     ACE_DEFINE_PROPERTY_GROUP(ScrollBarProperty, ScrollBarProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMode, DisplayMode, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarHeight, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMargin, ScrollBarMargin, PROPERTY_UPDATE_RENDER);
@@ -80,6 +82,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, DefaultFadingEdge, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdgeLength, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentClip, ContentClip, PROPERTY_UPDATE_RENDER);
+    Dimension GetBarHeight() const;
     Dimension GetBarWidth() const;
     ACE_FORCE_EXPORT Color GetBarColor() const;
 

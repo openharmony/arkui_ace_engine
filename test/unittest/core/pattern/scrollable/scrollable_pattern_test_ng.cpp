@@ -18,8 +18,11 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
@@ -36,6 +39,18 @@ using namespace testing::ext;
 class ScrollablePatternTestNg : public TestNG {
 public:
 };
+
+namespace {
+void SetUpMockScrollBarTheme()
+{
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = ScrollablePatternTestNg::CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
+}
+} // namespace
 
 /**
  * @tc.name: HandleScrollParallel001
@@ -1223,6 +1238,7 @@ HWTEST_F(ScrollablePatternTestNg, UpdateMouseStartOffset002, TestSize.Level1)
  */
 HWTEST_F(ScrollablePatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
+    SetUpMockScrollBarTheme();
     RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
@@ -1235,6 +1251,7 @@ HWTEST_F(ScrollablePatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1
     scrollablePattern->scrollBar_ = scrollBar;
     scrollablePattern->OnColorConfigurationUpdate();
     EXPECT_EQ(scrollablePattern->scrollBar_->foregroundColor_.colorValue_.value, 0xffff0000);
+    MockPipelineContext::TearDown();
 }
 
 /**

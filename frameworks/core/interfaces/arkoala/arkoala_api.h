@@ -5121,6 +5121,9 @@ struct ArkUIScrollableModifier {
     void (*setBackToTop)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetBackToTop)(ArkUINodeHandle node);
     ArkUI_Int32 (*getBackToTop)(ArkUINodeHandle node);
+    void (*setScrollBarHeight)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*resetScrollBarHeight)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getScrollBarHeight)(ArkUINodeHandle node);
     void (*setEnableScrollWithMouse)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableScrollWithMouse)(ArkUINodeHandle node);
     ArkUI_Int32 (*getEnableScrollWithMouse)(ArkUINodeHandle node);

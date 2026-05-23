@@ -43,6 +43,42 @@ void ScrollableModelStatic::SetScrollBarMode(FrameNode* frameNode, const std::op
     }
 }
 
+void ScrollableModelStatic::SetScrollBarHeight(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarHeight, value.value(), frameNode);
+    } else {
+        CHECK_NULL_VOID(frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarHeight, PROPERTY_UPDATE_RENDER, frameNode);
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollBarTheme = context->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        if (!scrollBar->GetUseInnerScrollBar()) {
+            return;
+        }
+        scrollBar->SetScrollBarHeight(scrollBarTheme->GetScrollBarHeight());
+        scrollBar->FlushBarWidth();
+    }
+}
+
+void ScrollableModelStatic::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollablePaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+        FREE_NODE_CHECK(frameNode, SetScrollBarColor, frameNode, std::nullopt);
+        UpdateScrollBarColorWithTheme(frameNode);
+    }
+}
+
 void ScrollableModelStatic::UpdateScrollBarColorWithTheme(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -75,18 +111,6 @@ void ScrollableModelStatic::UpdateScrollBarWidthWithTheme(FrameNode* frameNode)
     scrollBar->SetInactiveWidth(defaultScrollBarWidth);
     scrollBar->SetNormalWidth(defaultScrollBarWidth);
     scrollBar->SetIsUserNormalWidth(false);
-}
-
-void ScrollableModelStatic::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value)
-{
-    if (value) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
-            ScrollablePaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
-        FREE_NODE_CHECK(frameNode, SetScrollBarColor, frameNode, std::nullopt);
-        UpdateScrollBarColorWithTheme(frameNode);
-    }
 }
 
 void ScrollableModelStatic::SetScrollBarColorMultiThread(FrameNode* frameNode, const std::optional<Color>& value)

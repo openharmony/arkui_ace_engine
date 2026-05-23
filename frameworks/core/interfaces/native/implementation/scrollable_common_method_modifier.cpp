@@ -377,6 +377,22 @@ void SetBackToTopImpl(Ark_NativePointer node,
     }
     ScrollableModelStatic::SetBackToTop(frameNode, *convValue);
 }
+void SetScrollBarHeightImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    if (!convValue) {
+        ScrollableModelStatic::SetScrollBarHeight(frameNode, std::nullopt);
+        return;
+    }
+    Validator::ValidateNonNegative(convValue);
+    if (LessNotEqual(convValue->Value(), 0.0)) {
+        ScrollableModelStatic::SetScrollBarHeight(frameNode, std::nullopt);
+        return;
+    }
+    ScrollableModelStatic::SetScrollBarHeight(frameNode, convValue);
+}
 void SetEdgeEffectImpl(Ark_NativePointer node,
                        const Opt_EdgeEffect* edgeEffect,
                        const Opt_EdgeEffectOptions* options)
@@ -438,6 +454,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetClipContentImpl,
         ScrollableCommonMethodModifier::SetDigitalCrownSensitivityImpl,
         ScrollableCommonMethodModifier::SetBackToTopImpl,
+        ScrollableCommonMethodModifier::SetScrollBarHeightImpl,
         ScrollableCommonMethodModifier::SetEdgeEffectImpl,
         ScrollableCommonMethodModifier::SetFadingEdgeImpl,
     };

@@ -3384,6 +3384,10 @@ void ArkUINativeModule::RegisterScrollableAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetBackToTop));
     scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackToTop"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetBackToTop));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetScrollBarHeight));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetScrollBarHeight));
     scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableScrollWithMouse"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetEnableScrollWithMouse));
     scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableScrollWithMouse"),

@@ -64,6 +64,19 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
     auto barHeight = barHeight_->Get();
     auto barX = barX_->Get();
     auto barY = barY_->Get();
+    if (needPaintTrack_ && !NearZero(trackRect_.Width()) && !NearZero(trackRect_.Height())) {
+        auto& canvas = drawingContext.canvas;
+        RSBrush brush;
+        brush.SetBlendMode(RSBlendMode::SRC_OVER);
+        brush.SetAntiAlias(true);
+        RSRect trackRect(trackRect_.Left() + adjustOffset_.GetX(), trackRect_.Top() + adjustOffset_.GetY(),
+            trackRect_.Right() + adjustOffset_.GetX(), trackRect_.Bottom() + adjustOffset_.GetY());
+        double trackRadius = std::min(trackRect_.Width(), trackRect_.Height()) * HALF;
+        brush.SetColor(ToRSColor(trackColor_.BlendOpacity(opacity_->Get() / FULL_ALPHA)));
+        canvas.AttachBrush(brush);
+        canvas.DrawRoundRect({ trackRect, trackRadius, trackRadius });
+        canvas.DetachBrush();
+    }
     if (!NearZero(barWidth) && !NearZero(barHeight)) {
         auto& canvas = drawingContext.canvas;
         RSBrush brush;

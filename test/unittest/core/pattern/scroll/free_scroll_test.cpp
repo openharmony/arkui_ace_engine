@@ -1151,7 +1151,7 @@ TEST_F(FreeScrollTest, ScrollBar001)
     const auto scrollBar = pattern_->scrollBar2d_;
     ASSERT_TRUE(scrollBar);
     EXPECT_EQ(scrollBar->vertical_->GetActiveRect().ToString(), "Rect (236.00, 8.00) - [4.00 x 76.80]");
-    EXPECT_EQ(scrollBar->horizontal_->GetActiveRect().ToString(), "Rect (8.00, 396.00) - [26.88 x 4.00]");
+    EXPECT_EQ(scrollBar->horizontal_->GetActiveRect().ToString(), "Rect (8.00, 396.00) - [44.80 x 4.00]");
     EXPECT_EQ(scrollBar->vertical_->GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
     EXPECT_EQ(scrollBar->horizontal_->GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
     EXPECT_EQ(scrollBar->vertical_->GetTouchRegion().ToString(), "Rect (208.00, 8.00) - [32.00 x 76.80]");
@@ -1186,7 +1186,7 @@ TEST_F(FreeScrollTest, ScrollBar002)
     const auto scrollBar = pattern_->scrollBar2d_;
     ASSERT_TRUE(scrollBar);
     EXPECT_EQ(scrollBar->vertical_->GetActiveRect().ToString(), "Rect (236.00, 315.20) - [4.00 x 76.80]");
-    EXPECT_EQ(scrollBar->horizontal_->GetActiveRect().ToString(), "Rect (205.12, 396.00) - [26.88 x 4.00]");
+    EXPECT_EQ(scrollBar->horizontal_->GetActiveRect().ToString(), "Rect (187.20, 396.00) - [44.80 x 4.00]");
 
     ScrollModelNG::SetScrollBarColor(frameNode_.GetRawPtr(), Color::BLUE);
     pattern_->OnModifyDone();

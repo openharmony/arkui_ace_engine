@@ -7321,6 +7321,23 @@ typedef enum {
     NODE_SCROLL_AUTO_ADJUST_MARGIN = 1002028,
 
     /**
+     * @brief Defines the scrollbar track height. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:
+     * .value[0].f32: height of the scrollbar track, in vp. 
+     * Default value: adaptive to the height of the scrollable component. 
+     * Value range: The value must be greater than or equal to 0. If set to a value less than 0,
+     * the default value is used. If set to 0, the scrollbar is not displayed. 
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:
+     * .value[0].f32: height of the scrollbar track, in vp. 
+     *
+     * @since 26.0.0
+     */
+    NODE_SCROLL_BAR_HEIGHT = 1002029,
+
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *

@@ -85,7 +85,9 @@ void WaterFlowPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
-    OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
+    scrollBarOverlayModifier->SetNeedPaintTrack(scrollBar->GetUseInnerScrollBar());
+    scrollBarOverlayModifier->SetTrackRect(scrollBar->GetTrackRect());
+    scrollBarOverlayModifier->SetTrackColor(scrollBar->GetBackgroundColor());
     auto selfAdjust = paintWrapper->GetGeometryNode()->GetSelfAdjust();
     auto rect = scrollBar->GetActiveRect();
     rect.SetTop(rect.Top() - selfAdjust.GetY());

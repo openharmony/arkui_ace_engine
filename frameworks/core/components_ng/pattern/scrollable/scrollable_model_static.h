@@ -36,6 +36,7 @@ class FrameNode;
 class ACE_FORCE_EXPORT ScrollableModelStatic {
 public:
     static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& value);
+    static void SetScrollBarHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void UpdateScrollBarColorWithTheme(FrameNode* frameNode);
