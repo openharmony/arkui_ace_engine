@@ -399,4 +399,5 @@ std::pair<bool, bool> NavigationLayoutUtil::CheckVerticalExtend(
     }
     return std::make_pair(isCanTopExtend, isCanBottomExtend);
 }
+
 } // namespace OHOS::Ace::NG

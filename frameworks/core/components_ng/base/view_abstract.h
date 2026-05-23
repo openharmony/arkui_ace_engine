@@ -337,6 +337,7 @@ public:
     static void SetBlendMode(BlendMode blendMode);
     static void SetBlendApplyType(BlendApplyType blendApplyType);
     static void SetBlender(const OHOS::Rosen::Blender* blender);
+    static void ResetBlender();
 
     // graphics
     static void SetBrightness(const Dimension &value);
@@ -938,6 +939,7 @@ public:
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
     static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
     static void SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender);
+    static void ResetBlender(FrameNode* frameNode);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);

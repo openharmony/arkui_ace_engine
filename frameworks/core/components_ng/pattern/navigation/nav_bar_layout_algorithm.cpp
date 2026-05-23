@@ -261,19 +261,6 @@ void NavBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     navBarPattern->SetTitleBarHeight(titleBarHeight);
     auto transferedTitleBarHeight = TransferBarHeight(hostNode, titleBarHeight, true);
 
-    auto maskUINode = hostNode->GetTitleBarMaskNode();
-    if (maskUINode && navBarPattern->IsScrollEffectEnabled()) {
-        auto maskIndex = hostNode->GetChildIndexById(maskUINode->GetId());
-        if (maskIndex >= 0) {
-            auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
-            if (maskWrapper) {
-                auto maskConstraint = navBarLayoutProperty->CreateChildConstraint();
-                maskConstraint.selfIdealSize = OptionalSizeF(size.Width(), titleBarHeight);
-                maskWrapper->Measure(maskConstraint);
-            }
-        }
-    }
-
     float toolBarHeight = NavigationLayoutUtil::MeasureToolBar(layoutWrapper, hostNode, navBarLayoutProperty, size);
     navBarPattern->SetToolBarHeight(toolBarHeight);
     // after the visibility of title/tool bar determined, update safeAreaPadding of content node if needed.
@@ -317,20 +304,6 @@ void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navBarLayoutProperty, decorBarHeight);
     auto transferedTitleBarHeight = TransferBarHeight(hostNode, titlebarHeight, true);
     LayoutContent(layoutWrapper, hostNode, navBarLayoutProperty, transferedTitleBarHeight);
-
-    auto maskUINode = hostNode->GetTitleBarMaskNode();
-    if (maskUINode && navBarPattern && navBarPattern->IsScrollEffectEnabled()) {
-        auto maskIndex = hostNode->GetChildIndexById(maskUINode->GetId());
-        if (maskIndex >= 0) {
-            auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
-            if (maskWrapper && maskWrapper->GetGeometryNode()) {
-                auto maskGeometryNode = maskWrapper->GetGeometryNode();
-                float maskOffsetY = navBarPattern->GetTitleBarOffsetY();
-                maskGeometryNode->SetMarginFrameOffset(OffsetF(0.0f, maskOffsetY));
-                maskWrapper->Layout();
-            }
-        }
-    }
 
     float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(
         layoutWrapper, hostNode, navBarLayoutProperty, false);

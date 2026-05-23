@@ -104,12 +104,14 @@ private:
 
     void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
+    void MeasureMask(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize);
 
     void ShowBackButtonLayout(LayoutWrapper* layoutWrapper, RefPtr<GeometryNode>& geometryNode,
         const RefPtr<LayoutWrapper>& backButtonWrapper, float titleBarHeight);
 
     void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
+    void LayoutMask(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
 
     float GetFullModeTitleOffsetY(float titleHeight, float subtitleHeight, RefPtr<GeometryNode> titleBarGeometryNode);
 

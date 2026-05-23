@@ -275,6 +275,7 @@ public:
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
     void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
+    void ResetBlender() override;
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
     void SetShadowPath(const std::string path) override;
     void ResetShadowPath() override;
@@ -905,6 +906,9 @@ protected:
     void RemoveTransparencyCallback();
 
     void OnEmitterPropertyUpdate();
+
+    void UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara) override;
+    void ResetRadiusGradientBlur() override;
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;

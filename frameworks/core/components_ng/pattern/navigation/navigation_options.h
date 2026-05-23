@@ -32,6 +32,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_BLUR_RADIUS = 40;
+constexpr double GRADUAL_BLUR_MASK_EXTRA_HEIGHT_VP = 32.0;
 
 enum class ScrollEffectType {
     COMMON_BLUR = 0,
