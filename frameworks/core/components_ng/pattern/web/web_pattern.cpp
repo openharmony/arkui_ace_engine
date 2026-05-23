@@ -4758,6 +4758,7 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnableAutoFill(GetEnableAutoFill().value_or(true));
         delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
         UpdateScrollbarLayout();
+        delegate_->UpdateTouchEventFeatureDetectionEnabled();
     }
 
     // Set the default background color when the component did not set backgroundColor()
