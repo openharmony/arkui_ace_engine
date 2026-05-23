@@ -1422,8 +1422,8 @@ export class FrameNodeUtils {
             let frameNode = isWeak
                 ? new BuilderRootWeakFrameNode<T>(uiContext, 'BuilderRootWeakFrameNode', ptr)
                 : new BuilderRootFrameNode<T>(uiContext, 'BuilderRootFrameNode', ptr);
-            frameNode._nodeId = nodeId;
-            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
+            (frameNode! as FrameNode)._nodeId = nodeId;
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, (frameNode! as FrameNode));
             return frameNode;
         }
         return null;
