@@ -32,10 +32,59 @@ export enum EditableLeftIconTypeV2 {
   Cancel,
 }
 
-export interface EditableTitleBarMenuItem {
-  value: ResourceStr;
+export interface EditableLeftIconV2Options {
+  iconType?: EditableLeftIconTypeV2;
+  defaultFocus?: boolean;
+  onAction?: () => void;
+}
+
+@ObservedV2
+export class EditableLeftIconV2 {
+  @Trace iconType: EditableLeftIconTypeV2 = EditableLeftIconTypeV2.Back;
+  @Trace defaultFocus: boolean = false;
+  @Trace onAction?: () => void;
+
+  constructor(options?: EditableLeftIconV2Options) {
+    if (options) {
+      if (options.iconType !== undefined) {
+        this.iconType = options.iconType;
+      }
+      if (options.defaultFocus !== undefined) {
+        this.defaultFocus = options.defaultFocus;
+      }
+      if (options.onAction !== undefined) {
+        this.onAction = options.onAction;
+      }
+    }
+  }
+}
+
+export interface EditableTitleV2Options {
+  mainTitle?: ResourceStr;
+  subTitle?: ResourceStr;
+}
+
+@ObservedV2
+export class EditableTitleV2 {
+  @Trace mainTitle: ResourceStr = '';
+  @Trace subTitle?: ResourceStr;
+
+  constructor(options?: EditableTitleV2Options) {
+    if (options) {
+      if (options.mainTitle !== undefined) {
+        this.mainTitle = options.mainTitle;
+      }
+      if (options.subTitle !== undefined) {
+        this.subTitle = options.subTitle;
+      }
+    }
+  }
+}
+
+export interface EditableTitleBarMenuItemV2Options {
+  value?: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
-  isEnabled: boolean;
+  isEnabled?: boolean;
   label?: ResourceStr;
   action?: () => void;
   accessibilityLevel?: string;
@@ -44,13 +93,115 @@ export interface EditableTitleBarMenuItem {
   defaultFocus?: boolean;
 }
 
-export type EditableTitleBarItem = EditableTitleBarMenuItem;
+@ObservedV2
+export class EditableTitleBarMenuItemV2 {
+  @Trace value: ResourceStr = '';
+  @Trace symbolStyle?: SymbolGlyphModifier;
+  @Trace isEnabled: boolean = true;
+  @Trace label?: ResourceStr;
+  @Trace action?: () => void;
+  @Trace accessibilityLevel: string = 'auto';
+  @Trace accessibilityText?: ResourceStr;
+  @Trace accessibilityDescription?: ResourceStr;
+  @Trace defaultFocus: boolean = false;
 
-export declare interface EditableTitleBarOptions {
+  constructor(options?: EditableTitleBarMenuItemV2Options) {
+    if (options) {
+      if (options.value !== undefined) {
+        this.value = options.value;
+      }
+      if (options.symbolStyle !== undefined) {
+        this.symbolStyle = options.symbolStyle;
+      }
+      if (options.isEnabled !== undefined) {
+        this.isEnabled = options.isEnabled;
+      }
+      if (options.label !== undefined) {
+        this.label = options.label;
+      }
+      if (options.action !== undefined) {
+        this.action = options.action;
+      }
+      if (options.accessibilityLevel !== undefined) {
+        this.accessibilityLevel = options.accessibilityLevel;
+      }
+      if (options.accessibilityText !== undefined) {
+        this.accessibilityText = options.accessibilityText;
+      }
+      if (options.accessibilityDescription !== undefined) {
+        this.accessibilityDescription = options.accessibilityDescription;
+      }
+      if (options.defaultFocus !== undefined) {
+        this.defaultFocus = options.defaultFocus;
+      }
+    }
+  }
+}
+
+export type EditableTitleBarItemV2 = EditableTitleBarMenuItemV2;
+
+export interface EditableSaveButtonV2Options {
+  isRequired?: boolean;
+  defaultFocus?: boolean;
+  onAction?: () => void;
+}
+
+@ObservedV2
+export class EditableSaveButtonV2 {
+  @Trace isRequired: boolean = true;
+  @Trace defaultFocus: boolean = false;
+  @Trace onAction?: () => void;
+
+  constructor(options?: EditableSaveButtonV2Options) {
+    if (options) {
+      if (options.isRequired !== undefined) {
+        this.isRequired = options.isRequired;
+      }
+      if (options.defaultFocus !== undefined) {
+        this.defaultFocus = options.defaultFocus;
+      }
+      if (options.onAction !== undefined) {
+        this.onAction = options.onAction;
+      }
+    }
+  }
+}
+
+export interface EditableTitleBarStyleV2Options {
   backgroundColor?: ResourceColor;
   backgroundBlurStyle?: BlurStyle;
   safeAreaTypes?: Array<SafeAreaType>;
   safeAreaEdges?: Array<SafeAreaEdge>;
+  contentMargin?: LocalizedMargin;
+}
+
+@ObservedV2
+export class EditableTitleBarStyleV2 {
+  @Trace backgroundColor?: ResourceColor;
+  @Trace backgroundBlurStyle?: BlurStyle;
+  @Trace safeAreaTypes?: Array<SafeAreaType>;
+  @Trace safeAreaEdges?: Array<SafeAreaEdge>;
+  @Trace contentMargin?: LocalizedMargin;
+
+  constructor(options?: EditableTitleBarStyleV2Options) {
+    if (options) {
+      if (options.backgroundColor !== undefined) {
+        this.backgroundColor = options.backgroundColor;
+      }
+      if (options.backgroundBlurStyle !== undefined) {
+        this.backgroundBlurStyle = options.backgroundBlurStyle;
+      }
+      if (options.safeAreaTypes !== undefined) {
+        this.safeAreaTypes = options.safeAreaTypes;
+      }
+      if (options.safeAreaEdges !== undefined) {
+        this.safeAreaEdges = options.safeAreaEdges;
+      }
+      if (options.contentMargin !== undefined) {
+        this.contentMargin = options.contentMargin;
+      }
+    }
+  }
 }
 
 enum ItemType {
@@ -152,18 +303,12 @@ class ButtonGestureModifier implements GestureModifier {
 
 @ComponentV2
 export struct EditableTitleBarV2 {
-  @Param leftIconStyle: EditableLeftIconTypeV2 = EditableLeftIconTypeV2.Back;
-  @Param title: ResourceStr = '';
-  @Param subtitle?: ResourceStr = '';
-  @Param isSaveIconRequired: boolean = true;
-  @Param imageItem?: EditableTitleBarItem = undefined;
-  @Param menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
-  @Param options: EditableTitleBarOptions = {};
-  @Param onSave?: () => void = undefined;
-  @Param onCancel?: () => void = undefined;
-  @Param constraintWidth: number = 0;
-  @Param leftIconDefaultFocus?: boolean = false;
-  @Param saveIconDefaultFocus?: boolean = false;
+  @Param leftIcon?: EditableLeftIconV2 = undefined;
+  @Param title: ResourceStr | EditableTitleV2 = new EditableTitleV2();
+  @Param imageItem?: EditableTitleBarItemV2 = undefined;
+  @Param menuItems?: Array<EditableTitleBarMenuItemV2> = undefined;
+  @Param saveButton?: EditableSaveButtonV2 = undefined;
+  @Param options: EditableTitleBarStyleV2 = new EditableTitleBarStyleV2();
   public static readonly maxCountOfExtraItems = 3;
   public static readonly maxOtherCountOfExtraItems = 2;
   public static readonly commonZero = 0;
@@ -184,13 +329,18 @@ export struct EditableTitleBarV2 {
   private maxFontScale: number = 1;
   private systemFontScale?: number = 1;
   @Local editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
-  @Param contentMargin?: LocalizedMargin = undefined;
-  @Local titleBarMargin: LocalizedMargin = {
-    start: LengthMetrics.resource($r('sys.float.margin_left')),
-    end: LengthMetrics.resource($r('sys.float.margin_right')),
-  }
   @Local fontSize: number = 1;
   private callbackId: number | undefined = undefined;
+
+  private getContentMargin(): LocalizedMargin {
+    if (this.options.contentMargin) {
+      return this.options.contentMargin;
+    }
+    return {
+      start: LengthMetrics.resource($r('sys.float.margin_left')),
+      end: LengthMetrics.resource($r('sys.float.margin_right')),
+    };
+  }
 
   onWillApplyTheme(theme: Theme): void {
     this.editableTitleBarTheme.iconColor = theme.colors.iconPrimary;
@@ -241,7 +391,9 @@ export struct EditableTitleBarV2 {
     }) {
       Row() {
         Row() {
-          this.leftIconLayout();
+          if (this.leftIcon) {
+            this.leftIconLayout();
+          }
         }
         .flexShrink(0)
 
@@ -270,7 +422,7 @@ export struct EditableTitleBarV2 {
         .flexShrink(0)
       }
       .width('100%')
-      .margin(this.contentMargin ?? this.titleBarMargin)
+      .margin(this.getContentMargin())
       .height(EditableTitleBarV2.totalHeight)
     }
     .backgroundColor(this.options.backgroundColor ?? EditableTitleBarV2.noneColor)
@@ -285,7 +437,7 @@ export struct EditableTitleBarV2 {
   @Builder
   imageItemLayout(): void {
     ImageMenuItem({
-      item: this.imageItem,
+      item: this.imageItem!,
       attribute: ItemType.Image,
       editableTitleBarTheme: this.editableTitleBarTheme,
     })
@@ -293,14 +445,14 @@ export struct EditableTitleBarV2 {
 
   @Builder
   leftIconLayout(): void {
-    if (this.leftIconStyle === EditableLeftIconTypeV2.Back) {
+    if (this.leftIcon!.iconType === EditableLeftIconTypeV2.Back) {
       ImageMenuItem({
-        item: {
+        item: new EditableTitleBarMenuItemV2({
           value: PUBLIC_BACK,
           isEnabled: true,
-          action: () => this.onCancel ? this.onCancel() : this.getUIContext()?.getRouter()?.back(),
-          defaultFocus: this.leftIconDefaultFocus
-        },
+          action: this.leftIcon!.onAction ? this.leftIcon!.onAction : () => this.getUIContext()?.getRouter()?.back(),
+          defaultFocus: this.leftIcon!.defaultFocus
+        }),
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
         imageMenuItemId: `BackMenuItem_${this.getUniqueId()}`,
@@ -308,12 +460,12 @@ export struct EditableTitleBarV2 {
       })
     } else {
       ImageMenuItem({
-        item: {
+        item: new EditableTitleBarMenuItemV2({
           value: PUBLIC_CANCEL,
           isEnabled: true,
-          action: () => this.onCancel && this.onCancel(),
-          defaultFocus: this.leftIconDefaultFocus
-        },
+          action: this.leftIcon!.onAction ? this.leftIcon!.onAction : () => {},
+          defaultFocus: this.leftIcon!.defaultFocus
+        }),
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
         imageMenuItemId: `CancelMenuItem_${this.getUniqueId()}`,
@@ -322,29 +474,53 @@ export struct EditableTitleBarV2 {
     }
   }
 
+  private isTitleConfig(title: ResourceStr | EditableTitleV2): boolean {
+    return title instanceof EditableTitleV2;
+  }
+
+  private getMainTitle(): ResourceStr {
+    if (typeof this.title === 'string') {
+      return this.title;
+    }
+    if (this.isTitleConfig(this.title)) {
+      return (this.title as EditableTitleV2).mainTitle;
+    }
+    return this.title as Resource;
+  }
+
+  private getSubTitle(): ResourceStr | undefined {
+    if (typeof this.title === 'string') {
+      return undefined;
+    }
+    if (this.isTitleConfig(this.title)) {
+      return (this.title as EditableTitleV2).subTitle;
+    }
+    return undefined;
+  }
+
   @Builder
   titleLayout(): void {
     Column() {
       Row() {
-        Text(this.title)
+        Text(this.getMainTitle())
           .maxFontSize(TITLE_F_VP)
           .minFontSize(SUBTITLE_F_VP)
           .fontColor(this.editableTitleBarTheme.titleColor)
-          .maxLines(this.subtitle ? MAX_LINE_ONE : MAX_LINES_TWO)
+          .maxLines(this.getSubTitle() ? MAX_LINE_ONE : MAX_LINES_TWO)
           .fontWeight(FontWeight.Bold)
           .textAlign(TextAlign.Start)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .heightAdaptivePolicy(this.subtitle ?
+          .heightAdaptivePolicy(this.getSubTitle() ?
             TextHeightAdaptivePolicy.MAX_LINES_FIRST : TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .constraintSize({
-            maxHeight: this.subtitle ? EditableTitleBarV2.maxMainTitleHeight : EditableTitleBarV2.totalHeight,
+            maxHeight: this.getSubTitle() ? EditableTitleBarV2.maxMainTitleHeight : EditableTitleBarV2.totalHeight,
           })
       }
       .justifyContent(FlexAlign.Start)
 
-      if (this.subtitle) {
+      if (this.getSubTitle()) {
         Row() {
-          Text(this.subtitle)
+          Text(this.getSubTitle()!)
             .maxFontSize(SUBTITLE_F_VP)
             .minFontSize(MIN_SUBTITLE_SIZE)
             .fontColor(this.editableTitleBarTheme.subTitleColor)
@@ -354,7 +530,7 @@ export struct EditableTitleBarV2 {
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
             .constraintSize({
-              maxHeight: this.title ? EditableTitleBarV2.maxSubTitleHeight : EditableTitleBarV2.totalHeight,
+              maxHeight: this.getMainTitle() ? EditableTitleBarV2.maxSubTitleHeight : EditableTitleBarV2.totalHeight,
             })
         }
         .margin({
@@ -375,11 +551,9 @@ export struct EditableTitleBarV2 {
   rightMenuItemsLayout(): void {
     EditableTitleBarMenuSection({
       menuItems: this.menuItems,
-      onSave: this.onSave,
-      isSaveEnabled: this.isSaveIconRequired,
+      saveButton: this.saveButton,
       fontSize: this.fontSize,
       parentUniqueId: this.getUniqueId(),
-      saveIconDefaultFocus: this.saveIconDefaultFocus,
       editableTitleBarTheme: this.editableTitleBarTheme,
     })
   }
@@ -404,22 +578,41 @@ export struct EditableTitleBarV2 {
 
 @ComponentV2
 struct EditableTitleBarMenuSection {
-  @Param menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
-  @Param onSave?: () => void = undefined;
-  @Param isSaveEnabled: boolean = true;
-  @Param saveIconDefaultFocus?: boolean = false;
+  @Param menuItems?: Array<EditableTitleBarMenuItemV2> = undefined;
+  @Param saveButton?: EditableSaveButtonV2 = undefined;
   @Param fontSize: number = 1;
   @Param parentUniqueId?: number = undefined;
   @Param editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
+
+  private getIsRequired(): boolean {
+    if (this.saveButton) {
+      return this.saveButton.isRequired;
+    }
+    return true;
+  }
+
+  private getDefaultFocus(): boolean {
+    if (this.saveButton) {
+      return this.saveButton.defaultFocus;
+    }
+    return false;
+  }
+
+  private getOnAction(): (() => void) | undefined {
+    if (this.saveButton) {
+      return this.saveButton.onAction;
+    }
+    return undefined;
+  }
 
   build() {
     Column() {
       Row() {
         if (this.menuItems !== undefined && this.menuItems.length > EditableTitleBarV2.commonZero) {
           ForEach(this.menuItems.slice(EditableTitleBarV2.commonZero,
-            this.isSaveEnabled ?
+            this.getIsRequired() ?
               EditableTitleBarV2.maxOtherCountOfExtraItems : EditableTitleBarV2.maxCountOfExtraItems),
-            (item: EditableTitleBarMenuItem, index: number) => {
+            (item: EditableTitleBarMenuItemV2, index: number) => {
               ImageMenuItem({
                 item: item,
                 attribute: ItemType.Icon,
@@ -428,14 +621,14 @@ struct EditableTitleBarMenuSection {
               })
             })
         }
-        if (this.isSaveEnabled) {
+        if (this.getIsRequired()) {
           ImageMenuItem({
-            item: {
+            item: new EditableTitleBarMenuItemV2({
               value: PUBLIC_OK,
               isEnabled: true,
-              action: () => this.onSave && this.onSave(),
-              defaultFocus: this.saveIconDefaultFocus
-            },
+              action: this.getOnAction() ? this.getOnAction() : () => {},
+              defaultFocus: this.getDefaultFocus()
+            }),
             fontSize: this.fontSize,
             attribute: ItemType.Icon,
             imageMenuItemId: `SaveMenuItem_${this.parentUniqueId}`,
@@ -450,14 +643,7 @@ struct EditableTitleBarMenuSection {
 
 @ComponentV2
 struct ImageMenuItem {
-  @Param item: EditableTitleBarMenuItem = {
-    value: '',
-    isEnabled: true,
-    label: '',
-    accessibilityLevel: 'auto',
-    accessibilityText: '',
-    accessibilityDescription: '',
-  };
+  @Param item: EditableTitleBarMenuItemV2 = new EditableTitleBarMenuItemV2();
   @Param attribute: ItemType = ItemType.Image;
   callbackId: number | undefined = undefined;
   minFontSize: number = 1.75;
@@ -839,10 +1025,7 @@ struct ImageMenuItem {
 
 @ComponentV2
 struct EditableTitleBarDialogContent {
-  @Param itemEditableDialog: EditableTitleBarMenuItem = {
-    value: '',
-    isEnabled: true,
-  };
+  @Param itemEditableDialog: EditableTitleBarMenuItemV2 = new EditableTitleBarMenuItemV2();
   callbackId: number | undefined = undefined;
   @Param textEditableTitleBarDialog?: ResourceStr = '';
   mainWindowStage: window.Window | undefined = undefined;
