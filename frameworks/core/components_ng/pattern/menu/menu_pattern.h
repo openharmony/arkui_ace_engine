@@ -713,8 +713,6 @@ public:
     bool UpdateMenuBackBlurStyle(bool userSetBgColor);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     bool IsUseDistortionAnimation() const;
-    bool FireSelectDisappearDistortAnimation(AnimationOption& option);
-    void FireSelectDisappearLightAnimation();
 
     float GetTranslateYForStack()
     {
@@ -852,12 +850,8 @@ private:
     MenuParam GetMenuParam() const;
     bool IsUseEdgeLightAnimation() const;
     void PlayDistortAnimation(const OffsetF& menuPosition);
-    void PlaySelectDistortAnimation(const OffsetF& menuPosition);
-    void PlaySelectDisapperDistortAnimation(AnimationOption& disappearOption);
     void PlayTranslateAnimation(const RefPtr<RenderContext>& renderContext, const OffsetF& finalPlacement);
-    void PlaySelectTranslateAnimation(const OffsetF& offset);
     void PlayLightAnimation();
-    void PlayDisappearLightAnimation();
     void ShowMenuAppearAnimation();
     void ShowMenuAppearMaterialAnimation();
     void ShowStackMenuAppearAnimation();
