@@ -1042,7 +1042,13 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg157, TestSize.Level
     EXPECT_TRUE(context_->IsTagInOverlay(V2::DIALOG_ETS_TAG));
     EXPECT_TRUE(context_->IsTagInOverlay(V2::MENU_ETS_TAG));
     EXPECT_TRUE(context_->IsTagInOverlay(V2::SHEET_PAGE_TAG));
+    EXPECT_TRUE(context_->IsTagInOverlay(V2::OVERLAY_ETS_TAG));
+    EXPECT_TRUE(context_->IsTagInOverlay(V2::ORDER_OVERLAY_ETS_TAG));
+    EXPECT_TRUE(context_->IsTagInOverlay(V2::ACTION_SHEET_DIALOG_ETS_TAG));
+    EXPECT_TRUE(context_->IsTagInOverlay(V2::ALERT_DIALOG_ETS_TAG));
+    EXPECT_TRUE(context_->IsTagInOverlay(V2::MENU_WRAPPER_ETS_TAG));
     EXPECT_FALSE(context_->IsTagInOverlay("unknown_tag"));
+    EXPECT_FALSE(context_->IsTagInOverlay(V2::ROOT_ETS_TAG));
     EXPECT_FALSE(context_->IsTagInOverlay(""));
 }
 

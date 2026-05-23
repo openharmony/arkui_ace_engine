@@ -7003,7 +7003,9 @@ bool PipelineContext::IsTagInOverlay(const std::string& tag) const
 {
     static const std::unordered_set<std::string> targetTags = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG,
         V2::DIALOG_ETS_TAG, V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG,
-        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG };
+        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG, V2::OVERLAY_ETS_TAG,
+        V2::ORDER_OVERLAY_ETS_TAG
+    };
 
     if (targetTags.find(tag) != targetTags.end()) {
         return true;
