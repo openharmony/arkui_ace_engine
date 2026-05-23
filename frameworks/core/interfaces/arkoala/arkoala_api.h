@@ -3725,6 +3725,8 @@ struct ArkUICommonModifier {
     ArkUIIgnoreLayoutSafeAreaOpts (*getIgnoreLayoutSafeAreaOpts)(ArkUINodeHandle node);
     void (*setUseUnionEffect)(ArkUINodeHandle node, bool useUnion);
     void (*resetUseUnionEffect)(ArkUINodeHandle node);
+    void (*setMaterialShadow)(ArkUINodeHandle node);
+    void (*resetMaterialShadow)(ArkUINodeHandle node);
     ArkUIOffsetType (*getCurrentLocation)(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
         const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit);
     void (*setDoubleSided)(ArkUINodeHandle node, bool doubleSided);

@@ -64,6 +64,7 @@ namespace OHOS::Ace {
 class DrawableDescriptor;
 class SpanBase;
 class ResponseRegion;
+class UiMaterial;
 enum class AutoCapitalizationMode;
 enum class CanvasUnit;
 enum class CancelButtonStyle;
@@ -97,6 +98,7 @@ struct TextMetrics;
 struct UserUnderlineColor;
 struct RenderingContextOptions;
 struct UpdateParagraphStyle;
+struct LightEffectOptions;
 
 namespace NG {
 // SORTED_SECTION
@@ -1123,6 +1125,8 @@ namespace Converter {
     void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_UnionEffectContainerOptions& src);
     template<> void AssignCast(std::optional<ScrollDirectionalLockType>& dst,
         const Ark_ScrollDirectionalLockType& src);
+    template<> void AssignCast(std::optional<ImmersiveOptions>& dst, const Ark_ImmersiveOptionsInner& src);
+    template<> void AssignCast(std::optional<LightEffectOptions>& dst, const Ark_LightEffectOptionsInner& src);
     // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     template<typename From>

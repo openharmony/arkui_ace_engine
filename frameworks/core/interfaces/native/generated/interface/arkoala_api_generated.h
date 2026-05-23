@@ -3029,6 +3029,8 @@ typedef struct Ark_Length Ark_Length;
 typedef struct Opt_Length Opt_Length;
 typedef struct Ark_LengthConstrain Ark_LengthConstrain;
 typedef struct Opt_LengthConstrain Opt_LengthConstrain;
+typedef struct Ark_LightEffectOptionsInner Ark_LightEffectOptionsInner;
+typedef struct Opt_LightEffectOptionsInner Opt_LightEffectOptionsInner;
 typedef struct Ark_LightSource Ark_LightSource;
 typedef struct Opt_LightSource Opt_LightSource;
 typedef struct Ark_LocalizedAlignRuleOptions Ark_LocalizedAlignRuleOptions;
@@ -3339,6 +3341,8 @@ typedef struct Ark_ImageError Ark_ImageError;
 typedef struct Opt_ImageError Opt_ImageError;
 typedef struct Ark_ImageParticleParameters Ark_ImageParticleParameters;
 typedef struct Opt_ImageParticleParameters Opt_ImageParticleParameters;
+typedef struct Ark_ImmersiveOptionsInner Ark_ImmersiveOptionsInner;
+typedef struct Opt_ImmersiveOptionsInner Opt_ImmersiveOptionsInner;
 typedef struct Ark_LeadingMarginPlaceholder Ark_LeadingMarginPlaceholder;
 typedef struct Opt_LeadingMarginPlaceholder Opt_LeadingMarginPlaceholder;
 typedef struct Ark_LinearStyleOptions Ark_LinearStyleOptions;
@@ -19579,6 +19583,14 @@ typedef struct Opt_LengthConstrain {
     Ark_Tag tag;
     Ark_LengthConstrain value;
 } Opt_LengthConstrain;
+typedef struct Ark_LightEffectOptionsInner {
+    /* kind: Interface */
+    Opt_ResourceColor color;
+} Ark_LightEffectOptionsInner;
+typedef struct Opt_LightEffectOptionsInner {
+    Ark_Tag tag;
+    Ark_LightEffectOptionsInner value;
+} Opt_LightEffectOptionsInner;
 typedef struct Ark_LightSource {
     /* kind: Interface */
     Ark_Dimension positionX;
@@ -21279,6 +21291,19 @@ typedef struct Opt_ImageParticleParameters {
     Ark_Tag tag;
     Ark_ImageParticleParameters value;
 } Opt_ImageParticleParameters;
+typedef struct Ark_ImmersiveOptionsInner {
+    /* kind: Interface */
+    Opt_Int32 style;
+    Opt_ResourceColor materialColor;
+    Opt_Boolean colorInvert;
+    Opt_Boolean applyShadow;
+    Opt_Boolean interactive;
+    Opt_LightEffectOptionsInner lightEffect;
+} Ark_ImmersiveOptionsInner;
+typedef struct Opt_ImmersiveOptionsInner {
+    Ark_Tag tag;
+    Ark_ImmersiveOptionsInner value;
+} Opt_ImmersiveOptionsInner;
 typedef struct Ark_LeadingMarginPlaceholder {
     /* kind: Interface */
     Ark_image_PixelMap pixelMap;
@@ -29709,6 +29734,10 @@ typedef struct GENERATED_ArkUIIMEClientAccessor {
                       Ark_Int64 nodeId);
 } GENERATED_ArkUIIMEClientAccessor;
 
+typedef struct GENERATED_ArkUIImmersiveHelperAccessor {
+    Ark_Int64 (*ImmersiveConstruct)(const Opt_ImmersiveOptionsInner* options);
+} GENERATED_ArkUIImmersiveHelperAccessor;
+
 typedef struct GENERATED_ArkUIIndicatorAccessor {
     void (*destroyPeer)(Ark_Indicator peer);
     Ark_Indicator (*construct)();
@@ -32368,6 +32397,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIImageAttachmentAccessor* (*getImageAttachmentAccessor)();
     const GENERATED_ArkUIImageBitmapAccessor* (*getImageBitmapAccessor)();
     const GENERATED_ArkUIIMEClientAccessor* (*getIMEClientAccessor)();
+    const GENERATED_ArkUIImmersiveHelperAccessor* (*getImmersiveHelperAccessor)();
     const GENERATED_ArkUIIndicatorAccessor* (*getIndicatorAccessor)();
     const GENERATED_ArkUIIndicatorComponentControllerAccessor* (*getIndicatorComponentControllerAccessor)();
     const GENERATED_ArkUIIUIContextAccessor* (*getIUIContextAccessor)();

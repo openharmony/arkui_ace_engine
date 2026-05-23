@@ -7894,6 +7894,29 @@ void ViewAbstract::SetUseUnion(FrameNode* frameNode, bool useUnion)
     ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnionEffect, useUnion, frameNode);
 }
 
+void ViewAbstract::SetMaterialShadow(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    Shadow shadow = MaterialUtils::GetImmersiveShadow(pipeline->GetDipScale());
+    renderContext->UpdateBackShadow(shadow);
+}
+
+void ViewAbstract::ResetMaterialShadow(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    ResetImmersiveShadowToDefault(pattern, renderContext);
+}
+
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
     auto renderContext = frameNode->GetRenderContext();

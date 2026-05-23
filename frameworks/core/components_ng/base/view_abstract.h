@@ -832,6 +832,8 @@ public:
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseUnion(FrameNode* frameNode, bool useUnion);
+    static void SetMaterialShadow(FrameNode* frameNode);
+    static void ResetMaterialShadow(FrameNode* frameNode);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
