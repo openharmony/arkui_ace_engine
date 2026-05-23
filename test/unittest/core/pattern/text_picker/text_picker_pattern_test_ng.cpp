@@ -59,6 +59,8 @@ const std::string TEXT_PICKER_CONTENT = "text";
 const OffsetF CHILD_OFFSET(0.0f, 10.0f);
 const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
+const int32_t TEST_TEXT_PICKER_WINDOW_WIDTH = 720;
+const int32_t TEST_TEXT_PICKER_WINDOW_HEIGHT = 1280;
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -1331,4 +1333,75 @@ HWTEST_F(TextPickerPatternTestNg, OnThemeScopeUpdateTest002, TestSize.Level1)
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
 }
+
+/**
+ * @tc.name: TextPickerPatternOnWindowSizeChanged001
+ * @tc.desc: Test TextPickerPattern OnWindowSizeChanged flushes column options
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternOnWindowSizeChanged001, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(textPickerColumnPattern_, nullptr);
+
+    std::vector<NG::RangeContent> range = { { "", "test1" }, { "", "test2" }, { "", "test3" } };
+    textPickerColumnPattern_->SetOptions(range);
+
+    textPickerPattern_->OnWindowSizeChanged(TEST_TEXT_PICKER_WINDOW_WIDTH, TEST_TEXT_PICKER_WINDOW_HEIGHT,
+        WindowSizeChangeReason::ROTATION);
+
+    auto columnNodes = textPickerPattern_->GetColumnNodes();
+    EXPECT_FALSE(columnNodes.empty());
+}
+
+/**
+ * @tc.name: TextPickerPatternOnWindowSizeChanged002
+ * @tc.desc: Test TextPickerPattern OnWindowSizeChanged with multiple columns
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternOnWindowSizeChanged002, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnNodeNext_, nullptr);
+
+    std::vector<NG::RangeContent> range = { { "", "test1" }, { "", "test2" } };
+    textPickerColumnPattern_->SetOptions(range);
+    textPickerColumnPatternNext_->SetOptions(range);
+
+    textPickerPattern_->OnWindowSizeChanged(TEST_TEXT_PICKER_WINDOW_WIDTH, TEST_TEXT_PICKER_WINDOW_HEIGHT,
+        WindowSizeChangeReason::DRAG);
+
+    auto columnNodes = textPickerPattern_->GetColumnNodes();
+    EXPECT_EQ(columnNodes.size(), static_cast<size_t>(2));
+}
+
+/**
+ * @tc.name: TextPickerPatternOnWindowSizeChanged003
+ * @tc.desc: Test TextPickerPattern OnWindowSizeChanged handles resize event
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternOnWindowSizeChanged003, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(textPickerPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(textPickerColumnPattern_, nullptr);
+
+    std::vector<NG::RangeContent> range = { { "", "value1" } };
+    textPickerColumnPattern_->SetOptions(range);
+
+    textPickerPattern_->OnWindowSizeChanged(TEST_TEXT_PICKER_WINDOW_WIDTH, TEST_TEXT_PICKER_WINDOW_HEIGHT,
+        WindowSizeChangeReason::RESIZE);
+
+    auto columnNodes = textPickerPattern_->GetColumnNodes();
+    EXPECT_FALSE(columnNodes.empty());
+}
+
 } // namespace OHOS::Ace::NG
