@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +30,7 @@ import {
   $r
 } from '@ohos.arkui.component';
 import { LengthMetrics } from '@ohos.arkui.node';
-import { Param } from '@ohos.arkui.stateManagement';
+import { Param, Require } from '@ohos.arkui.stateManagement';
 
 const DEFAULT_MARGIN = 16
 const ITEM_SPACE = 4
@@ -43,6 +44,7 @@ export struct SwipeRefresherV2 {
   @Param
   content: ResourceStr = '';
   @Param
+  @Require
   isLoading: boolean = false;
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
