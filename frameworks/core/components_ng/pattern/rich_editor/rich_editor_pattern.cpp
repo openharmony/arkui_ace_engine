@@ -38,6 +38,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
@@ -1260,11 +1261,12 @@ RefPtr<FrameNode> RichEditorPattern::GetContentHost() const
 void RichEditorPattern::OnAttachToFrameNode()
 {
     ACE_SCOPED_TRACE("RichEditorPattern::OnAttachToFrameNode");
+    auto frameNode = GetHost();
+    THREAD_SAFE_NODE_CHECK(frameNode, OnAttachToFrameNode);
     TextPattern::OnAttachToFrameNode();
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     richEditorInstanceId_ = Container::CurrentIdSafely();
-    auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     ACE_UINODE_TRACE(frameNode);
     frameId_ = frameNode->GetId();
@@ -1284,11 +1286,28 @@ void RichEditorPattern::OnAttachToMainTreeMultiThreadExtension()
 {
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
+    richEditorInstanceId_ = Container::CurrentIdSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    frameId_ = host->GetId();
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(host, WeakClaim(this));
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowSizeChangeCallback(frameId_);
+    auto patternCreator = [weak = WeakClaim(this)]() { return AceType::MakeRefPtr<RichEditorContentPattern>(weak); };
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_CONTENT_ETS_TAG, nodeId, patternCreator);
+    CHECK_NULL_VOID(contentNode);
+    host->AddChild(contentNode);
+    auto contentPattern = contentNode->GetPattern<RichEditorContentPattern>();
+    CHECK_NULL_VOID(contentPattern);
+    SetContentPattern(contentPattern);
 }
 
 void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDetachFromFrameNode");
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
     CloseSelectOverlay();
     CHECK_NULL_VOID(node);
     TextPattern::OnDetachFromFrameNode(node);
@@ -14681,6 +14700,8 @@ void RichEditorPattern::OnAttachToMainTree()
 
 void RichEditorPattern::OnDetachFromMainTree()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
     TextPattern::OnDetachFromMainTree();
 }
 
