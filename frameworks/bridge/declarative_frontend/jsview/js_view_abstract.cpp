@@ -9568,6 +9568,7 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
         auto infoPtr = new KeyEventInfo(info);
         auto eventObj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnKeyEvent_end type:%d", infoPtr->GetKeyType());
         auto ret = func->Call(vm, func.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
         return ret->IsBoolean() ? ret->ToBoolean(vm)->Value() : false;
