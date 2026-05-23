@@ -423,6 +423,7 @@ public:
 
     bool NeedDistortion();
     bool NeedEdgeLight();
+    bool ShouldApplySystemMaterialShadow() const;
 
 private:
     bool AvoidKeyboard() const override
@@ -459,7 +460,9 @@ private:
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
     void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props,
         bool isCustomBorder, RefPtr<DialogTheme> dialogTheme);
-    void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode);
+    void UpdateContentBorderRadius(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    void UpdateDialogShadow(const RefPtr<RenderContext>& renderContext, const DialogProperties& props);
+    bool SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode);
     void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
