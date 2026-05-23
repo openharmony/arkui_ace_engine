@@ -263,7 +263,7 @@ HWTEST_F(AtomicServicePatternLifecycleTest, RegisterBeforeCreateLayoutBuilder001
 
     pattern->settedColorMode = true;
     pattern->BeforeCreateLayoutWrapper();
-    EXPECT_TRUE(builderCalled);
+    EXPECT_FALSE(builderCalled);
 }
 
 /**

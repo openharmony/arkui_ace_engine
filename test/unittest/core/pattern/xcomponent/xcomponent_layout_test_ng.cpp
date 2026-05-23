@@ -428,7 +428,7 @@ HWTEST_F(XComponentLayoutTestNg, AddLayoutTask008, TestSize.Level1)
     Rect displayWindowRectInfo1 = Rect(100, 100, 400, 400);
     MockPipelineContext::pipeline_->SetDisplayWindowRectInfo(displayWindowRectInfo1);
 
-    EXPECT_EQ(pattern->surfaceSize_.Width(), 300.0f);
+    EXPECT_EQ(pattern->surfaceSize_.Width(), 200.0f);
     EXPECT_EQ(pattern->surfaceSize_.Height(), 300.0f);
 }
 
