@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,9 +23,9 @@ import {
   GeometryInfo, Layoutable, ConstraintSizeOptions, focusControl, PopupStateChangeParam,
   SymbolEffectStrategy, SymbolEffect, TextAlign, BlurStyle, ButtonOptions, HoverEvent,
   KeyEvent, TouchEvent, ClickEvent, ShadowStyle, Margin, $r,
-  ResourceStr, Resource, GestureModifier, UIGestureEvent, LongPressGestureHandler, Padding
+  ResourceStr, Resource, UIGestureEvent, LongPressGestureHandler, Padding, GestureModifier
 } from '@ohos.arkui.component';
-import { Param, Local, Monitor, IMonitor } from '@ohos.arkui.stateManagement';
+import { Param, Local, Monitor, IMonitor, ObservedV2, Trace } from '@ohos.arkui.stateManagement';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import { UIContext } from '@ohos.arkui.UIContext';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
@@ -34,15 +35,56 @@ import common from '@ohos.app.ability.common';
 import hilog from '@ohos.hilog';
 
 
+export type OnActionCallback = () => void;
+
+export interface ComposeTitleBarV2MenuItemParams {
+  value: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  isEnabled?: boolean;
+  action?: OnActionCallback;
+  label?: ResourceStr;
+  accessibilityText?: ResourceStr;
+  accessibilityLevel?: string;
+  accessibilityDescription?: ResourceStr;
+}
+
+@ObservedV2
 export class ComposeTitleBarV2MenuItem {
-  public value: ResourceStr = '';
-  public symbolStyle?: SymbolGlyphModifier;
-  public isEnabled?: boolean;
-  public action?: () => void;
-  public label?: ResourceStr;
-  public accessibilityText?: ResourceStr;
-  public accessibilityLevel?: string;
-  public accessibilityDescription?: ResourceStr;
+  @Trace public value: ResourceStr = '';
+  @Trace public symbolStyle?: SymbolGlyphModifier;
+  @Trace public isEnabled?: boolean;
+  @Trace public action?: OnActionCallback;
+  @Trace public label?: ResourceStr;
+  @Trace public accessibilityText?: ResourceStr;
+  @Trace public accessibilityLevel?: string;
+  @Trace public accessibilityDescription?: ResourceStr;
+
+  constructor(params?: ComposeTitleBarV2MenuItemParams) {
+    if (params !== undefined) {
+      this.value = params.value;
+      if (params.symbolStyle !== undefined) {
+        this.symbolStyle = params.symbolStyle;
+      }
+      if (params.isEnabled !== undefined) {
+        this.isEnabled = params.isEnabled;
+      }
+      if (params.action !== undefined) {
+        this.action = params.action;
+      }
+      if (params.label !== undefined) {
+        this.label = params.label;
+      }
+      if (params.accessibilityText !== undefined) {
+        this.accessibilityText = params.accessibilityText;
+      }
+      if (params.accessibilityLevel !== undefined) {
+        this.accessibilityLevel = params.accessibilityLevel;
+      }
+      if (params.accessibilityDescription !== undefined) {
+        this.accessibilityDescription = params.accessibilityDescription;
+      }
+    }
+  }
 }
 
 const TEXT_EDITABLE_DIALOG = '18.3fp';
@@ -76,7 +118,7 @@ class Util {
   }
 }
 
-class ButtonGestureModifier implements GestureModifier {
+export class ButtonGestureModifier implements GestureModifier {
   public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
   public fontSize: number = 1;
@@ -132,13 +174,13 @@ export struct ComposeTitleBarV2 {
     }) {
       Row() {
         ImageMenuItemV2({
-          item: {
+          item: new ComposeTitleBarV2MenuItem({
             value: this.PUBLIC_BACK,
             isEnabled: true,
             action: () => {
               this.getUIContext()?.getRouter()?.back()
             }
-          } as ComposeTitleBarV2MenuItem,
+          }),
           index: -1,
           itemIndex: -1
         })
@@ -223,8 +265,8 @@ export struct ComposeTitleBarV2 {
       this.titleMaxWidth -= ImageMenuItemV2.imageHotZoneWidth;
       if (this.item !== undefined) {
         this.titleMaxWidth -= ComposeTitleBarV2.portraitImageLeftPadding +
-        ComposeTitleBarV2.portraitImageSize +
-        ComposeTitleBarV2.portraitImageRightPadding;
+          ComposeTitleBarV2.portraitImageSize +
+          ComposeTitleBarV2.portraitImageRightPadding;
       }
       this.titleMaxWidth -= ComposeTitleBarV2.rightPadding;
     })
@@ -239,10 +281,10 @@ struct CollapsibleMenuSectionV2 {
   private static readonly marginsNum: number = 2;
   private static readonly focusIndexOffset: number = 2;
   @Param menuItems: Array<ComposeTitleBarV2MenuItem> = [] as Array<ComposeTitleBarV2MenuItem>;
-  @Param item: ComposeTitleBarV2MenuItem = {
+  @Param item: ComposeTitleBarV2MenuItem = new ComposeTitleBarV2MenuItem({
     value: $r('sys.symbol.dot_grid_2x2'),
     label: $r('sys.string.ohos_toolbar_more'),
-  } as ComposeTitleBarV2MenuItem;
+  });
   @Param index: number = 0;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
@@ -548,7 +590,7 @@ struct CollapsibleMenuSectionV2 {
           (item: ComposeTitleBarV2MenuItem, index: int) => {
             ImageMenuItemV2({
               item: item, index: this.index * 1000 +
-              CollapsibleMenuSectionV2.maxCountOfVisibleItems + index, isPopup: false
+                CollapsibleMenuSectionV2.maxCountOfVisibleItems + index, isPopup: false
             })
           })
       }
@@ -558,7 +600,7 @@ struct CollapsibleMenuSectionV2 {
     .margin({ top: CollapsibleMenuSectionV2.focusPadding, bottom: CollapsibleMenuSectionV2.focusPadding } as Margin)
     .onAppear(() => {
       focusControl.requestFocus(ImageMenuItemV2.focusablePrefix as string +
-      this!.firstFocusableIndex as string)
+        this!.firstFocusableIndex as string)
     })
   }
 }
@@ -572,7 +614,7 @@ struct ImageMenuItemV2 {
   static readonly buttonBorderRadius: number = 8;
   static readonly focusBorderWidth: number = 2;
   static readonly focusablePrefix: string = 'Id-ComposeTitleBar-ImageMenuItem-';
-  @Param item: ComposeTitleBarV2MenuItem = {value: 'undefined'} as ComposeTitleBarV2MenuItem;
+  @Param item: ComposeTitleBarV2MenuItem = new ComposeTitleBarV2MenuItem({value: 'undefined'});
   @Param index: number = 0;
   @Param itemIndex?: number = 0;
   minFontSize: number = 1.75;
