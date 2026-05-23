@@ -351,7 +351,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setUseEffect0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setUseUnionEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _CommonMethod_setUseUnionEffect0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setRenderGroup(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -442,6 +442,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CommonMethod_setMotionPath(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _CommonMethod_setEdgeLight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setClip(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -570,6 +572,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CommonMethod_setSystemBarEffect(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _CommonMethod_setUseEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _CommonMethod_setUseUnionEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setBackdropBlur(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -3110,6 +3114,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _UnionEffectContainerAttribute_setPointLight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _UnionEffectContainerAttribute_setUnionMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _Video_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _VideoInterface_setVideoOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -5259,6 +5265,8 @@ export class ArkUIGeneratedNativeModule {
     native static _IUIContext_setCustomKeyboardContinueFeature(feature: KInt): void
     @ani.unsafe.Direct
     native static _IUIContext_setCustomCursor(value: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _IUIContext_enableEventPassthrough(thisArray: KSerializerBuffer, thisLength: KInt, eventType: KInt): void
     @ani.unsafe.Quick
     native static _IUIContext_addLocalInputEventMonitor(eventMask: KInt, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct

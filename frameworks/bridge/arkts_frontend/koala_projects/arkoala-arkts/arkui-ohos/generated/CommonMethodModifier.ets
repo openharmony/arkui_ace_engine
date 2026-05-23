@@ -19,7 +19,7 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, GestureType, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, SpatialEffectParams, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, GestureCollectInterceptCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, AreaChangeCallback, AreaChangeOptions, CommonMethod } from './component/common'
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, SpatialEffectParams, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, GestureCollectInterceptCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, AreaChangeCallback, AreaChangeOptions, CommonMethod, GravityCenterOptions, EdgeLightParams } from './component/common'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { Length, Resource as arkui_component_units_Resource, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, AccessibilityCustomAction } from './component/units'
@@ -128,6 +128,9 @@ export class CommonMethodModifier implements CommonMethod {
     public _useShadowBatching_0_0value?: boolean | undefined
     public _useEffect_0_0value?: boolean | undefined
     public _useUnionEffect_0_0value?: boolean | undefined
+    public _useUnionEffect_1_0value?: boolean | undefined
+    public _useUnionEffect_1_1value?: GravityCenterOptions | undefined
+    public _edgeLight_0_0value?: EdgeLightParams | undefined
     public _renderGroup_0_0value?: boolean | undefined
     public _excludeFromRenderGroup_0_0value?: boolean | undefined
     public _freeze_0_0value?: boolean | undefined
@@ -1652,7 +1655,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[76] != 0) {
             switch (flagArray[76]) {
                 case 1: {
-                    peer.setUseUnionEffectAttribute((this._useUnionEffect_0_0value as boolean | undefined));
+                    peer.setUseUnionEffect0Attribute((this._useUnionEffect_0_0value as boolean | undefined));
                     flagArray[76] = 2;
                     break;
                 }
@@ -1662,7 +1665,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[76] = 0;
-                    peer.setUseUnionEffectAttribute(undefined);
+                    peer.setUseUnionEffect0Attribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -4116,6 +4119,40 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     flagArray[219] = 0;
                     peer.setDoubleSidedAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[220] != 0) {
+            switch (flagArray[220]) {
+                case 1: {
+                    peer.setUseUnionEffect1Attribute((this._useUnionEffect_1_0value as boolean | undefined), (this._useUnionEffect_1_1value as GravityCenterOptions | undefined));
+                    flagArray[220] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[220] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[220] = 0;
+                    peer.setUseUnionEffect1Attribute((undefined as boolean | undefined), (undefined as GravityCenterOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[221] != 0) {
+            switch (flagArray[221]) {
+                case 1: {
+                    peer.setEdgeLightAttribute((this._edgeLight_0_0value as EdgeLightParams | undefined));
+                    flagArray[221] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[221] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[221] = 0;
+                    peer.setEdgeLightAttribute((undefined as EdgeLightParams | undefined));
                 }
             }
         }
@@ -6807,6 +6844,30 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[220] != 0) {
+            switch (flagArray[220]) {
+                case 1:
+                case 3: {
+                    this.useUnionEffect((modifier._useUnionEffect_1_0value as boolean | undefined), (modifier._useUnionEffect_1_1value as GravityCenterOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.useUnionEffect((undefined as boolean | undefined), (undefined as GravityCenterOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[221] != 0) {
+            switch (flagArray[221]) {
+                case 1:
+                case 3: {
+                    this.edgeLight((modifier._edgeLight_0_0value as EdgeLightParams | undefined));
+                    break;
+                }
+                default: {
+                    this.edgeLight((undefined as EdgeLightParams | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -9081,6 +9142,27 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[219] = 3
+        }
+        return this
+    }
+    useUnionEffect(value: boolean | undefined, options?: GravityCenterOptions): this {
+        if (((this._flagArray[220]) == (0)) || ((this._useUnionEffect_1_0value) !== (value)) || (true)) {
+            this._flagArray[220] = 1
+            this._useUnionEffect_1_0value = value
+            this._useUnionEffect_1_1value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[220] = 3
+        }
+        return this
+    }
+    edgeLight(value: EdgeLightParams | undefined): this {
+        if (((this._flagArray[221]) == (0)) || ((this._edgeLight_0_0value) !== (value))) {
+            this._flagArray[221] = 1
+            this._edgeLight_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[221] = 3
         }
         return this
     }
