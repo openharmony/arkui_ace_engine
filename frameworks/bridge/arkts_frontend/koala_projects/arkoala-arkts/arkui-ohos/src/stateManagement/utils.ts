@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+import { int32 } from '@koalaui/common';
 import { uiUtils } from './base/uiUtilsImpl';
 import { MonitorFunctionDecorator } from './decoratorImpl/decoratorMonitor';
 import { ExtendableComponent } from '@component/extendableComponent';
 import { BusinessError } from '@ohos.base';
 import { canBeObserved as canBeObservedImpl } from './tools/stateMgmtDFX';
-import { CustomComponentV2, CustomComponentLifecycle } from '@component/customComponent';
+import { CustomComponentV2, CustomComponentLifecycle, CustomComponentContextImpl } from '@component/customComponent';
 import {
   IMonitor,
   IMonitorDecoratedVariable,
@@ -36,6 +37,7 @@ import {
 import { SubscribedWatches } from './decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './base/iFactoryInternal';
 import { ObserveSingleton } from './base/observeSingleton';
+import { WrappedBuilder, CustomBuilder } from '../component/builder';
 
 final class CONSTANT {
     public static readonly OB_ARRAY_ANY_KEY = '__OB_ANY_INDEX';
@@ -47,6 +49,38 @@ final class CONSTANT {
 export interface ElementInfo {
     elementName: string;
     elementId: int;
+}
+
+/**
+ * Public-facing info object describing one bucket of cached reusable
+ * components inside a ReusePool. Returned from IReusePool.getReusableInfo.
+ *
+ * `count` and `maxCount` are live: reading them always reflects the pool's
+ * current state. Writing `maxCount` immediately prunes excess cached entries.
+ */
+export interface IReusableInfo {
+    readonly count: int32;
+    maxCount: int32;
+    readonly reuseId?: string;
+}
+
+export interface IReusePool {
+    /**
+     * Inspect the pool for a given reusable component class.
+     * Returns undefined if the pool does not accept this class.
+     * Returns a single IReusableInfo if reuseId is supplied, or if the class
+     * has no reuseId-bucketed instances and no per-bucket maxCount overrides.
+     * Returns Array<IReusableInfo> otherwise (one entry per relevant bucket
+     * plus a default-bucket entry).
+    */
+    getReusableInfo(reusableComp: Class, reuseId?: string): IReusableInfo[] | IReusableInfo | undefined;
+    /**
+     * Pre-render `n` instances using the supplied builder. Created instances
+     * are pushed into this pool (or one of its accepting ancestor pools)
+     * instead of being attached to the UI tree. Resolves when all builds and
+     * any tail observation work have completed.
+     */
+    preRender(builder: WrappedBuilder<CustomBuilder>, times: int32): Promise<void>;
 }
 
 export interface DecoratorInfo {
@@ -149,19 +183,25 @@ export class UIUtils {
         return customComponent.__getLifecycle__Internal();
     }
 
-      /**
-   * Get the custom component context.
-   *
-   * @param { T } customComponent - custom component instance
-   * @returns { CustomComponentContext } The lifecycle that the custom component belongs to.
-   * @static
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @stagemodelonly
-   * @since 26.0.0 static
-   */
-  static getCustomComponentContext<T extends IVariableOwner>(customComponent: T): CustomComponentContext {
-    return customComponent.__getCustomComponentContext__Internal();
-  }
+    
+    /**
+     * Get the CustomComponentContext for a @Component / @ComponentV2 instance.
+     * Apps use this as the entry point to the IReusePool that recycles the
+     * component:
+     *
+     * Returns undefined when called with a non-component value. The returned
+     * context's getCustomComponentReusePool() walks the parent chain and returns the
+     * nearest ancestor pool that accepts this component's class.
+     */
+    static getCustomComponentContext<T extends IVariableOwner>(customComponent: T): CustomComponentContext  | undefined {
+        if (customComponent === undefined || customComponent === null) {
+            return undefined;
+        }
+        if (!(customComponent instanceof ExtendableComponent)) {
+            return undefined;
+        }
+        return new CustomComponentContextImpl(customComponent);
+    }
 
     private static pathToArray(path?: string | string[]): string[] {
         if (!path) {
@@ -337,17 +377,34 @@ export class MutableBinding<T> {
  * @since 26.0.0 static
  */
 export interface CustomComponentContext {
-/**
- * Register active and inactive callback.
- *
- * @param { ActiveAndInactiveCallbackType } [active] - active function callback.
- * @param { ActiveAndInactiveCallbackType } [inactive] - inactive function callback.
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @stagemodelonly
- * @since 26.0.0 static
- */
-registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType,
-  inactive?: ActiveAndInactiveCallbackType): void;
+
+    /**
+     * The getCustomComponentReusePool function gets the reuse pool.
+     *
+     * Walks up from the wrapped component looking for the nearest ancestor
+     * whose ___reusePool accepts this component's class and is still active.
+     * If this component owns a pool, returns it directly.
+     *
+     * @returns { IReusePool | undefined } Returns the reuse pool instance,
+     *          or undefined when no accepting pool exists.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @stagemodelonly
+     * @since 26.0.0 static
+     */
+    getCustomComponentReusePool(): IReusePool | undefined;
+
+    /**
+     * Register active and inactive callback.
+     *
+     * @param { ActiveAndInactiveCallbackType } [active] - active function callback.
+     * @param { ActiveAndInactiveCallbackType } [inactive] - inactive function callback.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @stagemodelonly
+     * @since 26.0.0 static
+     */
+    registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType,
+    inactive?: ActiveAndInactiveCallbackType): void;
+
 }
 
  /**

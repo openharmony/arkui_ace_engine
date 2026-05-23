@@ -136,6 +136,23 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.backing_.fireChange();
     }
 
+public resetOnReuse(newValue: T): void {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provide resetOnReuse ${this.setTraceInfo()}`);
+        const oldValue = this.backing_.get(false);
+        this.checkValueIsNotFunction(newValue);
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        let value: T;
+        if (isDynamicObject(newValue)) {
+            value = getObservedObject(newValue);
+        } else {
+            value = uiUtils.makeV1Observed(newValue);
+        }
+        this.backing_.set(value);
+        this.registerWatchForObservedObjectChanges(value);
+        this.updateObservedObjectRegistration(oldValue, value);
+        // silent — no execWatchFuncs
+    }
+
     public aboutToBeDeletedInternal(): void {
         // Unregister from the observed object before deletion
         const currentValue = this.backing_.get(false);
