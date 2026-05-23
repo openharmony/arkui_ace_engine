@@ -1,3 +1,4 @@
+'use static'
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,7 +48,7 @@ import {
   ClickEvent
 } from '@ohos.arkui.component'
 
-import { ObservedV2, Param, Local } from '@ohos.arkui.stateManagement'
+import { ObservedV2, Param, Local, Trace } from '@ohos.arkui.stateManagement'
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 import curves from '@ohos.curves';
 import common from '@ohos.app.ability.common';
@@ -75,14 +76,53 @@ export enum MarginTypeV2 {
   FIT_MARGIN = 1,
 }
 
-export interface PromptOptionsV2 {
-  icon?: ResourceStr,
-  symbolStyle?: SymbolGlyphModifier,
-  tip?: ResourceStr,
-  marginType: MarginTypeV2,
-  actionText?: ResourceStr,
-  marginTop: Dimension,
-  isShown?: boolean
+export interface PromptOptionsV2Config {
+  marginType: MarginTypeV2;
+  marginTop: Dimension;
+  icon?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  tip?: ResourceStr;
+  actionText?: ResourceStr;
+  isShown?: boolean;
+}
+
+@ObservedV2
+export class PromptOptionsV2 {
+  @Trace
+  icon?: ResourceStr;
+
+  @Trace
+  symbolStyle?: SymbolGlyphModifier;
+
+  @Trace
+  tip?: ResourceStr;
+
+  @Trace
+  marginType: MarginTypeV2;
+
+  @Trace
+  actionText?: ResourceStr;
+
+  @Trace
+  marginTop: Dimension;
+
+  @Trace
+  isShown?: boolean;
+
+  constructor(config?: PromptOptionsV2Config) {
+    if (config) {
+      this.marginType = config.marginType;
+      this.marginTop = config.marginTop;
+      this.icon = config.icon;
+      this.symbolStyle = config.symbolStyle;
+      this.tip = config.tip;
+      this.actionText = config.actionText;
+      this.isShown = config.isShown;
+    } else {
+      this.marginType = MarginTypeV2.DEFAULT_MARGIN;
+      this.marginTop = 0;
+    }
+  }
 }
 
 export class EnvironmentCallbackEntry implements EnvironmentCallback {
@@ -103,7 +143,7 @@ export class EnvironmentCallbackEntry implements EnvironmentCallback {
 
 @ComponentV2
 export struct ExceptionPromptV2 {
-  @Param options: PromptOptionsV2 = { marginType: MarginTypeV2.DEFAULT_MARGIN, marginTop: 0 } as PromptOptionsV2;
+  @Param options: PromptOptionsV2 = new PromptOptionsV2();
   @Local localSymbolStyle: SymbolGlyphModifier | undefined = undefined;
   @Local fontSizeScale: number | undefined = undefined;
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');

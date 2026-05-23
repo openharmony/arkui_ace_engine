@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (h88, i88, j88, k88) {
-    var l88 = arguments.length,
-        m88 = l88 < 3 ? i88 : k88 === null ? k88 = Object.getOwnPropertyDescriptor(i88, j88) : k88, n88;
+var __decorate = (this && this.__decorate) || function (b2, c2, d2, e2) {
+    var f2 = arguments.length, g2 = f2 < 3 ? c2 : e2 === null ? e2 = Object.getOwnPropertyDescriptor(c2, d2) : e2, h2;
     if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function') {
-        m88 = Reflect.decorate(h88, i88, j88, k88);
+        g2 = Reflect.decorate(b2, c2, d2, e2);
     } else {
-        for (var o88 = h88.length - 1; o88 >= 0; o88--) {
-            if (n88 = h88[o88]) {
-                m88 = (l88 < 3 ? n88(m88) : l88 > 3 ? n88(i88, j88, m88) : n88(i88, j88)) || m88;
+        for (var i2 = b2.length - 1; i2 >= 0; i2--) {
+            if (h2 = b2[i2]) {
+                g2 = (f2 < 3 ? h2(g2) : f2 > 3 ? h2(c2, d2, g2) : h2(c2, d2)) || g2;
             }
         }
     }
-    return l88 > 3 && m88 && Object.defineProperty(i88, j88, m88), m88;
+    return f2 > 3 && g2 && Object.defineProperty(c2, d2, g2), g2;
 };
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
@@ -46,18 +45,72 @@ const MIN_SYMBOL_FONT_SCALE = 1;
 const DEFAULT_SYMBOL_FONT_SCALE = 1;
 
 export var MarginTypeV2;
-(function (g88) {
-    g88[g88['DEFAULT_MARGIN'] = 0] = 'DEFAULT_MARGIN';
-    g88[g88['FIT_MARGIN'] = 1] = 'FIT_MARGIN';
+(function (a2) {
+    a2[a2['DEFAULT_MARGIN'] = 0] = 'DEFAULT_MARGIN';
+    a2[a2['FIT_MARGIN'] = 1] = 'FIT_MARGIN';
 })(MarginTypeV2 || (MarginTypeV2 = {}));
+let PromptOptionsV2 = class PromptOptionsV2 {
+    constructor(z1) {
+        if (z1) {
+            this.marginType = z1.marginType;
+            this.marginTop = z1.marginTop;
+            if (z1.icon !== undefined) {
+                this.icon = z1.icon;
+            }
+            if (z1.symbolStyle !== undefined) {
+                this.symbolStyle = z1.symbolStyle;
+            }
+            if (z1.tip !== undefined) {
+                this.tip = z1.tip;
+            }
+            if (z1.actionText !== undefined) {
+                this.actionText = z1.actionText;
+            }
+            if (z1.isShown !== undefined) {
+                this.isShown = z1.isShown;
+            }
+        } else {
+            this.marginType = MarginTypeV2.DEFAULT_MARGIN;
+            this.marginTop = 0;
+        }
+    }
+};
+__decorate([
+    Trace
+], PromptOptionsV2.prototype, 'icon', void 0);
+__decorate([
+    Trace
+], PromptOptionsV2.prototype, 'symbolStyle', void 0);
+__decorate([
+    Trace
+], PromptOptionsV2.prototype, 'tip', void 0);
+__decorate([
+    Trace
+], PromptOptionsV2.prototype, 'marginType', void 0);
+__decorate([
+    Trace
+], PromptOptionsV2.prototype, 'actionText', void 0);
+__decorate([
+    Trace
+], PromptOptionsV2.prototype, 'marginTop', void 0);
+__decorate([
+    Trace
+], PromptOptionsV2.prototype, 'isShown', void 0);
+PromptOptionsV2 = __decorate([
+    ObservedV2
+], PromptOptionsV2);
+
+export { PromptOptionsV2 };
 
 export class ExceptionPromptV2 extends ViewV2 {
-    constructor(z87, a88, b88, c88 = -1, d88, e88) {
-        super(z87, c88, e88);
-        this.initParam('options', (a88 && 'options' in a88) ? a88.options : {
+    constructor(s1, t1, u1, v1 = -1, w1, x1) {
+        super(s1, v1, x1);
+        this.initParam('options', (t1 && 'options' in t1) ? t1.options : new PromptOptionsV2({
             marginType: MarginTypeV2.DEFAULT_MARGIN,
             marginTop: 0
-        });
+        }));
+        this.initParam('onTipClick', (t1 && 'onTipClick' in t1) ? t1.onTipClick : undefined);
+        this.initParam('onActionTextClick', (t1 && 'onActionTextClick' in t1) ? t1.onActionTextClick : undefined);
         this.fontSizeScale = undefined;
         this.touchBackgroundColor = {
             'id': -1,
@@ -68,13 +121,9 @@ export class ExceptionPromptV2 extends ViewV2 {
         };
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
-        this.onTipClick = 'onTipClick' in a88 ? a88.onTipClick : () => {
-        };
-        this.onActionTextClick = 'onActionTextClick' in a88 ? a88.onActionTextClick : () => {
-        };
         this.callbackId = undefined;
         this.callbacks = {
-            onConfigurationUpdated: (f88) => {
+            onConfigurationUpdated: (y1) => {
                 this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
                 this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
             },
@@ -84,11 +133,13 @@ export class ExceptionPromptV2 extends ViewV2 {
         this.finalizeConstruction();
     }
 
-    resetStateVarsOnReuse(y87) {
-        this.resetParam('options', (y87 && 'options' in y87) ? y87.options : {
+    resetStateVarsOnReuse(r1) {
+        this.resetParam('options', (r1 && 'options' in r1) ? r1.options : new PromptOptionsV2({
             marginType: MarginTypeV2.DEFAULT_MARGIN,
             marginTop: 0
-        });
+        }));
+        this.resetParam('onTipClick', (r1 && 'onTipClick' in r1) ? r1.onTipClick : undefined);
+        this.resetParam('onActionTextClick', (r1 && 'onActionTextClick' in r1) ? r1.onActionTextClick : undefined);
         this.fontSizeScale = undefined;
         this.touchBackgroundColor = {
             'id': -1,
@@ -99,15 +150,11 @@ export class ExceptionPromptV2 extends ViewV2 {
         };
         this.maxAppFontScale = 1;
         this.isFollowingSystemFontScale = false;
-        this.onTipClick = 'onTipClick' in y87 ? y87.onTipClick : () => {
-        };
-        this.onActionTextClick = 'onActionTextClick' in y87 ? y87.onActionTextClick : () => {
-        };
         this.callbackId = undefined;
     }
 
-    TextBuilder(x86 = null) {
-        this.observeComponentCreation2((w87, x87) => {
+    TextBuilder(q = null) {
+        this.observeComponentCreation2((p1, q1) => {
             Flex.create({
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Center
@@ -143,7 +190,7 @@ export class ExceptionPromptV2 extends ViewV2 {
                 }
             });
         }, Flex);
-        this.observeComponentCreation2((u87, v87) => {
+        this.observeComponentCreation2((n1, o1) => {
             Row.create();
             Row.padding({
                 right: {
@@ -160,11 +207,11 @@ export class ExceptionPromptV2 extends ViewV2 {
                 this.onTipClick && this.onTipClick();
             });
         }, Row);
-        this.observeComponentCreation2((k87, l87) => {
+        this.observeComponentCreation2((d1, e1) => {
             If.create();
             if (this.options?.symbolStyle !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((s87, t87) => {
+                    this.observeComponentCreation2((l1, m1) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontColor([{
                             'id': -1,
@@ -181,11 +228,11 @@ export class ExceptionPromptV2 extends ViewV2 {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((m87, n87) => {
+                    this.observeComponentCreation2((f1, g1) => {
                         If.create();
                         if (Util.isSymbolResource(this.options?.icon)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((q87, r87) => {
+                                this.observeComponentCreation2((j1, k1) => {
                                     SymbolGlyph.create(this.options?.icon ?? {
                                         'id': -1,
                                         'type': 40000,
@@ -206,7 +253,7 @@ export class ExceptionPromptV2 extends ViewV2 {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((o87, p87) => {
+                                this.observeComponentCreation2((h1, i1) => {
                                     Image.create(this.options?.icon);
                                     Image.width('24vp');
                                     Image.height('24vp');
@@ -226,8 +273,8 @@ export class ExceptionPromptV2 extends ViewV2 {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((i87, j87) => {
-            Text.create(this.options.tip);
+        this.observeComponentCreation2((b1, c1) => {
+            Text.create(this.options?.tip);
             Text.fontSize({
                 'id': -1,
                 'type': 10002,
@@ -260,17 +307,17 @@ export class ExceptionPromptV2 extends ViewV2 {
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((y86, z86) => {
+        this.observeComponentCreation2((r, s) => {
             If.create();
-            if (this.options.actionText) {
+            if (this.options?.actionText) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((g87, h87) => {
+                    this.observeComponentCreation2((z, a1) => {
                         Button.createWithChild({
                             stateEffect: false,
                             type: ButtonType.Normal
                         });
                         Button.backgroundColor(this.touchBackgroundColor);
-                        Button.width(this.options.actionText ? 144 : 0);
+                        Button.width(this.options?.actionText ? 144 : 0);
                         Button.borderRadius({
                             'id': -1,
                             'type': 10002,
@@ -294,13 +341,13 @@ export class ExceptionPromptV2 extends ViewV2 {
                             this.onActionTextClick && this.onActionTextClick();
                         });
                     }, Button);
-                    this.observeComponentCreation2((e87, f87) => {
+                    this.observeComponentCreation2((x, y) => {
                         Row.create();
                         Row.width('100%');
                         Row.justifyContent(FlexAlign.End);
                     }, Row);
-                    this.observeComponentCreation2((c87, d87) => {
-                        Text.create(this.options.actionText);
+                    this.observeComponentCreation2((v, w) => {
+                        Text.create(this.options?.actionText);
                         Text.fontSize({
                             'id': -1,
                             'type': 10002,
@@ -334,7 +381,7 @@ export class ExceptionPromptV2 extends ViewV2 {
                         Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((a87, b87) => {
+                    this.observeComponentCreation2((t, u) => {
                         SymbolGlyph.create({
                             'id': -1,
                             'type': 40000,
@@ -364,15 +411,15 @@ export class ExceptionPromptV2 extends ViewV2 {
     }
 
     initialRender() {
-        this.observeComponentCreation2((v86, w86) => {
+        this.observeComponentCreation2((o, p) => {
             Row.create();
             Row.width('100%');
-            Row.position({ y: this.options.marginTop });
+            Row.position({ y: this.options?.marginTop });
             Row.zIndex(ZINDEX_NUM);
         }, Row);
-        this.observeComponentCreation2((t86, u86) => {
+        this.observeComponentCreation2((m, n) => {
             Column.create();
-            Column.padding(this.options.marginType === MarginTypeV2.DEFAULT_MARGIN
+            Column.padding(this.options?.marginType === MarginTypeV2.DEFAULT_MARGIN
                 ? {
                     left: {
                         'id': -1,
@@ -407,11 +454,11 @@ export class ExceptionPromptV2 extends ViewV2 {
                 });
             Column.transition(TransitionEffect.OPACITY.animation({
                 curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1),
-                duration: this.options.isShown ? START_TIME : END_TIME
+                duration: this.options?.isShown ? START_TIME : END_TIME
             }));
-            Column.visibility(this.options.isShown ? Visibility.Visible : Visibility.None);
+            Column.visibility(this.options?.isShown ? Visibility.Visible : Visibility.None);
         }, Column);
-        this.observeComponentCreation2((r86, s86) => {
+        this.observeComponentCreation2((k, l) => {
             Column.create();
             Column.width('100%');
             Column.borderRadius(BORDER_RADIUS);
@@ -432,16 +479,16 @@ export class ExceptionPromptV2 extends ViewV2 {
 
     aboutToAppear() {
         try {
-            let q86 = this.getUIContext();
-            this.isFollowingSystemFontScale = q86.isFollowingSystemFontScale();
-            this.maxAppFontScale = q86.getMaxFontScale();
+            let j = this.getUIContext();
+            this.isFollowingSystemFontScale = j.isFollowingSystemFontScale();
+            this.maxAppFontScale = j.getMaxFontScale();
             this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
             this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
-            this.callbackId = q86.getHostContext()?.getApplicationContext()?.on('environment', this.callbacks);
-        } catch (n86) {
-            let o86 = n86.code;
-            let p86 = n86.message;
-            hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${o86}, message: ${p86}`);
+            this.callbackId = j.getHostContext()?.getApplicationContext()?.on('environment', this.callbacks);
+        } catch (g) {
+            let h = g.code;
+            let i = g.message;
+            hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${h}, message: ${i}`);
         }
     }
 
@@ -453,20 +500,26 @@ export class ExceptionPromptV2 extends ViewV2 {
     }
 
     updateFontScale() {
-        let l86 = this.getUIContext();
-        let m86 = l86.getHostContext()?.config?.fontSizeScale ?? 1;
+        let e = this.getUIContext();
+        let f = e.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
-        return Math.min(m86, this.maxAppFontScale);
+        return Math.min(f, this.maxAppFontScale);
     }
 
-    updateStateVars(k86) {
-        if (k86 === undefined) {
+    updateStateVars(d) {
+        if (d === undefined) {
             return;
         }
-        if ('options' in k86) {
-            this.updateParam('options', k86.options);
+        if ('options' in d) {
+            this.updateParam('options', d.options);
+        }
+        if ('onTipClick' in d) {
+            this.updateParam('onTipClick', d.onTipClick);
+        }
+        if ('onActionTextClick' in d) {
+            this.updateParam('onActionTextClick', d.onActionTextClick);
         }
     }
 
@@ -477,6 +530,12 @@ export class ExceptionPromptV2 extends ViewV2 {
 __decorate([
     Param
 ], ExceptionPromptV2.prototype, 'options', void 0);
+__decorate([
+    Param
+], ExceptionPromptV2.prototype, 'onTipClick', void 0);
+__decorate([
+    Param
+], ExceptionPromptV2.prototype, 'onActionTextClick', void 0);
 __decorate([
     Local
 ], ExceptionPromptV2.prototype, 'fontSizeScale', void 0);
@@ -490,38 +549,31 @@ __decorate([
     Local
 ], ExceptionPromptV2.prototype, 'isFollowingSystemFontScale', void 0);
 __decorate([
-    Event
-], ExceptionPromptV2.prototype, 'onTipClick', void 0);
-__decorate([
-    Event
-], ExceptionPromptV2.prototype, 'onActionTextClick', void 0);
-__decorate([
     Local
 ], ExceptionPromptV2.prototype, 'callbackId', void 0);
 
 class Util {
-    static isSymbolResource(i86) {
-        if (i86 === undefined) {
+    static isSymbolResource(b) {
+        if (b === undefined) {
             return true;
         }
-        if (!Util.isResourceType(i86)) {
+        if (!Util.isResourceType(b)) {
             return false;
         }
-        let j86 = i86;
-        return j86.type === Util.RESOURCE_TYPE_SYMBOL;
+        let c = b;
+        return c.type === Util.RESOURCE_TYPE_SYMBOL;
     }
 
-    static isResourceType(h86) {
-        if (!h86) {
+    static isResourceType(a) {
+        if (!a) {
             return false;
         }
-        return typeof h86 !== 'string';
+        return typeof a !== 'string';
     }
 }
 
 Util.RESOURCE_TYPE_SYMBOL = 40000;
 
 export default {
-  MarginTypeV2,
-  ExceptionPromptV2
+    ExceptionPromptV2, PromptOptionsV2, MarginTypeV2
 }
