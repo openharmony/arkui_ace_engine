@@ -37,4 +37,12 @@ void UnionEffectContainerModelStatic::SetUnionEffectContainerOptions(FrameNode* 
     float spacing = options ? options->spacing : 0.0f;
     pattern->SetSpacing(spacing);
 }
+
+void UnionEffectContainerModelStatic::SetUnionMode(FrameNode* node, UnionMode unionMode)
+{
+    CHECK_NULL_VOID(node);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateUnionMode(unionMode);
+}
 } // namespace OHOS::Ace::NG

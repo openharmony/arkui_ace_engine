@@ -390,6 +390,8 @@ public:
     static void SetToolbarBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc);
     static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
     static void SetInspectorLabelSta(UINode* node, const std::string& inspectorLabel);
+    static void SetEdgeLightParam(FrameNode* frameNode, const std::optional<EdgeLightParam>& param);
+    static void SetCenterGravityOptions(FrameNode* frameNode, const CenterGravityOptions& centerGravityOptions);
 
 private:
     static bool CheckMenuIsShow(

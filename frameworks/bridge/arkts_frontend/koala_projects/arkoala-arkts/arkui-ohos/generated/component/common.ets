@@ -24,7 +24,7 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { unifiedDataChannel_UnifiedData_serializer } from './../framework/ohos.data.unifiedDataChannel'
 import { default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
 import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer, AccessibilityCustomAction, AccessibilityCustomAction_serializer } from './units'
-import { KeyType, KeySource, Color as arkui_component_enums_Color, TouchType, InteractionHand, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, UIMaterialAnimationMode, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, GestureCollectIntervention, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, GestureShortcut, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
+import { KeyType, KeySource, Color as arkui_component_enums_Color, TouchType, InteractionHand, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, UIMaterialAnimationMode, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, GestureCollectIntervention, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, GestureShortcut, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction, EdgeLightPosition } from './enums'
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -4652,7 +4652,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setUseUnionEffectAttribute(value: boolean | undefined): void {
+    setUseUnionEffect0Attribute(value: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4661,7 +4661,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRenderGroupAttribute(value: boolean | undefined): void {
@@ -4766,6 +4766,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setTransform3D(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEdgeLightAttribute(value: EdgeLightParams | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            EdgeLightParams_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setEdgeLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnAppearAttribute(value: (() => void) | undefined): void {
@@ -6308,6 +6320,25 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setUseUnionEffect1Attribute(value: boolean | undefined, options?: GravityCenterOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            GravityCenterOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBackdropBlurAttribute(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
@@ -7950,6 +7981,17 @@ export interface GeometryTransitionOptions {
     follow?: boolean;
     hierarchyStrategy?: TransitionHierarchyStrategy;
 }
+export interface GravityCenterOptions {
+    gravityCenter?: boolean;
+    gravityIntensity?: double;
+}
+export interface EdgeLightParams {
+    position: EdgeLightPosition;
+    length: Length;
+    intensity?: double;
+    color?: ResourceColor;
+    thickness?: Length;
+}
 export interface LinearGradientOptions {
     angle?: double | string;
     direction?: GradientDirection;
@@ -8438,6 +8480,7 @@ export interface SheetOptions extends BindOptions {
     showInSubWindow?: boolean;
     placement?: Placement;
     placementOnTarget?: boolean;
+    edgeLightMode?: EdgeLightMode;
 }
 export interface StateStyles {
     normal?: CustomStyles;
@@ -9758,6 +9801,30 @@ export interface CommonMethod {
             }
         }
         throw new Error('Unimplemented method useUnionEffect')
+    }
+    useUnionEffect(value: boolean | undefined, options?: GravityCenterOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.useUnionEffect(value, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method useUnionEffect can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method useUnionEffect')
+    }
+    edgeLight(value: EdgeLightParams | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.edgeLight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method edgeLight can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method edgeLight')
     }
     renderGroup(value: boolean | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
@@ -12542,7 +12609,18 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public useUnionEffect(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
-        this.getPeer()?.setUseUnionEffectAttribute(value_casted)
+        this.getPeer()?.setUseUnionEffect0Attribute(value_casted)
+        return this
+    }
+    public useUnionEffect(value: boolean | undefined, options?: GravityCenterOptions): this {
+        const value_casted = value as (boolean | undefined)
+        const options_casted = options as (GravityCenterOptions | undefined)
+        this.getPeer()?.setUseUnionEffect1Attribute(value_casted, options_casted)
+        return this
+    }
+    public edgeLight(value: EdgeLightParams | undefined): this {
+        const value_casted = value as (EdgeLightParams | undefined)
+        this.getPeer()?.setEdgeLightAttribute(value_casted)
         return this
     }
     public renderGroup(value: boolean | undefined): this {
@@ -15160,6 +15238,44 @@ export class GeometryTransitionOptions_serializer {
         }
         const hierarchyStrategyTmpResult: TransitionHierarchyStrategy | undefined = hierarchyStrategyTmpBuf
         let value: GeometryTransitionOptions = ({follow: followTmpResult, hierarchyStrategy: hierarchyStrategyTmpResult} as GeometryTransitionOptions)
+        return value
+    }
+}
+export class GravityCenterOptions_serializer {
+    public static write(buffer: SerializerBase, value: GravityCenterOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForGravityCenter = value.gravityCenter
+        if (valueHolderForGravityCenter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGravityCenterTmpValue = valueHolderForGravityCenter!
+            valueSerializer.writeBoolean(valueHolderForGravityCenterTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGravityIntensity = value.gravityIntensity
+        if (valueHolderForGravityIntensity !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGravityIntensityTmpValue = valueHolderForGravityIntensity!
+            valueSerializer.writeFloat64(valueHolderForGravityIntensityTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): GravityCenterOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const gravityCenterTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let gravityCenterTmpBuf: boolean | undefined = undefined
+        if ((gravityCenterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gravityCenterTmpBuf = valueDeserializer.readBoolean()
+        }
+        const gravityCenterTmpResult: boolean | undefined = gravityCenterTmpBuf
+        const gravityIntensityTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let gravityIntensityTmpBuf: double | undefined = undefined
+        if ((gravityIntensityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gravityIntensityTmpBuf = valueDeserializer.readFloat64()
+        }
+        const gravityIntensityTmpResult: double | undefined = gravityIntensityTmpBuf
+        let value: GravityCenterOptions = ({gravityCenter: gravityCenterTmpResult, gravityIntensity: gravityIntensityTmpResult} as GravityCenterOptions)
         return value
     }
 }
@@ -19354,6 +19470,139 @@ export class DividerStyle_serializer {
         }
         const endMarginTmpResult: Length | undefined = endMarginTmpBuf
         let value: DividerStyle = ({strokeWidth: strokeWidthTmpResult, color: colorTmpResult, startMargin: startMarginTmpResult, endMargin: endMarginTmpResult} as DividerStyle)
+        return value
+    }
+}
+export class EdgeLightParams_serializer {
+    public static write(buffer: SerializerBase, value: EdgeLightParams): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForPosition = value.position
+        valueSerializer.writeInt32(valueHolderForPosition.valueOf())
+        const valueHolderForLength = value.length
+        if (valueHolderForLength instanceof string) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForLengthForIdx0 = valueHolderForLength as string
+            valueSerializer.writeString(valueHolderForLengthForIdx0)
+        } else if (valueHolderForLength instanceof double) {
+            valueSerializer.writeInt8((1).toByte())
+            const valueHolderForLengthForIdx1 = valueHolderForLength as double
+            valueSerializer.writeFloat64(valueHolderForLengthForIdx1)
+        } else if (valueHolderForLength instanceof arkui_component_units_Resource) {
+            valueSerializer.writeInt8((2).toByte())
+            const valueHolderForLengthForIdx2 = valueHolderForLength as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(valueSerializer, valueHolderForLengthForIdx2)
+        }
+        const valueHolderForIntensity = value.intensity
+        if (valueHolderForIntensity !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIntensityTmpValue = valueHolderForIntensity!
+            valueSerializer.writeFloat64(valueHolderForIntensityTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForColor = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorTmpValueForIdx0 = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorTmpValueForIdx1 = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForColorTmpValueForIdx2 = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForColorTmpValueForIdx3 = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForThickness = value.thickness
+        if (valueHolderForThickness !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForThicknessTmpValue = valueHolderForThickness!
+            if (valueHolderForThicknessTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForThicknessTmpValueForIdx0 = valueHolderForThicknessTmpValue as string
+                valueSerializer.writeString(valueHolderForThicknessTmpValueForIdx0)
+            } else if (valueHolderForThicknessTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForThicknessTmpValueForIdx1 = valueHolderForThicknessTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForThicknessTmpValueForIdx1)
+            } else if (valueHolderForThicknessTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForThicknessTmpValueForIdx2 = valueHolderForThicknessTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForThicknessTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): EdgeLightParams {
+        let valueDeserializer: DeserializerBase = buffer
+        const positionTmpResult: EdgeLightPosition = EdgeLightPosition.fromValue(valueDeserializer.readInt32())
+        const lengthTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let lengthTmpBuf: string | double | arkui_component_units_Resource | undefined
+        if (lengthTmpBufUnionSelector == (0).toByte()) {
+            lengthTmpBuf = (valueDeserializer.readString() as string)
+        } else if (lengthTmpBufUnionSelector == (1).toByte()) {
+            lengthTmpBuf = valueDeserializer.readFloat64()
+        } else if (lengthTmpBufUnionSelector == (2).toByte()) {
+            lengthTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error('One of the branches for lengthTmpBuf has to be chosen through deserialisation.')
+        }
+        const lengthTmpResult: Length = (lengthTmpBuf as string | double | arkui_component_units_Resource)
+        const intensityTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let intensityTmpBuf: double | undefined = undefined
+        if ((intensityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            intensityTmpBuf = valueDeserializer.readFloat64()
+        }
+        const intensityTmpResult: double | undefined = intensityTmpBuf
+        const colorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorTmpBuf: ResourceColor | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
+            }
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        }
+        const colorTmpResult: ResourceColor | undefined = colorTmpBuf
+        const thicknessTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let thicknessTmpBuf: Length | undefined = undefined
+        if ((thicknessTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const thicknessTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let thicknessTmpBufOpt: string | double | arkui_component_units_Resource | undefined
+            if (thicknessTmpBufOptUnionSelector == (0).toByte()) {
+                thicknessTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (thicknessTmpBufOptUnionSelector == (1).toByte()) {
+                thicknessTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (thicknessTmpBufOptUnionSelector == (2).toByte()) {
+                thicknessTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for thicknessTmpBufOpt has to be chosen through deserialisation.')
+            }
+            thicknessTmpBuf = (thicknessTmpBufOpt as string | double | arkui_component_units_Resource)
+        }
+        const thicknessTmpResult: Length | undefined = thicknessTmpBuf
+        let value: EdgeLightParams = ({position: positionTmpResult, length: lengthTmpResult, intensity: intensityTmpResult, color: colorTmpResult, thickness: thicknessTmpResult} as EdgeLightParams)
         return value
     }
 }
@@ -25404,6 +25653,14 @@ export class SheetOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): SheetOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -26150,7 +26407,13 @@ export class SheetOptions_serializer {
             placementOnTargetTmpBuf = valueDeserializer.readBoolean()
         }
         const placementOnTargetTmpResult: boolean | undefined = placementOnTargetTmpBuf
-        let value: SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, radiusRenderStrategy: radiusRenderStrategyTmpResult, systemMaterial: systemMaterialTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult} as SheetOptions)
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        let value: SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, radiusRenderStrategy: radiusRenderStrategyTmpResult, systemMaterial: systemMaterialTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult, edgeLightMode: edgeLightModeTmpResult} as SheetOptions)
         return value
     }
 }

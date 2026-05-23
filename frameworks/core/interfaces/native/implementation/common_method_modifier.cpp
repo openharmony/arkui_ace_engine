@@ -3669,6 +3669,24 @@ void SetOnFocusImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
+void SetUseUnionEffect1Impl(Ark_NativePointer node,
+                            const Opt_Boolean* value,
+                            const Opt_GravityCenterOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstract::SetUseUnion(frameNode, convValue.value_or(false));
+    auto optOptions = Converter::GetOptPtr(options);
+    CenterGravityOptions centerGravityOptions { .gravityCenter = false, .gravityIntensity = 0.0f };
+    if (optOptions) {
+        auto gravityCenter = Converter::OptConvert<bool>(optOptions->gravityCenter);
+        auto gravityIntensity = Converter::OptConvert<float>(optOptions->gravityIntensity);
+        centerGravityOptions.gravityCenter = gravityCenter.value_or(false);
+        centerGravityOptions.gravityIntensity = gravityIntensity.value_or(0.0f);
+    }
+    ViewAbstractModelStatic::SetCenterGravityOptions(frameNode, centerGravityOptions);
+}
 void SetOnBlurImpl(Ark_NativePointer node,
                    const Opt_synthetic_Callback_Void* value)
 {
@@ -4899,6 +4917,25 @@ void SetShadowImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstract::SetBackShadow(frameNode, shadow.value());
+}
+void SetEdgeLightImpl(Ark_NativePointer node,
+                      const Opt_EdgeLightParams* value)
+{
+auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstractModelStatic::SetEdgeLightParam(frameNode, std::nullopt);
+        return;
+    }
+    NG::EdgeLightParam param;
+    param.edgeLightPosition = Converter::OptConvert<NG::EdgeLightPosition>(optValue->position)
+                                  .value_or(NG::EdgeLightPosition::TOP_LEFT);
+    param.length = Converter::OptConvert<CalcDimension>(optValue->length).value_or(CalcDimension());
+    param.intensity = Converter::OptConvert<float>(optValue->intensity).value_or(1.0f);
+    param.color = Converter::OptConvert<Color>(optValue->color).value_or(Color::WHITE);
+    param.thickness = Converter::OptConvert<CalcDimension>(optValue->thickness).value_or(CalcDimension());
+    ViewAbstractModelStatic::SetEdgeLightParam(frameNode, std::optional<NG::EdgeLightParam>(param));
 }
 void SetClipImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
@@ -7214,6 +7251,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetRadialGradientImpl,
         CommonMethodModifier::SetMotionPathImpl,
         CommonMethodModifier::SetShadowImpl,
+        CommonMethodModifier::SetEdgeLightImpl,
         CommonMethodModifier::SetClipImpl,
         CommonMethodModifier::SetClipShapeImpl,
         CommonMethodModifier::SetMaskImpl,
@@ -7279,6 +7317,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetLinearGradientBlurImpl,
         CommonMethodModifier::SetSystemBarEffectImpl,
         CommonMethodModifier::SetUseEffect1Impl,
+        CommonMethodModifier::SetUseUnionEffect1Impl,
         CommonMethodModifier::SetBackdropBlurImpl,
         CommonMethodModifier::SetOnAreaChange1Impl,
         CommonMethodModifier::SetSharedTransitionImpl,

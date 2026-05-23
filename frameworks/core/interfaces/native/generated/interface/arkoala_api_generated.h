@@ -2381,6 +2381,8 @@ typedef struct Ark_GestureInfo Ark_GestureInfo;
 typedef struct Opt_GestureInfo Opt_GestureInfo;
 typedef struct Ark_GestureStyleInterface Ark_GestureStyleInterface;
 typedef struct Opt_GestureStyleInterface Opt_GestureStyleInterface;
+typedef struct Ark_GravityCenterOptions Ark_GravityCenterOptions;
+typedef struct Opt_GravityCenterOptions Opt_GravityCenterOptions;
 typedef struct Ark_GridColColumnOption Ark_GridColColumnOption;
 typedef struct Opt_GridColColumnOption Opt_GridColColumnOption;
 typedef struct Ark_GridItemOptions Ark_GridItemOptions;
@@ -3311,6 +3313,8 @@ typedef struct Ark_DoubleLengthDetents Ark_DoubleLengthDetents;
 typedef struct Opt_DoubleLengthDetents Opt_DoubleLengthDetents;
 typedef struct Ark_DrawableTabBarIndicator Ark_DrawableTabBarIndicator;
 typedef struct Opt_DrawableTabBarIndicator Opt_DrawableTabBarIndicator;
+typedef struct Ark_EdgeLightParams Ark_EdgeLightParams;
+typedef struct Opt_EdgeLightParams Opt_EdgeLightParams;
 typedef struct Ark_EdgeOutlineWidths Ark_EdgeOutlineWidths;
 typedef struct Opt_EdgeOutlineWidths Opt_EdgeOutlineWidths;
 typedef struct Ark_Edges Ark_Edges;
@@ -4837,6 +4841,20 @@ typedef struct Opt_EdgeLightMode {
     Ark_Tag tag;
     Ark_EdgeLightMode value;
 } Opt_EdgeLightMode;
+typedef enum Ark_EdgeLightPosition {
+    ARK_EDGE_LIGHT_POSITION_TOP_LEFT = 0,
+    ARK_EDGE_LIGHT_POSITION_TOP_RIGHT = 1,
+    ARK_EDGE_LIGHT_POSITION_BOTTOM_LEFT = 2,
+    ARK_EDGE_LIGHT_POSITION_BOTTOM_RIGHT = 3,
+    ARK_EDGE_LIGHT_POSITION_TOP = 4,
+    ARK_EDGE_LIGHT_POSITION_BOTTOM = 5,
+    ARK_EDGE_LIGHT_POSITION_LEFT = 6,
+    ARK_EDGE_LIGHT_POSITION_RIGHT = 7,
+} Ark_EdgeLightPosition;
+typedef struct Opt_EdgeLightPosition {
+    Ark_Tag tag;
+    Ark_EdgeLightPosition value;
+} Opt_EdgeLightPosition;
 typedef enum Ark_EffectDirection {
     ARK_EFFECT_DIRECTION_DOWN = 0,
     ARK_EFFECT_DIRECTION_UP = 1,
@@ -7671,6 +7689,14 @@ typedef struct Opt_UndoStyle {
     Ark_Tag tag;
     Ark_UndoStyle value;
 } Opt_UndoStyle;
+typedef enum Ark_UnionMode {
+    ARK_UNION_MODE_SMOOTH_UNION = 0,
+    ARK_UNION_MODE_GRAVITY_UNION = 1,
+} Ark_UnionMode;
+typedef struct Opt_UnionMode {
+    Ark_Tag tag;
+    Ark_UnionMode value;
+} Opt_UnionMode;
 typedef enum Ark_VerticalAlign {
     ARK_VERTICAL_ALIGN_TOP = 0,
     ARK_VERTICAL_ALIGN_CENTER = 1,
@@ -16052,6 +16078,15 @@ typedef struct Opt_GestureStyleInterface {
     Ark_Tag tag;
     Ark_GestureStyleInterface value;
 } Opt_GestureStyleInterface;
+typedef struct Ark_GravityCenterOptions {
+    /* kind: Interface */
+    Opt_Boolean gravityCenter;
+    Opt_Float64 gravityIntensity;
+} Ark_GravityCenterOptions;
+typedef struct Opt_GravityCenterOptions {
+    Ark_Tag tag;
+    Ark_GravityCenterOptions value;
+} Opt_GravityCenterOptions;
 typedef struct Ark_GridColColumnOption {
     /* kind: Interface */
     Opt_Int32 xs;
@@ -21129,6 +21164,18 @@ typedef struct Opt_DrawableTabBarIndicator {
     Ark_Tag tag;
     Ark_DrawableTabBarIndicator value;
 } Opt_DrawableTabBarIndicator;
+typedef struct Ark_EdgeLightParams {
+    /* kind: Interface */
+    Ark_EdgeLightPosition position;
+    Ark_Length length;
+    Opt_Float64 intensity;
+    Opt_ResourceColor color;
+    Opt_Length thickness;
+} Ark_EdgeLightParams;
+typedef struct Opt_EdgeLightParams {
+    Ark_Tag tag;
+    Ark_EdgeLightParams value;
+} Opt_EdgeLightParams;
 typedef struct Ark_EdgeOutlineWidths {
     /* kind: Interface */
     Opt_Dimension top;
@@ -23190,6 +23237,7 @@ typedef struct Ark_SheetOptions {
     Opt_Boolean showInSubWindow;
     Opt_Placement placement;
     Opt_Boolean placementOnTarget;
+    Opt_EdgeLightMode edgeLightMode;
 } Ark_SheetOptions;
 typedef struct Opt_SheetOptions {
     Ark_Tag tag;
@@ -24363,7 +24411,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                  const Opt_Boolean* value);
     void (*setUseEffect0)(Ark_NativePointer node,
                           const Opt_Boolean* value);
-    void (*setUseUnionEffect)(Ark_NativePointer node,
+    void (*setUseUnionEffect0)(Ark_NativePointer node,
                                const Opt_Boolean* value);
     void (*setRenderGroup)(Ark_NativePointer node,
                            const Opt_Boolean* value);
@@ -24455,6 +24503,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                           const Opt_MotionPathOptions* value);
     void (*setShadow)(Ark_NativePointer node,
                       const Opt_Union_ShadowOptions_ShadowStyle* value);
+    void (*setEdgeLight)(Ark_NativePointer node,
+                         const Opt_EdgeLightParams* value);
     void (*setClip)(Ark_NativePointer node,
                     const Opt_Boolean* value);
     void (*setClipShape)(Ark_NativePointer node,
@@ -24604,6 +24654,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setUseEffect1)(Ark_NativePointer node,
                           const Opt_Boolean* useEffect,
                           const Opt_EffectType* effectType);
+    void (*setUseUnionEffect1)(Ark_NativePointer node,
+                               const Opt_Boolean* value,
+                               const Opt_GravityCenterOptions* options);
     void (*setBackdropBlur)(Ark_NativePointer node,
                             const Opt_Float64* radius,
                             const Opt_BlurOptions* options,
@@ -27567,6 +27620,8 @@ typedef struct GENERATED_ArkUIUnionEffectContainerModifier {
                                            const Opt_UnionEffectContainerOptions* options);
     void (*setPointLight)(Ark_NativePointer node,
                           const Ark_PointLightStyle* value);
+    void (*setUnionMode)(Ark_NativePointer node,
+                         const Opt_UnionMode* value);
 } GENERATED_ArkUIUnionEffectContainerModifier;
 
 typedef struct GENERATED_ArkUIVideoModifier {
