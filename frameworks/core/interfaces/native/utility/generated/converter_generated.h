@@ -996,6 +996,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_CustomNodeBuilder_Array_MenuElement& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_CustomNodeBuilder_ComponentContentBase& src)
 {
     switch (src.selector) {
@@ -1058,6 +1073,21 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_CustomNodeBuilder_ResourceColor& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3821,6 +3851,7 @@ ASSIGN_OPT(Opt_MaxLinesMode)
 ASSIGN_OPT(Opt_Measurable)
 ASSIGN_OPT(Opt_MeasureResult)
 ASSIGN_OPT(Opt_MenuAlignType)
+ASSIGN_OPT(Opt_MenuGridPosition)
 ASSIGN_OPT(Opt_MenuItemConfiguration)
 ASSIGN_OPT(Opt_MenuKeyboardAvoidMode)
 ASSIGN_OPT(Opt_MenuPolicy)
@@ -4143,7 +4174,6 @@ ASSIGN_OPT(Opt_UIGestureEvent)
 ASSIGN_OPT(Opt_UIGridEvent)
 ASSIGN_OPT(Opt_UIListEvent)
 ASSIGN_OPT(Opt_uiMaterial_Material)
-ASSIGN_OPT(Opt_UIMaterialAnimationMode)
 ASSIGN_OPT(Opt_UIScrollableCommonEvent)
 ASSIGN_OPT(Opt_UIScrollEvent)
 ASSIGN_OPT(Opt_UIWaterFlowEvent)
@@ -4874,6 +4904,7 @@ ASSIGN_OPT(Opt_LocalizedHorizontalAlignParam)
 ASSIGN_OPT(Opt_LocalizedVerticalAlignParam)
 ASSIGN_OPT(Opt_Matrix4Result)
 ASSIGN_OPT(Opt_MaxLinesOptions)
+ASSIGN_OPT(Opt_MenuGridStyleOptions)
 ASSIGN_OPT(Opt_MessageEvents)
 ASSIGN_OPT(Opt_MotionBlurAnchor)
 ASSIGN_OPT(Opt_MotionPathOptions)
@@ -5031,11 +5062,13 @@ ASSIGN_OPT(Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_BorderStyle_EdgeStyles)
 ASSIGN_OPT(Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor)
 ASSIGN_OPT(Opt_Union_ColumnOptions_ColumnOptionsV2)
+ASSIGN_OPT(Opt_Union_CustomNodeBuilder_Array_MenuElement)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_ComponentContentBase)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_DragItemInfo)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_DragItemInfo_String)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_ExtendableComponent)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_ResourceColor)
+ASSIGN_OPT(Opt_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement)
 ASSIGN_OPT(Opt_Union_Date_Bindable_Date)
 ASSIGN_OPT(Opt_Union_EdgeOutlineStyles_OutlineStyle)
 ASSIGN_OPT(Opt_Union_EdgeStyles_BorderStyle)

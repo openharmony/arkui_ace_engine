@@ -6770,7 +6770,53 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindContextMenuWithResponseAttribute(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): void {
+    setBindContextMenuByResponseTypeAttribute(content: CustomBuilder | Array<MenuElement> | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue = content!
+            if (contentTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
+            } else if (contentTmpValue instanceof Array) {
+                if (contentTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const contentTmpValueElem = contentTmpValue[0]
+                    if (contentTmpValueElem instanceof MenuElement) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const contentTmpValueForIdx1 = contentTmpValue as Array<MenuElement>
+                        thisSerializer.writeInt32((contentTmpValueForIdx1.length).toInt())
+                        for (let contentTmpValueForIdx1CounterI = 0; contentTmpValueForIdx1CounterI < contentTmpValueForIdx1.length; contentTmpValueForIdx1CounterI++) {
+                            const contentTmpValueForIdx1TmpElement: MenuElement = contentTmpValueForIdx1[contentTmpValueForIdx1CounterI]
+                            MenuElement_serializer.write(thisSerializer, contentTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (responseType !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const responseTypeTmpValue = (responseType as ResponseType)
+            thisSerializer.writeInt32(responseTypeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            ContextMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuByResponseType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBindContextMenuWithResponse0Attribute(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6787,7 +6833,47 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBindContextMenuWithResponse1Attribute(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue = content!
+            if (contentTmpValue instanceof CustomBuilderT<ResponseType>) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentTmpValueForIdx0 = contentTmpValue as CustomBuilderT<ResponseType>
+                const contentTmpValueForIdx0Transformed: CustomNodeBuilderT<ResponseType> = extractors.transform_CustomBuilderT_ResponseType_to_CustomNodeBuilderT_ResponseType(contentTmpValueForIdx0)
+                thisSerializer.holdAndWriteCallback(contentTmpValueForIdx0Transformed)
+            } else if (contentTmpValue instanceof Array) {
+                if (contentTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const contentTmpValueElem = contentTmpValue[0]
+                    if (contentTmpValueElem instanceof MenuElement) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const contentTmpValueForIdx1 = contentTmpValue as Array<MenuElement>
+                        thisSerializer.writeInt32((contentTmpValueForIdx1.length).toInt())
+                        for (let contentTmpValueForIdx1CounterI = 0; contentTmpValueForIdx1CounterI < contentTmpValueForIdx1.length; contentTmpValueForIdx1CounterI++) {
+                            const contentTmpValueForIdx1TmpElement: MenuElement = contentTmpValueForIdx1[contentTmpValueForIdx1CounterI]
+                            MenuElement_serializer.write(thisSerializer, contentTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            ContextMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindContextMenu1Attribute(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
@@ -6822,6 +6908,60 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBindContextMenuByIsShowAttribute(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | Array<MenuElement> | undefined, options?: ContextMenuOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (isShow !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isShowTmpValue = isShow!
+            if (isShowTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const isShowTmpValueForIdx0 = isShowTmpValue as boolean
+                thisSerializer.writeBoolean(isShowTmpValueForIdx0)
+            } else if (isShowTmpValue instanceof Bindable) {
+                thisSerializer.writeInt8((1).toByte())
+                const isShowTmpValueForIdx1 = isShowTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue = content!
+            if (contentTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
+            } else if (contentTmpValue instanceof Array) {
+                if (contentTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const contentTmpValueElem = contentTmpValue[0]
+                    if (contentTmpValueElem instanceof MenuElement) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const contentTmpValueForIdx1 = contentTmpValue as Array<MenuElement>
+                        thisSerializer.writeInt32((contentTmpValueForIdx1.length).toInt())
+                        for (let contentTmpValueForIdx1CounterI = 0; contentTmpValueForIdx1CounterI < contentTmpValueForIdx1.length; contentTmpValueForIdx1CounterI++) {
+                            const contentTmpValueForIdx1TmpElement: MenuElement = contentTmpValueForIdx1[contentTmpValueForIdx1CounterI]
+                            MenuElement_serializer.write(thisSerializer, contentTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            ContextMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuByIsShow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindContentCover0Attribute(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): void {
@@ -8675,6 +8815,15 @@ export enum MenuKeyboardAvoidMode {
     NONE = 0,
     TRANSLATE_AND_RESIZE = 1
 }
+export enum MenuGridPosition {
+    TOP = 0,
+    BOTTOM = 1
+}
+export interface MenuGridStyleOptions {
+    count?: int32;
+    horizontalSize?: int32;
+    position?: MenuGridPosition;
+}
 export interface ContextMenuOptions {
     offset?: Position;
     placement?: Placement;
@@ -8714,7 +8863,9 @@ export interface ContextMenuOptions {
     systemMaterial?: SystemUiMaterial;
     scrollBar?: BarState;
     maxHeight?: arkui_Graphics_LengthMetrics;
-    uiMaterialAnimationMode?: UIMaterialAnimationMode;
+    distortionMode?: DistortionMode;
+    edgeLightMode?: EdgeLightMode;
+    gridStyle?: MenuGridStyleOptions;
 }
 export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
@@ -11422,7 +11573,31 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method bindContextMenu')
     }
+    bindContextMenuByResponseType(content: CustomBuilder | Array<MenuElement> | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuByResponseType(content, responseType, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method bindContextMenuByResponseType can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method bindContextMenuByResponseType')
+    }
     bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuWithResponse(content, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method bindContextMenuWithResponse can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method bindContextMenuWithResponse')
+    }
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
             (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuWithResponse(content, options));
@@ -11445,6 +11620,18 @@ export interface CommonMethod {
             }
         }
         throw new Error('Unimplemented method bindContextMenu')
+    }
+    bindContextMenuByIsShow(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuByIsShow(isShow, content, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Common method bindContextMenuByIsShow can only be set when creating a custom component.')
+            }
+        }
+        throw new Error('Unimplemented method bindContextMenuByIsShow')
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
@@ -13318,10 +13505,23 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setBindContextMenu0Attribute(content_casted, responseType_casted, options_casted)
         return this
     }
+    public bindContextMenuByResponseType(content: CustomBuilder | Array<MenuElement> | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        const content_casted = content as (CustomBuilder | Array<MenuElement> | undefined)
+        const responseType_casted = responseType as (ResponseType | undefined)
+        const options_casted = options as (ContextMenuOptions | undefined)
+        this.getPeer()?.setBindContextMenuByResponseTypeAttribute(content_casted, responseType_casted, options_casted)
+        return this
+    }
     public bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         const content_casted = content as (CustomBuilderT<ResponseType> | undefined)
         const options_casted = options as (ContextMenuOptions | undefined)
-        this.getPeer()?.setBindContextMenuWithResponseAttribute(content_casted, options_casted)
+        this.getPeer()?.setBindContextMenuWithResponse0Attribute(content_casted, options_casted)
+        return this
+    }
+    public bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        const content_casted = content as (CustomBuilderT<ResponseType> | Array<MenuElement> | undefined)
+        const options_casted = options as (ContextMenuOptions | undefined)
+        this.getPeer()?.setBindContextMenuWithResponse1Attribute(content_casted, options_casted)
         return this
     }
     public bindContextMenu(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
@@ -13329,6 +13529,13 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         const content_casted = content as (CustomBuilder | undefined)
         const options_casted = options as (ContextMenuOptions | undefined)
         this.getPeer()?.setBindContextMenu1Attribute(isShow_casted, content_casted, options_casted)
+        return this
+    }
+    public bindContextMenuByIsShow(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        const isShow_casted = isShow as (boolean | Bindable<boolean> | undefined)
+        const content_casted = content as (CustomBuilder | Array<MenuElement> | undefined)
+        const options_casted = options as (ContextMenuOptions | undefined)
+        this.getPeer()?.setBindContextMenuByIsShowAttribute(isShow_casted, content_casted, options_casted)
         return this
     }
     public bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
@@ -15700,6 +15907,58 @@ export class LocalizedVerticalAlignParam_serializer {
         const anchorTmpResult: string = (valueDeserializer.readString() as string)
         const alignTmpResult: VerticalAlign = VerticalAlign.fromValue(valueDeserializer.readInt32())
         let value: LocalizedVerticalAlignParam = ({anchor: anchorTmpResult, align: alignTmpResult} as LocalizedVerticalAlignParam)
+        return value
+    }
+}
+export class MenuGridStyleOptions_serializer {
+    public static write(buffer: SerializerBase, value: MenuGridStyleOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForCount = value.count
+        if (valueHolderForCount !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCountTmpValue = valueHolderForCount!
+            valueSerializer.writeInt32(valueHolderForCountTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHorizontalSize = value.horizontalSize
+        if (valueHolderForHorizontalSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHorizontalSizeTmpValue = valueHolderForHorizontalSize!
+            valueSerializer.writeInt32(valueHolderForHorizontalSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPosition = value.position
+        if (valueHolderForPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionTmpValue = (valueHolderForPosition as MenuGridPosition)
+            valueSerializer.writeInt32(valueHolderForPositionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): MenuGridStyleOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const countTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let countTmpBuf: int32 | undefined = undefined
+        if ((countTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            countTmpBuf = valueDeserializer.readInt32()
+        }
+        const countTmpResult: int32 | undefined = countTmpBuf
+        const horizontalSizeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let horizontalSizeTmpBuf: int32 | undefined = undefined
+        if ((horizontalSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            horizontalSizeTmpBuf = valueDeserializer.readInt32()
+        }
+        const horizontalSizeTmpResult: int32 | undefined = horizontalSizeTmpBuf
+        const positionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let positionTmpBuf: MenuGridPosition | undefined = undefined
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionTmpBuf = MenuGridPosition.fromValue(valueDeserializer.readInt32())
+        }
+        const positionTmpResult: MenuGridPosition | undefined = positionTmpBuf
+        let value: MenuGridStyleOptions = ({count: countTmpResult, horizontalSize: horizontalSizeTmpResult, position: positionTmpResult} as MenuGridStyleOptions)
         return value
     }
 }
@@ -21262,11 +21521,27 @@ export class ContextMenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForUiMaterialAnimationMode = value.uiMaterialAnimationMode
-        if (valueHolderForUiMaterialAnimationMode !== undefined) {
+        const valueHolderForDistortionMode = value.distortionMode
+        if (valueHolderForDistortionMode !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForUiMaterialAnimationModeTmpValue = (valueHolderForUiMaterialAnimationMode as UIMaterialAnimationMode)
-            valueSerializer.writeInt32(valueHolderForUiMaterialAnimationModeTmpValue.valueOf())
+            const valueHolderForDistortionModeTmpValue = (valueHolderForDistortionMode as DistortionMode)
+            valueSerializer.writeInt32(valueHolderForDistortionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGridStyle = value.gridStyle
+        if (valueHolderForGridStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGridStyleTmpValue = valueHolderForGridStyle!
+            MenuGridStyleOptions_serializer.write(valueSerializer, valueHolderForGridStyleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -21746,13 +22021,25 @@ export class ContextMenuOptions_serializer {
             maxHeightTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
         const maxHeightTmpResult: arkui_Graphics_LengthMetrics | undefined = maxHeightTmpBuf
-        const uiMaterialAnimationModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let uiMaterialAnimationModeTmpBuf: UIMaterialAnimationMode | undefined = undefined
-        if ((uiMaterialAnimationModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            uiMaterialAnimationModeTmpBuf = UIMaterialAnimationMode.fromValue(valueDeserializer.readInt32())
+        const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let distortionModeTmpBuf: DistortionMode | undefined = undefined
+        if ((distortionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distortionModeTmpBuf = DistortionMode.fromValue(valueDeserializer.readInt32())
         }
-        const uiMaterialAnimationModeTmpResult: UIMaterialAnimationMode | undefined = uiMaterialAnimationModeTmpBuf
-        let value: ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, colorMode: colorModeTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, targetSpace: targetSpaceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, maxHeight: maxHeightTmpResult, uiMaterialAnimationMode: uiMaterialAnimationModeTmpResult} as ContextMenuOptions)
+        const distortionModeTmpResult: DistortionMode | undefined = distortionModeTmpBuf
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        const gridStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let gridStyleTmpBuf: MenuGridStyleOptions | undefined = undefined
+        if ((gridStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gridStyleTmpBuf = MenuGridStyleOptions_serializer.read(valueDeserializer)
+        }
+        const gridStyleTmpResult: MenuGridStyleOptions | undefined = gridStyleTmpBuf
+        let value: ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, colorMode: colorModeTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, targetSpace: targetSpaceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, maxHeight: maxHeightTmpResult, distortionMode: distortionModeTmpResult, edgeLightMode: edgeLightModeTmpResult, gridStyle: gridStyleTmpResult} as ContextMenuOptions)
         return value
     }
 }
@@ -23125,11 +23412,27 @@ export class MenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForUiMaterialAnimationMode = value.uiMaterialAnimationMode
-        if (valueHolderForUiMaterialAnimationMode !== undefined) {
+        const valueHolderForDistortionMode = value.distortionMode
+        if (valueHolderForDistortionMode !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForUiMaterialAnimationModeTmpValue = (valueHolderForUiMaterialAnimationMode as UIMaterialAnimationMode)
-            valueSerializer.writeInt32(valueHolderForUiMaterialAnimationModeTmpValue.valueOf())
+            const valueHolderForDistortionModeTmpValue = (valueHolderForDistortionMode as DistortionMode)
+            valueSerializer.writeInt32(valueHolderForDistortionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEdgeLightMode = value.edgeLightMode
+        if (valueHolderForEdgeLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEdgeLightModeTmpValue = (valueHolderForEdgeLightMode as EdgeLightMode)
+            valueSerializer.writeInt32(valueHolderForEdgeLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGridStyle = value.gridStyle
+        if (valueHolderForGridStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGridStyleTmpValue = valueHolderForGridStyle!
+            MenuGridStyleOptions_serializer.write(valueSerializer, valueHolderForGridStyleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -23633,12 +23936,24 @@ export class MenuOptions_serializer {
             maxHeightTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
         const maxHeightTmpResult: arkui_Graphics_LengthMetrics | undefined = maxHeightTmpBuf
-        const uiMaterialAnimationModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let uiMaterialAnimationModeTmpBuf: UIMaterialAnimationMode | undefined = undefined
-        if ((uiMaterialAnimationModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            uiMaterialAnimationModeTmpBuf = UIMaterialAnimationMode.fromValue(valueDeserializer.readInt32())
+        const distortionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let distortionModeTmpBuf: DistortionMode | undefined = undefined
+        if ((distortionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distortionModeTmpBuf = DistortionMode.fromValue(valueDeserializer.readInt32())
         }
-        const uiMaterialAnimationModeTmpResult: UIMaterialAnimationMode | undefined = uiMaterialAnimationModeTmpBuf
+        const distortionModeTmpResult: DistortionMode | undefined = distortionModeTmpBuf
+        const edgeLightModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let edgeLightModeTmpBuf: EdgeLightMode | undefined = undefined
+        if ((edgeLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            edgeLightModeTmpBuf = EdgeLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const edgeLightModeTmpResult: EdgeLightMode | undefined = edgeLightModeTmpBuf
+        const gridStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let gridStyleTmpBuf: MenuGridStyleOptions | undefined = undefined
+        if ((gridStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gridStyleTmpBuf = MenuGridStyleOptions_serializer.read(valueDeserializer)
+        }
+        const gridStyleTmpResult: MenuGridStyleOptions | undefined = gridStyleTmpBuf
         const titleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let titleTmpBuf: ResourceStr | undefined = undefined
         if ((titleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -23660,7 +23975,7 @@ export class MenuOptions_serializer {
             showInSubWindowTmpBuf = valueDeserializer.readBoolean()
         }
         const showInSubWindowTmpResult: boolean | undefined = showInSubWindowTmpBuf
-        let value: MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, colorMode: colorModeTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, targetSpace: targetSpaceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, maxHeight: maxHeightTmpResult, uiMaterialAnimationMode: uiMaterialAnimationModeTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
+        let value: MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, colorMode: colorModeTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, targetSpace: targetSpaceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, maxHeight: maxHeightTmpResult, distortionMode: distortionModeTmpResult, edgeLightMode: edgeLightModeTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
         return value
     }
 }

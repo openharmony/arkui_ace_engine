@@ -2459,6 +2459,8 @@ typedef struct Ark_Matrix4Result Ark_Matrix4Result;
 typedef struct Opt_Matrix4Result Opt_Matrix4Result;
 typedef struct Ark_MaxLinesOptions Ark_MaxLinesOptions;
 typedef struct Opt_MaxLinesOptions Opt_MaxLinesOptions;
+typedef struct Ark_MenuGridStyleOptions Ark_MenuGridStyleOptions;
+typedef struct Opt_MenuGridStyleOptions Opt_MenuGridStyleOptions;
 typedef struct Ark_MessageEvents Ark_MessageEvents;
 typedef struct Opt_MessageEvents Opt_MessageEvents;
 typedef struct Ark_MotionBlurAnchor Ark_MotionBlurAnchor;
@@ -2773,6 +2775,8 @@ typedef struct Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor Ark_Union
 typedef struct Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
 typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 Ark_Union_ColumnOptions_ColumnOptionsV2;
 typedef struct Opt_Union_ColumnOptions_ColumnOptionsV2 Opt_Union_ColumnOptions_ColumnOptionsV2;
+typedef struct Ark_Union_CustomNodeBuilder_Array_MenuElement Ark_Union_CustomNodeBuilder_Array_MenuElement;
+typedef struct Opt_Union_CustomNodeBuilder_Array_MenuElement Opt_Union_CustomNodeBuilder_Array_MenuElement;
 typedef struct Ark_Union_CustomNodeBuilder_ComponentContentBase Ark_Union_CustomNodeBuilder_ComponentContentBase;
 typedef struct Opt_Union_CustomNodeBuilder_ComponentContentBase Opt_Union_CustomNodeBuilder_ComponentContentBase;
 typedef struct Ark_Union_CustomNodeBuilder_DragItemInfo Ark_Union_CustomNodeBuilder_DragItemInfo;
@@ -2783,6 +2787,8 @@ typedef struct Ark_Union_CustomNodeBuilder_ExtendableComponent Ark_Union_CustomN
 typedef struct Opt_Union_CustomNodeBuilder_ExtendableComponent Opt_Union_CustomNodeBuilder_ExtendableComponent;
 typedef struct Ark_Union_CustomNodeBuilder_ResourceColor Ark_Union_CustomNodeBuilder_ResourceColor;
 typedef struct Opt_Union_CustomNodeBuilder_ResourceColor Opt_Union_CustomNodeBuilder_ResourceColor;
+typedef struct Ark_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement Ark_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement;
+typedef struct Opt_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement Opt_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement;
 typedef struct Ark_Union_Date_Bindable_Date Ark_Union_Date_Bindable_Date;
 typedef struct Opt_Union_Date_Bindable_Date Opt_Union_Date_Bindable_Date;
 typedef struct Ark_Union_EdgeOutlineStyles_OutlineStyle Ark_Union_EdgeOutlineStyles_OutlineStyle;
@@ -5892,6 +5898,14 @@ typedef struct Opt_MenuAlignType {
     Ark_Tag tag;
     Ark_MenuAlignType value;
 } Opt_MenuAlignType;
+typedef enum Ark_MenuGridPosition {
+    ARK_MENU_GRID_POSITION_TOP = 0,
+    ARK_MENU_GRID_POSITION_BOTTOM = 1,
+} Ark_MenuGridPosition;
+typedef struct Opt_MenuGridPosition {
+    Ark_Tag tag;
+    Ark_MenuGridPosition value;
+} Opt_MenuGridPosition;
 typedef enum Ark_MenuKeyboardAvoidMode {
     ARK_MENU_KEYBOARD_AVOID_MODE_NONE = 0,
     ARK_MENU_KEYBOARD_AVOID_MODE_TRANSLATE_AND_RESIZE = 1,
@@ -7673,14 +7687,6 @@ typedef struct Opt_TransitionType {
     Ark_Tag tag;
     Ark_TransitionType value;
 } Opt_TransitionType;
-typedef enum Ark_UIMaterialAnimationMode {
-    ARK_UIMATERIAL_ANIMATION_MODE_IMMERSIVE = 0,
-    ARK_UIMATERIAL_ANIMATION_MODE_NONE = 1,
-} Ark_UIMaterialAnimationMode;
-typedef struct Opt_UIMaterialAnimationMode {
-    Ark_Tag tag;
-    Ark_UIMaterialAnimationMode value;
-} Opt_UIMaterialAnimationMode;
 typedef enum Ark_UndoStyle {
     ARK_UNDO_STYLE_CLEAR_STYLE = 0,
     ARK_UNDO_STYLE_KEEP_STYLE = 1,
@@ -16498,6 +16504,16 @@ typedef struct Opt_MaxLinesOptions {
     Ark_Tag tag;
     Ark_MaxLinesOptions value;
 } Opt_MaxLinesOptions;
+typedef struct Ark_MenuGridStyleOptions {
+    /* kind: Interface */
+    Opt_Int32 count;
+    Opt_Int32 horizontalSize;
+    Opt_MenuGridPosition position;
+} Ark_MenuGridStyleOptions;
+typedef struct Opt_MenuGridStyleOptions {
+    Ark_Tag tag;
+    Ark_MenuGridStyleOptions value;
+} Opt_MenuGridStyleOptions;
 typedef struct Ark_MessageEvents {
     /* kind: Interface */
     Ark_String type;
@@ -18105,6 +18121,18 @@ typedef struct Opt_Union_ColumnOptions_ColumnOptionsV2 {
     Ark_Tag tag;
     Ark_Union_ColumnOptions_ColumnOptionsV2 value;
 } Opt_Union_ColumnOptions_ColumnOptionsV2;
+typedef struct Ark_Union_CustomNodeBuilder_Array_MenuElement {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        CustomNodeBuilder value0;
+        Array_MenuElement value1;
+    };
+} Ark_Union_CustomNodeBuilder_Array_MenuElement;
+typedef struct Opt_Union_CustomNodeBuilder_Array_MenuElement {
+    Ark_Tag tag;
+    Ark_Union_CustomNodeBuilder_Array_MenuElement value;
+} Opt_Union_CustomNodeBuilder_Array_MenuElement;
 typedef struct Ark_Union_CustomNodeBuilder_ComponentContentBase {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -18166,6 +18194,18 @@ typedef struct Opt_Union_CustomNodeBuilder_ResourceColor {
     Ark_Tag tag;
     Ark_Union_CustomNodeBuilder_ResourceColor value;
 } Opt_Union_CustomNodeBuilder_ResourceColor;
+typedef struct Ark_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        CustomNodeBuilderT_ResponseType value0;
+        Array_MenuElement value1;
+    };
+} Ark_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement;
+typedef struct Opt_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement {
+    Ark_Tag tag;
+    Ark_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement value;
+} Opt_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement;
 typedef struct Ark_Union_Date_Bindable_Date {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -22750,6 +22790,9 @@ typedef struct Ark_ContextMenuOptions {
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
+    Opt_MenuGridStyleOptions gridStyle;
 } Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions {
     Ark_Tag tag;
@@ -22989,6 +23032,9 @@ typedef struct Ark_MenuOptions {
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
+    Opt_DistortionMode distortionMode;
+    Opt_EdgeLightMode edgeLightMode;
+    Opt_MenuGridStyleOptions gridStyle;
     Opt_ResourceStr title;
     Opt_Boolean showInSubWindow;
 } Ark_MenuOptions;
@@ -24708,13 +24754,24 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                 const Opt_CustomNodeBuilder* content,
                                 const Opt_ResponseType* responseType,
                                 const Opt_ContextMenuOptions* options);
-    void (*setBindContextMenuWithResponse)(Ark_NativePointer node,
-                                           const Opt_CustomNodeBuilderT_ResponseType* content,
-                                           const Opt_ContextMenuOptions* options);
+    void (*setBindContextMenuByResponseType)(Ark_NativePointer node,
+                                             const Opt_Union_CustomNodeBuilder_Array_MenuElement* content,
+                                             const Opt_ResponseType* responseType,
+                                             const Opt_ContextMenuOptions* options);
+    void (*setBindContextMenuWithResponse0)(Ark_NativePointer node,
+                                            const Opt_CustomNodeBuilderT_ResponseType* content,
+                                            const Opt_ContextMenuOptions* options);
+    void (*setBindContextMenuWithResponse1)(Ark_NativePointer node,
+                                            const Opt_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement* content,
+                                            const Opt_ContextMenuOptions* options);
     void (*setBindContextMenu1)(Ark_NativePointer node,
                                 const Opt_Union_Boolean_Bindable_Boolean* isShow,
                                 const Opt_CustomNodeBuilder* content,
                                 const Opt_ContextMenuOptions* options);
+    void (*setBindContextMenuByIsShow)(Ark_NativePointer node,
+                                       const Opt_Union_Boolean_Bindable_Boolean* isShow,
+                                       const Opt_Union_CustomNodeBuilder_Array_MenuElement* content,
+                                       const Opt_ContextMenuOptions* options);
     void (*setBindContentCover0)(Ark_NativePointer node,
                                  const Opt_Union_Boolean_Bindable_Boolean* isShow,
                                  const Opt_CustomNodeBuilder* builder,
