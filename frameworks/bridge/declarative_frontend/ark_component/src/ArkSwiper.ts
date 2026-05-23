@@ -400,6 +400,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
       let space;
       let ignoreSize;
       let setIgnoreSize;
+      let indicatorIcon;
       if (typeof this.value === 'boolean') {
         getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
       } else if (typeof this.value === 'object' && (this.value as ArkDotIndicator).type === 'DotIndicator') {
@@ -418,6 +419,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         space = (this.value as ArkDotIndicator).spaceValue;
         ignoreSize = (this.value as ArkDotIndicator).ignoreSizeValue;
         setIgnoreSize = (this.value as ArkDotIndicator).setIgnoreSizeValue;
+        indicatorIcon = (this.value as ArkDotIndicator).indicatorIconValue;
 
         getUINativeModule().swiper.setSwiperIndicator(
           node,
@@ -436,7 +438,8 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           bottom,
           space,
           ignoreSize,
-          setIgnoreSize
+          setIgnoreSize,
+          indicatorIcon
         );
       } else if (typeof this.value === 'object' && (this.value as ArkDigitIndicator).type === 'DigitIndicator') {
         left = (this.value as ArkDigitIndicator).leftValue;
@@ -533,6 +536,10 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         !isBaseOrResourceEqual(
           (this.stageValue as ArkDotIndicator).setIgnoreSizeValue,
           (this.value as ArkDotIndicator).setIgnoreSizeValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).indicatorIconValue,
+          (this.value as ArkDotIndicator).indicatorIconValue
         )
       );
     } else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {

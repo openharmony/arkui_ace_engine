@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
+#include <algorithm>
 #include <cmath>
+#include <map>
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
@@ -26,13 +28,22 @@
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t ICON_FADE_ANIMATION_DURATION = 150;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
+constexpr int32_t OVERLONG_THIRD_POINT_INDEX = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
+constexpr Dimension DEFAULT_SYMBOL_ITEM_SIZE = 10.0_vp;
+constexpr Dimension DEFAULT_SYMBOL_SELECTED_ITEM_SIZE = 10.0_vp;
 constexpr int32_t MULTIPLIER = 2;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 constexpr float HALF_FLOAT = 0.5f;
@@ -43,6 +54,70 @@ constexpr double THREE_QUARTER_CIRCLE_ANGLE = 270.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr Dimension CONTAINER_BORDER_WIDTH = 24.0_vp;
 constexpr float INDICATOR_TOUCH_BOTTOM_MAX_ANGLE = 120.0;
+constexpr Color DEFAULT_SYMBOL_ITEM_COLOR = Color(0x33FFFFFF);
+constexpr Color DEFAULT_SYMBOL_SELECTED_ITEM_COLOR = Color(0xFFFFFFFF);
+
+OverlongType GetInitOverlongType(int32_t currentIndex, int32_t realItemCount, int32_t maxDisplayCount)
+{
+    if (realItemCount <= 0 || maxDisplayCount <= 0) {
+        return OverlongType::NONE;
+    }
+    if (currentIndex < 0) {
+        currentIndex = 0;
+    }
+    if (currentIndex < maxDisplayCount - 1 - OVERLONG_THIRD_POINT_INDEX) {
+        return OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    }
+    int32_t rightFadeBeginIndex = realItemCount - 1 - OVERLONG_THIRD_POINT_INDEX;
+    if (currentIndex < rightFadeBeginIndex) {
+        return OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    }
+    return OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+}
+
+RefPtr<FrameNode> CreateCustomIconContentNode(const IndicatorIconParam& iconParam)
+{
+    if (iconParam.sourceType == IndicatorIconParam::SourceType::MEDIA) {
+        return FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    }
+    return FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+}
+
+bool IsCustomIconContentTagMatched(const RefPtr<FrameNode>& iconNode, const IndicatorIconParam& iconParam)
+{
+    CHECK_NULL_RETURN(iconNode, false);
+    auto expectedTag = iconParam.sourceType == IndicatorIconParam::SourceType::MEDIA ? V2::IMAGE_ETS_TAG :
+        V2::SYMBOL_ETS_TAG;
+    return iconNode->GetTag() == expectedTag;
+}
+
+bool IsCustomIconHoverHit(
+    const PointF& hoverPoint, Axis axis, const SizeF& frameSize, float centerX, const SizeF& iconSize)
+{
+    if (LessOrEqual(iconSize.Width(), 0.0f) || LessOrEqual(iconSize.Height(), 0.0f)) {
+        return false;
+    }
+    PointF localHoverPoint = axis == Axis::HORIZONTAL ? hoverPoint : PointF(hoverPoint.GetY(), hoverPoint.GetX());
+    float crossSize = axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width();
+    float left = centerX - iconSize.Width() * HALF_FLOAT;
+    float right = centerX + iconSize.Width() * HALF_FLOAT;
+    float top = (crossSize - iconSize.Height()) * HALF_FLOAT;
+    float bottom = top + iconSize.Height();
+    return GreatOrEqual(localHoverPoint.GetX(), left) && LessOrEqual(localHoverPoint.GetX(), right) &&
+           GreatOrEqual(localHoverPoint.GetY(), top) && LessOrEqual(localHoverPoint.GetY(), bottom);
+}
+
+RefPtr<FrameNode> FindWrapperNodeById(const std::map<int32_t, RefPtr<FrameNode>>& wrapperMap, int32_t wrapperId)
+{
+    for (const auto& [itemIndex, wrapperNode] : wrapperMap) {
+        if (wrapperNode && wrapperNode->GetId() == wrapperId) {
+            return wrapperNode;
+        }
+    }
+    return nullptr;
+}
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode()
@@ -59,8 +134,19 @@ void SwiperIndicatorPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
     if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {
+        auto hasIconState = ClearIndicatorIconState();
+        if (hasIconState) {
+            host->Clean();
+        }
         UpdateDigitalIndicator();
+    } else if (UpdateCustomDotIndicatorLayoutFlag()) {
+        if (indicatorWrapperNodeByItem_.empty() && !host->GetChildren().empty()) {
+            host->Clean();
+        }
+        UpdateDotIndicatorIconNodes();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else {
+        ClearIndicatorIconState();
         host->Clean();
     }
 
@@ -127,6 +213,419 @@ void SwiperIndicatorPattern::UpdateDigitalIndicator()
     host->AddChild(lastTextNode);
 }
 
+std::shared_ptr<SwiperParameters> SwiperIndicatorPattern::ObtainSwiperParameters() const
+{
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    return swiperPattern->GetSwiperParameters();
+}
+
+Color SwiperIndicatorPattern::GetDefaultSymbolColor(bool isSelected) const
+{
+    return isSelected ? DEFAULT_SYMBOL_SELECTED_ITEM_COLOR : DEFAULT_SYMBOL_ITEM_COLOR;
+}
+
+bool SwiperIndicatorPattern::UpdateCustomDotIndicatorLayoutFlag()
+{
+    auto params = ObtainSwiperParameters();
+    hasCustomDotIndicatorLayout_ =
+        GetIndicatorType() == SwiperIndicatorType::DOT && params && !params->indicatorIconMap.empty();
+    return hasCustomDotIndicatorLayout_;
+}
+
+LinearVector<float> SwiperIndicatorPattern::GetCustomIconCenterX() const
+{
+    if (!NeedCustomDotIndicatorLayout()) {
+        return {};
+    }
+    LinearVector<float> centers;
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_RETURN(swiperPattern, centers);
+    auto isOverlong = swiperPattern->GetMaxDisplayCount() > 0;
+    if (isOverlong && overlongDotIndicatorModifier_) {
+        centers = overlongDotIndicatorModifier_->GetVisibleAnimationStartCenterXOrCurrent();
+    } else if (dotIndicatorModifier_) {
+        centers = dotIndicatorModifier_->GetBlackPointCenterX();
+    } 
+    auto expectedCount = swiperPattern->GetMaxDisplayCount() > 0 ? swiperPattern->GetMaxDisplayCount()
+                                                                   : DisplayIndicatorTotalCount();
+    auto result = centers.size() >= static_cast<size_t>(expectedCount) ? centers : LinearVector<float>();
+    return result;
+}
+
+std::optional<int32_t> SwiperIndicatorPattern::GetCustomIconVisibleIndex(int32_t itemIndex) const
+{
+    if (!NeedCustomDotIndicatorLayout()) {
+        return std::nullopt;
+    }
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_RETURN(swiperPattern, std::nullopt);
+    auto isRtl = swiperPattern->IsHorizontalAndRightToLeft();
+    auto toVisualSlot = [isRtl](const std::optional<int32_t>& slot, int32_t visibleCount) -> std::optional<int32_t> {
+        if (!slot.has_value()) {
+            return std::nullopt;
+        }
+        if (slot.value() < 0 || slot.value() >= visibleCount) {
+            return std::nullopt;
+        }
+        if (!isRtl) {
+            return slot;
+        }
+        return visibleCount - 1 - slot.value();
+    };
+    auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
+    if (maxDisplayCount <= 0) {
+        return toVisualSlot(itemIndex, DisplayIndicatorTotalCount());
+    }
+    if (overlongDotIndicatorModifier_) {
+        if (overlongDotIndicatorModifier_->IsDraggingIndicator()) {
+            auto currentIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
+            auto realItemCount = swiperPattern->RealTotalCount();
+            auto overlongType = overlongDotIndicatorModifier_->GetCurrentOverlongType();
+            auto slot = OverlengthDotIndicatorModifier::CalcSlotForPage(
+                itemIndex, currentIndex, realItemCount, maxDisplayCount, overlongType);
+            return toVisualSlot(slot, maxDisplayCount);
+        }
+        return toVisualSlot(overlongDotIndicatorModifier_->GetSlotForPage(itemIndex), maxDisplayCount);
+    }
+    auto currentIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
+    auto realItemCount = swiperPattern->RealTotalCount();
+    auto fallbackType = GetInitOverlongType(currentIndex, realItemCount, maxDisplayCount);
+    auto slot = OverlengthDotIndicatorModifier::CalcSlotForPage(
+        itemIndex, currentIndex, realItemCount, maxDisplayCount, fallbackType);
+    return toVisualSlot(slot, maxDisplayCount);
+}
+
+bool SwiperIndicatorPattern::HasValidCustomIconAtIndex(int32_t itemIndex) const
+{
+    auto params = ObtainSwiperParameters();
+    CHECK_NULL_RETURN(params, false);
+    auto iconIter = params->indicatorIconMap.find(itemIndex);
+    if (iconIter == params->indicatorIconMap.end()) {
+        return false;
+    }
+    const auto& iconParam = iconIter->second;
+    if (iconParam.sourceType == IndicatorIconParam::SourceType::NONE) {
+        return false;
+    }
+    if (iconParam.sourceType == IndicatorIconParam::SourceType::SYMBOL) {
+        return iconParam.symbolApply != nullptr;
+    }
+    if (iconParam.sourceType == IndicatorIconParam::SourceType::MEDIA) {
+        return !iconParam.iconSrc.empty();
+    }
+    return true;
+}
+
+int32_t SwiperIndicatorPattern::GetStableCustomIconSelectedPageIndex(const RefPtr<SwiperPattern>& swiperPattern) const
+{
+    CHECK_NULL_RETURN(swiperPattern, 0);
+    auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
+    auto sourceIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
+    auto firstIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
+    auto displayCount = swiperPattern->GetDisplayCount();
+    if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup() && displayCount != 0) {
+        sourceIndex /= displayCount;
+        firstIndex /= displayCount;
+    }
+    auto normalizeIndex = [indicatorCount](int32_t index) {
+        if (index < 0) {
+            return indicatorCount - 1;
+        }
+        if (index >= indicatorCount) {
+            return 0;
+        }
+        return index;
+    };
+    sourceIndex = normalizeIndex(sourceIndex);
+    firstIndex = normalizeIndex(firstIndex);
+    auto actualTurnPageRate = (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()) ?
+        swiperPattern->GetGroupTurnPageRate() : swiperPattern->GetTurnPageRate();
+    auto isPageTransitionRunning = swiperPattern->IsTouchDown() || !NearZero(actualTurnPageRate);
+    auto involvedCustomIcon = HasValidCustomIconAtIndex(sourceIndex) || HasValidCustomIconAtIndex(firstIndex);
+    auto keepSourceIndexSelected = isPageTransitionRunning && sourceIndex != firstIndex && involvedCustomIcon;
+    return keepSourceIndexSelected ? sourceIndex : firstIndex;
+}
+
+bool SwiperIndicatorPattern::IsCustomIconSelected(int32_t itemIndex) const
+{
+    if (!NeedCustomDotIndicatorLayout()) {
+        return false;
+    }
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_RETURN(swiperPattern, false);
+    auto currentIndex = GetStableCustomIconSelectedPageIndex(swiperPattern);
+    return itemIndex == currentIndex;
+}
+
+void SwiperIndicatorPattern::UpdateDotIndicatorIconNode(const RefPtr<FrameNode>& iconNode, int32_t itemIndex)
+{
+    CHECK_NULL_VOID(iconNode);
+    auto params = ObtainSwiperParameters();
+    CHECK_NULL_VOID(params);
+    auto iconIter = params->indicatorIconMap.find(itemIndex);
+    if (iconIter == params->indicatorIconMap.end()) {
+        return;
+    }
+    auto indicatorNode = GetHost();
+    CHECK_NULL_VOID(indicatorNode);
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = indicatorNode->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_VOID(theme);
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    auto isSelected = IsCustomIconSelected(itemIndex);
+    auto itemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
+    auto itemHeight = paintProperty->GetItemHeightValue(theme->GetSize()).ConvertToPx();
+    auto selectedWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
+    auto selectedHeight = paintProperty->GetSelectedItemHeightValue(theme->GetSize()).ConvertToPx();
+    if (iconIter->second.sourceType == IndicatorIconParam::SourceType::SYMBOL ||
+        iconIter->second.sourceType == IndicatorIconParam::SourceType::MEDIA) {
+        auto paramsByUser = params->parametersByUser;
+        if (paramsByUser.find("itemWidth") == paramsByUser.end()) {
+            itemWidth = DEFAULT_SYMBOL_ITEM_SIZE.ConvertToPx();
+        }
+        if (paramsByUser.find("itemHeight") == paramsByUser.end()) {
+            itemHeight = DEFAULT_SYMBOL_ITEM_SIZE.ConvertToPx();
+        }
+        if (paramsByUser.find("selectedItemWidth") == paramsByUser.end()) {
+            selectedWidth = DEFAULT_SYMBOL_SELECTED_ITEM_SIZE.ConvertToPx();
+        }
+        if (paramsByUser.find("selectedItemHeight") == paramsByUser.end()) {
+            selectedHeight = DEFAULT_SYMBOL_SELECTED_ITEM_SIZE.ConvertToPx();
+        }
+    }
+    auto containerWidth = isSelected ? selectedWidth : itemWidth;
+    auto containerHeight = isSelected ? selectedHeight : itemHeight;
+    auto indicatorScale = theme->GetIndicatorScale();
+    if (IsPressed() || IsHover()) {
+        containerWidth *= indicatorScale;
+        containerHeight *= indicatorScale;
+    }
+    bool isIconHover = false;
+    if (IsHover()) {
+        auto visibleIndex = GetCustomIconVisibleIndex(itemIndex);
+        auto centers = GetCustomIconCenterX();
+        auto geometryNode = indicatorNode->GetGeometryNode();
+        auto axis = swiperPattern->GetDirection();
+        if (visibleIndex.has_value() && geometryNode &&
+            visibleIndex.value() >= 0 &&
+            static_cast<size_t>(visibleIndex.value()) < centers.size()) {
+            isIconHover = IsCustomIconHoverHit(
+                hoverPoint_, axis, geometryNode->GetFrameSize(),
+                centers[visibleIndex.value()], SizeF(containerWidth, containerHeight));
+        }
+    }
+    if (isIconHover) {
+        containerWidth *= indicatorScale;
+        containerHeight *= indicatorScale;
+    }
+    auto fontSize = std::min(containerWidth, containerHeight);
+    auto idealSize = CalcSize(
+        CalcLength(containerWidth, DimensionUnit::PX), CalcLength(containerHeight, DimensionUnit::PX));
+    if (iconIter->second.sourceType == IndicatorIconParam::SourceType::SYMBOL) {
+        CHECK_NULL_VOID(iconIter->second.symbolApply);
+        auto layoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        layoutProperty->UpdateMaxLines(1);
+        layoutProperty->UpdateSymbolColorList({ GetDefaultSymbolColor(isSelected) });
+        iconIter->second.symbolApply(AceType::WeakClaim(AceType::RawPtr(iconNode)));
+        layoutProperty->UpdateLineHeight(Dimension(fontSize, DimensionUnit::PX));
+        layoutProperty->UpdateFontSize(Dimension(fontSize, DimensionUnit::PX));
+        layoutProperty->UpdateUserDefinedIdealSize(idealSize);
+        iconNode->MarkModifyDone();
+        iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_RENDER);
+        return;
+    }
+    if (iconIter->second.sourceType == IndicatorIconParam::SourceType::MEDIA) {
+        auto layoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateImageSourceInfo(
+            ImageSourceInfo(iconIter->second.iconSrc, iconIter->second.bundleName, iconIter->second.moduleName));
+        layoutProperty->UpdateUserDefinedIdealSize(idealSize);
+        iconNode->MarkModifyDone();
+        iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_RENDER);
+    }
+}
+void SwiperIndicatorPattern::UpdateDotIndicatorIconNodes()
+{
+    CHECK_NE_VOID(NeedCustomDotIndicatorLayout(), true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto params = ObtainSwiperParameters();
+    CHECK_NULL_VOID(params);
+    std::map<int32_t, int32_t> visibleIndexes;
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
+    auto itemCount = maxDisplayCount > 0 ? maxDisplayCount : DisplayIndicatorTotalCount();
+    auto realItemCount = swiperPattern->RealTotalCount();
+    for (const auto& [itemIndex, iconParam] : params->indicatorIconMap) {
+        if (itemIndex < 0 || itemIndex >= realItemCount ||
+            iconParam.sourceType == IndicatorIconParam::SourceType::NONE) {
+            continue;
+        }
+        if (iconParam.sourceType == IndicatorIconParam::SourceType::SYMBOL && !iconParam.symbolApply) {
+            continue;
+        }
+        if (iconParam.sourceType == IndicatorIconParam::SourceType::MEDIA && iconParam.iconSrc.empty()) {
+            continue;
+        }
+        auto visibleIndex = GetCustomIconVisibleIndex(itemIndex);
+        if (!visibleIndex.has_value() || visibleIndex.value() < 0 || visibleIndex.value() >= itemCount) {
+            continue;
+        }
+        visibleIndexes.emplace(visibleIndex.value(), itemIndex);
+    }
+    std::map<int32_t, ActiveCustomIconInfo> previousInfoByItem;
+    for (const auto& info : activeCustomIconInfos_) {
+        previousInfoByItem[info.itemIndex] = info;
+    }
+    indicatorIconIndexes_.clear();
+    activeCustomIconInfos_.clear();
+    indicatorIconIndexes_.reserve(visibleIndexes.size());
+    activeCustomIconInfos_.reserve(visibleIndexes.size());
+    std::vector<RefPtr<FrameNode>> fadeInList;
+    pendingFadeInSlots_.clear();
+    for (const auto& [visibleIndex, itemIndex] : visibleIndexes) {
+        auto iconIter = params->indicatorIconMap.find(itemIndex);
+        if (iconIter == params->indicatorIconMap.end()) {
+            continue;
+        }
+        RefPtr<FrameNode> wrapperNode;
+        auto wrapperIter = indicatorWrapperNodeByItem_.find(itemIndex);
+        if (wrapperIter != indicatorWrapperNodeByItem_.end()) {
+            wrapperNode = wrapperIter->second;
+        }
+        bool wasVisible = previousInfoByItem.find(itemIndex) != previousInfoByItem.end();
+        if (!wrapperNode) {
+            wrapperNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+            CHECK_NULL_VOID(wrapperNode);
+            host->AddChild(wrapperNode);
+            indicatorWrapperNodeByItem_[itemIndex] = wrapperNode;
+        }
+        auto iconNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetFirstChild());
+        bool recreateContent = !IsCustomIconContentTagMatched(iconNode, iconIter->second);
+        if (recreateContent) {
+            if (iconNode) {
+                wrapperNode->RemoveChild(iconNode);
+            }
+            iconNode = CreateCustomIconContentNode(iconIter->second);
+            CHECK_NULL_VOID(iconNode);
+            wrapperNode->AddChild(iconNode);
+        }
+        bool needFadeIn = !wasVisible || recreateContent;
+        wrapperNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        UpdateDotIndicatorIconNode(iconNode, itemIndex);
+        if (needFadeIn) {
+            fadeInList.push_back(wrapperNode);
+            pendingFadeInSlots_.emplace_back(visibleIndex);
+        } else {
+            auto renderContext = wrapperNode->GetRenderContext();
+            if (renderContext) {
+                renderContext->UpdateOpacity(1.0f);
+            }
+        }
+        indicatorIconIndexes_.emplace_back(visibleIndex);
+        activeCustomIconInfos_.push_back({ itemIndex, visibleIndex, wrapperNode->GetId() });
+        previousInfoByItem.erase(itemIndex);
+    }
+    for (const auto& [itemIndex, previousInfo] : previousInfoByItem) {
+        auto wrapperNode = FindWrapperNodeById(indicatorWrapperNodeByItem_, previousInfo.wrapperId);
+        if (!wrapperNode) {
+            continue;
+        }
+        wrapperNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    }
+    if (dotIndicatorModifier_) {
+        dotIndicatorModifier_->SetCustomIconIndexes(indicatorIconIndexes_);
+    }
+    if (overlongDotIndicatorModifier_) {
+        overlongDotIndicatorModifier_->SetCustomIconIndexes(indicatorIconIndexes_);
+        if (!fadeInList.empty()) {
+            ScheduleBatchFadeAnimation(fadeInList);
+        }
+    }
+}
+
+void SwiperIndicatorPattern::ScheduleBatchFadeAnimation(const std::vector<RefPtr<FrameNode>>& fadeInList)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    for (const auto& wrapperNode : fadeInList) {
+        auto renderContext = wrapperNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateOpacity(0.0f);
+        }
+    }
+    auto fadeInSlots = pendingFadeInSlots_;
+    bool hasFadeSlots = !fadeInSlots.empty();
+    if (overlongDotIndicatorModifier_) {
+        overlongDotIndicatorModifier_->SetIndicatorIconFadeInSlots(fadeInSlots);
+        overlongDotIndicatorModifier_->SetIndicatorIconOpacity(hasFadeSlots ? 1.0f : 0.0f);
+    }
+    pipeline->AddAfterLayoutTask(
+        [weakPattern = WeakClaim(this), fadeInList, hasFadeSlots]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->PlayBatchFadeAnimation(fadeInList, hasFadeSlots);
+        });
+}
+
+void SwiperIndicatorPattern::PlayBatchFadeAnimation(
+    const std::vector<RefPtr<FrameNode>>& fadeInList, bool hasFadeSlots)
+{
+    if (fadeInList.empty()) {
+        return;
+    }
+    AnimationOption option;
+    option.SetDuration(ICON_FADE_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+    auto finishCallback = [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->overlongDotIndicatorModifier_) {
+            pattern->overlongDotIndicatorModifier_->SetIndicatorIconFadeInSlots({});
+        }
+    };
+    AnimationUtils::StartAnimation(option,
+        [weakPattern = WeakClaim(this), fadeInList, hasFadeSlots]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            for (const auto& wrapperNode : fadeInList) {
+                if (!wrapperNode) {
+                    continue;
+                }
+                auto renderContext = wrapperNode->GetRenderContext();
+                if (renderContext) {
+                    renderContext->UpdateOpacity(1.0f);
+                }
+            }
+            if (pattern->overlongDotIndicatorModifier_ && hasFadeSlots) {
+                pattern->overlongDotIndicatorModifier_->SetIndicatorIconOpacity(0.0f);
+            }
+        },
+        finishCallback);
+}
+
+void SwiperIndicatorPattern::RefreshCustomIconNodesForOverlongTransition()
+{
+    if (!NeedCustomDotIndicatorLayout()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    UpdateDotIndicatorIconNodes();
+    MarkCustomIconLayoutDirty();
+}
+
 void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
 {
     auto host = GetHost();
@@ -144,6 +643,10 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
             CHECK_NULL_VOID(indicator);
             auto pipeline = indicator->GetContext();
             CHECK_NULL_VOID(pipeline);
+            auto textContext = context.Upgrade();
+            if (textContext && textContext->NeedCustomDotIndicatorLayout()) {
+                textContext->RefreshCustomIconNodesForOverlongTransition();
+            }
             pipeline->AddAfterLayoutTask([weak, context]() {
                 auto indicator = weak.Upgrade();
                 CHECK_NULL_VOID(indicator);
@@ -325,6 +828,9 @@ bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     if (swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
         return SetArcIndicatorHotRegion(dirty, config);
     }
+    if (config.frameSizeChange && NeedCustomDotIndicatorLayout()) {
+        UpdateDotIndicatorIconNodes();
+    }
     CHECK_NULL_RETURN(config.frameSizeChange, false);
     return true;
 }
@@ -467,8 +973,13 @@ void SwiperIndicatorPattern::HandleMouseEvent(const MouseInfo& info)
     isRepeatClicked_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    PointF oldHoverPoint = hoverPoint_;
     hoverPoint_.SetX(mouseOffsetX);
     hoverPoint_.SetY(mouseOffsetY);
+
+    if (NeedCustomDotIndicatorLayout() && isHover_ && !NearEqual(oldHoverPoint, hoverPoint_)) {
+        RefreshCustomIconNodesForOverlongTransition();
+    }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -492,6 +1003,8 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
             swiperPattern->ArrowHover(isHover_, HOVER_INDICATOR);
         }
     }
+
+    RefreshCustomIconNodesForOverlongTransition();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -561,6 +1074,7 @@ void SwiperIndicatorPattern::HandleTouchDown()
     isPressed_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    RefreshCustomIconNodesForOverlongTransition();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -569,7 +1083,18 @@ void SwiperIndicatorPattern::HandleTouchUp()
     isPressed_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    RefreshCustomIconNodesForOverlongTransition();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwiperIndicatorPattern::MarkCustomIconLayoutDirty()
+{
+    if (!NeedCustomDotIndicatorLayout()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalMouseClickIndexStartAndEnd(
@@ -779,6 +1304,10 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     touchBottomType_ = TouchBottomType::NONE;
+    if (NeedCustomDotIndicatorLayout()) {
+        UpdateDotIndicatorIconNodes();
+    }
+    MarkCustomIconLayoutDirty();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -839,10 +1368,18 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
             touchBottomType = TouchBottomType::END;
         }
     }
+    auto oldTouchBottomType = touchBottomType_;
     touchBottomType_ = touchBottomType;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (touchBottomType_ != oldTouchBottomType) {
+        MarkCustomIconLayoutDirty();
+    }
+    auto dirtyFlag = PROPERTY_UPDATE_RENDER;
+    if (touchBottomType_ != TouchBottomType::NONE && NeedCustomDotIndicatorLayout()) {
+        dirtyFlag |= PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD;
+    }
+    host->MarkDirtyNode(dirtyFlag);
     return touchBottomType == TouchBottomType::NONE ? false : true;
 }
 
@@ -911,8 +1448,16 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
             }
         }
     }
+    auto oldTouchBottomType = touchBottomType_;
     touchBottomType_ = touchBottomType;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (touchBottomType_ != oldTouchBottomType) {
+        MarkCustomIconLayoutDirty();
+    }
+    auto dirtyFlag = PROPERTY_UPDATE_RENDER;
+    if (touchBottomType_ != TouchBottomType::NONE && NeedCustomDotIndicatorLayout()) {
+        dirtyFlag |= PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD;
+    }
+    host->MarkDirtyNode(dirtyFlag);
 
     return touchBottomType == TouchBottomType::NONE ? false : true;
 }
@@ -1004,6 +1549,10 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
         auto offset = dragPoint - dragStartPoint_;
         turnPageRateOffset = GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
         if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
+            if (NeedCustomDotIndicatorLayout() && swiperPattern->GetMaxDisplayCount() <= 0) {
+                swiperPattern->SetTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
+                swiperPattern->SetGroupTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
+            }
             return;
         }
         turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
@@ -1011,19 +1560,20 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
             turnPageRateOffset = -turnPageRateOffset;
         }
     }
-
-    swiperPattern->SetTurnPageRate(turnPageRate);
-    swiperPattern->SetGroupTurnPageRate(turnPageRate);
-    if (swiperPattern->GetMaxDisplayCount() > 0) {
-        GestureState gestureState =
-            turnPageRate < 0 ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
-        if (NearZero(turnPageRate)) {
-            gestureState = GestureState::GESTURE_STATE_NONE;
-        }
-        swiperPattern->SetGestureState(gestureState);
-        auto host = GetHost();
-        if (host) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (!NeedCustomDotIndicatorLayout() || swiperPattern->GetMaxDisplayCount() > 0) {
+        swiperPattern->SetTurnPageRate(turnPageRate);
+        swiperPattern->SetGroupTurnPageRate(turnPageRate);
+        if (swiperPattern->GetMaxDisplayCount() > 0) {
+            GestureState gestureState =
+                turnPageRate < 0 ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
+            if (NearZero(turnPageRate)) {
+                gestureState = GestureState::GESTURE_STATE_NONE;
+            }
+            swiperPattern->SetGestureState(gestureState);
+            auto host = GetHost();
+            if (host) {
+                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            }
         }
     }
     if (std::abs(turnPageRate) >= 1) {
@@ -1193,6 +1743,7 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
         swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     overlongDotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
     overlongDotIndicatorModifier_->SetIsBindIndicator(swiperPattern->IsBindIndicator());
+    overlongDotIndicatorModifier_->SetCustomIconIndexes(GetIndicatorIconIndexes());
     overlongDotIndicatorModifier_->SetUseSystemMaterial(UseSystemMaterialForBindIndicator());
 
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
@@ -1272,6 +1823,11 @@ void SwiperIndicatorPattern::CheckDragAndUpdate(
         return;
     }
 
+    if (NeedCustomDotIndicatorLayout() && overlongDotIndicatorModifier_ &&
+        overlongDotIndicatorModifier_->IsDraggingIndicator()) {
+        return;
+    }
+
     auto bottomTouchLoop = swiperPattern->GetTouchBottomTypeLoop();
     auto turnPageRateAbs = std::abs(swiperPattern->GetTurnPageRate());
     auto totalCount = swiperPattern->RealTotalCount();
@@ -1286,6 +1842,10 @@ void SwiperIndicatorPattern::CheckDragAndUpdate(
 
     if (loopDrag || nonLoopDrag) {
         overlongDotIndicatorModifier_->UpdateCurrentStatus();
+        if (NeedCustomDotIndicatorLayout()) {
+            UpdateDotIndicatorIconNodes();
+            MarkCustomIconLayoutDirty();
+        }
     }
 }
 
@@ -1398,6 +1958,9 @@ void SwiperIndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
     auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
+    if (NeedCustomDotIndicatorLayout()) {
+        useAnimation = false;
+    }
     swiperPattern->ChangeIndex(index, useAnimation);
 }
 

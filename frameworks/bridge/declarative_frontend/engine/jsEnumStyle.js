@@ -2405,6 +2405,10 @@ class DotIndicator extends Indicator {
     this.spaceValue = value;
     return this;
   }
+  indicatorIcon(value) {
+    this.indicatorIconValue = value;
+    return this;
+  }
 }
 
 class DigitIndicator extends Indicator {

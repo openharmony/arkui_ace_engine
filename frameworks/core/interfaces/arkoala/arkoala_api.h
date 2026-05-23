@@ -4723,6 +4723,8 @@ struct ArkUISwiperModifier {
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
     void (*setSwiperIndicatorRaw)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr, const void* resObjs);
+    void (*setSwiperIndicatorWithIcon)(
+        ArkUINodeHandle node, ArkUI_CharPtr indicatorStr, const void* resObjs, const void* indicatorIconRawPtr);
     void (*resetSwiperIndicator)(ArkUINodeHandle node);
     void (*setSwiperDuration)(ArkUINodeHandle node, ArkUI_Float32 duration);
     void (*resetSwiperDuration)(ArkUINodeHandle node);

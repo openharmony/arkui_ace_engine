@@ -22,6 +22,28 @@ constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 constexpr float DEFAULT_COUNT = 2.0f;
+constexpr Color IMMERSIVE_INDICATOR_UNSELECTED_COLOR(0x19FFFFFF);
+constexpr Color IMMERSIVE_INDICATOR_SELECTED_COLOR(0xFFFFFFFF);
+
+Color GetDefaultIndicatorColor(const RefPtr<FrameNode>& host, const RefPtr<SwiperIndicatorTheme>& theme)
+{
+    CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
+    CHECK_NULL_RETURN(host, theme->GetColor());
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, theme->GetColor());
+    return renderContext->GetImmersiveMaterialConfig().has_value() ? IMMERSIVE_INDICATOR_UNSELECTED_COLOR
+                                                                  : theme->GetColor();
+}
+
+Color GetDefaultSelectedIndicatorColor(const RefPtr<FrameNode>& host, const RefPtr<SwiperIndicatorTheme>& theme)
+{
+    CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
+    CHECK_NULL_RETURN(host, theme->GetSelectedColor());
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, theme->GetSelectedColor());
+    return renderContext->GetImmersiveMaterialConfig().has_value() ? IMMERSIVE_INDICATOR_SELECTED_COLOR
+                                                                  : theme->GetSelectedColor();
+}
 } // namespace
 
 IndicatorPattern::IndicatorPattern()
@@ -96,11 +118,21 @@ std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
         swiperParameters_->selectedItemWidth = swiperIndicatorTheme->GetSize();
         swiperParameters_->selectedItemHeight = swiperIndicatorTheme->GetSize();
         swiperParameters_->maskValue = false;
-        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
-        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+        swiperParameters_->colorVal = GetDefaultIndicatorColor(host, swiperIndicatorTheme);
+        swiperParameters_->selectedColorVal = GetDefaultSelectedIndicatorColor(host, swiperIndicatorTheme);
         swiperParameters_->dimSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     }
     return swiperParameters_;
+}
+
+std::shared_ptr<SwiperParameters> IndicatorPattern::ObtainSwiperParameters() const
+{
+    if (swiperParameters_) {
+        return swiperParameters_;
+    }
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    return swiperPattern->GetSwiperParameters();
 }
 
 std::shared_ptr<SwiperDigitalParameters> IndicatorPattern::GetSwiperDigitalParameters()
@@ -214,9 +246,17 @@ void IndicatorPattern::UpdatePaintProperty()
     paintProperty->UpdateSelectedItemHeight(
         swiperParameters->selectedItemHeight.value_or(swiperIndicatorTheme->GetSize()));
     paintProperty->UpdateIndicatorMask(swiperParameters->maskValue.value_or(false));
-    paintProperty->UpdateColor(swiperParameters->colorVal.value_or(swiperIndicatorTheme->GetColor()));
-    paintProperty->UpdateSelectedColor(
-        swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
+    if (!swiperParameters_->parametersByUser.count("colorVal")) {
+        paintProperty->UpdateColor(GetDefaultIndicatorColor(indicatorNode, swiperIndicatorTheme));
+    } else {
+        paintProperty->UpdateColor(swiperParameters->colorVal.value_or(swiperIndicatorTheme->GetColor()));
+    }
+    if (!swiperParameters_->parametersByUser.count("selectedColorVal")) {
+        paintProperty->UpdateSelectedColor(GetDefaultSelectedIndicatorColor(indicatorNode, swiperIndicatorTheme));
+    } else {
+        paintProperty->UpdateSelectedColor(
+            swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
+    }
     paintProperty->UpdateIsCustomSize(isCustomSize_);
     paintProperty->UpdateSpace(swiperParameters->dimSpace.value_or(swiperIndicatorTheme->GetIndicatorDotItemSpace()));
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -650,10 +690,10 @@ void IndicatorPattern::UpdateDefaultColor()
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     }
     if (swiperParameters_ && !swiperParameters_->parametersByUser.count("colorVal")) {
-        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+        swiperParameters_->colorVal = GetDefaultIndicatorColor(host, swiperIndicatorTheme);
     }
     if (swiperParameters_ && !swiperParameters_->parametersByUser.count("selectedColorVal")) {
-        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+        swiperParameters_->selectedColorVal = GetDefaultSelectedIndicatorColor(host, swiperIndicatorTheme);
     }
 }
 

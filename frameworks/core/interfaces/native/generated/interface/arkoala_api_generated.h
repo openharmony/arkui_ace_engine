@@ -1254,6 +1254,8 @@ typedef struct Array_ImageAnalyzerType Array_ImageAnalyzerType;
 typedef struct Opt_Array_ImageAnalyzerType Opt_Array_ImageAnalyzerType;
 typedef struct Array_ImageFrameInfo Array_ImageFrameInfo;
 typedef struct Opt_Array_ImageFrameInfo Opt_Array_ImageFrameInfo;
+typedef struct Array_IndicatorIconInfo Array_IndicatorIconInfo;
+typedef struct Opt_Array_IndicatorIconInfo Opt_Array_IndicatorIconInfo;
 typedef struct Array_KeyframeState Array_KeyframeState;
 typedef struct Opt_Array_KeyframeState Opt_Array_KeyframeState;
 typedef struct Array_Layoutable Array_Layoutable;
@@ -2890,6 +2892,8 @@ typedef struct Ark_Union_ResourceStr_image_PixelMap_SymbolGlyphModifier Ark_Unio
 typedef struct Opt_Union_ResourceStr_image_PixelMap_SymbolGlyphModifier Opt_Union_ResourceStr_image_PixelMap_SymbolGlyphModifier;
 typedef struct Ark_Union_ResourceStr_Scene Ark_Union_ResourceStr_Scene;
 typedef struct Opt_Union_ResourceStr_Scene Opt_Union_ResourceStr_Scene;
+typedef struct Ark_Union_ResourceStr_SymbolGlyphModifier Ark_Union_ResourceStr_SymbolGlyphModifier;
+typedef struct Opt_Union_ResourceStr_SymbolGlyphModifier Opt_Union_ResourceStr_SymbolGlyphModifier;
 typedef struct Ark_Union_ResourceStr_TabBarSymbol Ark_Union_ResourceStr_TabBarSymbol;
 typedef struct Opt_Union_ResourceStr_TabBarSymbol Opt_Union_ResourceStr_TabBarSymbol;
 typedef struct Ark_Union_RotateOptions_RotateAngleOptions Ark_Union_RotateOptions_RotateAngleOptions;
@@ -3054,6 +3058,8 @@ typedef struct Ark_ImageAlt Ark_ImageAlt;
 typedef struct Opt_ImageAlt Opt_ImageAlt;
 typedef struct Ark_ImageFrameInfo Ark_ImageFrameInfo;
 typedef struct Opt_ImageFrameInfo Opt_ImageFrameInfo;
+typedef struct Ark_IndicatorIconInfo Ark_IndicatorIconInfo;
+typedef struct Opt_IndicatorIconInfo Opt_IndicatorIconInfo;
 typedef struct Ark_InputCounterOptions Ark_InputCounterOptions;
 typedef struct Opt_InputCounterOptions Opt_InputCounterOptions;
 typedef struct Ark_KeyframeAnimateParam Ark_KeyframeAnimateParam;
@@ -10588,6 +10594,15 @@ typedef struct Opt_Array_ImageFrameInfo {
     Ark_Tag tag;
     Array_ImageFrameInfo value;
 } Opt_Array_ImageFrameInfo;
+typedef struct Array_IndicatorIconInfo {
+    /* kind: ContainerType */
+    Ark_IndicatorIconInfo* array;
+    Ark_Int32 length;
+} Array_IndicatorIconInfo;
+typedef struct Opt_Array_IndicatorIconInfo {
+    Ark_Tag tag;
+    Array_IndicatorIconInfo value;
+} Opt_Array_IndicatorIconInfo;
 typedef struct Array_KeyframeState {
     /* kind: ContainerType */
     Ark_KeyframeState* array;
@@ -18887,6 +18902,18 @@ typedef struct Opt_Union_ResourceStr_Scene {
     Ark_Tag tag;
     Ark_Union_ResourceStr_Scene value;
 } Opt_Union_ResourceStr_Scene;
+typedef struct Ark_Union_ResourceStr_SymbolGlyphModifier {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ResourceStr value0;
+        Ark_SymbolGlyphModifier value1;
+    };
+} Ark_Union_ResourceStr_SymbolGlyphModifier;
+typedef struct Opt_Union_ResourceStr_SymbolGlyphModifier {
+    Ark_Tag tag;
+    Ark_Union_ResourceStr_SymbolGlyphModifier value;
+} Opt_Union_ResourceStr_SymbolGlyphModifier;
 typedef struct Ark_Union_ResourceStr_TabBarSymbol {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -19812,6 +19839,15 @@ typedef struct Opt_ImageFrameInfo {
     Ark_Tag tag;
     Ark_ImageFrameInfo value;
 } Opt_ImageFrameInfo;
+typedef struct Ark_IndicatorIconInfo {
+    /* kind: Interface */
+    Ark_Int32 index;
+    Ark_Union_ResourceStr_SymbolGlyphModifier icon;
+} Ark_IndicatorIconInfo;
+typedef struct Opt_IndicatorIconInfo {
+    Ark_Tag tag;
+    Ark_IndicatorIconInfo value;
+} Opt_IndicatorIconInfo;
 typedef struct Ark_InputCounterOptions {
     /* kind: Interface */
     Opt_Float64 thresholdPercentage;
@@ -29540,6 +29576,8 @@ typedef struct GENERATED_ArkUIDotIndicatorAccessor {
                             const Opt_Int32* maxDisplayCount);
     void (*space)(Ark_DotIndicator peer,
                   const Opt_LengthMetrics* space);
+    void (*indicatorIcon)(Ark_DotIndicator peer,
+                          const Opt_Array_IndicatorIconInfo* iconList);
 } GENERATED_ArkUIDotIndicatorAccessor;
 
 typedef struct GENERATED_ArkUIDragEventAccessor {
