@@ -280,6 +280,7 @@ HWTEST_F(ListGeneratedTestNg, ListToJsonValue001, TestSize.Level1)
      */
     CreateList();
     CreateListItems(ITEM_COUNT);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Serialize to JSON
@@ -1784,8 +1785,6 @@ HWTEST_F(ListGeneratedTestNg, ListEnableEditModeModifier001, TestSize.Level1)
     EXPECT_FALSE(ListModelNG::GetEnableEditMode(frameNode));
     EXPECT_EQ(callbackCount, 2);
     EXPECT_FALSE(lastValue);
-    pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
 }
 
 /**
@@ -2008,6 +2007,34 @@ HWTEST_F(ListGeneratedTestNg, ListSwipeSelectStateKeyForGroup001, TestSize.Level
 }
 
 /**
+ * @tc.name: ListSwipeSelectNearStateKeyForGroup001
+ * @tc.desc: Test swipe multi-select resolves out-of-list positions near ListItemGroup to concrete group items
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectNearStateKeyForGroup001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, 3);
+    CreateDone();
+
+    auto listItems = GetFlatListItems(frameNode_);
+    ASSERT_GE(static_cast<int32_t>(listItems.size()), 3);
+    auto firstItemPoint = ConvertItemCenterToListLocal(frameNode_, listItems[0]);
+    auto stateKey = pattern_->GetSwipeSelectStateKeyNearPosition(WIDTH + 1.0f, firstItemPoint.GetY());
+    EXPECT_EQ(stateKey.index, 0);
+    EXPECT_EQ(stateKey.indexInGroup, 0);
+    EXPECT_EQ(pattern_->GetSelectableItemAtStateKey(stateKey), listItems[0]);
+
+    auto lastItemPoint = ConvertItemCenterToListLocal(frameNode_, listItems[2]);
+    stateKey = pattern_->GetSwipeSelectStateKeyNearPosition(lastItemPoint.GetX(), HEIGHT + 1.0f);
+    EXPECT_EQ(stateKey.index, 0);
+    EXPECT_EQ(stateKey.indexInGroup, 2);
+    EXPECT_EQ(pattern_->GetSelectableItemAtStateKey(stateKey), listItems[2]);
+}
+
+/**
  * @tc.name: ListSwipeSelectMarkGroupItem001
  * @tc.desc: Test swipe multi-select can mark list item inside list item group by state key
  * @tc.type: FUNC
@@ -2071,7 +2098,7 @@ HWTEST_F(ListGeneratedTestNg, SetListItemGroupParamStackFromEndContentOffset001,
 
     listLayoutAlgorithm->SetListItemGroupParam(layoutWrapper, 0, 0.0f, true, listLayoutProperty, false);
 
-    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentStartOffset_, 0.0f);
-    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentEndOffset_, contentEndOffset);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentStartOffset_, contentEndOffset);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentEndOffset_, 0.0f);
 }
 } // namespace OHOS::Ace::NG

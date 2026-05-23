@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/list/list_pattern.h"
+
+#include <limits>
 #include "core/common/container.h"
 #include "core/common/statistic_event_reporter.h"
 
@@ -3841,9 +3843,6 @@ RefPtr<FrameNode> ListPattern::GetSelectableItemAtIndex(int32_t index) const
     auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
     CHECK_NULL_RETURN(itemWrapper, nullptr);
     auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
-    if (!itemNode) {
-        itemNode = AceType::DynamicCast<FrameNode>(itemWrapper);
-    }
     CHECK_NULL_RETURN(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<ListItemPattern>();
     if (itemPattern) {
@@ -3977,6 +3976,71 @@ SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectState
     return { index, -1 };
 }
 
+SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectStateKeyNearPosition(
+    float offsetX, float offsetY) const
+{
+    auto key = GetSwipeSelectStateKeyAtPosition(offsetX, offsetY);
+    if (key.IsValid() && GetSelectableItemAtStateKey(key)) {
+        return key;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SwipeSelectStateKey());
+    SwipeSelectStateKey nearestKey;
+    double nearestDistance = std::numeric_limits<double>::max();
+    auto updateNearestKey = [this, offsetX, offsetY, &nearestKey, &nearestDistance](const SwipeSelectStateKey& stateKey,
+                                const Rect& itemRect) {
+        if (!stateKey.IsValid() || LessOrEqual(itemRect.Width(), 0.0) || LessOrEqual(itemRect.Height(), 0.0)) {
+            return;
+        }
+        auto itemNode = GetSelectableItemAtStateKey(stateKey);
+        auto itemPattern = itemNode ? itemNode->GetPattern<ListItemPattern>() : nullptr;
+        if (!itemPattern || !itemPattern->Selectable()) {
+            return;
+        }
+        double dx = 0.0;
+        if (LessNotEqual(offsetX, itemRect.Left())) {
+            dx = itemRect.Left() - offsetX;
+        } else if (GreatNotEqual(offsetX, itemRect.Right())) {
+            dx = offsetX - itemRect.Right();
+        }
+        double dy = 0.0;
+        if (LessNotEqual(offsetY, itemRect.Top())) {
+            dy = itemRect.Top() - offsetY;
+        } else if (GreatNotEqual(offsetY, itemRect.Bottom())) {
+            dy = offsetY - itemRect.Bottom();
+        }
+        double distance = dx * dx + dy * dy;
+        if (LessNotEqual(distance, nearestDistance)) {
+            nearestDistance = distance;
+            nearestKey = stateKey;
+        }
+    };
+
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
+        CHECK_NULL_CONTINUE(itemWrapper);
+        auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
+        CHECK_NULL_CONTINUE(itemNode);
+        auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+        if (itemPattern) {
+            updateNearestKey({ index, -1 }, GetItemRect(index));
+            continue;
+        }
+        auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_CONTINUE(groupPattern);
+        for (int32_t groupIndex = groupPattern->GetDisplayStartIndexInGroup();
+             groupIndex <= groupPattern->GetDisplayEndIndexInGroup(); ++groupIndex) {
+            updateNearestKey({ index, groupIndex }, GetItemRectInGroup(index, groupIndex));
+        }
+    }
+
+    if (nearestKey.IsValid()) {
+        swipeResolvedItemIndex_ = { nearestKey.index, nearestKey.indexInGroup >= 0 ? 1 : -1, nearestKey.indexInGroup };
+    }
+    return nearestKey;
+}
+
 SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectStateKeyAtIndex(int32_t index) const
 {
     if (swipeResolvedItemIndex_.has_value() && swipeResolvedItemIndex_->index == index) {
@@ -4020,9 +4084,6 @@ void ListPattern::BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& st
         auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
         CHECK_NULL_CONTINUE(itemWrapper);
         auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
-        if (!itemNode) {
-            itemNode = AceType::DynamicCast<FrameNode>(itemWrapper);
-        }
         CHECK_NULL_CONTINUE(itemNode);
         auto itemPattern = itemNode->GetPattern<ListItemPattern>();
         if (itemPattern) {

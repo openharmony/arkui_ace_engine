@@ -357,6 +357,7 @@ public:
     bool IsInEditModeHotZone(const PointF& point) const override;
     void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
     SwipeSelectStateKey GetSwipeSelectStateKeyAtPosition(float offsetX, float offsetY) const override;
+    SwipeSelectStateKey GetSwipeSelectStateKeyNearPosition(float offsetX, float offsetY) const override;
     SwipeSelectStateKey GetSwipeSelectStateKeyAtIndex(int32_t index) const override;
     RefPtr<FrameNode> GetSelectableItemAtIndex(int32_t index) const override;
     RefPtr<FrameNode> GetSelectableItemAtStateKey(const SwipeSelectStateKey& stateKey) const override;
