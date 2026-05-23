@@ -145,6 +145,10 @@ export struct DatePickerComponent {
     }
   }
   
+  aboutToDisappear(): void {
+    this.lunarCalendar = null;
+  }
+  
   private onLocaleChange(): void {
     this.locale = new intl.Locale(this.currentLocale);
     if (this.lunar) {
@@ -239,7 +243,7 @@ export struct DatePickerComponent {
   
   private formatLunarMonth(month: number, isLeap: boolean): string {
     const lunarMonthNames = ['正月', '二月', '三月', '四月', '五月', '六月',
-                             '七月', '八月', '九月', '十月', '十一月', '十二月'];
+                             '七月', '八月', '九月', '十月', '冬月', '腊月'];
     
     if (isLeap) {
       return `闰${lunarMonthNames[month]}`;
@@ -332,20 +336,24 @@ this.periodArray = [];
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     
+    const shortMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
     try {
       const localeStr = this.locale.toString();
       if (!localeStr || localeStr.length === 0) {
-        return monthNames[month];
+        return this.displayMode === DisplayMode.DATE_TIME ? shortMonthNames[month] : monthNames[month];
       }
       
+      const monthFormat = this.displayMode === DisplayMode.DATE_TIME ? 'short' : 'long';
       const dateFormat = new Intl.DateTimeFormat(localeStr, {
-        month: 'long'
+        month: monthFormat
       });
       const safeMonth = Math.max(0, Math.min(11, month));
       const date = new Date(2026, safeMonth, 15);
       return dateFormat.format(date);
     } catch (error) {
-      return monthNames[month];
+      return this.displayMode === DisplayMode.DATE_TIME ? shortMonthNames[month] : monthNames[month];
     }
   }
   
@@ -582,7 +590,20 @@ private formatSecond(second: number): string {
     result.month = this.selectedMonth;
     result.day = this.selectedDay;
     
-    result.hour = this.selectedHour;
+    if (!this.useMilitaryTime) {
+      if (this.selectedHour === 0) {
+        result.hour = 12;
+      } else if (this.selectedHour === 12) {
+        result.hour = 12;
+      } else if (this.selectedHour > 12) {
+        result.hour = this.selectedHour - 12;
+      } else {
+        result.hour = this.selectedHour;
+      }
+    } else {
+      result.hour = this.selectedHour;
+    }
+    
     result.minute = this.selectedMinute;
     result.second = this.selectedSecond;
     return result;
@@ -609,6 +630,16 @@ private onHourChange(selectedIndex: number): void {
     if (this.useMilitaryTime) {
       this.selectedHour = selectedIndex;
     } else {
+      // Detect boundary crossing: 12(index 11) → 1(index 0) or 1(index 0) → 12(index 11)
+      const oldDisplayIndex = this.getHourSelectedIndex();
+      const crossingBoundary = (oldDisplayIndex === 11 && selectedIndex === 0) || 
+                               (oldDisplayIndex === 0 && selectedIndex === 11);
+      
+      // Auto-switch period when crossing boundary
+      if (crossingBoundary) {
+        this.selectedPeriod = this.selectedPeriod === 0 ? 1 : 0;
+      }
+      
       const displayHour = selectedIndex + 1;
       if (displayHour === 12) {
         if (this.selectedPeriod === 0) {
@@ -758,6 +789,10 @@ private onHourChange(selectedIndex: number): void {
           UIPickerComponent({ selectedIndex: this.getYearSelectedIndex() }) {
             ForEach(this.yearArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
           .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '34%')
@@ -777,6 +812,10 @@ private onHourChange(selectedIndex: number): void {
           UIPickerComponent({ selectedIndex: this.getMonthSelectedIndex() }) {
             ForEach(this.monthArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
           .width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '33%')
@@ -795,6 +834,10 @@ private onHourChange(selectedIndex: number): void {
           UIPickerComponent({ selectedIndex: this.getDaySelectedIndex() }) {
             ForEach(this.dayArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
           .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%')
@@ -813,6 +856,10 @@ private onHourChange(selectedIndex: number): void {
           UIPickerComponent({ selectedIndex: this.getYearSelectedIndex() }) {
             ForEach(this.yearArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
           .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
@@ -832,6 +879,10 @@ private onHourChange(selectedIndex: number): void {
           UIPickerComponent({ selectedIndex: this.getMonthSelectedIndex() }) {
             ForEach(this.monthArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
           .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
@@ -850,6 +901,10 @@ private onHourChange(selectedIndex: number): void {
           UIPickerComponent({ selectedIndex: this.getMonthSelectedIndex() }) {
             ForEach(this.monthArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
           .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
@@ -868,6 +923,10 @@ private onHourChange(selectedIndex: number): void {
           UIPickerComponent({ selectedIndex: this.getDaySelectedIndex() }) {
             ForEach(this.dayArray, (item: string) => {
               Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
             })
           }
           .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
@@ -891,6 +950,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getHourSelectedIndex() }) {
               ForEach(this.hourArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
@@ -909,6 +972,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getMinuteSelectedIndex() }) {
               ForEach(this.minuteArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '25%' : '50%')
@@ -927,6 +994,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getPeriodSelectedIndex() }) {
               ForEach(this.periodArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%')
@@ -945,6 +1016,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getHourSelectedIndex() }) {
               ForEach(this.hourArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '34%')
@@ -963,6 +1038,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getMinuteSelectedIndex() }) {
               ForEach(this.minuteArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%')
@@ -983,6 +1062,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getHourSelectedIndex() }) {
               ForEach(this.hourArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '34%')
@@ -1001,6 +1084,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getMinuteSelectedIndex() }) {
               ForEach(this.minuteArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '16%' : '33%')
@@ -1019,6 +1106,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getSecondSelectedIndex() }) {
               ForEach(this.secondArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '17%' : '33%')
@@ -1037,6 +1128,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getPeriodSelectedIndex() }) {
               ForEach(this.periodArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '12%' : '25%')
@@ -1055,6 +1150,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getHourSelectedIndex() }) {
               ForEach(this.hourArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '13%' : '25%')
@@ -1073,6 +1172,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getMinuteSelectedIndex() }) {
               ForEach(this.minuteArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '13%' : '25%')
@@ -1091,6 +1194,10 @@ private onHourChange(selectedIndex: number): void {
             UIPickerComponent({ selectedIndex: this.getSecondSelectedIndex() }) {
               ForEach(this.secondArray, (item: string) => {
                 Text(item)
+                .maxLines(1)
+                .maxFontSize('16vp')
+                .minFontSize('14vp')
+                .textOverflow({ overflow: TextOverflow.Clip })
               })
             }
             .width(this.displayMode === DisplayMode.DATE_TIME ? '12%' : '25%')

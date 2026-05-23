@@ -423,6 +423,9 @@ export class DatePickerComponent extends ViewPU {
             this.initArrays();
         }
     }
+    aboutToDisappear() {
+        this.lunarCalendar = null;
+    }
     onLocaleChange() {
         this.locale = new intl.Locale(this.currentLocale);
         if (this.lunar) {
@@ -505,7 +508,7 @@ export class DatePickerComponent extends ViewPU {
     }
     formatLunarMonth(month, isLeap) {
         const lunarMonthNames = ['正月', '二月', '三月', '四月', '五月', '六月',
-            '七月', '八月', '九月', '十月', '十一月', '十二月'];
+            '七月', '八月', '九月', '十月', '冬月', '腊月'];
         if (isLeap) {
             return `闰${lunarMonthNames[month]}`;
         }
@@ -584,20 +587,23 @@ export class DatePickerComponent extends ViewPU {
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
         ];
+        const shortMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         try {
             const localeStr = this.locale.toString();
             if (!localeStr || localeStr.length === 0) {
-                return monthNames[month];
+                return this.displayMode === DisplayMode.DATE_TIME ? shortMonthNames[month] : monthNames[month];
             }
+            const monthFormat = this.displayMode === DisplayMode.DATE_TIME ? 'short' : 'long';
             const dateFormat = new Intl.DateTimeFormat(localeStr, {
-                month: 'long'
+                month: monthFormat
             });
             const safeMonth = Math.max(0, Math.min(11, month));
             const date = new Date(2026, safeMonth, 15);
             return dateFormat.format(date);
         }
         catch (error) {
-            return monthNames[month];
+            return this.displayMode === DisplayMode.DATE_TIME ? shortMonthNames[month] : monthNames[month];
         }
     }
     formatDay(day) {
@@ -808,7 +814,23 @@ export class DatePickerComponent extends ViewPU {
         result.year = this.selectedYear;
         result.month = this.selectedMonth;
         result.day = this.selectedDay;
-        result.hour = this.selectedHour;
+        if (!this.useMilitaryTime) {
+            if (this.selectedHour === 0) {
+                result.hour = 12;
+            }
+            else if (this.selectedHour === 12) {
+                result.hour = 12;
+            }
+            else if (this.selectedHour > 12) {
+                result.hour = this.selectedHour - 12;
+            }
+            else {
+                result.hour = this.selectedHour;
+            }
+        }
+        else {
+            result.hour = this.selectedHour;
+        }
         result.minute = this.selectedMinute;
         result.second = this.selectedSecond;
         return result;
@@ -832,6 +854,14 @@ export class DatePickerComponent extends ViewPU {
             this.selectedHour = selectedIndex;
         }
         else {
+            // Detect boundary crossing: 12(index 11) → 1(index 0) or 1(index 0) → 12(index 11)
+            const oldDisplayIndex = this.getHourSelectedIndex();
+            const crossingBoundary = (oldDisplayIndex === 11 && selectedIndex === 0) ||
+                (oldDisplayIndex === 0 && selectedIndex === 11);
+            // Auto-switch period when crossing boundary
+            if (crossingBoundary) {
+                this.selectedPeriod = this.selectedPeriod === 0 ? 1 : 0;
+            }
             const displayHour = selectedIndex + 1;
             if (displayHour === 12) {
                 if (this.selectedPeriod === 0) {
@@ -1005,6 +1035,10 @@ export class DatePickerComponent extends ViewPU {
                                         const item = _item;
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
+                                            Text.maxLines(1);
+                                            Text.maxFontSize('16vp');
+                                            Text.minFontSize('14vp');
+                                            Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
                                     };
@@ -1033,6 +1067,10 @@ export class DatePickerComponent extends ViewPU {
                                         const item = _item;
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
+                                            Text.maxLines(1);
+                                            Text.maxFontSize('16vp');
+                                            Text.minFontSize('14vp');
+                                            Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
                                     };
@@ -1061,6 +1099,10 @@ export class DatePickerComponent extends ViewPU {
                                         const item = _item;
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
+                                            Text.maxLines(1);
+                                            Text.maxFontSize('16vp');
+                                            Text.minFontSize('14vp');
+                                            Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
                                     };
@@ -1094,6 +1136,10 @@ export class DatePickerComponent extends ViewPU {
                                         const item = _item;
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
+                                            Text.maxLines(1);
+                                            Text.maxFontSize('16vp');
+                                            Text.minFontSize('14vp');
+                                            Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
                                     };
@@ -1122,6 +1168,10 @@ export class DatePickerComponent extends ViewPU {
                                         const item = _item;
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
+                                            Text.maxLines(1);
+                                            Text.maxFontSize('16vp');
+                                            Text.minFontSize('14vp');
+                                            Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
                                     };
@@ -1154,6 +1204,10 @@ export class DatePickerComponent extends ViewPU {
                                         const item = _item;
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
+                                            Text.maxLines(1);
+                                            Text.maxFontSize('16vp');
+                                            Text.minFontSize('14vp');
+                                            Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
                                     };
@@ -1182,6 +1236,10 @@ export class DatePickerComponent extends ViewPU {
                                         const item = _item;
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Text.create(item);
+                                            Text.maxLines(1);
+                                            Text.maxFontSize('16vp');
+                                            Text.minFontSize('14vp');
+                                            Text.textOverflow({ overflow: TextOverflow.Clip });
                                         }, Text);
                                         Text.pop();
                                     };
@@ -1238,6 +1296,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1266,6 +1328,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1298,6 +1364,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1326,6 +1396,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1354,6 +1428,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1394,6 +1472,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1422,6 +1504,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1450,6 +1536,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1482,6 +1572,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1510,6 +1604,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1538,6 +1636,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
@@ -1566,6 +1668,10 @@ export class DatePickerComponent extends ViewPU {
                                                     const item = _item;
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create(item);
+                                                        Text.maxLines(1);
+                                                        Text.maxFontSize('16vp');
+                                                        Text.minFontSize('14vp');
+                                                        Text.textOverflow({ overflow: TextOverflow.Clip });
                                                     }, Text);
                                                     Text.pop();
                                                 };
