@@ -1126,9 +1126,7 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
     spanInfos.emplace_back(std::move(info));
 }
 
-void HtmlToSpan::ToSpan(
-    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
-    bool isNeedLoadPixelMap)
+size_t HtmlToSpan::AccumulateNodeContent(xmlNodePtr curNode, size_t& pos, std::string& allContent)
 {
     std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
     bool isHeading = (curNode->type == XML_ELEMENT_NODE && IsHeadingTag(htmlTag));
@@ -1143,22 +1141,39 @@ void HtmlToSpan::ToSpan(
         allContent += curNodeContent;
         curNodeLen = StringUtils::ToWstring(curNodeContent).length();
     }
+    return curNodeLen;
+}
 
+void HtmlToSpan::HandlePTag(xmlNodePtr curNode, size_t& pos, size_t& childPos,
+    std::string& allContent, std::vector<SpanInfo>& spanInfos)
+{
+    if (curNode->parent == nullptr || curNode->parent->type != XML_ELEMENT_NODE ||
+        xmlStrcmp(curNode->parent->name, (const xmlChar*)"span") != 0) {
+        if (!EndsWithLineBreak(allContent)) {
+            allContent += "\n";
+            childPos++;
+        }
+        ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+    }
+}
+
+void HtmlToSpan::ToSpan(
+    xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
+    bool isNeedLoadPixelMap)
+{
+    size_t curNodeLen = AccumulateNodeContent(curNode, pos, allContent);
+    std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
     size_t childPos = pos + curNodeLen;
+
     bool isSmall = (curNode->type == XML_ELEMENT_NODE && htmlTag == "small");
     if (isSmall) {
         smallDepth_++;
     }
     ParseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
+
     if (curNode->type == XML_ELEMENT_NODE) {
         if (htmlTag == "p") {
-            if (curNode->parent == nullptr || curNode->parent->type != XML_ELEMENT_NODE ||
-                xmlStrcmp(curNode->parent->name, (const xmlChar*)"span") != 0) {
-                // The <p> contained in <span> is discarded. It is not considered as a standard writing method.
-                allContent += "\n";
-                childPos++;
-                ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
-            }
+            HandlePTag(curNode, pos, childPos, allContent, spanInfos);
         } else if (htmlTag == "img") {
             childPos++;
             ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);
@@ -1167,7 +1182,7 @@ void HtmlToSpan::ToSpan(
         } else if (htmlTag == "br") {
             allContent += "\n";
             childPos++;
-        } else if (isHeading) {
+        } else if (IsHeadingTag(htmlTag)) {
             ToHeadingSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
             if (!EndsWithLineBreak(allContent)) {
                 allContent += "\n";
