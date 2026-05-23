@@ -253,7 +253,8 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
             .level = UiMaterialLevel::SMOOTH,
-            .colorMode = colorMode,
+            .colorMode = (options->colorMode == ColorMode::COLOR_MODE_UNDEFINED) ?
+                                    colorMode : options->colorMode,
         };
         return result;
     }
@@ -263,6 +264,8 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     result.materialColor = options->materialColor;
     if (finalInvertColor) {
         colorMode = ColorMode::LIGHT;
+    } else if (options->colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = options->colorMode;
     }
     result.key = UiMaterialMapKey {
         .level = materialLevel,

@@ -889,7 +889,7 @@ TouchPosition TextSelectController::GetTouchLinePos(const Offset& localOffset)
     if (paragraph_->GetLineMetricsByCoordinate(offset, lineMetrics)) {
         std::vector<RectF> tempRects;
         paragraph_->GetRectsForRange(lineMetrics.startIndex, lineMetrics.endIndex, tempRects);
-        if (GreatNotEqual(offset.GetX(), lineMetrics.x + tempRects.back().Right())) {
+        if (!tempRects.empty() && GreatNotEqual(offset.GetX(), lineMetrics.x + tempRects.back().Right())) {
             return TouchPosition::RIGHT;
         }
         if (LessNotEqual(offset.GetX(), lineMetrics.x)) {
