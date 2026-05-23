@@ -242,6 +242,7 @@ HWTEST_F(ListGeneratedTestNg, ListToJsonValue001, TestSize.Level1)
      */
     CreateList();
     CreateListItems(ITEM_COUNT);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Serialize to JSON
