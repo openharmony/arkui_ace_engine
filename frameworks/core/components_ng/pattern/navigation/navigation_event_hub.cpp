@@ -39,7 +39,8 @@ void NavigationEventHub::FireNavBarStateChangeEvent(bool isVisible)
             if (onNavBarStateChangeEvent_) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavBar Visible State Change %{public}s",
                     isVisible ? "false -> true" : "true -> false");
-                onNavBarStateChangeEvent_(isVisible);
+                auto event = onNavBarStateChangeEvent_;
+                event(isVisible);
             }
         }
     } else {
@@ -48,7 +49,8 @@ void NavigationEventHub::FireNavBarStateChangeEvent(bool isVisible)
         if (onNavBarStateChangeEvent_) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set NavBar Visible State as %{public}s",
                 isVisible ? "true" : "false");
-            onNavBarStateChangeEvent_(isVisible);
+            auto event = onNavBarStateChangeEvent_;
+            event(isVisible);
         }
     }
     isVisible_ = isVisible;
