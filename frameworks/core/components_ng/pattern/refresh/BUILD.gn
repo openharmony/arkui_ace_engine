@@ -42,7 +42,11 @@ build_component_ng("refresh_pattern_ng") {
   if (!build_ohos_sdk && !is_arkui_x) {
     deps += [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
   }
+  external_deps = []
   if (!build_ohos_sdk && is_ohos_standard_system) {
-    external_deps = [ "accessibility:accessibility_common" ]
+    external_deps += [ "accessibility:accessibility_common" ]
+  }
+  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    external_deps += [ "api_metrics:histogrammanager" ]
   }
 }

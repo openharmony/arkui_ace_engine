@@ -18410,7 +18410,7 @@ int32_t SetRefreshContent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
 void ResetRefreshContent(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getRefreshModifier()->setRefreshContent(node->uiNodeHandle, nullptr);
+    GetFullImpl()->getNodeModifiers()->getRefreshModifier()->resetRefreshContent(node->uiNodeHandle);
 }
 
 int32_t SetRefreshPullDownRatio(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
