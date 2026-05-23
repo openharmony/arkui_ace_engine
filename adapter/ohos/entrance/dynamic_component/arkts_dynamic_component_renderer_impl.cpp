@@ -314,7 +314,7 @@ void ArktsDynamicComponentRendererImpl::InitUiContent(OHOS::AbilityRuntime::Cont
     rendererDumpInfo_.loadAbcTime = GetCurrentTimestamp();
 }
 
-void ArktsDynamicComponentRendererImpl::GetConnectToRender()
+sptr<IRemoteObject> ArktsDynamicComponentRendererImpl::GetConnectToRender()
 {
     auto hostContainer = Container::GetContainer(hostInstanceId_);
     CHECK_NULL_RETURN(hostContainer, nullptr);
