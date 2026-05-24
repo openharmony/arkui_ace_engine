@@ -2445,4 +2445,26 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, NodeContainerWrapper_001, TestSize.Level1
 
 // Header / footer / sticky tests live in lazy_water_flow_layout_header_footer_test.cpp.
 
+/**
+ * @tc.name: LazyWaterFlowLpxAttribute001
+ * @tc.desc: Verify rowsGap and columnsGap keep independent LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, LazyWaterFlowLpxAttribute001, TestSize.Level1)
+{
+    auto frameNode = LazyWaterFlowLayoutModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+
+    LazyWaterFlowLayoutModelStatic::SetRowGap(
+        AceType::RawPtr(frameNode), std::make_optional(Dimension(12.0, DimensionUnit::LPX)));
+    LazyWaterFlowLayoutModelStatic::SetColumnGap(
+        AceType::RawPtr(frameNode), std::make_optional(Dimension(8.0, DimensionUnit::LPX)));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ROWS_GAP));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_COLUMNS_GAP));
+
+    LazyWaterFlowLayoutModelStatic::SetRowGap(
+        AceType::RawPtr(frameNode), std::make_optional(Dimension(12.0, DimensionUnit::VP)));
+    EXPECT_FALSE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ROWS_GAP));
+    EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_COLUMNS_GAP));
+}
 } // namespace OHOS::Ace::NG

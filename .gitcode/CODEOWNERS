@@ -3694,6 +3694,7 @@ test/unittest/core/pattern/image/ @arkui001
 test/unittest/core/pattern/image_animator/ @arkui001
 test/unittest/core/pattern/indexer/ @arkui_navigation
 test/unittest/core/pattern/lazy_layout/ @arkuiscroll
+test/unittest/core/pattern/lazy_waterflow_layout/ @arkuiscroll
 test/unittest/core/pattern/linear_layout/ @arkuilayout1
 test/unittest/core/pattern/linear_split/ @arkuilayout1
 test/unittest/core/pattern/arc_list/ @arkuiscroll

@@ -45,21 +45,25 @@ void LazyWaterFlowLayoutModel::Create()
 
 void LazyWaterFlowLayoutModel::SetRowGap(const Dimension& rowGap)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(rowGap, LpxAttribute::LPX_ROWS_GAP);
     ACE_UPDATE_LAYOUT_PROPERTY(LazyWaterFlowLayoutProperty, RowGap, rowGap);
 }
 
 void LazyWaterFlowLayoutModel::SetColumnGap(const Dimension& columnGap)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(columnGap, LpxAttribute::LPX_COLUMNS_GAP);
     ACE_UPDATE_LAYOUT_PROPERTY(LazyWaterFlowLayoutProperty, ColumnGap, columnGap);
 }
 
 void LazyWaterFlowLayoutModel::SetRowGap(FrameNode* frameNode, const Dimension& rowGap)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(rowGap, LpxAttribute::LPX_ROWS_GAP, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyWaterFlowLayoutProperty, RowGap, rowGap, frameNode);
 }
 
 void LazyWaterFlowLayoutModel::SetColumnGap(FrameNode* frameNode, const Dimension& columnGap)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(columnGap, LpxAttribute::LPX_COLUMNS_GAP, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyWaterFlowLayoutProperty, ColumnGap, columnGap, frameNode);
 }
 
