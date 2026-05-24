@@ -752,27 +752,6 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_IsMaterialNode_True_Selected
 }
 
 /**
- * @tc.name: SliderPattern_IsMaterialNode_True_Particle_001
- * @tc.desc: Test IsMaterialNode returns true for particleFrameNode
- * @tc.type: FUNC
- */
-HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_IsMaterialNode_True_Particle_001, TestSize.Level1)
-{
-    auto frameNode = CreateSliderNode();
-    ASSERT_NE(frameNode, nullptr);
-    
-    auto pattern = frameNode->GetPattern<SliderPattern>();
-    ASSERT_NE(pattern, nullptr);
-    
-    auto particleFrameNode = FrameNode::CreateFrameNode(
-        V2::PARTICLE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ParticlePattern>(1));
-    pattern->particleFrameNode_ = particleFrameNode;
-    
-    EXPECT_TRUE(pattern->IsMaterialNode(particleFrameNode));
-}
-
-/**
  * @tc.name: SliderPattern_IsMaterialNode_False_001
  * @tc.desc: Test IsMaterialNode returns false for non-material nodes
  * @tc.type: FUNC
@@ -1552,4 +1531,297 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_IsPrefixOrSuffixNode_Null_00
     EXPECT_FALSE(pattern->IsPrefixOrSuffixNode(nullNode));
 }
 
+/**
+ * @tc.name: SliderPattern_IsNeedShowMaterial_True_001
+ * @tc.desc: Test IsNeedShowMaterial returns true when all conditions are met
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_IsNeedShowMaterial_True_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
+    
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateBlockType(SliderModel::BlockStyleType::DEFAULT);
+    
+    EXPECT_TRUE(pattern->IsNeedShowMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_IsNeedShowMaterial_False_NoSystemMaterial_001
+ * @tc.desc: Test IsNeedShowMaterial returns false when no system material
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_IsNeedShowMaterial_False_NoSystemMaterial_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    EXPECT_FALSE(pattern->IsNeedShowMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_IsNeedShowMaterial_False_BlockTypeNotDefault_001
+ * @tc.desc: Test IsNeedShowMaterial returns false when blockType is not DEFAULT
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_IsNeedShowMaterial_False_BlockTypeNotDefault_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateBlockType(SliderModel::BlockStyleType::IMAGE);
+    
+    EXPECT_FALSE(pattern->IsNeedShowMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_IsNeedShowMaterial_False_SliderModeNone_001
+ * @tc.desc: Test IsNeedShowMaterial returns false when sliderMode is NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_IsNeedShowMaterial_False_SliderModeNone_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSliderMode(SliderModel::SliderMode::NONE);
+    
+    EXPECT_FALSE(pattern->IsNeedShowMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_IsNeedShowMaterial_True_InsetMode_001
+ * @tc.desc: Test IsNeedShowMaterial returns true for INSET mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_IsNeedShowMaterial_True_InsetMode_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
+    
+    EXPECT_TRUE(pattern->IsNeedShowMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_HideMaterialNode_ShowMaterial_False_001
+ * @tc.desc: Test HideMaterialNode returns early when IsNeedShowMaterial is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_HideMaterialNode_ShowMaterial_False_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->dragPointNode_ = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    pattern->blurCoverNode_ = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    
+    pattern->HideMaterialNode();
+    
+    EXPECT_FALSE(pattern->IsNeedShowMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_StartLongPressTimer_ShowMaterial_False_001
+ * @tc.desc: Test StartLongPressTimer returns early when IsNeedShowMaterial is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_StartLongPressTimer_ShowMaterial_False_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->StartLongPressTimer();
+    
+    EXPECT_FALSE(pattern->longPressTask_);
+}
+
+/**
+ * @tc.name: SliderPattern_HandleLongPress_ShowMaterial_False_001
+ * @tc.desc: Test HandleLongPress returns early when IsNeedShowMaterial is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_HandleLongPress_ShowMaterial_False_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNode();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->HandleLongPress();
+    
+    EXPECT_FALSE(pattern->IsNeedShowMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_HandleLongPress_HighMiddleGrade_001
+ * @tc.desc: Test HandleLongPress handles high/middle grade material together
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_HandleLongPress_HighMiddleGrade_001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
+    
+    EXPECT_TRUE(pattern->IsNeedShowMaterial());
+    EXPECT_TRUE(pattern->IsHighGradeMaterial() || pattern->IsMiddleGradeMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_HandleLongPress_LowGrade_001
+ * @tc.desc: Test HandleLongPress handles low grade material
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_HandleLongPress_LowGrade_001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
+    
+    EXPECT_TRUE(pattern->IsNeedShowMaterial());
+    EXPECT_FALSE(pattern->IsHighGradeMaterial());
+    EXPECT_FALSE(pattern->IsMiddleGradeMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_CreateParticleOptions_Horizontal_001
+ * @tc.desc: Test CreateParticleOptions for horizontal direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_CreateParticleOptions_Horizontal_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    float emitterLength = 50.0f;
+    float trackThickness = 10.0f;
+    Color blockColor = Color::BLUE;
+    Axis direction = Axis::HORIZONTAL;
+    
+    auto particleOptions = pattern->CreateParticleOptions(emitterLength, trackThickness, blockColor, direction);
+    
+    EXPECT_EQ(particleOptions.size(), 5);
+}
+
+/**
+ * @tc.name: SliderPattern_CreateParticleOptions_Vertical_001
+ * @tc.desc: Test CreateParticleOptions for vertical direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_CreateParticleOptions_Vertical_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    float emitterLength = 50.0f;
+    float trackThickness = 10.0f;
+    Color blockColor = Color::BLUE;
+    Axis direction = Axis::VERTICAL;
+    
+    auto particleOptions = pattern->CreateParticleOptions(emitterLength, trackThickness, blockColor, direction);
+    
+    EXPECT_EQ(particleOptions.size(), 5);
+}
+
+/**
+ * @tc.name: SliderParticleNodeHierarchy_001
+ * @tc.desc: Test particleFrameNode is child of selectedTrackFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderParticleNodeHierarchy_001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
+    
+    EXPECT_TRUE(pattern->IsNeedShowMaterial());
+    EXPECT_TRUE(pattern->IsHighGradeMaterial());
+}
+
+/**
+ * @tc.name: SliderPattern_HideMaterialNodes_NoParticleRemove_001
+ * @tc.desc: Test HideMaterialNodes does not remove particleFrameNode from host
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_HideMaterialNodes_NoParticleRemove_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->particleFrameNode_ = FrameNode::CreateFrameNode(
+        V2::PARTICLE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ParticlePattern>(1));
+    
+    pattern->HideMaterialNodes();
+}
 } // namespace OHOS::Ace::NG
