@@ -67,13 +67,13 @@ export type OnActionTextClickCallback = () => void;
  */
 @ObservedV2
 export class PromptOptionsV2 {
-  @Trace icon?: ResourceStr;
-  @Trace symbolStyle?: SymbolGlyphModifier;
-  @Trace tip?: ResourceStr;
-  @Trace marginType: MarginTypeV2;
-  @Trace actionText?: ResourceStr;
-  @Trace marginTop: Dimension;
-  @Trace isShown?: boolean;
+  @Trace public icon?: ResourceStr;
+  @Trace public symbolStyle?: SymbolGlyphModifier;
+  @Trace public tip?: ResourceStr;
+  @Trace public marginType: MarginTypeV2;
+  @Trace public actionText?: ResourceStr;
+  @Trace public marginTop: Dimension;
+  @Trace public isShown?: boolean;
 
   constructor(config?: PromptOptionsV2Config) {
     if (config) {

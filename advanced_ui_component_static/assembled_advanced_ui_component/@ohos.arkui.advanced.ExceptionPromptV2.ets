@@ -88,25 +88,25 @@ export interface PromptOptionsV2Config {
 @ObservedV2
 export class PromptOptionsV2 {
   @Trace
-  icon?: ResourceStr;
+  public icon?: ResourceStr;
 
   @Trace
-  symbolStyle?: SymbolGlyphModifier;
+  public symbolStyle?: SymbolGlyphModifier;
 
   @Trace
-  tip?: ResourceStr;
+  public tip?: ResourceStr;
 
   @Trace
-  marginType: MarginTypeV2;
+  public marginType: MarginTypeV2;
 
   @Trace
-  actionText?: ResourceStr;
+  public actionText?: ResourceStr;
 
   @Trace
-  marginTop: Dimension;
+  public marginTop: Dimension;
 
   @Trace
-  isShown?: boolean;
+  public isShown?: boolean;
 
   constructor(config?: PromptOptionsV2Config) {
     if (config) {
