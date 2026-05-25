@@ -191,15 +191,12 @@ export function EmbeddedComponentImpl(
 export function EmbeddedComponent(
     @memo @memo_skip
     style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-    @memo @memo_skip
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkEmbeddedComponentComponent>((): ArkEmbeddedComponentComponent => {
         return new ArkEmbeddedComponentComponent()
     })
     NodeAttach<ArkEmbeddedComponentPeer>((): ArkEmbeddedComponentPeer => ArkEmbeddedComponentPeer.create(receiver), (_: ArkEmbeddedComponentPeer): void => {
         style?.(receiver)
-        content_?.()
     })
 }
 
