@@ -382,8 +382,8 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class SegmentButtonOptions {
     this._buttons = void 0;
     this.fontColor = options.fontColor ?? segmentButtonTheme.FONT_COLOR;
     this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR;
-    this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE;
-    this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE;
+    this.fontSize = options.fontSize ?? -1;
+    this.selectedFontSize = options.selectedFontSize ?? -1;
     this.fontWeight = options.fontWeight ?? initFontWeight(FontWeight.Regular);
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium;
     this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
@@ -2635,6 +2635,36 @@ export class SegmentButton extends ViewPU {
     }
     return false;
   }
+  isMultiplyCapsule() {
+    return this.options !== undefined &&
+      this.options.type === 'capsule' && (this.options.multiply ?? false);
+  }
+
+  shouldShowBackground() {
+    return !this.isMultiplyCapsule() && this.isBackgroundSystemMaterialEnabled();
+  }
+
+  getButtonBackgroundColor() {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
+  }
+
+  getButtonBorderRadius() {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return getBackgroundBorderRadius(this.options, this.componentSize.height / 2);
+  }
+
+  getButtonSystemMaterial() {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.options.backgroundSystemMaterial;
+  }
+
   isSegmentFocusStyleCustomized() {
     if (this.isCustomizedCache === undefined) {
       this.isCustomizedCache = resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED, 1.0) < 0.1;
@@ -2645,6 +2675,10 @@ export class SegmentButton extends ViewPU {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
       Stack.direction(this.options ? this.options.direction : undefined);
+      Stack.backgroundColor(this.getButtonBackgroundColor());
+      Stack.borderRadius(this.getButtonBorderRadius());
+      Stack.clip(false);
+      Stack.systemMaterial(this.getButtonSystemMaterial());
       Stack.onBlur(() => {
         this.focusIndex = -1;
       });
@@ -3287,13 +3321,16 @@ export class SegmentButton extends ViewPU {
     else {
       setAnimatedPropertyFunc();
     }
+    this.updateButtonFont();
+  }
+  updateButtonFont() {
     this.buttonItemsSelected.forEach((selected, index) => {
-      const selectedFontSize = this.options.selectedFontSize ??
-        (this.useAdaptiveLineHeight ?
-          segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE :
-          segmentButtonTheme.SELECTED_FONT_SIZE);
-      const normalFontSize = this.options.fontSize ??
-        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
+    const selectedFontSize = this.options.selectedFontSize !== -1 ? this.options.selectedFontSize :	 
+      (this.useAdaptiveLineHeight ?	 
+        segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE :	 
+        segmentButtonTheme.SELECTED_FONT_SIZE);	 
+    const normalFontSize = this.options.fontSize !== -1 ? this.options.fontSize :	 
+      (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
       this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
         this.options.fontWeight ?? initFontWeight(FontWeight.Regular);

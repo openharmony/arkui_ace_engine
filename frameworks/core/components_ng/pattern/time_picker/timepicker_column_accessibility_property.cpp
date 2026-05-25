@@ -108,6 +108,11 @@ std::string TimePickerColumnAccessibilityProperty::GetText() const
             return "";
         }
         std::string text = timePickerRowPattern->GetOptionsValue(frameNode, index);
+        CHECK_EQUAL_RETURN(text.empty(), true, "");
+        bool isValid = std::all_of(text.begin(), text.end(), [](char c) {
+            return std::isdigit(static_cast<unsigned char>(c));
+        });
+        CHECK_EQUAL_RETURN(isValid, false, text);
         if (AceApplicationInfo::GetInstance().GetLanguage() == "zh" && text.compare("00") == 0) {
             text = "0";
         }
@@ -129,14 +134,8 @@ std::string TimePickerColumnAccessibilityProperty::GetText() const
         } else {
             result = text;
         }
-        if (result.empty()) {
-            return "";
-        }
-        if (result.front() == '0') {
-            result = "[n1]" + result;
-        } else {
-            result = "[n2]" + result;
-        }
+        CHECK_EQUAL_RETURN(result.empty(), true, "");
+        result = (result.front() == '0') ? "[n1]" + result : "[n2]" + result;
         return result;
     }
     return "";

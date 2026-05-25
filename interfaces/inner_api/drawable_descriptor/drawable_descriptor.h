@@ -24,9 +24,8 @@
 #include <utility>
 #include <vector>
 
+#include "drawable_marcos.h"
 #include "rstate.h"
-
-#include "base/marcos.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -117,6 +116,17 @@ public:
     void ResetPixelMap()
     {
         pixelMap_.reset();
+    }
+
+    UINT8 TakeMediaData()
+    {
+        len_ = 0;
+        return std::move(mediaData_);
+    }
+
+    size_t GetMediaDataLen() const
+    {
+        return len_;
     }
 
 private:

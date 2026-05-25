@@ -120,6 +120,7 @@ void MarqueeModelNG::SetFontSize(const std::optional<Dimension>& fontSize)
     } else {
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE);
     }
+    ACE_CHECK_LPX_ATTRIBUTE(fontSize.value_or(Dimension()), LpxAttribute::LPX_FONT_SIZE);
 }
 
 void MarqueeModelNG::SetFontWeight(const std::optional<FontWeight>& fontWeight)
@@ -257,6 +258,7 @@ void MarqueeModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimen
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             MarqueeLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(fontSize.value_or(Dimension()), LpxAttribute::LPX_FONT_SIZE, frameNode);
 }
 
 void MarqueeModelNG::SetTextColor(FrameNode* frameNode, const std::optional<Color>& textColor)
@@ -435,11 +437,13 @@ void MarqueeModelNG::SetMarqueeSpacing(FrameNode* frameNode, const std::optional
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             MarqueeLayoutProperty, MarqueeSpacing, PROPERTY_UPDATE_MEASURE, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(spacing.value_or(Dimension()), LpxAttribute::LPX_MARQUEE_SPACING, frameNode);
 }
 
 void MarqueeModelNG::ResetMarqueeSpacing(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, MarqueeSpacing, PROPERTY_UPDATE_MEASURE, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_MARQUEE_SPACING, frameNode);
 }
 
 void MarqueeModelNG::SetMarqueeDelay(const std::optional<int32_t>& delay)

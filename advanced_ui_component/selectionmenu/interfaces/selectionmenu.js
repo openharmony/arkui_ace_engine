@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 const pasteboard = requireNapi('pasteboard');
 const hilog = requireNapi('hilog');
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
+const uiMaterial = requireNapi('arkui.uiMaterial');
 
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
@@ -232,6 +233,7 @@ class SelectionMenuComponent extends ViewPU {
         this.onCopy = undefined;
         this.onCut = undefined;
         this.onSelectAll = undefined;
+        this.backgroundSystemMaterial = undefined;
         this.theme = defaultTheme;
         this.builder = this.CloserFun;
         this.__showExpandedMenuOptions = new ObservedPropertySimplePU(false, this, 'showExpandedMenuOptions');
@@ -276,6 +278,9 @@ class SelectionMenuComponent extends ViewPU {
         }
         if (params.onSelectAll !== undefined) {
             this.onSelectAll = params.onSelectAll;
+        }
+        if (params.backgroundSystemMaterial !== undefined) {
+            this.backgroundSystemMaterial = params.backgroundSystemMaterial;
         }
         if (params.theme !== undefined) {
             this.theme = params.theme;
@@ -473,6 +478,20 @@ class SelectionMenuComponent extends ViewPU {
         return Boolean(showMenuOption || showBuilder);
     }
 
+    getSystemMaterial(inputMaterial) {
+        let info = uiMaterial.getMaterialInfo();
+        let isValidMaterial = inputMaterial instanceof uiMaterial.Material;
+        if (info.state === uiMaterial.MaterialState.ENABLE && !isValidMaterial) {
+            return new uiMaterial.ImmersiveMaterial({
+                style: uiMaterial.ImmersiveStyle.THICK
+            });
+        }
+        else if (!isValidMaterial || info.state === uiMaterial.MaterialState.DISABLE) {
+            return undefined;
+        }
+        return inputMaterial;
+    }
+
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -496,7 +515,8 @@ class SelectionMenuComponent extends ViewPU {
         If.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Scroll.create();
-            Scroll.backgroundColor(this.theme.backGroundColor);
+            Scroll.backgroundColor(this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                undefined : this.theme.backGroundColor);
             Scroll.shadow(this.theme.iconPanelShadowStyle);
             Scroll.borderRadius(this.theme.containerBorderRadius);
             Scroll.outline(this.hasSystemMenu() ? {
@@ -508,6 +528,7 @@ class SelectionMenuComponent extends ViewPU {
                     this.horizontalMenuHeight + this.theme.menuSpacing : 0}vp)`,
                 minWidth: this.theme.defaultMenuWidth
             });
+            Scroll.systemMaterial(this.getSystemMaterial(this.backgroundSystemMaterial));
         }, Scroll);
         this.SystemMenu.bind(this)();
         Scroll.pop();
@@ -602,7 +623,7 @@ class SelectionMenuComponent extends ViewPU {
                     }
                 }
                 if (element && element.plainText && element.mimeType === pasteboard.MIMETYPE_TEXT_PLAIN &&
-                this.controller) {
+                    this.controller) {
                     this.controller.addTextSpan(element.plainText, {
                         style: tex,
                         offset: start + moveOffset
@@ -696,7 +717,8 @@ class SelectionMenuComponent extends ViewPU {
             });
             Flex.borderRadius(this.theme.containerBorderRadius);
             Flex.margin({ bottom: this.theme.menuSpacing });
-            Flex.backgroundColor(this.theme.backGroundColor);
+            Flex.backgroundColor(this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                undefined : this.theme.backGroundColor);
             Flex.shadow(this.theme.iconPanelShadowStyle);
             Flex.border({
                 width: this.theme.borderWidth, color: this.theme.borderColor,
@@ -706,6 +728,7 @@ class SelectionMenuComponent extends ViewPU {
                 width: this.theme.outlineWidth, color: this.theme.outlineColor,
                 radius: this.theme.containerBorderRadius
             });
+            Flex.systemMaterial(this.getSystemMaterial(this.backgroundSystemMaterial));
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -719,7 +742,9 @@ class SelectionMenuComponent extends ViewPU {
                                 Button.createWithChild();
                                 Button.enabled(!(!item.action && !item.builder));
                                 Button.type(ButtonType.Normal);
-                                Button.backgroundColor(this.theme.backGroundColor);
+                                Button.backgroundColor(
+                                    this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                                        Color.Transparent : this.theme.backGroundColor);
                                 Button.onClick(() => {
                                     if (item.builder) {
                                         this.builder = item.builder;
@@ -808,6 +833,8 @@ class SelectionMenuComponent extends ViewPU {
             Column.create();
             Column.width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth);
             Column.shadow(this.theme.iconPanelShadowStyle);
+            Column.backgroundColor(
+                this.getSystemMaterial(this.backgroundSystemMaterial) ? Color.Transparent : undefined);
             Column.border({
                 width: this.theme.borderWidth, color: this.theme.borderColor,
                 radius: this.theme.containerBorderRadius
@@ -825,6 +852,8 @@ class SelectionMenuComponent extends ViewPU {
                         Menu.create();
                         Menu.radius(this.theme.containerBorderRadius);
                         Menu.clip(true);
+                        Menu.backgroundColor(
+                            this.getSystemMaterial(this.backgroundSystemMaterial) ? Color.Transparent : undefined);
                         Menu.width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth);
                         Menu.constraintSize({
                             minWidth: this.theme.defaultMenuWidth
@@ -846,6 +875,9 @@ class SelectionMenuComponent extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     MenuItemGroup.create();
+                                    MenuItemGroup.backgroundColor(
+                                        this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                                            Color.Transparent : undefined);
                                 }, MenuItemGroup);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     MenuItem.create({
@@ -856,7 +888,9 @@ class SelectionMenuComponent extends ViewPU {
                                     });
                                     MenuItem.enabled(this.cutAndCopyEnable);
                                     MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' :
-                                    this.theme.buttonSize);
+                                        this.theme.buttonSize);
+                                    MenuItem.backgroundColor(this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                                        Color.Transparent : undefined);
                                     MenuItem.borderRadius(this.theme.iconBorderRadius);
                                     MenuItem.onClick(() => {
                                         if (!this.controller) {
@@ -884,7 +918,9 @@ class SelectionMenuComponent extends ViewPU {
                                     });
                                     MenuItem.enabled(this.cutAndCopyEnable);
                                     MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' :
-                                    this.theme.buttonSize);
+                                        this.theme.buttonSize);
+                                    MenuItem.backgroundColor(this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                                        Color.Transparent : undefined);
                                     MenuItem.borderRadius(this.theme.iconBorderRadius);
                                     MenuItem.margin({ top: this.theme.menuItemPadding });
                                     MenuItem.onClick(() => {
@@ -910,7 +946,9 @@ class SelectionMenuComponent extends ViewPU {
                                     });
                                     MenuItem.enabled(this.pasteEnable);
                                     MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' :
-                                    this.theme.buttonSize);
+                                        this.theme.buttonSize);
+                                    MenuItem.backgroundColor(this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                                        Color.Transparent : undefined);
                                     MenuItem.borderRadius(this.theme.iconBorderRadius);
                                     MenuItem.margin({ top: this.theme.menuItemPadding });
                                     MenuItem.onClick(() => {
@@ -936,7 +974,9 @@ class SelectionMenuComponent extends ViewPU {
                                     });
                                     MenuItem.visibility(this.visibilityValue);
                                     MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' :
-                                    this.theme.buttonSize);
+                                        this.theme.buttonSize);
+                                    MenuItem.backgroundColor(this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                                        Color.Transparent : undefined);
                                     MenuItem.borderRadius(this.theme.iconBorderRadius);
                                     MenuItem.margin({ top: this.theme.menuItemPadding });
                                     MenuItem.onClick(() => {
@@ -965,7 +1005,7 @@ class SelectionMenuComponent extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.controller && !this.showExpandedMenuOptions &&
-                        this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
+                            this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     MenuItem.create({
@@ -974,7 +1014,9 @@ class SelectionMenuComponent extends ViewPU {
                                         symbolEndIcon: this.theme.defaultSymbolTheme.symbolArrowDownIcon
                                     });
                                     MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' :
-                                    this.theme.buttonSize);
+                                        this.theme.buttonSize);
+                                    MenuItem.backgroundColor(this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                                        Color.Transparent : undefined);
                                     MenuItem.borderRadius(this.theme.iconBorderRadius);
                                     MenuItem.margin({ top: this.theme.menuItemPadding });
                                     MenuItem.onClick(() => {
@@ -1001,7 +1043,10 @@ class SelectionMenuComponent extends ViewPU {
                                                 builder: expandedMenuOptionItem.builder
                                             });
                                             MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' :
-                                            this.theme.buttonSize);
+                                                this.theme.buttonSize);
+                                            MenuItem.backgroundColor(
+                                                this.getSystemMaterial(this.backgroundSystemMaterial) ?
+                                                    Color.Transparent : undefined);
                                             MenuItem.borderRadius(this.theme.iconBorderRadius);
                                             MenuItem.margin({ top: this.theme.menuItemPadding });
                                             MenuItem.onClick(() => {
@@ -1029,6 +1074,8 @@ class SelectionMenuComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
+                        Column.backgroundColor(
+                            this.getSystemMaterial(this.backgroundSystemMaterial) ? Color.Transparent : undefined);
                         Column.width(this.horizontalMenuWidth);
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1072,7 +1119,8 @@ export function SelectionMenu(options, parent = null) {
                     onPaste: options.onPaste,
                     onCopy: options.onCopy,
                     onCut: options.onCut,
-                    onSelectAll: options.onSelectAll
+                    onSelectAll: options.onSelectAll,
+                    backgroundSystemMaterial: options.backgroundSystemMaterial
                 }, undefined, elmtId, () => {
                 }, { page: 'SelectionMenu/src/main/ets/components/MainPage.ets', line: 633, col: 3 });
                 ViewPU.create(componentCall);
@@ -1084,7 +1132,8 @@ export function SelectionMenu(options, parent = null) {
                         onPaste: options.onPaste,
                         onCopy: options.onCopy,
                         onCut: options.onCut,
-                        onSelectAll: options.onSelectAll
+                        onSelectAll: options.onSelectAll,
+                        backgroundSystemMaterial: options.backgroundSystemMaterial
                     };
                 };
                 componentCall.paramsGenerator_ = paramsLambda;

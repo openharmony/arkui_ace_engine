@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "drawable_descriptor.h"
+
+#include "drawable_log.h"
 
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "application_context.h"
@@ -49,7 +51,6 @@
 #else
 #include "image_source_preview.h"
 #endif
-#include "base/log.h"
 
 namespace OHOS {
 namespace Ace {
@@ -886,8 +887,6 @@ void LayeredDrawableDescriptor::InitBlendMode()
         blendMode_ = static_cast<int32_t>(Rosen::Drawing::BlendMode::SRC_OVER);
     }
 }
-
-// drawable factory implement
 std::unique_ptr<DrawableDescriptor> DrawableDescriptorFactory::Create(int32_t id,
     const SharedResourceManager& resourceMgr, RState& state, DrawableType& drawableType, uint32_t density,
     bool foregroundOverBackground)

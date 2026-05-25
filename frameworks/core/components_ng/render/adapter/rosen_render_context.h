@@ -21,9 +21,11 @@
 #include <optional>
 #include <utility>
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
+#endif
 #include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/modifier_ng/appearance/rs_alpha_modifier.h"
 #include "render_service_client/core/modifier_ng/appearance/rs_behind_window_filter_modifier.h"
@@ -56,9 +58,13 @@
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
-#include "core/components_ng/property/particle_property.h"
 
 namespace OHOS::Ace::NG {
+struct EmitterOption;
+struct VelocityProperty;
+struct AccelerationProperty;
+struct ParticleColorPropertyOption;
+struct ParticleFloatPropertyOption;
 class BackgroundModifier;
 class TransitionModifier;
 class BorderImageModifier;
@@ -501,6 +507,7 @@ public:
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface(int width, int height) override;
     void SetMarkNodeGroup(bool isNodeGroup) override;
+    void SetLayerMark(bool isLayer) override;
     int32_t GetRotateDegree() override;
     void PaintDebugBoundary(bool flag) override;
     void PaintGestureDebugBoundary(const std::optional<GestureDebugBoundaryInfo>& info) override;
@@ -615,6 +622,8 @@ public:
     void ResetEdgeLightFilter() override;
 
     void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) override;
+
+    void OnDoubleSidedUpdate(bool doubleSided) override;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.

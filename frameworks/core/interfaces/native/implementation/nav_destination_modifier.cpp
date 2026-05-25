@@ -17,6 +17,7 @@
 
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -410,6 +411,14 @@ void SetEnableNavigationIndicatorImpl(Ark_NativePointer node,
     }
     NavDestinationModelStatic::SetEnableNavigationIndicator(frameNode, enabled);
 }
+void SetFullScreenOverlayImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto enabled = Converter::OptConvertPtr<bool>(value);
+    NavDestinationModelNG::SetFullScreenOverlay(frameNode, enabled);
+}
 void EnableNavigationIndicatorImpl(Ark_NativePointer node,
                                    const Opt_Boolean* value)
 {
@@ -773,6 +782,7 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::SetOnNewParamImpl,
         NavDestinationAttributeModifier::SetPreferredOrientationImpl,
         NavDestinationAttributeModifier::SetEnableNavigationIndicatorImpl,
+        NavDestinationAttributeModifier::SetFullScreenOverlayImpl,
         NavDestinationAttributeModifier::SetTitleImpl,
         NavDestinationAttributeModifier::SetHideTitleBar1Impl,
         NavDestinationAttributeModifier::SetBackButtonIconImpl,

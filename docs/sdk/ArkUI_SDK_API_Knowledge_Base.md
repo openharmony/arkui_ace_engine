@@ -8,10 +8,10 @@
 
 ---
 
-## Claude 参考指南
+## Agent 参考指南
 
 ### 文档用途
-本文档是 Claude 的内部参考知识库，用于：
+本文档是 Agent 的内部参考知识库，用于：
 1. **快速定位 SDK API 与实现层的映射关系** - 当用户询问组件功能时，能迅速找到源码位置
 2. **理解 ArkUI 架构层次** - 区分 Static API、Dynamic API、ace_engine Pattern 的职责
 3. **准确回答开发问题** - 提供基于实际代码的权威答案，避免猜测
@@ -61,7 +61,7 @@
 | API 快速参考 | 第 8 章 "API 快速参考" |
 
 ### 代码验证原则
-根据 ace_engine 的 **CLAUDE.md** 原则，回答问题时：
+根据 ace_engine 的 **AGENTS.md** 原则，回答问题时：
 1. **Always provide actual code** - 使用 Read/Grep 工具读取实际源码
 2. **Never guess** - 如果代码未找到，明确说明"此代码在 ace_engine 中未找到"
 3. **Verify before answering** - 用户建议可能有误，务必验证实际代码
@@ -72,43 +72,32 @@
 ## 1. 目录结构概览
 
 ```
-OpenHarmony/interface/sdk-js/api/arkui/
-├── [根目录]                           # 核心 Node API 和 Modifier 接口
-│   ├── FrameNode.d.ts                # 框架节点定义
-│   ├── BuilderNode.d.ts              # 构建器节点定义
-│   ├── RenderNode.d.ts               # 渲染节点定义
-│   ├── Graphics.d.ts                 # 图形绘制类型定义
-│   ├── CommonModifier.d.ts           # 通用属性修饰器
-│   ├── XComponentNode.d.ts           # XComponent 组件节点
-│   ├── NodeContent.d.ts              # 节点内容封装
-│   ├── ComponentContent.d.ts         # 组件内容封装
-│   ├── [76个 *Modifier.d.ts 文件]    # 动态 API: Modifier 类定义
-│   └── [74个 *Modifier.static.d.ets] # 静态 API: Component 定义
-├── component/                        # 组件静态接口定义 (129 个文件)
-│   ├── button.static.d.ets
-│   ├── text.static.d.ets
-│   ├── list.static.d.ets
-│   ├── grid.static.d.ets
-│   └── [... 126 个其他组件]
-├── incremental/                      # 增量渲染 API
-│   └── runtime/
-│       └── state.static.d.ets        # 增量状态管理
-└── stateManagement/                  # 状态管理 API
-    ├── decorator.static.d.ets        # 状态装饰器
-    ├── remember.static.d.ets         # 记忆函数
-    ├── utils.static.d.ets            # 工具函数
-    └── storage/                      # 存储相关
-        ├── appStorage.static.d.ets
-        ├── localStorage.static.d.ets
-        └── [... 4 个存储相关文件]
+OpenHarmony/interface/sdk-js/api/
+├── arkui/
+│   ├── component/                         # 静态 API：组件+属性定义（*.static.d.ets）
+│   │   ├── column.static.d.ets
+│   │   ├── text.static.d.ets
+│   │   ├── button.static.d.ets
+│   │   └── [... 130 个静态组件定义文件]
+│   ├── [76个 *Modifier.d.ts 文件]        # 动态 API：Modifier 定义
+│   ├── [74个 *Modifier.static.d.ets 文件] # 静态 API：Modifier 定义
+│   ├── FrameNode.d.ts / BuilderNode.d.ts / RenderNode.d.ts
+│   ├── FrameNode.static.d.ets / BuilderNode.static.d.ets / RenderNode.static.d.ets
+│   ├── stateManagement/                  # 状态管理静态 API
+│   └── incremental/                      # 增量渲染静态 API
+└── @internal/component/ets/
+    ├── column.d.ts                       # 动态 API：组件+属性定义
+    ├── text.d.ts
+    ├── button.d.ts
+    └── [... 140 个动态组件定义文件]
 ```
 
-**统计概览**:
-- 根目录文件总数: 169 个
-- component 目录文件: 129 个
-- Modifier.d.ts 文件: 76 个
-- Modifier.static.d.ets 文件: 74 个
-- 总计 API 定义文件: **298 个**
+**统计概览（当前仓库快照）**:
+- `arkui/` 根目录文件: 172 个
+- `arkui/component/*.static.d.ets`: 130 个
+- `arkui/*Modifier.d.ts`: 76 个
+- `arkui/*Modifier.static.d.ets`: 74 个
+- `@internal/component/ets/*.d.ts`: 140 个
 
 ---
 
@@ -1423,52 +1412,74 @@ BuilderNode<Args> (构建器节点)
 
 | SDK API 类型 | ace_engine 层次 | 路径示例 |
 |-------------|-----------------|----------|
-| **Static API (.static.d.ets)** | Bridge 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/` |
-| **Dynamic API (*.d.ts)** | Core 层 (Pattern + Property) | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/` |
+| **Static API 组件/属性定义 (`component/*.static.d.ets`)** | Bridge 层（ArkTS Static 前端） | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/` |
+| **Static API Modifier (`*Modifier.static.d.ets`)** | Bridge 层（ArkTS Static 前端） | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/` |
+| **Dynamic API 组件/属性定义 (`@internal/component/ets/*.d.ts`)** | Bridge 层（Declarative 前端） | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/` |
+| **Dynamic API Modifier (`*Modifier.d.ts`)** | Bridge 层（Declarative 前端） | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_modifier/` |
 | **FrameNode** | Base 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.h` |
 | **BuilderNode** | Bridge 层 + Core 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_view_builder_node.cpp` |
 | **RenderNode** | Render 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/render_node.h` |
-| **Modifier** | Property 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/*_property.cpp` |
+| **Native Node Modifier 实现汇聚点** | Core Native Node 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/interfaces/native/node/node_modifiers.cpp` |
 | **状态管理** | Bridge 层 State Management | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/` |
 
-### 9.2 组件从 SDK 到 ace_engine 的完整路径
+### 9.2 组件从 SDK 到 ace_engine 的完整路径（双轨）
 
-**示例**: Text 组件
+**示例 A：Dynamic API（Column）**
 
 ```
 应用层 (App)
   ↓
-SDK API 层 (OpenHarmony/interface/sdk-js/api/arkui/)
-  ├── text.static.d.ets          (Static API - 声明式语法)
-  └── TextModifier.d.ts           (Dynamic API - 声明式配置对象)
+SDK API 层
+  ├── OpenHarmony/interface/sdk-js/api/@internal/component/ets/column.d.ts
+  └── OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.d.ts
   ↓
-ace_engine 层 (OpenHarmony/foundation/arkui/ace_engine/)
-  ├── Bridge 层
-  │   ├── frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp  (Static API 实现)
-  │   └── frameworks/bridge/declarative_frontend/jsview/js_text.cpp             (Dynamic API 实现)
-  └── Core 层
-      ├── Pattern 层
-      │   ├── frameworks/core/components_ng/pattern/text/text_pattern.h
-      │   └── frameworks/core/components_ng/pattern/text/text_pattern.cpp
-      ├── Property 层
-      │   ├── frameworks/core/components_ng/property/text_property.h
-      │   └── frameworks/core/components_ng/property/text_property.cpp
-      └── Render 层
-          └── frameworks/core/components_ng/render/text_render_property.cpp
+Bridge 层（declarative_frontend）
+  ├── frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register_impl_ng.cpp
+  ├── frameworks/bridge/declarative_frontend/jsview/js_column.cpp
+  ├── frameworks/bridge/declarative_frontend/ark_component/src/ArkColumn.ts
+  ├── frameworks/bridge/declarative_frontend/ark_modifier/src/column_modifier.ts
+  └── frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.cpp
+  ↓
+Core Native Node Modifier
+  └── frameworks/core/interfaces/native/node/column_modifier.cpp
+  ↓
+Core Pattern / Layout / Render
+  └── frameworks/core/components_ng/pattern/linear_layout/
+```
+
+**示例 B：Static API（Column）**
+
+```
+应用层 (App)
+  ↓
+SDK API 层
+  ├── OpenHarmony/interface/sdk-js/api/arkui/component/column.static.d.ets
+  └── OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.static.d.ets
+  ↓
+Bridge 层（arkts_frontend）
+  ├── frameworks/bridge/arkts_frontend/arkoala_generator/BUILD.gn
+  │   └── --input: ${ohos_ets_api_path}
+  ├── frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/column.ets
+  ├── frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/ColumnModifier.ets
+  └── frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/BUILD.gn
+      └── generate_static_abc(...)-> modules_static.abc -> components.abc
+  ↓
+Native Node Modifier
+  └── frameworks/core/interfaces/native/node/column_modifier.cpp
 ```
 
 ### 9.3 关键文件路径对照表
 
-| SDK API 文件 | ace_engine 实现文件 |
+| SDK API 文件 | ace_engine 关联实现 |
 |-------------|-------------------|
-| `OpenHarmony/interface/sdk-js/api/arkui/FrameNode.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/BuilderNode.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_view_builder_node.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/RenderNode.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/render_node.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/ButtonModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/button_property.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/component/button.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_button_modifier.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/` |
+| `OpenHarmony/interface/sdk-js/api/@internal/component/ets/column.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_column.cpp` |
+| `OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_modifier/src/column_modifier.ts` |
+| `OpenHarmony/interface/sdk-js/api/arkui/component/column.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/column.ets` |
+| `OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/ColumnModifier.ets` |
+| `OpenHarmony/interface/sdk-js/api/@internal/component/ets/text.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp` |
+| `OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_modifier/src/text_modifier.ts` |
+| `OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/text.ets` |
+| `OpenHarmony/interface/sdk-js/api/arkui/TextModifier.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/TextModifier.ets` |
 
 ---
 
@@ -1617,6 +1628,7 @@ builderNode.dispose()        // 销毁
 | 类型 | 命名规则 | 示例 |
 |------|----------|------|
 | Static API | `{componentName}.static.d.ets` | `text.static.d.ets` |
+| Dynamic API (Component) | `@internal/component/ets/{component}.d.ts` | `text.d.ts` |
 | Dynamic API (Modifier) | `{ComponentName}Modifier.d.ts` | `TextModifier.d.ts` |
 | 状态管理 | `{category}/{name}.static.d.ets` | `stateManagement/decorator.static.d.ets` |
 
@@ -1640,9 +1652,11 @@ builderNode.dispose()        // 销毁
 ```
 Text 组件
 ├── SDK API (Static):     OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets
-├── SDK API (Dynamic):    OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts
-├── Bridge 层 (Static):   OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp
+├── SDK API (Dynamic):    OpenHarmony/interface/sdk-js/api/@internal/component/ets/text.d.ts
+├── SDK API (Dynamic Modifier): OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts
+├── Bridge 层 (Static):   OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/
 ├── Bridge 层 (Dynamic):  OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp
+├── Native Node Modifier: OpenHarmony/foundation/arkui/ace_engine/frameworks/core/interfaces/native/node/node_text_modifier.cpp
 ├── Pattern 层:           OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp
 ├── Property 层:          OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp
 └── Render 层:            OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/text_render_property.cpp
@@ -1755,57 +1769,68 @@ A: SDK API 是应用开发者使用的接口，ace_engine 是底层实现：
 ┌─────────────────────────────────────┐
 │  ace_engine 实现层                  │
 │  OpenHarmony/foundation/arkui/ace_engine/
-│  - Bridge 层 (Static API 实现)      │
-│  - Core 层 (Pattern + Property)     │
-│  - Render 层 (绘制)                 │
+│  - Dynamic: declarative_frontend    │
+│  - Static:  arkts_frontend          │
+│  - Core: Pattern/Layout/Render      │
 └─────────────────────────────────────┘
 ```
 
 **关键要点**:
 - SDK API 定义接口契约（TypeScript/ETS）
 - ace_engine 提供实际实现（C++）
-- Static API 通过 Bridge 层连接到 Core 层
-- Dynamic API 直接操作 Core 层
+- Dynamic API（组件/属性 + Modifier）主要走 `frameworks/bridge/declarative_frontend/`
+- Static API（组件/属性 + Modifier）主要走 `frameworks/bridge/arkts_frontend/`
+- 两条路径最终都汇聚到 Core Native Node Modifier 和 NG Pattern
 
-### 10.2 Static API 和 Dynamic API 的区别
+### 13.2 Static API 和 Dynamic API 的区别
 
 **Q: Static API (.static.d.ets) 和 Dynamic API (*.d.ts) 有什么区别？**
 
-A:
+A: Static API 和 Dynamic API 是**两套完整的、并行的 API 体系**，覆盖相同的功能范围，各自包含组件属性接口和 Modifier 动态修改接口。两者的核心区别在于**语法细节、编译链路和运行时**，而非功能或使用场景。
 
 | 特性 | Static API | Dynamic API |
 |------|-----------|-------------|
-| **文件类型** | `.static.d.ets` | `*.d.ts` |
-| **使用方式** | 声明式 `Text().width(100)` | 声明式 `new TextModifier().width(100)` |
-| **实现位置** | Modifier 层 | Bridge 层 |
-| **性能** | 编译时优化 | 运行时动态设置 |
-| **灵活性** | 较低，编译时确定 | 高，可动态修改 |
-| **适用场景** | 常规 UI 开发 | 动态属性修改、复用 |
+| **组件/属性定义文件** | `arkui/component/*.static.d.ets` | `@internal/component/ets/*.d.ts` |
+| **Modifier 定义文件** | `arkui/*Modifier.static.d.ets` | `arkui/*Modifier.d.ts` |
+| **主要实现路径** | `frameworks/bridge/arkts_frontend/` | `frameworks/bridge/declarative_frontend/` |
+| **编译链路** | koala 代码生成 → `components.abc`（AOT） | JS/ArkTS bridge 运行时分发 |
+| **运行时** | 静态编译执行 | 运行时动态分发 |
+| **语法差异** | 面向静态编译优化的 ArkTS 语法 | 标准 ArkTS/TypeScript 语法 |
 
-**说明**：两者都是声明式 API，Dynamic API 的 "Dynamic" 指的是支持运行时动态修改属性值，而非使用方式是命令式的。
+**关键要点**：
+- 两套 API **功能对等**，均支持组件属性设置和 Modifier 动态修改
+- 开发者使用层面的写法基本一致，部分语法有针对静态类型的差异
+- 编译和运行时完全不同：Static API 通过 koala 生成静态字节码，Dynamic API 通过 bridge 运行时分发
+- 同一组件在两套 API 中有各自独立的 Modifier 文件（如 `TextModifier.static.d.ets` 和 `TextModifier.d.ts`）
 
-**示例对比**:
+**示例**：两套 API 均支持组件属性设置和 Modifier 动态修改：
+
 ```typescript
-// Static API (推荐用于常规开发)
+// ===== 组件属性设置（两套 API 写法基本一致）=====
 Text('Hello')
   .fontSize(20)
   .fontColor(Color.Red)
 
-// Dynamic API (推荐用于动态属性修改和复用)
-const modifier = new TextModifier()  // 声明式创建配置对象
-modifier.fontSize(20)                // 声明式设置属性
-modifier.fontColor(Color.Red)
-Text().attribute(modifier)           // 应用配置
-// modifier 可以复用，动态修改属性
+// ===== Modifier 动态修改（两套 API 各自有独立的 Modifier 实现）=====
+
+// Static API Modifier（对应 TextModifier.static.d.ets）
+const staticModifier = new TextModifier()
+staticModifier.fontSize(20)
+Text().attribute(staticModifier)
+
+// Dynamic API Modifier（对应 TextModifier.d.ts）
+const dynamicModifier = new TextModifier()
+dynamicModifier.fontSize(20)
+Text().attribute(dynamicModifier)
 ```
 
-**Q: 什么时候用 Dynamic API？**
+**Q: 如何选择使用哪套 API？**
 
-A: 以下场景优先使用 Dynamic API：
-- 需要复用属性配置
-- 动态切换组件属性
-- 与 C++/Cangjie 等其他语言交互
-- 需要精细控制属性更新时机
+A: 选择依据主要是编译链路和运行时环境的差异，而非功能场景：
+- 根据应用使用的编译工具链选择对应的 API
+- 在需要静态编译优化（AOT）的场景优先使用 Static API
+- 在需要运行时动态分发能力的场景优先使用 Dynamic API
+- 与 C++/Cangjie 等其他语言交互时，具体选择取决于集成方式
 
 ### 13.3 如何查找组件实现
 
@@ -1820,9 +1845,9 @@ A: 按以下步骤操作：
 3. **查找 Property 文件**:
    - 路径: `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/`
    - 文件: `{component}_property.cpp`
-4. **查找 Bridge 实现** (Static API):
-   - 路径: `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/`
-   - 文件: `js_{component}.cpp`
+4. **查找 Bridge 实现**:
+   - Dynamic API 路径: `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/`
+   - Static API 路径: `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/`
 
 **快捷工具**: 使用本知识库"第 3 章 组件 API 分类清单"快速查找
 
@@ -1897,23 +1922,22 @@ uiContext.runTask(() => {
 })
 ```
 
-#### 陷阱 5: Static 和 Dynamic API 混用不当
+#### 陷阱 5: Attribute 链式调用与 Modifier 混用不当
 ```typescript
-// ❌ 可能的问题
+// ❌ 可能的问题：在同一 API 体系内混用 Attribute 链式调用和 Modifier
 const text = Text('Hello')
 const modifier = new TextModifier()
 modifier.fontSize(20)
-text.fontSize(30)  // Static 设置覆盖了 Dynamic，行为不确定
+text.fontSize(30)  // Attribute 设置与 Modifier 设置冲突，行为不确定
 
 // ✅ 明确使用一种方式
-// 方式 1: 纯 Static
+// 方式 1: 纯 Attribute 链式调用
 Text('Hello').fontSize(20)
 
-// 方式 2: 纯 Dynamic
+// 方式 2: 纯 Modifier 模式
 const modifier = new TextModifier()
 modifier.fontSize(20)
-const frameNode = FrameNode.create(uiContext, 'Text')
-frameNode.appendChild(modifier)
+Text().attribute(modifier)
 ```
 
 ### 13.6 性能优化建议
@@ -1937,17 +1961,18 @@ A: 关键优化点：
 
 **步骤 1: 确定入口点**
 ```
-应用代码 → SDK API (.static.d.ets / *.d.ts)
+应用代码 → SDK API（先区分 Static 还是 Dynamic）
 ```
 
 **步骤 2: 找到 Bridge 实现**
 ```
-SDK API → frameworks/bridge/declarative_frontend/jsview/js_*.cpp
+Dynamic API  → frameworks/bridge/declarative_frontend/
+Static API   → frameworks/bridge/arkts_frontend/
 ```
 
 **步骤 3: 定位 Pattern 实现**
 ```
-Bridge → frameworks/core/components_ng/pattern/*/*_pattern.cpp
+Bridge/NativeNodeModifier → frameworks/core/components_ng/pattern/*/*_pattern.cpp
 ```
 
 **步骤 4: 查看 Property 和 Render**
@@ -1956,24 +1981,35 @@ Pattern → frameworks/core/components_ng/property/*_property.cpp
 Pattern → frameworks/core/components_ng/render/*_render_property.cpp
 ```
 
-**示例追踪 Text 组件**:
+**示例追踪 Text 组件（Dynamic + Static）**:
 ```bash
-# 1. 从 SDK API 开始
-OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets
+# 1) Dynamic API 定义
+OpenHarmony/interface/sdk-js/api/@internal/component/ets/text.d.ts
+OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts
 
-# 2. Bridge 层实现 (Static API)
-OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp
-
-# 3. Bridge 层实现 (Dynamic API)
+# 2) Dynamic Bridge 层实现
 OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_modifier/src/text_modifier.ts
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.cpp
 
-# 4. Pattern 层实现
+# 3) Static API 定义
+OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets
+OpenHarmony/interface/sdk-js/api/arkui/TextModifier.static.d.ets
+
+# 4) Static Bridge 层实现
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/text.ets
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/TextModifier.ets
+
+# 5) Native Node Modifier
+OpenHarmony/foundation/arkui/ace_engine/frameworks/core/interfaces/native/node/node_text_modifier.cpp
+
+# 6) Pattern 层实现
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp
 
-# 5. Property 层
+# 7) Property 层
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp
 
-# 6. Render 层
+# 8) Render 层
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/text_render_property.cpp
 ```
 
@@ -2047,21 +2083,25 @@ grep "Layout" performance.log | awk '{print $1, $2, $NF}'
 
 #### 15.1.1 Static API vs Dynamic API 调用路径
 
-**Static API（声明式语法）**：
-```typescript
-Text('Hello').fontSize(20)
-```
-- **实现路径**: `node_text_modifier.cpp` (Modifier 层）
-- **说明**: Static API 的 "Static" 指的是声明式语法（Declarative Syntax），不是"静态"的意思
+> **注意**：Static API 和 Dynamic API 是两套并行的完整 API，均支持组件属性设置和 Modifier 动态修改。核心区别在于编译链路和运行时，而非功能或使用方式。
 
-**Dynamic API（Modifier 模式）**：
-```typescript
-const modifier = new TextModifier()
-modifier.fontSize(20)
-Text().attribute(modifier)
-```
-- **实现路径**: `js_text.cpp` (Bridge 层）
-- **说明**: Dynamic API 的 "Dynamic" 指的是命令式动态修改（Imperative Dynamic Modification）
+**Static API 路径**：
+
+Static API 的组件属性设置和 Modifier 动态修改均通过 `arkts_frontend` 编译链路：
+- **实现路径**: `frameworks/bridge/arkts_frontend/`（koala 生成链路）
+- **关键文件**:
+  - `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/text.ets`
+  - `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/TextModifier.ets`
+  - `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/BUILD.gn`（`generate_static_abc`）
+
+**Dynamic API 路径**：
+
+Dynamic API 的组件属性设置和 Modifier 动态修改均通过 `declarative_frontend` 运行时链路：
+- **实现路径**: `frameworks/bridge/declarative_frontend/`（jsview + ark_modifier + native bridge）
+- **关键文件**:
+  - `frameworks/bridge/declarative_frontend/jsview/js_text.cpp`
+  - `frameworks/bridge/declarative_frontend/ark_modifier/src/text_modifier.ts`
+  - `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.cpp`
 
 #### 15.1.2 Static API 完整调用链
 
@@ -2072,7 +2112,9 @@ Text().attribute(modifier)
   ↓
 Static API: text.static.d.ets (TextAttribute 接口)
   ↓
-Modifier 层: node_text_modifier.cpp (SetTextFontSize)
+arkts_frontend: generated/component/text.ets + generated/TextModifier.ets
+  ↓
+Core Native Node Modifier: node_text_modifier.cpp
   ↓
 Property 层: text_property.cpp (TextProperty::SetFontSize)
   ↓
@@ -2085,7 +2127,9 @@ Render 层: text_render_property.cpp (Paint 方法)
 
 **快速查找实现代码的路径**：
 - **Static API**: `interface/sdk-js/api/arkui/component/text.static.d.ets`
-- **Modifier 层**: `ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp`
+- **Static Bridge**: `ace_engine/frameworks/bridge/arkts_frontend/`
+- **Dynamic Bridge**: `ace_engine/frameworks/bridge/declarative_frontend/`
+- **Native Node Modifier**: `ace_engine/frameworks/core/interfaces/native/node/node_text_modifier.cpp`
 - **Property 层**: `ace_engine/frameworks/core/components_ng/property/text_property.cpp`
 - **Pattern 层**: `ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp`
 - **Render 层**: `ace_engine/frameworks/core/components_ng/render/text_render_property.cpp`
@@ -2127,7 +2171,7 @@ struct Example {
 | **链式调用** | ✅ | ❌ | ❌ |
 | **配置复用** | ❌ | ✅ | ⚠️ |
 | **动态修改** | ⚠️ | ✅ | ❌ |
-| **推荐场景** | 常规 UI 开发 | 属性复用 | 组件初始化 |
+| **推荐场景** | 内联属性设置 | 属性复用和动态修改 | 组件初始化参数 |
 
 **说明**：
 

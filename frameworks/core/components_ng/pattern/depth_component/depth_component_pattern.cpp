@@ -320,6 +320,7 @@ void DepthComponentPattern::OnPaint3D()
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     if (IsGltfBackground() && mrtDepthAdapter_) {
         mrtDepthAdapter_->RenderFrame();
+        MarkRender3D();
     }
 #endif
 }
@@ -727,7 +728,9 @@ void DepthComponentPattern::MarkRender3D()
     ACE_FUNCTION_TRACE();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (host->IsOnMainTree()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 #endif

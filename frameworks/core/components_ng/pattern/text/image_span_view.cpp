@@ -39,11 +39,13 @@ void ImageSpanView::SetVerticalAlign(FrameNode* frameNode, VerticalAlign vertica
 void ImageSpanView::SetBaselineOffset(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BASE_LINE_OFFSET);
 }
 
 void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BASE_LINE_OFFSET, frameNode);
 }
 
 float ImageSpanView::GetBaselineOffset(FrameNode* frameNode, int32_t unit)

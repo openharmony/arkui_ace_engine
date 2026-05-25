@@ -1556,4 +1556,71 @@ HWTEST_F(SheetPresentationTestSixNg, TranslateTo001, TestSize.Level1)
     EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 100.0f);
     SheetPresentationTestSixNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: UpdateSheetRenderForceShadow001
+ * @tc.desc: Test OverlayManager::UpdateSheetRender branch: systemMaterial with IsForceShadow()=true
+ *           skips shadow update, node shadow should remain unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, UpdateSheetRenderForceShadow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheetNode and get render context
+     */
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. set initial shadow on the node
+     */
+    Shadow initialShadow;
+    initialShadow.SetBlurRadius(10.0f);
+    initialShadow.SetColor(Color::RED);
+    initialShadow.SetOffsetX(5.0f);
+    initialShadow.SetOffsetY(5.0f);
+    renderContext->UpdateBackShadow(initialShadow);
+    ASSERT_TRUE(renderContext->GetBackShadow().has_value());
+    ASSERT_EQ(renderContext->GetBackShadow().value(), initialShadow);
+
+    /**
+     * @tc.steps: step3. create sheetStyle with shadow and systemMaterial where IsForceShadow()=true
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ImmersiveOptions options;
+    options.applyShadow = true;
+    material->SetImmersiveOptions(options);
+
+    SheetStyle sheetStyle;
+    Shadow sheetShadow;
+    sheetShadow.SetBlurRadius(20.0f);
+    sheetShadow.SetColor(Color::BLUE);
+    sheetShadow.SetOffsetX(10.0f);
+    sheetShadow.SetOffsetY(10.0f);
+    sheetStyle.shadow = sheetShadow;
+    sheetStyle.systemMaterial = material;
+
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. call UpdateSheetRender
+     * @tc.expected: shadow should NOT be updated (still initialShadow)
+     *               because systemMaterial with IsForceShadow()=true skips shadow update
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->UpdateSheetRender(sheetNode, sheetStyle, false);
+    EXPECT_TRUE(renderContext->GetBackShadow().has_value());
+    EXPECT_EQ(renderContext->GetBackShadow().value(), initialShadow);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

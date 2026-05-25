@@ -1108,9 +1108,8 @@ void ParagraphStyleSpan::AddParagraphStylePart2(const RefPtr<NG::SpanItem>& span
         resourceUpdater.updateFunc = updateFunc;
         spanItem->AddResourceObj("colorShaderStyle", resourceUpdater);
     }
-    auto gradient = paragraphStyle_.GetGradient();
-    if (gradient.has_value()) {
-        spanItem->textLineStyle->SetOptGradient(gradient.value());
+    if (paragraphStyle_.HasGradient()) {
+        spanItem->textLineStyle->SetOptGradient(paragraphStyle_.GetOptGradient());
     }
 }
 

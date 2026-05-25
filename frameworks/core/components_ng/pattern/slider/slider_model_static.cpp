@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 void SliderModelStatic::SetThickness(FrameNode* frameNode, const std::optional<Dimension>& thickness)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(thickness, LpxAttribute::LPX_TRACK_THICKNESS, frameNode);
     auto value = Dimension();
     if (thickness.has_value()) {
         value = thickness.value();
@@ -60,6 +61,7 @@ void SliderModelStatic::SetThickness(FrameNode* frameNode, const std::optional<D
 void SliderModelStatic::SetStepSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_STEP_SIZE, frameNode);
     if (value.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value.value(), frameNode);
     } else {
@@ -81,6 +83,8 @@ void SliderModelStatic::SetBlockSize(FrameNode* frameNode,
     const std::optional<Dimension>& widthParam, const std::optional<Dimension>& heightParam)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(widthParam, LpxAttribute::LPX_BLOCK_SIZE_WIDTH, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(heightParam, LpxAttribute::LPX_BLOCK_SIZE_HEIGHT, frameNode);
     if (!widthParam.has_value() || !heightParam.has_value()) {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(SliderLayoutProperty, BlockSize, PROPERTY_UPDATE_MEASURE, frameNode);
         return;
@@ -113,6 +117,7 @@ void SliderModelStatic::SetBlockSize(FrameNode* frameNode,
 void SliderModelStatic::SetTrackBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TRACK_BORDER_RADIUS, frameNode);
     if (value.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value.value(), frameNode);
     } else {
@@ -145,6 +150,7 @@ void SliderModelStatic::SetBlockBorderColor(FrameNode* frameNode, const std::opt
 void SliderModelStatic::SetBlockBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BLOCK_BORDER_WIDTH, frameNode);
     if (value.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth, value.value(), frameNode);
     } else {
@@ -372,6 +378,7 @@ void SliderModelStatic::SetValidSlideRange(FrameNode* frameNode,
 void SliderModelStatic::SetSelectedBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_SELECTED_BORDER_RADIUS, frameNode);
     if (value.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value.value(), frameNode);
     } else {

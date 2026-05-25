@@ -766,6 +766,7 @@ private:
     OnDidStopDraggingCallback onDidStopDraggingCallback_;
     OnWillStartFlingCallback onWillStartFlingCallback_;
     OnDidStopFlingCallback onDidStopFlingCallback_;
+
     Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;

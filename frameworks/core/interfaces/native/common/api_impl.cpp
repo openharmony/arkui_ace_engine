@@ -23,10 +23,12 @@
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #include "arkoala_api_generated.h"
 #include "arkoala-macros.h"

@@ -193,6 +193,27 @@ HWTEST_F(SwiperIndicatorTestNg, UpdateSelectedCenterXOnDrag007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSelectedCenterXOnDrag008
+ * @tc.desc: Test OverlengthDotIndicatorModifier UpdateSelectedCenterXOnDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, UpdateSelectedCenterXOnDrag008, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    modifier.overlongSelectedEndCenterX_.first = 5.0f;
+    modifier.overlongSelectedEndCenterX_.second = 2.0f;
+    modifier.isDraggingIndicator_ = false;
+    modifier.isSwiperTouchDown_ = true;
+    modifier.targetSelectedIndex_ = 1;
+    modifier.UpdateSelectedCenterXOnDrag(itemHalfSizes);
+    EXPECT_EQ(modifier.overlongSelectedEndCenterX_.first, 0.0f);
+}
+
+/**
  * @tc.name: GetMoveRateOnAllMove001
  * @tc.desc: Test OverlengthDotIndicatorModifier GetMoveRateOnAllMove
  * @tc.type: FUNC

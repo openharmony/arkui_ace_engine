@@ -2,8 +2,10 @@
     "DeletedPackages": [
         "arkui.component.interop",
         "arkui.component.customComponent",
+        "arkui.component.dynamicComponent",
         "arkui.component.repeat",
         "arkui.component.repeat",
+        "arkui.component.securityUIExtensionComponent",
         "arkui.stateManagement.utils",
         "ohos.buffer",
         "ohos.util.ArrayList",

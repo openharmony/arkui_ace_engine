@@ -226,6 +226,7 @@ void SetTextShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    Converter::DefaultShadowBlurRadius defaultBlurRadius(0.0);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
     SpanModelStatic::SetTextShadow(frameNode, shadowList);
 }

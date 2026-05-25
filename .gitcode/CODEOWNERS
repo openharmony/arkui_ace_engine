@@ -3260,6 +3260,9 @@ interfaces/napi/kits/ui_material/ @arkuicodepulse
 [Arkoala]
 frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkweb-committer-group
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.ArcList.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.ArcScrollBar.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.components.ArkLazyColumnLayout.ets @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.UIContext.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @ArkUI_Event
@@ -3392,6 +3395,7 @@ frameworks/core/interfaces/native/implementation/global_scope_uicontext_text_men
 frameworks/core/interfaces/native/implementation/global_scope_uicontext_font_scale_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/edit_menu_options_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/effect_component_modifier.cpp @arkuicodepulse
+frameworks/core/interfaces/native/implementation/distortion_component_modifier.cpp @arkuicodepulse
 frameworks/core/interfaces/native/implementation/text_menu_item_id_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/symbol_effect_accessor.cpp @huawei_g_five
@@ -3522,6 +3526,7 @@ frameworks/core/interfaces/native/implementation/grid_item_ops_accessor.cpp @ark
 frameworks/core/interfaces/native/implementation/grid_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/lazy_grid_layout_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/lazyv_grid_layout_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/lazy_column_layout_extender_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_group_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_swipe_action_manager_accessor.cpp @arkuiscroll
@@ -3592,6 +3597,7 @@ test/mock/core/common/mock_data_detector_mgr.cpp @huawei_g_five
 test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
 test/mock/frameworks/core/common/mock_container_scope.cpp @arkui_framework_xnode
 test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp @arkui_framework_xnode
+test/mock/frameworks/core/components_v2/inspector/mock_inspector_constants.cpp @arkui_framework_xnode
 test/mock/interfaces/native/mock_native_error_message_wrapper.cpp @arkui_framework_xnode
 test/mock/ohos_mock/ @arkui_framework_xnode
 
@@ -3965,6 +3971,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generat
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/flowItem.ets @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/list/ @arkuiscroll
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/water_flow/ @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/LazyColumnLayoutModifier.ets @arkuiscroll
 
 [Claude]
 .claude/ @arkui_architecture

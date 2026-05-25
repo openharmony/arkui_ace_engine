@@ -24,19 +24,13 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/property/particle_enum.h"
 #include "core/components_ng/property/particle_property_animation.h"
 #include "core/common/resource/resource_object.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_PARTICLE_COUNT = 5;
 }
-enum ACE_EXPORT UpdaterType { NONE_UPDATER = 0, RANDOM, CURVE };
-
-enum ACE_EXPORT ParticleType { POINT = 0, IMAGE };
-
-enum ACE_EXPORT ParticleEmitterShape { RECTANGLE = 0, CIRCLE, ELLIPSE, ANNULUS };
-
-enum ACE_EXPORT DistributionType { UNIFORM = 0, GAUSSIAN };
 
 struct PointParticleParameter {
 public:

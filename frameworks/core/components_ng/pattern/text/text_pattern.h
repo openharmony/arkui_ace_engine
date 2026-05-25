@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
+#include "core/components_ng/pattern/text/span/span_group_hash_calculator.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -60,12 +61,14 @@
 #include "core/components_ng/property/property.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/pattern/rich_editor/lru_cache.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MAX_SIZE_OF_LOG = 2000;
 }
 
+struct ParagraphCacheInfo;
 class InspectorFilter;
 class PreviewMenuController;
 class OneStepDragController;
@@ -92,6 +95,12 @@ public:
     TextPattern();
     ~TextPattern() override;
     virtual RefPtr<FrameNode> GetContentHost() const;
+    RefPtr<LRUMap<uint64_t, ParagraphCacheInfo>> GetParagraphCache() { return paragraphCache_; }
+    void SetParagraphCache(const RefPtr<LRUMap<uint64_t, ParagraphCacheInfo>>& cache) { paragraphCache_ = cache; }
+    const SpanGroupHashResult* GetSpanGroupHashResult() const { return spanGroupHashResult_.get(); }
+    
+    void InitParagraphCache();
+
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
     virtual int32_t GetTextContentLength();
@@ -275,6 +284,7 @@ public:
     void RemoveAreaChangeInner();
     void ResetDragOption() override;
     virtual bool NeedShowAIDetect();
+    bool IsAIDetectInitialized();
     int32_t GetDragRecordSize() override;
     void ResetDragRecordSize(int32_t size);
 
@@ -441,7 +451,7 @@ public:
     void SetExternalDrawCallback(ExternalDrawCallback&& callback);
     const ExternalDrawCallback& GetExternalDrawCallback();
     std::optional<void*> GetDrawParagraph();
-    void UpdateStyledStringByColorMode();
+    void UpdateStyledStringByColorMode(bool needUpdateSpanStyleHash = true);
     virtual void MarkContentNodeForRender() {};
     float TextContentAlignOffsetY();
     bool AllowVisibleAreaCheck() const override;
@@ -725,6 +735,10 @@ private:
     std::list<RefPtr<SpanItem>> GetSpanSelectedContent();
     bool RegularMatchNumbers(const std::u16string& content);
     void ResetMouseLeftPressedState();
+
+    void UpdateSpanGroupHash(const std::list<RefPtr<SpanItem>>& spans);
+    void UpdateSpanStyleHash(const std::list<RefPtr<SpanItem>>& spans);
+
     void GetPaintOffsetWithoutTransform(OffsetF& paintOffset);
     void ContentChangeByDetaching(PipelineContext*) override;
     void HighlightDisappearAnimation();
@@ -736,6 +750,8 @@ private:
     RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
     std::u16string GetContentWithPlaceholderSpaceFillter() const;
     std::u16string TextHighlightSelectedContent(int32_t start, int32_t end) const;
+    void UpdateLpxUnitFlag();
+
     RefPtr<ParagraphManager> pManager_;
     RefPtr<TextEffect> textEffect_;
     RefPtr<PreviewMenuController> previewController_;
@@ -798,12 +814,18 @@ private:
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
     bool isMeasured_ = false;
+    bool hasLpxUnitStyle_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
     friend class OneStepDragController;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----
+
+
+    //hash for span string
+    std::unique_ptr<SpanGroupHashResult> spanGroupHashResult_;
+    RefPtr<LRUMap<uint64_t, ParagraphCacheInfo>> paragraphCache_;
 };
 } // namespace OHOS::Ace::NG
 

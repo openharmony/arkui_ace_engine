@@ -279,7 +279,6 @@ abstract class ViewPU extends PUV2ViewBase
       this.myReusePool__ = this.getReusePoolInternal(this.constructor as new (...args: PUV2ViewBase[]) => PUV2ViewBase);
     }
     this.__customComponentExecuteInit__Internal();
-    this.__isCustomEnvConstructionFinalized__Internal = true;
   }
 
   // inform the subscribed property
@@ -1314,7 +1313,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
         const params = param ? param : this.paramsGenerator_();
-        if (this.resetStateVarsOnReuse !== ViewPU.prototype.resetStateVarsOnReuse) {
+        if (this.resetStateVarsOnReuse !== ViewPU.prototype.resetStateVarsOnReuse && this.getReusePoolInternal()) {
           this.resetStateVarsOnReuse(params);
         }
         this.updateStateVars(params);

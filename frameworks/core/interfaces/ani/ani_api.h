@@ -26,6 +26,8 @@
 #include "base/memory/referenced.h"
 #include "ui/base/utils/utils.h"
 #include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/components_ng/property/layout_constraint.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/geometry/ng/offset_t.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,6 +84,8 @@ struct Array_ResourceColor;
 struct Ark_ResourceColor;
 typedef struct webview_WebviewControllerPeer {
     std::function<int32_t()> getWebIdFunc = nullptr;
+    std::function<bool()> getWebDebuggingAccessFunc = nullptr;
+    std::function<int32_t()> getWebDebuggingPortFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
     std::function<long()> getNativePtrFunc = nullptr;
     std::function<void()> releaseRefFunc = nullptr;
@@ -476,6 +480,38 @@ struct ArkUIListItemGroupSpace {
     float value = 0.0f;
 };
 
+struct ArkUIStackLayoutAlgorithm {
+    ArkUI_Int32 alignContent = 4;
+};
+
+struct ArkUILayoutAlgorithmResource {
+    int32_t resId = 0;
+    int32_t resType = 0;
+    std::string bundleName;
+    std::string moduleName;
+};
+
+struct ArkUILayoutAlgorithmLengthMetrics {
+    ArkUI_Int32 unit = 1; // DimensionUnit::VP
+    ani_double value = 0.0;
+    bool isResource = false;
+    ArkUILayoutAlgorithmResource resource;
+};
+
+struct ArkUIRowLayoutAlgorithm {
+    ArkUILayoutAlgorithmLengthMetrics space;
+    ArkUI_Int32 alignItems = -1;     // VerticalAlign::Center
+    ArkUI_Int32 justifyContent = 0; // FlexAlign::Start
+    ani_boolean isReverse = false;
+};
+
+struct ArkUIColumnLayoutAlgorithm {
+    ArkUILayoutAlgorithmLengthMetrics space;
+    ArkUI_Int32 alignItems = -1;     // HorizontalAlign::Center
+    ArkUI_Int32 justifyContent = 0; // FlexAlign::Start
+    ani_boolean isReverse = false;
+};
+
 struct ArkUIAniWebModifier {
     void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
@@ -561,6 +597,7 @@ struct ArkUIAniCommonModifier {
     ArkUI_Int32 (*getCurrentInstanceId)();
     ArkUI_Int32 (*getFocusedInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
+    ani_long (*builderProxyNodeMockConstruct)(ArkUI_Int32 id);
     ani_ref (*getSharedLocalStorage)();
     void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
     void (*setCustomCallback)(ani_long ptr, void* fnMeasure, void* fnLayout);
@@ -702,6 +739,20 @@ struct ArkUIAniListModifier {
     void (*syncChildrenSizeOver)(ArkUINodeHandle node);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
 };
+
+struct ArkUICustomLayoutAlgorithm {
+    std::function<void(const OHOS::Ace::NG::LayoutConstraintF&)> onMeasureFunc = nullptr;
+    std::function<void(const OHOS::Ace::NG::OffsetF&)> onPlaceChildrenFunc = nullptr;
+};
+
+struct ArkUIAniDynamicLayoutModifier {
+    ArkUINodeHandle (*construct)(ArkUI_Int32 id, ArkUI_Int32 flags);
+    bool (*setDynamicLayoutStackOptions)(ArkUINodeHandle node, ArkUIStackLayoutAlgorithm algorithm);
+    bool (*setDynamicLayoutRowOptions)(ArkUINodeHandle node, ArkUIRowLayoutAlgorithm algorithm);
+    bool (*setDynamicLayoutColumnOptions)(ArkUINodeHandle node, ArkUIColumnLayoutAlgorithm algorithm);
+    bool (*setDynamicLayoutCustomOptions)(ArkUINodeHandle node, const ArkUICustomLayoutAlgorithm& algorithm);
+};
+
 struct ArkUIAniListItemGroupModifier {
     void (*setListItemGroupHeader)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
     void (*setListItemGroupHeaderContent)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
@@ -931,6 +982,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
+    const ArkUIAniDynamicLayoutModifier* (*getArkUIAniDynamicLayoutModifier)();
     const ArkUIAniListItemGroupModifier* (*getArkUIAniListItemGroupModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();

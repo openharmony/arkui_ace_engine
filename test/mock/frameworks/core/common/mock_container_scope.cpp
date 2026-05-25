@@ -113,6 +113,20 @@ void ContainerScope::CheckIdChange(int32_t id)
     (void)id;
 }
 
+void ContainerScope::MarkIsolatedThread() {}
+
+void ContainerScope::AddLocal(int32_t id)
+{
+    (void)id;
+}
+
+void ContainerScope::RemoveLocal(int32_t id)
+{
+    (void)id;
+}
+
+void ContainerScope::ResetIsolatedThread() {}
+
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
 
 uint64_t ContainerScope::PushCurrent(int32_t id, const char* fileId, int32_t line, int32_t sourceType)

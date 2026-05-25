@@ -927,4 +927,438 @@ HWTEST_F(ParticleTestNg, UpdateVelocityFieldsTest001, TestSize.Level1)
     EXPECT_EQ(pattern->GetVelocityField().size(), 1);
     EXPECT_EQ(pattern->GetVelocityField(), velocityVector);
 }
+
+/**
+ * @tc.name: ParticleModelNGTest001
+ * @tc.desc: Test ParticleModelNG static functions with valid particle FrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleModelNGTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<ParticleDisturbance> disArray;
+    ParticleDisturbance dis;
+    disArray.push_back(dis);
+    ParticleModelNG::DisturbanceField(disArray, AceType::RawPtr(frameNode));
+    EXPECT_EQ(pattern->GetDisturbance().size(), 1);
+
+    std::vector<ParticleRippleField> rippleArray;
+    ParticleRippleField ripple;
+    rippleArray.push_back(ripple);
+    ParticleModelNG::RippleFields(rippleArray, AceType::RawPtr(frameNode));
+    EXPECT_EQ(pattern->GetRippleField().size(), 1);
+
+    std::vector<ParticleVelocityField> velArray;
+    ParticleVelocityField vel;
+    velArray.push_back(vel);
+    ParticleModelNG::VelocityFields(velArray, AceType::RawPtr(frameNode));
+    EXPECT_EQ(pattern->GetVelocityField().size(), 1);
+
+    std::vector<EmitterProperty> emitterProps;
+    EmitterProperty prop;
+    prop.index = 5;
+    emitterProps.push_back(prop);
+    ParticleModelNG::updateEmitter(emitterProps, AceType::RawPtr(frameNode));
+    EXPECT_EQ(pattern->GetEmitterProperty().size(), 1);
+}
+
+/**
+ * @tc.name: ParticleModelNGNullPath
+ * @tc.desc: Test all CHECK_NULL_VOID branches (null case) in model_ng public functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleModelNGNullPath, TestSize.Level1)
+{
+    auto nonParticleNode = FrameNode::CreateFrameNode("other", 10, AceType::MakeRefPtr<Pattern>());
+    std::vector<ParticleDisturbance> dis;
+    std::vector<ParticleRippleField> ripple;
+    std::vector<ParticleVelocityField> vel;
+    std::vector<EmitterProperty> emitter;
+
+    ParticleModelNG::DisturbanceField(dis, AceType::RawPtr(nonParticleNode));
+    ParticleModelNG::RippleFields(ripple, AceType::RawPtr(nonParticleNode));
+    ParticleModelNG::RippleFields(ripple, nullptr);
+    ParticleModelNG::VelocityFields(vel, AceType::RawPtr(nonParticleNode));
+    ParticleModelNG::VelocityFields(vel, nullptr);
+    ParticleModelNG::updateEmitter(emitter, AceType::RawPtr(nonParticleNode));
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ParticleModelNG().DisturbanceField(dis);
+    ParticleModelNG().RippleFields(ripple);
+    ParticleModelNG().VelocityFields(vel);
+    ParticleModelNG().updateEmitter(emitter);
+
+    auto anotherNode = FrameNode::CreateFrameNode("another", 11, AceType::MakeRefPtr<Pattern>());
+    stack->Push(anotherNode);
+    ParticleModelNG().DisturbanceField(dis);
+    ParticleModelNG().RippleFields(ripple);
+    ParticleModelNG().VelocityFields(vel);
+    ParticleModelNG().updateEmitter(emitter);
+    stack->Pop();
+
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ParticleModelNGNonFrameNode
+ * @tc.desc: Test non-FrameNode versions of model_ng with valid particle FrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleModelNGNonFrameNode, TestSize.Level1)
+{
+    auto particleNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 21, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(particleNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->Push(particleNode);
+
+    std::vector<ParticleDisturbance> dis;
+    dis.push_back(ParticleDisturbance{});
+    ParticleModelNG().DisturbanceField(dis);
+    EXPECT_EQ(pattern->GetDisturbance().size(), 1);
+
+    std::vector<ParticleRippleField> ripple;
+    ripple.push_back(ParticleRippleField{});
+    ParticleModelNG().RippleFields(ripple);
+    EXPECT_EQ(pattern->GetRippleField().size(), 1);
+
+    std::vector<ParticleVelocityField> vel;
+    vel.push_back(ParticleVelocityField{});
+    ParticleModelNG().VelocityFields(vel);
+    EXPECT_EQ(pattern->GetVelocityField().size(), 1);
+
+    std::vector<EmitterProperty> emitter;
+    EmitterProperty prop;
+    prop.index = 0;
+    emitter.push_back(prop);
+    ParticleModelNG().updateEmitter(emitter);
+    EXPECT_EQ(pattern->GetEmitterProperty().size(), 1);
+
+    stack->Pop();
+}
+
+/**
+ * @tc.name: ParticleTestParseEmitterBranch
+ * @tc.desc: Test ParseEmitterParticleJson for IMAGE without objectFit (L91 F, L114 F).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestParseEmitterBranch, TestSize.Level1)
+{
+    ParticleOption particleOption;
+    EmitterOption emitterOption;
+    Particle particle;
+    particle.SetParticleType(ParticleType::IMAGE);
+    NG::ParticleConfig particleConfig;
+    NG::ImageParticleParameter imageParameter;
+    imageParameter.SetImageSource("testSrc");
+    particleConfig.SetImageParticleParameter(imageParameter);
+    particle.SetConfig(particleConfig);
+    emitterOption.SetParticle(particle);
+    particleOption.SetEmitterOption(emitterOption);
+    std::list<ParticleOption> particleArray;
+    particleArray.emplace_back(particleOption);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 2, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    frameNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    frameNode->renderContext_->UpdateParticleOptionArray(particleArray);
+
+    auto objectParticlesJson = JsonUtil::Create(true);
+    pattern->GetEmitterJson(objectParticlesJson, particleOption);
+    auto particleJson = objectParticlesJson->GetObject("emitter")->GetObject("particle");
+    EXPECT_EQ(particleJson->GetString("type"), "ParticleType.IMAGE");
+    EXPECT_EQ(particleJson->GetObject("config")->GetString("src"), "testSrc");
+}
+
+/**
+ * @tc.name: ParticleTestGetEmitterShapeBranch
+ * @tc.desc: Test GetEmitterJson ELLIPSE (L152 T), size (L166 T), annulusRegion (L171 T).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestGetEmitterShapeBranch, TestSize.Level1)
+{
+    ParticleOption particleOption;
+    EmitterOption emitterOption;
+    emitterOption.SetShape(ParticleEmitterShape::ELLIPSE);
+    emitterOption.SetSize(
+        std::pair<Dimension, Dimension>(Dimension(50.0), Dimension(100.0)));
+    auto center = std::pair<CalcDimension, CalcDimension>(
+        CalcDimension(0.5, DimensionUnit::PERCENT), CalcDimension(0.5, DimensionUnit::PERCENT));
+    emitterOption.SetAnnulusRegion(ParticleAnnulusRegion(
+        center, CalcDimension(20, DimensionUnit::VP), CalcDimension(40, DimensionUnit::VP), 0.0f, 180.0f));
+    particleOption.SetEmitterOption(emitterOption);
+    std::list<ParticleOption> particleArray;
+    particleArray.emplace_back(particleOption);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 3, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    frameNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    frameNode->renderContext_->UpdateParticleOptionArray(particleArray);
+
+    auto objectParticlesJson = JsonUtil::Create(true);
+    pattern->GetEmitterJson(objectParticlesJson, particleOption);
+    auto emitterJson = objectParticlesJson->GetObject("emitter");
+    EXPECT_EQ(emitterJson->GetString("shape"), "ParticleEmitterShape.ELLIPSE");
+    EXPECT_EQ(emitterJson->GetString("size"), "[50.00px,100.00px]");
+    EXPECT_NE(emitterJson->GetObject("annulusRegion"), nullptr);
+}
+
+/**
+ * @tc.name: ParticleTestGetEmitterShapeAnnulusRect
+ * @tc.desc: Test GetEmitterJson ANNULUS (L154 T) and RECTANGLE (else L157).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestGetEmitterShapeAnnulusRect, TestSize.Level1)
+{
+    EmitterOption emitterOption;
+    emitterOption.SetShape(ParticleEmitterShape::ANNULUS);
+    ParticleOption annulusOption;
+    annulusOption.SetEmitterOption(emitterOption);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 4, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    pattern->GetEmitterJson(json, annulusOption);
+    EXPECT_EQ(json->GetObject("emitter")->GetString("shape"), "ParticleEmitterShape.ANNULUS");
+
+    EmitterOption rectOpt;
+    rectOpt.SetShape(ParticleEmitterShape::RECTANGLE);
+    ParticleOption rectOption;
+    rectOption.SetEmitterOption(rectOpt);
+    auto rectJson = JsonUtil::Create(true);
+    pattern->GetEmitterJson(rectJson, rectOption);
+    EXPECT_EQ(rectJson->GetObject("emitter")->GetString("shape"), "ParticleEmitterShape.RECTANGLE");
+}
+
+/**
+ * @tc.name: ParticleTestFloatNoUpdaterBranch
+ * @tc.desc: Test ParseFloatObjectJson L339 T (float option without updater).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestFloatNoUpdaterBranch, TestSize.Level1)
+{
+    ParticleFloatPropertyOption scaleOnly;
+    scaleOnly.SetRange(std::pair<float, float>(0.0f, 2.0f));
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 20, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+
+    ParticleOption opt;
+    opt.SetParticleScaleOption(scaleOnly);
+
+    auto json = JsonUtil::Create(true);
+    pattern->GetScaleJson(json, opt);
+    EXPECT_NE(json->GetObject("scale"), nullptr);
+}
+
+/**
+ * @tc.name: ParticleTestColorUpdaterBranch
+ * @tc.desc: Test ParseColorUpdater CURVE (L204 T).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestColorUpdaterBranch, TestSize.Level1)
+{
+    std::list<ParticleOption> particleArray;
+    ParticleOption particleOption;
+    ParticleColorPropertyOption colorOption;
+    colorOption.SetRange(std::pair<Color, Color>(Color::BLACK, Color::RED));
+    colorOption.SetDistribution(DistributionType::UNIFORM);
+    ParticleColorPropertyUpdater updater;
+    updater.SetUpdateType(UpdaterType::CURVE);
+    ParticleColorPropertyUpdaterConfig config;
+    std::list<ParticlePropertyAnimation<Color>> animations;
+    ParticlePropertyAnimation<Color> anim;
+    anim.SetFrom(Color::BLACK);
+    anim.SetTo(Color::RED);
+    anim.SetStartMills(0.0);
+    anim.SetEndMills(1000.0);
+    anim.SetCurve(Curves::LINEAR);
+    animations.emplace_back(anim);
+    config.SetAnimationArray(animations);
+    updater.SetConfig(config);
+    colorOption.SetUpdater(updater);
+    particleOption.SetParticleColorOption(colorOption);
+    particleArray.emplace_back(particleOption);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 5, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    frameNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    frameNode->renderContext_->UpdateParticleOptionArray(particleArray);
+
+    auto objectParticlesJson = JsonUtil::Create(true);
+    pattern->GetColorJson(objectParticlesJson, particleOption);
+    EXPECT_EQ(objectParticlesJson->GetObject("color")->GetObject("updater")->GetString("type"),
+        "ParticleUpdater.CURVE");
+}
+
+/**
+ * @tc.name: ParticleTestAllOtherBranch
+ * @tc.desc: Comprehensive test for GetColorJson no updater (L250 T), GetScaleJson (L274 F),
+ *           GetAccelerationJson speed/angle (L311 T/ L314 T), GetSpinJson (L325 F),
+ *           ParseFloatObjectJson RANDOM (L346 T), NONE_UPDATER (L371 T), no updater (L339 T).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestAllOtherBranch, TestSize.Level1)
+{
+    std::list<ParticleOption> particleArray;
+    ParticleOption particleOption;
+
+    ParticleColorPropertyOption colorOption;
+    colorOption.SetRange(std::pair<Color, Color>(Color::BLACK, Color::RED));
+    colorOption.SetDistribution(DistributionType::UNIFORM);
+    particleOption.SetParticleColorOption(colorOption);
+
+    ParticleFloatPropertyOption scaleOption;
+    scaleOption.SetRange(std::pair<float, float>(0.0f, 2.0f));
+    ParticleFloatPropertyUpdater scaleUpdater;
+    scaleUpdater.SetUpdaterType(UpdaterType::RANDOM);
+    ParticleFloatPropertyUpdaterConfig scaleConfig;
+    scaleConfig.SetRandomConfig(std::pair<float, float>(0.0f, 1.0f));
+    scaleUpdater.SetConfig(scaleConfig);
+    scaleOption.SetUpdater(scaleUpdater);
+    particleOption.SetParticleScaleOption(scaleOption);
+
+    AccelerationProperty accelOption;
+    ParticleFloatPropertyOption speedOption;
+    speedOption.SetRange(std::pair<float, float>(0.0f, 10.0f));
+    accelOption.SetSpeed(speedOption);
+    ParticleFloatPropertyOption angleOption;
+    angleOption.SetRange(std::pair<float, float>(0.0f, 360.0f));
+    accelOption.SetAngle(angleOption);
+    particleOption.SetParticleAccelerationOption(accelOption);
+
+    ParticleFloatPropertyOption spinOption;
+    spinOption.SetRange(std::pair<float, float>(0.0f, 1.0f));
+    ParticleFloatPropertyUpdater spinUpdater;
+    spinUpdater.SetUpdaterType(UpdaterType::NONE_UPDATER);
+    spinOption.SetUpdater(spinUpdater);
+    particleOption.SetParticleSpinOption(spinOption);
+
+    particleArray.emplace_back(particleOption);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 6, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    frameNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    frameNode->renderContext_->UpdateParticleOptionArray(particleArray);
+
+    InspectorFilter testFilter;
+    testFilter.AddFilterAttr("focusable");
+    auto jsonValue = std::make_unique<JsonValue>();
+    pattern->ToJsonValue(jsonValue, testFilter);
+    EXPECT_NE(jsonValue, nullptr);
+}
+
+/**
+ * @tc.name: ParticleTestAccelOnlyBranch
+ * @tc.desc: Test GetAccelerationJson speed-only (L311 T, L314 F) and angle-only (L311 F, L314 T).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestAccelOnlyBranch, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 7, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+
+    AccelerationProperty accelSpeed;
+    ParticleFloatPropertyOption speed;
+    speed.SetRange(std::pair<float, float>(0.0f, 10.0f));
+    accelSpeed.SetSpeed(speed);
+    ParticleOption optSpeed;
+    optSpeed.SetParticleAccelerationOption(accelSpeed);
+    auto json1 = JsonUtil::Create(true);
+    pattern->GetAccelerationJson(json1, optSpeed);
+    EXPECT_NE(json1->GetObject("acceleration")->GetObject("speed"), nullptr);
+
+    AccelerationProperty accelAngle;
+    ParticleFloatPropertyOption angle;
+    angle.SetRange(std::pair<float, float>(0.0f, 360.0f));
+    accelAngle.SetAngle(angle);
+    ParticleOption optAngle;
+    optAngle.SetParticleAccelerationOption(accelAngle);
+    auto json2 = JsonUtil::Create(true);
+    pattern->GetAccelerationJson(json2, optAngle);
+    EXPECT_NE(json2->GetObject("acceleration")->GetObject("angle"), nullptr);
+}
+
+/**
+ * @tc.name: ParticleTestParseObjBranch
+ * @tc.desc: Test ParseParticleObject L383 T (host null), L385 T (context null), L386 T (no array).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestParseObjBranch, TestSize.Level1)
+{
+    InspectorFilter filter;
+    filter.AddFilterAttr("focusable");
+
+    auto patternOnly = AceType::MakeRefPtr<ParticlePattern>(1);
+    auto json1 = std::make_unique<JsonValue>();
+    patternOnly->ParseParticleObject(json1, filter);
+    EXPECT_NE(json1, nullptr);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 8, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern2 = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern2, nullptr);
+    frameNode->renderContext_ = nullptr;
+    auto json2 = std::make_unique<JsonValue>();
+    pattern2->ParseParticleObject(json2, filter);
+    EXPECT_NE(json2, nullptr);
+
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 9, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern3 = AceType::DynamicCast<ParticlePattern>(frameNode3->GetPattern());
+    ASSERT_NE(pattern3, nullptr);
+    frameNode3->renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    auto json3 = std::make_unique<JsonValue>();
+    pattern3->ParseParticleObject(json3, filter);
+    EXPECT_NE(json3, nullptr);
+}
+
+/**
+ * @tc.name: ParticleTestFieldToJsonBranch
+ * @tc.desc: Test ParseRippleFields L408 T and ParseVelocityFields L440 T via ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTestFieldToJsonBranch, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 10, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(1); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<ParticleRippleField> ripples;
+    ParticleRippleField rf;
+    ripples.push_back(rf);
+    pattern->UpdateRippleFields(ripples);
+
+    std::vector<ParticleVelocityField> velocities;
+    ParticleVelocityField vf;
+    velocities.push_back(vf);
+    pattern->UpdateVelocityFields(velocities);
+
+    InspectorFilter testFilter;
+    testFilter.AddFilterAttr("focusable");
+    auto jsonValue = std::make_unique<JsonValue>();
+    pattern->ToJsonValue(jsonValue, testFilter);
+    EXPECT_NE(jsonValue, nullptr);
+}
 } // namespace OHOS::Ace::NG

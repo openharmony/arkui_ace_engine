@@ -15,6 +15,8 @@
 #include "core/interfaces/native/node/lazy_grid_layout_modifier.h"
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model_static.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -22,6 +24,8 @@ namespace {
     const std::string DEFAULT_COLUMNS_TEMPLATE = "1fr";
     constexpr Dimension DEFAULT_COLUMNS_GAP = 0.0_fp;
     constexpr Dimension DEFAULT_ROWS_GAP = 0.0_fp;
+    constexpr int32_t STICKY_STYLE_NONE = 0;
+    constexpr int32_t STICKY_STYLE_BOTH = 3;
 }
 
 void SetLazyGridLayoutColumnsGap(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap)
@@ -86,6 +90,76 @@ void ResetLazyGridLayoutColumnsTemplate(ArkUINodeHandle node)
     LazyVGridLayoutModel::SetColumnsTemplate(frameNode, DEFAULT_COLUMNS_TEMPLATE);
 }
 
+void SetLazyGridLayoutSticky(ArkUINodeHandle node, ArkUI_Int32 stickyStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t normalized = stickyStyle;
+    if (normalized < STICKY_STYLE_NONE || normalized > STICKY_STYLE_BOTH) {
+        normalized = STICKY_STYLE_NONE;
+    }
+    LazyGridLayoutModelStatic::SetSticky(frameNode, std::optional<int32_t>(normalized));
+}
+
+void ResetLazyGridLayoutSticky(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyGridLayoutModelStatic::SetSticky(frameNode, std::nullopt);
+}
+
+void SetLazyGridLayoutHeader(ArkUINodeHandle node, ArkUINodeHandle header)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* headerNode = reinterpret_cast<UINode*>(header);
+    LazyGridLayoutModelStatic::SetHeader(frameNode, AceType::Claim<UINode>(headerNode));
+}
+
+void ResetLazyGridLayoutHeader(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyGridLayoutModelStatic::RemoveHeader(frameNode);
+}
+
+void SetLazyGridLayoutFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* footerNode = reinterpret_cast<UINode*>(footer);
+    LazyGridLayoutModelStatic::SetFooter(frameNode, AceType::Claim<UINode>(footerNode));
+}
+
+void ResetLazyGridLayoutFooter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyGridLayoutModelStatic::RemoveFooter(frameNode);
+}
+
+void SetLazyGridLayoutOnVisibleIndexesChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // extraParam is a heap-owned unique_ptr<std::function<void(int32_t, int32_t)>> handed off from the bridge
+    // (see bridge code that calls callback.release()). The Pattern takes ownership here.
+    using CallbackPtr = std::unique_ptr<std::function<void(int32_t, int32_t)>>;
+    CallbackPtr callback(static_cast<std::function<void(int32_t, int32_t)>*>(extraParam));
+    if (!callback) {
+        LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, nullptr);
+        return;
+    }
+    LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, std::move(*callback));
+}
+
+void ResetLazyGridLayoutOnVisibleIndexesChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUILazyGridLayoutModifier* GetLazyGridLayoutModifier()
 {
@@ -97,6 +171,14 @@ const ArkUILazyGridLayoutModifier* GetLazyGridLayoutModifier()
         .resetRowsGap = ResetLazyGridLayoutRowsGap,
         .setColumnsTemplate = SetLazyGridLayoutColumnsTemplate,
         .resetColumnsTemplate = ResetLazyGridLayoutColumnsTemplate,
+        .setSticky = SetLazyGridLayoutSticky,
+        .resetSticky = ResetLazyGridLayoutSticky,
+        .setHeader = SetLazyGridLayoutHeader,
+        .resetHeader = ResetLazyGridLayoutHeader,
+        .setFooter = SetLazyGridLayoutFooter,
+        .resetFooter = ResetLazyGridLayoutFooter,
+        .setOnVisibleIndexesChange = SetLazyGridLayoutOnVisibleIndexesChange,
+        .resetOnVisibleIndexesChange = ResetLazyGridLayoutOnVisibleIndexesChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

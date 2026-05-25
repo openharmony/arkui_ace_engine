@@ -16,13 +16,31 @@
 #include "interfaces/native/node/node_model.h"
 #include "ui/base/utils/utils.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.h"
+#include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 
 namespace OHOS::Ace {
 namespace NG {
 namespace {
+constexpr int32_t DEFAULT_STICKY_STYLE = static_cast<int32_t>(StickyStyle::NONE);
+
+RefPtr<UINode> ClaimHeaderFooterNode(ArkUINodeHandle edge)
+{
+    auto* rawNode = reinterpret_cast<UINode*>(edge);
+    CHECK_NULL_RETURN(rawNode, nullptr);
+    auto node = AceType::Claim(rawNode);
+    if (!HeaderFooterUtils::GetHeaderFooterFrameNode(node)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout rejects invalid header / footer node");
+        return nullptr;
+    }
+    return node;
+}
+
 void Create()
 {
     LazyColumnLayoutModel::Create();
@@ -84,6 +102,64 @@ void ResetOnVisibleIndexesChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     LazyColumnLayoutModel::SetOnVisibleIndexesChange(frameNode, nullptr);
 }
+
+void SetSticky(ArkUINodeHandle node, int32_t stickyStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (stickyStyle < static_cast<int32_t>(StickyStyle::NONE) ||
+        stickyStyle > static_cast<int32_t>(StickyStyle::BOTH)) {
+        stickyStyle = DEFAULT_STICKY_STYLE;
+    }
+    LazyColumnLayoutModel::SetSticky(frameNode, static_cast<StickyStyle>(stickyStyle));
+}
+
+void ResetSticky(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyColumnLayoutModel::SetSticky(frameNode, StickyStyle::NONE);
+}
+
+void SetHeader(ArkUINodeHandle node, ArkUINodeHandle header)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto headerNode = ClaimHeaderFooterNode(header);
+    CHECK_NULL_VOID(headerNode);
+    if (AceType::RawPtr(headerNode) == static_cast<UINode*>(frameNode)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout rejects itself as header node");
+        return;
+    }
+    LazyColumnLayoutModel::SetHeader(frameNode, headerNode);
+}
+
+void ResetHeader(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyColumnLayoutModel::RemoveHeader(frameNode);
+}
+
+void SetFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto footerNode = ClaimHeaderFooterNode(footer);
+    CHECK_NULL_VOID(footerNode);
+    if (AceType::RawPtr(footerNode) == static_cast<UINode*>(frameNode)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_COLUMN, "LazyColumnLayout rejects itself as footer node");
+        return;
+    }
+    LazyColumnLayoutModel::SetFooter(frameNode, footerNode);
+}
+
+void ResetFooter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyColumnLayoutModel::RemoveFooter(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUILazyColumnLayoutModifier* GetLazyColumnLayoutDynamicModifier()
@@ -95,6 +171,12 @@ const ArkUILazyColumnLayoutModifier* GetLazyColumnLayoutDynamicModifier()
         .resetSpace = ResetSpace,
         .setAlignItems = SetAlignItems,
         .resetAlignItems = ResetAlignItems,
+        .setSticky = SetSticky,
+        .resetSticky = ResetSticky,
+        .setHeader = SetHeader,
+        .resetHeader = ResetHeader,
+        .setFooter = SetFooter,
+        .resetFooter = ResetFooter,
         .setOnVisibleIndexesChange = SetOnVisibleIndexesChange,
         .resetOnVisibleIndexesChange = ResetOnVisibleIndexesChange,
     };

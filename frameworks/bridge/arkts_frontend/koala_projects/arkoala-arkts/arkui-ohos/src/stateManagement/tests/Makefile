@@ -114,6 +114,7 @@ SRCSTS = \
 	decoratorImpl/decoratorStoragePropRef.ts \
 	decoratorImpl/decoratorWatch.ts \
 	decoratorImpl/decoratorInteropWatch.ts \
+	decoratorImpl/decoratorGlobalReusePool.ts \
 	\
 	storage/appStorage.ts \
 	storage/appStorageV2.ts \
@@ -124,6 +125,7 @@ SRCSTS = \
 	storage/storageProperty.ts \
 	storage/environment.ts \
 	\
+	tools/globalReusePool.ts \
 	tools/stateMgmtDFX.ts \
 	tools/arkts/stateMgmtTool.ts \
 	tools/arkts/observeInterfaceProxy.ts

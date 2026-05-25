@@ -282,6 +282,37 @@ void ParagraphUtil::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spa
     }
 }
 
+void ParagraphUtil::ConstructParagraphSpanGroupForHash(
+    std::list<RefPtr<SpanItem>>& spans, std::vector<std::list<RefPtr<SpanItem>>>& spanGroupVec,
+    bool& spanStringHasMaxLines)
+{
+    // Keep hash grouping independent from layout grouping so later cache-rule changes
+    // do not accidentally affect the original paragraph construction path.
+    std::list<RefPtr<SpanItem>> spanGroup;
+    while (!spans.empty()) {
+        auto spanItem = spans.front();
+        spans.pop_front();
+        if (!spanItem) {
+            continue;
+        }
+        spanStringHasMaxLines |= spanItem->textLineStyle &&
+            spanItem->textLineStyle->GetMaxLines().value_or(UINT32_MAX) != UINT32_MAX;
+        spanItem->SetNeedRemoveNewLine(false);
+        const bool needSplit = !spanItem->content.empty() && spanItem->content.back() == u'\n' && !spans.empty();
+        if (needSplit) {
+            spanItem->SetNeedRemoveNewLine(true);
+        }
+        spanGroup.emplace_back(std::move(spanItem));
+        if (needSplit) {
+            spanGroupVec.emplace_back(std::move(spanGroup));
+            spanGroup = {};
+        }
+    }
+    if (!spanGroup.empty()) {
+        spanGroupVec.emplace_back(std::move(spanGroup));
+    }
+}
+
 void ParagraphUtil::HandleEmptyParagraph(RefPtr<Paragraph> paragraph,
     const std::list<RefPtr<SpanItem>>& spanGroup)
 {

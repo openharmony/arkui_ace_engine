@@ -1232,7 +1232,7 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         JSTextPickerTheme::ObtainTextStyle(textStyle);
     }
     if (info.Length() >= 1 && info[0]->IsObject()) {

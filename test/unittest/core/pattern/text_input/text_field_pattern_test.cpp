@@ -45,6 +45,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. update caret rect
+     */
     pattern->UpdateCaretRect(true);
 }
 
@@ -65,6 +68,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. check select area visible
+     */
     pattern->CheckSelectAreaVisible();
 }
 

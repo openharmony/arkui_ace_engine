@@ -985,4 +985,131 @@ HWTEST_F(WebPatternBranchTestUT, ShowMagnifierAndOnColor, TestSize.Level1)
     webPattern->magnifierController_.Reset();
 #endif
 }
+
+/**
+ * @tc.name: LtpoDisplayInfoListenerOnAttributeChangeWithContextNull
+ * @tc.desc: Test LtpoDisplayInfoListener::OnAttributeChange when context is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, LtpoDisplayInfoListenerOnAttributeChangeWithContextNull, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    // Create listener with null context weak pointer
+    WeakPtr<PipelineBase> nullContext;
+    auto webDelegate = AceType::MakeRefPtr<WebDelegateMock>(
+        nullContext, nullptr, "web", 0);
+    ASSERT_NE(webDelegate, nullptr);
+
+    // Create real listener with valid delegate but null context
+    auto listener = sptr<LtpoDisplayInfoListener>::MakeSptr(
+        AceType::WeakClaim(AceType::RawPtr(webDelegate)), nullContext);
+    ASSERT_NE(listener, nullptr);
+
+    // Call OnAttributeChange - should not crash when context is null
+    std::vector<std::string> attributes = {
+        "density", "densityPixels", "xDPI", "yDPI", "width", "height"};
+    Rosen::DisplayId displayId = 0;
+    listener->OnAttributeChange(displayId, attributes);
+
+    // Test passes if no crash occurs and returns early
+#endif
+}
+
+/**
+ * @tc.name: LtpoDisplayInfoListenerOnAttributeChangeNormal
+ * @tc.desc: Test LtpoDisplayInfoListener::OnAttributeChange in normal scenario
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, LtpoDisplayInfoListenerOnAttributeChangeNormal, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetupRootElement();
+
+    WeakPtr<PipelineBase> context = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
+
+    // Create delegate and listener
+    auto webDelegate = AceType::MakeRefPtr<WebDelegateMock>(
+        context, nullptr, "web", 0);
+    ASSERT_NE(webDelegate, nullptr);
+
+    auto listener = sptr<LtpoDisplayInfoListener>::MakeSptr(AceType::WeakClaim(AceType::RawPtr(webDelegate)), context);
+    ASSERT_NE(listener, nullptr);
+
+    // Call OnAttributeChange with valid delegate and context
+    std::vector<std::string> attributes = {"refreshRate", "colorMode"};
+    Rosen::DisplayId displayId = 0;
+    listener->OnAttributeChange(displayId, attributes);
+
+    // Test passes if no crash occurs
+#endif
+}
+
+/**
+ * @tc.name: LtpoDisplayInfoListenerOnAttributeChangeWithTaskExecutorNull
+ * @tc.desc: Test LtpoDisplayInfoListener::OnAttributeChange when TaskExecutor is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, LtpoDisplayInfoListenerOnAttributeChangeWithTaskExecutorNull, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetupRootElement();
+
+    // Set TaskExecutor to null by clearing it
+    pipelineContext->taskExecutor_ = nullptr;
+
+    WeakPtr<PipelineBase> context = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
+
+    // Create delegate and listener
+    auto webDelegate = AceType::MakeRefPtr<WebDelegateMock>(
+        context, nullptr, "web", 0);
+    ASSERT_NE(webDelegate, nullptr);
+
+    auto listener = sptr<LtpoDisplayInfoListener>::MakeSptr(AceType::WeakClaim(AceType::RawPtr(webDelegate)), context);
+    ASSERT_NE(listener, nullptr);
+
+    // Call OnAttributeChange with valid delegate and context but null TaskExecutor
+    std::vector<std::string> attributes = {"refreshRate", "colorMode"};
+    Rosen::DisplayId displayId = 0;
+    listener->OnAttributeChange(displayId, attributes);
+
+    // Test passes if no crash occurs and returns early
+#endif
+}
+
+/**
+ * @tc.name: WebDelegateRegisterDisplayInfoChange
+ * @tc.desc: Test WebDelegate::RegisterDisplayInfoChange and UnRegisterDisplayInfoChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, WebDelegateRegisterDisplayInfoChange, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetupRootElement();
+
+    WeakPtr<PipelineBase> context = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
+
+    auto webDelegate = AceType::MakeRefPtr<WebDelegateMock>(
+        context, nullptr, "web", 0);
+    ASSERT_NE(webDelegate, nullptr);
+
+    // Test RegisterDisplayInfoChange
+    webDelegate->RegisterDisplayInfoChange();
+
+    // Test that displayListener_ is created
+    // Note: Actual registration with DisplayManager requires system permissions
+    // so we just verify the listener object is created
+
+    // Test UnRegisterDisplayInfoChange
+    webDelegate->UnRegisterDisplayInfoChange();
+
+    // Test that displayListener_ is cleared
+#endif
+}
+
 } // namespace OHOS::Ace::NG

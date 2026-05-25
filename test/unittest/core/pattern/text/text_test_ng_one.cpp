@@ -1690,4 +1690,63 @@ HWTEST_F(TextTestNgOne, SetClipEdge007, TestSize.Level1)
     textModelNG.SetClipEdge(false);
     EXPECT_EQ(textLayoutProperty->GetClipEdge(), false);
 }
+
+/**
+ * @tc.name: GetFontVariationsInJson001
+ * @tc.desc: Verify GetFontVariationsInJson with empty list
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson001, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST emptyList;
+    ASSERT_EQ(GetFontVariationsInJson(emptyList), "[]");
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson002
+ * @tc.desc: Verify GetFontVariationsInJson with single item without isNormalized
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson002, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST list = { { "wght", 400.0f, std::nullopt } };
+    ASSERT_EQ(GetFontVariationsInJson(list), "[{axis:wght, value:400.000000}]");
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson003
+ * @tc.desc: Verify GetFontVariationsInJson with single item with isNormalized true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson003, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST list = { { "wght", 700.0f, true } };
+    ASSERT_EQ(GetFontVariationsInJson(list), "[{axis:wght, value:700.000000, isNormalized:true}]");
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson004
+ * @tc.desc: Verify GetFontVariationsInJson with single item with isNormalized false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson004, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST list = { { "wdth", 100.0f, false } };
+    ASSERT_EQ(GetFontVariationsInJson(list), "[{axis:wdth, value:100.000000, isNormalized:false}]");
+}
+
+/**
+ * @tc.name: GetFontVariationsInJson005
+ * @tc.desc: Verify GetFontVariationsInJson with multiple items
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, GetFontVariationsInJson005, TestSize.Level1)
+{
+    FONT_VARIATIONS_LIST list = {
+        { "wght", 400.0f, std::nullopt },
+        { "wdth", 100.0f, true },
+    };
+    std::string expected = "[{axis:wght, value:400.000000}, {axis:wdth, value:100.000000, isNormalized:true}]";
+    ASSERT_EQ(GetFontVariationsInJson(list), expected);
+}
 } // namespace OHOS::Ace::NG

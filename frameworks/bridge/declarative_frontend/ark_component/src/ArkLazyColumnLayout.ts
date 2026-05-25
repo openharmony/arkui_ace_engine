@@ -27,6 +27,18 @@ class ArkLazyColumnLayoutComponent extends ArkComponent implements LazyColumnLay
     modifierWithKey(this._modifiersWithKeys, LazyColumnLayoutAlignItemsModifier.identity, LazyColumnLayoutAlignItemsModifier, value);
     return this;
   }
+  sticky(value: StickyStyle): this {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnLayoutStickyModifier.identity, LazyColumnLayoutStickyModifier, value);
+    return this;
+  }
+  header(value: CustomBuilder | ComponentContent | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnLayoutHeaderModifier.identity, LazyColumnLayoutHeaderModifier, value);
+    return this;
+  }
+  footer(value: CustomBuilder | ComponentContent | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnLayoutFooterModifier.identity, LazyColumnLayoutFooterModifier, value);
+    return this;
+  }
   onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this {
     modifierWithKey(this._modifiersWithKeys, LazyColumnLayoutOnVisibleIndexesChangeModifier.identity,
       LazyColumnLayoutOnVisibleIndexesChangeModifier, callback);
@@ -61,6 +73,48 @@ class LazyColumnLayoutAlignItemsModifier extends ModifierWithKey<HorizontalAlign
       getUINativeModule().lazyColumnLayout.resetAlignItems(node);
     } else {
       getUINativeModule().lazyColumnLayout.setAlignItems(node, this.value);
+    }
+  }
+}
+
+class LazyColumnLayoutStickyModifier extends ModifierWithKey<StickyStyle> {
+  constructor(value: StickyStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyColumnLayoutSticky');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !isNumber(this.value)) {
+      getUINativeModule().lazyColumnLayout.resetSticky(node);
+    } else {
+      getUINativeModule().lazyColumnLayout.setSticky(node, this.value);
+    }
+  }
+}
+
+class LazyColumnLayoutHeaderModifier extends ModifierWithKey<CustomBuilder | ComponentContent | undefined> {
+  constructor(value: CustomBuilder | ComponentContent | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyColumnLayoutHeader');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyColumnLayout.resetHeader(node);
+    } else {
+      getUINativeModule().lazyColumnLayout.setHeader(node, this.value);
+    }
+  }
+}
+
+class LazyColumnLayoutFooterModifier extends ModifierWithKey<CustomBuilder | ComponentContent | undefined> {
+  constructor(value: CustomBuilder | ComponentContent | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyColumnLayoutFooter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyColumnLayout.resetFooter(node);
+    } else {
+      getUINativeModule().lazyColumnLayout.setFooter(node, this.value);
     }
   }
 }

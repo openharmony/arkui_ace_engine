@@ -78,6 +78,7 @@ void GaugeModelNG::SetStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, StrokeWidth, strokeWidth);
     ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, StrokeWidth, strokeWidth);
+    ACE_CHECK_LPX_ATTRIBUTE(strokeWidth, LpxAttribute::LPX_STROKE_WIDTH);
 }
 
 void GaugeModelNG::SetDescription(const RefPtr<AceType>& customNode)
@@ -152,6 +153,7 @@ void GaugeModelNG::SetIndicatorIconPath(
 void GaugeModelNG::SetIndicatorSpace(const Dimension& space)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, IndicatorSpace, space);
+    ACE_CHECK_LPX_ATTRIBUTE(space, LpxAttribute::LPX_GAUGE_INDICATOR_SPACE);
 }
 
 void GaugeModelNG::ResetGradientColors()
@@ -219,6 +221,7 @@ void GaugeModelNG::SetGaugeStrokeWidth(FrameNode* frameNode, const Dimension& st
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, StrokeWidth, strokeWidth, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, StrokeWidth, strokeWidth, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(strokeWidth, LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void GaugeModelNG::SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue)
@@ -279,11 +282,13 @@ void GaugeModelNG::ResetIndicatorIconPath(FrameNode* frameNode)
 void GaugeModelNG::SetIndicatorSpace(FrameNode* frameNode, const Dimension& space)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IndicatorSpace, space, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(space, LpxAttribute::LPX_GAUGE_INDICATOR_SPACE, frameNode);
 }
 
 void GaugeModelNG::ResetIndicatorSpace(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorSpace, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_GAUGE_INDICATOR_SPACE, frameNode);
 }
 
 void GaugeModelNG::SetColors(FrameNode* frameNode, const std::vector<Color>& colors, const std::vector<float>& values)

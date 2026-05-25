@@ -302,7 +302,7 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     napi_get_named_property(env, value, "typeName", &typeName);
     std::string typenameStr;
     GetStringFromNapiValue(env, typeName, typenameStr);
-    if (typenameStr == "AnimatedDrawableDescriptor") {
+    if (typenameStr == "AnimatedDrawableDescriptor" || typenameStr == "PixelMapDrawableDescriptor") {
         OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
         drawable->newDrawableDescriptor = objectNapi;
         *drawableDescriptor = drawable;

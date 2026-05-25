@@ -36,7 +36,7 @@ import { ActiveAndInactiveCallbackType, CustomComponentContext } from '../stateM
 import { CustomComponentContextImpl } from './customComponent.ets';
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ExtendableComponentDFX } from './extendableComponentDFX';
-
+import { GlobalReusePool } from '../stateManagement/tools/globalReusePool';
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
         throw new Error("TBD");
@@ -74,7 +74,7 @@ export interface IExtendableComponent {
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     static current: object | undefined = undefined;
     private activeCount_: number = 1;
-
+    public ___reusePool: GlobalReusePool | undefined = undefined;
     // Lifecycle management
     @JSONStringifyIgnore
     private __lifecycle__Internal?: CustomComponentLifecycle;
@@ -88,6 +88,30 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         }
         return this.__lifecycle__Internal!;
     }
+
+    /**
+    * Walks up the parent chain from this component looking for the nearest
+    * ancestor whose ___reusePool accepts the given class and is still active.
+    * Used by PeerNode.reuse/recycle to route reusable instances to the correct shared pool.
+    * Returns undefined if no matching pool is found.
+    */
+    public __getReusePoolForClass__Internal(classKey: string): GlobalReusePool | undefined {
+        // Fast path: no pool anywhere in the chain we can see
+        if (this.___reusePool === undefined && this.parent_ === undefined) {
+            return undefined;
+        }
+	    console.log(`GlobalReuse: WALK start from=${Class.of(this).getName()} classKey=${classKey}`);
+        let current: ExtendableComponent | undefined = this;
+        while (current !== undefined) {
+            const pool = current!.___reusePool;
+            if (pool !== undefined && pool!.acceptsComponent(classKey) && pool!.isActive()) {
+                return pool;
+            }
+            current = current!.parent_;
+        }
+        return undefined;
+    }
+
 
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
@@ -156,7 +180,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         }
     }
 
-    __switchHasBeenRecycle_Ineternal(recycle: boolean): void {
+    __switchHasBeenRecycle_Internal(recycle: boolean): void {
         this.hasBeenRecycled_ = recycle;
     }
     __aboutToRecycle_Internal(): void {

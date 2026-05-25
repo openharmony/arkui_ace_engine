@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { IReusePool } from './utils'
 import { ObserveSingleton } from './base/observeSingleton';
 import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
@@ -23,7 +23,23 @@ import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
 import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
 export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
-
+export { ReusePoolOwnership } from '../component/customComponent';
+/**
+ * Framework-internal extension of IReusePool. Carries the methods the
+ * framework needs to push/pop instances and inspect ownership; not exposed
+ * to applications.
+ */
+export interface IGlobalReusePoolVariable extends IReusePool {
+    readonly ownership: ReusePoolOwnership;
+    readonly acceptedClasses: Array<string>;
+    readonly owner: IVariableOwner;
+ 
+    pop(classKey: string, reuseId?: string): Object | undefined;
+    push(classKey: string, instance: Object, reuseId?: string): boolean;
+    peek(classKey: string, reuseId?: string): Object | undefined;
+    acceptsComponent(classKey: string): boolean;
+    isActive(): boolean;
+}
 export interface IDecoratorBaseRegistry {
     registerToOwningView(): void;
 }
@@ -52,7 +68,9 @@ export interface IDecoratedVariable {
 export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
     registerWatchToSource(me: IDecoratedV1Variable<T>): WatchIdType;
 }
-
+export interface IDecoratedV1ResettableVariable<T> {
+    resetOnReuse(newValue: T): void;
+}
 export interface IDecoratedV2Variable<T> extends IDecoratedVariable {
     resetOnReuse(newValue: T): void;
 }
@@ -72,7 +90,7 @@ export interface IDecoratedUpdatableVariable<T> {
     update(newValue: T): void;
 }
 
-export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T>, IDecoratedV1ResettableVariable<T> {}
 
 export interface ILocalDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable<T> {}
 
@@ -95,18 +113,24 @@ export interface IPropDecoratedVariable<T>
 export interface IPropRefDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
         IDecoratedUpdatableVariable<T>,
-        IDecoratedV1Variable<T> {}
+        IDecoratedV1Variable<T>,
+        IDecoratedV1ResettableVariable<T> {}
 
-export interface ILinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface ILinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(newSource: IDecoratedV1Variable<T>): void;
+}
 
-export interface IProvideDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IProvideDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T>, IDecoratedV1ResettableVariable<T> {}
 
-export interface IConsumeDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IConsumeDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(provideAliasName: string, watchFunc?: WatchFuncType, consumeOptions?: ConsumeOptions<T>): void;
+}
 
 export interface IObjectLinkDecoratedVariable<T>
     extends IDecoratedImmutableVariable<T>,
         IDecoratedUpdatableVariable<T>,
-        IDecoratedV1Variable<T> {}
+        IDecoratedV1Variable<T>,
+        IDecoratedV1ResettableVariable<T> {}
 
 export interface IStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
@@ -284,6 +308,7 @@ export interface IStateMgmtFactory {
         envOptions?: EnvOptions<T>
     ): IEnvDecoratedVariable<T>;
     makeSyncMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
+    makeGlobalReusePool(ownership: ReusePoolOwnership, acceptedClasses: Class[], owner: IVariableOwner): IGlobalReusePoolVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;

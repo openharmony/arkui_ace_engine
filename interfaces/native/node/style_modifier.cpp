@@ -21,6 +21,7 @@
 
 #include "frame_information.h"
 #include "grid_layout_option.h"
+#include "native_material_impl.h"
 #include "native_type.h"
 #include "node_model.h"
 #include "node_transition.h"
@@ -1233,7 +1234,7 @@ const ArkUI_AttributeItem* GetKey(ArkUI_NodeHandle node)
 
 int32_t SetInspectorLabel(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!item->string) {
+    if (item == nullptr || !item->string) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1245,6 +1246,44 @@ void ResetInspectorLabel(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetInspectorLabel(node->uiNodeHandle);
+}
+
+int32_t SetSystemMaterial(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!item) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto materialModifier = fullImpl->getNodeModifiers()->getMaterialModifier();
+    if (!materialModifier->getDeviceSystemMaterialSupported()) {
+        return ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED;
+    }
+    auto* material = reinterpret_cast<ArkUI_ImmersiveMaterial*>(item->object);
+    materialModifier->setSystemMaterialByHandle(node->uiNodeHandle, material);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetSystemMaterial(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    auto materialModifier = fullImpl->getNodeModifiers()->getMaterialModifier();
+    if (!materialModifier->getDeviceSystemMaterialSupported()) {
+        return;
+    }
+    materialModifier->resetSystemMaterial(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetSystemMaterial(ArkUI_NodeHandle node)
+{
+    thread_local static ArkUI_ImmersiveMaterial material = {};
+    auto success = GetFullImpl()->getNodeModifiers()->getMaterialModifier()->getSystemMaterialHandle(
+        node->uiNodeHandle, &material);
+    if (success) {
+        g_attributeItem.object = &material;
+    } else {
+        g_attributeItem.object = nullptr;
+    }
+    return &g_attributeItem;
 }
 
 const ArkUI_AttributeItem* GetInspectorLabel(ArkUI_NodeHandle node)
@@ -20527,9 +20566,8 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetBorderRadiusType,
         SetAccessibilityNextFocusId,
         SetAccessibilityDefaultFocus,
-        nullptr,
-        nullptr,
         SetInspectorLabel,
+        SetSystemMaterial,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -20670,9 +20708,8 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetBorderRadiusType,
         nullptr,
         nullptr,
-        nullptr,
-        nullptr,
         GetInspectorLabel,
+        GetSystemMaterial,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -20814,9 +20851,8 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetBorderRadiusType,
         ResetAccessibilityNextFocusId,
         ResetAccessibilityDefaultFocus,
-        nullptr,
-        nullptr,
         ResetInspectorLabel,
+        ResetSystemMaterial,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

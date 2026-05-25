@@ -84,7 +84,7 @@ bool ListItemGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (listItemGroupStyle_ != V2::ListItemGroupStyle::CARD ||
-        host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        !host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
     auto layoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
@@ -791,6 +791,7 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
         .deadline = deadline,
     };
     itemGroup->SetContentOffset(listSizeValues.contentStartOffset, listSizeValues.contentEndOffset);
+    itemGroup->SetFixOffset(listSizeValues.startFixOffset, listSizeValues.endFixOffset);
     itemGroup->SetCacheParam(param);
     itemGroup->SetListLayoutProperty(listLayoutProperty);
     itemGroup->SetListMainSize(listSizeValues.startPos, listSizeValues.endPos, listSizeValues.referencePos,

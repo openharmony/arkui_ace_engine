@@ -57,12 +57,14 @@ public:
         const CalcLength& height = CalcLength(ITEM_HEIGHT));
     void CreateScroll();
     void CreateWaterFlow(WaterFlowLayoutMode mode = WaterFlowLayoutMode::TOP_DOWN);
+    void CreateFlowItem();
     void CreateList();
     void CreateListItems();
     void CreateListWithLazyColumnLayout(int32_t initialIndex = 0, bool stackFromEnd = false);
-    void AddChild();
+    void AddChildAtIndex(int32_t index = 0);
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
     void FlushIdleTask(const RefPtr<LazyColumnLayoutPattern>& pattern);
+    void FlushListIdleTask(const RefPtr<ListPattern>& listPattern);
     void CreateRepeatVirtualScrollNode(
         int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& createFunc);
 

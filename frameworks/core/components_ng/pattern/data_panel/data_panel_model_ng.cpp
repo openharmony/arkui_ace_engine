@@ -115,12 +115,14 @@ void DataPanelModelNG::SetStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth);
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, true);
+    ACE_CHECK_LPX_ATTRIBUTE(strokeWidth, LpxAttribute::LPX_STROKE_WIDTH);
 }
 
 void DataPanelModelNG::ResetStrokeWidth()
 {
     ACE_RESET_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth);
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
+    ACE_CHECK_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_STROKE_WIDTH);
 }
 
 void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
@@ -166,12 +168,14 @@ void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& str
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, true, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(strokeWidth, LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void DataPanelModelNG::ResetStrokeWidth(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption)

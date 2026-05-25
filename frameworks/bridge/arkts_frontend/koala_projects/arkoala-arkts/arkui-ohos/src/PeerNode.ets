@@ -24,7 +24,8 @@ import { RecordData } from "@ohos.base"
 import { ArkUIAniModule } from 'arkui.ani';
 import { ExtendableComponent } from './component/extendableComponent'
 import { ElementInfo } from './stateManagement/utils';
-
+import { ArkCustomComponentRootPeer } from './component/staticComponents';
+import { BaseCustomComponent } from './component/customComponent'
 export const PeerNodeType = 11
 export const RootPeerType = 33
 export const LazyForEachType = 13
@@ -32,6 +33,17 @@ export const LazyItemNodeType = 17 // LazyItems are detached node trees that are
 export const BuilderRootNodeType = 19 // BuilderRootNode are detached node trees that are stored privately in BuilderNode
 const INITIAL_ID = 0
 const ID_CAPACITY = 10000
+
+/**
+ * A reuseKey arriving from koalaui is "fullClassName@Component" by default,
+ * or "fullClassName@Component#userReuseId" when the application supplies a
+ * custom reuseId through the .reuse({ reuseId }) modifier (transpiler
+ * support pending). parseReuseKey splits the two parts.
+ */
+interface ParsedReuseKey {
+    classKey: string;
+    reuseId: string | undefined;
+}
 const UNINITIALIZE_CURSOR = -1
 
 export class PeerNode extends IncrementalNode {
@@ -59,7 +71,13 @@ export class PeerNode extends IncrementalNode {
     private _reusePool?: Map<string, ReusablePool>
     public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
-
+    /**
+    * Cached parent reference that survives IncrementalNode.detach(). Used by
+    * recycle() to walk up the tree when this.parent has already been cleared
+    * mid-cascade — happens when a parent component is being torn down and
+    * intermediate peers are detached before all descendant recycles complete.
+    */
+    private _recycleParentRef: PeerNode | undefined = undefined;
     getPeerPtr(): pointer {
         return this.peer.ptr
     }
@@ -131,9 +149,32 @@ export class PeerNode extends IncrementalNode {
 
     /* reuse and recycle object on RootPeers */
     override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
-        if (!this.isKind(RootPeerType))
-            return this.parent?.reuse(reuseKey, id)
+        if (!this.isKind(RootPeerType)) {
+            const upward = this.getParentNodeWhenRecycle()   // ← same resilient walk as recycle
+            if (upward !== undefined && upward !== (this as IncrementalNode)) {
+                return (upward as PeerNode).reuse(reuseKey, id)
+            }
+            return undefined
+        }
 
+        // Try global pool first
+        const rootPeer = this as ArkCustomComponentRootPeer;
+        const component = rootPeer.getComponent();
+        const instance = component?.getInstance() as ExtendableComponent | undefined;
+        if (instance !== undefined) {
+            const parsed = this.parseReuseKey(reuseKey);
+            const classKey = parsed.classKey;
+            const reuseId = parsed.reuseId;
+            const pool = instance!.__getReusePoolForClass__Internal(classKey);
+            if (pool !== undefined && pool!.isActive()) {
+                const cached = pool!.pop(classKey, reuseId);
+                if (cached !== undefined) {
+                    console.log(`GlobalReuse: PeerNode → GLOBAL POP SUCCESS`);
+                    return cached as Disposable;
+                }
+            }
+        }
+        console.log(`No GlobalReuse: PeerNode → LEGACY FALLBACK`);
         if (this._reusePool === undefined)
             return undefined
         if (this._reusePool!.has(reuseKey)) {
@@ -143,11 +184,74 @@ export class PeerNode extends IncrementalNode {
         return undefined;
     }
 
+    /**
+    * Normalizes a runtime reuseKey into the short class name used by __poolAccepts__.
+    * Strips the "@Component" suffix (koala's internal marker) and any module/path
+    * prefix, so "entry.src.main.ets.pages.Index.ReusableChild@Component" becomes
+    * "ReusableChild" — matching what users declare in static __poolAccepts__.
+    */
+    private stripClassPrefix(reuseKey: string): string {
+        let key = reuseKey.endsWith('@Component')
+            ? reuseKey.substring(0, reuseKey.length - 10)
+            : reuseKey;
+        const lastDot = key.lastIndexOf('.');
+        if (lastDot >= 0) key = key.substring(lastDot + 1);
+        return key;
+    }
+
+    /**
+    * Parses a reuseKey of the form "fullClassName@Component" or
+    * "fullClassName@Component#userReuseId" into its class-name and
+    * user-supplied reuseId components. The reuseId portion is optional and
+    * is omitted entirely until the .reuse({ reuseId }) modifier is wired
+    * through the transpiler.
+    */
+    private parseReuseKey(reuseKey: string): ParsedReuseKey {
+        const hashAt = reuseKey.indexOf('#');
+        if (hashAt < 0) {
+            return { classKey: this.stripClassPrefix(reuseKey), reuseId: undefined };
+        }
+        const beforeHash = reuseKey.substring(0, hashAt);
+        let afterHash = reuseKey.substring(hashAt + 1);
+        // The framework appends '@Component' after the whole key, so when a
+        // user-supplied reuseId is present (i.e., a '#' was inserted by
+        // _invokeImpl), the '@Component' suffix lands inside afterHash.
+        // Strip it here so the reuseId portion is clean.
+        if (afterHash.endsWith('@Component')) {
+            afterHash = afterHash.substring(0, afterHash.length - 10);
+        }
+        return { classKey: this.stripClassPrefix(beforeHash), reuseId: afterHash };
+    }
+
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
-        if (!this.isKind(RootPeerType)) {
-            return this.parent?.recycle(reuseKey, child, id) ?? false
+          if (!this.isKind(RootPeerType)) {
+            // this.parent may already be cleared during the same teardown sweep
+            // that triggered this recycle call. Use the resilient walk-up
+            // (live walk + cached ancestor + nodeRef fallback) instead of raw this.parent.
+            const upward = this.getParentNodeWhenRecycle()
+            if (upward !== undefined && upward !== (this as IncrementalNode)) {
+                return (upward as PeerNode).recycle(reuseKey, child, id)
+            }
+            return false
+        }
+        const rootPeer = this as ArkCustomComponentRootPeer;
+        const component = rootPeer.getComponent();
+        console.log(`GlobalReuse: PN.recycle component=${component !== undefined ? 'set' : 'undef'}`);
+
+        const instance = component?.getInstance() as ExtendableComponent | undefined;
+
+        if (instance !== undefined) {
+            const parsed = this.parseReuseKey(reuseKey);
+            const classKey = parsed.classKey;
+            const reuseId = parsed.reuseId;
+            const pool = instance!.__getReusePoolForClass__Internal(classKey);
+            console.log(`GlobalReuse: pool=${pool !== undefined ? 'found' : 'undef'}`);
+            if (pool !== undefined) {
+                return pool!.push(classKey, child as Object, reuseId);
+            }
         }
         if (this.disposing) {
+	        console.log(`GlobalReuse: PN.recycle disposing, bail`);
             return false;
         }
         if (!this._reusePool)
@@ -157,6 +261,36 @@ export class PeerNode extends IncrementalNode {
         }
         this._reusePool!.get(reuseKey)!.put(child);
         return true
+    }
+
+    override getParentNodeWhenRecycle(nodeRef?: IncrementalNode): IncrementalNode | undefined {
+        // Try live walk first
+        let cur: IncrementalNode | undefined = this.parent;
+        while (cur !== undefined) {
+            if (cur!.isKind(RootPeerType) && !cur!.disposed && !(cur as PeerNode).disposing) {
+                return cur;
+            }
+            cur = cur!.parent;
+        }
+        // Live chain broken — try cached ancestor
+        let cached: PeerNode | undefined = this._recycleParentRef;
+        while (cached !== undefined && (cached!.disposed || cached!.disposing)) {
+            cached = cached!._recycleParentRef;
+        }
+        if (cached !== undefined) {
+            return cached;
+        }
+        // Last resort — walk up nodeRef to find a RootPeer ancestor
+        if (nodeRef !== undefined) {
+            let nodeWalk: IncrementalNode | undefined = nodeRef;
+            while (nodeWalk !== undefined) {
+                if (nodeWalk!.isKind(RootPeerType) && !nodeWalk!.disposed && !(nodeWalk as PeerNode).disposing) {
+                    return nodeWalk;
+                }
+                nodeWalk = nodeWalk!.parent;
+            }
+        }
+        return undefined;
     }
 
     override incrementalUpdateDone(parent?: IncrementalNode) {
@@ -230,6 +364,11 @@ export class PeerNode extends IncrementalNode {
             // Improve: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
+                if (peer.isKind(RootPeerType)) {
+                    peer._recycleParentRef = peer;
+                } else {
+                    peer._recycleParentRef = this.isKind(RootPeerType) ? this : this._recycleParentRef;
+                }
                 if (peer.reusable) {
                     peer!.onReuse(false)
                 } else {
@@ -271,7 +410,7 @@ export class PeerNode extends IncrementalNode {
 
     override dispose(): void {
         let parent = this.parent
-        if (parent != undefined && parent.isKind(PeerNodeType)) {
+        if (parent != undefined && (parent!.isKind(PeerNodeType) || parent!.isKind(BuilderRootNodeType))) {
             const node = parent as PeerNode
             if (!node.disposed) node.peer.removeChild(this.peer.ptr)
         }

@@ -287,7 +287,7 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
         case SELECTOR_ID_1: {
             auto mouseEventInfo = arkEevent.value1->GetEventInfo();
             CHECK_NULL_RETURN(mouseEventInfo, errValue);
-            auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
+            auto mouseEvent = mouseEventInfo->ConvertToMouseEventForStatic();
             mouseEvent.time = mouseEventInfo->GetTimeStamp();
             result = postEventManager->PostMouseEvent(peer->realNode_, std::move(mouseEvent));
             break;
@@ -358,7 +358,7 @@ Ark_Boolean PostInputEventWithStrategyImpl(Ark_BuilderNodeOps peer, const Opt_In
         case SELECTOR_ID_1: {
             auto mouseEventInfo = arkEvent.value1->GetEventInfo();
             CHECK_NULL_RETURN(mouseEventInfo, errValue);
-            auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
+            auto mouseEvent = mouseEventInfo->ConvertToMouseEventForStatic();
             mouseEvent.time = mouseEventInfo->GetTimeStamp();
             mouseEvent.isNewReferee = isNewReferee;
             result = postEventManager->PostMouseEventWithStrategy(peer->realNode_, std::move(mouseEvent));
@@ -389,6 +389,10 @@ Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer, Ark
     if (AceType::InstanceOf<NG::FrameNode>(peer->realNode_)) {
         peer->viewNode_ = AceType::DynamicCast<NG::FrameNode>(peer->realNode_);
         peer->viewNode_->SetIsRootBuilderNode(true);
+    }
+    if (peer->realNode_->GetTag() == "DetachedFreeRootProxy") {
+        peer->realNode_->SetIsRootBuilderNode(true);
+        return FrameNodePeer::Create(peer->realNode_);
     }
     return FrameNodePeer::Create(peer->viewNode_);
 }

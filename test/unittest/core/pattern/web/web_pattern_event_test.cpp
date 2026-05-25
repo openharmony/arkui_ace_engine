@@ -1250,4 +1250,1398 @@ HWTEST_F(WebPatternEventTest, WebUtil_ComplexScenarios_002b, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: WebCommandAction_InputInsert_001
+ * @tc.desc: Test inputInsert command with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert",
+        "content": "hello world",
+        "index": 5
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandZero = R"({
+        "event_type": "inputInsert",
+        "content": "test",
+        "index": 0
+    })";
+    g_webPattern->OnInjectionEvent(commandZero);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandEmpty = R"({
+        "event_type": "inputInsert",
+        "content": "",
+        "index": 10
+    })";
+    g_webPattern->OnInjectionEvent(commandEmpty);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_002
+ * @tc.desc: Test inputInsert command with missing content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert",
+        "index": 5
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_003
+ * @tc.desc: Test inputInsert command with invalid content type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandNumber = R"({
+        "event_type": "inputInsert",
+        "content": 123,
+        "index": 5
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandNumber);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandBool = R"({
+        "event_type": "inputInsert",
+        "content": true,
+        "index": 5
+    })";
+    result = g_webPattern->OnInjectionEvent(commandBool);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandNull = R"({
+        "event_type": "inputInsert",
+        "content": null,
+        "index": 5
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNull);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandArray = R"({
+        "event_type": "inputInsert",
+        "content": ["a", "b"],
+        "index": 5
+    })";
+    result = g_webPattern->OnInjectionEvent(commandArray);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandObj = R"({
+        "event_type": "inputInsert",
+        "content": {"key": "value"},
+        "index": 5
+    })";
+    result = g_webPattern->OnInjectionEvent(commandObj);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_004
+ * @tc.desc: Test inputInsert command with missing index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert",
+        "content": "hello"
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_005
+ * @tc.desc: Test inputInsert command with invalid index type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandStr = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": "five"
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandStr);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandBool = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": true
+    })";
+    result = g_webPattern->OnInjectionEvent(commandBool);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandNull = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": null
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNull);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandObj = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": {}
+    })";
+    result = g_webPattern->OnInjectionEvent(commandObj);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandArr = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": []
+    })";
+    result = g_webPattern->OnInjectionEvent(commandArr);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_006
+ * @tc.desc: Test inputInsert command with negative index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": -1
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandNeg100 = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": -100
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNeg100);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_007
+ * @tc.desc: Test inputInsert command with both content and index missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert"
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputModify_001
+ * @tc.desc: Test inputModify command with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputModify_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputModify",
+        "content": "modified text"
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandEmpty = R"({
+        "event_type": "inputModify",
+        "content": ""
+    })";
+    g_webPattern->OnInjectionEvent(commandEmpty);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandLong = R"({
+        "event_type": "inputModify",
+        "content": "this is a very long modified text content for testing"
+    })";
+    g_webPattern->OnInjectionEvent(commandLong);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputModify_002
+ * @tc.desc: Test inputModify command with missing content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputModify_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputModify"
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputModify_003
+ * @tc.desc: Test inputModify command with invalid content types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputModify_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandNum = R"({
+        "event_type": "inputModify",
+        "content": 42
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandNum);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandBool = R"({
+        "event_type": "inputModify",
+        "content": true
+    })";
+    result = g_webPattern->OnInjectionEvent(commandBool);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandNull = R"({
+        "event_type": "inputModify",
+        "content": null
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNull);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandArr = R"({
+        "event_type": "inputModify",
+        "content": ["a", "b"]
+    })";
+    result = g_webPattern->OnInjectionEvent(commandArr);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandObj = R"({
+        "event_type": "inputModify",
+        "content": {"key": "value"}
+    })";
+    result = g_webPattern->OnInjectionEvent(commandObj);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_001
+ * @tc.desc: Test inputSelect command with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": 10
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandLarge = R"({
+        "event_type": "inputSelect",
+        "start_index": 100,
+        "finish_index": 200
+    })";
+    g_webPattern->OnInjectionEvent(commandLarge);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_002
+ * @tc.desc: Test inputSelect command with missing start_index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSelect",
+        "finish_index": 10
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_003
+ * @tc.desc: Test inputSelect command with missing finish_index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSelect",
+        "start_index": 0
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_004
+ * @tc.desc: Test inputSelect command with both indexes missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSelect"
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_005
+ * @tc.desc: Test inputSelect command with invalid start_index type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandStr = R"({
+        "event_type": "inputSelect",
+        "start_index": "zero",
+        "finish_index": 10
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandStr);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandBool = R"({
+        "event_type": "inputSelect",
+        "start_index": true,
+        "finish_index": 10
+    })";
+    result = g_webPattern->OnInjectionEvent(commandBool);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandNull = R"({
+        "event_type": "inputSelect",
+        "start_index": null,
+        "finish_index": 10
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNull);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandObj = R"({
+        "event_type": "inputSelect",
+        "start_index": {},
+        "finish_index": 10
+    })";
+    result = g_webPattern->OnInjectionEvent(commandObj);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_006
+ * @tc.desc: Test inputSelect command with invalid finish_index type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandStr = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": "ten"
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandStr);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandBool = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": false
+    })";
+    result = g_webPattern->OnInjectionEvent(commandBool);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandNull = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": null
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNull);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_007
+ * @tc.desc: Test inputSelect command with negative indexes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandNegStart = R"({
+        "event_type": "inputSelect",
+        "start_index": -1,
+        "finish_index": 10
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandNegStart);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandNegFinish = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": -5
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNegFinish);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandBothNeg = R"({
+        "event_type": "inputSelect",
+        "start_index": -10,
+        "finish_index": -5
+    })";
+    result = g_webPattern->OnInjectionEvent(commandBothNeg);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_008
+ * @tc.desc: Test inputSelect command with start >= finish.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_008, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandGreater = R"({
+        "event_type": "inputSelect",
+        "start_index": 10,
+        "finish_index": 5
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandGreater);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX_DURATION));
+
+    const std::string& commandEqual = R"({
+        "event_type": "inputSelect",
+        "start_index": 10,
+        "finish_index": 10
+    })";
+    result = g_webPattern->OnInjectionEvent(commandEqual);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX_DURATION));
+
+    const std::string& commandZeroEqual = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": 0
+    })";
+    result = g_webPattern->OnInjectionEvent(commandZeroEqual);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX_DURATION));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputFocus_001
+ * @tc.desc: Test inputFocus command with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputFocus_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input",
+        "no_need_keyboard": 1
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandNoKeyboard = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input",
+        "no_need_keyboard": 0
+    })";
+    g_webPattern->OnInjectionEvent(commandNoKeyboard);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputFocus_002
+ * @tc.desc: Test inputFocus command without no_need_keyboard (optional field).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputFocus_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input"
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputFocus_003
+ * @tc.desc: Test inputFocus command with missing XPath.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputFocus_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputFocus",
+        "no_need_keyboard": 1
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_XPATH));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputFocus_004
+ * @tc.desc: Test inputFocus command with invalid XPath type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputFocus_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandNum = R"({
+        "event_type": "inputFocus",
+        "XPath": 123,
+        "no_need_keyboard": 1
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandNum);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_XPATH));
+
+    const std::string& commandBool = R"({
+        "event_type": "inputFocus",
+        "XPath": true,
+        "no_need_keyboard": 1
+    })";
+    result = g_webPattern->OnInjectionEvent(commandBool);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_XPATH));
+
+    const std::string& commandNull = R"({
+        "event_type": "inputFocus",
+        "XPath": null,
+        "no_need_keyboard": 1
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNull);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_XPATH));
+
+    const std::string& commandObj = R"({
+        "event_type": "inputFocus",
+        "XPath": {},
+        "no_need_keyboard": 1
+    })";
+    result = g_webPattern->OnInjectionEvent(commandObj);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_XPATH));
+
+    const std::string& commandArr = R"({
+        "event_type": "inputFocus",
+        "XPath": [],
+        "no_need_keyboard": 1
+    })";
+    result = g_webPattern->OnInjectionEvent(commandArr);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_XPATH));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputFocus_005
+ * @tc.desc: Test inputFocus command with invalid no_need_keyboard value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputFocus_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command2 = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input",
+        "no_need_keyboard": 2
+    })";
+    int result = g_webPattern->OnInjectionEvent(command2);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_NO_NEED_KEYBOARD));
+
+    const std::string& commandNeg = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input",
+        "no_need_keyboard": -1
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNeg);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_NO_NEED_KEYBOARD));
+
+    const std::string& command100 = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/input",
+        "no_need_keyboard": 100
+    })";
+    result = g_webPattern->OnInjectionEvent(command100);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_NO_NEED_KEYBOARD));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSetCursor_001
+ * @tc.desc: Test inputSetCursor command with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSetCursor_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSetCursor",
+        "index": 15
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandZero = R"({
+        "event_type": "inputSetCursor",
+        "index": 0
+    })";
+    g_webPattern->OnInjectionEvent(commandZero);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandLarge = R"({
+        "event_type": "inputSetCursor",
+        "index": 10000
+    })";
+    g_webPattern->OnInjectionEvent(commandLarge);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSetCursor_002
+ * @tc.desc: Test inputSetCursor command with missing index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSetCursor_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSetCursor"
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSetCursor_003
+ * @tc.desc: Test inputSetCursor command with invalid index type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSetCursor_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandStr = R"({
+        "event_type": "inputSetCursor",
+        "index": "fifteen"
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandStr);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandBool = R"({
+        "event_type": "inputSetCursor",
+        "index": true
+    })";
+    result = g_webPattern->OnInjectionEvent(commandBool);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandNull = R"({
+        "event_type": "inputSetCursor",
+        "index": null
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNull);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandObj = R"({
+        "event_type": "inputSetCursor",
+        "index": {}
+    })";
+    result = g_webPattern->OnInjectionEvent(commandObj);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandArr = R"({
+        "event_type": "inputSetCursor",
+        "index": []
+    })";
+    result = g_webPattern->OnInjectionEvent(commandArr);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSetCursor_004
+ * @tc.desc: Test inputSetCursor command with negative index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSetCursor_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSetCursor",
+        "index": -3
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandNeg = R"({
+        "event_type": "inputSetCursor",
+        "index": -100
+    })";
+    result = g_webPattern->OnInjectionEvent(commandNeg);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputCut_001
+ * @tc.desc: Test inputCut command with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputCut_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputCut",
+        "XPath": "/html/body/input"
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputCopy_001
+ * @tc.desc: Test inputCopy command with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputCopy_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputCopy",
+        "XPath": "/html/body/input"
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodArray_001
+ * @tc.desc: Test input method commands in array format.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodArray_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandArray = R"([
+        {
+            "event_type": "inputInsert",
+            "content": "hello",
+            "index": 0
+        },
+        {
+            "event_type": "inputModify",
+            "content": "world"
+        },
+        {
+            "event_type": "inputSelect",
+            "start_index": 0,
+            "finish_index": 5
+        }
+    ])";
+    g_webPattern->OnInjectionEvent(commandArray);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodArray_002
+ * @tc.desc: Test input method commands in array with one invalid command.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodArray_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandArray = R"([
+        {
+            "event_type": "inputInsert",
+            "content": "hello",
+            "index": 0
+        },
+        {
+            "event_type": "inputModify"
+        }
+    ])";
+    int result = g_webPattern->OnInjectionEvent(commandArray);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::FAILED));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodArray_003
+ * @tc.desc: Test mixed command array with input method and click.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodArray_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandArray = R"([
+        {
+            "event_type": "inputFocus",
+            "XPath": "/html/body/input",
+            "no_need_keyboard": 1
+        },
+        {
+            "event_type": "inputInsert",
+            "content": "test",
+            "index": 0
+        },
+        {
+            "event_type": "inputSetCursor",
+            "index": 4
+        }
+    ])";
+    g_webPattern->OnInjectionEvent(commandArray);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodErrorCode_001
+ * @tc.desc: Test input method error codes have expected values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodErrorCode_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    EXPECT_EQ(static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT), 230);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::JSON_INVALID_INDEX), 231);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::JSON_INVALID_INDEX_DURATION), 232);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::JSON_INVALID_NO_NEED_KEYBOARD), 233);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodCaseSensitive_001
+ * @tc.desc: Test input method event types are case sensitive.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodCaseSensitive_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandUpper = R"({
+        "event_type": "INPUTINSERT",
+        "content": "hello",
+        "index": 0
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandUpper);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE));
+
+    const std::string& commandMixed = R"({
+        "event_type": "InputInsert",
+        "content": "hello",
+        "index": 0
+    })";
+    result = g_webPattern->OnInjectionEvent(commandMixed);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE));
+
+    const std::string& commandModifyUpper = R"({
+        "event_type": "INPUTMODIFY",
+        "content": "hello"
+    })";
+    result = g_webPattern->OnInjectionEvent(commandModifyUpper);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE));
+
+    const std::string& commandSelectUpper = R"({
+        "event_type": "INPUTSELECT",
+        "start_index": 0,
+        "finish_index": 5
+    })";
+    result = g_webPattern->OnInjectionEvent(commandSelectUpper);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE));
+
+    const std::string& commandCutUpper = R"({
+        "event_type": "INPUTCUT",
+        "XPath": "/html/body"
+    })";
+    result = g_webPattern->OnInjectionEvent(commandCutUpper);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE));
+
+    const std::string& commandCopyUpper = R"({
+        "event_type": "INPUTCOPY",
+        "XPath": "/html/body"
+    })";
+    result = g_webPattern->OnInjectionEvent(commandCopyUpper);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodDuplicateKeys_001
+ * @tc.desc: Test input method commands with duplicate JSON keys.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodDuplicateKeys_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "content": "world",
+        "index": 0
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_IS_INVALID));
+
+    const std::string& commandIndex = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": 0,
+        "index": 5
+    })";
+    result = g_webPattern->OnInjectionEvent(commandIndex);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_IS_INVALID));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodMalformed_001
+ * @tc.desc: Test input method commands with malformed JSON.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodMalformed_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command1 = R"({
+        "event_type": "inputInsert",
+        "content", "hello",
+        "index": 0
+    })";
+    int result = g_webPattern->OnInjectionEvent(command1);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_IS_INVALID));
+
+    const std::string& command2 = R"({
+        "event_type": "inputModify"
+        "content": "hello"
+    })";
+    result = g_webPattern->OnInjectionEvent(command2);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_IS_INVALID));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_SpecialContent_001
+ * @tc.desc: Test inputInsert with special characters in content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_SpecialContent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandUnicode = R"({
+        "event_type": "inputInsert",
+        "content": "你好世界",
+        "index": 0
+    })";
+    g_webPattern->OnInjectionEvent(commandUnicode);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandNewline = R"({
+        "event_type": "inputInsert",
+        "content": "line1\nline2",
+        "index": 0
+    })";
+    g_webPattern->OnInjectionEvent(commandNewline);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandTab = R"({
+        "event_type": "inputInsert",
+        "content": "col1\tcol2",
+        "index": 0
+    })";
+    g_webPattern->OnInjectionEvent(commandTab);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputModify_SpecialContent_001
+ * @tc.desc: Test inputModify with special characters in content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputModify_SpecialContent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandUnicode = R"({
+        "event_type": "inputModify",
+        "content": "修改后的文本"
+    })";
+    g_webPattern->OnInjectionEvent(commandUnicode);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandHtml = R"({
+        "event_type": "inputModify",
+        "content": "<div>html content</div>"
+    })";
+    g_webPattern->OnInjectionEvent(commandHtml);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_Boundary_001
+ * @tc.desc: Test inputSelect with boundary index values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_Boundary_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command1 = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": 1
+    })";
+    g_webPattern->OnInjectionEvent(command1);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& command2 = R"({
+        "event_type": "inputSelect",
+        "start_index": 0,
+        "finish_index": 2147483647
+    })";
+    g_webPattern->OnInjectionEvent(command2);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputFocus_ComplexXPath_001
+ * @tc.desc: Test inputFocus with complex XPath expressions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputFocus_ComplexXPath_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command1 = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/div[@id='container']/input[@type='text']",
+        "no_need_keyboard": 0
+    })";
+    g_webPattern->OnInjectionEvent(command1);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& command2 = R"({
+        "event_type": "inputFocus",
+        "XPath": "//input[@class='search-input' and @name='query']",
+        "no_need_keyboard": 1
+    })";
+    g_webPattern->OnInjectionEvent(command2);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& command3 = R"({
+        "event_type": "inputFocus",
+        "XPath": "/html/body/form[1]/input[2]"
+    })";
+    g_webPattern->OnInjectionEvent(command3);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSetCursor_Boundary_001
+ * @tc.desc: Test inputSetCursor with boundary index values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSetCursor_Boundary_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandMax = R"({
+        "event_type": "inputSetCursor",
+        "index": 2147483647
+    })";
+    g_webPattern->OnInjectionEvent(commandMax);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandOne = R"({
+        "event_type": "inputSetCursor",
+        "index": 1
+    })";
+    g_webPattern->OnInjectionEvent(commandOne);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputCutCopy_ExtraFields_001
+ * @tc.desc: Test inputCut/inputCopy with extra fields (should be ignored).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputCutCopy_ExtraFields_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandCutExtra = R"({
+        "event_type": "inputCut",
+        "XPath": "/html/body/input",
+        "extra_field": "value"
+    })";
+    g_webPattern->OnInjectionEvent(commandCutExtra);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+
+    const std::string& commandCopyExtra = R"({
+        "event_type": "inputCopy",
+        "XPath": "/html/body/input",
+        "content": "should be ignored"
+    })";
+    g_webPattern->OnInjectionEvent(commandCopyExtra);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_AllInputMethodTypes_001
+ * @tc.desc: Test all input method event types in one array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_AllInputMethodTypes_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandArray = R"([
+        {
+            "event_type": "inputFocus",
+            "XPath": "/html/body/textarea",
+            "no_need_keyboard": 1
+        },
+        {
+            "event_type": "inputInsert",
+            "content": "Hello",
+            "index": 0
+        },
+        {
+            "event_type": "inputSetCursor",
+            "index": 5
+        },
+        {
+            "event_type": "inputSelect",
+            "start_index": 0,
+            "finish_index": 5
+        },
+        {
+            "event_type": "inputCopy",
+            "XPath": "/html/body/textarea"
+        },
+        {
+            "event_type": "inputCut",
+            "XPath": "/html/body/textarea"
+        },
+        {
+            "event_type": "inputModify",
+            "content": "New content"
+        }
+    ])";
+    g_webPattern->OnInjectionEvent(commandArray);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodWithEmptyJson_001
+ * @tc.desc: Test input method commands with empty JSON object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodWithEmptyJson_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert"
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandModify = R"({
+        "event_type": "inputModify"
+    })";
+    result = g_webPattern->OnInjectionEvent(commandModify);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+
+    const std::string& commandSelect = R"({
+        "event_type": "inputSelect"
+    })";
+    result = g_webPattern->OnInjectionEvent(commandSelect);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandFocus = R"({
+        "event_type": "inputFocus"
+    })";
+    result = g_webPattern->OnInjectionEvent(commandFocus);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_XPATH));
+
+    const std::string& commandSetCursor = R"({
+        "event_type": "inputSetCursor"
+    })";
+    result = g_webPattern->OnInjectionEvent(commandSetCursor);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_LargeIndex_001
+ * @tc.desc: Test inputInsert with large index value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_LargeIndex_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert",
+        "content": "test",
+        "index": 2147483647
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_WithExtraFields_001
+ * @tc.desc: Test inputInsert with extra fields that should be ignored.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_WithExtraFields_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": 5,
+        "XPath": "/html/body",
+        "duration": 100,
+        "align": "top",
+        "offset": 10
+    })";
+    g_webPattern->OnInjectionEvent(command);
+    EXPECT_EQ(static_cast<int>(WebCommandResult::SUCCESS), 10);
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSelect_FloatIndex_001
+ * @tc.desc: Test inputSelect with float index values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSelect_FloatIndex_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSelect",
+        "start_index": 0.5,
+        "finish_index": 10.5
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_NE(result, static_cast<int>(WebCommandResult::SUCCESS));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputSetCursor_FloatIndex_001
+ * @tc.desc: Test inputSetCursor with float index value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputSetCursor_FloatIndex_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputSetCursor",
+        "index": 5.5
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_NE(result, static_cast<int>(WebCommandResult::SUCCESS));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputInsert_FloatIndex_001
+ * @tc.desc: Test inputInsert with float index value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputInsert_FloatIndex_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& command = R"({
+        "event_type": "inputInsert",
+        "content": "hello",
+        "index": 5.5
+    })";
+    int result = g_webPattern->OnInjectionEvent(command);
+    EXPECT_NE(result, static_cast<int>(WebCommandResult::SUCCESS));
+#endif
+}
+
+/**
+ * @tc.name: WebCommandAction_InputMethodWithGestureType_001
+ * @tc.desc: Test that gesture event types are not treated as input method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, WebCommandAction_InputMethodWithGestureType_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string& commandTap = R"({
+        "event_type": "tap",
+        "x": 100,
+        "y": 200
+    })";
+    int result = g_webPattern->OnInjectionEvent(commandTap);
+    EXPECT_NE(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+    EXPECT_NE(result, static_cast<int>(WebCommandResult::JSON_INVALID_INDEX));
+
+    const std::string& commandPinch = R"({
+        "event_type": "pinch",
+        "x": 100,
+        "y": 200,
+        "scale": 2.0
+    })";
+    result = g_webPattern->OnInjectionEvent(commandPinch);
+    EXPECT_NE(result, static_cast<int>(WebCommandResult::JSON_INVALID_CONTENT));
+#endif
+}
+
 } // namespace OHOS::Ace::NG

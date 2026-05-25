@@ -37,6 +37,79 @@ class ArkLazyVGridLayoutComponent extends ArkLazyGridLayout<ArkLazyVGridLayoutCo
     modifierWithKey(this._modifiersWithKeys, LazyGridColumnsTemplateModifier.identity, LazyGridColumnsTemplateModifier, value);
     return this;
   }
+  sticky(value: StickyStyle): this {
+    modifierWithKey(this._modifiersWithKeys, LazyGridStickyModifier.identity, LazyGridStickyModifier, value);
+    return this;
+  }
+  header(value: CustomBuilder | ComponentContent | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, LazyGridHeaderModifier.identity, LazyGridHeaderModifier, value);
+    return this;
+  }
+  footer(value: CustomBuilder | ComponentContent | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, LazyGridFooterModifier.identity, LazyGridFooterModifier, value);
+    return this;
+  }
+  onVisibleIndexesChange(callback: ((start: number, end: number) => void) | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, LazyGridOnVisibleIndexesChangeModifier.identity,
+      LazyGridOnVisibleIndexesChangeModifier, callback);
+    return this;
+  }
+}
+
+class LazyGridStickyModifier extends ModifierWithKey<StickyStyle> {
+  constructor(value: StickyStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyVGridSticky');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !isNumber(this.value)) {
+      getUINativeModule().lazyVGridLayout.resetSticky(node);
+    } else {
+      getUINativeModule().lazyVGridLayout.setSticky(node, this.value);
+    }
+  }
+}
+
+class LazyGridHeaderModifier extends ModifierWithKey<CustomBuilder | ComponentContent | undefined> {
+  constructor(value: CustomBuilder | ComponentContent | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyVGridHeader');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVGridLayout.resetHeader(node);
+    } else {
+      getUINativeModule().lazyVGridLayout.setHeader(node, this.value);
+    }
+  }
+}
+
+class LazyGridFooterModifier extends ModifierWithKey<CustomBuilder | ComponentContent | undefined> {
+  constructor(value: CustomBuilder | ComponentContent | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyVGridFooter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVGridLayout.resetFooter(node);
+    } else {
+      getUINativeModule().lazyVGridLayout.setFooter(node, this.value);
+    }
+  }
+}
+
+class LazyGridOnVisibleIndexesChangeModifier extends ModifierWithKey<((start: number, end: number) => void) | undefined> {
+  constructor(value: ((start: number, end: number) => void) | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lazyVGridOnVisibleIndexesChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !isFunction(this.value)) {
+      getUINativeModule().lazyVGridLayout.resetOnVisibleIndexesChange(node);
+    } else {
+      getUINativeModule().lazyVGridLayout.setOnVisibleIndexesChange(node, this.value);
+    }
+  }
 }
 
 class LazyGridColumnsTemplateModifier extends ModifierWithKey<string> {

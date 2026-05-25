@@ -1112,9 +1112,10 @@ void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper)
 
     auto columnProperty = lastColumnNode->GetLayoutProperty();
     CHECK_NULL_VOID(columnProperty);
-    columnProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth_)), NG::CalcLength(Dimension(popupMaxHeight_))));
-
+    if (GreatNotEqual(popupMaxWidth_, 0.0f) && GreatNotEqual(popupMaxHeight_, 0.0f)) {
+        columnProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth_)), NG::CalcLength(Dimension(popupMaxHeight_))));
+    }
     if (buttonRowNode->GetChildren().empty()) {
         return;
     }
@@ -2438,16 +2439,13 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         targetOffset_ = targetNode->GetPaintRectOffset(false, false, true);
     }
 
-    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
-    RefPtr<PipelineContext> pipelineContext;
-    if (expandDisplay) {
-        pipelineContext = targetNode->GetContextRefPtr();
-    } else {
+    RefPtr<PipelineContext> pipelineContext = targetNode->GetContextRefPtr();
+    if (!pipelineContext) {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
         pipelineContext = DialogManager::GetMainPipelineContext(host);
+        CHECK_NULL_VOID(pipelineContext);
     }
-    CHECK_NULL_VOID(pipelineContext);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s, "
         "followTransformOfTarget_: %{public}d",
         targetOffset_.ToString().c_str(), targetSize_.ToString().c_str(), followTransformOfTarget_);

@@ -30,6 +30,7 @@ Ark_TextShadowStyle ConstructImpl(const Ark_Union_ShadowOptions_Array_ShadowOpti
 {
     auto peer = PeerUtils::CreatePeer<TextShadowStylePeer>();
     if (value) {
+        Converter::DefaultShadowBlurRadius defaultBlurRadius(0.0);
         Converter::VisitUnion(*value,
             [peer](const Array_ShadowOptions& array) {
                 auto shadowsOpt = Converter::OptConvert<std::vector<Shadow>>(array);

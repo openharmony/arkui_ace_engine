@@ -79,6 +79,7 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
 bool IsDisableEventVersion();
 void ParseTextShadowFromShadowObject(
     const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows, bool needResObj = false);
+bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations);
 bool IsDrawable(const JSRef<JSVal>& jsValue);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine = nullptr);

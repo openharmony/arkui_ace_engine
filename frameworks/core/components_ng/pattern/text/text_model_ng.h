@@ -123,6 +123,8 @@ public:
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
     void SetSelectedDragPreviewStyle(const Color& value) override;
     void ResetSelectedDragPreviewStyle() override;
+    void SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy) override;
+    void ResetIncrementalUpdatePolicy() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -296,6 +298,8 @@ public:
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetIncrementalUpdatePolicy(FrameNode* frameNode, IncrementalUpdatePolicy policy);
+    static void ResetIncrementalUpdatePolicy(FrameNode* frameNode);
     static void SetExternalDrawCallback(
         FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback);
     static std::optional<void*> GetInnerParagraph(FrameNode* frameNode);

@@ -20,6 +20,7 @@ generate_static_abc("assembled_advanced_ets_abc") {
   files = [
     "./@ohos.arkui.advanced.Dialog.ets",
     "./@ohos.arkui.advanced.DialogV2.ets",
+    "./@ohos.arkui.advanced.DatePickerComponent.ets"
   ]
   if (!ace_engine_feature_wearable) {
     files += [
@@ -45,6 +46,7 @@ generate_static_abc("assembled_advanced_ets_abc") {
       "./@ohos.arkui.advanced.ToolBar.ets",
       "./@ohos.arkui.advanced.ToolBarV2.ets",
       "./@ohos.arkui.advanced.TreeView.ets",
+      "./@ohos.arkui.advanced.TreeViewV2.ets",
 
       "./@ohos.arkui.advanced.ArcButton.ets",
       "./@ohos.arkui.advanced.ArcSlider.ets",

@@ -21,6 +21,7 @@
 #include "core/common/event_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/relaxed_interaction/executors/smart_gesture_executor.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -219,4 +220,17 @@ HWTEST_F(SmartGestureExecutorGetDescriptionTest, GetDescription_DifferentTrigger
     EXPECT_EQ(executorSlide.GetType(), executorWrist.GetType());
 }
 
+HWTEST_F(SmartGestureExecutorExecuteStepTest, SmartGestureManager_HandleTriggerFailed, TestSize.Level1)
+{
+    auto smartGestureManager = AceType::MakeRefPtr<SmartGestureManager>(
+        WeakPtr<PipelineContext>(mockPipelineContext_));
+
+    auto eventManager = mockPipelineContext_->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->smartGestureManager_ = smartGestureManager;
+
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    SmartGestureExecutor executor(context, SmartGestureTrigger::TAP);
+    EXPECT_EQ(executor.ExecuteStep(), ExecutorResult::FAILED);
+}
 } // namespace OHOS::Ace::NG

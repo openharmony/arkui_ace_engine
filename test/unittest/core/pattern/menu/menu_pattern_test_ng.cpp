@@ -88,6 +88,44 @@ const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr double DIP_SCALE = 1.5;
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
 
+RefPtr<FrameNode> CreateMenuNodeForPlacementTest(
+    Placement placement, bool isSelectMenu, AvoidanceMode avoidanceMode = AvoidanceMode::COVER_TARGET,
+    MenuAlignType alignType = MenuAlignType::START)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    if (!rootNode) {
+        return nullptr;
+    }
+
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    if (!menuNode) {
+        return nullptr;
+    }
+    menuNode->MountToParent(rootNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    if (!menuPattern) {
+        return nullptr;
+    }
+    menuPattern->SetIsSelectMenu(isSelectMenu);
+
+    auto algorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(TARGET_ID, "");
+    algorithm->placement_ = placement;
+    menuNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+
+    if (isSelectMenu) {
+        auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+        if (property) {
+            property->UpdateSelectAvoidanceMode(avoidanceMode);
+            property->UpdateAlignType(alignType);
+        }
+    }
+    return menuNode;
+}
+
 } // namespace
 class MenuPatternTestNg : public testing::Test {
 public:
@@ -1327,9 +1365,11 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg078, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    menuNode->SetNeedCallChildrenUpdate(false);
     menuPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(menuNode->needCallChildrenUpdate_, SystemProperties::ConfigChangePerform());
     menuPattern->isDisableMenuBgColorByUser_ = true;
+    menuNode->SetNeedCallChildrenUpdate(false);
     menuPattern->OnColorConfigurationUpdate();
 }
 
@@ -1571,7 +1611,59 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTest_OnModifyDone_PercentBorderRadius, Te
     // Verify that UpdateBorderRadius was NOT triggered due to percent unit check
     // When borderRadius has percent unit, OnModifyDone should skip UpdateBorderRadius due to percent unit check
     auto outerRadius = renderContext->GetOuterBorderRadius();
-    EXPECT_FALSE(outerRadius.has_value()) << "OuterBorderRadius should not be set when borderRadius has percent unit";
+    EXPECT_FALSE(outerRadius.has_value())
+        << "OuterBorderRadius should not be set when borderRadius has percent unit";
+}
+
+/**
+ * @tc.name: MenuPattern_GetFinalPlacement_BoundaryConditions
+ * @tc.desc: Test GetFinalPlacement with boundary conditions:
+ *           null host, null layoutAlgorithm, !isSelectMenu, null property
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_GetFinalPlacement_BoundaryConditions, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
+    ASSERT_NE(menuPattern, nullptr);
+    EXPECT_EQ(menuPattern->GetFinalPlacement(), Placement::NONE);
+
+    auto menuNode = CreateMenuNodeForPlacementTest(Placement::BOTTOM, true);
+    menuNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(AceType::MakeRefPtr<BoxLayoutAlgorithm>());
+    auto pattern = menuNode->GetPattern<MenuPattern>();
+    EXPECT_EQ(pattern->GetFinalPlacement(), Placement::NONE);
+
+auto node = CreateMenuNodeForPlacementTest(Placement::TOP, false);
+auto p = node->GetPattern<MenuPattern>();
+EXPECT_EQ(p->GetFinalPlacement(), Placement::TOP);
+
+auto avoidNode = CreateMenuNodeForPlacementTest(Placement::BOTTOM, true, AvoidanceMode::AVOID_AROUND_TARGET);
+EXPECT_EQ(avoidNode->GetPattern<MenuPattern>()->GetFinalPlacement(), Placement::BOTTOM);
+}
+
+/**
+ * @tc.name: MenuPattern_GetFinalPlacement_AlignTypeLogic
+ * @tc.desc: Test GetFinalPlacement with alignType logic: START+BOTTOM/TOP, END+BOTTOM/TOP, CENTER, non-BOTTOM/TOP
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPattern_GetFinalPlacement_AlignTypeLogic, TestSize.Level1)
+{
+    struct TestParam { Placement input; MenuAlignType align; Placement expected; };
+    std::vector<TestParam> params = {
+        {Placement::BOTTOM, MenuAlignType::START, Placement::BOTTOM_LEFT},
+        {Placement::TOP, MenuAlignType::START, Placement::TOP_LEFT},
+        {Placement::BOTTOM, MenuAlignType::END, Placement::BOTTOM_RIGHT},
+        {Placement::TOP, MenuAlignType::END, Placement::TOP_RIGHT},
+        {Placement::BOTTOM, MenuAlignType::CENTER, Placement::BOTTOM},
+        {Placement::LEFT, MenuAlignType::START, Placement::LEFT},
+        {Placement::RIGHT, MenuAlignType::END, Placement::RIGHT},
+    };
+
+    for (const auto& param : params) {
+        auto node = CreateMenuNodeForPlacementTest(param.input, true, AvoidanceMode::COVER_TARGET, param.align);
+        ASSERT_NE(node, nullptr);
+        auto result = node->GetPattern<MenuPattern>()->GetFinalPlacement();
+        EXPECT_EQ(result, param.expected);
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,10 @@
  */
 
 #include "list_test_ng.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"

@@ -1487,7 +1487,7 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimation001, TestSize.Level1)
     repeatModel.StartRender();
     auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(repeatNode, nullptr);
-    
+
     listNode->AddChild(repeatNode);
     EXPECT_EQ(repeatNode->IsAllowAnimation(), true);
 }
@@ -1504,8 +1504,22 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimation002, TestSize.Level1)
     repeatModel.StartRender();
     auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(repeatNode, nullptr);
-    
+
     gridNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+}
+
+/**
+ * @tc.name: RepeatNodeIsAllowAnimation003
+ * @tc.desc: Test IsAllowAnimation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimation003, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
     EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
 }
 

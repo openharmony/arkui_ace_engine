@@ -326,9 +326,13 @@ JSRef<JSObject> JSSpanString::CreateJsSpanObject(const RefPtr<SpanBase>& spanObj
     if (it != spanCreators.end()) {
         obj = it->second(spanObject);
     } else if (type == SpanType::CustomSpan) {
-        obj = AceType::DynamicCast<JSCustomSpan>(spanObject)->GetJsCustomSpanObject();
+        auto customSpan = AceType::DynamicCast<JSCustomSpan>(spanObject);
+        CHECK_NULL_RETURN(customSpan, obj);
+        obj = customSpan->GetJsCustomSpanObject();
     } else if (type == SpanType::ExtSpan) {
-        obj = AceType::DynamicCast<JSExtSpan>(spanObject)->GetJsExtSpanObject();
+        auto extSpan = AceType::DynamicCast<JSExtSpan>(spanObject);
+        CHECK_NULL_RETURN(extSpan, obj);
+        obj = extSpan->GetJsExtSpanObject();
     }
     return obj;
 }

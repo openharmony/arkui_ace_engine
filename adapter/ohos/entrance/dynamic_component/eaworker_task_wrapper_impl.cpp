@@ -181,7 +181,19 @@ void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task,
     bool isNeedDetach = false;
     GetAniEnv(hostInstanceId_, attachCurrentThread, &callerAniEnv, isNeedDetach);
     auto callerWorkerId = arkts::concurrency_helpers::GetWorkerId(callerAniEnv);
+
+    auto detachThread = [this, tid, isNeedDetach] {
+        if (isNeedDetach) {
+            ani_vm *vm = nullptr;
+            GetVM(hostInstanceId_, &vm);
+            CHECK_NULL_VOID(vm);
+            vm->DetachCurrentThread();
+            attachCurrentThreads_.erase(tid);
+        }
+    };
+
     if (callerAniEnv == nullptr) {
+        detachThread();
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "EaWorkerTaskWrapperImpl callerAniEnv is nullptr, "
             "callerWorkerId: %{public}d, workerId: %{public}d", callerWorkerId, workerId_);
         return;
@@ -207,13 +219,7 @@ void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task,
     if (status != arkts::concurrency_helpers::WorkStatus::OK) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "SendEvent error");
     }
-    if (isNeedDetach) {
-        ani_vm *vm = nullptr;
-        GetVM(hostInstanceId_, &vm);
-        CHECK_NULL_VOID(vm);
-        vm->DetachCurrentThread();
-        attachCurrentThreads_.erase(tid);
-    }
+    detachThread();
 }
 
 extern "C" ACE_FORCE_EXPORT TaskWrapper* OHOS_ACE_CreatEaWorkerTaskWrapper(

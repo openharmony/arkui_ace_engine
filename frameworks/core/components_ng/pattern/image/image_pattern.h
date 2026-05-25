@@ -106,6 +106,10 @@ public:
     OffsetF GetParentGlobalOffset() const;
     void CheckHandles(SelectHandleInfo& handleInfo);
     // for drawable descriptor
+    void LoadPixelMapDrawable();
+    void LoadPixelMapDrawableSync();
+    void OnPixelMapDrawableLoaded(DrawableDescriptorLoadResult result);
+    void SetPixelMapDrawable(const RefPtr<DrawableDescriptor>& drawable);
     void UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& newDrawable);
     void InitializeStatus(DrawableDescriptorLoadResult loadResult);
     void AnimatedDrawableControllAnimation(const int32_t id);
@@ -144,7 +148,6 @@ public:
     std::string GetImageColorFilterStr(const std::vector<float>& colorFilter);
 
     std::string GetSrcTypeToString(SrcType srcType);
-
     void SetSyncLoad(bool value);
     bool GetSyncLoad() const;
 

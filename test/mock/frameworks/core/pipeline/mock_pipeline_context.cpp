@@ -1767,6 +1767,11 @@ float NG::PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
     return 1.0f;
 }
 
+std::optional<TextDirection> NG::PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
+{
+    return std::nullopt;
+}
+
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
@@ -1953,7 +1958,7 @@ bool WindowManager::GetPageViewportConfig(
 namespace OHOS::Ace::NG {
 bool PipelineContext::GetIsFocusActive() const
 {
-    return false;
+    return focusManager_ ? focusManager_->GetIsFocusActive() : false;
 }
 
 RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() const

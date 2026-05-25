@@ -1708,4 +1708,392 @@ HWTEST_F(EventHubTestNg, EventHubTest034, TestSize.Level1)
     auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputEventHub, nullptr);
 }
+
+/**
+ * @tc.name: EventHubTest035
+ * @tc.desc: Test AttachHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest035, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    EXPECT_NE(eventHub->GetFrameNode(), nullptr);
+    EXPECT_EQ(eventHub->GetFrameNode()->GetTag(), V2::TEXT_ETS_TAG);
+}
+ 
+/**
+ * @tc.name: EventHubTest036
+ * @tc.desc: Test GetUserSetStateStyle and SetScrollingFeatureForbidden
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest036, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->GetUserSetStateStyle());
+    eventHub->SetScrollingFeatureForbidden(true);
+    EXPECT_TRUE(eventHub->stateStyleMgr_->GetScrollingFeatureForbidden());
+}
+ 
+/**
+ * @tc.name: EventHubTest037
+ * @tc.desc: Test IsCurrentStateOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest037, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->IsCurrentStateOn(UI_STATE_PRESSED));
+    EXPECT_FALSE(eventHub->IsCurrentStateOn(UI_STATE_FOCUSED));
+    EXPECT_FALSE(eventHub->IsCurrentStateOn(UI_STATE_DISABLED));
+    EXPECT_FALSE(eventHub->IsCurrentStateOn(UI_STATE_SELECTED));
+    eventHub->AddSupportedState(UI_STATE_PRESSED);
+    eventHub->SetCurrentUIState(UI_STATE_PRESSED, true);
+    EXPECT_TRUE(eventHub->IsCurrentStateOn(UI_STATE_PRESSED));
+    eventHub->AddSupportedState(UI_STATE_FOCUSED);
+    eventHub->SetCurrentUIState(UI_STATE_FOCUSED, true);
+    EXPECT_TRUE(eventHub->IsCurrentStateOn(UI_STATE_FOCUSED));
+}
+ 
+/**
+ * @tc.name: EventHubTest038
+ * @tc.desc: Test FireEnabledTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest038, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    int count = 0;
+    auto callback = [&count]() { count++; };
+    eventHub->enabledFunc_ = callback;
+    eventHub->FireEnabledTask();
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(eventHub->enabledFunc_, nullptr);
+    eventHub->FireEnabledTask();
+    EXPECT_EQ(count, 1);
+}
+ 
+/**
+ * @tc.name: EventHubTest039
+ * @tc.desc: Test MarkModifyDone with enabled branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest039, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->AddSupportedState(UI_STATE_DISABLED);
+    eventHub->SetSupportedStates(UI_STATE_DISABLED);
+    eventHub->SetEnabled(false);
+    eventHub->MarkModifyDone();
+    EXPECT_FALSE(eventHub->IsEnabled());
+    eventHub->AddSupportedState(UI_STATE_DISABLED);
+    eventHub->SetSupportedStates(UI_STATE_DISABLED);
+    eventHub->SetEnabled(true);
+    eventHub->MarkModifyDone();
+    EXPECT_TRUE(eventHub->IsEnabled());
+}
+ 
+/**
+ * @tc.name: EventHubTest040
+ * @tc.desc: Test IsFireOnDrop and HandleInternalOnDrop
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest040, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_NE(dragEvent, nullptr);
+    dragEvent->SetResult(DragRet::DRAG_DEFAULT);
+    EXPECT_TRUE(eventHub->IsFireOnDrop(dragEvent));
+    dragEvent->SetResult(DragRet::ENABLE_DROP);
+    EXPECT_TRUE(eventHub->IsFireOnDrop(dragEvent));
+    dragEvent->SetResult(DragRet::DISABLE_DROP);
+    EXPECT_TRUE(eventHub->IsFireOnDrop(dragEvent));
+    dragEvent->SetResult(DragRet::DRAG_SUCCESS);
+    EXPECT_TRUE(eventHub->IsFireOnDrop(dragEvent));
+    dragEvent->SetResult(DragRet::DRAG_FAIL);
+    EXPECT_TRUE(eventHub->IsFireOnDrop(dragEvent));
+    dragEvent->SetResult(DragRet::DRAG_CANCEL);
+    EXPECT_TRUE(eventHub->IsFireOnDrop(dragEvent));
+    eventHub->SetOnDrop([](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {});
+    EXPECT_TRUE(eventHub->IsFireOnDrop(dragEvent));
+    eventHub->HandleInternalOnDrop(dragEvent, DRAG_DROP_EVENT_TYPE);
+}
+ 
+/**
+ * @tc.name: EventHubTest041
+ * @tc.desc: Test OnContextAttached
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest041, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->GetOrCreateGestureEventHub();
+    eventHub->OnContextAttached();
+    EXPECT_NE(eventHub->GetGestureEventHub(), nullptr);
+}
+ 
+/**
+ * @tc.name: EventHubTest042
+ * @tc.desc: Test SetEnabledInternal and RestoreEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest042, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(false);
+    EXPECT_FALSE(eventHub->IsEnabled());
+    eventHub->RestoreEnabled();
+    EXPECT_TRUE(eventHub->IsEnabled());
+    eventHub->SetEnabled(false);
+    EXPECT_FALSE(eventHub->IsEnabled());
+    EXPECT_FALSE(eventHub->IsDeveloperEnabled());
+    eventHub->SetEnabled(true);
+    EXPECT_TRUE(eventHub->IsEnabled());
+    eventHub->SetEnabledInternal(true);
+    EXPECT_TRUE(eventHub->IsEnabled());
+    EXPECT_TRUE(eventHub->IsDeveloperEnabled());
+}
+ 
+/**
+ * @tc.name: EventHubTest043
+ * @tc.desc: Test UpdateCurrentUIState, ResetCurrentUIState and GetCurrentUIState
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest043, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->AddSupportedState(UI_STATE_PRESSED);
+    eventHub->UpdateCurrentUIState(UI_STATE_PRESSED);
+    EXPECT_EQ(eventHub->GetCurrentUIState() & UI_STATE_PRESSED, UI_STATE_PRESSED);
+    eventHub->ResetCurrentUIState(UI_STATE_PRESSED);
+    EXPECT_EQ(eventHub->GetCurrentUIState() & UI_STATE_PRESSED, 0);
+    eventHub->AddSupportedState(UI_STATE_FOCUSED);
+    eventHub->UpdateCurrentUIState(UI_STATE_FOCUSED);
+    EXPECT_EQ(eventHub->GetCurrentUIState() & UI_STATE_FOCUSED, UI_STATE_FOCUSED);
+}
+ 
+/**
+ * @tc.name: EventHubTest044
+ * @tc.desc: Test ClearSingleKeyboardShortcut when multiple shortcuts exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest044, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->SetKeyboardShortcut(STRINGCTER_A, NUM_CTRL_VALUE, []() {});
+    eventHub->SetKeyboardShortcut(STRINGCTER_Q, NUM_SHIFT_VALUE, []() {});
+    eventHub->ClearSingleKeyboardShortcut();
+    EXPECT_FALSE(eventHub->GetKeyboardShortcut().empty());
+    eventHub->ClearSingleKeyboardShortcutAll();
+    EXPECT_TRUE(eventHub->GetKeyboardShortcut().empty());
+}
+ 
+/**
+ * @tc.name: EventHubTest045
+ * @tc.desc: Test HasStateStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest045, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->HasStateStyle(UI_STATE_PRESSED));
+    EXPECT_FALSE(eventHub->HasStateStyle(UI_STATE_FOCUSED));
+    EXPECT_FALSE(eventHub->HasStateStyle(UI_STATE_DISABLED));
+    EXPECT_FALSE(eventHub->HasStateStyle(UI_STATE_SELECTED));
+    eventHub->AddSupportedState(UI_STATE_PRESSED);
+    EXPECT_TRUE(eventHub->HasStateStyle(UI_STATE_PRESSED));
+    eventHub->AddSupportedState(UI_STATE_FOCUSED);
+    EXPECT_TRUE(eventHub->HasStateStyle(UI_STATE_FOCUSED));
+}
+ 
+/**
+ * @tc.name: EventHubTest046
+ * @tc.desc: Test SetDefaultOnDragStart and GetDefaultOnDragStart, HasDefaultOnDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest046, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto onDragStartFunc = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) -> DragDropInfo {
+        return {};
+    };
+    eventHub->SetDefaultOnDragStart(onDragStartFunc);
+    EXPECT_NE(eventHub->GetDefaultOnDragStart(), nullptr);
+    EXPECT_TRUE(eventHub->HasDefaultOnDragStart());
+    eventHub->SetOnDragStart(onDragStartFunc);
+    EXPECT_TRUE(eventHub->HasOnDragStart());
+}
+ 
+/**
+ * @tc.name: EventHubTest047
+ * @tc.desc: Test DragDropCallbackSet GetOrCreate methods
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest047, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto callbackSet = eventHub->GetOrCreateDragDropCallbackSet();
+    EXPECT_NE(callbackSet, nullptr);
+    auto innerCallback = callbackSet->GetOrCreateInnerDragDropCallback();
+    EXPECT_NE(innerCallback, nullptr);
+    auto customerCallback = callbackSet->GetOrCreateCustomerDragDropCallback();
+    EXPECT_NE(customerCallback, nullptr);
+    auto callbackSet2 = eventHub->GetOrCreateDragDropCallbackSet();
+    EXPECT_EQ(callbackSet, callbackSet2);
+}
+ 
+/**
+ * @tc.name: EventHubTest048
+ * @tc.desc: Test VisibleAreaChangeCallbackSet GetOrCreate methods
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest048, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto callbackSet = eventHub->GetOrCreateVisibleAreaChangeCallbackSet();
+    EXPECT_NE(callbackSet, nullptr);
+    auto userConfig = callbackSet->GetOrCreateUserVisibleAreaChange();
+    EXPECT_NE(userConfig, nullptr);
+    auto innerConfig = callbackSet->GetOrCreateInnerVisibleAreaChange();
+    EXPECT_NE(innerConfig, nullptr);
+    auto throttledConfig = callbackSet->GetOrCreateThrottledVisibleAreaChange();
+    EXPECT_NE(throttledConfig, nullptr);
+    auto callbackSet2 = eventHub->GetOrCreateVisibleAreaChangeCallbackSet();
+    EXPECT_EQ(callbackSet, callbackSet2);
+}
+ 
+/**
+ * @tc.name: EventHubTest049
+ * @tc.desc: Test HandleOnAreaChange and FireUntriggeredInnerOnAreaChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest049, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    bool flag = false;
+    OnAreaChangedFunc callback =
+        [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        flag = true;
+    };
+    eventHub->AddInnerOnAreaChangedCallback(1, std::move(callback));
+    auto lastFrameRect = std::make_unique<RectF>(OLD_RECT);
+    auto lastParentOffsetToWindow = std::make_unique<OffsetF>(OLD_ORIGIN);
+    eventHub->HandleOnAreaChange(lastFrameRect, lastParentOffsetToWindow, NEW_RECT, NEW_ORIGIN);
+    EXPECT_TRUE(flag);
+}
+ 
+/**
+ * @tc.name: EventHubTest050
+ * @tc.desc: Test GetDisableDataPrefetch and SetDisableDataPrefetch
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest050, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->GetDisableDataPrefetch());
+    eventHub->SetDisableDataPrefetch(true);
+    EXPECT_TRUE(eventHub->GetDisableDataPrefetch());
+    eventHub->SetDisableDataPrefetch(false);
+    EXPECT_FALSE(eventHub->GetDisableDataPrefetch());
+}
+ 
+/**
+ * @tc.name: EventHubTest051
+ * @tc.desc: Test ClearOnAreaChangedInnerCallbacks and ClearInnerOnSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest051, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    OnAreaChangedFunc onAreaChanged =
+        [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
+    OnSizeChangedFunc onSizeChanged = [](const RectF& oldRect, const RectF& rect) {};
+    eventHub->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
+    eventHub->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
+    EXPECT_FALSE(eventHub->HasInnerOnAreaChanged());
+    EXPECT_TRUE(eventHub->HasInnerOnSizeChanged());
+    eventHub->ClearOnAreaChangedInnerCallbacks();
+    eventHub->ClearInnerOnSizeChanged();
+    EXPECT_FALSE(eventHub->HasInnerOnAreaChanged());
+    EXPECT_FALSE(eventHub->HasInnerOnSizeChanged());
+}
+ 
+/**
+ * @tc.name: EventHubTest052
+ * @tc.desc: Test OnModifyDone virtual method call
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest052, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->AddSupportedState(UI_STATE_PRESSED);
+    eventHub->SetSupportedStates(UI_STATE_PRESSED);
+    eventHub->MarkModifyDone();
+    EXPECT_NE(eventHub->GetGestureEventHub(), nullptr);
+}
+ 
+/**
+ * @tc.name: EventHubTest053
+ * @tc.desc: Test ClearStateStyle and OnDetachClear
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest053, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->AddSupportedState(UI_STATE_PRESSED);
+    eventHub->SetCurrentUIState(UI_STATE_PRESSED, true);
+    EXPECT_TRUE(eventHub->IsCurrentStateOn(UI_STATE_PRESSED));
+    eventHub->ClearStateStyle();
+    EXPECT_TRUE(eventHub->IsCurrentStateOn(UI_STATE_PRESSED));
+    int detachCount = 0;
+    int disappearCount = 0;
+    eventHub->SetOnDetach([&detachCount]() { detachCount++; });
+    eventHub->SetOnDisappear([&disappearCount]() { disappearCount++; });
+    eventHub->OnDetachClear();
+    EXPECT_EQ(detachCount, 1);
+    EXPECT_EQ(disappearCount, 1);
+}
+ 
+/**
+ * @tc.name: EventHubTest054
+ * @tc.desc: Test ClearOnAttach and ClearOnDetach
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest054, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->SetOnAttach([]() {});
+    eventHub->SetOnDetach([]() {});
+    EXPECT_NE(eventHub->onAttach_, nullptr);
+    EXPECT_NE(eventHub->onDetach_, nullptr);
+    eventHub->ClearOnAttach();
+    eventHub->ClearOnDetach();
+    EXPECT_EQ(eventHub->onAttach_, nullptr);
+    EXPECT_EQ(eventHub->onDetach_, nullptr);
+    eventHub->FireOnAttach();
+    eventHub->FireOnDetach();
+}
 } // namespace OHOS::Ace::NG

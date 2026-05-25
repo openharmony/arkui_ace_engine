@@ -26,6 +26,9 @@
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_base_pattern.h"
+namespace OHOS::Rosen {
+class BrightnessBlender;
+}
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -226,6 +229,8 @@ private:
     float GetActualGap() const;
 
     void ApplyDragFrameNodeSystemMaterial();
+    void ApplyDragFrameNodeBlendMode();
+    std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender();
     void ResetHostMaterialEffects();
 
     // Drag animation helpers

@@ -90,6 +90,11 @@ void TextClockModelStatic::SetFontSize(FrameNode* frameNode, const std::optional
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontSize, frameNode);
     }
+    CHECK_NULL_VOID(frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(size.value_or(Dimension()), LpxAttribute::LPX_FONT_SIZE, textNode);
 }
 
 void TextClockModelStatic::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)

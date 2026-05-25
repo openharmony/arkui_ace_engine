@@ -686,6 +686,16 @@ public:
         return customNode_.Upgrade();
     }
 
+    void SetIsGridMenu(bool isGridMenu)
+    {
+        isGridMenu_ = isGridMenu;
+    }
+
+    bool GetIsGridMenu() const
+    {
+        return isGridMenu_;
+    }
+
     void UpdateSelectOptionTextByIndex(int32_t index, const std::string& text);
     void UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon);
 
@@ -703,8 +713,6 @@ public:
     bool UpdateMenuBackBlurStyle(bool userSetBgColor);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     bool IsUseDistortionAnimation() const;
-    bool FireSelectDisappearDistortAnimation(AnimationOption& option);
-    void FireSelectDisappearLightAnimation();
 
     float GetTranslateYForStack()
     {
@@ -780,6 +788,45 @@ public:
         isColorModeFollowTarget_ = isColorModeFollowTarget;
     }
 
+    bool IsExtensionInnerMenu()
+    {
+        return isExtensionInnerMenu_;
+    }
+
+    void SetExtensionInnerMenu(bool isExtensionInnerMenu)
+    {
+        isExtensionInnerMenu_ = isExtensionInnerMenu;
+    }
+
+    void SetIsExtensionMenuEnableNewAnimation(bool flag)
+    {
+        isExtensionMenuEnableNewAnimation_ = flag;
+    }
+
+    bool GetIsExtensionMenuEnableNewAnimation()
+    {
+        return isExtensionMenuEnableNewAnimation_;
+    }
+
+    void SetSelectMenuPaintRect(const RectF& rect)
+    {
+        selectMenuPaintRect_ = rect;
+    }
+
+    RectF GetSelectMenuPaintRect() const
+    {
+        return selectMenuPaintRect_;
+    }
+
+    using BeforeExtensionMenuDistortAnimationCallback =
+        std::function<void(const RefPtr<FrameNode>&, const OffsetF&)>;
+
+    void SetBeforeExtensionMenuDistortAnimationCallback(BeforeExtensionMenuDistortAnimationCallback&& callback)
+    {
+        beforeExtensionMenuDistortAnimationCallback_ = std::move(callback);
+    }
+
+    OffsetF GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition);
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -832,12 +879,8 @@ private:
     MenuParam GetMenuParam() const;
     bool IsUseEdgeLightAnimation() const;
     void PlayDistortAnimation(const OffsetF& menuPosition);
-    void PlaySelectDistortAnimation(const OffsetF& menuPosition);
-    void PlaySelectDisapperDistortAnimation(AnimationOption& disappearOption);
     void PlayTranslateAnimation(const RefPtr<RenderContext>& renderContext, const OffsetF& finalPlacement);
-    void PlaySelectTranslateAnimation(const OffsetF& offset);
     void PlayLightAnimation();
-    void PlayDisappearLightAnimation();
     void ShowMenuAppearAnimation();
     void ShowMenuAppearMaterialAnimation();
     void ShowStackMenuAppearAnimation();
@@ -880,7 +923,7 @@ private:
     void OnAttachToMainTree() override;
     void BuildDivider();
     RefPtr<FrameNode> GetFirstNodeWithTagInParent(const RefPtr<UINode>& node, const std::string& tag);
-
+    void PlayExtensionMenuDistortAnimation(const OffsetF& menuPosition);
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
@@ -905,10 +948,12 @@ private:
     bool isShowHoverImage_ = false;
     bool isFirstShow_ = false;
     bool isExtensionMenuShow_ = false;
+    bool isExtensionInnerMenu_ = false;
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
     bool needHideAfterTouch_ = true;
+    bool isGridMenu_ = false;
 
     std::optional<OffsetF> lastPosition_;
     std::optional<Placement> lastPlacement_;
@@ -944,9 +989,12 @@ private:
     OffsetF subMenuOriginOffset_ = OffsetF();
     std::optional<DisplayMode> scrollBar_;
     bool isColorModeFollowTarget_ = true;
-
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;
+
+    bool isExtensionMenuEnableNewAnimation_ = false;
+    RectF selectMenuPaintRect_;
+    BeforeExtensionMenuDistortAnimationCallback beforeExtensionMenuDistortAnimationCallback_;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
 

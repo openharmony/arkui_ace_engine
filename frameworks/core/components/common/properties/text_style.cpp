@@ -149,6 +149,26 @@ std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorLis
     }
     return symbolColorList;
 }
+
+std::string ConvertTextShadowToString(const std::vector<Shadow>& shadows)
+{
+    std::string result;
+    for (const auto& shadow : shadows) {
+        result.append("radius")
+              .append(std::to_string(shadow.GetBlurRadius()))
+              .append("color")
+              .append(shadow.GetColor().ColorToString())
+              .append("offsetX")
+              .append(std::to_string(shadow.GetOffset().GetX()))
+              .append("offsetY")
+              .append(std::to_string(shadow.GetOffset().GetY()))
+              .append(",");
+    }
+    if (!result.empty()) {
+        result = result.substr(0, result.size() - 1);
+    }
+    return result;
+}
 } // namespace StringUtils
 
 FontWeight ConvertFontWeight(FontWeight fontWeight)

@@ -213,6 +213,8 @@ public:
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
     static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
         std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindContextMenuStaticWithOptions(const RefPtr<FrameNode>& targetNode, ResponseType type,
+        std::vector<NG::OptionParam>&& params, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void BindDragWithContextMenuParamsStatic(const RefPtr<FrameNode>& targetNode,
         const NG::MenuParam& menuParam);
 
@@ -388,16 +390,24 @@ public:
     static void SetToolbarBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc);
     static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
     static void SetInspectorLabelSta(UINode* node, const std::string& inspectorLabel);
+    static void SetEdgeLightParam(FrameNode* frameNode, const std::optional<EdgeLightParam>& param);
+    static void SetCenterGravityOptions(FrameNode* frameNode, const CenterGravityOptions& centerGravityOptions);
 
 private:
     static bool CheckMenuIsShow(
         const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode,  bool isBuildFuncNull);
     static void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
+    static void RegisterContextMenuKeyEventOptions(
+        const RefPtr<FrameNode>& targetNode, std::vector<NG::OptionParam>&& param, const MenuParam& menuParam);
     static void CreateCustomMenuWithPreview(FrameNode* targetNode,
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void CreateOptionMenuWithPreview(FrameNode* targetNode,
+        std::vector<NG::OptionParam>&& param, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void BindContextMenuSingle(FrameNode* targetNode,
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindContextMenuSingleWithOptions(FrameNode* targetNode,
+        std::vector<NG::OptionParam>&& param, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 };
 
 
@@ -411,6 +421,8 @@ void BindMenuMultiThread(FrameNode* frameNode, std::vector<NG::OptionParam>&& pa
     const MenuParam& menuParam);
 void BindContextMenuStaticMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
     std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+void BindContextMenuStaticWithOptionsMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::vector<NG::OptionParam>&& param, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 // multi thread function end
 } // namespace OHOS::Ace::NG
 

@@ -56,6 +56,16 @@ void AssignCast(std::optional<MarqueeStartPolicy>& dst, const Ark_MarqueeStartPo
 }
 
 template<>
+void AssignCast(std::optional<IncrementalUpdatePolicy>& dst, const Ark_IncrementalUpdatePolicy& src)
+{
+    switch (src) {
+        case ARK_INCREMENTAL_UPDATE_POLICY_NONE: dst = IncrementalUpdatePolicy::NONE; break;
+        case ARK_INCREMENTAL_UPDATE_POLICY_PARAGRAPH_CACHE: dst = IncrementalUpdatePolicy::PARAGRAPH_CACHE; break;
+        default: LOGE("Unexpected enum value in ArkUI_IncrementalUpdatePolicy: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<MarqueeUpdatePolicy>& dst, const Ark_MarqueeUpdatePolicy& src)
 {
     switch (src) {
@@ -463,6 +473,7 @@ void SetTextShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    Converter::DefaultShadowBlurRadius defaultBlurRadius(0.0);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
     TextModelStatic::SetTextShadow(frameNode, shadowList);
 }
@@ -867,6 +878,14 @@ void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
     TextModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
+void SetIncrementalUpdatePolicyImpl(Ark_NativePointer node,
+                                    const Opt_IncrementalUpdatePolicy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<IncrementalUpdatePolicy>(value->value) : std::nullopt;
+    TextModelStatic::SetIncrementalUpdatePolicy(frameNode, convValue);
+}
 void SetTextDirectionImpl(Ark_NativePointer node,
                           const Opt_TextDirection* value)
 {
@@ -1086,6 +1105,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetTextDirectionImpl,
         TextAttributeModifier::SetOrphanCharOptimizationImpl,
         TextAttributeModifier::SetFontVariationsImpl,
+        TextAttributeModifier::SetIncrementalUpdatePolicyImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetLineSpacingImpl,

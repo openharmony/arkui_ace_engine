@@ -35,8 +35,6 @@
 #include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
-#include "core/components_ng/property/particle_property.h"
-#include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
@@ -49,7 +47,6 @@
 #include "core/components_ng/render/render_property.h"
 
 
-struct ParticleOptionArrayStorage;
 namespace OHOS::Rosen {
 class DrawCmdList;
 class VisualEffect;
@@ -76,6 +73,8 @@ class Modifier;
 }
 
 namespace OHOS::Ace::NG {
+
+struct ParticleOption;
 
 struct ShapeMaskProperty;
 
@@ -430,6 +429,7 @@ public:
     virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
     virtual void SetMarkNodeGroup(bool isNodeGroup) {}
+    virtual void SetLayerMark(bool isLayer) {}
 
     virtual RectF GetPaintRectWithTransform()
     {
@@ -608,7 +608,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SpatialEffect, SpatialEffectParams);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
+    const std::optional<std::list<ParticleOption>>& GetParticleOptionArray() const;
+    bool HasParticleOptionArray() const;
+    const std::list<ParticleOption>& GetParticleOptionArrayValue() const;
+    const std::list<ParticleOption>& GetParticleOptionArrayValue(const std::list<ParticleOption>& defaultValue) const;
+    std::optional<std::list<ParticleOption>> CloneParticleOptionArray() const;
+    void ResetParticleOptionArray();
+    void UpdateParticleOptionArray(const std::list<ParticleOption>& value);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false, bool isOffline = true)
     {
@@ -819,6 +825,9 @@ public:
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
+    // DoubleSided
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DoubleSided, bool);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
@@ -962,6 +971,7 @@ protected:
     bool handleChildBounds_ = false;
     bool isNeedAnimate_ = true;
     bool isFree_ = false;
+    std::optional<std::list<ParticleOption>> propParticleOptionArray_;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -1062,6 +1072,7 @@ protected:
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
     virtual void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) {}
+    virtual void OnDoubleSidedUpdate(bool doubleSided) {}
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;

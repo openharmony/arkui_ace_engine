@@ -463,4 +463,123 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg011, TestSize.Level
     CheckBoxGroupModelStatic::TriggerChange(frameNode, SELECTED);
     EXPECT_EQ(paintProperty->GetCheckBoxGroupSelect(), SELECTED);
 }
+/**
+ * @tc.name: CheckboxGroupStaticTestNg012
+ * @tc.desc: Test SetCheckMarkSize registers/unregisters LPX attribute based on dimension unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkboxgroup frameNode.
+     */
+    auto node = CheckBoxGroupModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set CheckMarkSize with LPX dimension.
+     * @tc.expected: step2. lpxAttributes_ contains LPX_MARK_SIZE.
+     */
+    CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(node->lpxAttributes_.count(LpxAttribute::LPX_MARK_SIZE), 0);
+
+    /**
+     * @tc.steps: step3. set CheckMarkSize with VP dimension.
+     * @tc.expected: step3. lpxAttributes_ does not contain LPX_MARK_SIZE.
+     */
+    CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, Dimension(10.0, DimensionUnit::VP));
+    EXPECT_EQ(node->lpxAttributes_.count(LpxAttribute::LPX_MARK_SIZE), 0);
+}
+
+/**
+ * @tc.name: CheckboxGroupStaticTestNg013
+ * @tc.desc: Test SetCheckMarkSize unregisters LPX attribute when optional is nullopt.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkboxgroup frameNode.
+     */
+    auto node = CheckBoxGroupModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set CheckMarkSize with LPX dimension to register.
+     * @tc.expected: step2. lpxAttributes_ contains LPX_MARK_SIZE.
+     */
+    CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, Dimension(10.0, DimensionUnit::LPX));
+    EXPECT_GT(node->lpxAttributes_.count(LpxAttribute::LPX_MARK_SIZE), 0);
+
+    /**
+     * @tc.steps: step3. set CheckMarkSize with nullopt to unregister.
+     * @tc.expected: step3. lpxAttributes_ does not contain LPX_MARK_SIZE.
+     */
+    CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, std::nullopt);
+    EXPECT_EQ(node->lpxAttributes_.count(LpxAttribute::LPX_MARK_SIZE), 0);
+}
+
+/**
+ * @tc.name: CheckboxGroupStaticTestNg014
+ * @tc.desc: Test SetCheckMarkWidth registers/unregisters LPX attribute based on dimension unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkboxgroup frameNode.
+     */
+    auto node = CheckBoxGroupModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set CheckMarkWidth with LPX dimension.
+     * @tc.expected: step2. lpxAttributes_ contains LPX_MARK_STROKE_WIDTH.
+     */
+    CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, Dimension(5.0, DimensionUnit::LPX));
+    EXPECT_GT(node->lpxAttributes_.count(LpxAttribute::LPX_MARK_STROKE_WIDTH), 0);
+
+    /**
+     * @tc.steps: step3. set CheckMarkWidth with VP dimension.
+     * @tc.expected: step3. lpxAttributes_ does not contain LPX_MARK_STROKE_WIDTH.
+     */
+    CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, Dimension(5.0, DimensionUnit::VP));
+    EXPECT_EQ(node->lpxAttributes_.count(LpxAttribute::LPX_MARK_STROKE_WIDTH), 0);
+}
+
+/**
+ * @tc.name: CheckboxGroupStaticTestNg015
+ * @tc.desc: Test SetCheckMarkWidth unregisters LPX attribute when optional is nullopt.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkboxgroup frameNode.
+     */
+    auto node = CheckBoxGroupModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set CheckMarkWidth with LPX dimension to register.
+     * @tc.expected: step2. lpxAttributes_ contains LPX_MARK_STROKE_WIDTH.
+     */
+    CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, Dimension(5.0, DimensionUnit::LPX));
+    EXPECT_GT(node->lpxAttributes_.count(LpxAttribute::LPX_MARK_STROKE_WIDTH), 0);
+
+    /**
+     * @tc.steps: step3. set CheckMarkWidth with nullopt to unregister.
+     * @tc.expected: step3. lpxAttributes_ does not contain LPX_MARK_STROKE_WIDTH.
+     */
+    CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, std::nullopt);
+    EXPECT_EQ(node->lpxAttributes_.count(LpxAttribute::LPX_MARK_STROKE_WIDTH), 0);
+}
 } // namespace OHOS::Ace::NG

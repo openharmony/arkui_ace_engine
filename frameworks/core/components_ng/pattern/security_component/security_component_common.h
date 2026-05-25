@@ -55,6 +55,11 @@ enum class SecurityComponentRegisterStatus : int32_t {
     REGISTERED = 2,
 };
 
+enum class SecurityComponentRoleType : int32_t {
+    ROLE_NONE = 0,
+    BUTTON = 1,
+};
+
 static int32_t BUTTON_TYPE_NULL = -1;
 } // namespace OHOS::Ace
 

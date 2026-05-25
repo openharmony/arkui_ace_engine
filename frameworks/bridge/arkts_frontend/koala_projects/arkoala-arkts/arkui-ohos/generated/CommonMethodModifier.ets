@@ -19,10 +19,10 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, GestureType, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, SpatialEffectParams, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, GestureCollectInterceptCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, AreaChangeCallback, AreaChangeOptions, CommonMethod } from './component/common'
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, SpatialEffectParams, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, GestureCollectInterceptCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, AreaChangeCallback, AreaChangeOptions, CommonMethod, GravityCenterOptions, EdgeLightParams } from './component/common'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
-import { Length, Resource as arkui_component_units_Resource, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions } from './component/units'
+import { Length, Resource as arkui_component_units_Resource, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, AccessibilityCustomAction } from './component/units'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { HitTestMode, Color as arkui_component_enums_Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from './component/enums'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
@@ -128,6 +128,9 @@ export class CommonMethodModifier implements CommonMethod {
     public _useShadowBatching_0_0value?: boolean | undefined
     public _useEffect_0_0value?: boolean | undefined
     public _useUnionEffect_0_0value?: boolean | undefined
+    public _useUnionEffect_1_0value?: boolean | undefined
+    public _useUnionEffect_1_1value?: GravityCenterOptions | undefined
+    public _edgeLight_0_0value?: EdgeLightParams | undefined
     public _renderGroup_0_0value?: boolean | undefined
     public _excludeFromRenderGroup_0_0value?: boolean | undefined
     public _freeze_0_0value?: boolean | undefined
@@ -217,6 +220,8 @@ export class CommonMethodModifier implements CommonMethod {
     public _onNeedSoftkeyboard_0_0value?: OnNeedSoftkeyboardCallback | undefined
     public _accessibilityStateDescription_0_0value?: string | global_resource_Resource | undefined
     public _accessibilityActionOptions_0_0value?: AccessibilityActionOptions | undefined
+    public _accessibilityCustomActions_0_0value?: Array<AccessibilityCustomAction> | undefined
+    public _doubleSided_0_0value?: boolean | undefined
     public _customProperty_0_0value?: string
     public _customProperty_0_1value?: CustomProperty
     public _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
@@ -296,11 +301,19 @@ export class CommonMethodModifier implements CommonMethod {
     public _bindContextMenu_0_0value?: CustomBuilder | undefined
     public _bindContextMenu_0_1value?: ResponseType | undefined
     public _bindContextMenu_0_2value?: ContextMenuOptions | undefined
+    public _bindContextMenuByResponseType_0_0value?: CustomBuilder | Array<MenuElement> | undefined
+    public _bindContextMenuByResponseType_0_1value?: ResponseType | undefined
+    public _bindContextMenuByResponseType_0_2value?: ContextMenuOptions | undefined
     public _bindContextMenuWithResponse_0_0value?: CustomBuilderT<ResponseType> | undefined
     public _bindContextMenuWithResponse_0_1value?: ContextMenuOptions | undefined
+    public _bindContextMenuWithResponse_1_0value?: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined
+    public _bindContextMenuWithResponse_1_1value?: ContextMenuOptions | undefined
     public _bindContextMenu_1_0value?: boolean | Bindable<boolean> | undefined
     public _bindContextMenu_1_1value?: CustomBuilder | undefined
     public _bindContextMenu_1_2value?: ContextMenuOptions | undefined
+    public _bindContextMenuByIsShow_0_0value?: boolean | Bindable<boolean> | undefined
+    public _bindContextMenuByIsShow_0_1value?: CustomBuilder | Array<MenuElement> | undefined
+    public _bindContextMenuByIsShow_0_2value?: ContextMenuOptions | undefined
     public _bindContentCover_0_0value?: boolean | Bindable<boolean> | undefined
     public _bindContentCover_0_1value?: CustomBuilder | undefined
     public _bindContentCover_0_2value?: ModalTransition | undefined
@@ -1650,7 +1663,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[76] != 0) {
             switch (flagArray[76]) {
                 case 1: {
-                    peer.setUseUnionEffectAttribute((this._useUnionEffect_0_0value as boolean | undefined));
+                    peer.setUseUnionEffect0Attribute((this._useUnionEffect_0_0value as boolean | undefined));
                     flagArray[76] = 2;
                     break;
                 }
@@ -1660,7 +1673,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[76] = 0;
-                    peer.setUseUnionEffectAttribute(undefined);
+                    peer.setUseUnionEffect0Attribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -3187,6 +3200,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[216] != 0) {
+            switch (flagArray[216]) {
+                case 1: {
+                    peer.setAccessibilityCustomActionsAttribute((this._accessibilityCustomActions_0_0value as Array<AccessibilityCustomAction> | undefined));
+                    flagArray[216] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[216] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[216] = 0;
+                    peer.setAccessibilityCustomActionsAttribute(undefined);
+                }
+            }
+        }
         if (flagArray[165] != 0) {
             switch (flagArray[165]) {
                 case 1: {
@@ -3817,7 +3847,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[202] != 0) {
             switch (flagArray[202]) {
                 case 1: {
-                    peer.setBindContextMenuWithResponseAttribute((this._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
+                    peer.setBindContextMenuWithResponse0Attribute((this._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
                     flagArray[202] = 2;
                     break;
                 }
@@ -3827,7 +3857,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[202] = 0;
-                    peer.setBindContextMenuWithResponseAttribute(undefined, undefined);
+                    peer.setBindContextMenuWithResponse0Attribute(undefined, undefined);
                 }
             }
         }
@@ -4080,6 +4110,108 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     flagArray[218] = 0;
                     peer.setOnVisibleAreaChange1Attribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[219] != 0) {
+            switch (flagArray[219]) {
+                case 1: {
+                    peer.setDoubleSidedAttribute((this._doubleSided_0_0value as boolean | undefined));
+                    flagArray[219] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[219] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[219] = 0;
+                    peer.setDoubleSidedAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[220] != 0) {
+            switch (flagArray[220]) {
+                case 1: {
+                    peer.setUseUnionEffect1Attribute((this._useUnionEffect_1_0value as boolean | undefined), (this._useUnionEffect_1_1value as GravityCenterOptions | undefined));
+                    flagArray[220] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[220] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[220] = 0;
+                    peer.setUseUnionEffect1Attribute((undefined as boolean | undefined), (undefined as GravityCenterOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[221] != 0) {
+            switch (flagArray[221]) {
+                case 1: {
+                    peer.setEdgeLightAttribute((this._edgeLight_0_0value as EdgeLightParams | undefined));
+                    flagArray[221] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[221] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[221] = 0;
+                    peer.setEdgeLightAttribute((undefined as EdgeLightParams | undefined));
+                }
+            }
+        }
+        if (flagArray[222] != 0) {
+            switch (flagArray[222]) {
+                case 1: {
+                    peer.setBindContextMenuByResponseTypeAttribute((this._bindContextMenuByResponseType_0_0value as CustomBuilder | Array<MenuElement> | undefined), (this._bindContextMenuByResponseType_0_1value as ResponseType | undefined), (this._bindContextMenuByResponseType_0_2value as ContextMenuOptions | undefined));
+                    flagArray[222] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[222] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[222] = 0;
+                    peer.setBindContextMenuByResponseTypeAttribute((undefined as CustomBuilder | Array<MenuElement> | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[223] != 0) {
+            switch (flagArray[223]) {
+                case 1: {
+                    peer.setBindContextMenuWithResponse1Attribute((this._bindContextMenuWithResponse_1_0value as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (this._bindContextMenuWithResponse_1_1value as ContextMenuOptions | undefined));
+                    flagArray[223] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[223] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[223] = 0;
+                    peer.setBindContextMenuWithResponse1Attribute((undefined as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[224] != 0) {
+            switch (flagArray[224]) {
+                case 1: {
+                    peer.setBindContextMenuByIsShowAttribute((this._bindContextMenuByIsShow_0_0value as boolean | Bindable<boolean> | undefined), (this._bindContextMenuByIsShow_0_1value as CustomBuilder | Array<MenuElement> | undefined), (this._bindContextMenuByIsShow_0_2value as ContextMenuOptions | undefined));
+                    flagArray[224] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[224] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[224] = 0;
+                    peer.setBindContextMenuByIsShowAttribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -6108,6 +6240,18 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[216] != 0) {
+            switch (flagArray[216]) {
+                case 1:
+                case 3: {
+                    this.accessibilityCustomActions((modifier._accessibilityCustomActions_0_0value as Array<AccessibilityCustomAction> | undefined));
+                    break;
+                }
+                default: {
+                    this.accessibilityCustomActions(undefined);
+                }
+            }
+        }
         if (flagArray[165] != 0) {
             switch (flagArray[165]) {
                 case 1:
@@ -6744,6 +6888,78 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[219] != 0) {
+            switch (flagArray[219]) {
+                case 1:
+                case 3: {
+                    this.doubleSided((modifier._doubleSided_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.doubleSided((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[220] != 0) {
+            switch (flagArray[220]) {
+                case 1:
+                case 3: {
+                    this.useUnionEffect((modifier._useUnionEffect_1_0value as boolean | undefined), (modifier._useUnionEffect_1_1value as GravityCenterOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.useUnionEffect((undefined as boolean | undefined), (undefined as GravityCenterOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[221] != 0) {
+            switch (flagArray[221]) {
+                case 1:
+                case 3: {
+                    this.edgeLight((modifier._edgeLight_0_0value as EdgeLightParams | undefined));
+                    break;
+                }
+                default: {
+                    this.edgeLight((undefined as EdgeLightParams | undefined));
+                }
+            }
+        }
+        if (flagArray[222] != 0) {
+            switch (flagArray[222]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenuByResponseType((modifier._bindContextMenuByResponseType_0_0value as CustomBuilder | Array<MenuElement> | undefined), (modifier._bindContextMenuByResponseType_0_1value as ResponseType | undefined), (modifier._bindContextMenuByResponseType_0_2value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenuByResponseType((undefined as CustomBuilder | Array<MenuElement> | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[223] != 0) {
+            switch (flagArray[223]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenuWithResponse((modifier._bindContextMenuWithResponse_1_0value as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (modifier._bindContextMenuWithResponse_1_1value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenuWithResponse((undefined as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[223] != 0) {
+            switch (flagArray[223]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenuByIsShow((modifier._bindContextMenuByIsShow_0_0value as boolean | Bindable<boolean> | undefined), (modifier._bindContextMenuByIsShow_0_1value as CustomBuilder | Array<MenuElement> | undefined), (modifier._bindContextMenuByIsShow_0_2value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenuByIsShow((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -8408,6 +8624,16 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    accessibilityCustomActions(value: Array<AccessibilityCustomAction> | undefined): this {
+        if (((this._flagArray[216]) == (0)) || (true)) {
+            this._flagArray[216] = 1
+            this._accessibilityCustomActions_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[216] = 3
+        }
+        return this
+    }
     customProperty(name: string, value: CustomProperty): this {
         hookCommonMethodModifierCustomProperty(this, name, value)
         return this
@@ -9001,6 +9227,72 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[218] = 3
+        }
+        return this
+    }
+    doubleSided(value: boolean | undefined): this {
+        if (((this._flagArray[219]) == (0)) || ((this._doubleSided_0_0value) !== (value))) {
+            this._flagArray[219] = 1
+            this._doubleSided_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[219] = 3
+        }
+        return this
+    }
+    useUnionEffect(value: boolean | undefined, options?: GravityCenterOptions): this {
+        if (((this._flagArray[220]) == (0)) || ((this._useUnionEffect_1_0value) !== (value)) || (true)) {
+            this._flagArray[220] = 1
+            this._useUnionEffect_1_0value = value
+            this._useUnionEffect_1_1value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[220] = 3
+        }
+        return this
+    }
+    edgeLight(value: EdgeLightParams | undefined): this {
+        if (((this._flagArray[221]) == (0)) || ((this._edgeLight_0_0value) !== (value))) {
+            this._flagArray[221] = 1
+            this._edgeLight_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[221] = 3
+        }
+        return this
+    }
+    bindContextMenuByResponseType(content: CustomBuilder | Array<MenuElement> | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[222]) == (0)) || (true) || (true) || (true)) {
+            this._flagArray[222] = 1
+            this._bindContextMenuByResponseType_0_0value = content
+            this._bindContextMenuByResponseType_0_1value = responseType
+            this._bindContextMenuByResponseType_0_2value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[222] = 3
+        }
+        return this
+    }
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[223]) == (0)) || (true) || (true)) {
+            this._flagArray[223] = 1
+            this._bindContextMenuWithResponse_1_0value = content
+            this._bindContextMenuWithResponse_1_1value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[223] = 3
+        }
+        return this
+    }
+    bindContextMenuByIsShow(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[224]) == (0)) || (true) || (true) || (true)) {
+            this._flagArray[224] = 1
+            this._bindContextMenuByIsShow_0_0value = isShow
+            this._bindContextMenuByIsShow_0_1value = content
+            this._bindContextMenuByIsShow_0_2value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[224] = 3
         }
         return this
     }

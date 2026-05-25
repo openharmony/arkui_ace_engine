@@ -134,18 +134,22 @@ void TextModelNG::SetFontSize(const Dimension& value)
 {
     if (!value.IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension());
+        ACE_CHECK_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_FONT_SIZE);
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE);
 }
 
 void TextModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     if (!value.IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension(), frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_FONT_SIZE, frameNode);
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, frameNode);
 }
 
 void TextModelNG::SetTextColor(const Color& value)
@@ -412,16 +416,19 @@ void TextModelNG::ResetMinLines()
 void TextModelNG::SetTextIndent(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_INDENT);
 }
 
 void TextModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_HEIGHT);
 }
 
 void TextModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_HEIGHT, frameNode);
 }
 
 void TextModelNG::ResetLineHeightMultiply()
@@ -448,52 +455,62 @@ void TextModelNG::SetLineHeightMultiply(FrameNode* frameNode, double value)
 void TextModelNG::ResetMinimumLineHeight()
 {
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinimumLineHeight, PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_MIN_LINE_HEIGHT);
 }
 
 void TextModelNG::SetMinimumLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinimumLineHeight, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_MIN_LINE_HEIGHT);
 }
 
 void TextModelNG::ResetMinimumLineHeight(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MinimumLineHeight, PROPERTY_UPDATE_MEASURE, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_MIN_LINE_HEIGHT, frameNode);
 }
 
 void TextModelNG::SetMinimumLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinimumLineHeight, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_MIN_LINE_HEIGHT, frameNode);
 }
 
 void TextModelNG::ResetMaximumLineHeight()
 {
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MaximumLineHeight, PROPERTY_UPDATE_MEASURE);
+    ACE_CHECK_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_MAX_LINE_HEIGHT);
 }
 
 void TextModelNG::SetMaximumLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaximumLineHeight, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_MAX_LINE_HEIGHT);
 }
 
 void TextModelNG::ResetMaximumLineHeight(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, MaximumLineHeight, PROPERTY_UPDATE_MEASURE, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_MAX_LINE_HEIGHT, frameNode);
 }
 
 void TextModelNG::SetMaximumLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaximumLineHeight, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_MAX_LINE_HEIGHT, frameNode);
 }
 
 void TextModelNG::SetLineSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_SPACING);
 }
 
 void TextModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LINE_SPACING, frameNode);
 }
 
 void TextModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
@@ -544,6 +561,7 @@ void TextModelNG::SetLineThicknessScale(FrameNode* frameNode, float value)
 void TextModelNG::SetBaselineOffset(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BASE_LINE_OFFSET);
 }
 
 void TextModelNG::SetTextCase(Ace::TextCase value)
@@ -554,16 +572,19 @@ void TextModelNG::SetTextCase(Ace::TextCase value)
 void TextModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LETTER_SPACING);
 }
 
 void TextModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE);
 }
 
 void TextModelNG::SetAdaptMaxFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value);
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE);
 }
 
 void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
@@ -755,11 +776,13 @@ void TextModelNG::ResetMinLines(FrameNode* frameNode)
 void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, frameNode);
 }
 
 void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, frameNode);
 }
 
 void TextModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
@@ -821,11 +844,13 @@ void TextModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdapti
 void TextModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextIndent, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_TEXT_INDENT, frameNode);
 }
 
 void TextModelNG::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BASE_LINE_OFFSET, frameNode);
 }
 
 void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
@@ -848,6 +873,7 @@ void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
 void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value, frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_LETTER_SPACING, frameNode);
 }
 
 void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
@@ -1055,6 +1081,8 @@ void TextModelNG::SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptio
     UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeStartPolicy);
     UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeUpdatePolicy);
     UPDATE_OR_RESET_MARQUEE_PROPERTY(TextMarqueeSpacing);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(
+        options.propTextMarqueeSpacing.value_or(Dimension()), LpxAttribute::LPX_MARQUEE_SPACING, frameNode);
 }
 
 void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
@@ -2081,6 +2109,26 @@ void TextModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color&
 void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, frameNode);
+}
+
+void TextModelNG::SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, IncrementalUpdatePolicy, policy);
+}
+
+void TextModelNG::ResetIncrementalUpdatePolicy()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, IncrementalUpdatePolicy, PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextModelNG::SetIncrementalUpdatePolicy(FrameNode* frameNode, IncrementalUpdatePolicy policy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IncrementalUpdatePolicy, policy, frameNode);
+}
+
+void TextModelNG::ResetIncrementalUpdatePolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IncrementalUpdatePolicy, frameNode);
 }
 
 void TextModelNG::SetExternalDrawCallback(

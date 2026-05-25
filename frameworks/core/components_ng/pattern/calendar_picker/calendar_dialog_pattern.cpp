@@ -51,8 +51,8 @@ constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
 constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
 constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
-constexpr uint32_t MIN_MONTH = 1;
-constexpr uint32_t MIN_DAY = 1;
+constexpr int32_t MIN_MONTH = 1;
+constexpr int32_t MIN_DAY = 1;
 } // namespace
 
 FocusPattern CalendarDialogPattern::GetFocusPattern() const

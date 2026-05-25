@@ -19,6 +19,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +39,7 @@ public:
         value->propColumnGap_ = CloneColumnGap();
         value->propColumnsTemplate_ = CloneColumnsTemplate();
         value->propItemFillPolicy_ = CloneItemFillPolicy();
+        value->propStickyStyle_ = CloneStickyStyle();
         return value;
     }
 
@@ -48,6 +50,7 @@ public:
         ResetColumnGap();
         ResetColumnsTemplate();
         ResetItemFillPolicy();
+        ResetStickyStyle();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -62,6 +65,16 @@ public:
         json->PutExtAttr("columnsTemplate", propColumnsTemplate_.value_or("").c_str(), filter);
         if (propItemFillPolicy_.has_value()) {
             json->PutExtAttr("itemFillPolicy", GetItemFillPolicyString().c_str(), filter);
+        }
+        auto sticky = propStickyStyle_.value_or(StickyStyle::NONE);
+        if (sticky == StickyStyle::HEADER) {
+            json->PutExtAttr("sticky", "StickyStyle.Header", filter);
+        } else if (sticky == StickyStyle::FOOTER) {
+            json->PutExtAttr("sticky", "StickyStyle.Footer", filter);
+        } else if (sticky == StickyStyle::BOTH) {
+            json->PutExtAttr("sticky", "StickyStyle.Header | StickyStyle.Footer", filter);
+        } else {
+            json->PutExtAttr("sticky", "StickyStyle.None", filter);
         }
     }
 
@@ -83,6 +96,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsTemplate, std::string, PROPERTY_UPDATE_MEASURE);
     // Higher priority than ColumnsTemplate.
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemFillPolicy, PresetFillType, PROPERTY_UPDATE_MEASURE);
+    // Sticky behavior for header / footer: NONE / HEADER / FOOTER / BOTH.
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, StickyStyle, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

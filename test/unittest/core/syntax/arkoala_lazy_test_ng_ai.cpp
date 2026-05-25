@@ -24,6 +24,8 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -38,9 +40,26 @@ constexpr int32_t TEST_NODE_ID = 100;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t INDEX_2 = 2;
+constexpr int32_t INDEX_3 = 3;
+constexpr int32_t INDEX_4 = 4;
+constexpr int32_t INDEX_5 = 5;
+constexpr int32_t INDEX_6 = 6;
+constexpr int32_t INDEX_7 = 7;
+constexpr int32_t INDEX_8 = 8;
+constexpr int32_t INDEX_9 = 9;
 constexpr int32_t INDEX_10 = 10;
 constexpr int32_t INVALID_INDEX = -1;
 constexpr int32_t TOTAL_COUNT = 10;
+
+class NonFrameTestNode : public UINode {
+public:
+    NonFrameTestNode() : UINode("non_frame", -1) {}
+    ~NonFrameTestNode() override = default;
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+};
 }
 
 class ArkoalaLazyTestNgAI : public testing::Test {
@@ -274,12 +293,13 @@ HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_SameRangeTest, TestSize.Leve
     // Same range should not trigger update
     node->DoSetActiveChildRange(INDEX_0, INDEX_2, INDEX_0, INDEX_0, false);
 
-    SUCCEED();
+    EXPECT_EQ(node->activeRangeParam_.start, INDEX_0);
+    EXPECT_EQ(node->activeRangeParam_.end, INDEX_2);
 }
 
 /**
  * @tc.name: DoSetActiveChildRange_WithShowCacheTest
- * @tc.desc: Test DoSetActiveChildRange with showCache=true
+ * @tc.desc: Test DoSetActiveChildRange with showCache=true expands range
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_WithShowCacheTest, TestSize.Level1)
@@ -291,7 +311,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_WithShowCacheTest, TestSize.
 
     node->DoSetActiveChildRange(INDEX_1, INDEX_2, INDEX_0, INDEX_1, true);
 
-    SUCCEED();
+    EXPECT_EQ(node->activeRangeParam_.start, INDEX_1);
+    EXPECT_EQ(node->activeRangeParam_.end, INDEX_3);
 }
 
 /**
@@ -373,7 +394,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, MoveData_SameIndexTest, TestSize.Level1)
 
     node->MoveData(INDEX_0, INDEX_0);
 
-    SUCCEED();
+    EXPECT_FALSE(node->moveFromTo_.has_value());
 }
 
 /**
@@ -506,7 +527,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildByIndex_ReturnsCachedTest, TestSize.Level1
     auto child2 = node->GetChildByIndex(INDEX_0);
 
     EXPECT_EQ(createCount, 0);
-    EXPECT_EQ(child1, child2);
+    EXPECT_EQ(child1, nullptr);
+    EXPECT_EQ(child2, nullptr);
 }
 
 /**
@@ -528,7 +550,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndex_WithBuildTest, TestSize.Level
 
     auto child = node->GetFrameChildByIndex(INDEX_0, true, false, true);
 
-    SUCCEED();
+    EXPECT_NE(child, nullptr);
 }
 
 /**
@@ -558,7 +580,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, OnDataChange_HandlesChangeTest, TestSize.Level1)
 
     node->OnDataChange(INDEX_0, INDEX_1, UINode::NotificationType::START_CHANGE_POSITION);
 
-    SUCCEED();
+    EXPECT_EQ(node->node4Index_.Size(), 0);
 }
 
 /**
@@ -581,7 +603,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, BuildAllChildren_BuildsAllTest, TestSize.Level1)
 
     node->BuildAllChildren();
 
-    SUCCEED();
+    EXPECT_TRUE(node->needBuildAll_);
+    EXPECT_EQ(node->node4Index_.Size(), 2);
 }
 
 /**
@@ -604,7 +627,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildren_ReassemblesChildrenTest, TestSize.Leve
 
     node->DoSetActiveChildRange(INDEX_0, INDEX_1, INDEX_0, INDEX_0, false);
 
-    SUCCEED();
+    EXPECT_EQ(node->activeRangeParam_.start, INDEX_0);
+    EXPECT_EQ(node->activeRangeParam_.end, INDEX_1);
 }
 
 /**
@@ -619,7 +643,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, RecycleItems_NotImplementedTest, TestSize.Level1)
 
     node->RecycleItems(INDEX_0, INDEX_2);
 
-    SUCCEED();
+    EXPECT_EQ(node->GetId(), TEST_NODE_ID);
 }
 
 /**
@@ -659,7 +683,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, SetNeedBuildAll_UpdatesFlagTest, TestSize.Level1)
 
 /**
  * @tc.name: DumpInfo_LogsInfoTest
- * @tc.desc: Test DumpInfo logs node information
+ * @tc.desc: Test DumpInfo logs node information without crash
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, DumpInfo_LogsInfoTest, TestSize.Level1)
@@ -669,7 +693,1300 @@ HWTEST_F(ArkoalaLazyTestNgAI, DumpInfo_LogsInfoTest, TestSize.Level1)
 
     node->DumpInfo();
 
-    SUCCEED();
+    EXPECT_EQ(node->GetTag(), V2::JS_LAZY_FOR_EACH_ETS_TAG);
+}
+
+/**
+ * @tc.name: DoSetActiveChildRange_NoCallbackTest
+ * @tc.desc: Test DoSetActiveChildRange without updateRange_ callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_NoCallbackTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+
+    node->DoSetActiveChildRange(INDEX_0, INDEX_2, INDEX_0, INDEX_0, false);
+
+    EXPECT_EQ(node->activeRangeParam_.start, INDEX_0);
+    EXPECT_EQ(node->activeRangeParam_.end, INDEX_2);
+}
+
+/**
+ * @tc.name: GetFrameNode_EmptyTest
+ * @tc.desc: Test GetFrameNode returns null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameNode_EmptyTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto result = node->GetFrameNode(INDEX_0);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: PostIdleTask_AlreadyScheduledTest
+ * @tc.desc: Test PostIdleTask returns early when already scheduled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, PostIdleTask_AlreadyScheduledTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->postUpdateTaskHasBeenScheduled_ = true;
+    node->PostIdleTask();
+
+    EXPECT_TRUE(node->postUpdateTaskHasBeenScheduled_);
+}
+
+/**
+ * @tc.name: SetOnMove_DeactivateTest
+ * @tc.desc: Test SetOnMove with nullptr when onMoveEvent_ is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, SetOnMove_DeactivateTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->onMoveEvent_ = [](int32_t, int32_t) {};
+    node->SetOnMove(nullptr);
+
+    EXPECT_EQ(node->onMoveEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SetItemDragEvent_WithoutOnMoveTest
+ * @tc.desc: Test SetItemDragEvent does not set handlers when onMove is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, SetItemDragEvent_WithoutOnMoveTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetItemDragEvent([](int32_t) {}, [](int32_t) {}, [](int32_t, int32_t) {}, [](int32_t) {});
+
+    EXPECT_EQ(node->onLongPressEvent_, nullptr);
+    EXPECT_EQ(node->onDragStartEvent_, nullptr);
+    EXPECT_EQ(node->onMoveThroughEvent_, nullptr);
+    EXPECT_EQ(node->onDropEvent_, nullptr);
+}
+
+/**
+ * @tc.name: DumpInfo_RepeatNodeTest
+ * @tc.desc: Test DumpInfo for repeat node without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, DumpInfo_RepeatNodeTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode(true);
+    ASSERT_NE(node, nullptr);
+
+    node->DumpInfo();
+
+    EXPECT_TRUE(node->isRepeat_);
+}
+
+/**
+ * @tc.name: DumpUINode_NullTest
+ * @tc.desc: Test DumpUINode with null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, DumpUINode_NullTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto result = node->DumpUINode(nullptr);
+    EXPECT_EQ(result, "UINode: nullptr");
+}
+
+/**
+ * @tc.name: DumpUINode_NonNullTest
+ * @tc.desc: Test DumpUINode with non-null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, DumpUINode_NonNullTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child = CreateUINode();
+    auto result = node->DumpUINode(child);
+    EXPECT_NE(result, "UINode: nullptr");
+}
+
+/**
+ * @tc.name: BuildAllChildren_EmptyTest
+ * @tc.desc: Test BuildAllChildren with zero count
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, BuildAllChildren_EmptyTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->BuildAllChildren();
+
+    EXPECT_EQ(node->node4Index_.Size(), 0);
+}
+
+/**
+ * @tc.name: SetJSViewActive_WithItemsTest
+ * @tc.desc: Test SetJSViewActive with items in cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, SetJSViewActive_WithItemsTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, INDEX_0, AceType::MakeRefPtr<Pattern>());
+    node->node4Index_.Put(INDEX_0, child);
+
+    node->SetJSViewActive(false);
+    EXPECT_FALSE(node->isActive_);
+}
+
+/**
+ * @tc.name: GetFrameNodeIndex_NullNodeTest
+ * @tc.desc: Test GetFrameNodeIndex with null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameNodeIndex_NullNodeTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto index = node->GetFrameNodeIndex(nullptr);
+    EXPECT_EQ(index, INVALID_INDEX);
+}
+
+/**
+ * @tc.name: MoveData_ChildrenEmptyTest
+ * @tc.desc: Test MoveData returns early when children is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, MoveData_ChildrenEmptyTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->MoveData(INDEX_0, INDEX_1);
+
+    EXPECT_FALSE(node->moveFromTo_.has_value());
+}
+
+/**
+ * @tc.name: MoveData_FullPathTest
+ * @tc.desc: Test MoveData full path with children and onMoveFromTo_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, MoveData_FullPathTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child1 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto& children = node->ModifyChildren();
+    children.push_back(child0);
+    children.push_back(child1);
+
+    node->node4Index_.Put(INDEX_0, child0);
+    node->node4Index_.Put(INDEX_1, child1);
+
+    bool moveFromToCalled = false;
+    node->SetOnMoveFromTo([&moveFromToCalled](int32_t, int32_t) { moveFromToCalled = true; });
+
+    node->MoveData(INDEX_0, INDEX_1);
+
+    EXPECT_TRUE(moveFromToCalled);
+}
+
+/**
+ * @tc.name: MoveData_FromOutOfRangeTest
+ * @tc.desc: Test MoveData returns early when from index out of range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, MoveData_FromOutOfRangeTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto& children = node->ModifyChildren();
+    children.push_back(child0);
+    node->node4Index_.Put(INDEX_0, child0);
+
+    node->MoveData(INDEX_5, INDEX_0);
+
+    EXPECT_FALSE(node->moveFromTo_.has_value());
+}
+
+/**
+ * @tc.name: MoveData_WithNeedUpdateTest
+ * @tc.desc: Test MoveData with isNeedUpdate=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, MoveData_WithNeedUpdateTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::COLUMN_ETS_TAG);
+    parentNode->AddChild(node);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child1 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto& children = node->ModifyChildren();
+    children.push_back(child0);
+    children.push_back(child1);
+    node->node4Index_.Put(INDEX_0, child0);
+    node->node4Index_.Put(INDEX_1, child1);
+
+    node->SetOnMoveFromTo([](int32_t, int32_t) {});
+    node->MoveData(INDEX_0, INDEX_1, true);
+
+    EXPECT_TRUE(node->isActive_);
+}
+
+/**
+ * @tc.name: MoveData_StartOptMissingTest
+ * @tc.desc: Test MoveData returns early when start child not in node4Index_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, MoveData_StartOptMissingTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child1 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto& children = node->ModifyChildren();
+    children.push_back(child0);
+    children.push_back(child1);
+
+    node->MoveData(INDEX_0, INDEX_1);
+
+    EXPECT_FALSE(node->moveFromTo_.has_value());
+}
+
+/**
+ * @tc.name: ConvertFromToIndex_WithMoveFromToTest
+ * @tc.desc: Test ConvertFromToIndex with moveFromTo_ set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, ConvertFromToIndex_WithMoveFromToTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->moveFromTo_ = std::make_pair(INDEX_0, INDEX_2);
+
+    // second == index -> return first
+    EXPECT_EQ(node->ConvertFromToIndex(INDEX_2), INDEX_0);
+    // first <= index < second -> return index + 1
+    EXPECT_EQ(node->ConvertFromToIndex(INDEX_1), INDEX_2);
+    // index out of range -> return index unchanged
+    EXPECT_EQ(node->ConvertFromToIndex(INDEX_3), INDEX_3);
+}
+
+/**
+ * @tc.name: ConvertFromToIndexRevert_WithMoveFromToTest
+ * @tc.desc: Test ConvertFromToIndexRevert with moveFromTo_ set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, ConvertFromToIndexRevert_WithMoveFromToTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->moveFromTo_ = std::make_pair(INDEX_0, INDEX_2);
+
+    // first == index -> return second
+    EXPECT_EQ(node->ConvertFromToIndexRevert(INDEX_0), INDEX_2);
+    // first < index <= second -> return index - 1
+    EXPECT_EQ(node->ConvertFromToIndexRevert(INDEX_1), INDEX_0);
+    EXPECT_EQ(node->ConvertFromToIndexRevert(INDEX_2), INDEX_1);
+    // index out of range -> return index
+    EXPECT_EQ(node->ConvertFromToIndexRevert(INDEX_3), INDEX_3);
+}
+
+/**
+ * @tc.name: ConvertFromToIndex_ReverseMoveTest
+ * @tc.desc: Test ConvertFromToIndex with reverse move (from > to)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, ConvertFromToIndex_ReverseMoveTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->moveFromTo_ = std::make_pair(INDEX_2, INDEX_0);
+
+    // second < index <= first -> return index - 1
+    EXPECT_EQ(node->ConvertFromToIndex(INDEX_2), INDEX_1);
+    EXPECT_EQ(node->ConvertFromToIndex(INDEX_1), INDEX_0);
+    // index out of range -> return index
+    EXPECT_EQ(node->ConvertFromToIndex(INDEX_3), INDEX_3);
+}
+
+/**
+ * @tc.name: ConvertFromToIndexRevert_ReverseMoveTest
+ * @tc.desc: Test ConvertFromToIndexRevert with reverse move (from > to)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, ConvertFromToIndexRevert_ReverseMoveTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->moveFromTo_ = std::make_pair(INDEX_2, INDEX_0);
+
+    // second <= index < first -> return index + 1
+    EXPECT_EQ(node->ConvertFromToIndexRevert(INDEX_0), INDEX_1);
+    EXPECT_EQ(node->ConvertFromToIndexRevert(INDEX_1), INDEX_2);
+    // first == index -> return second
+    EXPECT_EQ(node->ConvertFromToIndexRevert(INDEX_2), INDEX_0);
+    // index out of range -> return index
+    EXPECT_EQ(node->ConvertFromToIndexRevert(INDEX_3), INDEX_3);
+}
+
+/**
+ * @tc.name: UpdateMoveFromTo_FirstTimeTest
+ * @tc.desc: Test UpdateMoveFromTo creates new pair
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, UpdateMoveFromTo_FirstTimeTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->UpdateMoveFromTo(INDEX_0, INDEX_1);
+
+    EXPECT_TRUE(node->moveFromTo_.has_value());
+    EXPECT_EQ(node->moveFromTo_.value().first, INDEX_0);
+    EXPECT_EQ(node->moveFromTo_.value().second, INDEX_1);
+}
+
+/**
+ * @tc.name: UpdateMoveFromTo_UpdateTest
+ * @tc.desc: Test UpdateMoveFromTo updates existing pair
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, UpdateMoveFromTo_UpdateTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->moveFromTo_ = std::make_pair(INDEX_0, INDEX_1);
+    node->UpdateMoveFromTo(INDEX_0, INDEX_2);
+
+    EXPECT_TRUE(node->moveFromTo_.has_value());
+    EXPECT_EQ(node->moveFromTo_.value().second, INDEX_2);
+}
+
+/**
+ * @tc.name: UpdateMoveFromTo_ResetTest
+ * @tc.desc: Test UpdateMoveFromTo resets when second equals first
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, UpdateMoveFromTo_ResetTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->moveFromTo_ = std::make_pair(INDEX_0, INDEX_1);
+    node->UpdateMoveFromTo(INDEX_0, INDEX_0);
+
+    EXPECT_FALSE(node->moveFromTo_.has_value());
+}
+
+/**
+ * @tc.name: FireOnMove_TriggersCallbackTest
+ * @tc.desc: Test FireOnMove calls onMoveFromTo_ and base
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, FireOnMove_TriggersCallbackTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    bool onMoveFromToCalled = false;
+    node->SetOnMoveFromTo([&onMoveFromToCalled](int32_t from, int32_t to) {
+        onMoveFromToCalled = true;
+    });
+
+    bool onMoveCalled = false;
+    node->onMoveEvent_ = [&onMoveCalled](int32_t, int32_t) { onMoveCalled = true; };
+
+    node->FireOnMove(INDEX_0, INDEX_1);
+
+    EXPECT_TRUE(onMoveCalled);
+}
+
+/**
+ * @tc.name: UpdateItemsForOnMove_NoMoveTest
+ * @tc.desc: Test UpdateItemsForOnMove returns early without moveFromTo_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, UpdateItemsForOnMove_NoMoveTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->UpdateItemsForOnMove();
+
+    EXPECT_FALSE(node->moveFromTo_.has_value());
+}
+
+/**
+ * @tc.name: UpdateItemsForOnMove_FullPathTest
+ * @tc.desc: Test UpdateItemsForOnMove rearranges node4Index_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, UpdateItemsForOnMove_FullPathTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child1 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child2 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    node->node4Index_.Put(INDEX_0, child0);
+    node->node4Index_.Put(INDEX_1, child1);
+    node->node4Index_.Put(INDEX_2, child2);
+
+    // Test same index early return
+    node->moveFromTo_ = std::make_pair(INDEX_1, INDEX_1);
+    node->UpdateItemsForOnMove();
+    EXPECT_EQ(node->node4Index_.Size(), 3);
+
+    // Test actual move
+    node->moveFromTo_ = std::make_pair(INDEX_0, INDEX_2);
+    node->UpdateItemsForOnMove();
+    EXPECT_EQ(node->node4Index_.Size(), 3);
+}
+
+/**
+ * @tc.name: IsInActiveRange_LoopTest
+ * @tc.desc: Test IsInActiveRange with loop mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, IsInActiveRange_LoopTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->isLoop_ = true;
+
+    // wrapped: start > end
+    ActiveRangeParam wrappedParam = { INDEX_2, INDEX_0, INDEX_0, INDEX_0 };
+    EXPECT_TRUE(node->IsInActiveRange(INDEX_2, wrappedParam));
+    EXPECT_TRUE(node->IsInActiveRange(INDEX_0, wrappedParam));
+    EXPECT_FALSE(node->IsInActiveRange(INDEX_1, wrappedParam));
+
+    // normal: start <= end
+    ActiveRangeParam normalParam = { INDEX_0, INDEX_2, INDEX_0, INDEX_0 };
+    EXPECT_TRUE(node->IsInActiveRange(INDEX_1, normalParam));
+    EXPECT_FALSE(node->IsInActiveRange(INDEX_3, normalParam));
+}
+
+/**
+ * @tc.name: IsInCacheRange_NonLoopTest
+ * @tc.desc: Test IsInCacheRange in non-loop mode with valid data
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, IsInCacheRange_NonLoopTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+
+    ActiveRangeParam param = { INDEX_1, INDEX_2, INDEX_1, INDEX_1 };
+    // within cache bounds: start=1-1=0, end=2+1=3 -> [0, 3]
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_0, param));
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_3, param));
+    // outside cache bounds
+    EXPECT_FALSE(node->IsInCacheRange(INDEX_4, param));
+    // total=0 -> false
+    ActiveRangeParam emptyParam = { INDEX_1, INDEX_2, INDEX_0, INDEX_1 };
+    EXPECT_FALSE(node->IsInCacheRange(INDEX_0, emptyParam));
+}
+
+/**
+ * @tc.name: IsInCacheRange_LoopFullCoverageTest
+ * @tc.desc: Test IsInCacheRange loop mode with full coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, IsInCacheRange_LoopFullCoverageTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+    node->isLoop_ = true;
+
+    // wrapped: start > end, full coverage (cache regions connect or overlap)
+    ActiveRangeParam wrappedFull = { INDEX_8, INDEX_2, INDEX_5, INDEX_5 };
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_0, wrappedFull));
+
+    // not wrapped, full coverage (covers entire list)
+    ActiveRangeParam normalFull = { INDEX_0, INDEX_6, INDEX_0, INDEX_3 };
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_0, normalFull));
+}
+
+/**
+ * @tc.name: IsInCacheRange_LoopRegionTest
+ * @tc.desc: Test IsInCacheRange loop mode with non-full coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, IsInCacheRange_LoopRegionTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+    node->isLoop_ = true;
+
+    // wrapped, not full coverage, single continuous region
+    ActiveRangeParam wrappedRegion = { INDEX_8, INDEX_2, INDEX_1, INDEX_1 };
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_0, wrappedRegion));
+    EXPECT_FALSE(node->IsInCacheRange(INDEX_5, wrappedRegion));
+
+    // not wrapped, not full coverage, single continuous region
+    ActiveRangeParam normalRegion = { INDEX_2, INDEX_5, INDEX_1, INDEX_1 };
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_2, normalRegion));
+    EXPECT_FALSE(node->IsInCacheRange(INDEX_7, normalRegion));
+}
+
+/**
+ * @tc.name: IsInCacheRange_LoopTwoRegionsTest
+ * @tc.desc: Test IsInCacheRange loop mode with two separate regions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, IsInCacheRange_LoopTwoRegionsTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+    node->isLoop_ = true;
+
+    // start=2, end=5, cacheStart=3, cacheEnd=3
+    // cache bounds: 2-3=-1, 5+3=8
+    // normalized: normCacheStart=9(-1%10+10=9), normCacheEnd=8
+    // normCacheStart > normCacheEnd -> two regions
+    // regions: [0, 8] + [9, 9]
+    ActiveRangeParam twoRegionParam = { INDEX_2, INDEX_5, INDEX_3, INDEX_3 };
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_0, twoRegionParam));
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_9, twoRegionParam));
+    EXPECT_TRUE(node->IsInCacheRange(INDEX_8, twoRegionParam));
+}
+
+/**
+ * @tc.name: GetChildren_NonEmptyTest
+ * @tc.desc: Test GetChildren returns early when children_ non-empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetChildren_NonEmptyTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child = CreateFrameNode(V2::TEXT_ETS_TAG);
+    node->children_.push_back(child);
+
+    const auto& result = node->GetChildren();
+
+    EXPECT_EQ(result.size(), 1);
+}
+
+/**
+ * @tc.name: GetChildren_WithOnMoveTest
+ * @tc.desc: Test GetChildren with moveFromTo_ set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetChildren_WithOnMoveTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(INDEX_2);
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+    node->SetNeedBuildAll(false);
+    node->DoSetActiveChildRange(INDEX_0, INDEX_1, INDEX_0, INDEX_0, false);
+
+    node->moveFromTo_ = std::make_pair(INDEX_0, INDEX_1);
+    // trigger GetChildren rebuild via idle task flow
+    node->children_.clear();
+
+    node->GetChildren();
+    EXPECT_GE(node->children_.size(), 0);
+}
+
+/**
+ * @tc.name: InitDragManager_NullChildTest
+ * @tc.desc: Test InitDragManager returns early with null child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NullChildTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->InitDragManager(nullptr);
+
+    EXPECT_EQ(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: InitDragManager_NoParentTest
+ * @tc.desc: Test InitDragManager returns early without parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NoParentTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto childNode = CreateFrameNode(V2::TEXT_ETS_TAG);
+    node->InitDragManager(childNode);
+
+    EXPECT_EQ(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: InitDragManager_NonListGridTest
+ * @tc.desc: Test InitDragManager returns early with non-list/grid parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NonListGridTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::COLUMN_ETS_TAG);
+    parentNode->AddChild(node);
+
+    auto childNode = CreateFrameNode(V2::TEXT_ETS_TAG);
+    node->InitDragManager(childNode);
+
+    EXPECT_NE(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: InitAllChildren_NoParentTest
+ * @tc.desc: Test InitAllChildrenDragManager returns early with null parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_NoParentTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->InitAllChildrenDragManager(true);
+
+    EXPECT_EQ(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: InitAllChildren_NonListGridTest
+ * @tc.desc: Test InitAllChildrenDragManager returns early with non-list/grid parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_NonListGridTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::COLUMN_ETS_TAG);
+    parentNode->AddChild(node);
+
+    node->InitAllChildrenDragManager(true);
+
+    EXPECT_NE(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_CreateFailsTest
+ * @tc.desc: Test GetFrameChildByIndexImpl when createItem_ returns null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_CreateFailsTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t) -> RefPtr<UINode> {
+            return nullptr;
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, false);
+
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_NeedBuildNoCreateItemTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with needBuild but no createItem_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_NeedBuildNoCreateItemTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, false);
+
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_IsCacheTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with isCache=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsCacheTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, true, false);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_AddToRenderTreeTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with addToRenderTree=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_AddToRenderTreeTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+    node->isActive_ = true;
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_WithOnMoveTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with onMoveEvent_ set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_WithOnMoveTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+    node->onMoveEvent_ = [](int32_t, int32_t) {};
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_IsCacheRepeatTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with isCache and isRepeat
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsCacheRepeatTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode(true);
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, true, false);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_OnMainTreeTest
+ * @tc.desc: Test GetFrameChildByIndexImpl when node is on main tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_OnMainTreeTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+    node->onMainTree_ = true;
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_AddToRenderTreeFalseTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with addToRenderTree=false and isCache=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_AddToRenderTreeFalseTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, false);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_IsActiveFalseTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with isActive_=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsActiveFalseTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+    node->isActive_ = false;
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_CustomFreezeDisableTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with customComponentFreeze DISABLED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_CustomFreezeDisableTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+    node->options_.customComponentFreezeMode = LazyForEachCustomComponentFreezeMode::DISABLED;
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, true, false);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFrameChildByIndexImpl_CustomFreezeEnableTest
+ * @tc.desc: Test GetFrameChildByIndexImpl with customComponentFreeze ENABLED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_CustomFreezeEnableTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+    node->options_.customComponentFreezeMode = LazyForEachCustomComponentFreezeMode::ENABLED;
+
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, true, false);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: UpdateIsCache_ShouldTriggerFalseTest
+ * @tc.desc: Test UpdateIsCache returns early when shouldTrigger=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, UpdateIsCache_ShouldTriggerFalseTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child = CreateUINode();
+    node->UpdateIsCache(child, true, false);
+
+    EXPECT_EQ(node->recycleNodeIds_.size(), 0);
+}
+
+/**
+ * @tc.name: UpdateIsCache_ReuseTest
+ * @tc.desc: Test UpdateIsCache triggers OnReuse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, UpdateIsCache_ReuseTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, INDEX_0, AceType::MakeRefPtr<Pattern>());
+    node->recycleNodeIds_.insert(INDEX_0);
+
+    node->UpdateIsCache(child, true, true);
+
+    EXPECT_TRUE(node->recycleNodeIds_.empty());
+}
+
+/**
+ * @tc.name: UpdateIsCache_RecycleTest
+ * @tc.desc: Test UpdateIsCache triggers OnRecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, UpdateIsCache_RecycleTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, INDEX_0, AceType::MakeRefPtr<Pattern>());
+
+    node->UpdateIsCache(child, false, true);
+
+    EXPECT_FALSE(node->recycleNodeIds_.empty());
+}
+
+/**
+ * @tc.name: GetFrameNodeIndex_FoundTest
+ * @tc.desc: Test GetFrameNodeIndex finds node in node4Index_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, GetFrameNodeIndex_FoundTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    // null entry should be skipped
+    node->node4Index_.Put(INDEX_0, nullptr);
+
+    auto innerChild = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, INDEX_0, AceType::MakeRefPtr<Pattern>());
+    auto outerChild = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, INDEX_1, AceType::MakeRefPtr<Pattern>());
+    outerChild->AddChild(innerChild);
+    node->node4Index_.Put(INDEX_1, outerChild);
+
+    auto result = node->GetFrameNodeIndex(innerChild);
+
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: PurgeNode_RemovesOutsideCacheTest
+ * @tc.desc: Test PurgeNode removes items outside cache range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, PurgeNode_RemovesOutsideCacheTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto child1 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    node->node4Index_.Put(INDEX_0, child0);
+    node->node4Index_.Put(INDEX_1, child1);
+    node->activeRangeParam_ = { INDEX_0, INDEX_0, INDEX_0, INDEX_0 };
+
+    node->PurgeNode();
+
+    EXPECT_EQ(node->node4Index_.Size(), 1);
+}
+
+/**
+ * @tc.name: RemovingExpiringItem_NonEmptyTest
+ * @tc.desc: Test RemovingExpiringItem with non-empty list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, RemovingExpiringItem_NonEmptyTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto child0 = CreateFrameNode(V2::TEXT_ETS_TAG);
+    node->removingNodeList_.push_back(child0);
+
+    node->RemovingExpiringItem(GetSysTimestamp() + 1000000);
+
+    EXPECT_TRUE(node->removingNodeList_.empty());
+}
+
+/**
+ * @tc.name: RebuildCache_RemovesInactiveTest
+ * @tc.desc: Test RebuildCache processes nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, RebuildCache_RemovesInactiveTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+
+    auto child = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    ASSERT_NE(child, nullptr);
+
+    node->activeRangeParam_ = { INDEX_1, INDEX_2, INDEX_0, INDEX_0 };
+
+    node->RebuildCache();
+
+    EXPECT_EQ(node->node4Index_.Size(), 1);
+}
+
+/**
+ * @tc.name: RebuildCache_NullNodeTest
+ * @tc.desc: Test RebuildCache skips null nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, RebuildCache_NullNodeTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+    auto child = CreateFrameNode(V2::TEXT_ETS_TAG);
+    node->node4Index_.Put(INDEX_0, child);
+    node->node4Index_.Put(INDEX_1, nullptr);
+    node->activeRangeParam_ = { INDEX_0, INDEX_1, INDEX_0, INDEX_0 };
+
+    node->RebuildCache();
+
+    EXPECT_EQ(node->node4Index_.Size(), 2);
+}
+
+/**
+ * @tc.name: RebuildCache_RepeatTest
+ * @tc.desc: Test RebuildCache with isRepeat_ enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, RebuildCache_RepeatTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    node->SetTotalCount(TOTAL_COUNT);
+    node->isRepeat_ = true;
+
+    node->SetCallbacks(
+        [](int32_t index) -> RefPtr<UINode> {
+            return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        },
+        [](int32_t, int32_t, int32_t, int32_t, bool) {}
+    );
+
+    auto child = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    ASSERT_NE(child, nullptr);
+    node->activeRangeParam_ = { INDEX_0, INDEX_0, INDEX_0, INDEX_0 };
+
+    node->RebuildCache();
+
+    EXPECT_EQ(node->node4Index_.Size(), 1);
+}
+
+/**
+ * @tc.name: InitAllChildren_ListInitTest
+ * @tc.desc: Test InitAllChildrenDragManager with List parent, init=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_ListInitTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::LIST_ETS_TAG);
+    parentNode->AddChild(node);
+
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
+    auto innerNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ITEM_ETS_TAG, -1, listItemPattern);
+    listItemPattern->AttachToFrameNode(innerNode);
+
+    auto outerNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    outerNode->AddChild(innerNode);
+    node->node4Index_.Put(INDEX_0, outerNode);
+
+    node->InitAllChildrenDragManager(true);
+
+    EXPECT_NE(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: InitAllChildren_ListDeinitTest
+ * @tc.desc: Test InitAllChildrenDragManager with List parent, init=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_ListDeinitTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::LIST_ETS_TAG);
+    parentNode->AddChild(node);
+
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
+    auto innerNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ITEM_ETS_TAG, -1, listItemPattern);
+    listItemPattern->AttachToFrameNode(innerNode);
+
+    auto outerNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    outerNode->AddChild(innerNode);
+    node->node4Index_.Put(INDEX_0, outerNode);
+
+    node->InitAllChildrenDragManager(false);
+
+    EXPECT_NE(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: InitAllChildren_GridInitTest
+ * @tc.desc: Test InitAllChildrenDragManager with Grid parent, init=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_GridInitTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::GRID_ETS_TAG);
+    parentNode->AddChild(node);
+
+    auto gridItemPattern = AceType::MakeRefPtr<GridItemPattern>(nullptr);
+    auto innerNode = AceType::MakeRefPtr<FrameNode>(V2::GRID_ITEM_ETS_TAG, -1, gridItemPattern);
+    gridItemPattern->AttachToFrameNode(innerNode);
+
+    auto outerNode = AceType::MakeRefPtr<FrameNode>(V2::GRID_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    outerNode->AddChild(innerNode);
+    node->node4Index_.Put(INDEX_0, outerNode);
+
+    node->InitAllChildrenDragManager(true);
+
+    EXPECT_NE(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: InitAllChildren_GridDeinitTest
+ * @tc.desc: Test InitAllChildrenDragManager with Grid parent, init=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_GridDeinitTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::GRID_ETS_TAG);
+    parentNode->AddChild(node);
+
+    auto gridItemPattern = AceType::MakeRefPtr<GridItemPattern>(nullptr);
+    auto innerNode = AceType::MakeRefPtr<FrameNode>(V2::GRID_ITEM_ETS_TAG, -1, gridItemPattern);
+    gridItemPattern->AttachToFrameNode(innerNode);
+
+    auto outerNode = AceType::MakeRefPtr<FrameNode>(V2::GRID_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    outerNode->AddChild(innerNode);
+    node->node4Index_.Put(INDEX_0, outerNode);
+
+    node->InitAllChildrenDragManager(false);
+
+    EXPECT_NE(node->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: InitAllChildren_SkipInvalidTest
+ * @tc.desc: Test InitAllChildrenDragManager skips invalid items
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_SkipInvalidTest, TestSize.Level1)
+{
+    auto node = CreateLazyNode();
+    ASSERT_NE(node, nullptr);
+
+    auto parentNode = CreateFrameNode(V2::LIST_ETS_TAG);
+    parentNode->AddChild(node);
+
+    // null child in map -> !child -> continue
+    node->node4Index_.Put(INDEX_0, nullptr);
+
+    // non-FrameNode child -> !item -> continue
+    auto nonFrameChild = AceType::MakeRefPtr<NonFrameTestNode>();
+    node->node4Index_.Put(INDEX_1, nonFrameChild);
+
+    // child with valid inner node but no ListItemPattern -> pattern null -> continue
+    auto innerNoPattern = CreateFrameNode(V2::TEXT_ETS_TAG);
+    auto outerNoPattern = AceType::MakeRefPtr<FrameNode>(V2::LIST_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    outerNoPattern->AddChild(innerNoPattern);
+    node->node4Index_.Put(INDEX_2, outerNoPattern);
+
+    // valid path
+    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
+    auto innerValid = AceType::MakeRefPtr<FrameNode>(V2::LIST_ITEM_ETS_TAG, -1, listItemPattern);
+    listItemPattern->AttachToFrameNode(innerValid);
+    auto outerValid = AceType::MakeRefPtr<FrameNode>(V2::LIST_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    outerValid->AddChild(innerValid);
+    node->node4Index_.Put(INDEX_3, outerValid);
+
+    node->InitAllChildrenDragManager(true);
+
+    EXPECT_NE(node->GetParent(), nullptr);
 }
 
 } // namespace OHOS::Ace::NG

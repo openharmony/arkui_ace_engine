@@ -1480,15 +1480,16 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Send speed command with valid value
-     */
-    std::string speedCommand = R"({"cmd":"setVideoPlaybackSpeed","value":2.0})";
-    int32_t result = pattern->OnInjectionEvent(speedCommand);
-
-    /**
      * @tc.expected: step2. Return success and verify speed
      */
+    std::string speedCommand = R"({"cmd":"setVideoPlaybackSpeed","value":8.0})";
+    int32_t result = pattern->OnInjectionEvent(speedCommand);
     EXPECT_EQ(result, RET_SUCCESS);
-    EXPECT_DOUBLE_EQ(pattern->GetProgressRate(), 2.0);
+    EXPECT_DOUBLE_EQ(pattern->GetProgressRate(), 8.0);
+    speedCommand = R"({"cmd":"setVideoPlaybackSpeed","value":0.125})";
+    result = pattern->OnInjectionEvent(speedCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+    EXPECT_DOUBLE_EQ(pattern->GetProgressRate(), 0.125);
 }
 
 /**
@@ -1684,13 +1685,16 @@ HWTEST_F(VideoTestAddNg, OnInjectionEvent009, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Send speed command with invalid value (negative)
+     * @tc.expected: step2. Return failure
      */
     std::string invalidSpeed = R"({"cmd":"setVideoPlaybackSpeed","value":-1.0})";
     int32_t result = pattern->OnInjectionEvent(invalidSpeed);
-
-    /**
-     * @tc.expected: step2. Return failure
-     */
+    EXPECT_EQ(result, RET_FAILED);
+    invalidSpeed = R"({"cmd":"setVideoPlaybackSpeed","value":0.1})";
+    result = pattern->OnInjectionEvent(invalidSpeed);
+    EXPECT_EQ(result, RET_FAILED);
+    invalidSpeed = R"({"cmd":"setVideoPlaybackSpeed","value":8.1})";
+    result = pattern->OnInjectionEvent(invalidSpeed);
     EXPECT_EQ(result, RET_FAILED);
 }
 

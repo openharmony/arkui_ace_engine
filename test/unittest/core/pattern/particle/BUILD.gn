@@ -18,6 +18,7 @@ ace_unittest("particle_test_ng") {
   type = "new"
   sources = [
     "particle_test_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/particle/particle_model_ng.cpp",
   ]
   if (!ace_enable_full_test_suite) {
     sources = []

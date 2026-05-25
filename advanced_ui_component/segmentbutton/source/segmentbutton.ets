@@ -381,8 +381,8 @@ export class SegmentButtonOptions {
   constructor(options: TabSegmentButtonOptions | CapsuleSegmentButtonOptions) {
     this.fontColor = options.fontColor ?? segmentButtonTheme.FONT_COLOR
     this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR
-    this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE
-    this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE
+    this.fontSize = options.fontSize ?? -1;
+    this.selectedFontSize = options.selectedFontSize ?? -1;
     this.fontWeight = options.fontWeight ?? initFontWeight(FontWeight.Regular)
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium
     this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR
@@ -1535,6 +1535,36 @@ export struct SegmentButton {
     return false;
   }
 
+  private isMultiplyCapsule(): boolean {
+    return this.options !== undefined &&
+      this.options.type === 'capsule' && (this.options.multiply ?? false);
+  }
+
+  private shouldShowBackground(): boolean {
+    return !this.isMultiplyCapsule() && this.isBackgroundSystemMaterialEnabled();
+  }
+
+  private getButtonBackgroundColor(): ResourceColor | undefined {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
+  }
+
+  private getButtonBorderRadius(): Length | undefined {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return getBackgroundBorderRadius(this.options, this.componentSize.height as number / 2);
+  }
+
+  private getButtonSystemMaterial(): uiMaterial.Material | undefined {
+    if (!this.shouldShowBackground()) {
+      return undefined;
+    }
+    return this.options.backgroundSystemMaterial;
+  }
+
   private isSegmentFocusStyleCustomized(): boolean {
     if (this.isCustomizedCache === undefined) {
       this.isCustomizedCache = resourceToNumber(
@@ -1620,6 +1650,10 @@ export struct SegmentButton {
       }
     }
     .direction(this.options ? this.options.direction : undefined)
+    .backgroundColor(this.getButtonBackgroundColor())
+    .borderRadius(this.getButtonBorderRadius())
+    .clip(false)
+    .systemMaterial(this.getButtonSystemMaterial())
     .onBlur(() => {
       this.focusIndex = -1
     })
@@ -2058,12 +2092,16 @@ export struct SegmentButton {
     } else {
       setAnimatedPropertyFunc();
     }
+    this.updateButtonFont();
+  }
+
+  updateButtonFont(): void {
     this.buttonItemsSelected.forEach((selected, index) => {
-      const selectedFontSize = this.options.selectedFontSize ?? 
+      const selectedFontSize = this.options.selectedFontSize !== -1 ? this.options.selectedFontSize: 
         (this.useAdaptiveLineHeight ? 
           segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : 
           segmentButtonTheme.SELECTED_FONT_SIZE);
-      const normalFontSize = this.options.fontSize ?? 
+      const normalFontSize = this.options.fontSize !== -1 ? this.options.fontSize: 
         (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
       this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :

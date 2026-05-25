@@ -16,14 +16,12 @@
 #include <optional>
 
 #include "grid_test_ng.h"
-#include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/grid/grid_focus.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"

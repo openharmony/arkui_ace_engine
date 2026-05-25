@@ -46,6 +46,8 @@ void SetOnListReachEndCallBack(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollStartCallBack(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollStopCallBack(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollVisibleContentChange(ArkUINodeHandle node, void* extraParam);
+void SetOnListEditModeChange(ArkUINodeHandle node, void* extraParam);
+void SetOnListEditModeChangeCallBack(ArkUINodeHandle node, void* extraParam);
 
 void ResetOnListScroll(ArkUINodeHandle node);
 void ResetOnListScrollIndex(ArkUINodeHandle node);
@@ -63,6 +65,7 @@ void ResetOnItemDragEnter(ArkUINodeHandle node);
 void ResetOnItemDragMove(ArkUINodeHandle node);
 void ResetOnItemDragLeave(ArkUINodeHandle node);
 void ResetOnItemDrop(ArkUINodeHandle node);
+void ResetOnListEditModeChange(ArkUINodeHandle node);
 void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj);
 void ParseResObjDividerStrokeWidth(ArkUINodeHandle node, void* resObj);
 void ParseResObjDividerColor(ArkUINodeHandle node, void* resObj);

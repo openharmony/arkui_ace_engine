@@ -256,10 +256,10 @@ UpdateParagraphStyle Convert(const Ark_RichEditorParagraphStyle& src)
     } else if (hasLinear) {
         Gradient gradient;
         Converter::ProcessLinearGradient(linearGradientOpt, gradient);
-        ret.SetOptGradient(GradientConvert::ToGradient(gradient));
+        ret.SetOptGradient(gradient);
     } else if (hasRadial) {
         Gradient gradient = Converter::Convert<Gradient>(radialGradientOpt.value);
-        ret.SetOptGradient(GradientConvert::ToGradient(gradient));
+        ret.SetOptGradient(gradient);
     }
     return ret;
 }

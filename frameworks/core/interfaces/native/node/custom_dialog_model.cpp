@@ -26,6 +26,7 @@
 #include "frameworks/core/components/theme/shadow_theme.h"
 #include "frameworks/core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "native_material_util.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
 namespace {
@@ -407,6 +408,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
     dialogProperties.displayModeInSubWindow =
         static_cast<DialogDisplayModeInSubWindow>(controllerHandler->displayModeInSubWindow);
+    dialogProperties.systemMaterial = CreateUiMaterialFromHandle(controllerHandler->material);
     dialogProperties.isModal = controllerHandler->isModal;
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
     dialogProperties.hasInvertColor.hasBackgroundColor = controllerHandler->hasCustomBackgroundColor;
@@ -556,7 +558,8 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogPr
         .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
         .displayModeInSubWindow = dialogProps.displayModeInSubWindow,
-        .customCNode = dialogProps.customCNode };
+        .customCNode = dialogProps.customCNode,
+        .systemMaterial = dialogProps.systemMaterial };
     ParsePartialDialogPropertiesFromProps(dialogProps, dialogAttr);
     return dialogAttr;
 }
@@ -955,6 +958,13 @@ ArkUI_Int32 SetDialogDisplayModeInSubWindow(ArkUIDialogHandle controllerHandler,
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->displayModeInSubWindow = displayModeInSubWindow;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetSystemMaterial(ArkUIDialogHandle controllerHandler, ArkUI_ImmersiveMaterial* material)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->material = material;
     return ERROR_CODE_NO_ERROR;
 }
 

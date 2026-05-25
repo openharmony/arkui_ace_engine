@@ -1,0 +1,13 @@
+{
+    "devices": {
+        "general": ["default"],
+        "custom": [
+            {
+                "xts": [
+                    "SystemCapability.Account.AppAccount",
+                    "SystemCapability.Account.OsAccount"
+                ]
+            }
+        ]
+    }
+}

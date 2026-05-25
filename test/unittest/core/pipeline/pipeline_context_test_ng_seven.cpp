@@ -24,6 +24,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/common/mock_resource_register.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
@@ -31,14 +32,18 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
+#include "core/common/ace_engine.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -66,6 +71,8 @@ constexpr int32_t TEST_CURSOR_OUT_OF_RANGE = 99999;
 constexpr int32_t TEST_CURSOR_NEGATIVE = -1;
 constexpr uint8_t TEST_RENDERING_MODE_FORM = 1;
 constexpr uint8_t TEST_RENDERING_MODE_FULL = 0;
+constexpr uint64_t LARGE_TIME_THRESHOLD = static_cast<uint64_t>(INT64_MAX >> 2);
+constexpr uint64_t TEST_SMALL_TIMESTAMP = 1000;
 } // namespace
 
 // ==========================================================================
@@ -1098,6 +1105,816 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest051, TestSize.Level1
 
     context_->windowModal_ = originalWindowModal;
     context_->rootNode_ = originalRoot;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest052
+ * @tc.desc: Test DumpVisibleInspectorTree with normal rootNode (no ContainerModal, no AtomicService)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest052, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(pageNode);
+    rootNode->AddChild(stageNode);
+    context_->rootNode_ = rootNode;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->DumpVisibleInspectorTree(root, config);
+    EXPECT_FALSE(root->ToString().empty());
+    context_->rootNode_ = rootBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest053
+ * @tc.desc: Test DumpVisibleInspectorTree with interaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest053, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(pageNode);
+    rootNode->AddChild(stageNode);
+    context_->rootNode_ = rootNode;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    config.interactionInfo = true;
+    config.accessibilityInfo = true;
+    context_->DumpVisibleInspectorTree(root, config);
+    EXPECT_FALSE(root->ToString().empty());
+    context_->rootNode_ = rootBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest054
+ * @tc.desc: Test DumpVisibleInspectorTree when rootNode has no ContainerModal child
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest054, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(pageNode);
+    rootNode->AddChild(stageNode);
+    context_->rootNode_ = rootNode;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->DumpVisibleInspectorTree(root, config);
+    EXPECT_FALSE(root->ToString().empty());
+    context_->rootNode_ = rootBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest055
+ * @tc.desc: Test DumpVisibleInspectorTree under CONTAINER_MODAL window modal with ContainerModalPattern child
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest055, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto windowModalBackup = context_->windowModal_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto containerModalNode = FrameNode::CreateFrameNode(
+        "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ContainerModalPattern>());
+    rootNode->AddChild(containerModalNode);
+    context_->rootNode_ = rootNode;
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(containerModalNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->DumpVisibleInspectorTree(root, config);
+    EXPECT_FALSE(root->ToString().empty());
+    context_->rootNode_ = rootBackup;
+    context_->windowModal_ = windowModalBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest056
+ * @tc.desc: Test DumpVisibleInspectorTree under CONTAINER_MODAL but child has no ContainerModalPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest056, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto windowModalBackup = context_->windowModal_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto nonContainerModalChild = FrameNode::CreateFrameNode(
+        "NonContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(pageNode);
+    rootNode->AddChild(nonContainerModalChild);
+    rootNode->AddChild(stageNode);
+    context_->rootNode_ = rootNode;
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->DumpVisibleInspectorTree(root, config);
+    EXPECT_FALSE(root->ToString().empty());
+    context_->rootNode_ = rootBackup;
+    context_->windowModal_ = windowModalBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest057
+ * @tc.desc: Test DumpVisibleInspectorTree when rootNode has ATOMIC_SERVICE child
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest057, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto atomicNode = FrameNode::CreateFrameNode(
+        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(pageNode);
+    rootNode->AddChild(atomicNode);
+    rootNode->AddChild(stageNode);
+    context_->rootNode_ = rootNode;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->DumpVisibleInspectorTree(root, config);
+    EXPECT_FALSE(root->ToString().empty());
+    context_->rootNode_ = rootBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest058
+ * @tc.desc: Test DumpVisibleInspectorTree when rootNode has no ATOMIC_SERVICE child
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest058, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto otherChild = FrameNode::CreateFrameNode(
+        "OtherTag", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(pageNode);
+    rootNode->AddChild(otherChild);
+    rootNode->AddChild(stageNode);
+    context_->rootNode_ = rootNode;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->DumpVisibleInspectorTree(root, config);
+    EXPECT_FALSE(root->ToString().empty());
+    context_->rootNode_ = rootBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest059
+ * @tc.desc: Test DumpVisibleInspectorTree when rootNode has no children besides stage
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest059, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    auto overlayBackup = context_->overlayManager_;
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(pageNode);
+    rootNode->AddChild(stageNode);
+    context_->rootNode_ = rootNode;
+    context_->overlayManager_ = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->DumpVisibleInspectorTree(root, config);
+    EXPECT_FALSE(root->ToString().empty());
+    context_->rootNode_ = rootBackup;
+    context_->overlayManager_ = overlayBackup;
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest060
+ * @tc.desc: Test PipelineContext 6-param constructor initializes managers and sets pipeline context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest060, TestSize.Level1)
+{
+    auto window = std::make_shared<MockWindow>();
+    EXPECT_CALL(*window, RequestFrame()).Times(AnyNumber());
+    EXPECT_CALL(*window, FlushTasks(testing::_)).Times(AnyNumber());
+    EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
+    EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
+    auto context = AceType::MakeRefPtr<PipelineContext>(
+        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr,
+        AceType::MakeRefPtr<MockResourceRegister>(), nullptr, DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context, nullptr);
+    ASSERT_NE(context->navigationMgr_, nullptr);
+    ASSERT_NE(context->forceSplitMgr_, nullptr);
+    ASSERT_NE(context->avoidInfoMgr_, nullptr);
+    ASSERT_NE(context->safeAreaManager_, nullptr);
+    ASSERT_NE(context->touchOptimizer_, nullptr);
+    ASSERT_NE(context->clickOptimizer_, nullptr);
+    ASSERT_NE(context->dynamicComponentSafeManager_, nullptr);
+    EXPECT_EQ(context->avoidInfoMgr_->instanceId_, DEFAULT_INSTANCE_ID);
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest061
+ * @tc.desc: Test DumpInspector skips when accessibilityManager is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest061, TestSize.Level1)
+{
+    AssertValidContext();
+    auto mockFrontend = AceType::MakeRefPtr<MockFrontend>();
+    testing::Mock::AllowLeak(AceType::RawPtr(mockFrontend));
+    auto weakFrontendBackup = context_->weakFrontend_;
+    context_->weakFrontend_ = mockFrontend;
+    EXPECT_CALL(*mockFrontend, GetAccessibilityManager())
+        .WillRepeatedly(testing::Return(nullptr));
+    std::vector<std::string> params = { "-inspector" };
+    context_->DumpInspector(params, true);
+    context_->weakFrontend_ = weakFrontendBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest062
+ * @tc.desc: Test FlushReload when fontManager is not null and languageUpdate is true,
+ *           covering branch (fontManager && (languageUpdate || fullUpdate)) as true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest062, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    context_->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto fontManagerBackup = context_->fontManager_;
+    context_->fontManager_ = FontManager::Create();
+    auto stageManagerBackup = context_->stageManager_;
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(context_->rootNode_);
+    context_->onShow_ = false;
+    ConfigurationChange config;
+    config.languageUpdate = true;
+    config.colorModeUpdate = true;
+    context_->FlushReload(config, true);
+    EXPECT_FALSE(context_->isReloading_);
+    context_->fontManager_ = fontManagerBackup;
+    context_->stageManager_ = stageManagerBackup;
+    context_->onShow_ = false;
+    context_->rootNode_ = rootBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest063
+ * @tc.desc: Test FlushReload when fontManager is null and no updates,
+ *           covering branch (fontManager && (languageUpdate || fullUpdate)) as false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest063, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    context_->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto fontManagerBackup = context_->fontManager_;
+    context_->fontManager_ = nullptr;
+    auto stageManagerBackup = context_->stageManager_;
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(context_->rootNode_);
+    context_->onShow_ = false;
+    ConfigurationChange config;
+    context_->FlushReload(config, false);
+    EXPECT_FALSE(context_->isReloading_);
+    context_->fontManager_ = fontManagerBackup;
+    context_->stageManager_ = stageManagerBackup;
+    context_->rootNode_ = rootBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest064
+ * @tc.desc: Test FlushReload when iconUpdate is true,
+ *           covering branch (IsNeedUpdate() || iconUpdate) as true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest064, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    context_->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto stageManagerBackup = context_->stageManager_;
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(context_->rootNode_);
+    context_->onShow_ = false;
+    ConfigurationChange config;
+    config.iconUpdate = true;
+    context_->FlushReload(config, false);
+    EXPECT_FALSE(context_->isReloading_);
+    context_->stageManager_ = stageManagerBackup;
+    context_->rootNode_ = rootBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest065
+ * @tc.desc: Test FlushReload when all config flags are false,
+ *           covering branch (IsNeedUpdate() || iconUpdate) as false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest065, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    context_->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto fontManagerBackup = context_->fontManager_;
+    context_->fontManager_ = nullptr;
+    auto stageManagerBackup = context_->stageManager_;
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(context_->rootNode_);
+    context_->onShow_ = false;
+    ConfigurationChange config;
+    context_->FlushReload(config, false);
+    EXPECT_FALSE(context_->isReloading_);
+    context_->fontManager_ = fontManagerBackup;
+    context_->stageManager_ = stageManagerBackup;
+    context_->rootNode_ = rootBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest066
+ * @tc.desc: Test FlushReload when fullUpdate is true and IsNeedUpdate is true,
+ *           covering branch (fullUpdate && IsNeedUpdate()) as true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest066, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    context_->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto fontManagerBackup = context_->fontManager_;
+    context_->fontManager_ = FontManager::Create();
+    auto stageManagerBackup = context_->stageManager_;
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(context_->rootNode_);
+    context_->onShow_ = false;
+    ConfigurationChange config;
+    config.languageUpdate = true;
+    config.colorModeUpdate = true;
+    context_->FlushReload(config, true);
+    EXPECT_FALSE(context_->isReloading_);
+    context_->fontManager_ = fontManagerBackup;
+    context_->stageManager_ = stageManagerBackup;
+    context_->rootNode_ = rootBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest067
+ * @tc.desc: Test FlushReload when fullUpdate is true but IsNeedUpdate is false,
+ *           covering branch (fullUpdate && IsNeedUpdate()) as false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest067, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    context_->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto fontManagerBackup = context_->fontManager_;
+    context_->fontManager_ = nullptr;
+    auto stageManagerBackup = context_->stageManager_;
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(context_->rootNode_);
+    context_->onShow_ = false;
+    ConfigurationChange config;
+    context_->FlushReload(config, true);
+    EXPECT_FALSE(context_->isReloading_);
+    context_->fontManager_ = fontManagerBackup;
+    context_->stageManager_ = stageManagerBackup;
+    context_->rootNode_ = rootBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest068
+ * @tc.desc: Test FlushReload when onShow is false,
+ *           covering branch (!onShow_) as true, changeTask executed directly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest068, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    context_->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto stageManagerBackup = context_->stageManager_;
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(context_->rootNode_);
+    context_->onShow_ = false;
+    ConfigurationChange config;
+    context_->FlushReload(config, false);
+    EXPECT_FALSE(context_->isReloading_);
+    context_->stageManager_ = stageManagerBackup;
+    context_->rootNode_ = rootBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest069
+ * @tc.desc: Test FlushReload when onShow is true,
+ *           covering branch (!onShow_) as false, AnimationUtils::Animate path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest069, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootBackup = context_->rootNode_;
+    context_->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto stageManagerBackup = context_->stageManager_;
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(context_->rootNode_);
+    context_->onShow_ = true;
+    ConfigurationChange config;
+    context_->FlushReload(config, false);
+    EXPECT_FALSE(context_->isReloading_);
+    context_->stageManager_ = stageManagerBackup;
+    context_->onShow_ = false;
+    context_->rootNode_ = rootBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest070
+ * @tc.desc: Test TriggerIdleCallback when idleCallbackFuncs is empty,
+ *           covering branch (idleCallbackFuncs_.empty()) as true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest070, TestSize.Level1)
+{
+    AssertValidContext();
+    ASSERT_TRUE(context_->idleCallbackFuncs_.empty());
+    context_->TriggerIdleCallback(0);
+    EXPECT_TRUE(context_->idleCallbackFuncs_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest071
+ * @tc.desc: Test TriggerIdleCallback when deadline - currentTime < MIN_IDLE_TIME,
+ *           covering branch (deadline - currentTime < MIN_IDLE_TIME) as true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest071, TestSize.Level1)
+{
+    AssertValidContext();
+    auto idleBackup = std::move(context_->idleCallbackFuncs_);
+    context_->idleCallbackFuncs_.push_back([](uint64_t, uint32_t) {});
+    context_->TriggerIdleCallback(0);
+    EXPECT_FALSE(context_->idleCallbackFuncs_.empty());
+    context_->idleCallbackFuncs_ = std::move(idleBackup);
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest072
+ * @tc.desc: Test ProcessOverlayChildrenDumpInfo when child has overlay tag and isInSubWindow is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest072, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayChild = FrameNode::CreateFrameNode(
+        V2::TOAST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(overlayChild, nullptr);
+    rootNode->AddChild(overlayChild);
+    auto overlayChildrenArray = JsonUtil::CreateArray();
+    auto subWindowOverlayArray = JsonUtil::CreateArray();
+    ParamConfig config;
+    bool result = context_->ProcessOverlayChildrenDumpInfo(
+        rootNode, overlayChildrenArray, subWindowOverlayArray, true, config);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest073
+ * @tc.desc: Test ProcessOverlayChildrenDumpInfo when child has overlay tag and isInSubWindow is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest073, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayChild = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(overlayChild, nullptr);
+    rootNode->AddChild(overlayChild);
+    auto overlayChildrenArray = JsonUtil::CreateArray();
+    auto subWindowOverlayArray = JsonUtil::CreateArray();
+    ParamConfig config;
+    bool result = context_->ProcessOverlayChildrenDumpInfo(
+        rootNode, overlayChildrenArray, subWindowOverlayArray, false, config);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest074
+ * @tc.desc: Test ProcessOverlayChildrenDumpInfo when child does not have overlay tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest074, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto nonOverlayChild = FrameNode::CreateFrameNode(
+        "Column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(nonOverlayChild, nullptr);
+    rootNode->AddChild(nonOverlayChild);
+    auto overlayChildrenArray = JsonUtil::CreateArray();
+    auto subWindowOverlayArray = JsonUtil::CreateArray();
+    ParamConfig config;
+    bool result = context_->ProcessOverlayChildrenDumpInfo(
+        rootNode, overlayChildrenArray, subWindowOverlayArray, false, config);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest075
+ * @tc.desc: Test ProcessOverlayChildrenDumpInfo when rootNode has no children
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest075, TestSize.Level1)
+{
+    AssertValidContext();
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayChildrenArray = JsonUtil::CreateArray();
+    auto subWindowOverlayArray = JsonUtil::CreateArray();
+    ParamConfig config;
+    bool result = context_->ProcessOverlayChildrenDumpInfo(
+        rootNode, overlayChildrenArray, subWindowOverlayArray, false, config);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest076
+ * @tc.desc: Test GetComponentOverlayInspector with isInSubWindow false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest076, TestSize.Level1)
+{
+    AssertValidContext();
+    auto startNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(startNode, nullptr);
+    auto overlayChild = FrameNode::CreateFrameNode(
+        V2::TOAST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(overlayChild, nullptr);
+    startNode->AddChild(overlayChild);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->GetComponentOverlayInspector(root, startNode, config, false);
+    EXPECT_TRUE(root->Contains("$type"));
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest077
+ * @tc.desc: Test GetComponentOverlayInspector with isInSubWindow true and root has no "$children"
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest077, TestSize.Level1)
+{
+    AssertValidContext();
+    auto startNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(startNode, nullptr);
+    auto overlayChild = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(overlayChild, nullptr);
+    startNode->AddChild(overlayChild);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->GetComponentOverlayInspector(root, startNode, config, true);
+    EXPECT_TRUE(root->Contains("$children"));
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest078
+ * @tc.desc: Test GetComponentOverlayInspector with isInSubWindow true and root contains "$children"
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest078, TestSize.Level1)
+{
+    AssertValidContext();
+    auto startNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(startNode, nullptr);
+    auto overlayChild = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(overlayChild, nullptr);
+    startNode->AddChild(overlayChild);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    auto childrenArray = JsonUtil::CreateArray();
+    auto childItem = JsonUtil::CreateSharedPtrJson();
+    auto subChildren = JsonUtil::CreateArray();
+    childItem->PutRef("$children", std::move(subChildren));
+    childrenArray->Put(childItem);
+    root->PutRef("$children", std::move(childrenArray));
+    ParamConfig config;
+    context_->GetComponentOverlayInspector(root, startNode, config, true);
+    auto rootChildren = root->GetValue("$children");
+    ASSERT_TRUE(rootChildren != nullptr && rootChildren->IsArray() && rootChildren->GetArraySize() > 0);
+    auto firstChild = rootChildren->GetArrayItem(0);
+    ASSERT_TRUE(firstChild != nullptr && firstChild->Contains("$children"));
+    EXPECT_GT(firstChild->GetValue("$children")->GetArraySize(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest079
+ * @tc.desc: Test DumpSimplifyTreeJsonEntrance when lastPageNode is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest079, TestSize.Level1)
+{
+    AssertValidContext();
+    auto startNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(startNode, nullptr);
+    auto stageManagerBackup = context_->stageManager_;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(rootNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    context_->DumpSimplifyTreeJsonEntrance(root, startNode, config);
+    EXPECT_FALSE(root->Contains("$children"));
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest080
+ * @tc.desc: Test DumpSimplifyTreeJsonEntrance when lastPageNode exists but has no navigation child
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest080, TestSize.Level1)
+{
+    AssertValidContext();
+    auto startNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(startNode, nullptr);
+    auto stageManagerBackup = context_->stageManager_;
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(pageNode);
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    EXPECT_NO_FATAL_FAILURE(context_->DumpSimplifyTreeJsonEntrance(root, startNode, config));
+    context_->stageManager_ = stageManagerBackup;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest081
+ * @tc.desc: Test AdjustVsyncTimeStamp when period is 0 (default mock window)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest081, TestSize.Level1)
+{
+    AssertValidContext();
+    auto backupRecvTime = context_->recvTime_;
+    context_->recvTime_ = 0;
+    auto result = context_->AdjustVsyncTimeStamp(TEST_SMALL_TIMESTAMP);
+    EXPECT_EQ(result, TEST_SMALL_TIMESTAMP);
+    context_->recvTime_ = backupRecvTime;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest082
+ * @tc.desc: Test AdjustVsyncTimeStamp when nanoTimestamp exceeds LARGE_TIME
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest082, TestSize.Level1)
+{
+    AssertValidContext();
+    auto backupRecvTime = context_->recvTime_;
+    context_->recvTime_ = 0;
+    uint64_t hugeTimestamp = LARGE_TIME_THRESHOLD + 1;
+    auto result = context_->AdjustVsyncTimeStamp(hugeTimestamp);
+    EXPECT_EQ(result, hugeTimestamp);
+    context_->recvTime_ = backupRecvTime;
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest083
+ * @tc.desc: Test DumpForceColor when params size <= PARAM_NUM
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest083, TestSize.Level1)
+{
+    AssertValidContext();
+    std::vector<std::string> params = {"-forcecolor"};
+    EXPECT_NO_FATAL_FAILURE(context_->DumpForceColor(params));
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest084
+ * @tc.desc: Test DumpForceColor when nodeId < 0 (invalid node id string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest084, TestSize.Level1)
+{
+    AssertValidContext();
+    std::vector<std::string> params = {"-forcecolor", "abc", "#FF000000"};
+    EXPECT_NO_FATAL_FAILURE(context_->DumpForceColor(params));
+}
+
+/**
+ * @tc.name: PipelineContextSevenTest085
+ * @tc.desc: Test DumpForceColor with valid params, nodeId >= 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest085, TestSize.Level1)
+{
+    AssertValidContext();
+    std::vector<std::string> params = {"-forcecolor", "100", "#FF000000"};
+    EXPECT_NO_FATAL_FAILURE(context_->DumpForceColor(params));
 }
 
 } // namespace OHOS::Ace::NG

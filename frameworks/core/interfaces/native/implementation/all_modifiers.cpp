@@ -102,6 +102,7 @@ const GENERATED_ArkUICustomLayoutRootModifier* GetCustomLayoutRootModifier();
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier();
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier();
 const GENERATED_ArkUIDepthComponentModifier* GetDepthComponentModifier();
+const GENERATED_ArkUIDistortionComponentModifier* GetDistortionComponentModifier();
 const GENERATED_ArkUIDividerModifier* GetDividerModifier();
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier();
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier();
@@ -293,7 +294,9 @@ const GENERATED_ArkUILayoutableAccessor* GetLayoutableAccessor();
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
 const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor();
+const GENERATED_ArkUILazyColumnLayoutExtenderAccessor* GetLazyColumnLayoutExtenderAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
+const GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor* GetLazyWaterFlowLayoutExtenderAccessor();
 const GENERATED_ArkUILeadingMarginSpanAccessor* GetLeadingMarginSpanAccessor();
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
 const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor();
@@ -447,6 +450,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetDataPanelModifier,
         GetDatePickerModifier,
         GetDepthComponentModifier,
+        GetDistortionComponentModifier,
         GetDividerModifier,
         GetEffectComponentModifier,
         GetEllipseModifier,
@@ -644,7 +648,9 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLayoutManagerAccessor,
         GetLayoutPolicyAccessor,
         GetLazyBuildAccessor,
+        GetLazyColumnLayoutExtenderAccessor,
         GetLazyForEachOpsAccessor,
+        GetLazyWaterFlowLayoutExtenderAccessor,
         GetLeadingMarginSpanAccessor,
         GetLetterSpacingStyleAccessor,
         GetLevelOrderExtenderAccessor,

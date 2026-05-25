@@ -275,7 +275,7 @@ ArkUINativeModuleValue TextTimerBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     std::vector<RefPtr<ResourceObject>> offsetXResObjArray;
     std::vector<RefPtr<ResourceObject>> offsetYResObjArray;
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_1),
-        radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResObjArray);
+        radiusArray.get(), length, ArkTSUtils::parseTextShadowRadiusWithResObj, radiusResObjArray);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, runtimeCallInfo->GetCallArgRef(NUM_3),

@@ -517,9 +517,7 @@ void JSFontSpan::ParseJsFontVariations(const JSRef<JSObject>& obj, Font& font)
         }
         fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
     }
-    if (!fontVariations.empty()) {
-        font.fontVariations = fontVariations;
-    }
+    font.fontVariations = fontVariations;
 }
 
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
@@ -2401,6 +2399,10 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
         return;
     }
     auto shaderStyleObj = obj->GetProperty("shaderStyle");
+    if (!shaderStyleObj->IsObject()) {
+        paragraphStyle.ResetGradient();
+        return;
+    }
     std::optional<NG::Gradient> gradientShaderStyle;
     std::optional<Color> colorShaderStyle;
     RefPtr<ResourceObject> resObj;
@@ -2408,12 +2410,15 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
     JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
     paragraphStyle.colorShaderStyle = colorShaderStyle;
     if (gradientShaderStyle.has_value()) {
-        paragraphStyle.SetGradient(gradientShaderStyle.value());
+        paragraphStyle.SetOptGradient(gradientShaderStyle);
     } else {
         paragraphStyle.ResetGradient();
     }
     if (resObj && colorShaderStyle.has_value()) {
         JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(jsObject->GetProperty("color"));
+        if (!colorObj->IsObject()) {
+            return;
+        }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
         JSViewAbstract::CompleteResourceObject(jsObj);
         resObj = JSViewAbstract::GetResourceObject(jsObj);

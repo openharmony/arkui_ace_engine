@@ -306,12 +306,6 @@ RectF RichEditorSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
     auto intersectRect = pattern->GetSelectArea(pos);
-
-    if (hasTransform_) {
-        auto textPaintOffset = GetPaintOffsetWithoutTransform();
-        intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
-        GetGlobalRectWithTransform(intersectRect);
-    }
     ApplySelectAreaWithKeyboard(intersectRect);
     return intersectRect;
 }

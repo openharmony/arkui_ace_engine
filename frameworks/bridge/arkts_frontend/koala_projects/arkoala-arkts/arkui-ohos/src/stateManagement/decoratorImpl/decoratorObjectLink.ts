@@ -92,6 +92,18 @@ export class ObjectLinkDecoratedVariable<T>
         });
     }
 
+    public resetOnReuse(newValue: T): void {
+        console.log(`GlobalReuse: Reset.PROBE @ObjectLink ${this.varName}`);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ObjectLink resetOnReuse ${this.updateTraceInfo()}`);
+        const oldValue = this.backing_.get(false);
+        const value = uiUtils.makeV1Observed(newValue) as T;
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        this.registerWatchForObservedObjectChanges(value);
+        this.updateObservedObjectRegistration(oldValue, value);
+        this.backing_.set(value);
+        // silent
+    }
+
     public aboutToBeDeletedInternal(): void {
         // Unregister from the observed object before deletion
         const currentValue = this.backing_.get(false);

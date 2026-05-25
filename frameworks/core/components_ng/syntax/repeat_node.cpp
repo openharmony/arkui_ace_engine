@@ -260,7 +260,13 @@ void RepeatNode::InitAllChildrenDragManager(bool init)
 
 bool RepeatNode::IsAllowAnimation()
 {
-    return GetParentFrameNode()->GetTag() == V2::LIST_ETS_TAG;
+    auto parent = GetParentFrameNode();
+    if (!parent) {
+        TAG_LOGI(AceLogTag::ACE_REPEAT,
+            "RepeatNode::IsAllowAnimation[id:%{public}d] - Parent FrameNode is nullptr", GetId());
+        return false;
+    }
+    return parent->GetTag() == V2::LIST_ETS_TAG;
 }
 
 bool RepeatNode::IsChildInAnimation(uint32_t fromIndex)

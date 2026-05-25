@@ -60,6 +60,7 @@
 #include "visual_effect/visual_effect_module.h"
 #include "security_component/paste_button_module.h"
 #include "security_component/save_button_module.h"
+#include "dynamiclayout/dynamiclayout_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -75,6 +76,31 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array staticMethods = {
+        ani_native_function {
+            "_SetDynamicLayoutStackLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutStackLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_DynamicLayout_construct",
+            "ii:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DynamicLayoutConstruct)
+        },
+        ani_native_function {
+            "_SetDynamicLayoutRowLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutRowLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_SetDynamicLayoutColumnLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutColumnLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_SetDynamicLayoutCustomLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutCustomLayoutAlgorithm)
+        },
         ani_native_function {
             "_Extractors_ToDrawableDescriptorPtr",
             nullptr,
@@ -491,6 +517,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
         },
         ani_native_function {
+            "_BuilderProxyNode_Mock_Construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeMockConstruct)
+        },
+        ani_native_function {
             "_ContentSlot_construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ContentSlotConstruct)
@@ -692,6 +723,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function { "_Drawable_CreatePixelMapDrawable", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawable)
+        },
+        ani_native_function { "_Drawable_CreatePixelMapDrawableByResource", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawableByResource)
+        },
+        ani_native_function { "_Drawable_CreatePixelMapDrawableByString", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawableByString)
         },
         ani_native_function { "_Drawable_CreateLayeredDrawable", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateLayeredDrawable)

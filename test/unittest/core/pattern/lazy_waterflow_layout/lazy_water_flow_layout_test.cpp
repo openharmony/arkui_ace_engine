@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -27,8 +28,10 @@
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model_static.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_property.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/node_container/node_container_model_ng.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
@@ -38,6 +41,8 @@
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +52,23 @@ constexpr int64_t FRAME_INTERVAL_MS = 16;
 constexpr int64_t NANOSECONDS_PER_MILLISECOND = 1000000;
 
 class LazyVWaterFlowLayoutCoreTest : public LazyWaterFlowLayoutTestBase {};
+
+void CreateFlowItem(float height)
+{
+    WaterFlowItemModelNG itemModel;
+    itemModel.Create();
+    ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+    ViewAbstract::SetHeight(CalcLength(height));
+}
+
+void CreateListFooter(float height)
+{
+    ListItemModelNG itemModel;
+    itemModel.Create();
+    ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+    ViewAbstract::SetHeight(CalcLength(height));
+    ViewStackProcessor::GetInstance()->Pop();
+}
 
 class LazyWaterFlowMockLazy : public Framework::MockLazyForEachBuilder {
 public:
@@ -61,6 +83,14 @@ public:
     {
         auto insertIndex = std::max(0, std::min(index, static_cast<int32_t>(items_.size())));
         items_.insert(items_.begin() + insertIndex, { nextId_++, height });
+    }
+
+    void Erase(int32_t index)
+    {
+        if (index < 0 || index >= static_cast<int32_t>(items_.size())) {
+            return;
+        }
+        items_.erase(items_.begin() + index);
     }
 
 protected:
@@ -95,6 +125,8 @@ private:
     std::vector<Item> items_;
 };
 
+using VisibleRange = std::pair<int32_t, int32_t>;
+
 RefPtr<LazyWaterFlowMockLazy> CreateLazyForEachContent(const std::vector<float>& heights, ElementIdType elmtId)
 {
     auto mockLazy = AceType::MakeRefPtr<LazyWaterFlowMockLazy>(heights);
@@ -115,6 +147,34 @@ void InsertTopBatch(
         mockLazy->Insert(i, height);
         lazyForEachNode->OnDataAdded(i);
     }
+}
+
+float GetMinLaneEnd(const RefPtr<LazyWaterFlowLayoutInfo>& layoutInfo)
+{
+    CHECK_NULL_RETURN(layoutInfo, 0.0f);
+    float minEnd = std::numeric_limits<float>::max();
+    for (const auto& lane : layoutInfo->lanes_) {
+        if (!lane.items_.empty()) {
+            minEnd = std::min(minEnd, lane.endPos);
+        }
+    }
+    return minEnd == std::numeric_limits<float>::max() ? 0.0f : minEnd;
+}
+
+void ExpectVisibleRange(const VisibleRange& visibleRange, int32_t start, int32_t end)
+{
+    EXPECT_EQ(visibleRange.first, start);
+    EXPECT_EQ(visibleRange.second, end);
+}
+
+void RegisterVisibleRangeObserver(const RefPtr<FrameNode>& frameNode, int32_t& callCount, VisibleRange& visibleRange)
+{
+    CHECK_NULL_VOID(frameNode);
+    LazyWaterFlowLayoutModel::SetOnVisibleIndexesChange(
+        AceType::RawPtr(frameNode), [&callCount, &visibleRange](int32_t start, int32_t end) {
+            ++callCount;
+            visibleRange = { start, end };
+        });
 }
 
 }
@@ -555,6 +615,53 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, NeedPredictUsesShortestLane_001, TestSize
 }
 
 /**
+ * @tc.name: NeedPredictSkipsOffscreenCacheOnlyWindow_001
+ * @tc.desc: Verify cache overlap alone cannot start predict while the parent-extended view window is
+ *           still fully before content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, NeedPredictSkipsOffscreenCacheOnlyWindow_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(3);
+    layoutInfo->totalMainSize_ = 600.0f;
+    layoutInfo->extendedViewStartPos_ = -568.0f;
+    layoutInfo->extendedViewEndPos_ = 0.0f;
+    layoutInfo->UpdateVisibleRange(-568.0f, 0.0f);
+    layoutInfo->UpdateCachedRange(-852.0f, 284.0f);
+
+    EXPECT_EQ(layoutInfo->startIndex_, -1);
+    EXPECT_EQ(layoutInfo->endIndex_, -1);
+    EXPECT_EQ(layoutInfo->cachedStartIndex_, -1);
+    EXPECT_EQ(layoutInfo->cachedEndIndex_, -1);
+    EXPECT_FALSE(layoutInfo->NeedPredict());
+}
+
+/**
+ * @tc.name: NeedPredictContinuesStartedOffscreenCacheBuild_001
+ * @tc.desc: Verify a parent-started offscreen preload can finish its cache window after a partial first pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, NeedPredictContinuesStartedOffscreenCacheBuild_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(3);
+    layoutInfo->totalMainSize_ = 600.0f;
+    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+    layoutInfo->laneEndPos_ = { 100.0f, 0.0f };
+    layoutInfo->extendedViewStartPos_ = -568.0f;
+    layoutInfo->extendedViewEndPos_ = 0.0f;
+    layoutInfo->UpdateVisibleRange(-568.0f, 0.0f);
+    layoutInfo->UpdateCachedRange(-852.0f, 284.0f);
+
+    EXPECT_EQ(layoutInfo->startIndex_, -1);
+    EXPECT_EQ(layoutInfo->endIndex_, -1);
+    EXPECT_EQ(layoutInfo->cachedStartIndex_, 0);
+    EXPECT_EQ(layoutInfo->cachedEndIndex_, 0);
+    EXPECT_TRUE(layoutInfo->NeedPredict());
+}
+
+/**
  * @tc.name: PredictEmptyMeasureKeepsCacheRangeEmpty_001
  * @tc.desc: Verify a predict pass that measures no item does not write an inverted cached range.
  * @tc.type: FUNC
@@ -854,6 +961,58 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, LazyForEachInsertOnBackScrollKeepsNewItem
 }
 
 /**
+ * @tc.name: LazyForEachInsertBeforeViewportFillsShiftedBottom_001
+ * @tc.desc: A START-anchor insertion before the visible range shifts the parent Scroll offset in the same frame.
+ *           The lazy child must refill against the shifted viewport/cache window so no lane exposes a bottom gap
+ *           until the next scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, LazyForEachInsertBeforeViewportFillsShiftedBottom_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+
+    std::vector<float> heights;
+    for (int32_t i = 0; i < 80; ++i) {
+        heights.emplace_back(72.0f + static_cast<float>(i % 6) * 18.0f);
+    }
+    auto mockLazy = CreateLazyForEachContent(heights, GetElmtId());
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    scrollablePattern_->UpdateCurrentOffset(-900.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+
+    const auto firstVisibleIndex = pattern_->layoutInfo_->startIndex_;
+    ASSERT_GT(firstVisibleIndex, 6);
+    auto firstVisiblePos = pattern_->layoutInfo_->GetPos(firstVisibleIndex);
+    ASSERT_NE(firstVisiblePos, nullptr);
+    const auto offsetBeforeInsert = static_cast<float>(scrollablePattern_->GetTotalOffset());
+    const auto firstVisibleViewportY = firstVisiblePos->startPos - offsetBeforeInsert;
+
+    constexpr int32_t insertCount = 4;
+    const int32_t insertIndex = firstVisibleIndex - 6;
+    for (int32_t i = 0; i < insertCount; ++i) {
+        const int32_t addedIndex = insertIndex + i;
+        mockLazy->Insert(addedIndex, 180.0f);
+        lazyForEachNode->OnDataAdded(addedIndex);
+    }
+    FlushUITasks();
+
+    const auto offsetAfterInsert = static_cast<float>(scrollablePattern_->GetTotalOffset());
+    EXPECT_GT(offsetAfterInsert, offsetBeforeInsert);
+    auto shiftedFirstVisiblePos = pattern_->layoutInfo_->GetPos(firstVisibleIndex + insertCount);
+    ASSERT_NE(shiftedFirstVisiblePos, nullptr);
+    EXPECT_NEAR(shiftedFirstVisiblePos->startPos - offsetAfterInsert, firstVisibleViewportY, 1.0f);
+    EXPECT_GE(GetMinLaneEnd(pattern_->layoutInfo_), offsetAfterInsert + LAZY_WATER_FLOW_SCROLL_HEIGHT - 0.01f);
+}
+
+/**
  * @tc.name: LazyForEachAppendOutsideViewportKeepsOffset_001
  * @tc.desc: Verify LazyForEach insertion after the viewport does not move the parent Scroll offset.
  * @tc.type: FUNC
@@ -915,7 +1074,8 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ScrollAxisFallbackFullRange_001, TestSize
     ASSERT_NE(scrollableFrameNode_, nullptr);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 9);
-    EXPECT_TRUE(pattern_->layoutInfo_->NeedPredict());
+    // Cache is synchronously filled by Measure (Option A), so no predict gap remains.
+    EXPECT_FALSE(pattern_->layoutInfo_->NeedPredict());
 
     ScrollModelNG::SetAxis(AceType::RawPtr(scrollableFrameNode_), Axis::HORIZONTAL);
     pattern_->OnModifyDone();
@@ -951,6 +1111,44 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, MissingAnchorAdjustOffset_001, TestSize.L
 
     EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.start, 0.0f);
     EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.end, 0.0f);
+}
+
+/**
+ * @tc.name: FrontDeleteMissingStartAnchorAdjustsEndOnly_001
+ * @tc.desc: When the previous visible start item is deleted under a START-edge parent, the remaining items
+ *           should move up naturally. The shrink delta is reported on .end so the parent does not push the
+ *           lazy child down by consuming a negative .start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, FrontDeleteMissingStartAnchorAdjustsEndOnly_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(2);
+    layoutInfo->hasDataChange_ = true;
+    layoutInfo->pendingVisiblePositions_[0] =
+        LazyWaterFlowItemMainPos { .laneIdx = 0, .startPos = 100.0f, .endPos = 200.0f };
+    layoutInfo->pendingVisiblePositions_[1] =
+        LazyWaterFlowItemMainPos { .laneIdx = 0, .startPos = 200.0f, .endPos = 300.0f };
+    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+    layoutInfo->SetPosMap(1, { .laneIdx = 0, .startPos = 100.0f, .endPos = 200.0f });
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.referenceEdge_ = ReferenceEdge::START;
+    algorithm.totalMainSize_ = 200.0f;
+
+    LazyWaterFlowLayoutAlgorithm::PrevFrameSnapshot prevFrameSnapshot;
+    prevFrameSnapshot.anchor.startIndex = -1;
+    prevFrameSnapshot.anchor.startPos =
+        LazyWaterFlowItemMainPos { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f };
+    prevFrameSnapshot.anchor.endIndex = 1;
+    prevFrameSnapshot.anchor.endPos =
+        LazyWaterFlowItemMainPos { .laneIdx = 0, .startPos = 200.0f, .endPos = 300.0f };
+    prevFrameSnapshot.anchor.totalMainSize = 300.0f;
+
+    algorithm.UpdateAdjustOffset(prevFrameSnapshot);
+
+    EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.start, 0.0f);
+    EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.end, -100.0f);
 }
 
 /**
@@ -1054,18 +1252,18 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, EndAnchorAdjustOffset_AnchorMissing_001, 
 
 /**
  * @tc.name: CheckResetClearsStaleMaxHeightOnTailShrinkPastWindow_001
- * @tc.desc: A7 regression. After a tail-side delete, NotifyDataChange's TransformLaneCacheAfterDataChange
+ * @tc.desc: Regression: after a tail-side delete, NotifyDataChange's TransformLaneCacheAfterDataChange
  *           pops the deleted item from the lane cache, so the next Measure sees windowEnd one step earlier
  *           than the recorded updatedStart_. CheckReset's past-window branch (updateIdx > windowEnd) used to
  *           early-return without touching maxHeight_, leaving the sticky high-water mark tracking now-gone
  *           body height. Subsequent EstimateTotalHeight() then froze totalMainSize_ at the pre-delete value,
- *           making the parent's reachable scroll range stale (LazyVWaterFlow_Redundancy_Audit.md A7).
- *           The fix gates the past-window branch on TWO conditions before resetting: (1) retained window
- *           has reached the new tail (windowEnd >= totalItemCount_-1) — confirms maxHeight_ is no longer
- *           legitimately holding a far-end scroll range for an unmaterialised tail; AND (2) lane
- *           high-water has dropped below maxHeight_ — confirms the sticky value is actually stale. Both
- *           conditions together → reset maxHeight_ and the boundary latch alongside the existing reset
- *           paths. Either alone is insufficient (see the two negative companions below).
+ *           making the parent's reachable scroll range stale. The fix gates the past-window branch on TWO
+ *           conditions before resetting: (1) retained window has reached the new tail
+ *           (windowEnd >= totalItemCount_-1) — confirms maxHeight_ is no longer legitimately holding a
+ *           far-end scroll range for an unmaterialised tail; AND (2) lane high-water has dropped below
+ *           maxHeight_ — confirms the sticky value is actually stale. Both conditions together → reset
+ *           maxHeight_ and the boundary latch alongside the existing reset paths. Either alone is
+ *           insufficient (see the two negative companions below).
  * @tc.type: FUNC
  */
 HWTEST_F(LazyVWaterFlowLayoutCoreTest, CheckResetClearsStaleMaxHeightOnTailShrinkPastWindow_001, TestSize.Level1)
@@ -1100,7 +1298,7 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, CheckResetClearsStaleMaxHeightOnTailShrin
 
     // Past-window branch returns -1 (no rebuild needed beyond clearing the sticky).
     EXPECT_EQ(dirtyIdx, -1);
-    // A7: stale maxHeight_ (600 > current lane high-water 500) reset to 0 so EstimateTotalHeight() can
+    // Stale maxHeight_ (600 > current lane high-water 500) reset to 0 so EstimateTotalHeight() can
     // shrink totalMainSize_ to the new tail.
     EXPECT_FLOAT_EQ(layoutInfo->maxHeight_, 0.0f);
     // Boundary latch released so the next DetectItemBoundary() can re-fire bottom snap on the new tail.
@@ -1109,7 +1307,7 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, CheckResetClearsStaleMaxHeightOnTailShrin
 
 /**
  * @tc.name: CheckResetKeepsHighWaterWhenLaneStillCoversIt_001
- * @tc.desc: A7 negative companion. The past-window reset must NOT fire when the lane high-water still
+ * @tc.desc: Negative companion: the past-window reset must NOT fire when the lane high-water still
  *           covers the recorded maxHeight_ — i.e. the data change did not actually shrink the body.
  *           Guards against accidentally dropping maxHeight_ on benign past-window changes.
  * @tc.type: FUNC
@@ -1149,7 +1347,7 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, CheckResetKeepsHighWaterWhenLaneStillCove
 
 /**
  * @tc.name: CheckResetKeepsHighWaterWhenWindowDoesNotReachTail_001
- * @tc.desc: A7 negative companion guarding the past-window gate. When the retained window has NOT yet
+ * @tc.desc: Negative companion guarding the past-window gate. When the retained window has NOT yet
  *           reached the new tail (windowEnd < totalItemCount_-1), maxHeight_'s sticky purpose is exactly
  *           to keep the far-end scroll range stable while the user scrolls the retained window back up
  *           from a previously-deeper position. Even if `lane.endPos < maxHeight_`, that is the legitimate
@@ -1343,4 +1541,908 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, DataChangeRekeysItemSizeCacheOnDelete_001
     EXPECT_FALSE(layoutInfo->GetCachedHeight(2).has_value());
     EXPECT_FLOAT_EQ(layoutInfo->estimateItemSize_, 55.0f);
 }
+
+/**
+ * @tc.name: FillFrontKeepsCachedContinuousIndexes_001
+ * @tc.desc: Verify front recovery does not skip an item whose remembered lane is already cache-covered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, FillFrontKeepsCachedContinuousIndexes_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(102);
+    layoutInfo->ResetLanes(2, 0.0f);
+    layoutInfo->lanes_[0].startPos = 0.0f;
+    layoutInfo->lanes_[0].endPos = 100.0f;
+    layoutInfo->lanes_[0].items_.push_back({ 100, 100.0f });
+    layoutInfo->lanes_[1].startPos = 50.0f;
+    layoutInfo->lanes_[1].endPos = 150.0f;
+    layoutInfo->lanes_[1].items_.push_back({ 101, 100.0f });
+    layoutInfo->idxToLane_[98] = 1;
+    layoutInfo->idxToLane_[99] = 0;
+    layoutInfo->idxToLane_[100] = 0;
+    layoutInfo->idxToLane_[101] = 1;
+    layoutInfo->CacheItemHeight(98, 20.0f);
+    layoutInfo->CacheItemHeight(99, 20.0f);
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.totalItemCount_ = 102;
+    algorithm.mainGap_ = 10.0f;
+    float maxMainSize = 150.0f;
+    algorithm.FillFront(nullptr, 25.0f, 99, 98, maxMainSize);
+
+    ASSERT_FALSE(layoutInfo->lanes_[0].items_.empty());
+    ASSERT_FALSE(layoutInfo->lanes_[1].items_.empty());
+    EXPECT_EQ(layoutInfo->lanes_[0].items_.front().idx, 99);
+    EXPECT_EQ(layoutInfo->lanes_[1].items_.front().idx, 98);
+    EXPECT_EQ(layoutInfo->StartIndex(), 98);
+}
+
+/**
+ * @tc.name: FillFrontTieBreakMatchesWaterFlowSW_001
+ * @tc.desc: Verify reverse fill uses the same equal-start lane tie-break as WaterFlow sliding window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, FillFrontTieBreakMatchesWaterFlowSW_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(4);
+    layoutInfo->ResetLanes(2, 0.0f);
+    layoutInfo->lanes_[0].startPos = 100.0f;
+    layoutInfo->lanes_[0].endPos = 200.0f;
+    layoutInfo->lanes_[0].items_.push_back({ 2, 100.0f });
+    layoutInfo->lanes_[1].startPos = 100.0f;
+    layoutInfo->lanes_[1].endPos = 200.0f;
+    layoutInfo->lanes_[1].items_.push_back({ 3, 100.0f });
+    layoutInfo->idxToLane_[2] = 0;
+    layoutInfo->idxToLane_[3] = 1;
+    layoutInfo->CacheItemHeight(1, 20.0f);
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.totalItemCount_ = 4;
+    algorithm.mainGap_ = 10.0f;
+    float maxMainSize = 200.0f;
+    algorithm.FillFront(nullptr, 0.0f, 1, 1, maxMainSize);
+
+    EXPECT_EQ(layoutInfo->lanes_[0].items_.front().idx, 2);
+    EXPECT_EQ(layoutInfo->lanes_[1].items_.front().idx, 1);
+    EXPECT_FLOAT_EQ(layoutInfo->lanes_[1].startPos, 70.0f);
+}
+
+/**
+ * @tc.name: FillBackKeepsCachedContinuousIndexes_001
+ * @tc.desc: Verify back recovery does not skip an item whose remembered lane is already cache-covered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, FillBackKeepsCachedContinuousIndexes_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(102);
+    layoutInfo->ResetLanes(2, 0.0f);
+    layoutInfo->lanes_[0].startPos = 100.0f;
+    layoutInfo->lanes_[0].endPos = 200.0f;
+    layoutInfo->lanes_[0].items_.push_back({ 99, 100.0f });
+    layoutInfo->lanes_[1].startPos = 0.0f;
+    layoutInfo->lanes_[1].endPos = 100.0f;
+    layoutInfo->lanes_[1].items_.push_back({ 98, 100.0f });
+    layoutInfo->idxToLane_[98] = 1;
+    layoutInfo->idxToLane_[99] = 0;
+    layoutInfo->idxToLane_[100] = 0;
+    layoutInfo->idxToLane_[101] = 1;
+    layoutInfo->CacheItemHeight(100, 20.0f);
+    layoutInfo->CacheItemHeight(101, 20.0f);
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.totalItemCount_ = 102;
+    algorithm.mainGap_ = 10.0f;
+    float maxMainSize = 200.0f;
+    algorithm.FillBack(nullptr, 150.0f, 100, 101, maxMainSize);
+
+    ASSERT_FALSE(layoutInfo->lanes_[0].items_.empty());
+    ASSERT_FALSE(layoutInfo->lanes_[1].items_.empty());
+    EXPECT_EQ(layoutInfo->lanes_[0].items_.back().idx, 100);
+    EXPECT_EQ(layoutInfo->lanes_[1].items_.back().idx, 101);
+    EXPECT_EQ(layoutInfo->EndIndex(), 101);
+}
+
+/**
+ * @tc.name: ClearFrontBackAllowsEmptyLanes_001
+ * @tc.desc: Verify clear operations can remove every cached item so far jumps rebuild from an empty window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ClearFrontBackAllowsEmptyLanes_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(2);
+    layoutInfo->ResetLanes(2, 0.0f);
+    layoutInfo->lanes_[0].endPos = 100.0f;
+    layoutInfo->lanes_[0].items_.push_back({ 0, 100.0f });
+    layoutInfo->lanes_[1].endPos = 100.0f;
+    layoutInfo->lanes_[1].items_.push_back({ 1, 100.0f });
+    layoutInfo->idxToLane_[0] = 0;
+    layoutInfo->idxToLane_[1] = 1;
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.mainGap_ = 10.0f;
+    algorithm.ClearFront(200.0f);
+
+    EXPECT_TRUE(layoutInfo->lanes_[0].items_.empty());
+    EXPECT_TRUE(layoutInfo->lanes_[1].items_.empty());
+    EXPECT_EQ(layoutInfo->StartIndex(), -1);
+    EXPECT_EQ(layoutInfo->EndIndex(), -1);
+
+    layoutInfo->lanes_[0].startPos = 0.0f;
+    layoutInfo->lanes_[0].endPos = 100.0f;
+    layoutInfo->lanes_[0].items_.push_back({ 0, 100.0f });
+    layoutInfo->lanes_[1].startPos = 0.0f;
+    layoutInfo->lanes_[1].endPos = 100.0f;
+    layoutInfo->lanes_[1].items_.push_back({ 1, 100.0f });
+    layoutInfo->idxToLane_[0] = 0;
+    layoutInfo->idxToLane_[1] = 1;
+    algorithm.ClearBack(-1.0f);
+
+    EXPECT_TRUE(layoutInfo->lanes_[0].items_.empty());
+    EXPECT_TRUE(layoutInfo->lanes_[1].items_.empty());
+    EXPECT_EQ(layoutInfo->StartIndex(), -1);
+    EXPECT_EQ(layoutInfo->EndIndex(), -1);
+}
+
+/**
+ * @tc.name: OffscreenAfterContentKeepsWindowEmpty_001
+ * @tc.desc: Verify viewport past content end keeps the lane window empty instead of refilling tail items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, OffscreenAfterContentKeepsWindowEmpty_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->ResetLanes(2, 0.0f);
+    layoutInfo->totalItemCount_ = 4;
+    layoutInfo->lanes_[0].items_.push_back({ 0, 100.0f });
+    layoutInfo->lanes_[0].items_.push_back({ 2, 100.0f });
+    layoutInfo->lanes_[1].items_.push_back({ 1, 100.0f });
+    layoutInfo->lanes_[1].items_.push_back({ 3, 100.0f });
+    layoutInfo->idxToLane_ = { { 0, 0 }, { 1, 1 }, { 2, 0 }, { 3, 1 } };
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.totalItemCount_ = 4;
+    algorithm.totalMainSize_ = 210.0f;
+    algorithm.mainGap_ = 10.0f;
+    algorithm.viewStart_ = 500.0f;
+    algorithm.viewEnd_ = 600.0f;
+    algorithm.extendedViewStart_ = 500.0f;
+    algorithm.extendedViewEnd_ = 600.0f;
+    float maxMainSize = 0.0f;
+
+    algorithm.RefillLaneWindow(nullptr, -1, 500.0f, 600.0f, maxMainSize);
+
+    EXPECT_EQ(layoutInfo->StartIndex(), -1);
+    EXPECT_EQ(layoutInfo->EndIndex(), -1);
+    EXPECT_TRUE(layoutInfo->posMap_.empty());
+    EXPECT_FLOAT_EQ(maxMainSize, 210.0f);
+    EXPECT_FLOAT_EQ(algorithm.EstimateBodyHeight(maxMainSize), 210.0f);
+}
+
+/**
+ * @tc.name: OffscreenBeforeContentKeepsWindowEmpty_001
+ * @tc.desc: Verify viewport before content does not trigger the top-edge refill path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, OffscreenBeforeContentKeepsWindowEmpty_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->ResetLanes(2, 0.0f);
+    layoutInfo->totalItemCount_ = 4;
+    layoutInfo->lanes_[0].items_.push_back({ 0, 100.0f });
+    layoutInfo->lanes_[0].items_.push_back({ 2, 100.0f });
+    layoutInfo->lanes_[1].items_.push_back({ 1, 100.0f });
+    layoutInfo->lanes_[1].items_.push_back({ 3, 100.0f });
+    layoutInfo->idxToLane_ = { { 0, 0 }, { 1, 1 }, { 2, 0 }, { 3, 1 } };
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.totalItemCount_ = 4;
+    algorithm.totalMainSize_ = 210.0f;
+    algorithm.mainGap_ = 10.0f;
+    algorithm.viewStart_ = -500.0f;
+    algorithm.viewEnd_ = -50.0f;
+    algorithm.extendedViewStart_ = -500.0f;
+    algorithm.extendedViewEnd_ = -50.0f;
+    float maxMainSize = 0.0f;
+
+    algorithm.RefillLaneWindow(nullptr, -1, -500.0f, -50.0f, maxMainSize);
+
+    EXPECT_EQ(layoutInfo->StartIndex(), -1);
+    EXPECT_EQ(layoutInfo->EndIndex(), -1);
+    EXPECT_TRUE(layoutInfo->posMap_.empty());
+    EXPECT_FLOAT_EQ(maxMainSize, 210.0f);
+    EXPECT_FLOAT_EQ(algorithm.EstimateBodyHeight(maxMainSize), 210.0f);
+}
+
+/**
+ * @tc.name: ClearFrontKeepsContinuousIndexes_001
+ * @tc.desc: Verify front clear does not remove a later index while an earlier index is still retained.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ClearFrontKeepsContinuousIndexes_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(2);
+    layoutInfo->ResetLanes(2, 0.0f);
+    layoutInfo->lanes_[0].endPos = 250.0f;
+    layoutInfo->lanes_[0].items_.push_back({ 0, 250.0f });
+    layoutInfo->lanes_[1].endPos = 100.0f;
+    layoutInfo->lanes_[1].items_.push_back({ 1, 100.0f });
+    layoutInfo->idxToLane_[0] = 0;
+    layoutInfo->idxToLane_[1] = 1;
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.ClearFront(200.0f);
+
+    ASSERT_EQ(layoutInfo->lanes_[1].items_.size(), 1u);
+    EXPECT_EQ(layoutInfo->lanes_[1].items_.front().idx, 1);
+    EXPECT_EQ(layoutInfo->StartIndex(), 0);
+    EXPECT_EQ(layoutInfo->EndIndex(), 1);
+}
+
+/**
+ * @tc.name: DataChangeZeroReconcilesLaneEndPos_001
+ * @tc.desc: Verify count=0 invalidation cannot leave lane end positions without the main gap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, DataChangeZeroReconcilesLaneEndPos_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(3);
+    layoutInfo->ResetLanes(1, 0.0f);
+    layoutInfo->lanes_[0].endPos = 320.0f;
+    layoutInfo->lanes_[0].items_.push_back({ 0, 100.0f });
+    layoutInfo->lanes_[0].items_.push_back({ 1, 100.0f });
+    layoutInfo->lanes_[0].items_.push_back({ 2, 100.0f });
+    layoutInfo->idxToLane_[0] = 0;
+    layoutInfo->idxToLane_[1] = 0;
+    layoutInfo->idxToLane_[2] = 0;
+    layoutInfo->CacheItemHeight(0, 100.0f);
+    layoutInfo->CacheItemHeight(1, 100.0f);
+    layoutInfo->CacheItemHeight(2, 100.0f);
+    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+
+    layoutInfo->NotifyDataChange(2, 0);
+    EXPECT_EQ(layoutInfo->GetPos(0), nullptr);
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.mainGap_ = 10.0f;
+    algorithm.SyncLaneGeometry();
+    EXPECT_FLOAT_EQ(layoutInfo->lanes_[0].endPos, 210.0f);
+}
+
+/**
+ * @tc.name: ItemStartOffsetShiftsSuffixOnly_001
+ * @tc.desc: Verify item-level start offsets keep the lane prefix stable and move the measured item suffix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ItemStartOffsetShiftsSuffixOnly_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(3);
+    layoutInfo->ResetLanes(1, 0.0f);
+    layoutInfo->lanes_[0].items_.push_back({ 0, 100.0f });
+    layoutInfo->lanes_[0].items_.push_back({ 1, 120.0f, -20.0f });
+    layoutInfo->lanes_[0].items_.push_back({ 2, 100.0f });
+    layoutInfo->SyncItemPositions(10.0f);
+
+    auto firstPos = layoutInfo->GetPos(0);
+    auto adjustedPos = layoutInfo->GetPos(1);
+    auto suffixPos = layoutInfo->GetPos(2);
+    ASSERT_NE(firstPos, nullptr);
+    ASSERT_NE(adjustedPos, nullptr);
+    ASSERT_NE(suffixPos, nullptr);
+    EXPECT_FLOAT_EQ(firstPos->startPos, 0.0f);
+    EXPECT_FLOAT_EQ(firstPos->endPos, 100.0f);
+    EXPECT_FLOAT_EQ(adjustedPos->startPos, 90.0f);
+    EXPECT_FLOAT_EQ(adjustedPos->endPos, 210.0f);
+    EXPECT_FLOAT_EQ(suffixPos->startPos, 220.0f);
+}
+
+/**
+ * @tc.name: LaneTemplateChangeClearsPendingAnchor_001
+ * @tc.desc: Verify lane topology changes invalidate pending keep-position anchors.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, LaneTemplateChangeClearsPendingAnchor_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(2);
+    layoutInfo->startIndex_ = 0;
+    layoutInfo->endIndex_ = 1;
+    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f });
+    layoutInfo->SetPosMap(1, { .laneIdx = 0, .startPos = 100.0f, .endPos = 200.0f });
+
+    layoutInfo->NotifyDataChange(0, 1);
+    ASSERT_TRUE(layoutInfo->hasPendingAdjustAnchor_);
+    // UpdateLaneCrossLens only signals "lane topology needs a rebuild" now; the actual cleanup
+    // (boundary flags, item-size cache, pending anchor, totalOffset_/maxHeight_) lives in ResetLanes.
+    // Production callers always pair the two; this test mirrors that contract.
+    const std::vector<double> newLens { 100.0, 100.0 };
+    ASSERT_TRUE(layoutInfo->UpdateLaneCrossLens(newLens));
+    layoutInfo->ResetLanes(static_cast<int32_t>(newLens.size()), 0.0f);
+    EXPECT_FALSE(layoutInfo->hasPendingAdjustAnchor_);
+}
+
+/**
+ * @tc.name: TopDataChangeKeepsAnchor_001
+ * @tc.desc: Verify structural changes at the top keep the old first item stable through adjust offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, TopDataChangeKeepsAnchor_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(3);
+    LazyWaterFlowItemMainPos oldStartPos { .laneIdx = 0, .startPos = 0.0f, .endPos = 100.0f };
+    layoutInfo->SetPosMap(0, oldStartPos);
+    layoutInfo->NotifyDataChange(0, 1);
+    layoutInfo->SetPosMap(0, { .laneIdx = 0, .startPos = 0.0f, .endPos = 80.0f });
+    layoutInfo->SetPosMap(1, { .laneIdx = 0, .startPos = 80.0f, .endPos = 180.0f });
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    LazyWaterFlowLayoutAlgorithm::PrevFrameSnapshot prevFrameSnapshot;
+    prevFrameSnapshot.anchor.startIndex = 1;
+    prevFrameSnapshot.anchor.startPos = oldStartPos;
+
+    algorithm.viewStart_ = 0.0f;
+    algorithm.UpdateAdjustOffset(prevFrameSnapshot);
+    EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.start, 80.0f);
+
+    algorithm.viewStart_ = 120.0f;
+    algorithm.UpdateAdjustOffset(prevFrameSnapshot);
+    EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.start, 80.0f);
+}
+
+/**
+ * @tc.name: TopDataChangeUsesAnchorLaneDelta_001
+ * @tc.desc: Verify insertions before the viewport take the anchor's own lane delta when the anchor itself can be
+ *           located in the new layout. Earlier this case was expected to take the largest visible lane delta, but
+ *           that path clipped the anchor behind sticky edges in waterflow with varying-height new items: a sibling
+ *           lane sees a larger delta because its inserted items are taller, and applying that delta to the parent
+ *           shifts the anchor's lane up by the height difference. The anchor-based delta keeps the anchor's visual
+ *           position stable, leaving any residual totalDelta to flow into adjustOffset.end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, TopDataChangeUsesAnchorLaneDelta_001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    layoutInfo->SetTotalItemCount(8);
+    layoutInfo->hasDataChange_ = true;
+    layoutInfo->pendingVisiblePositions_[4] = { .laneIdx = 0, .startPos = 200.0f, .endPos = 300.0f };
+    layoutInfo->pendingVisiblePositions_[5] = { .laneIdx = 1, .startPos = 200.0f, .endPos = 300.0f };
+    layoutInfo->SetPosMap(4, { .laneIdx = 0, .startPos = 280.0f, .endPos = 380.0f });
+    layoutInfo->SetPosMap(5, { .laneIdx = 1, .startPos = 300.0f, .endPos = 400.0f });
+
+    LazyWaterFlowLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.totalMainSize_ = 600.0f;
+    LazyWaterFlowLayoutAlgorithm::PrevFrameSnapshot prevFrameSnapshot;
+    prevFrameSnapshot.anchor.startIndex = 4;
+    prevFrameSnapshot.anchor.startPos = LazyWaterFlowItemMainPos { .laneIdx = 0, .startPos = 200.0f, .endPos = 300.0f };
+    prevFrameSnapshot.anchor.totalMainSize = 500.0f;
+
+    algorithm.UpdateAdjustOffset(prevFrameSnapshot);
+
+    // Anchor (idx=4, lane=0) moved 280-200=80; the residual totalDelta (600-500-80=20) flows into adjustOffset.end.
+    EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.start, 80.0f);
+    EXPECT_FLOAT_EQ(layoutInfo->adjustOffset_.end, 20.0f);
+}
+
+/**
+ * @tc.name: PredictBuild_001
+ * @tc.desc: Verify LazyVWaterFlowLayout synchronously fills the half-screen cache during Measure
+ *           (no idle predict pass needed for the standard scroll case).
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, PredictBuild_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    CreateContent(30);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 9);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedStartIndex_, 0);
+    // Cache extends past the visible end by half a viewport thanks to Option A in ResolveBackBoundary.
+    EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 13);
+    EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 1500.0f);
+    EXPECT_FALSE(pattern_->layoutInfo_->NeedPredict());
+}
+
+/**
+ * @tc.name: ColumnsTemplateChangeDeactivatesOldVisibleItems_001
+ * @tc.desc: Verify direct children visible in the old lane topology are deactivated when they leave the new viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ColumnsTemplateChangeDeactivatesOldVisibleItems_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr 1fr");
+    CreateContent(30);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
+    ASSERT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 14);
+    auto oldVisibleChild = GetChildFrameNode(frameNode_, 14);
+    ASSERT_NE(oldVisibleChild, nullptr);
+    EXPECT_TRUE(oldVisibleChild->IsActive());
+    auto oldVisibleCachedChild = GetChildFrameNode(frameNode_, 12);
+    ASSERT_NE(oldVisibleCachedChild, nullptr);
+    EXPECT_TRUE(oldVisibleCachedChild->IsActive());
+
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate(AceType::RawPtr(frameNode_), "1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 9);
+    auto oldVisibleCachedPos = pattern_->layoutInfo_->GetPos(12);
+    const bool oldVisibleCachedItemOutOfViewport =
+        oldVisibleCachedPos == nullptr || GreatOrEqual(oldVisibleCachedPos->startPos, LAZY_WATER_FLOW_SCROLL_HEIGHT);
+    EXPECT_TRUE(oldVisibleCachedItemOutOfViewport);
+    auto oldVisiblePos = pattern_->layoutInfo_->GetPos(14);
+    EXPECT_TRUE(oldVisiblePos == nullptr || GreatOrEqual(oldVisiblePos->startPos, pattern_->layoutInfo_->cacheEndPos_));
+    // Item 12 falls inside the new layout's cache range (visible 0-9 + half-screen back = up to ~13),
+    // so it stays alive as a cache child. Item 14 lies past the cache window and is deactivated.
+    EXPECT_TRUE(oldVisibleCachedChild->IsActive());
+    EXPECT_FALSE(oldVisibleChild->IsActive());
+}
+
+/**
+ * @tc.name: ArkoalaChildKeepsVisibleAndCacheRangesSeparated_001
+ * @tc.desc: Verify static lazy children receive visible range separately from the cache expansion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildKeepsVisibleAndCacheRangesSeparated_001, TestSize.Level1)
+{
+    auto host = FrameNode::CreateFrameNode(
+        V2::LAZY_V_WATERFLOW_LAYOUT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LazyWaterFlowLayoutPattern>());
+    auto arkoalaLazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetElmtId());
+    arkoalaLazyNode->SetTotalCount(500);
+    host->AddChild(arkoalaLazyNode);
+
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    auto algorithm = AceType::MakeRefPtr<LazyWaterFlowLayoutAlgorithm>(layoutInfo);
+    algorithm->UpdateItemActiveRangeOnChildren(host, 1, 10, 1, 3);
+
+    const ActiveRangeParam expectedRange = { 1, 10, 1, 3 };
+    EXPECT_EQ(arkoalaLazyNode->activeRangeParam_, expectedRange);
+}
+
+/**
+ * @tc.name: ArkoalaChildWithHeaderKeepsItemRange_001
+ * @tc.desc: Verify header raw index is removed before forwarding range to static lazy children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildWithHeaderKeepsItemRange_001, TestSize.Level1)
+{
+    auto host = FrameNode::CreateFrameNode(
+        V2::LAZY_V_WATERFLOW_LAYOUT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LazyWaterFlowLayoutPattern>());
+    auto headerNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    auto arkoalaLazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetElmtId());
+    arkoalaLazyNode->SetTotalCount(500);
+    host->AddChild(headerNode);
+    host->AddChild(arkoalaLazyNode);
+
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    auto algorithm = AceType::MakeRefPtr<LazyWaterFlowLayoutAlgorithm>(layoutInfo);
+    algorithm->headerIndex_ = 0;
+    algorithm->UpdateItemActiveRangeOnChildren(host, 1, 10, 1, 3);
+
+    const ActiveRangeParam expectedRange = { 1, 10, 1, 3 };
+    EXPECT_EQ(arkoalaLazyNode->activeRangeParam_, expectedRange);
+}
+
+/**
+ * @tc.name: ArkoalaChildReceivesOneRangeUpdate_001
+ * @tc.desc: Verify static lazy children are not first reactivated by the raw cache range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildReceivesOneRangeUpdate_001, TestSize.Level1)
+{
+    auto host = FrameNode::CreateFrameNode(
+        V2::LAZY_V_WATERFLOW_LAYOUT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LazyWaterFlowLayoutPattern>());
+    auto arkoalaLazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetElmtId());
+    arkoalaLazyNode->SetTotalCount(12);
+    int32_t updateRangeCount = 0;
+    arkoalaLazyNode->SetCallbacks(nullptr,
+        [&updateRangeCount](int32_t, int32_t, int32_t, int32_t, bool) { ++updateRangeCount; });
+    host->AddChild(arkoalaLazyNode);
+
+    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
+    auto algorithm = AceType::MakeRefPtr<LazyWaterFlowLayoutAlgorithm>(layoutInfo);
+    algorithm->UpdateActiveChildRange(AceType::RawPtr(host), 6, 11, 2, 11);
+
+    EXPECT_EQ(updateRangeCount, 1);
+    const ActiveRangeParam expectedRange = { 6, 11, 4, 0 };
+    EXPECT_EQ(arkoalaLazyNode->activeRangeParam_, expectedRange);
+}
+
+/**
+ * @tc.name: PredictDeadlineMissContinues_001
+ * @tc.desc: Verify predict re-posts on missed deadline and finishes when a usable deadline arrives.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, PredictDeadlineMissContinues_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    CreateContent(30);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    // Option A fills the cache synchronously, so force a forward gap to exercise the predict path.
+    pattern_->layoutInfo_->cacheEndPos_ += LAZY_WATER_FLOW_SCROLL_HEIGHT;
+    ASSERT_TRUE(pattern_->layoutInfo_->NeedPredict());
+
+    pattern_->ProcessIdleTask(0); // missed deadline; re-post path runs, NeedPredict stays true
+    EXPECT_TRUE(pattern_->layoutInfo_->NeedPredict());
+}
+
+/**
+ * @tc.name: ParentPredictDeadlineMarksPredictPass_001
+ * @tc.desc: Verify a parent-provided predict deadline is consumed like LazyColumnLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ParentPredictDeadlineMarksPredictPass_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    CreateContent(4);
+    CreateDone();
+
+    auto layoutWrapper = frameNode_->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    constexpr int64_t deadline = 12345;
+    std::optional<ViewPosReference> reference = ViewPosReference {
+        .viewPosStart = 0.0f,
+        .viewPosEnd = LAZY_WATER_FLOW_SCROLL_HEIGHT,
+        .referencePos = 0.0f,
+        .referenceEdge = ReferenceEdge::START,
+        .axis = Axis::VERTICAL,
+        .deadline = deadline,
+    };
+
+    LazyWaterFlowLayoutAlgorithm algorithm(pattern_->layoutInfo_);
+    algorithm.UpdateReferencePos(AceType::RawPtr(layoutWrapper), reference);
+
+    ASSERT_TRUE(pattern_->layoutInfo_->deadline_.has_value());
+    EXPECT_EQ(pattern_->layoutInfo_->deadline_.value(), deadline);
+}
+
+/**
+ * @tc.name: InactiveNodeSkipsIdlePredict_001
+ * @tc.desc: Verify an inactive LazyVWaterFlowLayout clears the queued deadline and skips predict.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, InactiveNodeSkipsIdlePredict_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    CreateContent(30);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    // Force NeedPredict() so ProcessIdleTask would normally proceed; the host->IsActive() guard must
+    // short-circuit before the work runs and must clear the queued deadline.
+    pattern_->layoutInfo_->cacheEndPos_ += LAZY_WATER_FLOW_SCROLL_HEIGHT;
+    ASSERT_TRUE(pattern_->layoutInfo_->NeedPredict());
+    frameNode_->SetActive(false);
+    pattern_->layoutInfo_->deadline_ = GetSysTimestamp();
+
+    pattern_->ProcessIdleTask(GetSysTimestamp() + FRAME_INTERVAL_MS * NANOSECONDS_PER_MILLISECOND);
+
+    EXPECT_FALSE(pattern_->layoutInfo_->deadline_.has_value());
+}
+
+/**
+ * @tc.name: ListScrollToEdgeBottomThenTop_001
+ * @tc.desc: Verify top-edge snapping after a bottom jump does not feed an internal lane correction back to List.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ListScrollToEdgeBottomThenTop_001, TestSize.Level1)
+{
+    CreateList();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    std::vector<float> heights(50, 80.0f);
+    std::fill(heights.begin(), heights.begin() + 25, 120.0f);
+    CreateContent(heights);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_LT(pattern_->layoutInfo_->endIndex_, 49);
+
+    scrollablePattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+
+    EXPECT_GE(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 49);
+    EXPECT_FALSE(pattern_->layoutInfo_->posMap_.empty());
+    EXPECT_NE(pattern_->layoutInfo_->posMap_.find(pattern_->layoutInfo_->startIndex_),
+        pattern_->layoutInfo_->posMap_.end());
+    EXPECT_NE(pattern_->layoutInfo_->posMap_.find(pattern_->layoutInfo_->endIndex_),
+        pattern_->layoutInfo_->posMap_.end());
+    EXPECT_GT(static_cast<float>(scrollablePattern_->GetTotalOffset()), 0.0f);
+
+    scrollablePattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushUITasks();
+
+    EXPECT_NEAR(static_cast<float>(scrollablePattern_->GetTotalOffset()), 0.0f, 0.01f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    auto firstPos = pattern_->layoutInfo_->GetPos(0);
+    ASSERT_NE(firstPos, nullptr);
+    EXPECT_NEAR(firstPos->startPos, 0.0f, 0.01f);
+}
+
+/**
+ * @tc.name: ListOffscreenAfterContentReportsEmptyRange_001
+ * @tc.desc: Verify a List child LazyVWaterFlowLayout reports an empty range when it is fully above viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ListOffscreenAfterContentReportsEmptyRange_001, TestSize.Level1)
+{
+    CreateList();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    int32_t callCount = 0;
+    VisibleRange visibleRange = { -2, -2 };
+    RegisterVisibleRangeObserver(frameNode_, callCount, visibleRange);
+    CreateContent(12);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateListFooter(900.0f);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_GT(callCount, 0);
+    EXPECT_GE(pattern_->layoutInfo_->startIndex_, 0);
+
+    scrollablePattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+
+    EXPECT_GT(static_cast<float>(scrollablePattern_->GetTotalOffset()), pattern_->layoutInfo_->totalMainSize_);
+    ExpectVisibleRange(visibleRange, -1, -1);
+}
+
+/**
+ * @tc.name: ScrollBottomThenTopOvershoot_001
+ * @tc.desc: Regression for FillFront overshoot after bottom jump. With small front items and tall tail
+ *           items, the average-based estimate over-counts the prefix during the bottom jump's FillFront
+ *           pass; a subsequent ScrollToEdge(SCROLL_TOP) used to stop at AreFrontLanesCovered before
+ *           reaching item 0, leaving lane.startPos negative and item 0 absent from the lane window.
+ *           After the fillToTop short-circuit, item 0 must enter the lane and sit at content origin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ScrollBottomThenTopOvershoot_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    // Front 25 items short (60), tail 25 tall (200). Initial measure samples only the short prefix,
+    // so the avg estimate is biased low; the bottom jump's FillFront overshoots when prepending tall
+    // tail items, leaving lane.startPos drifted past 0 when the user scrolls back to top.
+    std::vector<float> heights(50, 200.0f);
+    std::fill(heights.begin(), heights.begin() + 25, 60.0f);
+    CreateContent(heights);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+
+    scrollablePattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+    EXPECT_GT(static_cast<float>(scrollablePattern_->GetTotalOffset()), 0.0f);
+
+    scrollablePattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushUITasks();
+
+    EXPECT_NEAR(static_cast<float>(scrollablePattern_->GetTotalOffset()), 0.0f, 0.01f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    auto firstPos = pattern_->layoutInfo_->GetPos(0);
+    ASSERT_NE(firstPos, nullptr);
+    EXPECT_NEAR(firstPos->startPos, 0.0f, 0.01f);
+    // Confirm item 0 actually entered the lane window (the bug-state had laneStartIdx > 0 with
+    // negative content positions for items above the lane front).
+    ASSERT_FALSE(pattern_->layoutInfo_->lanes_.empty());
+    EXPECT_EQ(pattern_->layoutInfo_->lanes_[0].items_.empty() ? -1 :
+              pattern_->layoutInfo_->lanes_[0].items_.front().idx, 0);
+}
+
+/**
+ * @tc.name: FlowItemVisibleRange_001
+ * @tc.desc: Verify LazyVWaterFlowLayout works under WaterFlow-FlowItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, FlowItemVisibleRange_001, TestSize.Level1)
+{
+    WaterFlowModelNG model;
+    model.Create();
+    ViewAbstract::SetHeight(CalcLength(LAZY_WATER_FLOW_SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(LAZY_WATER_FLOW_SCROLL_WIDTH));
+    model.SetColumnsTemplate("1fr");
+    scrollableFrameNode_ = GetMainFrameNode();
+    scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
+
+    int32_t callCount = 0;
+    std::pair<int32_t, int32_t> visibleRange = { -1, -1 };
+    CreateFlowItem(160.0f);
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    LazyWaterFlowLayoutModel::SetOnVisibleIndexesChange([&callCount, &visibleRange](int32_t start, int32_t end) {
+        ++callCount;
+        visibleRange = { start, end };
+    });
+    CreateContent(std::vector<float>(6, 50.0f));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateDone();
+
+    ASSERT_NE(frameNode_, nullptr);
+    EXPECT_EQ(frameNode_->GetParent()->GetTag(), V2::FLOW_ITEM_ETS_TAG);
+    EXPECT_GT(callCount, 0);
+    EXPECT_EQ(visibleRange.first, 0);
+    EXPECT_EQ(visibleRange.second, 5);
+}
+
+/**
+ * @tc.name: DirectWaterFlowMultiLaneBoundedFallback_001
+ * @tc.desc: Verify direct multi-lane WaterFlow keeps a bounded fallback when no view reference is provided.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, DirectWaterFlowMultiLaneBoundedFallback_001, TestSize.Level1)
+{
+    WaterFlowModelNG model;
+    model.Create();
+    ViewAbstract::SetHeight(CalcLength(LAZY_WATER_FLOW_SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(LAZY_WATER_FLOW_SCROLL_WIDTH));
+    model.SetColumnsTemplate("1fr 1fr");
+    scrollableFrameNode_ = GetMainFrameNode();
+    scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
+
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    CreateContent(30);
+    CreateDone();
+
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(frameNode_->GetParent()->GetTag(), V2::WATERFLOW_ETS_TAG);
+    EXPECT_LT(pattern_->layoutInfo_->posMap_.size(), 30u);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
+    EXPECT_LT(pattern_->layoutInfo_->layoutedEndIndex_, 29);
+}
+
+/**
+ * @tc.name: DirectWaterFlowWeightedColumnFallback_001
+ * @tc.desc: Verify direct WaterFlow fallback remains safe when child content uses layoutWeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, DirectWaterFlowWeightedColumnFallback_001, TestSize.Level1)
+{
+    WaterFlowModelNG model;
+    model.Create();
+    ViewAbstract::SetHeight(CalcLength(LAZY_WATER_FLOW_SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(LAZY_WATER_FLOW_SCROLL_WIDTH));
+    model.SetColumnsTemplate("1fr 1fr");
+    scrollableFrameNode_ = GetMainFrameNode();
+    scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
+
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    constexpr int32_t itemCount = 30;
+    for (int32_t i = 0; i < itemCount; ++i) {
+        CreateColumn([](ColumnModelNG) {
+            ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(LAZY_WATER_FLOW_ITEM_HEIGHT));
+
+            StackModelNG stackModel;
+            stackModel.Create();
+            ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(20.0f));
+            ViewStackProcessor::GetInstance()->Pop();
+            stackModel.Create();
+            ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+            ViewAbstract::SetLayoutWeight(1.0f);
+            ViewStackProcessor::GetInstance()->Pop();
+        });
+    }
+    CreateDone();
+
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(frameNode_->GetParent()->GetTag(), V2::WATERFLOW_ETS_TAG);
+    EXPECT_LT(pattern_->layoutInfo_->posMap_.size(), static_cast<size_t>(itemCount));
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
+    EXPECT_LT(pattern_->layoutInfo_->layoutedEndIndex_, itemCount - 1);
+
+    auto firstColumn = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(firstColumn, nullptr);
+    auto weightedStack = AceType::DynamicCast<FrameNode>(firstColumn->GetChildAtIndex(1));
+    ASSERT_NE(weightedStack, nullptr);
+    const auto columnHeight = firstColumn->GetGeometryNode()->GetFrameSize().Height();
+    const auto weightedHeight = weightedStack->GetGeometryNode()->GetFrameSize().Height();
+    EXPECT_TRUE(std::isfinite(columnHeight));
+    EXPECT_TRUE(std::isfinite(weightedHeight));
+    EXPECT_GT(weightedHeight, 0.0f);
+    EXPECT_LE(columnHeight, LAZY_WATER_FLOW_ITEM_HEIGHT);
+    EXPECT_LE(weightedHeight, LAZY_WATER_FLOW_ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: CommonViewWrapper_001
+ * @tc.desc: Verify LazyVWaterFlowLayout works when wrapped by a custom component host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, CommonViewWrapper_001, TestSize.Level1)
+{
+    CreateScroll();
+    CommonViewModelNG commonViewModel;
+    commonViewModel.Create(false);
+    auto commonViewNode = GetMainFrameNode();
+    CreateLazyWaterFlowLayout();
+
+    int32_t callCount = 0;
+    std::pair<int32_t, int32_t> visibleRange = { -1, -1 };
+    LazyWaterFlowLayoutModel::SetOnVisibleIndexesChange([&callCount, &visibleRange](int32_t start, int32_t end) {
+        ++callCount;
+        visibleRange = { start, end };
+    });
+    CreateContent(4);
+    CreateDone();
+
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(commonViewNode, nullptr);
+    EXPECT_EQ(frameNode_->GetParent()->GetTag(), V2::COMMON_VIEW_ETS_TAG);
+    EXPECT_TRUE(commonViewNode->GetLayoutProperty()->GetNeedLazyLayout());
+    EXPECT_GT(callCount, 0);
+    EXPECT_EQ(visibleRange.first, 0);
+    EXPECT_EQ(visibleRange.second, 3);
+}
+
+/**
+ * @tc.name: NodeContainerWrapper_001
+ * @tc.desc: Verify LazyVWaterFlowLayout accepts NodeContainer as an intermediate wrapper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, NodeContainerWrapper_001, TestSize.Level1)
+{
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto nodeContainerNode = NodeContainerModelNG::CreateFrameNode(GetElmtId());
+    auto lazyNode = LazyWaterFlowLayoutModelStatic::CreateFrameNode(GetElmtId());
+    lazyNode->SetIsArkTsFrameNode(true);
+    auto nodeContainerPattern = nodeContainerNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(nodeContainerPattern, nullptr);
+    nodeContainerPattern->SetMakeFunction([lazyNode]() -> RefPtr<UINode> { return lazyNode; });
+
+    scrollNode->AddChild(nodeContainerNode);
+    nodeContainerPattern->RemakeNode();
+    MountToStageNode(scrollNode);
+
+    auto lazyPattern = lazyNode->GetPattern<LazyWaterFlowLayoutPattern>();
+    ASSERT_NE(lazyPattern, nullptr);
+    lazyPattern->OnAttachToMainTree();
+
+    EXPECT_TRUE(lazyNode->GetLayoutProperty()->GetNeedLazyLayout());
+    EXPECT_TRUE(nodeContainerNode->GetLayoutProperty()->GetNeedLazyLayout());
+    EXPECT_EQ(lazyNode->GetParent()->GetTag(), V2::NODE_CONTAINER_ETS_TAG);
+}
+
+// Header / footer / sticky tests live in lazy_water_flow_layout_header_footer_test.cpp.
+
 } // namespace OHOS::Ace::NG

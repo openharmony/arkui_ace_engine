@@ -1011,10 +1011,12 @@ HWTEST_F(ParallelStageTestTwoNg, ShouldCurrentPushPageToPrimary001, TestSize.Lev
     auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
     ASSERT_NE(stageManager, nullptr);
 
+    auto oldPage = CreateRouterPage("old");
+    MountRouterPage(stageNode, oldPage);
     auto newPage = CreateRouterPage("new");
     MountRouterPage(stageNode, newPage);
 
-    EXPECT_FALSE(stageManager->ShouldCurrentPushPageToPrimary(newPage));
+    EXPECT_FALSE(stageManager->ShouldCurrentPushPageToPrimary(oldPage, newPage));
 }
 
 /**

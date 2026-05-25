@@ -562,12 +562,21 @@ bool ForceSplitUtils::ParseCommonConfig(const std::unique_ptr<JsonValue>& config
         config.behaviorMode = modeValue == DISPLACE_BEHAVIOR_MODE ?
             ForceSplitBehaviorMode::DISPLACE : ForceSplitBehaviorMode::NAVIGATION;
     }
-    if (configJson->Contains(PAGE_PAIRS_KEY)) {
+    return ParseBehaviorModeConfig(configJson, config);
+}
+
+bool ForceSplitUtils::ParseBehaviorModeConfig(
+    const std::unique_ptr<JsonValue>& configJson, ForceSplitConfig& config)
+{
+    if (!configJson) {
+        return false;
+    }
+    if (config.behaviorMode == ForceSplitBehaviorMode::NAVIGATION && configJson->Contains(PAGE_PAIRS_KEY)) {
         if (!ParsePagePairs(configJson->GetValue(PAGE_PAIRS_KEY), config)) {
             return false;
         }
     }
-    if (configJson->Contains(TRANS_PAGES_KEY)) {
+    if (config.behaviorMode == ForceSplitBehaviorMode::DISPLACE && configJson->Contains(TRANS_PAGES_KEY)) {
         if (!ParseTransPages(configJson->GetValue(TRANS_PAGES_KEY), config)) {
             return false;
         }

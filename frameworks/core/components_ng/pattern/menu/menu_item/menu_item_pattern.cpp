@@ -2026,13 +2026,13 @@ void MenuItemPattern::UpdateSymbolColorList(RefPtr<TextLayoutProperty>& props, c
 }
 void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
-    auto pipeline = GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    auto itemProperty = host->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    if (selectIcon->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         selectIcon->SetThemeScopeId(host->GetThemeScopeId());
     }
     auto symbol = itemProperty->GetSelectSymbol();

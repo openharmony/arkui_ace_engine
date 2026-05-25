@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
+#include "core/components_ng/pattern/rich_editor/lru_cache.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace {
 class TextLayoutProperty;
@@ -46,6 +48,13 @@ struct DragSpanPosition {
     int32_t spanEnd { 0 };
 };
 
+struct ParagraphCacheInfo {
+    RefPtr<Paragraph> paragraph;
+    int32_t start { 0 };
+    int32_t end { 0 };
+    int32_t firstSpanTextStyleUid { 0 };
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_FORCE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, public TextAdaptFontSizer {
     DECLARE_ACE_TYPE(TextLayoutAlgorithm, BoxLayoutAlgorithm, TextAdaptFontSizer);
@@ -54,6 +63,9 @@ public:
     TextLayoutAlgorithm();
     explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
         const bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
+    explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
+        bool isSpanStringMode, const TextStyle& textStyle,
+        const RefPtr<LRUMap<uint64_t, ParagraphCacheInfo>>& paragraphCache);
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
@@ -97,6 +109,32 @@ protected:
     bool IsNeedParagraphReLayout() const override;
     double GetIndentMaxWidth(double width) const override;
     void MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapper) override;
+    bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper,
+        ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle);
+    bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper,
+        ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle, bool useCache);
+    bool UpdateParagraphBySpanWithCache(LayoutWrapper* layoutWrapper,
+        ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle,
+        const std::vector<uint64_t>& spanGroupHash, const std::vector<uint64_t>& spanGroupStyleHash);
+    void UpdateCachedSpanGroup(const std::list<RefPtr<SpanItem>>& group, int32_t currentParagraphIndex,
+        const RefPtr<TextPattern>& pattern, const ChildrenListWithGuard& children,
+        std::list<RefPtr<LayoutWrapper>>::const_iterator& iterItems,
+        std::vector<WeakPtr<FrameNode>>& imageNodeList,
+        std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholderInfo, int32_t& spanTextLength);
+    bool BuildSpanGroup(const std::list<RefPtr<SpanItem>>& group, int32_t currentParagraphIndex,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph,
+        const ChildrenListWithGuard& children, std::list<RefPtr<LayoutWrapper>>::const_iterator& iterItems,
+        std::vector<WeakPtr<FrameNode>>& imageNodeList,
+        std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholderInfo, int32_t& spanTextLength);
+    ParagraphStyle CreateSpanParagraphStyle(LayoutWrapper* layoutWrapper, const std::list<RefPtr<SpanItem>>& group,
+        const ParagraphStyle& paraStyle, const TextStyle& textStyle, int32_t& maxLines, bool isFirstGroup,
+        bool hasNextGroup);
+    void AppendCachedParagraphInfo(uint64_t groupHash, const ParagraphCacheInfo& paragraphInfo,
+        int32_t& spanTextLength);
+    void StoreParagraphCache(uint64_t groupHash, const std::list<RefPtr<SpanItem>>& group,
+        const RefPtr<Paragraph>& paragraph, const ParagraphStyle& spanParagraphStyle, int32_t paraStart,
+        int32_t spanTextLength);
+    RefPtr<LRUMap<uint64_t, ParagraphCacheInfo>> paragraphCache_;
     void MeasureHeightLayoutCalPolicy(LayoutWrapper* layoutWrapper) override;
 
 private:

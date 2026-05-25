@@ -84,7 +84,6 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
     UpdateStrokeJoinStyle(textFieldLayoutProperty, textStyle);
-    UpdateShaderStyle(textFieldLayoutProperty, textStyle);
     auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
@@ -823,6 +822,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(theme);
+    UpdateShaderStyle(layoutProperty, textStyle);
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     FontRegisterCallback(frameNode, textStyle.GetFontFamilies());

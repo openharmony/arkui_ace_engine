@@ -17,6 +17,7 @@
 
 #include "interfaces/native/node/node_model.h"
 
+#include "base/log/event_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
@@ -5059,6 +5060,7 @@ void SetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 safeAreaType, ArkUI_Ui
     opts.type = safeAreaType;
     opts.edges = safeAreaEdge;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR);
 }
 
 void ResetExpandSafeArea(ArkUINodeHandle node)
@@ -5069,6 +5071,7 @@ void ResetExpandSafeArea(ArkUINodeHandle node)
     opts.type = DEFAULT_SAFE_AREA_TYPE;
     opts.edges = DEFAULT_SAFE_AREA_EDGE;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR);
 }
 
 void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdges)
@@ -10238,6 +10241,20 @@ void ResetUseUnionEffect(ArkUINodeHandle node)
     ViewAbstract::SetUseUnion(frameNode, false);
 }
 
+void SetDoubleSided(ArkUINodeHandle node, bool doubleSided)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDoubleSided(frameNode, doubleSided);
+}
+ 
+void ResetDoubleSided(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDoubleSided(frameNode, true);
+}
+
 ArkUIOffsetType GetCurrentLocation(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
     const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit)
 {
@@ -11896,6 +11913,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setUseUnionEffect = SetUseUnionEffect,
         .resetUseUnionEffect = ResetUseUnionEffect,
         .getCurrentLocation = GetCurrentLocation,
+        .setDoubleSided = SetDoubleSided,
+        .resetDoubleSided = ResetDoubleSided
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

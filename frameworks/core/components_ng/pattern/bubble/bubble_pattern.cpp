@@ -127,6 +127,9 @@ void BubblePattern::OnAttachToFrameNode()
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(popupNode);
+        if (!popupNode->IsOnMainTree()) {
+            return;
+        }
         ACE_UINODE_TRACE(popupNode);
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = weak.Upgrade();

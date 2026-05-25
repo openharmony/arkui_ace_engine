@@ -26,9 +26,14 @@ build_component_ng("lazy_waterflow_layout_pattern_ng") {
   ]
 
   ark_sources = [
-    "$ace_root/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/" +
-        "arkts_native_lazy_water_flow_layout_bridge.cpp",
+    "$ace_root/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/" + "arkts_native_lazy_water_flow_layout_bridge.cpp",
     "bridge/lazy_water_flow_layout_dynamic_module.cpp",
     "bridge/lazy_water_flow_layout_dynamic_modifier.cpp",
   ]
+
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      ark_sources += [ "bridge/lazy_water_flow_layout_static_modifier.cpp" ]
+    }
+  }
 }

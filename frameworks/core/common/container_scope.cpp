@@ -113,6 +113,19 @@ bool CheckRunOnUIThread(int32_t currentId, bool defaultRes)
     return checkFunc(currentId, defaultRes);
 }
 
+// Isolated thread state: used in dc (dynamic component) and card (Form) scenarios.
+// In these scenarios, multiple instances run in the same process but on different threads,
+// and the global containerSet_ contains instance IDs from all threads. To avoid cross-thread
+// instance ID confusion, each isolated thread maintains its own local set of instance IDs.
+// All base query functions (ContainerCount, SingletonId, RecentActiveId, RecentForegroundId,
+// DefaultId) check isIsolatedThread_ and return local values when true, so that upper-level
+// functions like SafelyId/CurrentIdWithReason naturally get the correct thread-local instance
+// without needing explicit isolation branches.
+thread_local bool isIsolatedThread_ = false;
+thread_local std::set<int32_t> localContainerSet_;
+thread_local int32_t localRecentActiveId_ = DEFAULT_ID;
+thread_local int32_t localRecentForegroundId_ = DEFAULT_ID;
+
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
 bool trackingEnabled_ = false;
 thread_local size_t maxHistorySize_ = 64;
@@ -334,6 +347,13 @@ int32_t ContainerScope::CurrentLocalId()
 
 int32_t ContainerScope::DefaultId()
 {
+    // Isolated thread: return the last-inserted ID from the thread-local set.
+    if (isIsolatedThread_) {
+        if (localContainerSet_.empty()) {
+            return INSTANCE_ID_UNDEFINED;
+        }
+        return *localContainerSet_.rbegin();
+    }
     if (ContainerCount() > 0) {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         return *containerSet_.rbegin();
@@ -343,6 +363,13 @@ int32_t ContainerScope::DefaultId()
 
 int32_t ContainerScope::SingletonId()
 {
+    // Isolated thread: return the only ID from the thread-local set.
+    if (isIsolatedThread_) {
+        if (localContainerSet_.size() != 1) {
+            return INSTANCE_ID_UNDEFINED;
+        }
+        return *localContainerSet_.begin();
+    }
     if (ContainerCount() != 1) {
         return INSTANCE_ID_UNDEFINED;
     }
@@ -352,11 +379,19 @@ int32_t ContainerScope::SingletonId()
 
 int32_t ContainerScope::RecentActiveId()
 {
+    // Isolated thread: return the thread-local recent active ID.
+    if (isIsolatedThread_) {
+        return localRecentActiveId_;
+    }
     return recentActiveId_.load(std::memory_order_relaxed);
 }
 
 int32_t ContainerScope::RecentForegroundId()
 {
+    // Isolated thread: return the thread-local recent foreground ID.
+    if (isIsolatedThread_) {
+        return localRecentForegroundId_;
+    }
     return recentForegroundId_.load(std::memory_order_relaxed);
 }
 
@@ -446,6 +481,41 @@ const std::set<int32_t> ContainerScope::GetAllUIContexts()
 void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
+}
+
+// Mark the current thread as an isolated thread (dc/card scenario).
+// Once marked, base query functions will return thread-local values instead of global ones.
+void ContainerScope::MarkIsolatedThread()
+{
+    isIsolatedThread_ = true;
+}
+
+// Register an instance ID to the thread-local container set.
+void ContainerScope::AddLocal(int32_t id)
+{
+    localContainerSet_.emplace(id);
+}
+
+// Unregister an instance ID from the thread-local container set,
+// and reset local active/foreground cache if they match the removed ID.
+void ContainerScope::RemoveLocal(int32_t id)
+{
+    localContainerSet_.erase(id);
+    if (localRecentActiveId_ == id) {
+        localRecentActiveId_ = DEFAULT_ID;
+    }
+    if (localRecentForegroundId_ == id) {
+        localRecentForegroundId_ = DEFAULT_ID;
+    }
+}
+
+// Reset all isolated thread state. Intended for test cleanup only.
+void ContainerScope::ResetIsolatedThread()
+{
+    isIsolatedThread_ = false;
+    localContainerSet_.clear();
+    localRecentActiveId_ = DEFAULT_ID;
+    localRecentForegroundId_ = DEFAULT_ID;
 }
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
@@ -567,15 +637,27 @@ std::string ContainerScope::Diagnose()
 void ContainerScope::UpdateRecentActive(int32_t id)
 {
     recentActiveId_.store(id, std::memory_order_relaxed);
+    // Isolated thread: also sync to thread-local cache for local queries.
+    if (isIsolatedThread_) {
+        localRecentActiveId_ = id;
+    }
 }
 
 void ContainerScope::UpdateRecentForeground(int32_t id)
 {
     recentForegroundId_.store(id, std::memory_order_relaxed);
+    // Isolated thread: also sync to thread-local cache for local queries.
+    if (isIsolatedThread_) {
+        localRecentForegroundId_ = id;
+    }
 }
 
 uint32_t ContainerScope::ContainerCount()
 {
+    // Isolated thread: return the thread-local container count.
+    if (isIsolatedThread_) {
+        return static_cast<uint32_t>(localContainerSet_.size());
+    }
     std::shared_lock<std::shared_mutex> lock(mutex_);
     return static_cast<uint32_t>(containerSet_.size());
 }

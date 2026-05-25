@@ -33,6 +33,7 @@
 #include "wm_common.h"
 #include "form_ashmem.h"
 #include "pointer_event.h"
+#include "configuration.h"
 
 #include "base/resource/shared_image_manager.h"
 #include "base/utils/layout_break_point.h"
@@ -1747,6 +1748,20 @@ OHOS::AbilityRuntime::Context* AceContainer::GetRuntimeContext(int32_t instanceI
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_RETURN(container, nullptr);
     return container->GetRuntimeContextInner().lock().get();
+}
+
+float AceContainer::GetFontWeightScaleFromConfig(int32_t instanceId)
+{
+    auto runtimeContext = GetRuntimeContext(instanceId);
+    CHECK_NULL_RETURN(runtimeContext, 1.0f);
+    auto configuration = runtimeContext->GetConfiguration();
+    CHECK_NULL_RETURN(configuration, 1.0f);
+    auto fontWeightScaleStr = configuration->GetItem(
+        OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    if (fontWeightScaleStr.empty()) {
+        return 1.0f;
+    }
+    return StringUtils::StringToFloat(fontWeightScaleStr);
 }
 
 UIContentErrorCode AceContainer::RunPage(

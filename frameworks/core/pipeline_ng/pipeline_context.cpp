@@ -1198,26 +1198,20 @@ void PipelineContext::FlushMouseEventVoluntarily()
     CHECK_NULL_VOID(rootNode_);
     ACE_SCOPED_TRACE("FlushMouseEventVoluntarily x:%f y:%f", lastMouseEvent_->x, lastMouseEvent_->y);
 
-    MouseEvent event;
+    auto scaleEvent = lastMouseEvent_->CreateScaleEvent(viewScale_);
     if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT) {
-        event.mockFlushEvent = true;
+        scaleEvent.mockFlushEvent = true;
     }
-    event.x = lastMouseEvent_->x;
-    event.y = lastMouseEvent_->y;
-    event.time = lastMouseEvent_->time;
-    event.action = MouseAction::MOVE;
-    event.button = MouseButton::NONE_BUTTON;
-    event.sourceType = SourceType::MOUSE;
-    event.deviceId = lastMouseEvent_->deviceId;
-    event.sourceTool = SourceTool::MOUSE;
-    event.targetDisplayId = lastMouseEvent_->targetDisplayId;
+    scaleEvent.action = MouseAction::MOVE;
+    scaleEvent.button = MouseButton::NONE_BUTTON;
+    scaleEvent.sourceType = SourceType::MOUSE;
+    scaleEvent.sourceTool = SourceTool::MOUSE;
 
-    auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
-    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceType = scaleEvent.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    touchRestrict.sourceTool = event.sourceTool;
+    touchRestrict.sourceTool = scaleEvent.sourceTool;
 
     eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
@@ -4780,21 +4774,10 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
+    *lastMouseEvent_ = event;
     if (event.mockFlushEvent && event.action == MouseAction::WINDOW_LEAVE) {
         lastMouseEvent_->isMockWindowTransFlag = true;
     }
-    lastMouseEvent_->x = event.x;
-    lastMouseEvent_->y = event.y;
-    lastMouseEvent_->button = event.button;
-    lastMouseEvent_->action = event.action;
-    lastMouseEvent_->sourceType = event.sourceType;
-    lastMouseEvent_->time = event.time;
-    lastMouseEvent_->touchEventId = event.touchEventId;
-    lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
-    lastMouseEvent_->pointerEvent = event.pointerEvent;
-    lastMouseEvent_->deviceId = event.deviceId;
-    lastMouseEvent_->sourceTool = event.sourceTool;
-    lastMouseEvent_->targetDisplayId = event.targetDisplayId;
     lastSourceType_ = event.sourceType;
 }
 
@@ -7003,7 +6986,9 @@ bool PipelineContext::IsTagInOverlay(const std::string& tag) const
 {
     static const std::unordered_set<std::string> targetTags = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG,
         V2::DIALOG_ETS_TAG, V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG,
-        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG };
+        V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG, V2::OVERLAY_ETS_TAG,
+        V2::ORDER_OVERLAY_ETS_TAG
+    };
 
     if (targetTags.find(tag) != targetTags.end()) {
         return true;
@@ -8132,6 +8117,32 @@ void PipelineContext::FlushRelaxedInteraction()
     CHECK_NULL_VOID(eventManager_);
     eventManager_->FlushRelaxedInteraction([this]() { RequestFrame(); });
 #endif
+}
+
+std::optional<TextDirection> PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto envManager = GetEnvironmentManager();
+    CHECK_NULL_RETURN(envManager, std::nullopt);
+
+    EnvironmentQueryResult result;
+    if (!envManager->FindValueByKey(
+        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_DIRECTION, result)) {
+        return std::nullopt;
+    }
+
+    if (result.type == EnvironmentValueType::STRING) {
+        if (result.stringValue == "Ltr") {
+            return TextDirection::LTR;
+        }
+        if (result.stringValue == "Rtl") {
+            return TextDirection::RTL;
+        }
+        if (result.stringValue == "Auto") {
+            return TextDirection::AUTO;
+        }
+    }
+    return std::nullopt;
 }
 
 std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<FrameNode>& host)

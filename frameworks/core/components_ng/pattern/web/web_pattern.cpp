@@ -7901,6 +7901,7 @@ void WebPattern::OnActive()
 
 void WebPattern::UpdateScrollbarLayout()
 {
+    RETURN_IF_CALLING_FROM_M132();
     TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::UpdateScrollbarLayout");
     CHECK_NULL_VOID(delegate_);
     if (scrollbarLayoutPolicyChanged_ || ScrollbarLayoutPolicy::CONTENT != scrollbarLayoutPolicy_) {
@@ -10321,20 +10322,9 @@ int WebPattern::ExecuteInputMethodCommand(const std::unique_ptr<JsonValue>& comJ
     }
     if (!delegate_) {
         TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteInputMethodCommand: delegate_ is nullptr");
-        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR,
-            std::to_string(static_cast<int32_t>(WebCommandResult::DELEGATE_NULL)));
         return static_cast<int>(WebCommandResult::DELEGATE_NULL);
     }
     result = delegate_->SendCommandActionToNWeb(std::move(commandAction));
-    if (result == static_cast<int>(WebCommandResult::ELEMENT_NOT_FOUND)) {
-        auto xpathValue = comJson->GetValue("XPath");
-        std::string xpathStr = xpathValue ? xpathValue->GetString() : "";
-        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_TARGET_NODE_NOT_FOUND,
-            std::to_string(static_cast<int32_t>(WebCommandResult::ELEMENT_NOT_FOUND)), xpathStr.c_str());
-    } else if (result > RET_SUCCESS) {
-        NWeb::EventReport::ReportMSDPError(
-            INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR, std::to_string(result));
-    }
     return result;
 }
 

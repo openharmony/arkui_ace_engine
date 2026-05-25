@@ -30,6 +30,7 @@ class FrameNode;
 class LazyWaterFlowLayoutInfo;
 class LayoutWrapper;
 class UINode;
+enum class StickyStyle : uint32_t;
 
 class ACE_FORCE_EXPORT LazyWaterFlowLayoutPattern : public LazyLayoutPattern {
     DECLARE_ACE_TYPE(LazyWaterFlowLayoutPattern, LazyLayoutPattern);
@@ -51,8 +52,45 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
     void OnActive() override;
     void NotifyDataChange(int32_t index, int32_t count) override;
+    void OnModifyDone() override;
+    void BeforeCreateLayoutWrapper() override;
     void OnAttachToMainTree() override;
     void OnInActive() override;
+
+    // Mount the header node (replaces any existing header). Validates via IsValidHeaderFooter first.
+    void AddHeader(const RefPtr<UINode>& header);
+    // Mount the footer node (replaces any existing footer). Validates via IsValidHeaderFooter first.
+    void AddFooter(const RefPtr<UINode>& footer);
+    // Remove the current header (if any).
+    void RemoveHeader();
+    // Remove the current footer (if any).
+    void RemoveFooter();
+
+    // Upgrade the header weak ref (may return null; callers must check).
+    RefPtr<UINode> GetHeader() const
+    {
+        return header_.Upgrade();
+    }
+
+    // Upgrade the footer weak ref (may return null; callers must check).
+    RefPtr<UINode> GetFooter() const
+    {
+        return footer_.Upgrade();
+    }
+
+    // Resolve the FrameNode that actually carries the header (peeling through BuilderProxy and friends).
+    RefPtr<FrameNode> GetHeaderNode() const;
+    // Resolve the FrameNode that actually carries the footer.
+    RefPtr<FrameNode> GetFooterNode() const;
+
+    // Header main-axis size; returns 0 when layoutInfo_ is null.
+    float GetHeaderMainSize() const;
+
+    // Footer main-axis size; returns 0 when layoutInfo_ is null.
+    float GetFooterMainSize() const;
+
+    // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH); defaults to NONE.
+    StickyStyle GetStickyStyle() const;
 
     AdjustOffset GetAdjustOffset() const override;
     AdjustOffset GetAndResetAdjustOffset() override;
@@ -64,9 +102,12 @@ public:
     }
 
 private:
-    static constexpr int32_t MAX_IDLE_DEADLINE_MISS_COUNT = 3;
-
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    // Validate a header / footer candidate. isHeader picks which side is the peerEdge.
+    bool IsValidHeaderFooter(const RefPtr<UINode>& edge, bool isHeader) const;
+    // Sync header/footer positions in the child sequence (header first, footer last). markDirty controls whether to
+    // trigger a remeasure when a position move actually happened.
+    void SyncHeaderFooter(bool markDirty = true);
     void ResetVisibleIndexesChangeState();
     void PostIdleTask();
     void ProcessIdleTask(int64_t deadline);
@@ -76,10 +117,11 @@ private:
 
     int32_t itemTotalCount_ = 0;
     RefPtr<LazyWaterFlowLayoutInfo> layoutInfo_;
-    bool hasVisibleIndexesChangeFired_ = false;
-    int32_t idleDeadlineMissCount_ = 0;
+    // Header / footer node weak refs to avoid retain cycles.
+    WeakPtr<UINode> header_;
+    WeakPtr<UINode> footer_;
     std::function<void(int32_t, int32_t)> onVisibleIndexesChange_;
-    std::pair<int32_t, int32_t> lastVisibleIndexesRange_ = { -1, -1 };
+    std::pair<int32_t, int32_t> lastVisibleIndexesRange_ = { -2, -2 };
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyWaterFlowLayoutPattern);
 };

@@ -37,22 +37,6 @@ namespace OHOS::Ace::NG {
 class SliderPattern : public Pattern {
     DECLARE_ACE_TYPE(SliderPattern, Pattern);
 
-private:
-    static constexpr int32_t PARTICLE_NODE_ZINDEX = 2;
-    static constexpr int32_t DRAG_FRAME_NODE_ZINDEX = 4;
-    static constexpr int32_t BLUR_COVER_NODE_ZINDEX = 5;
-    static constexpr int32_t DRAG_POINT_NODE_ZINDEX = 3;
-    static constexpr int32_t PREFIX_SUFFIX_STACK_ZINDEX = 10;
-    
-    static constexpr int32_t PARTICLE_EMITTER_RATE = 50;
-    static constexpr int32_t PARTICLE_LIFE_TIME = 2000;
-    static constexpr int32_t PARTICLE_LIFE_TIME_RANGE = 1000;
-    static constexpr int32_t PARTICLE_OPACITY_END_MILLS = 1600;
-    static constexpr int32_t PARTICLE_COLOR_END_MILLS = 2000;
-    static constexpr float PARTICLE_RADIUS = 2.0f;
-    static constexpr int32_t LOW_GRADE_ANIMATION_DELAY_MS = 100;
-    static constexpr int32_t LOW_GRADE_DURATION_MULTIPLIER = 2;
-
 public:
     SliderPattern() = default;
     ~SliderPattern() override = default;
@@ -426,16 +410,18 @@ private:
     void CreateBlurCoverNode();
     void CreateSelectedTrackFrameNode();
     void CreateParticleFrameNode();
+    void CalculateEmitterPosition(float& emitterNodeX, float& emitterNodeY, float& emitterLength);
     void UpdateDragFrameNode();
+    void UpdateDragPointNode();
+    void UpdateBlurCoverNode();
     void UpdateSelectedTrackFrameNode();
     void UpdateParticleFrameNode();
     void UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius);
     void RegisterMaterialNodePositionCallback();
     void ShowMaterialNode();
     void HideMaterialNode();
+    bool IsNeedShowMaterial();
     void HideMaterialNodes();
-    void ResetMaterialNodeAppearance(const RefPtr<RenderContext>& pointRC,
-        const RefPtr<RenderContext>& blurRC);
     void AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
         const RefPtr<RenderContext>& blurRC);
     void ApplyDragFrameNodeSystemMaterial();
@@ -447,13 +433,12 @@ private:
     void StartLongPressTimer();
     void HandleLongPress();
     void HandleHighGradeLongPress();
-    void HandleMiddleGradeLongPress();
     void HandleLowGradeLongPress();
     void StartDeformAnimation();
     void RestoreDeformAnimation();
     void ScheduleDeformRestore();
-    std::list<NG::ParticleOption> CreateParticleOptions(const RSRect& selectedRect, const Color& themeColor);
-    void StartParticleEffect();
+    std::list<NG::ParticleOption> CreateParticleOptions(
+        float emitterLength, float trackThickness, const Color& blockColor, Axis direction);
     void StopParticleEffect();
 
     std::optional<SliderMakeCallback> makeFunc_;
@@ -558,7 +543,6 @@ private:
     RefPtr<FrameNode> blurCoverNode_;
     RefPtr<FrameNode> selectedTrackFrameNode_;
     RefPtr<FrameNode> particleFrameNode_;
-    bool isFrameNodeVisible_ = false;
     CancelableCallback<void()> longPressTask_;
     CancelableCallback<void()> deformRestoreTask_;
     bool isDeformStarted_ = false;

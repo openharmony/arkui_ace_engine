@@ -93,6 +93,7 @@ void DividerModelNG::DividerColor(const RefPtr<ResourceObject>& resObj)
 
 void DividerModelNG::StrokeWidth(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_DIVIDER_STROKE_WIDTH);
     ACE_UPDATE_LAYOUT_PROPERTY(DividerLayoutProperty, StrokeWidth, value);
 }
 
@@ -103,6 +104,7 @@ void DividerModelNG::LineCap(const Ace::LineCap& value)
 
 void DividerModelNG::StrokeWidth(FrameNode* frameNode, const Dimension& value)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_DIVIDER_STROKE_WIDTH, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DividerLayoutProperty, StrokeWidth, value, frameNode);
 }
 

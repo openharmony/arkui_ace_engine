@@ -31,6 +31,7 @@ public:
     struct ParagraphInfo {
         RefPtr<Paragraph> paragraph;
         ParagraphStyle paragraphStyle;
+        int32_t firstSpanTextStyleUid = 0;
         int32_t start = 0;
         int32_t end = 0;
         float topPos = 0.0f;

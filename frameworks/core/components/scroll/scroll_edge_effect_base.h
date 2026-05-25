@@ -20,7 +20,6 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/scroll/scrollable.h"
 
 namespace OHOS::Ace {

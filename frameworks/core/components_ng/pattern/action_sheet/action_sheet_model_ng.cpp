@@ -25,17 +25,19 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto isSubContainer = container->IsSubContainer();
-    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
-    if (!expandDisplay && isSubContainer && arg.isShowInSubWindow) {
-        TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not show actionSheet in subwindow");
-        return;
-    }
-
     auto currentId = Container::CurrentId();
-    if (expandDisplay && isSubContainer) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
-        container = AceEngine::Get().GetContainer(currentId);
-        CHECK_NULL_VOID(container);
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+
+    if (isSubContainer) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        if (parentContainer && (expandDisplay || !parentContainer->IsSubContainer())) {
+            currentId = parentContainerId;
+            container = parentContainer;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not show actionSheet in subwindow");
+            return;
+        }
     }
     ContainerScope scope(currentId);
 

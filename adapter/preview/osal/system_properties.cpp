@@ -644,6 +644,11 @@ UiMaterialLevel SystemProperties::GetUiMaterialLevel()
     return UiMaterialLevel::DEFAULT;
 }
 
+bool SystemProperties::IsDeviceSystemMaterialSupported()
+{
+    return true;
+}
+
 int32_t SystemProperties::GetFormTaskPriority()
 {
     return DEFAULT_FORM_TASK_PRIORITY;

@@ -31,6 +31,7 @@ namespace NG {
 
 class FrameNode;
 class UINode;
+enum class StickyStyle : uint32_t;
 
 class ACE_EXPORT LazyWaterFlowLayoutModel {
 public:
@@ -44,6 +45,26 @@ public:
     static void SetColumnGap(FrameNode* frameNode, const Dimension& space);
     static void SetOnVisibleIndexesChange(VisibleIndexesChangeEvent&& onVisibleIndexesChange);
     static void SetOnVisibleIndexesChange(FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange);
+    // Set the header / footer sticky behavior (declarative).
+    static void SetSticky(StickyStyle stickyStyle);
+    // Set the header / footer sticky behavior (per-node).
+    static void SetSticky(FrameNode* frameNode, StickyStyle stickyStyle);
+    // Declare a header via builder closure (declarative).
+    static void SetHeader(std::function<void()>&& header);
+    // Declare a footer via builder closure (declarative).
+    static void SetFooter(std::function<void()>&& footer);
+    // Mount an already-constructed header node (per-node).
+    static void SetHeader(FrameNode* frameNode, const RefPtr<UINode>& headerNode);
+    // Mount an already-constructed footer node (per-node).
+    static void SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footerNode);
+    // Remove the header (declarative).
+    static void RemoveHeader();
+    // Remove the footer (declarative).
+    static void RemoveFooter();
+    // Remove the header (per-node).
+    static void RemoveHeader(FrameNode* frameNode);
+    // Remove the footer (per-node).
+    static void RemoveFooter(FrameNode* frameNode);
 };
 
 class ACE_EXPORT LazyVWaterFlowLayoutModel : public LazyWaterFlowLayoutModel {

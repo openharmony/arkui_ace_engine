@@ -183,6 +183,7 @@ public:
         dialogProperties_ = param;
         InitHostWindowRect();
         InitParentWindowRect();
+        InitDefaultSystemMaterial();
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
@@ -193,6 +194,7 @@ public:
     }
 
     void OnColorConfigurationUpdate() override;
+    void UpdateResourceColors();
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -319,6 +321,7 @@ public:
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
     void InitParentWindowRect();
+    void InitDefaultSystemMaterial();
     void UpdateHostWindowRect();
     void UpdateFontScale();
 
@@ -420,6 +423,7 @@ public:
 
     bool NeedDistortion();
     bool NeedEdgeLight();
+    bool ShouldApplySystemMaterialShadow() const;
 
 private:
     bool AvoidKeyboard() const override
@@ -454,6 +458,11 @@ private:
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props,
+        bool isCustomBorder, RefPtr<DialogTheme> dialogTheme);
+    void UpdateContentBorderRadius(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    void UpdateDialogShadow(const RefPtr<RenderContext>& renderContext, const DialogProperties& props);
+    bool SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode);
     void BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
@@ -476,6 +485,7 @@ private:
         const Dimension& dividerLength, const Dimension& dividerWidth, const Color& color, const Dimension& space);
     RefPtr<FrameNode> CreateButton(
         const ButtonInfo& params, int32_t index, bool isCancel = false, bool isVertical = false, int32_t length = 0);
+    void AddButtonColorCallback(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode);
     RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
@@ -527,9 +537,6 @@ private:
     void OnWindowShow() override;
     void PlayFlowLight();
     void PlayDistortion();
-#if defined(ENABLE_ROSEN_BACKEND)
-    void UpdateSDFRRectShape(const RefPtr<FrameNode>& contentNode);
-#endif
     void ReportActionSheetOnInjectionEvent(bool result,
         std::string reason, int32_t sheetIndex = -1, int32_t buttonIndex = -1);
     int32_t OnInjectionEvent(const std::string& command) override;
@@ -600,7 +607,6 @@ private:
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
     RectF parentWindowRect_;
-    RectF lastPaintRect_;
     bool isDialogShow_ = true;
     bool hasExtraNodeForDistortion_ = false;
     std::function<void()> onFinishEvent_ = nullptr;

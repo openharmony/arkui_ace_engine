@@ -22,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 
 using OHOS::Ace::NG::SecurityComponentModelNG;
@@ -443,5 +444,14 @@ void JSSecButtonBase::SetHeightAdaptivePolicy(int32_t value)
 void JSSecButtonBase::SetFocusBox(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsFocusBox(info);
+}
+
+void JSSecButtonBase::SetFallbackLineSpacing(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || (!info[0]->IsBoolean())) {
+        return;
+    }
+    bool fallbackLineSpacing = info[0]->ToBoolean();
+    SecurityComponentModelNG::SetFallbackLineSpacing(fallbackLineSpacing);
 }
 }

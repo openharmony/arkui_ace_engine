@@ -49,8 +49,11 @@ std::optional<SmartGestureProposal> SmartGestureDecider::BuildDefaultProposal(Sm
                     SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP, selectedNode);
             }
             if (!selectedNode) {
-                return SmartGestureProposal(
-                    SmartGestureProposalType::SELECT, SmartGestureOperateIntention::TAP, visiblePrimaryNodes.front());
+                auto firstNode = GetFirstVisiblePrimaryNode(visiblePrimaryNodes);
+                if (firstNode) {
+                    return SmartGestureProposal(
+                        SmartGestureProposalType::SELECT, SmartGestureOperateIntention::TAP, firstNode);
+                }
             }
             return SmartGestureProposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::TAP);
         case SmartGestureTrigger::SLIDE_FORWARD:
@@ -73,10 +76,9 @@ std::optional<SmartGestureProposal> SmartGestureDecider::BuildDefaultProposal(Sm
 RefPtr<FrameNode> SmartGestureDecider::GetFirstVisiblePrimaryNode(
     const std::vector<RefPtr<FrameNode>>& visiblePrimaryNodes)
 {
-    if (visiblePrimaryNodes.empty()) {
-        return nullptr;
-    }
-    return visiblePrimaryNodes.front();
+    auto iter = std::find_if(visiblePrimaryNodes.begin(), visiblePrimaryNodes.end(),
+        [](const RefPtr<FrameNode>& node) { return IsNodeClickable(node); });
+    return iter != visiblePrimaryNodes.end() ? *iter : nullptr;
 }
 
 RefPtr<FrameNode> SmartGestureDecider::GetNextVisiblePrimaryNode(
@@ -86,22 +88,26 @@ RefPtr<FrameNode> SmartGestureDecider::GetNextVisiblePrimaryNode(
         return nullptr;
     }
     if (!selectedNode) {
-        return visiblePrimaryNodes.front();
+        return GetFirstVisiblePrimaryNode(visiblePrimaryNodes);
     }
     auto iter = std::find_if(visiblePrimaryNodes.begin(), visiblePrimaryNodes.end(),
         [selectedId = selectedNode->GetId()](
             const RefPtr<FrameNode>& node) { return node && node->GetId() == selectedId; });
     if (iter == visiblePrimaryNodes.end()) {
-        return visiblePrimaryNodes.front();
+        return GetFirstVisiblePrimaryNode(visiblePrimaryNodes);
     }
     if (std::next(iter) == visiblePrimaryNodes.end()) {
         return nullptr;
     }
-    return *std::next(iter);
+    for (iter = std::next(iter); iter != visiblePrimaryNodes.end(); ++iter) {
+        if (IsNodeClickable(*iter)) {
+            return *iter;
+        }
+    }
+    return nullptr;
 }
 
-SmartGestureProposal SmartGestureDecider::BuildCenterHitProposal(
-    const std::vector<RefPtr<FrameNode>>& centerHitPath)
+SmartGestureProposal SmartGestureDecider::BuildCenterHitProposal(const std::vector<RefPtr<FrameNode>>& centerHitPath)
 {
     for (const auto& node : centerHitPath) {
         if (!node) {

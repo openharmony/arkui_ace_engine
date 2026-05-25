@@ -63,6 +63,7 @@ void DataPanelModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(strokeWidth.value_or(Dimension()), LpxAttribute::LPX_STROKE_WIDTH, frameNode);
 }
 
 void DataPanelModelStatic::SetValueColors(FrameNode* frameNode, const std::optional<std::vector<Gradient>>& valueColors)

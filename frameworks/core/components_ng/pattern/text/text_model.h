@@ -274,6 +274,8 @@ public:
     virtual void SetFallbackLineSpacing(bool enabled) {};
     virtual void SetSelectedDragPreviewStyle(const Color& value) {};
     virtual void ResetSelectedDragPreviewStyle() {};
+    virtual void SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy) {};
+    virtual void ResetIncrementalUpdatePolicy() {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

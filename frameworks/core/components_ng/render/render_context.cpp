@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/render_context.h"
 
+#include "base/utils/utils.h"
+#include "core/components_ng/property/particle_property.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/border_image.h"
@@ -45,12 +47,28 @@ std::string UseEffectTypeToString(EffectType effectType)
 
 std::string MaterialTypeToString(int32_t type)
 {
-    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT" };
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
     if (type >= static_cast<int32_t>(MaterialType::NONE) &&
-        type <= static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT)) {
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
         return MaterialTypeStyles[type];
     }
     return MaterialTypeStyles[0];
+}
+
+std::string ImmersiveStyleToString(UiMaterialStyle style)
+{
+    static const std::string ImmersiveStyles[] = { "ImmersiveStyle.ULTRA_THIN",
+        "ImmersiveStyle.THIN",
+        "ImmersiveStyle.REGULAR",
+        "ImmersiveStyle.THICK",
+        "ImmersiveStyle.ULTRA_THICK" };
+    auto index = static_cast<int32_t>(style);
+    if (index >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
+        index <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        return ImmersiveStyles[index];
+    }
+    return ImmersiveStyles[static_cast<int32_t>(UiMaterialStyle::REGULAR)];
 }
 
 } // namespace
@@ -192,6 +210,17 @@ void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const Ins
         auto& material = uiMaterial_->material;
         auto optJsonValue = JsonUtil::Create(true);
         optJsonValue->Put("type", MaterialTypeToString(material->GetType()).c_str());
+        if (material->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+            auto immersiveOptionsValue = JsonUtil::Create(true);
+            auto immersiveOptions = material->GetImmersiveOptions();
+            if (immersiveOptions) {
+                immersiveOptionsValue->Put("style", ImmersiveStyleToString(immersiveOptions->style).c_str());
+                immersiveOptionsValue->Put("materialColor", immersiveOptions->materialColor.ColorToString().c_str());
+                immersiveOptionsValue->Put("colorInvert", immersiveOptions->colorInvert ? "true" : "false");
+                immersiveOptionsValue->Put("applyShadow", immersiveOptions->applyShadow ? "true" : "false");
+                optJsonValue->Put("immersiveOptions", immersiveOptionsValue);
+            }
+        }
         auto materialJsonValue = JsonUtil::Create(true);
         materialJsonValue->Put("material", optJsonValue);
         json->PutExtAttr("systemMaterial", materialJsonValue, filter);
@@ -345,5 +374,45 @@ void RenderContext::UpdateBorderImage(const RefPtr<BorderImage>& value)
     }
     groupProperty->UpdateBorderImage(value);
     OnBorderImageUpdate(value);
+}
+
+void RenderContext::UpdateParticleOptionArray(const std::list<ParticleOption>& value)
+{
+    if (propParticleOptionArray_.has_value()) {
+        if (NearEqual(propParticleOptionArray_.value(), value)) {
+            return;
+        }
+    }
+    propParticleOptionArray_ = value;
+    OnParticleOptionArrayUpdate(value);
+}
+
+const std::optional<std::list<ParticleOption>>& RenderContext::GetParticleOptionArray() const
+{
+    return propParticleOptionArray_;
+}
+bool RenderContext::HasParticleOptionArray() const
+{
+    return propParticleOptionArray_.has_value();
+}
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue() const
+{
+    return propParticleOptionArray_.value();
+}
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue(
+    const std::list<ParticleOption>& defaultValue) const
+{
+    if (!HasParticleOptionArray()) {
+        return defaultValue;
+    }
+    return propParticleOptionArray_.value();
+}
+std::optional<std::list<ParticleOption>> RenderContext::CloneParticleOptionArray() const
+{
+    return propParticleOptionArray_;
+}
+void RenderContext::ResetParticleOptionArray()
+{
+    return propParticleOptionArray_.reset();
 }
 } // namespace OHOS::Ace::NG

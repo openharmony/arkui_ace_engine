@@ -26,6 +26,8 @@ class PerfInterfaces {
 public:
     static void SetScrollState(bool state);
     static void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
+    static void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time,
+        int32_t xPos, int32_t yPos);
     static int64_t GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note);
 
     static void NotifyAppJankStatsBegin();

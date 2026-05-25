@@ -40,7 +40,7 @@ struct ColumnItemMainPos {
 class ACE_EXPORT LazyColumnLayoutInfo : public AceType {
     DECLARE_ACE_TYPE(LazyColumnLayoutInfo, AceType);
 public:
-    void EstimateItemSize();
+    float GetEstimateItemSize();
     void UpdatePosMap();
     void SetPosMap(int32_t index, const ColumnItemMainPos& pos);
     void SetCachedPosMap(int32_t index, const ColumnItemMainPos& pos);
@@ -62,7 +62,12 @@ private:
     std::map<int32_t, ColumnItemMainPos> posMap_;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    int32_t visibleStartIndex_ = -1;
+    int32_t visibleEndIndex_ = -1;
     int32_t totalItemCount_ = 0;
+    // Header / footer main-axis sizes; the header counts toward the layout coords' baseline at 0.
+    float headerMainSize_ = 0.0f;
+    float footerMainSize_ = 0.0f;
     float totalMainSize_ = 0.0f;
     float space_ = 0.0f;
 

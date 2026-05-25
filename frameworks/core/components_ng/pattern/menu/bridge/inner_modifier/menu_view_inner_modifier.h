@@ -37,6 +37,9 @@ class UINode;
 struct ArkUIMenuViewInnerModifier {
     RefPtr<FrameNode> (*createWithOptionParams)(std::vector<OptionParam>&& params, int32_t targetId,
         const std::string& targetTag, MenuType type, const MenuParam& menuParam);
+    RefPtr<FrameNode> (*createWithOptionParamsAndPreview)(std::vector<OptionParam>&& params, int32_t targetId,
+        const std::string& targetTag, MenuType type, const MenuParam& menuParam,
+        const RefPtr<UINode>& previewCustomNode);
     RefPtr<FrameNode> (*createWithCustomNode)(const RefPtr<UINode>& customNode, int32_t targetId,
         const std::string& targetTag, const MenuParam& menuParam, bool withWrapper,
         const RefPtr<UINode>& previewCustomNode);

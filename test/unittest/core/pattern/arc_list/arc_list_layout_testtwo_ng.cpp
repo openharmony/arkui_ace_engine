@@ -14,6 +14,7 @@
  */
 
 #include "arc_list_test_ng.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "gtest/gtest.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -23,6 +24,7 @@
 #include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 
 namespace OHOS::Ace::NG {
 

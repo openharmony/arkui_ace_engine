@@ -221,7 +221,7 @@ void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 
     // Determine if smart layout should execute this frame
     bool shouldExecuteSmartLayout = FeatureParam::IsSmartLayoutEnabled() &&
-        !vOverflowHandler->IsOverflowDisabled() && vOverflowHandler->IsOverflow();
+        !pattern->IsScrollAble() && vOverflowHandler->IsOverflow();
     // State change detection: restore scales when transitioning from executed to not-executed
     if (vOverflowHandler->WasSmartLayoutExecuted() && !shouldExecuteSmartLayout) {
         vOverflowHandler->RestoreScales(layoutWrapper);

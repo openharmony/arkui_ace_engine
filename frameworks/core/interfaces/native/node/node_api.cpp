@@ -674,6 +674,7 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
     NodeModifier::SetOnListScrollVisibleContentChange,
+    NodeModifier::SetOnListEditModeChange,
 };
 
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -898,7 +899,7 @@ const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::ResetSwiperOnContentDidScroll,
     nullptr,
     nullptr,
     nullptr,
@@ -920,6 +921,7 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnListReachStart,
     NodeModifier::ResetOnListReachEnd,
     NodeModifier::ResetOnScrollVisibleContentChange,
+    NodeModifier::ResetOnListEditModeChange,
 };
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -2423,6 +2425,11 @@ ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFl
     return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
 }
 
+ArkUI_Int32 SetSystemMaterial(ArkUIDialogHandle handle, ArkUI_ImmersiveMaterial* material)
+{
+    return CustomDialog::SetSystemMaterial(handle, material);
+}
+
 ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
 {
     return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
@@ -2540,6 +2547,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .closeCustomDialog = CloseCustomDialog,
         .setSubwindowMode = SetDialogSubwindowMode,
         .setDisplayModeInSubWindow = SetDialogDisplayModeInSubWindow,
+        .setSystemMaterial = SetSystemMaterial,
         .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
         .setBackgroundEffect = SetBackgroundEffect
     };

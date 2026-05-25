@@ -883,7 +883,13 @@ void RepeatVirtualScroll2Node::fireOnUpdateDirty()
 
 bool RepeatVirtualScroll2Node::IsAllowAnimation()
 {
-    return GetParentFrameNode()->GetTag() == V2::LIST_ETS_TAG;
+    auto parent = GetParentFrameNode();
+    if (!parent) {
+        TAG_LOGI(AceLogTag::ACE_REPEAT,
+            "RepeatVirtualScroll2Node::IsAllowAnimation[id:%{public}d] - Parent FrameNode is nullptr", GetId());
+        return false;
+    }
+    return parent->GetTag() == V2::LIST_ETS_TAG;
 }
 
 bool RepeatVirtualScroll2Node::IsChildInAnimation(uint32_t rid)

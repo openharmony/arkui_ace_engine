@@ -133,7 +133,7 @@ bool ParseTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length,
     auto fillArray = std::make_unique<uint32_t[]>(length);
 
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, radiusArg, radiusArray.get(), length,
-        ArkTSUtils::parseShadowRadiusWithResObj, radiusResArr);
+        ArkTSUtils::parseTextShadowRadiusWithResObj, radiusResArr);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(vm, typeArg, typeArray.get(), length,
         ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, colorArg, colorArray.get(), length,

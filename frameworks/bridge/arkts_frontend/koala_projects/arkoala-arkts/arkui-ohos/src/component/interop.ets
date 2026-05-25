@@ -395,8 +395,7 @@ export function registerTransferCompatibleUpdatableBuilderCallback(): void {
  	    throw new Error('registerTransferCompatibleUpdatableBuilderCallback error: global objects is undefined');
  	}
     const registerCallback = global.getProperty('registerTransferCompatibleUpdatableBuilderCallback');
-    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder<Any>(builder).unwrap()!};
-    registerCallback.invoke(callback);
+    registerCallback.invoke(unwrapTransferCompatibleUpdatableBuilder<Any>);
 }
 
 type ESValueOrUndefined  = ESValue | undefined;
@@ -623,6 +622,13 @@ export function transferCompatibleUpdatableBuilder<T>(
     const createDynamicUpdatableBuilder = ESValue.getGlobal().getProperty('createDynamicUpdatableBuilder');
     const dynamicBuilder = createDynamicUpdatableBuilder.invoke(ESValue.wrap(staticBuilderFunc));
     return dynamicBuilder;
+}
+
+export function unwrapTransferCompatibleUpdatableBuilder<T>(
+    /** @memo */
+    builder: (args: T) => void
+): Any {
+    return transferCompatibleUpdatableBuilder(builder).unwrap();
 }
 
 /**

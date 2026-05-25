@@ -232,6 +232,19 @@ public:
         }
     }
 
+    void SetOnSystemEnvUpdateFunc(std::function<void(const std::string&)>&& onSystemEnvUpdate)
+    {
+        onSystemEnvUpdateFunc_ = std::move(onSystemEnvUpdate);
+    }
+
+    void FireOnSystemEnvUpdate(const std::string& key)
+    {
+        auto callback = onSystemEnvUpdateFunc_;
+        if (callback) {
+            callback(key);
+        }
+    }
+
     bool FireOnCleanup();
 private:
     // for DFX
@@ -257,6 +270,7 @@ private:
     std::function<void()> pageTransitionFunc_ = nullptr;
     std::function<void()> onCleanupFunc_ = nullptr;
     std::function<void(const std::string&)> onCustomEnvUpdateFunc_ = nullptr;
+    std::function<void(const std::string&)> onSystemEnvUpdateFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

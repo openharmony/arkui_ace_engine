@@ -37,6 +37,7 @@
 #include "base/want/want_wrap.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -51,6 +52,12 @@ constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 } // namespace
 
 #if !defined(PREVIEW)
+namespace {
+constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+} // namespace
+
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine)
 {
     if (!obj->IsObject()) {
@@ -91,7 +98,25 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngi
 
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
 {
-    return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(obj);
+    if (jsObj->IsUndefined()) {
+        return nullptr;
+    }
+    JSRef<JSVal> jsTypeName = jsObj->GetProperty("typeName");
+    if (!jsTypeName->IsString()) {
+        return nullptr;
+    }
+    auto typeName = jsTypeName->ToString();
+    if (typeName == DRAWABLE_DESCRIPTOR_NAME || typeName == ANIMATED_DRAWABLE_DESCRIPTOR_NAME ||
+        typeName == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+        auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(UnwrapNapiValue(obj));
+        if (!drawableAddr) {
+            return nullptr;
+        }
+        return drawableAddr->GetPixelMap();
+    } else {
+        return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
+    }
 }
 
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
@@ -236,7 +261,7 @@ void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vect
     }
     if (!shadowObject->IsArray()) {
         Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(shadowObject, shadow, false, needResObj)) {
+        if (!JSViewAbstract::ParseTextShadowProps(shadowObject, shadow, false, needResObj)) {
             return;
         }
         shadows.push_back(shadow);
@@ -247,11 +272,39 @@ void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vect
     for (size_t i = 0; i < shadowLength; ++i) {
         auto shadowJsVal = params->GetValueAt(i);
         Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow, false, needResObj)) {
+        if (!JSViewAbstract::ParseTextShadowProps(shadowJsVal, shadow, false, needResObj)) {
             continue;
         }
         shadows.push_back(shadow);
     }
+}
+
+bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    auto jsArray = JSRef<JSArray>::Cast(jsValue);
+    auto length = jsArray->Length();
+    for (uint32_t i = 0; i < length; ++i) {
+        auto item = jsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            continue;
+        }
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        auto axis = itemObject->GetProperty("axis");
+        auto value = itemObject->GetProperty("value");
+        auto isNormalized = itemObject->GetProperty("isNormalized");
+        if (!axis->IsString() || !value->IsNumber()) {
+            continue;
+        }
+        std::optional<bool> normalized;
+        if (isNormalized->IsBoolean()) {
+            normalized = isNormalized->ToBoolean();
+        }
+        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
+    }
+    return true;
 }
 
 #ifdef PIXEL_MAP_SUPPORTED

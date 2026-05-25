@@ -22,7 +22,7 @@ import { finalizerRegister, Thunk, int32 } from "@koalaui/common"
 import { ComputableState, MutableState, rememberMutableState, StateManager, memoEntry, createStateManager, GlobalStateManager, IncrementalNode } from "@koalaui/runtime"
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { WrappedBuilder } from "./component/builder"
-import { BuilderRootFrameNode, FrameNode, FrameNodeUtils } from "./FrameNode"
+import { BuilderRootFrameNode, BuilderRootWeakFrameNode, FrameNode, FrameNodeUtils } from "./FrameNode"
 import { BuilderRootNodeType, findPeerNode, PeerNode, PeerNodeType } from "./PeerNode"
 import { BuilderNodeOps, BuilderNodeOptions, InputEventType } from "#generated"
 import { ArkBuilderProxyNodePeer } from "./base/BuilderProxyNode"
@@ -45,6 +45,7 @@ export interface RenderOptions {
     selfIdealSize?: Size;
     type?: NodeRenderType;
     surfaceId?: string;
+    isWeak?: boolean;
 }
 export interface BuildOptions {
     nestingBuilderSupported?: boolean;
@@ -325,12 +326,13 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __builder?: WrappedBuilder<TBuilderFunc<T>>;
     private __builder0?: WrappedBuilder<voidBuilderFunc>;
     private __reactiveBuilder?: WrappedBuilder<CustomBuilder>;
-    private __frameNode: BuilderRootFrameNode<T> | null;
+    private __frameNode: BuilderRootFrameNode<T> | BuilderRootWeakFrameNode<T> | null;
     private __uiContext?: UIContext;
     private _instanceId: int32 = -1;
     private __buildOptions: BuildOptions | undefined = undefined
     private __updateUseParallel: boolean = false;
     private __isDisposed: boolean = false;
+    private __isWeak: boolean = false;
     private __extendableComponent?: BuilderNodeExtendableComponent;
     private __delegate?: BuilderNodeCustomDelegate;
 
@@ -355,6 +357,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__uiContext = uiContext as UIContext;
         this._instanceId = (uiContext as UIContext).instanceId_;
         if (options !== undefined) {
+            this.__isWeak = options?.isWeak ?? false;
             let buildOptions: BuilderNodeOptions = {};
             if (options?.selfIdealSize !== undefined) {
                 buildOptions.selfIdealSize = options.selfIdealSize;
@@ -455,7 +458,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             return;
         }
         if (this.__root !== null || this.__buildOptions?.useParallel) {
-            this.__builderProxyNode = ArkBuilderProxyNodePeer.create(undefined);
+            this.__builderProxyNode = ArkBuilderProxyNodePeer.create(undefined, this.__isWeak);
             this.__root!.__parent = this.__builderProxyNode;
             this.__builderProxyNode!.hasChild = true;
             this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
@@ -470,7 +473,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                 return;
             }
             const frameNodeOfBuilderNode: KPointer = this.setRootFrameNodeInBuilderNode(this.__builderRootNode!.getPeerPtr()!)
-            this.__frameNode = FrameNodeUtils.createBuilderRootFrameNode<T>(this.__uiContext!, frameNodeOfBuilderNode);
+            this.__frameNode = FrameNodeUtils.createBuilderRootFrameNode<T>(this.__uiContext!, frameNodeOfBuilderNode, this.__isWeak);
             this.__frameNode?.setJsBuilderNode(this);
             this.setUpdateConfigurationCallback(this.updateConfiguration);
         }

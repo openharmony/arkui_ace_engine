@@ -135,8 +135,13 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
-    CreateTextStyleUsingTheme(textLayoutProperty, textTheme,
-        textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG, pattern);
+    auto policy = textLayoutProperty->GetIncrementalUpdatePolicyValue(IncrementalUpdatePolicy::NONE);
+    if (policy != IncrementalUpdatePolicy::NONE) {
+        UpdateTextStyleFromProperty(textLayoutProperty, textTheme, textStyle, pattern);
+    } else {
+        CreateTextStyleUsingTheme(textLayoutProperty, textTheme,
+            textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG, pattern);
+    }
     textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
     if (textLayoutProperty->HasFontForegroudGradiantColor()) {
         textStyle.SetFontForegroudGradiantColor(textLayoutProperty->GetFontForegroudGradiantColor());
@@ -253,6 +258,9 @@ void MultipleParagraphLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayo
                 textStyle = textStyle_;
             }
             CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
+            if (pIter->firstSpanTextStyleUid > 0) {
+                textStyle.SetTextStyleUid(pIter->firstSpanTextStyleUid);
+            }
             textStyle.SetForeGroundBrushBitMap();
             paragraph->ReLayoutForeground(textStyle);
         }
@@ -886,6 +894,9 @@ ChildrenListWithGuard MultipleParagraphLayoutAlgorithm::GetAllChildrenWithBuild(
 bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
     LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle)
 {
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan");
+    }
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -902,7 +913,6 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
     std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholderInfo;
     int32_t paragraphIndex = -1;
     preParagraphsPlaceholderCount_ = 0;
-    currentParagraphPlaceholderCount_ = 0;
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
     for (auto groupIt = spans_.begin(); groupIt != spans_.end(); groupIt++) {
         auto& group = *(groupIt);
@@ -930,7 +940,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
             spanParagraphStyle.colorShaderStyle = paraStyleSpanItem->textLineStyle->GetColorShaderStyle();
             spanParagraphStyle.SetOptGradient(paraStyleSpanItem->textLineStyle->GetGradient());
         }
-        auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
+        auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle);
         CHECK_NULL_RETURN(paragraph, false);
         auto paraStart = spanTextLength;
         paragraphIndex++;
@@ -991,8 +1001,6 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
             }
             child->ResetReCreateAndReLayout();
         }
-        preParagraphsPlaceholderCount_ += currentParagraphPlaceholderCount_;
-        currentParagraphPlaceholderCount_ = 0;
         shadowOffset_ += GetShadowOffset(group);
         if (!useParagraphCache_) {
             HandleEmptyParagraph(paragraph, group);
@@ -1053,9 +1061,8 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     if (!isSpanStringMode_) {
         CHECK_NULL_VOID(id == targetId);
     }
-    imageSpanItem->placeholderIndex = imageSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_);
-    currentParagraphPlaceholderCount_++;
-    imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
+    imageSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_);
+    imageSpanItem->placeholderIndex = preParagraphsPlaceholderCount_++;
     imageSpanItem->content = u" ";
     spanTextLength += 1;
     imageSpanItem->position = spanTextLength;
@@ -1070,10 +1077,8 @@ void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<Placehol
     auto id = frameNode->GetId();
     int32_t targetId = placeholderSpanItem->placeholderSpanNodeId;
     CHECK_NULL_VOID(id == targetId);
-    placeholderSpanItem->placeholderIndex =
-        placeholderSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_);
-    currentParagraphPlaceholderCount_++;
-    placeholderSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
+    placeholderSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_);
+    placeholderSpanItem->placeholderIndex = preParagraphsPlaceholderCount_++;
     placeholderSpanItem->content = u" ";
     spanTextLength += 1;
     placeholderSpanItem->length = 1;
@@ -1083,9 +1088,8 @@ void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<Placehol
 void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem,
     const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder)
 {
-    customSpanItem->placeholderIndex = customSpanItem->UpdateParagraph(nullptr, paragraph, inheritTextStyle_);
-    currentParagraphPlaceholderCount_++;
-    customSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
+    customSpanItem->UpdateParagraph(nullptr, paragraph, inheritTextStyle_);
+    customSpanItem->placeholderIndex = preParagraphsPlaceholderCount_++;
     customSpanItem->content = u" ";
     spanTextLength += 1;
     customSpanItem->length = 1;

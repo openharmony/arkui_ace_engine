@@ -5356,13 +5356,13 @@ bool JsAccessibilityManager::DumpWebInfoParams(const std::vector<std::string>& p
                 return false;
             }
             if (argument.webAccFun == "exeAction") {
-                argument.action = StringUtils::StringToUint(*arg);
+                argument.action = StringUtils::StringToInt(*arg);
             } else if (argument.webAccFun == "sendEvent") {
-                argument.eventId = StringUtils::StringToUint(*arg);
+                argument.eventId = StringUtils::StringToInt(*arg);
             } else if (argument.webAccFun == "hover") {
-                argument.pointX = StringUtils::StringToUint(*arg);
+                argument.pointX = StringUtils::StringToInt(*arg);
                 ++arg;
-                argument.pointY = StringUtils::StringToUint(*arg);
+                argument.pointY = StringUtils::StringToInt(*arg);
             }
         }
     }

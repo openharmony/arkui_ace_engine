@@ -246,18 +246,27 @@ public:
     static void SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value);
     static void ResetSafeAreaPadding();
     static void ResetSafeAreaPadding(FrameNode* frameNode);
+    static void CheckSafeAreaPaddingLPX(const PaddingProperty& value);
+    static void CheckNodeSafeAreaPaddingLPX(FrameNode* frameNode, const PaddingProperty& value);
+    static void CheckNodeSafeAreaPaddingLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const PaddingProperty& value);
     static void SetMargin(const CalcLength &value);
     static void SetMargin(const PaddingProperty &value);
     static void SetMargin(const RefPtr<ResourceObject>& resObj);
     static void SetBorderRadius(const BorderRadiusProperty &value);
     static void SetBorderRadius(const Dimension &value);
     static void SetBorderRadius(const RefPtr<ResourceObject>& resObj);
+    static void CheckBorderRadiusLPX(const BorderRadiusProperty& value);
+    static void CheckNodeBorderRadiusLPX(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void CheckNodeBorderRadiusLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderRadiusProperty& value);
     static void SetBorderColor(const Color &value);
     static void SetBorderColor(const BorderColorProperty &value);
     static void SetBorderColor(const RefPtr<ResourceObject>& resobj);
     static void SetBorderWidth(const Dimension &value);
     static void SetBorderWidth(const BorderWidthProperty &value);
     static void SetBorderWidth(const RefPtr<ResourceObject>& resObj);
+    static void CheckBorderWidthLPX(const BorderWidthProperty& value);
+    static void CheckNodeBorderWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void CheckNodeBorderWidthLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value);
     static void SetBorderStyle(const BorderStyle &value);
     static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetDashGap(const Dimension &value);
@@ -594,6 +603,7 @@ public:
     // progress mask
     static void SetProgressMask(const RefPtr<ProgressMaskProperty> &progress);
     static void SetEdgeLightParam(const std::optional<EdgeLightParam>& param);
+    static void SetDoubleSided(bool doubleSided);
 
     static void Pop();
 
@@ -744,6 +754,9 @@ public:
     static void SetPositionX(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
     static void SetPositionY(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
+    static void CheckPositionEdgesLPX(const EdgesParam &value);
+    static void CheckNodePositionEdgesLPX(FrameNode *frameNode, const EdgesParam &value);
+    static void CheckNodePositionEdgesLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const EdgesParam &value);
     static void ResetPosition(FrameNode* frameNode);
     static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
     static void SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix);
@@ -848,8 +861,14 @@ public:
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void SetMargin(FrameNode* frameNode, const CalcLength& value);
     static void SetMargin(FrameNode* frameNode, const PaddingProperty& value);
+    static void CheckMarginLPX(const MarginProperty &value);
+    static void CheckNodeMarginLPX(FrameNode *frameNode, const MarginProperty &value);
+    static void CheckNodeMarginLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const MarginProperty &value);
     static void SetPadding(FrameNode* frameNode, const CalcLength& value);
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void CheckPaddingLPX(const PaddingProperty &value);
+    static void CheckNodePaddingLPX(FrameNode *frameNode, const PaddingProperty &value);
+    static void CheckNodePaddingLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const PaddingProperty &value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
@@ -980,6 +999,7 @@ public:
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style, bool isReset = false);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
+    static void SetDoubleSided(FrameNode* frameNode, bool doubleSided);
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback);
 #endif

@@ -783,7 +783,7 @@ SelectionOptions Convert(const Ark_SelectionOptions& options)
 template<>
 Shadow Convert(const Ark_ShadowOptions& src)
 {
-    Shadow shadow;
+    Shadow shadow(ConverterState::defShadowBlurRadius);
 
     auto radius = Converter::OptConvert<float>(src.radius);
     if (radius) {
@@ -1367,7 +1367,7 @@ Font Convert(const Ark_arkui_component_units_Font& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_FontWeight& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_FontWeight& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1378,7 +1378,7 @@ FontWeightInt Convert(const Ark_FontWeight& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_Int32& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Int32& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1390,7 +1390,7 @@ FontWeightInt Convert(const Ark_Int32& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_String& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_String& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1413,7 +1413,7 @@ FontWeightInt Convert(const Ark_String& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Resource& src)
 {
     FontWeightInt dst = {};
     ResourceConverter resourceConverter(src);
@@ -1434,7 +1434,7 @@ FontWeightInt Convert(const Ark_Resource& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_ResourceStr& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_ResourceStr& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0:

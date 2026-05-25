@@ -102,33 +102,6 @@ void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
         }
     }
 }
-
-bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
-{
-    if (!jsValue->IsArray()) {
-        return false;
-    }
-    auto array = JSRef<JSArray>::Cast(jsValue);
-    for (uint32_t i = 0; i < array->Length(); ++i) {
-        auto item = array->GetValueAt(i);
-        if (!item->IsObject()) {
-            continue;
-        }
-        auto itemObj = JSRef<JSObject>::Cast(item);
-        auto axis = itemObj->GetProperty("axis");
-        auto value = itemObj->GetProperty("value");
-        auto isNormalized = itemObj->GetProperty("isNormalized");
-        if (!axis->IsString() || !value->IsNumber()) {
-            continue;
-        }
-        std::optional<bool> normalized;
-        if (isNormalized->IsBoolean()) {
-            normalized = isNormalized->ToBoolean();
-        }
-        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
-    }
-    return !fontVariations.empty();
-}
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -1062,7 +1035,7 @@ void JSText::SetOnWillCopy(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+        JSRef<JSFunc>::Cast(args), CreateSimpleJsOnWillObj);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                         const std::u16string& value) -> bool {
@@ -1310,6 +1283,7 @@ void JSText::SetFontVariations(const JSCallbackInfo& info)
     FONT_VARIATIONS_LIST fontVariations;
     if (!ParseJsFontVariations(info[0], fontVariations)) {
         TextModel::GetInstance()->ResetFontVariations();
+        return;
     }
     TextModel::GetInstance()->SetFontVariations(fontVariations);
 }
@@ -1557,6 +1531,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("includeFontPadding", &JSText::SetIncludeFontPadding);
     JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
     JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);
+    JSClass<JSText>::StaticMethod("incrementalUpdatePolicy", &JSText::SetIncrementalUpdatePolicy);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1898,5 +1873,23 @@ void JSText::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
         RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
     }
     TextModel::GetInstance()->SetSelectedDragPreviewStyle(color);
+}
+
+void JSText::SetIncrementalUpdatePolicy(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextModel::GetInstance()->ResetIncrementalUpdatePolicy();
+        return;
+    }
+    int32_t policyValue = args->ToNumber<int32_t>();
+    auto isNormalValue =
+        policyValue >= 0 && policyValue <= static_cast<int32_t>(IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+    if (!isNormalValue) {
+        TextModel::GetInstance()->ResetIncrementalUpdatePolicy();
+        return;
+    }
+    auto policy = static_cast<IncrementalUpdatePolicy>(policyValue);
+    TextModel::GetInstance()->SetIncrementalUpdatePolicy(policy);
 }
 } // namespace OHOS::Ace::Framework

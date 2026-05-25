@@ -45,6 +45,7 @@ class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace {
+struct ImmersiveOptions;
 struct UiMaterialParam;
 class NotifyDragEvent;
 class GestureEvent;
@@ -887,6 +888,13 @@ public:
     virtual void OnBorderWidthReset() {}
     virtual void OnBorderColorReset() {}
     virtual void OnBackShadowReset() {}
+    // process default lightEffectOptions and interactive behavior. If the user does not set related parameters
+    // or disable the ability, the default behavior of the component needs to be processed if it has.
+    virtual void ProcessDefaultImmersiveOptions(const std::shared_ptr<ImmersiveOptions>& options) {}
+    virtual bool EnableCachePredictNodes() const
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

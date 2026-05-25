@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/list/list_pattern.h"
+
+#include <limits>
 #include "core/common/container.h"
 #include "core/common/statistic_event_reporter.h"
 
@@ -29,6 +31,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -230,10 +233,11 @@ void ListPattern::OnModifyDone()
     if (!multiSelectable_ && isMouseEventInit_) {
         UninitMouseEvent();
     }
-    if (GetEnableEditMode() && !swipeSelectPanEvent_) {
+    bool needSwipeSelect = GetEnableEditMode() || ShouldEnableTwoFingerSelect();
+    if (needSwipeSelect && !swipeSelectPanEvent_) {
         InitSwipeSelectEvent();
     }
-    if (!GetEnableEditMode() && swipeSelectPanEvent_) {
+    if (!needSwipeSelect && swipeSelectPanEvent_) {
         UninitSwipeSelectEvent();
     }
     if (IsDefaultMultiSelectStyleEnabled()) {
@@ -676,7 +680,9 @@ bool ListPattern::UpdateStartListItemIndex()
     bool startFlagChanged = (startInfo_.index != startIndex_);
     bool startIsGroup = startWrapper && startWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (startIsGroup) {
-        auto startPattern = startWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
+        auto startNode = startWrapper->GetHostNode();
+        CHECK_NULL_RETURN(startNode, false);
+        auto startPattern = startNode->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo startGroupInfo = GetStartListItemIndex(startPattern);
         startFlagChanged = startFlagChanged || (startInfo_.area != startGroupInfo.area) ||
                            (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
@@ -685,7 +691,7 @@ bool ListPattern::UpdateStartListItemIndex()
         if (startFlagChanged && GetScrollSource() != SCROLL_FROM_NONE) {
             VisibleContentInfo endGroupInfo = GetEndListItemIndex(startPattern);
             int32_t endItemIndexInGroup = endGroupInfo.indexInGroup;
-            startWrapper->GetHostNode()->OnAccessibilityEvent(
+            startNode->OnAccessibilityEvent(
                 AccessibilityEventType::SCROLLING_EVENT, startItemIndexInGroup, endItemIndexInGroup);
         }
     }
@@ -1181,7 +1187,8 @@ std::optional<ScrollingConfig> ListPattern::GetDefaultScrollingConfig(SmartGestu
         auto targetIndex = GetDefaultScrollTargetIndex(direction, align, anchorIndex);
         if (targetIndex.has_value()) {
             float targetPos = 0.0f;
-            if (CalculateScrollingDistanceToIndex(targetIndex.value(), align, targetPos) && !NearZero(targetPos)) {
+            if (CalculateScrollingDistanceToIndex(targetIndex.value(), align, targetPos, true) &&
+                !NearZero(targetPos)) {
                 return CreateScrollingConfig(direction, std::abs(targetPos));
             }
         }
@@ -2422,11 +2429,24 @@ std::optional<ScrollingConfig> ListPattern::CreateScrollingConfig(
     return ScrollingConfig { .distance = distance, .direction = direction };
 }
 
-bool ListPattern::CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos) const
+bool ListPattern::CalculateScrollingDistanceToIndex(int32_t index, ScrollAlign align, float& targetPos,
+    bool isForceLayoutTarget) const
 {
     auto iter = itemPosition_.find(index);
     if (iter == itemPosition_.end()) {
-        return false;
+        CHECK_NULL_RETURN(isForceLayoutTarget, false);
+        targetIndex_ = index;
+        isLayoutListForFocus_ = true;
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto pipeline = GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        pipeline->FlushUITasks();
+        iter = itemPosition_.find(index);
+        if (iter == itemPosition_.end()) {
+            return false;
+        }
     }
     if (iter->second.isGroup) {
         return GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos, iter->second.endPos,
@@ -3823,9 +3843,6 @@ RefPtr<FrameNode> ListPattern::GetSelectableItemAtIndex(int32_t index) const
     auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
     CHECK_NULL_RETURN(itemWrapper, nullptr);
     auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
-    if (!itemNode) {
-        itemNode = AceType::DynamicCast<FrameNode>(itemWrapper);
-    }
     CHECK_NULL_RETURN(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<ListItemPattern>();
     if (itemPattern) {
@@ -3959,6 +3976,71 @@ SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectState
     return { index, -1 };
 }
 
+SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectStateKeyNearPosition(
+    float offsetX, float offsetY) const
+{
+    auto key = GetSwipeSelectStateKeyAtPosition(offsetX, offsetY);
+    if (key.IsValid() && GetSelectableItemAtStateKey(key)) {
+        return key;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SwipeSelectStateKey());
+    SwipeSelectStateKey nearestKey;
+    double nearestDistance = std::numeric_limits<double>::max();
+    auto updateNearestKey = [this, offsetX, offsetY, &nearestKey, &nearestDistance](const SwipeSelectStateKey& stateKey,
+                                const Rect& itemRect) {
+        if (!stateKey.IsValid() || LessOrEqual(itemRect.Width(), 0.0) || LessOrEqual(itemRect.Height(), 0.0)) {
+            return;
+        }
+        auto itemNode = GetSelectableItemAtStateKey(stateKey);
+        auto itemPattern = itemNode ? itemNode->GetPattern<ListItemPattern>() : nullptr;
+        if (!itemPattern || !itemPattern->Selectable()) {
+            return;
+        }
+        double dx = 0.0;
+        if (LessNotEqual(offsetX, itemRect.Left())) {
+            dx = itemRect.Left() - offsetX;
+        } else if (GreatNotEqual(offsetX, itemRect.Right())) {
+            dx = offsetX - itemRect.Right();
+        }
+        double dy = 0.0;
+        if (LessNotEqual(offsetY, itemRect.Top())) {
+            dy = itemRect.Top() - offsetY;
+        } else if (GreatNotEqual(offsetY, itemRect.Bottom())) {
+            dy = offsetY - itemRect.Bottom();
+        }
+        double distance = dx * dx + dy * dy;
+        if (LessNotEqual(distance, nearestDistance)) {
+            nearestDistance = distance;
+            nearestKey = stateKey;
+        }
+    };
+
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
+        CHECK_NULL_CONTINUE(itemWrapper);
+        auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
+        CHECK_NULL_CONTINUE(itemNode);
+        auto itemPattern = itemNode->GetPattern<ListItemPattern>();
+        if (itemPattern) {
+            updateNearestKey({ index, -1 }, GetItemRect(index));
+            continue;
+        }
+        auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_CONTINUE(groupPattern);
+        for (int32_t groupIndex = groupPattern->GetDisplayStartIndexInGroup();
+             groupIndex <= groupPattern->GetDisplayEndIndexInGroup(); ++groupIndex) {
+            updateNearestKey({ index, groupIndex }, GetItemRectInGroup(index, groupIndex));
+        }
+    }
+
+    if (nearestKey.IsValid()) {
+        swipeResolvedItemIndex_ = { nearestKey.index, nearestKey.indexInGroup >= 0 ? 1 : -1, nearestKey.indexInGroup };
+    }
+    return nearestKey;
+}
+
 SelectableContainerPattern::SwipeSelectStateKey ListPattern::GetSwipeSelectStateKeyAtIndex(int32_t index) const
 {
     if (swipeResolvedItemIndex_.has_value() && swipeResolvedItemIndex_->index == index) {
@@ -4002,9 +4084,6 @@ void ListPattern::BuildSwipeSelectStateKeysInRange(const SwipeSelectStateKey& st
         auto itemWrapper = host->GetChildByIndex(index + itemStartIndex_);
         CHECK_NULL_CONTINUE(itemWrapper);
         auto itemNode = AceType::DynamicCast<FrameNode>(itemWrapper->GetHostNode());
-        if (!itemNode) {
-            itemNode = AceType::DynamicCast<FrameNode>(itemWrapper);
-        }
         CHECK_NULL_CONTINUE(itemNode);
         auto itemPattern = itemNode->GetPattern<ListItemPattern>();
         if (itemPattern) {
@@ -5015,7 +5094,10 @@ bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
     CHECK_NULL_RETURN(pipeline, false);
     pipeline->FlushUITasks();
     RequestFocusForItem(index, focusGroupIndex_.has_value() && indexInGroup >= 0 ? indexInGroup : -1);
-    auto child = host->GetChildByIndex(focusIndex_.value_or(-1));
+    if (!focusIndex_.has_value() || focusIndex_.value() < 0) {
+        return false;
+    }
+    auto child = host->GetChildByIndex(static_cast<uint32_t>(focusIndex_.value()));
     if (child && focusGroupIndex_.has_value()) {
         auto childNode = child->GetHostNode();
         CHECK_NULL_RETURN(childNode, false);

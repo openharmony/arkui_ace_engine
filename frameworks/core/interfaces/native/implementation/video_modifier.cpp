@@ -26,6 +26,10 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "color_metrics_peer.h"
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 
 namespace OHOS::Ace::NG {
 struct VideoOptions {
@@ -41,6 +45,12 @@ struct VideoOptions {
 } // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
+constexpr float VALID_SPEEDS[] = { 0.125, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 3.00 };
+bool IsValidSpeed(float speed)
+{
+    return std::find(std::begin(VALID_SPEEDS), std::end(VALID_SPEEDS), speed) != std::end(VALID_SPEEDS);
+}
+
 template<>
 void AssignCast(std::optional<float>& dst, const Ark_PlaybackSpeed& src)
 {
@@ -74,8 +84,11 @@ VideoOptions Convert(const Ark_VideoOptions& src)
 
     options.currentProgressRate = 1.0;
     // currentProgressRate
-    options.currentProgressRate =
+    auto currentProgressRate =
         Converter::OptConvert<float>(src.currentProgressRate).value_or(options.currentProgressRate);
+    if ((src.currentProgressRate.value.selector == SELECTOR_ID_0) || IsValidSpeed(currentProgressRate)) {
+        options.currentProgressRate = currentProgressRate;
+    }
 
     // previewUri
     options.previewSourceInfo = Converter::OptConvert<ImageSourceInfo>(src.previewUri)
@@ -113,16 +126,28 @@ namespace VideoModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+#ifdef VIDEO_SUPPORTED
     auto frameNode = VideoModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::VIDEO_ETS_TAG, id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
+    return {};
+#endif // VIDEO_SUPPORTED
 }
 } // VideoModifier
 namespace VideoInterfaceModifier {
 void SetVideoOptionsImpl(Ark_NativePointer node,
                          const Ark_VideoOptions* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
@@ -141,6 +166,9 @@ namespace VideoAttributeModifier {
 void SetMutedImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
@@ -153,6 +181,9 @@ void SetMutedImpl(Ark_NativePointer node,
 void SetAutoPlayImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
@@ -165,6 +196,9 @@ void SetAutoPlayImpl(Ark_NativePointer node,
 void SetControlsImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
@@ -177,6 +211,9 @@ void SetControlsImpl(Ark_NativePointer node,
 void SetLoopImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
@@ -189,6 +226,9 @@ void SetLoopImpl(Ark_NativePointer node,
 void SetObjectFitImpl(Ark_NativePointer node,
                       const Opt_ImageFit* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelStatic::SetObjectFit(frameNode, Converter::OptConvertPtr<ImageFit>(value));
@@ -196,6 +236,9 @@ void SetObjectFitImpl(Ark_NativePointer node,
 void SetOnStartImpl(Ark_NativePointer node,
                     const Opt_VoidCallback* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -214,6 +257,9 @@ void SetOnStartImpl(Ark_NativePointer node,
 void SetOnPauseImpl(Ark_NativePointer node,
                     const Opt_VoidCallback* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -232,6 +278,9 @@ void SetOnPauseImpl(Ark_NativePointer node,
 void SetOnFinishImpl(Ark_NativePointer node,
                      const Opt_VoidCallback* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -250,6 +299,9 @@ void SetOnFinishImpl(Ark_NativePointer node,
 void SetOnFullscreenChangeImpl(Ark_NativePointer node,
                                const Opt_Callback_FullscreenInfo_Void* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -274,6 +326,9 @@ void SetOnFullscreenChangeImpl(Ark_NativePointer node,
 void SetOnPreparedImpl(Ark_NativePointer node,
                        const Opt_Callback_PreparedInfo_Void* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -298,6 +353,9 @@ void SetOnPreparedImpl(Ark_NativePointer node,
 void SetOnSeekingImpl(Ark_NativePointer node,
                       const Opt_Callback_PlaybackInfo_Void* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -321,6 +379,9 @@ void SetOnSeekingImpl(Ark_NativePointer node,
 void SetOnSeekedImpl(Ark_NativePointer node,
                      const Opt_Callback_PlaybackInfo_Void* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -344,6 +405,9 @@ void SetOnSeekedImpl(Ark_NativePointer node,
 void SetOnUpdateImpl(Ark_NativePointer node,
                      const Opt_Callback_PlaybackInfo_Void* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -367,6 +431,9 @@ void SetOnUpdateImpl(Ark_NativePointer node,
 void SetOnErrorImpl(Ark_NativePointer node,
                     const Opt_Union_VoidCallback_ErrorCallback_BusinessErrorInterface_Void* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -392,6 +459,9 @@ void SetOnErrorImpl(Ark_NativePointer node,
 void SetOnStopImpl(Ark_NativePointer node,
                    const Opt_VoidCallback* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
@@ -410,6 +480,9 @@ void SetOnStopImpl(Ark_NativePointer node,
 void SetEnableAnalyzerImpl(Ark_NativePointer node,
                            const Opt_Boolean* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
@@ -422,6 +495,9 @@ void SetEnableAnalyzerImpl(Ark_NativePointer node,
 void SetAnalyzerConfigImpl(Ark_NativePointer node,
                            const Opt_ImageAnalyzerConfig* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
@@ -432,6 +508,9 @@ void SetAnalyzerConfigImpl(Ark_NativePointer node,
 void SetSurfaceBackgroundColorImpl(Ark_NativePointer node,
                                    const Opt_ColorMetricsExt* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto colorValue = Converter::OptConvertPtr<Color>(value);
@@ -441,6 +520,9 @@ void SetSurfaceBackgroundColorImpl(Ark_NativePointer node,
 void SetEnableShortcutKeyImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
 {
+#if defined(PREVIEW) && !defined(VIDEO_SUPPORTED)
+    return;
+#endif
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);

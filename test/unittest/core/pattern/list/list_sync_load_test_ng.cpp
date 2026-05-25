@@ -179,6 +179,7 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad005, TestSize.Level1)
      * @tc.steps: step2. Set List inactive and layout List.
      * @tc.expected: List async load, item2 inactive
      */
+    frameNode_->SetActive(false);
     MockPipelineContext::GetCurrent()->SetResponseTime(1);
     frameNode_->SetLayoutDirtyMarked(true);
     frameNode_->CreateLayoutTask();

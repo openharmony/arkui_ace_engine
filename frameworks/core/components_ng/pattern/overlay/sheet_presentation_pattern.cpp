@@ -145,6 +145,9 @@ void SheetPresentationPattern::OnModifyDone()
         } else if (!MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial)) {
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
+        } else if (MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial) &&
+                   SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
     }
     InitPanEvent();
@@ -1757,7 +1760,11 @@ void SheetPresentationPattern::UpdateSheetBackgroundColor()
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.backgroundColor.has_value()) {
+    // - has systemMaterial and not SMOOTH -> return
+    // - has systemMaterial and SMOOTH -> update default backgroundColor
+    // - no systemMaterial and sheetStyle.backgroundColor has value -> return
+    if ((sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) ||
+        (!sheetStyle.systemMaterial && sheetStyle.backgroundColor.has_value())) {
         return;
     }
     auto pipeline = host->GetContext();
@@ -4411,8 +4418,8 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
     // Parse the background olor using the resource object.
     Color backgroundColor;
     bool result = ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     if (!result) {
-        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         backgroundColor = (sheetTheme != nullptr) ? sheetTheme->GetSheetBackgoundColor() : backgroundColor;
     }
 
@@ -4426,7 +4433,12 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
 
     // Update sheet mask background color.
     auto renderContext = sheetNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(backgroundColor);
+    if (!currSheetStyle.systemMaterial) {
+        renderContext->UpdateBackgroundColor(backgroundColor);
+    } else if (currSheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH &&
+               sheetTheme) {
+        renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+    }
     sheetNode->MarkModifyDone();
 }
 

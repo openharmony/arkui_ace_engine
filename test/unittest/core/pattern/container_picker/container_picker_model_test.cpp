@@ -15,6 +15,9 @@
 
 #include "gtest/gtest.h"
 
+#define private public
+#define protected public
+
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -25,6 +28,9 @@
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
+
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -2703,6 +2709,293 @@ HWTEST_F(ContainerPickerModelTest, SetItemHeight005, TestSize.Level1)
     ASSERT_TRUE(layoutProperty_->HasItemHeight());
     auto resultHeight = layoutProperty_->GetItemHeight().value().ConvertToVp();
     EXPECT_NEAR(resultHeight, DEFAULT_ITEM_HEIGHT_VP, FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: SetItemHeightLpx001
+ * @tc.desc: Test SetItemHeight with LPX unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeightLpx001, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    constexpr double lpxValue = 50.0;
+    Dimension height(lpxValue, DimensionUnit::LPX);
+
+    ContainerPickerModel::SetItemHeight(height);
+
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_PICKER_ITEM_HEIGHT) !=
+        frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetItemHeightLpx002
+ * @tc.desc: Test SetItemHeight with VP unit (non-LPX)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeightLpx002, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    constexpr double vpValue = 50.0;
+    Dimension height(vpValue, DimensionUnit::VP);
+
+    ContainerPickerModel::SetItemHeight(height);
+
+    EXPECT_TRUE(frameNode_->lpxAttributes_.find(LpxAttribute::ALWAYS) == frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpx001
+ * @tc.desc: Test SetIndicatorStyle with LPX units for divider indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpx001, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double lpxValue = 5.0;
+    style.strokeWidth = Dimension(lpxValue, DimensionUnit::LPX);
+    style.startMargin = Dimension(lpxValue, DimensionUnit::LPX);
+    style.endMargin = Dimension(lpxValue, DimensionUnit::LPX);
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_STROKE_WIDTH) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_START_MARGIN) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_END_MARGIN) !=
+        frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpx002
+ * @tc.desc: Test SetIndicatorStyle with VP units (non-LPX) for divider indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpx002, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double vpValue = 5.0;
+    style.strokeWidth = Dimension(vpValue, DimensionUnit::VP);
+    style.startMargin = Dimension(vpValue, DimensionUnit::VP);
+    style.endMargin = Dimension(vpValue, DimensionUnit::VP);
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    EXPECT_TRUE(frameNode_->lpxAttributes_.find(LpxAttribute::ALWAYS) == frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpx003
+ * @tc.desc: Test SetIndicatorStyle with LPX units for borderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpx003, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_BACKGROUND;
+    constexpr double lpxValue = 5.0;
+    BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusTopRight = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusBottomLeft = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusBottomRight = Dimension(lpxValue, DimensionUnit::LPX);
+    style.borderRadius = borderRadius;
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT) !=
+        frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleLpx004
+ * @tc.desc: Test SetIndicatorStyle with VP units (non-LPX) for borderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleLpx004, TestSize.Level1)
+{
+    GetContainerPickerComponentsFromStack();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double vpValue = 5.0;
+    BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(vpValue, DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(vpValue, DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(vpValue, DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(vpValue, DimensionUnit::VP);
+    style.borderRadius = borderRadius;
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    EXPECT_TRUE(frameNode_->lpxAttributes_.find(LpxAttribute::ALWAYS) == frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetItemHeightFrameNodeLpx001
+ * @tc.desc: Test SetItemHeight with FrameNode and LPX unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeightFrameNodeLpx001, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+    ASSERT_NE(frameNode_, nullptr);
+
+    constexpr double lpxValue = 50.0;
+    Dimension height(lpxValue, DimensionUnit::LPX);
+
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), height);
+
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_PICKER_ITEM_HEIGHT) !=
+        frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetItemHeightFrameNodeLpx002
+ * @tc.desc: Test SetItemHeight with FrameNode and VP unit (non-LPX)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetItemHeightFrameNodeLpx002, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+    ASSERT_NE(frameNode_, nullptr);
+
+    constexpr double vpValue = 50.0;
+    Dimension height(vpValue, DimensionUnit::VP);
+
+    ContainerPickerModel::SetItemHeight(AceType::RawPtr(frameNode_), height);
+
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_PICKER_ITEM_HEIGHT) ==
+        frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleFrameNodeLpx001
+ * @tc.desc: Test SetIndicatorStyle with FrameNode and LPX units
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleFrameNodeLpx001, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double lpxValue = 5.0;
+    style.strokeWidth = Dimension(lpxValue, DimensionUnit::LPX);
+    style.startMargin = Dimension(lpxValue, DimensionUnit::LPX);
+    style.endMargin = Dimension(lpxValue, DimensionUnit::LPX);
+
+    ContainerPickerModel::SetIndicatorStyle(AceType::RawPtr(frameNode_), style);
+
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_STROKE_WIDTH) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_START_MARGIN) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_END_MARGIN) !=
+        frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleFrameNodeLpx002
+ * @tc.desc: Test SetIndicatorStyle with FrameNode and VP units (non-LPX)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleFrameNodeLpx002, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_DIVIDER;
+    constexpr double vpValue = 5.0;
+    style.strokeWidth = Dimension(vpValue, DimensionUnit::VP);
+    style.startMargin = Dimension(vpValue, DimensionUnit::VP);
+    style.endMargin = Dimension(vpValue, DimensionUnit::VP);
+
+    ContainerPickerModel::SetIndicatorStyle(AceType::RawPtr(frameNode_), style);
+
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_STROKE_WIDTH) ==
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_START_MARGIN) ==
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_DIVIDER_END_MARGIN) ==
+        frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: SetIndicatorStyleFrameNodeLpx003
+ * @tc.desc: Test SetIndicatorStyle with FrameNode and LPX units for borderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleFrameNodeLpx003, TestSize.Level1)
+{
+    GetContainerPickerComponents();
+    ASSERT_NE(frameNode_, nullptr);
+
+    PickerIndicatorStyle style;
+    style.type = INDICATOR_TYPE_BACKGROUND;
+    constexpr double lpxValue = 5.0;
+    BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusTopRight = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusBottomLeft = Dimension(lpxValue, DimensionUnit::LPX);
+    borderRadius.radiusBottomRight = Dimension(lpxValue, DimensionUnit::LPX);
+    style.borderRadius = borderRadius;
+
+    ContainerPickerModel::SetIndicatorStyle(AceType::RawPtr(frameNode_), style);
+
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_TOP_RIGHT) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_LEFT) !=
+        frameNode_->lpxAttributes_.end());
+    EXPECT_TRUE(
+        frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT) !=
+        frameNode_->lpxAttributes_.end());
 }
 
 } // namespace OHOS::Ace::NG

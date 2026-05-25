@@ -147,6 +147,7 @@
 #ifdef VIDEO_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async.h"
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_embedded_component.h"
@@ -381,6 +382,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
+    JSVideoControllerAsync::JSBind(globalObj);
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponent::JSBind(globalObj);

@@ -1090,6 +1090,7 @@ void SelectPattern::SetFontSize(const Dimension& value)
     CHECK_NULL_VOID(host);
     FREE_NODE_CHECK(host, SetFontSize, value);
     CHECK_NULL_VOID(text_);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_FONT_SIZE, text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontSize(value);

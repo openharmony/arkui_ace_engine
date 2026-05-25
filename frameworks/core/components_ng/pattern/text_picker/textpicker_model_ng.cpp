@@ -290,6 +290,9 @@ void TextPickerModelNG::SetColumnWidths(const std::vector<Dimension>& widths)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    for (const auto& width : widths) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width, LpxAttribute::LPX_PICKER_COLUMN_WIDTH, frameNode);
+    }
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->SetColumnWidths(widths);
 }
@@ -297,6 +300,9 @@ void TextPickerModelNG::SetColumnWidths(const std::vector<Dimension>& widths)
 void TextPickerModelNG::SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths)
 {
     CHECK_NULL_VOID(frameNode);
+    for (const auto& width : widths) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(width, LpxAttribute::LPX_PICKER_COLUMN_WIDTH, frameNode);
+    }
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->SetColumnWidths(widths);
 }
@@ -320,6 +326,7 @@ void TextPickerModelNG::SetRange(const std::vector<NG::RangeContent>& value)
 
 void TextPickerModelNG::SetDefaultPickerItemHeight(const Dimension& value)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PICKER_ITEM_HEIGHT);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
 }
 
@@ -327,6 +334,7 @@ void TextPickerModelNG::SetGradientHeight(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PICKER_GRADIENT_HEIGHT, frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetGradientHeight(value);
@@ -1210,6 +1218,7 @@ void TextPickerModelNG::SetDisappearTextStyle(
 void TextPickerModelNG::SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_PICKER_ITEM_HEIGHT, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value, frameNode);
 }
 

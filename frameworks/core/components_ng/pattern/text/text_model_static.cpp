@@ -31,6 +31,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MAX_FONT_SCALE = 2.0;
+constexpr int32_t DEFAULT_LINE_HEIGHT = 28;
 } // namespace
 
 void TextModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -44,6 +45,7 @@ void TextModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dime
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value_or(Dimension()), LpxAttribute::LPX_FONT_SIZE, frameNode);
 }
 
 void TextModelStatic::SetTextColor(FrameNode* frameNode, const std::optional<Color>& color)
@@ -133,6 +135,7 @@ void TextModelStatic::SetLineHeight(FrameNode* frameNode, const std::optional<Di
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, LineHeight, PROPERTY_UPDATE_MEASURE, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value_or(Dimension()), LpxAttribute::LPX_LINE_HEIGHT, frameNode);
 }
 
 void TextModelStatic::SetLineSpacing(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -142,6 +145,7 @@ void TextModelStatic::SetLineSpacing(FrameNode* frameNode, const std::optional<D
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, LineSpacing, PROPERTY_UPDATE_MEASURE, frameNode);
     }
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value.value_or(Dimension()), LpxAttribute::LPX_LINE_SPACING, frameNode);
 }
 
 void TextModelStatic::SetTextDecoration(FrameNode* frameNode, const std::optional<TextDecoration>& value)
@@ -199,6 +203,7 @@ void TextModelStatic::SetAdaptMinFontSize(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             TextLayoutProperty, AdaptMinFontSize, PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_ADAPT_MIN_FONT_SIZE, frameNode);
     }
 }
 
@@ -209,6 +214,7 @@ void TextModelStatic::SetAdaptMaxFontSize(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             TextLayoutProperty, AdaptMaxFontSize, PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_ADAPT_MAX_FONT_SIZE, frameNode);
     }
 }
 
@@ -275,6 +281,7 @@ void TextModelStatic::SetTextIndent(FrameNode* frameNode, const std::optional<Di
         TextModelNG::SetTextIndent(frameNode, value.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TextIndent, PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_TEXT_INDENT, frameNode);
     }
 }
 
@@ -285,6 +292,7 @@ void TextModelStatic::SetBaselineOffset(FrameNode* frameNode, const std::optiona
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             TextLayoutProperty, BaselineOffset, PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_BASE_LINE_OFFSET, frameNode);
     }
 }
 
@@ -311,6 +319,7 @@ void TextModelStatic::SetLetterSpacing(FrameNode* frameNode, const std::optional
         TextModelNG::SetLetterSpacing(frameNode, value.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, LetterSpacing, PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(Dimension(), LpxAttribute::LPX_LETTER_SPACING, frameNode);
     }
 }
 
@@ -452,6 +461,16 @@ void TextModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const st
     TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
+void TextModelStatic::SetIncrementalUpdatePolicy(
+    FrameNode* frameNode, const std::optional<IncrementalUpdatePolicy>& policy)
+{
+    if (policy.has_value()) {
+        TextModelNG::SetIncrementalUpdatePolicy(frameNode, policy.value());
+    } else {
+        TextModelNG::ResetIncrementalUpdatePolicy(frameNode);
+    }
+}
+
 void TextModelStatic::SetOptimizeTrailingSpace(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
     TextModelNG::SetOptimizeTrailingSpace(frameNode, valueOpt.value_or(false));
@@ -505,7 +524,8 @@ void TextModelStatic::SetMaximumLineHeight(FrameNode* frameNode, const std::opti
 
 void TextModelStatic::SetLineHeightMultiply(FrameNode* frameNode, const std::optional<double>& valueOpt)
 {
-    if (valueOpt.has_value()) {
+    if (valueOpt.has_value() && !LessNotEqual(valueOpt.value(), 0.0)) {
+        TextModelNG::SetLineHeight(frameNode, CalcDimension(DEFAULT_LINE_HEIGHT, DimensionUnit::PX));
         TextModelNG::SetLineHeightMultiply(frameNode, valueOpt.value());
     } else {
         TextModelNG::ResetLineHeightMultiply(frameNode);

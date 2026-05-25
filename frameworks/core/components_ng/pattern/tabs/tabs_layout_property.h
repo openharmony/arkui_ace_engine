@@ -119,6 +119,34 @@ public:
                             : "TabsCacheMode.CACHE_LATEST_SWITCHED");
             json->PutExtAttr("cachedMaxCount", cacheInfo, filter);
         }
+
+        ToJsonValueWithBarFloatingStyle(json, filter);
+    }
+
+    void ToJsonValueWithBarFloatingStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    {
+        if (!propBarFloatingStyle_.has_value()) {
+            return;
+        }
+        auto root = JsonUtil::Create(true);
+        auto barWidth = JsonUtil::Create(true);
+        auto smallBarWidth = propBarFloatingStyle_.value().smallBarWidth;
+        barWidth->Put("smallBarWidth", smallBarWidth.has_value() ? smallBarWidth.value().ToString().c_str() : "");
+        auto mediumBarWidth = propBarFloatingStyle_.value().mediumBarWidth;
+        barWidth->Put("mediumBarWidth", mediumBarWidth.has_value() ? mediumBarWidth.value().ToString().c_str() : "");
+        auto largeBarWidth = propBarFloatingStyle_.value().largeBarWidth;
+        barWidth->Put("largeBarWidth", largeBarWidth.has_value() ? largeBarWidth.value().ToString().c_str() : "");
+        root->Put("barWidth", barWidth);
+        auto barSideMargin = propBarFloatingStyle_.value().barSideMargin;
+        root->Put("barSideMargin", barSideMargin.has_value() ? barSideMargin.value().ToString().c_str() : "");
+        auto barBottomMargin = propBarFloatingStyle_.value().barBottomMargin;
+        root->Put("barBottomMargin", barBottomMargin.has_value() ? barBottomMargin.value().ToString().c_str() : "");
+        auto maskColor = propBarFloatingStyle_.value().maskColor;
+        root->Put("maskColor", maskColor.has_value() ? maskColor.value().ToString().c_str() : "");
+        auto maskHeight = propBarFloatingStyle_.value().maskHeight;
+        root->Put("maskHeight", maskHeight.has_value() ? maskHeight.value().ToString().c_str() : "");
+        root->Put("adaptToHandedness",  propBarFloatingStyle_.value().adaptToHandedness.value_or(false));
+        json->PutExtAttr("barFloatingStyle", root, filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

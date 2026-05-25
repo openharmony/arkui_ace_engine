@@ -172,6 +172,7 @@ private:
         std::set<WeakPtr<ImageLoadingContext>> ctxs_;
     };
 
+    static std::atomic<int32_t> traceTaskId_;
     static std::timed_mutex taskMtx_;
     static std::unordered_map<std::string, Task> tasks_;
 };

@@ -22,6 +22,7 @@
 #include "core/common/share/text_share_adapter.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_animation_utils.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
@@ -33,6 +34,7 @@ namespace {
 constexpr int32_t NO_NEED_RESTART_SINGLE_HANDLE = 100;
 constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1 << 8;
 const char *SYSTEM_CAPABILITY_OF_SHARE = "SystemCapability.Collaboration.SystemShare";
+
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 {
@@ -894,11 +896,11 @@ void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(
         return;
     }
     if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG && !GetIsHandleDragging()) {
-        manager->ShowOptionMenu();
+        manager->ShowOptionMenu(UseNewAnimation());
         return;
     }
     if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging() && !GetSelectArea().IsEmpty()) {
-        manager->ShowOptionMenu();
+        manager->ShowOptionMenu(UseNewAnimation());
     }
 }
 

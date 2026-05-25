@@ -996,6 +996,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_CustomNodeBuilder_Array_MenuElement& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_CustomNodeBuilder_ComponentContentBase& src)
 {
     switch (src.selector) {
@@ -1058,6 +1073,21 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_CustomNodeBuilder_ResourceColor& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1479,6 +1509,22 @@ void AssignUnionTo(std::optional<T>& dst,
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Resource_image_PixelMap_String& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3634,6 +3680,7 @@ ASSIGN_OPT(Opt_DynamicRangeMode)
 ASSIGN_OPT(Opt_Edge)
 ASSIGN_OPT(Opt_EdgeEffect)
 ASSIGN_OPT(Opt_EdgeLightMode)
+ASSIGN_OPT(Opt_EdgeLightPosition)
 ASSIGN_OPT(Opt_EffectDirection)
 ASSIGN_OPT(Opt_EffectEdge)
 ASSIGN_OPT(Opt_EffectFillStyle)
@@ -3728,6 +3775,7 @@ ASSIGN_OPT(Opt_ImageSourceSize)
 ASSIGN_OPT(Opt_ImageSpanAlignment)
 ASSIGN_OPT(Opt_IMEClient)
 ASSIGN_OPT(Opt_ImmersiveMode)
+ASSIGN_OPT(Opt_IncrementalUpdatePolicy)
 ASSIGN_OPT(Opt_IndexerAlign)
 ASSIGN_OPT(Opt_Indicator)
 ASSIGN_OPT(Opt_IndicatorComponentController)
@@ -3803,6 +3851,7 @@ ASSIGN_OPT(Opt_MaxLinesMode)
 ASSIGN_OPT(Opt_Measurable)
 ASSIGN_OPT(Opt_MeasureResult)
 ASSIGN_OPT(Opt_MenuAlignType)
+ASSIGN_OPT(Opt_MenuGridPosition)
 ASSIGN_OPT(Opt_MenuItemConfiguration)
 ASSIGN_OPT(Opt_MenuKeyboardAvoidMode)
 ASSIGN_OPT(Opt_MenuPolicy)
@@ -4125,7 +4174,6 @@ ASSIGN_OPT(Opt_UIGestureEvent)
 ASSIGN_OPT(Opt_UIGridEvent)
 ASSIGN_OPT(Opt_UIListEvent)
 ASSIGN_OPT(Opt_uiMaterial_Material)
-ASSIGN_OPT(Opt_UIMaterialAnimationMode)
 ASSIGN_OPT(Opt_UIScrollableCommonEvent)
 ASSIGN_OPT(Opt_UIScrollEvent)
 ASSIGN_OPT(Opt_UIWaterFlowEvent)
@@ -4167,11 +4215,13 @@ ASSIGN_OPT(Opt_Union_String_FunctionKey)
 ASSIGN_OPT(Opt_Union_String_I32)
 ASSIGN_OPT(Opt_Union_SwiperAnimationMode_Boolean)
 ASSIGN_OPT(Opt_Union_TextInputStyle_TextContentStyle)
+ASSIGN_OPT(Opt_UnionMode)
 ASSIGN_OPT(Opt_UrlRegexRule)
 ASSIGN_OPT(Opt_UrlStyle)
 ASSIGN_OPT(Opt_Vector2)
 ASSIGN_OPT(Opt_Vector2F64)
 ASSIGN_OPT(Opt_Vector3)
+ASSIGN_OPT(Opt_Vector4)
 ASSIGN_OPT(Opt_VelocityOptions)
 ASSIGN_OPT(Opt_VerifyPinHandler)
 ASSIGN_OPT(Opt_VerticalAlign)
@@ -4218,6 +4268,7 @@ ASSIGN_OPT(Opt_arkui_component_common_Callback_I32_Void)
 ASSIGN_OPT(Opt_arkui_component_common_Callback_I64_Void)
 ASSIGN_OPT(Opt_arkui_component_idlize_Callback_I32_Void)
 ASSIGN_OPT(Opt_Array_AcceptableFileType)
+ASSIGN_OPT(Opt_Array_AccessibilityCustomAction)
 ASSIGN_OPT(Opt_Array_AISessionEvent)
 ASSIGN_OPT(Opt_Array_AlertDialogButtonOptions)
 ASSIGN_OPT(Opt_Array_AnimationPropertyType)
@@ -4770,6 +4821,7 @@ ASSIGN_OPT(Opt_DepthComponentOptions)
 ASSIGN_OPT(Opt_DepthVector3)
 ASSIGN_OPT(Opt_DepthVector4)
 ASSIGN_OPT(Opt_DirectionalEdgesT_F64)
+ASSIGN_OPT(Opt_DistortionParam)
 ASSIGN_OPT(Opt_DisturbanceFieldOptionsInner)
 ASSIGN_OPT(Opt_DoubleAnimationParam)
 ASSIGN_OPT(Opt_dragController_DragSpringLoadingConfiguration)
@@ -4813,6 +4865,7 @@ ASSIGN_OPT(Opt_GaugeOptions)
 ASSIGN_OPT(Opt_GeometryTransitionOptions)
 ASSIGN_OPT(Opt_GestureInfo)
 ASSIGN_OPT(Opt_GestureStyleInterface)
+ASSIGN_OPT(Opt_GravityCenterOptions)
 ASSIGN_OPT(Opt_GridColColumnOption)
 ASSIGN_OPT(Opt_GridItemOptions)
 ASSIGN_OPT(Opt_GridLayoutOptions)
@@ -4851,6 +4904,7 @@ ASSIGN_OPT(Opt_LocalizedHorizontalAlignParam)
 ASSIGN_OPT(Opt_LocalizedVerticalAlignParam)
 ASSIGN_OPT(Opt_Matrix4Result)
 ASSIGN_OPT(Opt_MaxLinesOptions)
+ASSIGN_OPT(Opt_MenuGridStyleOptions)
 ASSIGN_OPT(Opt_MessageEvents)
 ASSIGN_OPT(Opt_MotionBlurAnchor)
 ASSIGN_OPT(Opt_MotionPathOptions)
@@ -5008,11 +5062,13 @@ ASSIGN_OPT(Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_BorderStyle_EdgeStyles)
 ASSIGN_OPT(Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor)
 ASSIGN_OPT(Opt_Union_ColumnOptions_ColumnOptionsV2)
+ASSIGN_OPT(Opt_Union_CustomNodeBuilder_Array_MenuElement)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_ComponentContentBase)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_DragItemInfo)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_DragItemInfo_String)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_ExtendableComponent)
 ASSIGN_OPT(Opt_Union_CustomNodeBuilder_ResourceColor)
+ASSIGN_OPT(Opt_Union_CustomNodeBuilderT_ResponseType_Array_MenuElement)
 ASSIGN_OPT(Opt_Union_Date_Bindable_Date)
 ASSIGN_OPT(Opt_Union_EdgeOutlineStyles_OutlineStyle)
 ASSIGN_OPT(Opt_Union_EdgeStyles_BorderStyle)
@@ -5040,6 +5096,7 @@ ASSIGN_OPT(Opt_Union_MenuPreviewMode_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_NestedScrollOptions_NestedScrollOptionsExt)
 ASSIGN_OPT(Opt_Union_OutlineStyle_EdgeOutlineStyles)
 ASSIGN_OPT(Opt_Union_ParticleColorOptions_Array_ParticlePropertyAnimationColorInner)
+ASSIGN_OPT(Opt_Union_Resource_image_PixelMap_String)
 ASSIGN_OPT(Opt_Union_Resource_String)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColorContent_ColorMetricsExt)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColoringStrategy)
@@ -5086,6 +5143,7 @@ ASSIGN_OPT(Opt_WebOptions)
 ASSIGN_OPT(Opt_window_SystemBarStyle)
 ASSIGN_OPT(Opt_WorkerOptions)
 ASSIGN_OPT(Opt_XComponentParameters)
+ASSIGN_OPT(Opt_AccessibilityCustomAction)
 ASSIGN_OPT(Opt_AccessibilitySpanOptions)
 ASSIGN_OPT(Opt_ActionSheetButtonOptions)
 ASSIGN_OPT(Opt_ActionSheetOffset)
@@ -5118,6 +5176,7 @@ ASSIGN_OPT(Opt_DecorationStyleResult)
 ASSIGN_OPT(Opt_DepthCameraParams)
 ASSIGN_OPT(Opt_DepthLightParams)
 ASSIGN_OPT(Opt_Dimension)
+ASSIGN_OPT(Opt_DistortionComponentOptions)
 ASSIGN_OPT(Opt_DividerStyleOptions)
 ASSIGN_OPT(Opt_EdgeColors)
 ASSIGN_OPT(Opt_FadingEdgeOptions)
@@ -5275,6 +5334,7 @@ ASSIGN_OPT(Opt_DividerOptions)
 ASSIGN_OPT(Opt_DividerStyle)
 ASSIGN_OPT(Opt_DoubleLengthDetents)
 ASSIGN_OPT(Opt_DrawableTabBarIndicator)
+ASSIGN_OPT(Opt_EdgeLightParams)
 ASSIGN_OPT(Opt_EdgeOutlineWidths)
 ASSIGN_OPT(Opt_Edges)
 ASSIGN_OPT(Opt_EdgeWidths)

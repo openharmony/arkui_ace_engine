@@ -42,6 +42,9 @@ public:
     static void ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans,
         std::vector<std::list<RefPtr<SpanItem>>>& spanGroupVec,
         bool& spanStringHasMaxLines);
+    static void ConstructParagraphSpanGroupForHash(
+        std::list<RefPtr<SpanItem>>& spans, std::vector<std::list<RefPtr<SpanItem>>>& spanGroupVec,
+        bool& spanStringHasMaxLines);
     static void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup);
     static void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
         const TextStyle& textStyle, double indentMaxWidth);

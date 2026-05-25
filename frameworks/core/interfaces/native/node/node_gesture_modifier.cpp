@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_drag_modifier.h"
@@ -401,15 +402,9 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.inputEventType = ConvertInputEventTypeToArkuiUIInputEventType(info.GetInputEventType());
 }
 
-int32_t GetGestureAttachNodeId(const Gesture* gesture)
+int32_t GetGestureAttachNodeId(const ArkUIGestureRecognizer* recognizer)
 {
-    auto* recognizer = gesture ? reinterpret_cast<const ArkUIGestureRecognizer*>(gesture->GetUserData()) : nullptr;
-    auto* node = recognizer ? reinterpret_cast<ArkUI_Node*>(recognizer->attachNode) : nullptr;
-    if (!node || !node->uiNodeHandle) {
-        return -1;
-    }
-    auto* uiNode = reinterpret_cast<UINode*>(node->uiNodeHandle);
-    return uiNode ? uiNode->GetId() : -1;
+    return recognizer ? recognizer->attachNodeId : -1;
 }
 
 int32_t GetPointerEventAction(InputEventType type, std::shared_ptr<MMI::PointerEvent> pointerEvent)
@@ -622,11 +617,11 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
-void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam, const Gesture* gesture)
+void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam, const ArkUIGestureRecognizer* recognizer)
 {
     ArkUINodeEvent eventData;
     eventData.kind = GESTURE_ASYNC_EVENT;
-    eventData.nodeId = GetGestureAttachNodeId(gesture);
+    eventData.nodeId = GetGestureAttachNodeId(recognizer);
     eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
     eventData.gestureAsyncEvent.subKind = eventKind;
     eventData.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
@@ -661,31 +656,32 @@ void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam, c
     SendArkUISyncEvent(&eventData);
 }
 
-void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam)
+void registerGestureEvent(
+    ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam, const ArkUIGestureRecognizer* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(gesture);
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_ACCEPT) {
-        auto onActionAccept = [extraParam, gestureRef](GestureEvent& info) {
-            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_START), extraParam, gestureRef);
+        auto onActionAccept = [extraParam, recognizer](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_START), extraParam, recognizer);
         };
         gestureRef->SetOnActionId(onActionAccept);
         gestureRef->SetOnActionStartId(onActionAccept);
     }
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_UPDATE) {
-        auto onActionUpdate = [extraParam, gestureRef](GestureEvent& info) {
-            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_UPDATE), extraParam, gestureRef);
+        auto onActionUpdate = [extraParam, recognizer](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_UPDATE), extraParam, recognizer);
         };
         gestureRef->SetOnActionUpdateId(onActionUpdate);
     }
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_END) {
-        auto onActionEnd = [extraParam, gestureRef](GestureEvent& info) {
-            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_END), extraParam, gestureRef);
+        auto onActionEnd = [extraParam, recognizer](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_END), extraParam, recognizer);
         };
         gestureRef->SetOnActionEndId(onActionEnd);
     }
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_CANCEL) {
-        auto onActionCancel = [extraParam, gestureRef](GestureEvent& info) {
-            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_CANCEL), extraParam, gestureRef);
+        auto onActionCancel = [extraParam, recognizer](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_CANCEL), extraParam, recognizer);
         };
         gestureRef->SetOnActionCancelId(onActionCancel);
     }

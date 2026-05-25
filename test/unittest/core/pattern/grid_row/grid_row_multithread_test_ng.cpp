@@ -68,6 +68,9 @@ HWTEST_F(GridRowMultiThreadTestNG, MultiThreadLifecycleCallbackTest001, TestSize
     pattern->OnDetachFromMainTreeMultiThread();
 
     // Verify that the callback is unregistered (check if callbackId_ has been reset)
+    /**
+     * @tc.expected: pattern->callbackId_ has value
+     */
     EXPECT_TRUE(pattern->callbackId_.has_value());
 }
 
@@ -167,5 +170,8 @@ HWTEST_F(GridRowMultiThreadTestNG, THREAD_SAFE_NODE_CHECK_MacroTest001, TestSize
     pattern->OnDetachFromFrameNode(frameNode.GetRawPtr());
 
     // The state should remain unregistered
+    /**
+     * @tc.expected: pattern->callbackId_ has value
+     */
     EXPECT_TRUE(pattern->callbackId_.has_value());
 }

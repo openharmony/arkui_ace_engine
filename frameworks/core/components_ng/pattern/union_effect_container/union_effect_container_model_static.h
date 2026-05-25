@@ -24,11 +24,13 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 struct UnionEffectContainerOptions;
+enum class UnionMode;
 class ACE_EXPORT UnionEffectContainerModelStatic {
 public:
     static RefPtr<FrameNode> Create(int32_t nodeId);
     static void SetUnionEffectContainerOptions(
         FrameNode* node, const std::optional<UnionEffectContainerOptions>& options);
+    static void SetUnionMode(FrameNode* node, UnionMode unionMode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_MODEL_STATIC_H

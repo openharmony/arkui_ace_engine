@@ -856,6 +856,21 @@ void ResetTabsIsCustomAnimation(ArkUINodeHandle node)
     TabsModelNG::SetIsCustomAnimation(frameNode, false);
 }
 
+void SetTabsBarFloatingStyle(ArkUINodeHandle node, void* paramRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto param = reinterpret_cast<BarFloatingStyleParameters*>(paramRawPtr);
+    TabsModelNG::SetBarFloatingStyle(frameNode, *param);
+}
+
+void ResetTabsBarFloatingStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::ResetBarFloatingStyle(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -947,6 +962,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .createTabBarWidthWithResourceObj = CreateTabBarWidthWithResourceObj,
         .createTabBarHeightWithResourceObj = CreateTabBarHeightWithResourceObj,
         .createBarBackgroundEffectWithResourceObj = CreateBarBackgroundEffectWithResourceObj,
+        .setTabsBarFloatingStyle = SetTabsBarFloatingStyle,
+        .resetTabsBarFloatingStyle = ResetTabsBarFloatingStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

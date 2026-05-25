@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { extractors, initializers } from '#handwritten'
-import { DrawContext as arkui_Graphics_DrawContext, Frame, Size, Vector2, Vector3, Circle, CommandPath, Corners, LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit, RoundRect, Rect, CornerRadius } from 'arkui.Graphics'
+import { DrawContext as arkui_Graphics_DrawContext, Frame, Size, Vector2, Vector3, Vector4, Circle, CommandPath, Corners, LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit, RoundRect, Rect, CornerRadius } from 'arkui.Graphics'
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { CallbackTransformer } from './../CallbackTransformer'
@@ -105,6 +105,28 @@ export class Vector3_serializer {
         const yTmpResult: double = valueDeserializer.readFloat64()
         const zTmpResult: double = valueDeserializer.readFloat64()
         let value: Vector3 = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as Vector3)
+        return value
+    }
+}
+export class Vector4_serializer {
+    public static write(buffer: SerializerBase, value: Vector4): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForX = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+        const valueHolderForZ = value.z
+        valueSerializer.writeFloat64(valueHolderForZ)
+        const valueHolderForW = value.w
+        valueSerializer.writeFloat64(valueHolderForW)
+    }
+    public static read(buffer: DeserializerBase): Vector4 {
+        let valueDeserializer: DeserializerBase = buffer
+        const xTmpResult: double = valueDeserializer.readFloat64()
+        const yTmpResult: double = valueDeserializer.readFloat64()
+        const zTmpResult: double = valueDeserializer.readFloat64()
+        const wTmpResult: double = valueDeserializer.readFloat64()
+        let value: Vector4 = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, w: wTmpResult} as Vector4)
         return value
     }
 }

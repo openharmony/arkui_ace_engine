@@ -37,6 +37,7 @@ using CreateMaterialFilterFunc = void* (*)(const ArkUIMaterialKeyParams*);
 using ReleaseMaterialFilterFunc = void (*)(void*);
 using GetEnableColorInvertFunc = int32_t (*)(int32_t, int32_t);
 using GetGlobalMaterialLevelFunc = int32_t (*)();
+using GetEnableMaterialFunc = bool (*)();
 struct MaterialFilterStruct {
     std::shared_ptr<Rosen::RSNGFilterBase> filter;
 };
@@ -46,6 +47,7 @@ const char UI_MATERIAL_FUNC_CREATE_UI_MATERIAL[] = "CreateUiMaterialFilter";
 const char UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL[] = "ReleaseUiMaterialFilter";
 const char UI_MATERIAL_FUNC_GET_ENABLE_COLOR_INVERT[] = "GetEnableColorInvert";
 const char UI_MATERIAL_FUNC_GET_GLOBAL_LEVEL[] = "GetGlobalMaterialLevel";
+const char UI_MATERIAL_FUNC_GET_ENABLE_MATERIAL[] = "IsSystemMaterialSupported";
 void* GetMaterialLib()
 {
     static void* handle = nullptr;
@@ -251,7 +253,8 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
             .level = UiMaterialLevel::SMOOTH,
-            .colorMode = colorMode,
+            .colorMode = (options->colorMode == ColorMode::COLOR_MODE_UNDEFINED) ?
+                                    colorMode : options->colorMode,
         };
         return result;
     }
@@ -261,6 +264,8 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     result.materialColor = options->materialColor;
     if (finalInvertColor) {
         colorMode = ColorMode::LIGHT;
+    } else if (options->colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = options->colorMode;
     }
     result.key = UiMaterialMapKey {
         .level = materialLevel,
@@ -363,6 +368,28 @@ bool MaterialUtils::GetGlobalMaterialLevel(UiMaterialLevel& result)
             result = static_cast<UiMaterialLevel>(level);
             return true;
         }
+    }
+    return false;
+}
+
+bool MaterialUtils::GetDeviceUiMaterialEnabled(bool& result)
+{
+    static std::optional<bool> executeResult;
+#ifndef _WIN32
+    static GetEnableMaterialFunc enableFunc = nullptr;
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        auto handle = GetMaterialLib();
+        CHECK_NULL_VOID(handle);
+        enableFunc = reinterpret_cast<GetEnableMaterialFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_GET_ENABLE_MATERIAL));
+        if (enableFunc) {
+            executeResult = enableFunc();
+        }
+    });
+#endif
+    if (executeResult.has_value()) {
+        result = executeResult.value();
+        return true;
     }
     return false;
 }

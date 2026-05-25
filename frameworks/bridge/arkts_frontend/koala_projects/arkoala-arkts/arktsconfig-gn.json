@@ -145,8 +145,17 @@
             "@ohos.arkui.ArcSwiper": [
                 "./@ohos.arkui.ArcSwiper.ets"
             ],
+            "@ohos.arkui.components.ArkLazyColumnLayout": [
+                "./@ohos.arkui.components.ArkLazyColumnLayout.ets"
+            ],
+            "@ohos.arkui.components.ArkLazyWaterFlowLayout": [
+                "./@ohos.arkui.components.ArkLazyWaterFlowLayout.ets"
+            ],
             "#arktheme": [
                 "./arkui/theme"
+            ],
+            "@ohos.arkui.components.ArkDynamicLayout": [
+                "./@ohos.arkui.components.ArkDynamicLayout"
             ],
             "@component/customComponent": [
                 "./arkui/component/customComponent.ets"

@@ -21,6 +21,7 @@ const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const mediaquery = requireNapi('mediaquery');
 const deviceInfo = requireNapi('deviceInfo');
+const uiMaterial = requireNapi('arkui.uiMaterial');
 export var ChipSize;
 (function (ChipSize) {
   ChipSize['NORMAL'] = 'NORMAL';
@@ -2040,10 +2041,18 @@ export class ChipComponent extends ViewPU {
     if (deviceInfo.sdkApiVersion < 26) {
       return undefined;
     }
-    if (this.isChipActivated()) {
-      return this.activatedBackgroundSystemMaterial;
+    let info = uiMaterial.getMaterialInfo();
+    if (info.state === uiMaterial.MaterialState.DISABLE) {
+      return undefined;
     }
-    return this.backgroundSystemMaterial;
+    if (this.isChipActivated()) {
+      return info.state === uiMaterial.MaterialState.ENABLE && !this.activatedBackgroundSystemMaterial ?
+        new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) :
+        this.activatedBackgroundSystemMaterial;
+    }
+    return info.state === uiMaterial.MaterialState.ENABLE && !this.backgroundSystemMaterial ?
+      new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) :
+      this.backgroundSystemMaterial;
   }
   getColor(color, defaultColor) {
     if (!color) {

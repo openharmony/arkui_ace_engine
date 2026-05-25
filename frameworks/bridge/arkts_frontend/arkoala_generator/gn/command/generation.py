@@ -129,6 +129,17 @@ def main():
         print("Error: 'npm' command not found. Please ensure Node.js and npm are installed and in PATH.")
         sys.exit(1)
 
+    # step4 clear output directory
+    print(f"Step4: Clearing output directory {output_dir}...")
+    try:
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+        print("Output directory cleared successfully.")
+    except Exception as e:
+        print(f"Error: Failed to clear output directory: {e}")
+        sys.exit(1)
+
     # step5 generate code
     cmd = [
         npx, "@idlizer/runner", "m3", arkts_sdk_path,

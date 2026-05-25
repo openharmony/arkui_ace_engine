@@ -290,6 +290,7 @@ MouseEvent MouseEvent::operator-(const Offset& offset) const
     mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
     mouseEvent.isInjected = isInjected;
     mouseEvent.isPrivacyMode = isPrivacyMode;
+    mouseEvent.isStylusMouseMode = isStylusMouseMode;
     mouseEvent.rawDeltaX = rawDeltaX;
     mouseEvent.rawDeltaY = rawDeltaY;
     mouseEvent.pressedButtonsArray = pressedButtonsArray;
@@ -321,6 +322,29 @@ MouseEvent MouseInfo::ConvertToMouseEvent() const
     mouseEvent.targetDisplayId = GetTargetDisplayId();
     mouseEvent.x = localLocation_.GetX();
     mouseEvent.y = localLocation_.GetY();
+    mouseEvent.globalDisplayX = globalDisplayLocation_.GetX();
+    mouseEvent.globalDisplayY = globalDisplayLocation_.GetY();
+    mouseEvent.button = button_;
+    mouseEvent.action = action_;
+    mouseEvent.screenX = screenLocation_.GetX();
+    mouseEvent.screenY = screenLocation_.GetY();
+    mouseEvent.rawDeltaX = rawDeltaX_;
+    mouseEvent.rawDeltaY = rawDeltaY_;
+    mouseEvent.pressedKeyCodes_ = GetPressedKeyCodes();
+    mouseEvent.pressedButtonsArray = pressedButtonsArray_;
+    return mouseEvent;
+}
+
+MouseEvent MouseInfo::ConvertToMouseEventForStatic() const
+{
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = GetSourceDevice();
+    mouseEvent.sourceTool = GetSourceTool();
+    mouseEvent.time = GetTimeStamp();
+    mouseEvent.deviceId = GetDeviceId();
+    mouseEvent.targetDisplayId = GetTargetDisplayId();
+    mouseEvent.x = globalLocation_.GetX();
+    mouseEvent.y = globalLocation_.GetY();
     mouseEvent.globalDisplayX = globalDisplayLocation_.GetX();
     mouseEvent.globalDisplayY = globalDisplayLocation_.GetY();
     mouseEvent.button = button_;
@@ -376,6 +400,11 @@ MouseEvent MouseEvent::CloneWith(float scale) const
     mouseEvent.pointerEvent = pointerEvent;
     mouseEvent.originalId = originalId;
     mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+    mouseEvent.touchEventId = touchEventId;
+    mouseEvent.eventHandleId = eventHandleId;
+    mouseEvent.isFalsifyCancel = isFalsifyCancel;
+    mouseEvent.isNewReferee = isNewReferee;
+    mouseEvent.eventType = eventType;
     mouseEvent.history.reserve(history.size());
     for (const auto& historyEvent : history) {
         auto clonedHistoryEvent = historyEvent.CloneWith(scale);
@@ -385,6 +414,7 @@ MouseEvent MouseEvent::CloneWith(float scale) const
     mouseEvent.isInjected = isInjected;
     mouseEvent.isPrivacyMode = isPrivacyMode;
     mouseEvent.mockFlushEvent = mockFlushEvent;
+    mouseEvent.isStylusMouseMode = isStylusMouseMode;
     mouseEvent.rawDeltaX = rawDeltaX;
     mouseEvent.rawDeltaY = rawDeltaY;
     mouseEvent.pressedButtonsArray = pressedButtonsArray;
@@ -454,6 +484,7 @@ TouchEvent MouseEvent::CreateTouchPoint() const
         .SetOriginalId(pointOriginalId)
         .SetIsInjected(isInjected);
     event.isPrivacyMode = isPrivacyMode;
+    event.isStylusMouseMode = isStylusMouseMode;
     event.pointers.emplace_back(std::move(point));
     event.pressedKeyCodes_ = pressedKeyCodes_;
     event.passThrough = passThrough;

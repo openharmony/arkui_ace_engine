@@ -3618,6 +3618,12 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
         return false;
     }
     ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
+    if (preTopNavDestination) {
+        preTopNavDestination->GetRenderContext()->SetLayerMark(true);
+    }
+    if (newTopNavDestination) {
+        newTopNavDestination->GetRenderContext()->SetLayerMark(true);
+    }
     ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition start");
     if (navigationTransition.interactive) {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE,
@@ -3626,6 +3632,14 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
                                   weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                   weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
                                   isPopPage, proxyId]() {
+            auto preDestination = weakPreNavDestination.Upgrade();
+            auto topDestination = weakNewNavDestination.Upgrade();
+            if (preDestination) {
+                preDestination->GetRenderContext()->SetLayerMark(false);
+            }
+            if (topDestination) {
+                topDestination->GetRenderContext()->SetLayerMark(false);
+            }
             auto pattern = weakNavigation.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto proxy = pattern->GetProxyById(proxyId);
@@ -3638,8 +3652,6 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             }
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation is finish: %{public}d", proxy->GetIsSuccess());
             pattern->isFinishInteractiveAnimation_ = true;
-            auto preDestination = weakPreNavDestination.Upgrade();
-            auto topDestination = weakNewNavDestination.Upgrade();
             proxy->SetIsFinished(true);
             // this flag will be update in cancelTransition or finishTransition
             ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
@@ -5090,6 +5102,12 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         auto proxy = pattern->GetProxyById(proxyId);
         auto preDestination = weakPreNavDestination.Upgrade();
         auto topDestination = weakNewNavDestination.Upgrade();
+        if (preDestination) {
+            preDestination->GetRenderContext()->SetLayerMark(false);
+        }
+        if (topDestination) {
+            topDestination->GetRenderContext()->SetLayerMark(false);
+        }
         // disable render group for text node after the custom animation
         if (isPopPage && preDestination) {
             preDestination->ReleaseTextNodeList();
@@ -6369,20 +6387,19 @@ bool NavigationPattern::IsTransitionShouldMovePageToPrimary(
 {
     CHECK_NULL_RETURN(preTopDest, false);
     CHECK_NULL_RETURN(curTopDest, false);
+    if (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
+            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        // In both navigation mode and displace mode, treat dialog destinations as transPages
+        // by default even when developers do not configure them explicitly. This prevents
+        // dialog push/pop from being misidentified as secondary-push-primary transitions.
+        return false;
+    }
     auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_RETURN(forceSplitMgr, false);
-    if (forceSplitMgr->GetBehaviorMode() == ForceSplitBehaviorMode::DISPLACE &&
-        (preTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
-            curTopDest->GetNavDestinationMode() == NavDestinationMode::DIALOG)) {
-        // In navigation displace mode, treat dialog destinations as transPages by default even
-        // when developers do not configure them explicitly. This prevents dialog push/pop from
-        // being misidentified as secondary-push-primary transitions.
-        return false;
-    }
     auto preTopPattern = preTopDest->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(preTopPattern, false);
     auto curTopPattern = curTopDest->GetPattern<NavDestinationPattern>();

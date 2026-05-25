@@ -3089,6 +3089,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsCustomContentTransition));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsCustomContentTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsCustomContentTransition));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsBarFloatingStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsBarFloatingStyle));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsBarFloatingStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsBarFloatingStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
 
@@ -3915,6 +3919,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetEditModeOptions));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditModeOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetEditModeOptions));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnEditModeChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetOnEditModeChange));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnEditModeChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetOnEditModeChange));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListNestedScroll));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListNestedScroll"),
@@ -4865,6 +4873,22 @@ void ArkUINativeModule::RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::SetColumnsTemplate));
     lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsTemplate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::ResetColumnsTemplate));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetSticky));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetSticky));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetHeader));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetHeader));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetFooter));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetFooter));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnVisibleIndexesChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetOnVisibleIndexesChange));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnVisibleIndexesChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetOnVisibleIndexesChange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "lazyVGridLayout"), lazyVGridLayout);
 }
 
@@ -6076,6 +6100,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnNeedSoftkeyboard));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNeedSoftkeyboard"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnNeedSoftkeyboard));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDoubleSided"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDoubleSided));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDoubleSided"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDoubleSided));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 }
 
@@ -6394,6 +6422,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectedDragPreviewStyle));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectedDragPreviewStyle));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncrementalUpdatePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetIncrementalUpdatePolicy));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncrementalUpdatePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetIncrementalUpdatePolicy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 }
 

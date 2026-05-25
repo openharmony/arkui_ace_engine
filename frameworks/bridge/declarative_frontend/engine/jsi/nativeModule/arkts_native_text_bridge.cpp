@@ -925,7 +925,7 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
-        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResArr);
+        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseTextShadowRadiusWithResObj, radiusResArr);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(
@@ -2458,6 +2458,35 @@ ArkUINativeModuleValue TextBridge::ResetSelectedDragPreviewStyle(ArkUIRuntimeCal
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextModifier()->resetTextSelectedDragPreviewStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::SetIncrementalUpdatePolicy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber()) {
+        auto policy = static_cast<IncrementalUpdatePolicy>(secondArg->Int32Value(vm));
+        GetArkUINodeModifiers()->getTextModifier()->setIncrementalUpdatePolicy(
+            nativeNode, static_cast<int32_t>(policy));
+    } else {
+        GetArkUINodeModifiers()->getTextModifier()->resetIncrementalUpdatePolicy(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetIncrementalUpdatePolicy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetIncrementalUpdatePolicy(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -578,6 +578,7 @@ void ConvertMouseEvent(
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
     events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
+    events.isStylusMouseMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_STYLUS_MOUSE_MODE);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
     events.deviceId = pointerEvent->GetDeviceId();

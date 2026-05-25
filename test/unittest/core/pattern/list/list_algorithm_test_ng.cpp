@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
@@ -1553,6 +1554,119 @@ HWTEST_F(ListAlgorithmTestNg, CheckAndUpdateCurOffset004, TestSize.Level1)
     listItemLayoutAlgorithm->CheckAndUpdateCurOffset(&layoutWrapper);
     EXPECT_TRUE(listItemLayoutAlgorithm->isCurOffsetUpdated_);
     EXPECT_EQ(listItemLayoutAlgorithm->curOffset_, -2.0f);
+}
+
+/**
+ * @tc.name: CalculateFixOffset001
+ * @tc.desc: Test ListLayoutAlgorithm CalculateFixOffset when isStackFromEnd_ is false, fix offsets should not swap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, CalculateFixOffset001, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    
+    listLayoutAlgorithm->contentClipMode_ = ContentClipMode::BOUNDARY;
+    listLayoutAlgorithm->contentMainSize_ = 100.0f;  // 100.0f: content main size
+    listLayoutAlgorithm->paddingBeforeContent_ = 10.0f;  // 10.0f: padding before content
+    listLayoutAlgorithm->paddingAfterContent_ = 15.0f;  // 15.0f: padding after content
+    listLayoutAlgorithm->isStackFromEnd_ = false;
+    listLayoutAlgorithm->startFixOffset_ = 0.0f;
+    listLayoutAlgorithm->endFixOffset_ = 0.0f;
+    
+    ScaleProperty scaleProperty;
+    listLayoutAlgorithm->CalculateFixOffset(scaleProperty);
+    
+    // When isStackFromEnd_ is false, startFixOffset should be paddingBefore (10.0f)
+    // endFixOffset should be paddingAfter (15.0f)
+    EXPECT_EQ(listLayoutAlgorithm->startFixOffset_, 10.0f);  // 10.0f: preset startFixOffset
+    EXPECT_EQ(listLayoutAlgorithm->endFixOffset_, 15.0f);  // 15.0f: preset endFixOffset
+}
+
+/**
+ * @tc.name: CalculateFixOffset002
+ * @tc.desc: Test ListLayoutAlgorithm CalculateFixOffset when isStackFromEnd_ is true, fix offsets should swap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, CalculateFixOffset002, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    
+    listLayoutAlgorithm->contentClipMode_ = ContentClipMode::BOUNDARY;
+    listLayoutAlgorithm->contentMainSize_ = 100.0f;  // 100.0f: content main size
+    listLayoutAlgorithm->paddingBeforeContent_ = 10.0f;  // 10.0f: padding before content
+    listLayoutAlgorithm->paddingAfterContent_ = 15.0f;  // 15.0f: padding after content
+    listLayoutAlgorithm->isStackFromEnd_ = true;
+    listLayoutAlgorithm->startFixOffset_ = 0.0f;
+    listLayoutAlgorithm->endFixOffset_ = 0.0f;
+    
+    ScaleProperty scaleProperty;
+    listLayoutAlgorithm->CalculateFixOffset(scaleProperty);
+    
+    // When isStackFromEnd_ is true, fix offsets should swap
+    // startFixOffset becomes paddingAfter (15.0f), endFixOffset becomes paddingBefore (10.0f)
+    EXPECT_EQ(listLayoutAlgorithm->startFixOffset_, 15.0f);  // 15.0f: preset startFixOffset
+    EXPECT_EQ(listLayoutAlgorithm->endFixOffset_, 10.0f);  // 10.0f: preset endFixOffset
+}
+
+/**
+ * @tc.name: CalculateFixOffset003
+ * @tc.desc: Test ListLayoutAlgorithm CalculateFixOffset when contentClipMode is CONTENT_ONLY, should return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, CalculateFixOffset003, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    
+    listLayoutAlgorithm->contentClipMode_ = ContentClipMode::CONTENT_ONLY;
+    listLayoutAlgorithm->contentMainSize_ = 100.0f;  // 100.0f: content main size
+    listLayoutAlgorithm->paddingBeforeContent_ = 10.0f;  // 10.0f: padding before content
+    listLayoutAlgorithm->paddingAfterContent_ = 15.0f;  // 15.0f: padding after content
+    listLayoutAlgorithm->isStackFromEnd_ = false;
+    listLayoutAlgorithm->startFixOffset_ = 10.0f;  // 10.0f: preset startFixOffset
+    listLayoutAlgorithm->endFixOffset_ = 15.0f;  // 15.0f: preset endFixOffset
+    
+    ScaleProperty scaleProperty;
+    listLayoutAlgorithm->CalculateFixOffset(scaleProperty);
+    
+    // When contentClipMode is CONTENT_ONLY, CalculateFixOffset should return early
+    // startFixOffset and endFixOffset should remain unchanged
+    EXPECT_EQ(listLayoutAlgorithm->startFixOffset_, 10.0f);  // 10.0f: preset startFixOffset
+    EXPECT_EQ(listLayoutAlgorithm->endFixOffset_, 15.0f);  // 15.0f: preset endFixOffset
+}
+
+/**
+ * @tc.name: ProcessCacheCount001
+ * @tc.desc: Test ListLayoutAlgorithm ProcessCacheCount when itemPosition is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, ProcessCacheCount001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    geometryNode->frame_ = geometryProperty;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.layoutProperty_ = listLayoutProperty;
+    layoutWrapper.hostNode_ = frameNode;
+    
+    listLayoutAlgorithm->itemPosition_.clear();
+    listLayoutAlgorithm->startFixOffset_ = 10.0f;  // 10.0f: preset startFixOffset
+    listLayoutAlgorithm->endFixOffset_ = 15.0f;  // 15.0f: preset endFixOffset
+    
+    int32_t cacheCount = 2;
+    bool show = false;
+    listLayoutAlgorithm->ProcessCacheCount(&layoutWrapper, cacheCount, show);
+    
+    // ProcessCacheCount should not modify fix offsets when itemPosition is empty
+    EXPECT_EQ(listLayoutAlgorithm->startFixOffset_, 10.0f);  // 10.0f: preset startFixOffset
+    EXPECT_EQ(listLayoutAlgorithm->endFixOffset_, 15.0f);  // 15.0f: preset endFixOffset
 }
 } // namespace OHOS::Ace::NG
 

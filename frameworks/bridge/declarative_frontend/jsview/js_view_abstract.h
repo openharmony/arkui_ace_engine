@@ -150,7 +150,7 @@ public:
         std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops,
-        const int32_t mapIdx = 0);
+        const int32_t mapIdx = 0, bool loadRes = false);
     static void NewGetJsGradientColorStopsCheck(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -513,8 +513,13 @@ public:
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
-    static void ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow);
+    static void ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double defaultRadius, double& radius,
+        Shadow& shadow);
+    static bool ParseShadowPropsInner(const JSRef<JSVal>& jsValue, Shadow& shadow, double defaultRadius,
+        const bool configChangePerform, bool needResObj);
     static bool ParseShadowProps(
+        const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform = false, bool needResObj = false);
+    static bool ParseTextShadowProps(
         const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform = false, bool needResObj = false);
     static void ParseDialogShadowProps(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogHasBorderColor(NG::BorderColorProperty& borderColor, std::optional<Color>& color,
@@ -574,7 +579,7 @@ public:
     static void JsRadialGradient(const JSCallbackInfo& info);
     static void JsSweepGradient(const JSCallbackInfo& info);
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
-    static void NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient);
+    static void NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient, bool loadRes = false);
     static void SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction);
     static void ParseJsTextShaderStyle(std::optional<NG::Gradient>& gradientShaderStyle,
         std::optional<Color>& colorShaderStyle, JSRef<JSObject>& obj, RefPtr<ResourceObject>& resObj);
@@ -584,7 +589,7 @@ public:
     static void ParseLinearGradient(const NG::Gradient& gradient, JSRef<JSObject>& options);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
-    static void NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient);
+    static void NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient, bool loadRes = false);
     static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
     static void JsMotionPath(const JSCallbackInfo& info);
     static void JsMotionBlur(const JSCallbackInfo& info);
@@ -806,6 +811,9 @@ public:
         resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
                                                          : GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
+        if (!resourceWrapper) {
+            return false;
+        }
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {
                 return false;
@@ -950,6 +958,7 @@ public:
     static void JSAllowForceDark(const JSCallbackInfo& info);
     static std ::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision);
     static void JSEdgeLight(const JSCallbackInfo& info);
+    static void JSDoubleSided(const JSCallbackInfo& info);
 
 private:
     static DepthVector3 ParseDepthVector3(const JSRef<JSVal>& vectorValue);

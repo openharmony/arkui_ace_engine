@@ -66,11 +66,21 @@ struct ImmersiveMaterialConfig {
     bool colorInvert = false;
     bool applyShadow = true;
     float dipScale = 1.0f;
+    // the result of interactive after the calculation of component.
+    bool interactive = false;
+    // the result of lightEffectOptions after the calculation of component. std::nullopt means no lightEffect.
+    std::optional<LightEffectOptions> lightEffectOptions;
 
     bool operator==(const ImmersiveMaterialConfig& other) const
     {
         return key == other.key && materialColor == other.materialColor && colorInvert == other.colorInvert &&
-               applyShadow == other.applyShadow && NearEqual(dipScale, other.dipScale);
+               applyShadow == other.applyShadow && interactive == other.interactive &&
+               NearEqual(dipScale, other.dipScale) && lightEffectOptions == other.lightEffectOptions;
+    }
+
+    bool HasLightEffect() const
+    {
+        return lightEffectOptions.has_value();
     }
 };
 
@@ -99,6 +109,7 @@ public:
     static Shadow GetImmersiveShadow(float dipScale);
     static Shadow GetImmersiveEmptyShadow();
     static bool GetGlobalMaterialLevel(UiMaterialLevel& result);
+    static bool GetDeviceUiMaterialEnabled(bool& result);
     static MaterialState GetConfiguredMaterialState();
     static MaterialType GetConfiguredMaterialType();
     static bool IsMaterialDisabled();
@@ -108,9 +119,9 @@ public:
     static bool IsEnableMaterialParam(const RefPtr<UiMaterial>& material);
     static const UiMaterial* PreProcessMaterial(const UiMaterial* material);
     static std::shared_ptr<Rosen::Filter> CreateRosenFilter(const ImmersiveMaterialConfig& params);
+    static ColorMode GetNodeColorMode(const RefPtr<NG::FrameNode>& node);
 
 private:
-    static ColorMode GetNodeColorMode(const RefPtr<NG::FrameNode>& node);
     static bool ValidColorInvert(const std::shared_ptr<ImmersiveOptions>& options, UiMaterialLevel systemLevel,
         UiMaterialTransparency systemTransparency);
     static MaterialState ParseMaterialState(const std::string& value);

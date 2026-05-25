@@ -18,6 +18,8 @@
 
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 

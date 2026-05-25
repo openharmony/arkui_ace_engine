@@ -43,6 +43,25 @@
  */
 
 namespace ArkUICApiDemo {
+namespace {
+void SetGridSizeAndStyle(const std::shared_ptr<GridComponent>& grid, float width, float height,
+    float borderWidth, float margin)
+{
+    grid->SetWidth(width);
+    grid->SetHeight(height);
+    grid->SetBorderWidth(borderWidth);
+    grid->SetMargin(margin);
+}
+
+void SetGridTemplate(const std::shared_ptr<GridComponent>& grid, const std::string& columnsTemplate,
+    float columnsGap, float rowsGap)
+{
+    grid->SetGridColumnsTemplate(columnsTemplate);
+    grid->SetGridColumnsGap(columnsGap);
+    grid->SetGridRowsGap(rowsGap);
+}
+} // namespace
+
 constexpr int32_t GRID_ITEM_COUNT = 100;
 constexpr int32_t GRID_ITEM_COUNT_80 = 80;
 // 设置边缘回弹效果
@@ -178,15 +197,8 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid2(int32_t type)
     ArkUI_NativeNodeAPI_1 *nodeAPI = nullptr;
     OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
     auto grid = std::make_shared<GridComponent>();
-    grid->SetWidth(SIZE_450);
-    grid->SetHeight(SIZE_300);
-    // 设置columnsTemplate:NODE_GRID_COLUMN_TEMPLATE;
-    grid->SetGridColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
-    // 设置columnsGap:NODE_GRID_COLUMN_GAP
-    grid->SetGridColumnsGap(SIZE_10);
-    grid->SetGridRowsGap(PARAM_10);
-    grid->SetBorderWidth(SIZE_5);
-    grid->SetMargin(SIZE_5);
+    SetGridSizeAndStyle(grid, SIZE_450, SIZE_300, SIZE_5, SIZE_5);
+    SetGridTemplate(grid, "1fr 1fr 1fr 1fr 1fr", SIZE_10, PARAM_10);
     if (type == 1) {
         ArkUI_NumberValue value[] = {{.i32 = 1}};
         ArkUI_AttributeItem item = {value, 1};
@@ -226,6 +238,8 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid2(int32_t type)
             return {1, 4};
         });
     grid->SetLayoutOptions(option);
+    delete str;
+    OH_ArkUI_GridLayoutOptions_Dispose(option);
     return grid;
 }
 
@@ -297,6 +311,7 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid3(int32_t type)
             }
         });
     grid->SetLayoutOptions(option);
+    delete str;
     OH_ArkUI_GridLayoutOptions_Dispose(option);
     return grid;
 }
@@ -853,6 +868,7 @@ static std::shared_ptr<GridComponent> CreateBaseGrid2()
     OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest",
                  "CreateNativeNode Option ret: %{public}d, size:%{public}d, index[0]:%{public}d, index[1]:%{public}d",
                  ret, size, irregularIndexes[0], irregularIndexes[1]);
+    delete str;
     OH_ArkUI_GridLayoutOptions_Dispose(option2);
     return grid2;
 }

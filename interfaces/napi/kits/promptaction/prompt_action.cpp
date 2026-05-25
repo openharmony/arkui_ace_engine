@@ -19,6 +19,7 @@
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/components/theme/shadow_theme.h"
@@ -827,7 +828,12 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context,
                 return false;
             }
         }
-        ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
+        RefPtr<ResourceObject> colorResObj;
+        Color colorResult;
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseNapiColor(env, colorNApi, colorResult, colorResObj);
+        }
+        ButtonInfo buttonInfo = { .text = textString, .textColor = colorString, .textColorResObj = colorResObj };
         if (primaryButtonNum <= PROMPTACTION_VALID_PRIMARY_BUTTON_NUM) {
             napi_get_named_property(env, buttonArray, "primary", &primaryButtonNApi);
             napi_typeof(env, primaryButtonNApi, &valueType);
@@ -1011,6 +1017,47 @@ void CheckNapiDimension(CalcDimension value)
     }
 }
 
+void AddBorderColorCallback(NG::BorderColorProperty& colorProperty, const RefPtr<ResourceObject>& leftColorResObj,
+    const RefPtr<ResourceObject>& rightColorResObj, const RefPtr<ResourceObject>& topColorResObj,
+    const RefPtr<ResourceObject>& bottomColorResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (leftColorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.leftColor = result;
+        };
+        colorProperty.AddResource("borderColor.left", leftColorResObj, std::move(updateFunc));
+    }
+    if (rightColorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.rightColor = result;
+        };
+        colorProperty.AddResource("borderColor.right", rightColorResObj, std::move(updateFunc));
+    }
+    if (topColorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.topColor = result;
+        };
+        colorProperty.AddResource("borderColor.top", topColorResObj, std::move(updateFunc));
+    }
+    if (bottomColorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.bottomColor = result;
+        };
+        colorProperty.AddResource("borderColor.bottom", bottomColorResObj, std::move(updateFunc));
+    }
+}
+
 bool ParseBorderColorProps(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext, NG::BorderColorProperty& colorProperty)
 {
@@ -1057,6 +1104,7 @@ bool ParseBorderColorProps(
             }
             colorProperty.bottomColor = bottomColor;
         }
+        AddBorderColorCallback(colorProperty, leftColorResObj, rightColorResObj, topColorResObj, bottomColorResObj);
         colorProperty.multiValued = true;
         return true;
     } else {
@@ -1081,6 +1129,14 @@ std::optional<NG::BorderColorProperty> GetBorderColorProps(
             asyncContext->hasInvertColor.hasBorderBottomColor = true;
             asyncContext->hasInvertColor.hasBorderLeftColor = true;
             asyncContext->hasInvertColor.hasBorderRightColor = true;
+        }
+        if (SystemProperties::ConfigChangePerform() && borderColorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+                Color result;
+                ResourceParseUtils::ParseResColor(resObj, result);
+                borderColors.SetColor(result);
+            };
+            colorProperty.AddResource("borderColor.single", borderColorResObj, std::move(updateFunc));
         }
         colorProperty.SetColor(borderColor);
         return colorProperty;
@@ -1270,6 +1326,14 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     } else if (ParseNapiColor(env, colorApi, color, colorResObj)) {
         if (SystemProperties::ConfigChangePerform() && !CheckDarkResource(colorResObj)) {
             asyncContext->hasInvertColor.hasShadowColor = true;
+        }
+        if (SystemProperties::ConfigChangePerform() && colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, Shadow& shadow) {
+                Color colorValue;
+                ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+                shadow.SetColor(colorValue);
+            };
+            shadow.AddResource("shadow.colorValue", colorResObj, std::move(updateFunc));
         }
         shadow.SetColor(color);
     }
@@ -1669,7 +1733,7 @@ DistortionMode GetDistortionModeParam(
 EdgeLightMode GetEdgeLightModeParam(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    int32_t edgeLightMode = 2;
+    int32_t edgeLightMode = 0;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, asyncContext->edgeLightModeApi, &valueType);
     if (valueType != napi_number) {
@@ -1795,6 +1859,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     PromptDialogAttr lifeCycleAttr = {};
+    RefPtr<ResourceObject> backgroundColorResObj;
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -1833,8 +1898,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString, valueType);
             GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
-            RefPtr<ResourceObject> backgroundColorResObj;
-            backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi);
+            backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi, backgroundColorResObj);
             if (backgroundColor && SystemProperties::ConfigChangePerform() &&
                 !CheckDarkResource(backgroundColorResObj)) {
                 asyncContext->hasInvertColor.hasBackgroundColor = true;
@@ -2001,6 +2065,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .offset = offset,
         .maskRect = maskRect,
         .backgroundColor = backgroundColor,
+        .backgroundColorResObj = backgroundColorResObj,
         .backgroundBlurStyle = backgroundBlurStyle,
         .blurStyleOption = blurStyleOption,
         .effectOption = effectOption,
@@ -2690,6 +2755,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .offset = offset,
         .maskRect = maskRect,
         .backgroundColor = backgroundColorProps,
+        .backgroundColorResObj = backgroundColorResObj,
         .backgroundBlurStyle = backgroundBlurStyle,
         .blurStyleOption = blurStyleOption,
         .effectOption = effectOption,
@@ -2704,6 +2770,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .hasInvertColor = asyncContext->hasInvertColor,
         .contentNode = AceType::WeakClaim(nodePtr),
         .maskColor = maskColorProps,
+        .maskColorResObj = maskColorResObj,
         .transitionEffect = transitionEffectProps,
         .dialogTransitionEffect = dialogTransitionEffectProps,
         .maskTransitionEffect = maskTransitionEffectProps,

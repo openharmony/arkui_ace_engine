@@ -125,6 +125,7 @@ struct _ArkUIRSProperty;
 struct ArkUI_GridLayoutOptions;
 struct ArkUI_AccessibilityProvider;
 typedef struct ArkUI_InnerColor ArkUI_InnerColor;
+typedef struct ArkUI_ImmersiveMaterial ArkUI_ImmersiveMaterial;
 struct ArkUI_EditModeOptions {
     ArkUI_Bool enableGatherSelectedItemsAnimation;
     ArkUI_Bool useDefaultMultiSelectStyle;
@@ -1512,6 +1513,7 @@ enum ArkUIEventSubKind {
     ON_LIST_REACH_START,
     ON_LIST_REACH_END,
     ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE,
+    ON_LIST_EDIT_MODE_CHANGE,
 
     ON_LIST_ITEM_SELECTED = ARKUI_MAX_EVENT_NUM * ARKUI_LIST_ITEM,
 
@@ -3725,6 +3727,8 @@ struct ArkUICommonModifier {
     void (*resetUseUnionEffect)(ArkUINodeHandle node);
     ArkUIOffsetType (*getCurrentLocation)(ArkUI_Int32 nodeId, const ArkUIOffsetType& windowOffset,
         const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit);
+    void (*setDoubleSided)(ArkUINodeHandle node, bool doubleSided);
+    void (*resetDoubleSided)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -4083,6 +4087,8 @@ struct ArkUITextModifier {
     void (*setStyledString)(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor);
     void (*setFontVariations)(ArkUINodeHandle node, ArkUIFontVariation* value, ArkUI_Int32 length);
     void (*resetFontVariations)(ArkUINodeHandle node);
+    void (*setIncrementalUpdatePolicy)(ArkUINodeHandle node, ArkUI_Int32 policy);
+    void (*resetIncrementalUpdatePolicy)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -4473,6 +4479,7 @@ struct ArkUIListModifier {
     void (*setOnListReachEndCallBack)(ArkUINodeHandle node, void* callback);
     void (*setOnListScrollStartCallBack)(ArkUINodeHandle node, void* callback);
     void (*setOnListScrollStopCallBack)(ArkUINodeHandle node, void* callback);
+    void (*setOnListEditModeChangeCallBack)(ArkUINodeHandle node, void* callback);
 
     void (*resetOnListScrollIndex)(ArkUINodeHandle node);
     void (*resetOnScrollVisibleContentChange)(ArkUINodeHandle node);
@@ -4489,6 +4496,7 @@ struct ArkUIListModifier {
     void (*resetOnListDidScroll)(ArkUINodeHandle node);
     void (*resetOnListReachStart)(ArkUINodeHandle node);
     void (*resetOnListReachEnd)(ArkUINodeHandle node);
+    void (*resetOnListEditModeChange)(ArkUINodeHandle node);
     void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
     void (*parseResObjDividerStrokeWidth)(ArkUINodeHandle node, void* resObj);
     void (*parseResObjDividerColor)(ArkUINodeHandle node, void* resObj);
@@ -4744,6 +4752,14 @@ struct ArkUILazyGridLayoutModifier {
     void (*resetRowsGap)(ArkUINodeHandle node);
     void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
+    void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
+    void (*resetSticky)(ArkUINodeHandle node);
+    void (*setHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
+    void (*resetHeader)(ArkUINodeHandle node);
+    void (*setFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
+    void (*resetFooter)(ArkUINodeHandle node);
+    void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* extraParam);
+    void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
 };
 
 struct ArkUILazyColumnLayoutModifier {
@@ -4752,6 +4768,12 @@ struct ArkUILazyColumnLayoutModifier {
     void (*resetSpace)(ArkUINodeHandle node);
     void (*setAlignItems)(ArkUINodeHandle node, ArkUI_Int32 align);
     void (*resetAlignItems)(ArkUINodeHandle node);
+    void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
+    void (*resetSticky)(ArkUINodeHandle node);
+    void (*setHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
+    void (*resetHeader)(ArkUINodeHandle node);
+    void (*setFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
+    void (*resetFooter)(ArkUINodeHandle node);
     void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
 };
@@ -5323,6 +5345,8 @@ struct ArkUITabsModifier {
     void (*createTabBarHeightWithResourceObj)(ArkUINodeHandle node, void* heightRawPtr);
     void (*createBarBackgroundEffectWithResourceObj)(ArkUINodeHandle node,
         void* colorRawPtr, void* inactiveColorRawPtr);
+    void (*setTabsBarFloatingStyle)(ArkUINodeHandle node, void* paramRawPtr);
+    void (*resetTabsBarFloatingStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {
@@ -5405,6 +5429,7 @@ struct ArkUIGestureRecognizer {
     bool capi = true;
     void* recognizer = nullptr;
     ArkUIGestureEventTargetInfo targetInfo = {};
+    ArkUI_Int32 attachNodeId = -1;
 };
 
 struct ArkUIGestureEvent {
@@ -5471,7 +5496,8 @@ struct ArkUIGestureModifier {
     void (*removeGestureFromGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
-    void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
+    void (*registerGestureEvent)(
+        ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam, const ArkUIGestureRecognizer* recognizer);
     void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
     void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
     void (*removeGestureFromNodeByTag)(ArkUINodeHandle node, ArkUI_CharPtr gestureTag);
@@ -9102,6 +9128,14 @@ struct ArkUIThemeModifier {
     ArkUI_Int32 (*getThemeScopeId)(ArkUINodeHandle node);
 };
 
+struct ArkUIMaterialModifier {
+    bool (*getDeviceSystemMaterialSupported)();
+    ArkUI_Int32 (*getGlobalMaterialLevel)();
+    void (*setSystemMaterialByHandle)(ArkUINodeHandle node, ArkUI_ImmersiveMaterial* material);
+    void (*resetSystemMaterial)(ArkUINodeHandle node);
+    bool (*getSystemMaterialHandle)(ArkUINodeHandle node, ArkUI_ImmersiveMaterial* material);
+};
+
 struct ArkUIAtomicServiceModifier {
     ArkUI_Int32 (*setMenuBarVisible)(ArkUIContext* context, ArkUI_Bool visible);
 };
@@ -9256,6 +9290,12 @@ struct ArkUILazyWaterFlowLayoutModifier {
     void (*resetRowsGap)(ArkUINodeHandle node);
     void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
+    void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
+    void (*resetSticky)(ArkUINodeHandle node);
+    void (*setHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
+    void (*resetHeader)(ArkUINodeHandle node);
+    void (*setFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
+    void (*resetFooter)(ArkUINodeHandle node);
     void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* extraParam);
     void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
     void (*setItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 policy);
@@ -9391,6 +9431,7 @@ struct ArkUINodeModifiers {
     const ArkUIDynamicLayoutModifier* (*getDynamicLayoutModifier)();
     const ArkUILazyColumnLayoutModifier* (*getLazyColumnLayoutModifier)();
     const ArkUILazyWaterFlowLayoutModifier* (*getLazyWaterFlowLayoutModifier)();
+    const ArkUIMaterialModifier* (*getMaterialModifier)();
 };
 
 // same as inner defines in property.h
@@ -9537,6 +9578,7 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*closeCustomDialog)(ArkUI_Int32 dialogId);
     ArkUI_Int32 (*setSubwindowMode)(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow);
     ArkUI_Int32 (*setDisplayModeInSubWindow)(ArkUIDialogHandle handle, ArkUI_Int32 displayModeInSubWindow);
+    ArkUI_Int32 (*setSystemMaterial)(ArkUIDialogHandle handle, ArkUI_ImmersiveMaterial* material);
     ArkUI_Int32 (*setBackgroundBlurStyleOptions)(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3],
         ArkUI_Float32 scale, ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor);
     ArkUI_Int32 (*setBackgroundEffect)(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3],

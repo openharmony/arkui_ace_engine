@@ -45,6 +45,7 @@
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
+#include "core/interfaces/native/node/material_modifier.h"
 #include "core/interfaces/native/node/menu_item_group_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -320,6 +321,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getDynamicLayoutModifier = NodeModifier::GetDynamicLayoutModifier,
         .getLazyColumnLayoutModifier = NodeModifier::GetLazyColumnLayoutModifier,
         .getLazyWaterFlowLayoutModifier = NodeModifier::GetLazyWaterFlowLayoutModifier,
+        .getMaterialModifier = NodeModifier::GetMaterialModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;
