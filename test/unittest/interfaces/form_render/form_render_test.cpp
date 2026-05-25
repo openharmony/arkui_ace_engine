@@ -305,8 +305,11 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
      * @tc.steps: step5. Test surface change
      * @tc.expected: step5. onSurfaceChange & uiContent.OnFormSurfaceChange has been called
      */
+
+    std::shared_ptr<Rosen::RSUIContext> rsUiContext = std::make_shared<Rosen::RSUIContext>();
     auto formRendererDispatcher = formRenderer->formRendererDispatcherImpl_;
     EXPECT_TRUE(formRendererDispatcher);
+    EXPECT_CALL(formRendererDispatcher, GetRSUIContext(_)).WillOnce(Return(rsUiContext));
     EXPECT_CALL(*((MockUIContent*)(ui_content)), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(ui_content)), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(ui_content)), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
@@ -319,6 +322,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
     EXPECT_EQ(onSurfaceChangeEventKey, CHECK_KEY);
     // formRenderer is null
     formRendererDispatcher->formRenderer_.reset();
+    EXPECT_CALL(formRendererDispatcher, GetRSUIContext(_)).WillOnce(Return(rsUiContext));
     EXPECT_CALL(*((MockUIContent*)(ui_content)), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(ui_content)), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(ui_content)), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
