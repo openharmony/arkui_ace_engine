@@ -21,13 +21,19 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+
+namespace OHOS::Ace {
+class TextOverlayTheme;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 
 struct OptionParam;
 struct MenuParam;
+class SelectOverlayPattern;
 
 const std::string SelectOverlayRrightClickMenuWrapper = "select_overlay_right_click_menuWrapper";
 
@@ -192,10 +198,24 @@ private:
         const std::function<void()>& systemEvent, const MenuOptionsParam& item);
     RefPtr<FrameNode> GetExtensionMenuOutterrMenu(std::vector<OptionParam>& params, const MenuParam& menuParam,
         const RefPtr<FrameNode>& caller);
+    void InitExtensionMenu(
+        const RefPtr<FrameNode>& menu, const RefPtr<FrameNode>& caller, const MenuParam& menuParam);
     void CreatExtensionMenu(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& caller);
 
     void MoreAnimation(bool noAnimation);
     void BackAnimation(bool noAnimation);
+    void PlaySelectMenuToExtensionAnimation(
+        const RectF& selectMenuTargetRect, const std::function<void()>& onFinish);
+    void PlayExtensionMenuDistortAnimation(const RefPtr<FrameNode>& extensionMenu, const OffsetF& menuPosition);
+    void ContinuePlayExtensionMenuDistortAnimation(
+        const RefPtr<FrameNode>& extensionMenu, const OffsetF& adjustedMenuPosition, Placement finalPlacement,
+        const RectF& selectMenuTargetRect);
+    void PlayExtensionMenuLightAnimation(
+        const RefPtr<FrameNode>& extensionMenu, const RectF& adjustedExtensionMenuRect, Placement finalPlacement);
+    void UpdateNewMaterialBackAnimationProperties(PipelineContext* pipeline,
+        const RefPtr<SelectOverlayPattern>& pattern, const RefPtr<TextOverlayTheme>& textOverlayTheme,
+        const std::optional<float>& menuWidth);
+    void PlayNewMaterialBackSelectAnimation(int32_t containerId);
 
     void DispatchVisibleState(FrameNodeType type, FrameNodeTrigger trigger);
     void DispatchVisibleToGoneState(FrameNodeType type, FrameNodeTrigger trigger);
@@ -239,6 +259,8 @@ private:
     std::optional<float> GetParentWidth();
 
     using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
+    void NewMaterialMoreAnimation(bool noAnimation);
+    void NewMaterialBackAnimation(bool noAnimation);
 
     /* Text selection menu node structure.
         -rootNode
