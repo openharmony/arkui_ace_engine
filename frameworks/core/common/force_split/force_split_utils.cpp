@@ -47,7 +47,6 @@ constexpr char NAV_BAR_HOME_PAGE_NAME[] = "navBar";
 constexpr char HOME_PAGE_KEY[] = "homePage";
 constexpr char RELATED_PAGE_KEY[] = "relatedPage";
 constexpr char ENABLE_HOOK_KEY[] = "enableReducedContainerSize";
-constexpr char NAVIGATION_OPTIONS_KEY[] = "navigationOptions";
 constexpr char HOME_NAVIGATION_ID_KEY[] = "homeNavigationId";
 constexpr char HOME_NAVIGATION_DEPTH_KEY[] = "homeNavigationDepth";
 constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "navigationDisablePlaceholder";
