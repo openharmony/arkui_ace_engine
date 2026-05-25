@@ -24,7 +24,7 @@ import {
 } from '@ohos.arkui.component';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 import { LengthMetrics } from '@ohos.arkui.node';
-import { Param, Local, Monitor, IMonitor, ObservedV2, Trace } from '@ohos.arkui.stateManagement';
+import { Param, Local, Monitor, IMonitor, ObservedV2, Trace, Require } from '@ohos.arkui.stateManagement';
 import { Theme } from '@ohos.arkui.theme';
 
 import hilog from '@ohos.hilog';
@@ -35,7 +35,6 @@ import promptAction from '@ohos.promptAction';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
-import { Require } from '@kit.ArkUI';
 
 export type OnActionCallback = () => void;
 
