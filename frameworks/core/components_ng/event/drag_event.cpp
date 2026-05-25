@@ -357,10 +357,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        auto prepareDragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
-        CHECK_NULL_VOID(prepareDragFrameNode);
-        if (DragDropGlobalController::GetInstance().GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
-            (frameNode->GetContextRefPtr() == pipeline && frameNode != prepareDragFrameNode &&
+        auto& dragDropGlobalController = DragDropGlobalController::GetInstance();
+        if (dragDropGlobalController.GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED ||
+            (frameNode->GetContextRefPtr() == pipeline &&
+            frameNode != dragDropGlobalController.GetPrepareDragFrameNode().Upgrade() &&
             info.GetSourceDevice() != SourceType::MOUSE && !actuator->isForDragDrop_)) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Drag preview is landing finished, stop dragging.");
             return;
