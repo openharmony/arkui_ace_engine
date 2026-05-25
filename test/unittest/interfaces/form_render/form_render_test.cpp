@@ -270,7 +270,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
      * @tc.steps: step3. call formRenderer's AddForm
      * @tc.expected: step3. onSurfaceCreate has been called
      */
-    EXPECT_CALL(*((MockUIContent*)(ui_content)), SetFormWidth(_)).WillOnce(Return());  
+    EXPECT_CALL(*((MockUIContent*)(ui_content)), SetFormWidth(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(ui_content)), SetFormHeight(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(ui_content)), UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(ui_content)), UpdateFormData(_)).WillOnce(Return());
