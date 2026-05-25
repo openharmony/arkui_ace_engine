@@ -649,4 +649,39 @@ HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, StickyHeaderFooterRtlAlignment_00
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 13), 540.0f);
 }
 
+/**
+ * @tc.name: ContentItemsRenderWithStickyHeaderFooter001
+ * @tc.desc: A header+footer sticky LazyVWaterFlowLayout must render its content items, not just the header/footer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, ContentItemsRenderWithStickyHeaderFooter001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    LazyWaterFlowLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyWaterFlowLayoutModel::SetHeader([]() { CreateEdge(40.0f); });
+
+    auto mockLazy = AceType::MakeRefPtr<LazyWaterFlowMockLazy>(std::vector<float>(10, 100.0f));
+    CreateLazyForEach(mockLazy, GetElmtId());
+    LazyWaterFlowLayoutModel::SetFooter([]() { CreateEdge(30.0f); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    auto headerNode = AceType::DynamicCast<FrameNode>(pattern_->GetHeader());
+    auto footerNode = AceType::DynamicCast<FrameNode>(pattern_->GetFooter());
+    ASSERT_NE(headerNode, nullptr);
+    ASSERT_NE(footerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_TRUE(footerNode->IsActive());
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_GT(pattern_->layoutInfo_->endIndex_, 0);
+    auto firstItemPos = pattern_->layoutInfo_->GetPos(0);
+    ASSERT_NE(firstItemPos, nullptr);
+    EXPECT_FLOAT_EQ(firstItemPos->startPos, 40.0f);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 1), 40.0f);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 2), 140.0f);
+}
+
 } // namespace OHOS::Ace::NG

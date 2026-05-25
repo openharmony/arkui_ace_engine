@@ -143,7 +143,8 @@ float LazyColumnLayoutInfo::UpdatePosWithIter(
 
 void LazyColumnLayoutInfo::UpdatePosMap()
 {
-    float prevTotalMainSize_ = totalMainSize_;
+    // Exclude the constant footer so it does not leak into the inter-frame adjustOffset.
+    float prevTotalMainSize_ = totalMainSize_ - footerMainSize_;
     if (!Positive(estimateItemSize_)) {
         auto estimateItemSize = GetEstimateItemSize();
         if (Positive(estimateItemSize)) {

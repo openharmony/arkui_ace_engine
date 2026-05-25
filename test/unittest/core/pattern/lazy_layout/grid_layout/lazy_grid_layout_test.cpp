@@ -2475,4 +2475,67 @@ HWTEST_F(LazyGridLayoutTest, LayoutPolicyTest001, TestSize.Level1)
     EXPECT_EQ(size, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
 }
+
+namespace {
+void CreateGridEdge(float height)
+{
+    StackModelNG stackModel;
+    stackModel.Create();
+    ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+    ViewAbstract::SetHeight(CalcLength(height));
+    ViewStackProcessor::GetInstance()->Pop();
+}
+} // namespace
+
+/**
+ * @tc.name: HeaderFooterTotalStableOnIdle001
+ * @tc.desc: A header+footer grid must not inflate totalMainSize_ on predictive (idle) frames.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, HeaderFooterTotalStableOnIdle001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    CreateLazyGridLayout();
+    LazyGridLayoutModel::SetHeader([]() { CreateGridEdge(60.0f); });
+    CreateContent(30);
+    LazyGridLayoutModel::SetFooter([]() { CreateGridEdge(40.0f); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    const float totalAfterLayout = pattern_->layoutInfo_->totalMainSize_;
+    EXPECT_GT(totalAfterLayout, pattern_->GetHeaderMainSize() + pattern_->GetFooterMainSize());
+
+    FlushIdleTask(pattern_);
+    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
+    FlushIdleTask(pattern_);
+    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
+}
+
+/**
+ * @tc.name: StickyHeaderStaysLaidOutOnIdle001
+ * @tc.desc: A sticky header/footer grid must keep its edges active across predictive (idle) frames.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, StickyHeaderStaysLaidOutOnIdle001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    CreateLazyGridLayout();
+    LazyGridLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyGridLayoutModel::SetHeader([]() { CreateGridEdge(60.0f); });
+    CreateContent(30);
+    LazyGridLayoutModel::SetFooter([]() { CreateGridEdge(40.0f); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    auto headerNode = pattern_->GetHeaderNode();
+    auto footerNode = pattern_->GetFooterNode();
+    ASSERT_NE(headerNode, nullptr);
+    ASSERT_NE(footerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_TRUE(footerNode->IsActive());
+
+    FlushIdleTask(pattern_);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_TRUE(footerNode->IsActive());
+}
 } // namespace OHOS::Ace::NG

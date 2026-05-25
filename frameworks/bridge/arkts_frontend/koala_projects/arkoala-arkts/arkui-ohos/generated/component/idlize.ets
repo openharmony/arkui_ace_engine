@@ -62,6 +62,7 @@ import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from './d
 import { LayoutConstraint_serializer, InteractionEventBindingInfo_serializer } from './../framework/FrameNode'
 import { FrameNode, UIStatesChangeHandler, LayoutConstraint, InteractionEventBindingInfo } from 'arkui.FrameNode'
 import { CustomBuilder } from './builder'
+import { StickyStyle } from './list'
 import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask, PanGestureHandlerOptions_serializer, PanGestureHandlerOptions, GestureRecognizer, GestureRecognizerInternal, GestureEvent_serializer, GestureRecognizer_serializer } from './gesture'
 import { default as image } from '@ohos.multimedia.image'
 import { font_FontOptions_serializer, font_FontInfo_serializer, font_UIFontConfig_serializer } from './../framework/ohos.font'
@@ -3986,6 +3987,60 @@ export class LazyColumnLayoutExtender {
         ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_onVisibleIndexesChange(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    public static header(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        LazyColumnLayoutExtender.header_serialize(node_casted, builder_casted)
+        return
+    }
+    public static footer(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        LazyColumnLayoutExtender.footer_serialize(node_casted, builder_casted)
+        return
+    }
+    public static sticky(node: KPointer, sticky?: StickyStyle): void {
+        const node_casted = node as (KPointer)
+        const sticky_casted = sticky as (StickyStyle | undefined)
+        LazyColumnLayoutExtender.sticky_serialize(node_casted, sticky_casted)
+        return
+    }
+    private static header_serialize(node: KPointer, builder?: CustomBuilder): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (builder !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const builderTmpValue = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_header(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static footer_serialize(node: KPointer, builder?: CustomBuilder): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (builder !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const builderTmpValue = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_footer(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static sticky_serialize(node: KPointer, sticky?: StickyStyle): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (sticky !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const stickyTmpValue = (sticky as StickyStyle)
+            thisSerializer.writeInt32(stickyTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_sticky(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export class LazyForEachOps {
     public static NotifyChange(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
@@ -4150,6 +4205,60 @@ export class LazyWaterFlowLayoutExtender {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_onVisibleIndexesChange(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static header(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        LazyWaterFlowLayoutExtender.header_serialize(node_casted, builder_casted)
+        return
+    }
+    public static footer(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        LazyWaterFlowLayoutExtender.footer_serialize(node_casted, builder_casted)
+        return
+    }
+    public static sticky(node: KPointer, sticky?: StickyStyle): void {
+        const node_casted = node as (KPointer)
+        const sticky_casted = sticky as (StickyStyle | undefined)
+        LazyWaterFlowLayoutExtender.sticky_serialize(node_casted, sticky_casted)
+        return
+    }
+    private static header_serialize(node: KPointer, builder?: CustomBuilder): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (builder !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const builderTmpValue = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_header(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static footer_serialize(node: KPointer, builder?: CustomBuilder): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (builder !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const builderTmpValue = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_footer(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static sticky_serialize(node: KPointer, sticky?: StickyStyle): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (sticky !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const stickyTmpValue = (sticky as StickyStyle)
+            thisSerializer.writeInt32(stickyTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_sticky(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

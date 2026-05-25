@@ -1703,17 +1703,16 @@ void LazyWaterFlowLayoutAlgorithm::UpdateActiveChildRange(LayoutWrapper* layoutW
     const auto activeEnd = hasVisibleRange ? visibleEnd : windowEnd;
     const auto cacheBefore = hasVisibleRange ? std::max(activeStart - windowStart, 0) : 0;
     const auto cacheAfter = hasVisibleRange ? std::max(windowEnd - activeEnd, 0) : 0;
-    if (!needVisibleRange) {
-        // h/f/s: translate item indices to raw indices; when header / footer present, use ActiveChildSets so
-        // they stay active alongside the item cache window.
-        const auto rawWindowStart = GetRawIndexForItem(windowStart);
-        const auto rawWindowEnd = GetRawIndexForItem(windowEnd);
-        if (headerIndex_ < 0 && footerIndex_ < 0) {
+    // With header/footer, run the set-based prune even when needVisibleRange, or the section never registers its items.
+    const auto rawWindowStart = GetRawIndexForItem(windowStart);
+    const auto rawWindowEnd = GetRawIndexForItem(windowEnd);
+    if (headerIndex_ < 0 && footerIndex_ < 0) {
+        if (!needVisibleRange) {
             layoutWrapper->SetActiveChildRange(rawWindowStart, rawWindowEnd, 0, 0);
-        } else {
-            auto activeChildSets = BuildActiveChildSets(rawWindowStart, rawWindowEnd);
-            layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
         }
+    } else {
+        auto activeChildSets = BuildActiveChildSets(rawWindowStart, rawWindowEnd);
+        layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
     }
     UpdateItemActiveRangeOnChildren(host, activeStart, activeEnd, cacheBefore, cacheAfter);
 }

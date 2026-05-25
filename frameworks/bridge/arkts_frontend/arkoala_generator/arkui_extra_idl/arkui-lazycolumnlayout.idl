@@ -16,11 +16,15 @@ package arkui.component.idlize;
 import arkui.Graphics.LengthMetrics as LengthMetrics;
 import arkui.component.enums.HorizontalAlign as HorizontalAlign;
 import arkui.component.common.OnVisibleIndexesChangeCallback as OnVisibleIndexesChangeCallback;
+import arkui.component.list.StickyStyle as StickyStyle;
 [Entity=Class]
 interface LazyColumnLayoutExtender {
     static pointer lazyColumnLayoutConstructor(i32 id);
     static void setLazyColumnLayoutOptions(pointer node);
     static void space(pointer node, optional LengthMetrics space);
     static void alignItems(pointer node, optional HorizontalAlign value);
+    static void header(pointer node, optional CustomBuilder builder);
+    static void footer(pointer node, optional CustomBuilder builder);
+    static void sticky(pointer node, optional StickyStyle sticky);
     static void onVisibleIndexesChange(pointer node, optional OnVisibleIndexesChangeCallback callback_);
 };

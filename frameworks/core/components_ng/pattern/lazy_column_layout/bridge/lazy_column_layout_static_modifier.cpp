@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model_static.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -32,6 +33,17 @@ void AssignCast(std::optional<HorizontalAlign>& dst, const Ark_HorizontalAlign& 
         case ARK_HORIZONTAL_ALIGN_START: dst = HorizontalAlign::START; break;
         case ARK_HORIZONTAL_ALIGN_END: dst = HorizontalAlign::END; break;
         case ARK_HORIZONTAL_ALIGN_CENTER: dst = HorizontalAlign::CENTER; break;
+        default: break;
+    }
+}
+template<>
+void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
+{
+    switch (src) {
+        case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;
+        case ARK_STICKY_STYLE_HEADER: dst = V2::StickyStyle::HEADER; break;
+        case ARK_STICKY_STYLE_FOOTER: dst = V2::StickyStyle::FOOTER; break;
+        case ARK_STICKY_STYLE_BOTH: dst = V2::StickyStyle::BOTH; break;
         default: break;
     }
 }
@@ -70,6 +82,50 @@ void AlignItemsImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<HorizontalAlign>(value);
     LazyColumnLayoutModelStatic::SetAlignItems(frameNode, convValue);
 }
+void HeaderImpl(Ark_NativePointer node,
+                const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        LazyColumnLayoutModelStatic::RemoveHeader(frameNode);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto host = weakNode.Upgrade();
+            CHECK_NULL_VOID(host);
+            LazyColumnLayoutModelStatic::SetHeader(AceType::RawPtr(host), uiNode);
+        }, node);
+}
+void FooterImpl(Ark_NativePointer node,
+                const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        LazyColumnLayoutModelStatic::RemoveFooter(frameNode);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto host = weakNode.Upgrade();
+            CHECK_NULL_VOID(host);
+            LazyColumnLayoutModelStatic::SetFooter(AceType::RawPtr(host), uiNode);
+        }, node);
+}
+void StickyImpl(Ark_NativePointer node,
+                const Opt_StickyStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto style = Converter::OptConvertPtr<V2::StickyStyle>(value);
+    LazyColumnLayoutModelStatic::SetSticky(frameNode, EnumToInt(style));
+}
 void OnVisibleIndexesChangeImpl(Ark_NativePointer node,
                                 const Opt_OnVisibleIndexesChangeCallback* callback_)
 {
@@ -97,6 +153,9 @@ const GENERATED_ArkUILazyColumnLayoutExtenderAccessor* GetLazyColumnLayoutStatic
         LazyColumnLayoutExtenderAccessor::SetLazyColumnLayoutOptionsImpl,
         LazyColumnLayoutExtenderAccessor::SpaceImpl,
         LazyColumnLayoutExtenderAccessor::AlignItemsImpl,
+        LazyColumnLayoutExtenderAccessor::HeaderImpl,
+        LazyColumnLayoutExtenderAccessor::FooterImpl,
+        LazyColumnLayoutExtenderAccessor::StickyImpl,
         LazyColumnLayoutExtenderAccessor::OnVisibleIndexesChangeImpl,
     };
     return &LazyColumnLayoutExtenderAccessorImpl;

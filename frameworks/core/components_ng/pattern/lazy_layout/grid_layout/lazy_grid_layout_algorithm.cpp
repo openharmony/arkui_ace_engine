@@ -196,6 +196,9 @@ void LazyGridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     if (layoutInfo_->deadline_) {
         layoutInfo_->deadline_.reset();
+        // Re-lay the sticky header/footer on predictive frames too, else the edges freeze for a frame and flicker.
+        LayoutHeader(layoutWrapper, paddingOffset, stickyStyle, stickyHeaderPos);
+        LayoutFooter(layoutWrapper, paddingOffset, stickyStyle, stickyFooterPos);
         return;
     }
     LayoutHeader(layoutWrapper, paddingOffset, stickyStyle, stickyHeaderPos);
@@ -1093,6 +1096,9 @@ void LazyGridLayoutAlgorithm::SyncPredictLayoutInfo(LayoutWrapper* layoutWrapper
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_MEASURE_SELF) {
+        // Reset to body total: Measure() re-adds header+footer afterward, so keeping the section total here would
+        // double-count them every predictive frame.
+        totalMainSize_ = layoutInfo_->totalMainSize_ - layoutInfo_->headerMainSize_ - layoutInfo_->footerMainSize_;
         return;
     }
     layoutInfo_->UpdatePosMap();
@@ -1266,9 +1272,11 @@ void LazyGridLayoutAlgorithm::SetHeaderFooterActive(
         return;
     }
     ActiveChildSets activeChildSets;
+    int32_t rawStart = -1;
+    int32_t rawEnd = -1;
     if (cachedStart >= 0 && cachedEnd >= cachedStart) {
-        const auto rawStart = GetRawIndexForItem(cachedStart);
-        const auto rawEnd = GetRawIndexForItem(cachedEnd);
+        rawStart = GetRawIndexForItem(cachedStart);
+        rawEnd = GetRawIndexForItem(cachedEnd);
         for (auto index = rawStart; index <= rawEnd; ++index) {
             activeChildSets.activeItems.insert(index);
         }
@@ -1279,6 +1287,35 @@ void LazyGridLayoutAlgorithm::SetHeaderFooterActive(
     if (footerIndex_ >= 0) {
         activeChildSets.activeItems.insert(footerIndex_);
     }
+    // Pass nullopt: a real range would also deactivate the header/footer nodes. Activate content items separately.
     layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
+    ActivateContentItemRange(layoutWrapper, rawStart, rawEnd);
+}
+
+void LazyGridLayoutAlgorithm::ActivateContentItemRange(
+    LayoutWrapper* layoutWrapper, int32_t rawStart, int32_t rawEnd) const
+{
+    if (rawStart < 0) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    int32_t childStart = 0;
+    for (const auto& child : host->GetChildren()) {
+        if (!child) {
+            continue;
+        }
+        auto childCount = child->FrameCount();
+        if (childCount <= 0) {
+            continue;
+        }
+        const auto childEnd = childStart + childCount - 1;
+        const bool isHeader = headerIndex_ >= childStart && headerIndex_ <= childEnd;
+        const bool isFooter = footerIndex_ >= childStart && footerIndex_ <= childEnd;
+        if (!isHeader && !isFooter) {
+            child->DoSetActiveChildRange(rawStart - childStart, rawEnd - childStart, 0, 0);
+        }
+        childStart += childCount;
+    }
 }
 } // namespace OHOS::Ace::NG

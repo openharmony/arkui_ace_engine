@@ -25429,6 +25429,12 @@ typedef struct GENERATED_ArkUILazyGridLayoutAttributeModifier {
                        const Opt_LengthMetrics* value);
     void (*setColumnsGap)(Ark_NativePointer node,
                           const Opt_LengthMetrics* value);
+    void (*setHeader)(Ark_NativePointer node,
+                      const Opt_CustomNodeBuilder* builder);
+    void (*setFooter)(Ark_NativePointer node,
+                      const Opt_CustomNodeBuilder* builder);
+    void (*setSticky)(Ark_NativePointer node,
+                      const Opt_StickyStyle* value);
     void (*setOnVisibleIndexesChange)(Ark_NativePointer node,
                                       const Opt_OnVisibleIndexesChangeCallback* callback_);
 } GENERATED_ArkUILazyGridLayoutAttributeModifier;
@@ -30066,6 +30072,12 @@ typedef struct GENERATED_ArkUILazyColumnLayoutExtenderAccessor {
                   const Opt_LengthMetrics* space);
     void (*alignItems)(Ark_NativePointer node,
                        const Opt_HorizontalAlign* value);
+    void (*header)(Ark_NativePointer node,
+                   const Opt_CustomNodeBuilder* builder);
+    void (*footer)(Ark_NativePointer node,
+                   const Opt_CustomNodeBuilder* builder);
+    void (*sticky)(Ark_NativePointer node,
+                   const Opt_StickyStyle* value);
     void (*onVisibleIndexesChange)(Ark_NativePointer node,
                                    const Opt_OnVisibleIndexesChangeCallback* callback_);
 } GENERATED_ArkUILazyColumnLayoutExtenderAccessor;
@@ -30097,6 +30109,12 @@ typedef struct GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor {
                        const Opt_LengthMetrics* value);
     void (*columnsTemplate)(Ark_NativePointer node,
                             const Opt_Union_String_ItemFillPolicy* value);
+    void (*header)(Ark_NativePointer node,
+                   const Opt_CustomNodeBuilder* builder);
+    void (*footer)(Ark_NativePointer node,
+                   const Opt_CustomNodeBuilder* builder);
+    void (*sticky)(Ark_NativePointer node,
+                   const Opt_StickyStyle* value);
     void (*onVisibleIndexesChange)(Ark_NativePointer node,
                                    const Opt_OnVisibleIndexesChangeCallback* callback_);
 } GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor;

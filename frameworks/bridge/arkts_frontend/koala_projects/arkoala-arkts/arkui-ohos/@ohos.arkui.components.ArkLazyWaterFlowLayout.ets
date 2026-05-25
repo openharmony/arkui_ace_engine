@@ -16,6 +16,8 @@
 import { LengthMetrics } from 'arkui/Graphics'
 import { ArkCommonMethodPeer, ArkCommonMethodComponent, CommonMethod, OnVisibleIndexesChangeCallback, AttributeModifier } from 'arkui/component/common'
 import { ItemFillPolicy } from 'arkui/component/units'
+import { CustomBuilder } from 'arkui/component/builder'
+import { StickyStyle } from 'arkui/component/list'
 import { int32 } from '@koalaui/common'
 import { KPointer } from '@koalaui/interop'
 import { ComponentBase } from 'arkui/ComponentBase'
@@ -38,6 +40,15 @@ export interface LazyWaterFlowLayoutAttribute extends CommonMethod {
     }
     attributeModifier(modifier: AttributeModifier<LazyWaterFlowLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         return this
+    }
+    header(builder: CustomBuilder | undefined): this {
+        return this;
+    }
+    footer(builder: CustomBuilder | undefined): this {
+        return this;
+    }
+    sticky(sticky: StickyStyle | undefined): this {
+        return this;
     }
 }
 
@@ -67,6 +78,15 @@ export class ArkLazyWaterFlowLayoutAttributePeer extends ArkCommonMethodPeer {
     }
     setOnVisibleIndexesChangeAttribute(callback: OnVisibleIndexesChangeCallback | undefined): void {
         LazyWaterFlowLayoutExtender.onVisibleIndexesChange(this.peer.ptr, callback)
+    }
+    setHeaderAttribute(builder: CustomBuilder | undefined): void {
+        LazyWaterFlowLayoutExtender.header(this.peer.ptr, builder)
+    }
+    setFooterAttribute(builder: CustomBuilder | undefined): void {
+        LazyWaterFlowLayoutExtender.footer(this.peer.ptr, builder)
+    }
+    setStickyAttribute(sticky: StickyStyle | undefined): void {
+        LazyWaterFlowLayoutExtender.sticky(this.peer.ptr, sticky)
     }
 }
 
@@ -133,6 +153,30 @@ export class ArkLazyWaterFlowLayoutAttributeComponent extends ArkCommonMethodCom
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
+    }
+    public header(builder: CustomBuilder | undefined): this {
+        if (this.checkPriority('header')) {
+            const builder_casted = builder as (CustomBuilder | undefined)
+            this.getPeer()?.setHeaderAttribute(builder_casted)
+            return this
+        }
+        return this
+    }
+    public footer(builder: CustomBuilder | undefined): this {
+        if (this.checkPriority('footer')) {
+            const builder_casted = builder as (CustomBuilder | undefined)
+            this.getPeer()?.setFooterAttribute(builder_casted)
+            return this
+        }
+        return this
+    }
+    public sticky(sticky: StickyStyle | undefined): this {
+        if (this.checkPriority('sticky')) {
+            const sticky_casted = sticky as (StickyStyle | undefined)
+            this.getPeer()?.setStickyAttribute(sticky_casted)
+            return this
+        }
+        return this
     }
 }
 
