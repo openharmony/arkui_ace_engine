@@ -746,7 +746,22 @@ private onHourChange(selectedIndex: number): void {
     return this.selectedSecond;
   }
   
+  private isRTL(): boolean {
+    return i18n.isRTL(this.locale.toString()) ?? false;
+  }
+  
   private getFirstPickerIndicator(radius: number = 20): PickerIndicatorStyle {
+    if (this.isRTL()) {
+      return {
+        type: PickerIndicatorType.BACKGROUND,
+        borderRadius: {
+          topLeft: 0,
+          topRight: radius,
+          bottomLeft: 0,
+          bottomRight: radius
+        } as BorderRadiuses
+      };
+    }
     return {
       type: PickerIndicatorType.BACKGROUND,
       borderRadius: {
@@ -771,6 +786,17 @@ private onHourChange(selectedIndex: number): void {
   }
   
   private getLastPickerIndicator(radius: number = 20): PickerIndicatorStyle {
+    if (this.isRTL()) {
+      return {
+        type: PickerIndicatorType.BACKGROUND,
+        borderRadius: {
+          topLeft: radius,
+          topRight: 0,
+          bottomLeft: radius,
+          bottomRight: 0
+        } as BorderRadiuses
+      };
+    }
     return {
       type: PickerIndicatorType.BACKGROUND,
       borderRadius: {

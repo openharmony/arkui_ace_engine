@@ -18,7 +18,6 @@ advanced_ui_component_libs = [
   "chip",
   "segmentbuttonv2",
   "dialog",
-  "datepickercomponent",
 ]
 
 template("advanced_ui_component_lib") {
