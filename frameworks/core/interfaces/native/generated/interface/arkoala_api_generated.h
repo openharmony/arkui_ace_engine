@@ -6788,6 +6788,14 @@ typedef struct Opt_SecurityComponentLayoutDirection {
     Ark_Tag tag;
     Ark_SecurityComponentLayoutDirection value;
 } Opt_SecurityComponentLayoutDirection;
+typedef enum Ark_SecurityComponentRoleType {
+    ARK_SECURITY_COMPONENT_ROLE_TYPE_ROLE_NONE = 0,
+    ARK_SECURITY_COMPONENT_ROLE_TYPE_BUTTON = 1,
+} Ark_SecurityComponentRoleType;
+typedef struct Opt_SecurityComponentRoleType {
+    Ark_Tag tag;
+    Ark_SecurityComponentRoleType value;
+} Opt_SecurityComponentRoleType;
 typedef enum Ark_SeekMode {
     ARK_SEEK_MODE_PREVIOUS_KEYFRAME = 0,
     ARK_SEEK_MODE_NEXT_KEYFRAME = 1,
@@ -26177,6 +26185,16 @@ typedef struct GENERATED_ArkUISecurityComponentMethodModifier {
                        const Opt_Boolean* respond);
     void (*setFocusBox)(Ark_NativePointer node,
                         const Opt_FocusBoxStyle* style);
+    void (*setFallbackLineSpacing)(Ark_NativePointer node,
+                                    const Opt_Boolean* enabled);
+    void (*setAccessibilityNextFocusId)(Ark_NativePointer node,
+                                        const Opt_String* nextId);
+    void (*setAccessibilityDefaultFocus)(Ark_NativePointer node,
+                                        const Opt_Boolean* focus);
+    void (*setAccessibilityRole)(Ark_NativePointer node,
+                                const Opt_SecurityComponentRoleType* role);
+    void (*setAccessibilityDescription)(Ark_NativePointer node,
+                                        const Opt_Union_String_Resource* description);
 } GENERATED_ArkUISecurityComponentMethodModifier;
 
 typedef struct GENERATED_ArkUISelectModifier {
