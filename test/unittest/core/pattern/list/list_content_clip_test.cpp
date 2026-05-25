@@ -1361,4 +1361,204 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithLazyVGridLayout001, TestS
     EXPECT_EQ(lazyGridVisibleEnd, 5);
     EXPECT_LE(lazyGridVisibleEnd, lazyGridPattern->layoutInfo_->endIndex_);
 }
+
+/**
+ * @tc.name: ContentClipSafeAreaWithMultipleLazyVGridLayout001
+ * @tc.desc: Test List with three LazyVGridLayout and ContentClip SAFE_AREA mode, verify preload range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SAFE_AREA content clip and safeAreaPadding
+     * List frame height is 400.f (HEIGHT), with 100.f bottom safeAreaPadding
+     * First LazyVGridLayout: height 350.f (larger than content area but smaller than clip extension)
+     * Second LazyVGridLayout: upper boundary at 350.f (just within clip extension range)
+     * Third LazyVGridLayout: upper boundary at 700.f (outside first LazyVGridLayout)
+     */
+    ListModelNG listModel = CreateList();
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    PaddingProperty safeAreaPadding;
+    safeAreaPadding.bottom = std::make_optional<CalcLength>(100.f);
+    layoutProperty_->UpdateSafeAreaPadding(safeAreaPadding);
+
+    // create 3 lazyVGridLayout
+    for (int32_t i = 0; i < 3; i++) {
+        LazyVGridLayoutModel lazyGridModel1;
+        lazyGridModel1.Create();
+        ViewAbstract::SetWidth(CalcLength(WIDTH));
+        lazyGridModel1.SetColumnsTemplate("1fr 1fr");
+        for (int32_t i = 0; i < 14; i++) {
+            StackModelNG stackModel;
+            stackModel.Create();
+            ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(50.f));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0);
+    EXPECT_EQ(pattern_->itemPosition_[0].endPos, 350);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 350);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 700);
+
+    /**
+     * @tc.steps: step2. Get LazyVGridLayout patterns
+     */
+    auto lazyGrid1 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(lazyGrid1, nullptr);
+    auto lazyGridPattern1 = lazyGrid1->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern1, nullptr);
+
+    auto lazyGrid2 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ASSERT_NE(lazyGrid2, nullptr);
+    auto lazyGridPattern2 = lazyGrid2->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern2, nullptr);
+
+    auto lazyGrid3 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(2));
+    ASSERT_NE(lazyGrid3, nullptr);
+    auto lazyGridPattern3 = lazyGrid3->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern3, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify first LazyVGridLayout preload range
+     * First grid at Y=0, height 350.f (14 items / 2 columns * 50.f = 7 rows)
+     * First grid fully visible and within clip extension, callback triggered
+     * @tc.expected: first grid visible and preload range should cover all 14 items
+     */
+    auto layoutInfo1 = lazyGridPattern1->layoutInfo_;
+    ASSERT_NE(layoutInfo1, nullptr);
+    EXPECT_EQ(lazyGridPattern1->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(0, 13)));
+    EXPECT_EQ(layoutInfo1->startIndex_, 0);
+    EXPECT_EQ(layoutInfo1->endIndex_, layoutInfo1->totalItemCount_ - 1);
+
+    /**
+     * @tc.steps: step4. Verify second LazyVGridLayout preload range
+     * Second grid starts at Y=350.f, within clip extension (350.f < 400.f frame + 100.f safeAreaPadding extension)
+     * Callback not triggered (no fully visible items), but preload triggered for items within grid
+     * @tc.expected: second grid visible range -1 (callback not triggered), preload range items 0-3
+     */
+    auto layoutInfo2 = lazyGridPattern2->layoutInfo_;
+    ASSERT_NE(layoutInfo2, nullptr);
+    EXPECT_EQ(lazyGridPattern2->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo2->startIndex_, 0);
+    EXPECT_EQ(layoutInfo2->endIndex_, 3);
+
+    /**
+     * @tc.steps: step5. Verify third LazyVGridLayout preload range
+     * Third grid starts at Y=700.f, outside clip extension (700.f > 400.f frame + 100.f
+     * safeAreaPadding + 200.f clipExtension)
+     * Callback not triggered, preload not triggered
+     * @tc.expected: third grid visible range -1, preload range -1
+     */
+    auto layoutInfo3 = lazyGridPattern3->layoutInfo_;
+    ASSERT_NE(layoutInfo3, nullptr);
+    EXPECT_EQ(lazyGridPattern3->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo3->startIndex_, -1);
+    EXPECT_EQ(layoutInfo3->endIndex_, -1);
+}
+
+/**
+ * @tc.name: ContentClipSafeAreaWithMultipleLazyVGridLayout002
+ * @tc.desc: Test List with three LazyVGridLayout and ContentClip SAFE_AREA mode and stackFromEnd, verify preload range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with SAFE_AREA content clip and safeAreaPadding and stackFromEnd
+     * List frame height is 400.f (HEIGHT), with 100.f top safeAreaPadding
+     * Third LazyVGridLayout: upper boundary at 50.f (just within clip extension range)
+     * Second LazyVGridLayout: bottom boundary at 50.f (just within clip extension range)
+     * First LazyVGridLayout: bottom boundary at -400 (outside first LazyVGridLayout)
+     */
+    ListModelNG listModel = CreateList();
+    listModel.SetStackFromEnd(true);
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::SAFE_AREA, nullptr);
+    PaddingProperty safeAreaPadding;
+    safeAreaPadding.top = std::make_optional<CalcLength>(100.f);
+    layoutProperty_->UpdateSafeAreaPadding(safeAreaPadding);
+    
+    // create 3 lazyVGridLayout
+    for (int32_t i = 0; i < 3; i++) {
+        LazyVGridLayoutModel lazyGridModel1;
+        lazyGridModel1.Create();
+        ViewAbstract::SetWidth(CalcLength(WIDTH));
+        lazyGridModel1.SetColumnsTemplate("1fr 1fr");
+        for (int32_t i = 0; i < 14; i++) {
+            StackModelNG stackModel;
+            stackModel.Create();
+            ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(50.f));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    CreateDone();
+    FlushUITasks(frameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->itemPosition_[2].endPos, 300);
+    EXPECT_EQ(pattern_->itemPosition_[2].startPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -400);
+
+    /**
+     * @tc.steps: step2. Get LazyVGridLayout patterns
+     */
+    auto lazyGrid1 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(lazyGrid1, nullptr);
+    auto lazyGridPattern1 = lazyGrid1->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern1, nullptr);
+
+    auto lazyGrid2 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ASSERT_NE(lazyGrid2, nullptr);
+    auto lazyGridPattern2 = lazyGrid2->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern2, nullptr);
+
+    auto lazyGrid3 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(2));
+    ASSERT_NE(lazyGrid3, nullptr);
+    auto lazyGridPattern3 = lazyGrid3->GetPattern<LazyGridLayoutPattern>();
+    ASSERT_NE(lazyGridPattern3, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify third LazyVGridLayout preload range (stackFromEnd order: first child is at bottom)
+     * Third grid: startPos=-50.f, endPos=300.f, height 350.f
+     * Covers visible area [0, 400] and clip extension [-200, 600]
+     * @tc.expected: third grid visible and preload range should cover all 14 items
+     */
+    auto layoutInfo3 = lazyGridPattern3->layoutInfo_;
+    ASSERT_NE(layoutInfo3, nullptr);
+    EXPECT_EQ(lazyGridPattern3->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(0, 13)));
+    EXPECT_EQ(layoutInfo3->startIndex_, 0);
+    EXPECT_EQ(layoutInfo3->endIndex_, 13);
+
+    /**
+     * @tc.steps: step4. Verify second LazyVGridLayout preload range (stackFromEnd order)
+     * Second grid: startPos=-400.f, endPos=-50.f, height 350.f
+     * Completely outside clip extension [-200, 600]
+     * @tc.expected: second grid visible range -1, preload range items 10-13 (bottom 2 rows)
+     */
+    auto layoutInfo2 = lazyGridPattern2->layoutInfo_;
+    ASSERT_NE(layoutInfo2, nullptr);
+    EXPECT_EQ(lazyGridPattern2->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo2->startIndex_, 10);
+    EXPECT_EQ(layoutInfo2->endIndex_, 13);
+
+    /**
+     * @tc.steps: step5. Verify first LazyVGridLayout preload range (stackFromEnd order)
+     * First grid: startPos=-750.f, endPos=-400.f, height 350.f
+     * Completely outside clip extension [-200, 600]
+     * @tc.expected: first grid visible range -1, preload range -1
+     */
+    auto layoutInfo1 = lazyGridPattern1->layoutInfo_;
+    ASSERT_NE(layoutInfo1, nullptr);
+    EXPECT_EQ(lazyGridPattern1->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
+    EXPECT_EQ(layoutInfo1->startIndex_, -1);
+    EXPECT_EQ(layoutInfo1->endIndex_, -1);
+}
 } // namespace OHOS::Ace::NG

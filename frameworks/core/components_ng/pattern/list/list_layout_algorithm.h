@@ -66,12 +66,15 @@ struct PredictLayoutItem {
     int32_t forwardCacheCount;
     int32_t backwardCacheCount;
     bool forceCache = true;
+    float referencePos = 0.0f;
 };
 
 struct ListPredictLayoutParamV2 {
     std::list<PredictLayoutItem> items;
     LayoutConstraintF layoutConstraint;
     LayoutConstraintF groupLayoutConstraint;
+    ListMainSizeValues listMainSizeValues;
+    bool show = false;
 };
 
 enum class ScrollAutoType {
@@ -567,6 +570,7 @@ protected:
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
     void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
+    LayoutConstraintF CreateLazyChildConstraint(float referencePos, bool forward) const;
     void MeasureLazyChild(
         const RefPtr<LayoutWrapper>& wrapper, int32_t index, float& referencePos, bool forward);
     void ApplyLazyVGridAdjustOffset(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
@@ -585,6 +589,8 @@ protected:
     ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     bool CheckLayoutConstraintChanged(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+    bool CheckLayoutConstraintChanged(
+        const RefPtr<LayoutWrapper>& layoutWrapper, float ref, bool forward) const;
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     CachedIndexInfo GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& wrapper,
         int32_t forwardCache, int32_t backwardCache, int32_t index, bool outOfView);
@@ -626,10 +632,8 @@ protected:
         int32_t cacheCount, std::list<PredictLayoutItem>& predictList);
     static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint, int64_t deadline,
         int32_t forwardCached, int32_t backwardCached, const ListMainSizeValues& listMainSizeValues);
-    static void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param,
-        ListMainSizeValues listMainSizeValues, bool show);
-    static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline,
-        ListMainSizeValues listMainSizeValues, bool show);
+    static void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param);
+    static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline);
 
     void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsCenter(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
@@ -730,14 +734,12 @@ private:
     void CheckAndMeasureStartItem(
         LayoutWrapper* layoutWrapper, int32_t startIndex, float& startPos, bool isGroup, bool forwardLayout);
 
-    static void ProcessPredictBuildLazyVGrid(
+    static void ProcessPredictBuildLazyChild(
         const RefPtr<LayoutWrapper>& wrapper,
-        int32_t index,
+        const PredictLayoutItem& item,
         const RefPtr<ListPattern>& pattern,
         const ListPredictLayoutParamV2& param,
-        const ListMainSizeValues& listMainSizeValues,
-        int64_t deadline,
-        bool show);
+        int64_t deadline);
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 

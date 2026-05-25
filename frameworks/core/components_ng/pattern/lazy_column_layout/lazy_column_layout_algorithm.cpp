@@ -311,7 +311,7 @@ void LazyColumnLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
         pos = headerSize;
         return;
     } else if (GreatNotEqual(startPos_, bodyEnd)) {
-        index = layoutInfo_->totalItemCount_;
+        index = totalItemCount_;
         pos = bodyEnd;
         return;
     } else if (GreatOrEqual(endPos_, bodyEnd) ||
