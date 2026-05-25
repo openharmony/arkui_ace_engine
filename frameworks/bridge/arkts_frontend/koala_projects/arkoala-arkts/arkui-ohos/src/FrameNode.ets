@@ -540,6 +540,7 @@ export class FrameNode implements MaterializedBase {
             ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr!);
             this.peer?.close();
         }
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this.nodePtr_ = undefined;
         this.renderNode_?.dispose();
         this.isDisposed_ = true;
