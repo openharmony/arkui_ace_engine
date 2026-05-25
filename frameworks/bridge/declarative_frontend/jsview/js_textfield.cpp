@@ -1384,7 +1384,7 @@ void JSTextField::SetOnWillCopy(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+        JSRef<JSFunc>::Cast(args), CreateSimpleJsOnWillObj);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                         const std::u16string& value) -> bool {
@@ -1419,7 +1419,7 @@ void JSTextField::SetOnWillCut(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+        JSRef<JSFunc>::Cast(args), CreateSimpleJsOnWillObj);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                         const std::u16string& value) -> bool {
@@ -2758,7 +2758,11 @@ void JSTextField::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
     auto jsTargetNode = info[0];
-    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto localHandle = jsTargetNode->GetLocalHandle();
+    if (!localHandle->IsNativePointer(vm)) {
+        return;
+    }
+    auto* targetNodePtr = localHandle->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
     CHECK_NULL_VOID(frameNode);
     if (!info[1]->IsObject()) {
@@ -2836,7 +2840,11 @@ void JSTextField::SetSearchKeyboardAppearanceConfig(const JSCallbackInfo& info)
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
     auto jsTargetNode = info[0];
-    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto localHandle = jsTargetNode->GetLocalHandle();
+    if (!localHandle->IsNativePointer(vm)) {
+        return;
+    }
+    auto* targetNodePtr = localHandle->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
     CHECK_NULL_VOID(frameNode);
     if (!info[1]->IsObject()) {

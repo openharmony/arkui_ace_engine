@@ -2399,6 +2399,10 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
         return;
     }
     auto shaderStyleObj = obj->GetProperty("shaderStyle");
+    if (!shaderStyleObj->IsObject()) {
+        paragraphStyle.ResetGradient();
+        return;
+    }
     std::optional<NG::Gradient> gradientShaderStyle;
     std::optional<Color> colorShaderStyle;
     RefPtr<ResourceObject> resObj;
@@ -2412,6 +2416,9 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
     }
     if (resObj && colorShaderStyle.has_value()) {
         JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(jsObject->GetProperty("color"));
+        if (!colorObj->IsObject()) {
+            return;
+        }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
         JSViewAbstract::CompleteResourceObject(jsObj);
         resObj = JSViewAbstract::GetResourceObject(jsObj);

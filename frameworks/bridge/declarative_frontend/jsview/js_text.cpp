@@ -1035,7 +1035,7 @@ void JSText::SetOnWillCopy(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+        JSRef<JSFunc>::Cast(args), CreateSimpleJsOnWillObj);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                         const std::u16string& value) -> bool {
