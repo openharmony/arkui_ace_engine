@@ -131,19 +131,18 @@ interface CommandPath {
 }
 
 class LengthMetrics {
-  private unit_: LengthUnit;
-  private value_: number;
-  private res_: Resource | undefined;
-  private autoRefresh_: boolean = false;
+  public unit: LengthUnit;
+  public value: number;
+  public res: Resource;
   constructor(value: number, unit?: LengthUnit, res?: Resource) {
     if (unit in LengthUnit) {
-        this.unit_ = unit;
-        this.value_ = value;
+        this.unit = unit;
+        this.value = value;
     } else {
-        this.unit_ = LengthUnit.VP;
-        this.value_ = unit === undefined ? value : 0;
+        this.unit = LengthUnit.VP;
+        this.value = unit === undefined ? value : 0;
     }
-    this.res_ = res === undefined ? undefined : res;
+    this.res = res === undefined ? undefined : res;
   }
   static px(value: number) {
     return new LengthMetrics(value, LengthUnit.PX);
@@ -163,28 +162,6 @@ class LengthMetrics {
   static resource(res: Resource) {
     let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
     return new LengthMetrics(length[0], length[1], res);
-  }
-  private updateValue(): void {
-    if (this.autoRefresh_ && this.res_ !== undefined) {
-      const length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(this.res_);
-      if (length === undefined) {
-        JSXNodeLogConsole.warn('Failed to obtain the length metrics resource when refresh length value.');
-        return;
-      }
-      this.value_ = length[0];
-      this.unit_ = length[1];
-    }
-  }
-  get value(): number {
-    this.updateValue();
-    return this.value_;
-  }
-  get unit() : LengthUnit {
-    return this.unit_;
-  }
-  public autoRefresh(value: boolean): LengthMetrics {
-    this.autoRefresh_ = value;
-    return this;
   }
 }
 
@@ -231,7 +208,6 @@ class ColorMetrics {
   private greenValue_: number;
   private blueValue_: number;
   private headRoom_: number;
-  private autoRefresh_: boolean = false;
   private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE, res?: Resource) {
     this.red_ = ColorMetrics.clamp(red);
     this.green_ = ColorMetrics.clamp(green);
@@ -247,25 +223,7 @@ class ColorMetrics {
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
-  public autoRefresh(value: boolean): ColorMetrics {
-    this.autoRefresh_ = value;
-    return this;
-  }
-  private refreshColorValue(): void {
-    if (this.autoRefresh_ && this.res_ !== undefined) {
-      const chanels: Array<number> = getUINativeModule().nativeUtils.parseResourceColor(this.res_);
-      if (chanels === undefined) {
-        JSXNodeLogConsole.warn('Failed to obtain the color resource when refresh color value.');
-        return;
-      }
-      this.red_ = chanels[0];
-      this.green_ = chanels[1];
-      this.blue_ = chanels[2];
-      this.alpha_ = chanels[3];
-    }
-  }
   private toNumeric(): number {
-    this.refreshColorValue();
     return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
   }
   static numeric(value: number): ColorMetrics {
