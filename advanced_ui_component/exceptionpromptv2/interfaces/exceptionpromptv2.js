@@ -109,8 +109,8 @@ export class ExceptionPromptV2 extends ViewV2 {
             marginType: MarginTypeV2.DEFAULT_MARGIN,
             marginTop: 0
         }));
-        this.initParam('onTipClick', (t1 && 'onTipClick' in t1) ? t1.onTipClick : undefined);
-        this.initParam('onActionTextClick', (t1 && 'onActionTextClick' in t1) ? t1.onActionTextClick : undefined);
+        this.onTipClick = 'onTipClick' in t1 ? t1.onTipClick : undefined;
+        this.onActionTextClick = 'onActionTextClick' in t1 ? t1.onActionTextClick : undefined;
         this.fontSizeScale = undefined;
         this.touchBackgroundColor = {
             'id': -1,
@@ -138,8 +138,8 @@ export class ExceptionPromptV2 extends ViewV2 {
             marginType: MarginTypeV2.DEFAULT_MARGIN,
             marginTop: 0
         }));
-        this.resetParam('onTipClick', (r1 && 'onTipClick' in r1) ? r1.onTipClick : undefined);
-        this.resetParam('onActionTextClick', (r1 && 'onActionTextClick' in r1) ? r1.onActionTextClick : undefined);
+        this.onTipClick = 'onTipClick' in r1 ? r1.onTipClick : undefined;
+        this.onActionTextClick = 'onActionTextClick' in r1 ? r1.onActionTextClick : undefined;
         this.fontSizeScale = undefined;
         this.touchBackgroundColor = {
             'id': -1,
@@ -515,12 +515,6 @@ export class ExceptionPromptV2 extends ViewV2 {
         if ('options' in d) {
             this.updateParam('options', d.options);
         }
-        if ('onTipClick' in d) {
-            this.updateParam('onTipClick', d.onTipClick);
-        }
-        if ('onActionTextClick' in d) {
-            this.updateParam('onActionTextClick', d.onActionTextClick);
-        }
     }
 
     rerender() {
@@ -531,10 +525,10 @@ __decorate([
     Param
 ], ExceptionPromptV2.prototype, 'options', void 0);
 __decorate([
-    Param
+    Event
 ], ExceptionPromptV2.prototype, 'onTipClick', void 0);
 __decorate([
-    Param
+    Event
 ], ExceptionPromptV2.prototype, 'onActionTextClick', void 0);
 __decorate([
     Local

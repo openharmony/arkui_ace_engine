@@ -47,7 +47,7 @@ import {
   ClickEvent
 } from '@ohos.arkui.component'
 
-import { ObservedV2, Param, Local, Trace } from '@ohos.arkui.stateManagement'
+import { ObservedV2, Param, Local, Trace, Event } from '@ohos.arkui.stateManagement'
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 import curves from '@ohos.curves';
 import common from '@ohos.app.ability.common';
@@ -149,8 +149,8 @@ export struct ExceptionPromptV2 {
   maxAppFontScale: number = 1;
   systemFontScale?: number = 1;
   isFollowingSystemFontScale: boolean = false;
-  @Param onTipClick?: () => void = undefined;
-  @Param onActionTextClick?: () => void = undefined;
+  @Event onTipClick?: () => void = undefined;
+  @Event onActionTextClick?: () => void = undefined;
   private callbackId: number = 0;
   private envCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this)
   applicationContext: ApplicationContext = new ApplicationContext()

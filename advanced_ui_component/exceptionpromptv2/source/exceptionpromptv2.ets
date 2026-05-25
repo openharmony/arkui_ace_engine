@@ -111,8 +111,8 @@ export struct ExceptionPromptV2 {
     marginType: MarginTypeV2.DEFAULT_MARGIN,
     marginTop: 0
   });
-  @Param onTipClick?: OnTipClickCallback = undefined;
-  @Param onActionTextClick?: OnActionTextClickCallback = undefined;
+  @Event onTipClick?: OnTipClickCallback = undefined;
+  @Event onActionTextClick?: OnActionTextClickCallback = undefined;
   @Local fontSizeScale: number | undefined = undefined;
   @Local touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @Local maxAppFontScale: number = 1;
