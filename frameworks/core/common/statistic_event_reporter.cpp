@@ -15,6 +15,8 @@
 
 #include "core/common/statistic_event_reporter.h"
 
+#include <mutex>
+
 #include "base/thread/task_executor.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -165,6 +167,7 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
 
 void StatisticEventReporter::SendEvent(StatisticEventType eventType)
 {
+    std::unique_lock<std::mutex> lock(statisitcEventMutex_);
     auto iter = statisitcEventMap_.find(eventType);
     if (iter == statisitcEventMap_.end()) {
         StatisticEventInfo event = ConvertToEvent(eventType);
@@ -187,14 +190,17 @@ void StatisticEventReporter::ReportStatisticEvents(const std::map<StatisticEvent
 void StatisticEventReporter::TryReportStatisticEvents(PipelineBase* pipeline)
 {
     CHECK_NULL_VOID(pipeline);
-    if (totalEventCount_ < MAX_PENDING_EVENT_COUNT) {
-        return;
-    }
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     std::map<StatisticEventType, StatisticEventInfo> statisitcEvents;
-    std::swap(statisitcEvents, statisitcEventMap_);
-    totalEventCount_ = 0;
+    {
+        std::unique_lock<std::mutex> lock(statisitcEventMutex_);
+        if (totalEventCount_ < MAX_PENDING_EVENT_COUNT) {
+            return;
+        }
+        std::swap(statisitcEvents, statisitcEventMap_);
+        totalEventCount_ = 0;
+    }
     executor->PostTask(
         [statisitcEvents = std::move(statisitcEvents), reporter = shared_from_this()] () {
             if (reporter) {
@@ -205,12 +211,15 @@ void StatisticEventReporter::TryReportStatisticEvents(PipelineBase* pipeline)
 
 void StatisticEventReporter::ForceReportStatisticEvents()
 {
-    if (statisitcEventMap_.size() == 0) {
-        return;
-    }
     std::map<StatisticEventType, StatisticEventInfo> statisitcEvents;
-    std::swap(statisitcEvents, statisitcEventMap_);
-    totalEventCount_ = 0;
+    {
+        std::unique_lock<std::mutex> lock(statisitcEventMutex_);
+        if (statisitcEventMap_.size() == 0) {
+            return;
+        }
+        std::swap(statisitcEvents, statisitcEventMap_);
+        totalEventCount_ = 0;
+    }
     ReportStatisticEvents(statisitcEvents);
 }
 } // namespace OHOS::Ace
