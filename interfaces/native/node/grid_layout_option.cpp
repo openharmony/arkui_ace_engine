@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "grid_layout_option.h"
+#include "native_error_message_macros.h"
 #include "native_type.h"
 #include "ui/base/utils/utils.h"
 #ifdef __cplusplus
@@ -36,9 +37,11 @@ void OH_ArkUI_GridLayoutOptions_Dispose(ArkUI_GridLayoutOptions* option)
 int32_t OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(ArkUI_GridLayoutOptions* option, uint32_t* irregularIndexes,
     int32_t size)
 {
-    CHECK_NULL_RETURN(option, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(irregularIndexes, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        irregularIndexes, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "irregularIndexes is null");
     if (size < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "size is less than 0");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     option->irregularIndexes.clear();
@@ -52,10 +55,12 @@ int32_t OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(ArkUI_GridLayoutOptions* 
 int32_t OH_ArkUI_GridLayoutOptions_GetIrregularIndexes(ArkUI_GridLayoutOptions* option,
     uint32_t* irregularIndexes, int32_t* size)
 {
-    CHECK_NULL_RETURN(option, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(irregularIndexes, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(size, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        irregularIndexes, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "irregularIndexes is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(size, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "size is null");
     if (*size < static_cast<int32_t>(option->irregularIndexes.size())) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "the provided buffer size is insufficient");
         return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     int32_t i = 0;

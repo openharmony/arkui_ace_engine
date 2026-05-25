@@ -17,6 +17,7 @@
 #include "interfaces/native/node/list_option.h"
 
 #include "base/error/error_code.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
@@ -157,13 +158,17 @@ ArkUI_Int32 Expand(ArkUINodeHandle node, ArkUI_Int32 direction)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_ERROR, "node type is not ListItem");
         return ERROR_CODE_PARAM_ERROR;
     }
     if (static_cast<int32_t>(ListItemSwipeActionDirection::START) > direction ||
         static_cast<int32_t>(ListItemSwipeActionDirection::END) < direction) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "direction is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!frameNode->IsOnMainTree()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE,
+            "node is not on main tree");
         return ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
     }
     ListItemModelNG::ExpandSwipeAction(frameNode, static_cast<ListItemSwipeActionDirection>(direction));
@@ -175,9 +180,12 @@ ArkUI_Int32 Collapse(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_ERROR, "node type is not ListItem");
         return ERROR_CODE_PARAM_ERROR;
     }
     if (!frameNode->IsOnMainTree()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE,
+            "node is not on main tree");
         return ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
     }
     ListItemModelNG::CollapseSwipeAction(frameNode);
