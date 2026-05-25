@@ -8,9 +8,9 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *     See the License for the specific language governing permissions and
+ *     limitations under the License.
  */
 
 import curves from '@ohos.curves';
@@ -29,33 +29,94 @@ const MAX_SYMBOL_FONT_SCALE: number = 2;
 const MIN_SYMBOL_FONT_SCALE: number = 1;
 const DEFAULT_SYMBOL_FONT_SCALE: number = 1;
 
+/**
+ * Control margin status of ExceptionPromptV2.
+ */
 export enum MarginTypeV2 {
   DEFAULT_MARGIN = 0,
   FIT_MARGIN = 1,
 }
 
-export interface PromptOptionsV2 {
-  icon?: ResourceStr,
-  symbolStyle?: SymbolGlyphModifier,
-  tip?: ResourceStr,
-  marginType: MarginTypeV2,
-  actionText?: ResourceStr,
-  marginTop: Dimension,
-  isShown?: boolean
+/**
+ * Configuration information interface for PromptOptionsV2.
+ * Used to construct PromptOptionsV2 object.
+ */
+export interface PromptOptionsV2Config {
+  marginType: MarginTypeV2;
+  marginTop: Dimension;
+  icon?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  tip?: ResourceStr;
+  actionText?: ResourceStr;
+  isShown?: boolean;
 }
 
+/**
+ * Declare the callback function type to be called when clicking the text on the left.
+ */
+export type OnTipClickCallback = () => void;
+
+/**
+ * Declare the callback function type to be called when clicking the icon button.
+ */
+export type OnActionTextClickCallback = () => void;
+
+/**
+ * Configuration parameter of ExceptionPromptV2.
+ * Use @ObservedV2 and @Trace to support deep observation and dynamic refresh of properties.
+ */
+@ObservedV2
+export class PromptOptionsV2 {
+  @Trace public icon?: ResourceStr;
+  @Trace public symbolStyle?: SymbolGlyphModifier;
+  @Trace public tip?: ResourceStr;
+  @Trace public marginType: MarginTypeV2;
+  @Trace public actionText?: ResourceStr;
+  @Trace public marginTop: Dimension;
+  @Trace public isShown?: boolean;
+
+  constructor(config?: PromptOptionsV2Config) {
+    if (config) {
+      this.marginType = config.marginType;
+      this.marginTop = config.marginTop;
+      if (config.icon !== undefined) {
+        this.icon = config.icon;
+      }
+      if (config.symbolStyle !== undefined) {
+        this.symbolStyle = config.symbolStyle;
+      }
+      if (config.tip !== undefined) {
+        this.tip = config.tip;
+      }
+      if (config.actionText !== undefined) {
+        this.actionText = config.actionText;
+      }
+      if (config.isShown !== undefined) {
+        this.isShown = config.isShown;
+      }
+    } else {
+      this.marginType = MarginTypeV2.DEFAULT_MARGIN;
+      this.marginTop = 0;
+    }
+  }
+}
+
+/**
+ * Declare struct ExceptionPromptV2 higher-order component.
+ * The exception prompt component is used to show an error message when an error arises.
+ */
 @ComponentV2
 export struct ExceptionPromptV2 {
-  @Param options: PromptOptionsV2 = {
+  @Param options: PromptOptionsV2 = new PromptOptionsV2({
     marginType: MarginTypeV2.DEFAULT_MARGIN,
     marginTop: 0
-  };
+  });
+  @Event onTipClick?: OnTipClickCallback = undefined;
+  @Event onActionTextClick?: OnActionTextClickCallback = undefined;
   @Local fontSizeScale: number | undefined = undefined;
   @Local touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @Local maxAppFontScale: number = 1;
   @Local isFollowingSystemFontScale: boolean = false;
-  @Event onTipClick?: () => void;
-  @Event onActionTextClick?: () => void;
   @Local private callbackId: number | undefined = undefined;
   private callbacks: EnvironmentCallback = {
     onConfigurationUpdated: (config) => {
@@ -93,7 +154,7 @@ export struct ExceptionPromptV2 {
           }
         }
 
-        Text(this.options.tip)
+        Text(this.options?.tip)
           .fontSize($r('sys.float.ohos_id_text_size_body1'))
           .minFontScale(1)
           .maxFontScale(Math.min(this.updateFontScale(), 2))
@@ -115,13 +176,13 @@ export struct ExceptionPromptV2 {
         this.onTipClick && this.onTipClick();
       });
 
-      if (this.options.actionText) {
+      if (this.options?.actionText) {
         Button({
           stateEffect: false,
           type: ButtonType.Normal
         }) {
           Row() {
-            Text(this.options.actionText)
+            Text(this.options?.actionText)
               .fontSize($r('sys.float.ohos_id_text_size_body2'))
               .minFontScale(1)
               .maxFontScale(Math.min(this.updateFontScale(), 2))
@@ -144,7 +205,7 @@ export struct ExceptionPromptV2 {
           .justifyContent(FlexAlign.End);
         }
         .backgroundColor(this.touchBackgroundColor)
-        .width(this.options.actionText ? 144 : 0)
+        .width(this.options?.actionText ? 144 : 0)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({
           right: $r('sys.float.padding_level2'),
@@ -178,7 +239,7 @@ export struct ExceptionPromptV2 {
         .zIndex(ZINDEX_NUM);
       }
       .padding(
-        this.options.marginType === MarginTypeV2.DEFAULT_MARGIN
+        this.options?.marginType === MarginTypeV2.DEFAULT_MARGIN
           ? {
             left: $r('sys.float.ohos_id_card_margin_start'),
             right: $r('sys.float.ohos_id_card_margin_end')
@@ -191,13 +252,13 @@ export struct ExceptionPromptV2 {
       .transition(
         TransitionEffect.OPACITY.animation({
           curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1),
-          duration: this.options.isShown ? START_TIME : END_TIME
+          duration: this.options?.isShown ? START_TIME : END_TIME
         })
       )
-      .visibility(this.options.isShown ? Visibility.Visible : Visibility.None);
+      .visibility(this.options?.isShown ? Visibility.Visible : Visibility.None);
     }
     .width('100%')
-    .position({ y: this.options.marginTop })
+    .position({ y: this.options?.marginTop })
     .zIndex(ZINDEX_NUM);
   }
 
