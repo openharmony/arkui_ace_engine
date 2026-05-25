@@ -301,11 +301,19 @@ export class CommonMethodModifier implements CommonMethod {
     public _bindContextMenu_0_0value?: CustomBuilder | undefined
     public _bindContextMenu_0_1value?: ResponseType | undefined
     public _bindContextMenu_0_2value?: ContextMenuOptions | undefined
+    public _bindContextMenuByResponseType_0_0value?: CustomBuilder | Array<MenuElement> | undefined
+    public _bindContextMenuByResponseType_0_1value?: ResponseType | undefined
+    public _bindContextMenuByResponseType_0_2value?: ContextMenuOptions | undefined
     public _bindContextMenuWithResponse_0_0value?: CustomBuilderT<ResponseType> | undefined
     public _bindContextMenuWithResponse_0_1value?: ContextMenuOptions | undefined
+    public _bindContextMenuWithResponse_1_0value?: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined
+    public _bindContextMenuWithResponse_1_1value?: ContextMenuOptions | undefined
     public _bindContextMenu_1_0value?: boolean | Bindable<boolean> | undefined
     public _bindContextMenu_1_1value?: CustomBuilder | undefined
     public _bindContextMenu_1_2value?: ContextMenuOptions | undefined
+    public _bindContextMenuByIsShow_0_0value?: boolean | Bindable<boolean> | undefined
+    public _bindContextMenuByIsShow_0_1value?: CustomBuilder | Array<MenuElement> | undefined
+    public _bindContextMenuByIsShow_0_2value?: ContextMenuOptions | undefined
     public _bindContentCover_0_0value?: boolean | Bindable<boolean> | undefined
     public _bindContentCover_0_1value?: CustomBuilder | undefined
     public _bindContentCover_0_2value?: ModalTransition | undefined
@@ -3839,7 +3847,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[202] != 0) {
             switch (flagArray[202]) {
                 case 1: {
-                    peer.setBindContextMenuWithResponseAttribute((this._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
+                    peer.setBindContextMenuWithResponse0Attribute((this._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
                     flagArray[202] = 2;
                     break;
                 }
@@ -3849,7 +3857,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[202] = 0;
-                    peer.setBindContextMenuWithResponseAttribute(undefined, undefined);
+                    peer.setBindContextMenuWithResponse0Attribute(undefined, undefined);
                 }
             }
         }
@@ -4153,6 +4161,57 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     flagArray[221] = 0;
                     peer.setEdgeLightAttribute((undefined as EdgeLightParams | undefined));
+                }
+            }
+        }
+        if (flagArray[222] != 0) {
+            switch (flagArray[222]) {
+                case 1: {
+                    peer.setBindContextMenuByResponseTypeAttribute((this._bindContextMenuByResponseType_0_0value as CustomBuilder | Array<MenuElement> | undefined), (this._bindContextMenuByResponseType_0_1value as ResponseType | undefined), (this._bindContextMenuByResponseType_0_2value as ContextMenuOptions | undefined));
+                    flagArray[222] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[222] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[222] = 0;
+                    peer.setBindContextMenuByResponseTypeAttribute((undefined as CustomBuilder | Array<MenuElement> | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[223] != 0) {
+            switch (flagArray[223]) {
+                case 1: {
+                    peer.setBindContextMenuWithResponse1Attribute((this._bindContextMenuWithResponse_1_0value as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (this._bindContextMenuWithResponse_1_1value as ContextMenuOptions | undefined));
+                    flagArray[223] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[223] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[223] = 0;
+                    peer.setBindContextMenuWithResponse1Attribute((undefined as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[224] != 0) {
+            switch (flagArray[224]) {
+                case 1: {
+                    peer.setBindContextMenuByIsShowAttribute((this._bindContextMenuByIsShow_0_0value as boolean | Bindable<boolean> | undefined), (this._bindContextMenuByIsShow_0_1value as CustomBuilder | Array<MenuElement> | undefined), (this._bindContextMenuByIsShow_0_2value as ContextMenuOptions | undefined));
+                    flagArray[224] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[224] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[224] = 0;
+                    peer.setBindContextMenuByIsShowAttribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -6868,6 +6927,42 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[222] != 0) {
+            switch (flagArray[222]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenuByResponseType((modifier._bindContextMenuByResponseType_0_0value as CustomBuilder | Array<MenuElement> | undefined), (modifier._bindContextMenuByResponseType_0_1value as ResponseType | undefined), (modifier._bindContextMenuByResponseType_0_2value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenuByResponseType((undefined as CustomBuilder | Array<MenuElement> | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[223] != 0) {
+            switch (flagArray[223]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenuWithResponse((modifier._bindContextMenuWithResponse_1_0value as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (modifier._bindContextMenuWithResponse_1_1value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenuWithResponse((undefined as CustomBuilderT<ResponseType> | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[223] != 0) {
+            switch (flagArray[223]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenuByIsShow((modifier._bindContextMenuByIsShow_0_0value as boolean | Bindable<boolean> | undefined), (modifier._bindContextMenuByIsShow_0_1value as CustomBuilder | Array<MenuElement> | undefined), (modifier._bindContextMenuByIsShow_0_2value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenuByIsShow((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | Array<MenuElement> | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -9163,6 +9258,41 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[221] = 3
+        }
+        return this
+    }
+    bindContextMenuByResponseType(content: CustomBuilder | Array<MenuElement> | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[222]) == (0)) || (true) || (true) || (true)) {
+            this._flagArray[222] = 1
+            this._bindContextMenuByResponseType_0_0value = content
+            this._bindContextMenuByResponseType_0_1value = responseType
+            this._bindContextMenuByResponseType_0_2value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[222] = 3
+        }
+        return this
+    }
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[223]) == (0)) || (true) || (true)) {
+            this._flagArray[223] = 1
+            this._bindContextMenuWithResponse_1_0value = content
+            this._bindContextMenuWithResponse_1_1value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[223] = 3
+        }
+        return this
+    }
+    bindContextMenuByIsShow(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | Array<MenuElement> | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[224]) == (0)) || (true) || (true) || (true)) {
+            this._flagArray[224] = 1
+            this._bindContextMenuByIsShow_0_0value = isShow
+            this._bindContextMenuByIsShow_0_1value = content
+            this._bindContextMenuByIsShow_0_2value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[224] = 3
         }
         return this
     }
