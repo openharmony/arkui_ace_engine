@@ -25662,6 +25662,8 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
                                     const Opt_window_Orientation* value);
     void (*setEnableNavigationIndicator)(Ark_NativePointer node,
                                          const Opt_Boolean* value);
+    void (*setFullScreenOverlay)(Ark_NativePointer node,
+                                 const Opt_Boolean* value);
     void (*setTitle)(Ark_VMContext vmContext,
                      Ark_NativePointer node,
                      const Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
