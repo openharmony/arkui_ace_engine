@@ -439,6 +439,13 @@ void SpanItem::SpanDumpInfoAdvance()
             .append(" self: ")
             .append(
             fontStyle && fontStyle->HasFontFamily() ? GetFontFamilyInJson(fontStyle->GetFontFamilyValue()) : "Na"));
+    dumpLog.AddDesc(
+        std::string("fontVariations: ")
+            .append(GetFontVariationsInJson(textStyle->GetFontVariations()))
+            .append(" self: ")
+            .append(fontStyle && fontStyle->HasFontVariations()
+                        ? GetFontVariationsInJson(fontStyle->GetFontVariationsValue())
+                        : "Na"));
     ADD_FONT_STYLE_DESC_UTILS(TextCase, TextCase);
     ADD_LINE_STYLE_DESC_UTILS(TextOverflow, TextOverflow);
     ADD_LINE_STYLE_DESC_UTILS(WordBreak, WordBreak);
@@ -2125,6 +2132,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TextColor", textStyle->GetTextColor().ColorToString().c_str());
     json->Put("FontWeight", StringUtils::ToString(textStyle->GetFontWeight()).c_str());
     json->Put("FontStyle", StringUtils::ToString(textStyle->GetFontStyle()).c_str());
+    json->Put("FontVariations", GetFontVariationsInJson(textStyle->GetFontVariations()).c_str());
     json->Put("TextBaseline", StringUtils::ToString(textStyle->GetTextBaseline()).c_str());
     json->Put("TextOverflow", StringUtils::ToString(textStyle->GetTextOverflow()).c_str());
     json->Put("VerticalAlign", StringUtils::ToString(textStyle->GetTextVerticalAlign()).c_str());

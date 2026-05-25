@@ -1403,4 +1403,78 @@ HWTEST_F(TextTestFourNg, TextContentModifier029, TestSize.Level1)
     }
     textPattern->pManager_->Reset();
 }
+
+/**
+ * @tc.name: TextContentModifierFontVariationsEmpty001
+ * @tc.desc: Test ModifyFontVariationsInTextStyle with empty fontVariations_ map does not modify textStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, TextContentModifierFontVariationsEmpty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
+
+    /**
+     * @tc.steps: step2. Create TextContentModifier with empty fontVariations_.
+     */
+    TextStyle textStyle;
+    auto modifier =
+        AceType::MakeRefPtr<TextContentModifier>(textStyle, AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    ASSERT_NE(modifier, nullptr);
+    EXPECT_TRUE(modifier->fontVariations_.empty());
+
+    /**
+     * @tc.steps: step3. call ModifyFontVariationsInTextStyle.
+     * @tc.expected: textStyle fontVariations unchanged when fontVariations_ is empty.
+     */
+    FONT_VARIATIONS_LIST originalVariations = { { "wght", 400.0f, std::nullopt } };
+    textStyle.SetFontVariations(originalVariations);
+    modifier->ModifyFontVariationsInTextStyle(textStyle);
+    auto resultVariations = textStyle.GetFontVariations();
+    ASSERT_EQ(resultVariations.size(), 1);
+    EXPECT_EQ(resultVariations[0].axis, "wght");
+    EXPECT_FLOAT_EQ(resultVariations[0].value, 400.0f);
+
+    textPattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: TextContentModifierFontVariationsEmpty002
+ * @tc.desc: Test UpdateFontVariationsMeasureFlag with empty fontVariations_ does not set measure flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, TextContentModifierFontVariationsEmpty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    TextStyle textStyle;
+    auto modifier =
+        AceType::MakeRefPtr<TextContentModifier>(textStyle, AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    ASSERT_NE(modifier, nullptr);
+    EXPECT_TRUE(modifier->fontVariations_.empty());
+
+    /**
+     * @tc.steps: step2. call UpdateFontVariationsMeasureFlag.
+     * @tc.expected: flag remains 0 (no measure triggered) when fontVariations_ is empty.
+     */
+    PropertyChangeFlag flag = 0;
+    modifier->UpdateFontVariationsMeasureFlag(flag);
+    EXPECT_EQ(flag, 0);
+}
 } // namespace OHOS::Ace::NG

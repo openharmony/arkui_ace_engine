@@ -927,6 +927,7 @@ void TextContentModifier::ModifyLineHeightInTextStyle(TextStyle& textStyle)
 
 void TextContentModifier::ModifyFontVariationsInTextStyle(TextStyle& textStyle)
 {
+    CHECK_NULL_VOID(!fontVariations_.empty());
     auto fontVariations = textStyle.GetFontVariations();
     for (auto& item : fontVariations) {
         auto iter = fontVariations_.find(item.axis);
@@ -936,6 +937,7 @@ void TextContentModifier::ModifyFontVariationsInTextStyle(TextStyle& textStyle)
         auto fontVariation = iter->second;
         CHECK_NULL_VOID(fontVariation);
         item.value = fontVariation->Get();
+        lastFontVariationMeasureValues_[item.axis] = fontVariation->Get();
     }
     textStyle.SetFontVariations(fontVariations);
 }
@@ -1155,6 +1157,7 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
 
 void TextContentModifier::UpdateFontVariationsMeasureFlag(PropertyChangeFlag& flag)
 {
+    CHECK_NULL_VOID(!fontVariations_.empty());
     for (const auto& item : fontVariations_) {
         const auto& axis = item.first;
         const auto& property = item.second;
