@@ -564,7 +564,8 @@ export struct EditableTitleBarV2 {
           .heightAdaptivePolicy(this.getSubtitleText() ?
             TextHeightAdaptivePolicy.MAX_LINES_FIRST : TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .constraintSize({
-            maxHeight: this.getSubtitleText() ? EditableTitleBarV2.maxMainTitleHeightV2 : EditableTitleBarV2.totalHeightV2,
+            maxHeight: this.getSubtitleText() ?
+              EditableTitleBarV2.maxMainTitleHeightV2 : EditableTitleBarV2.totalHeightV2,
           })
       }
       .justifyContent(FlexAlign.Start)
@@ -581,7 +582,8 @@ export struct EditableTitleBarV2 {
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
             .constraintSize({
-              maxHeight: this.getTitleText() ? EditableTitleBarV2.maxSubTitleHeightV2 : EditableTitleBarV2.totalHeightV2,
+              maxHeight: this.getTitleText() ?
+                EditableTitleBarV2.maxSubTitleHeightV2 : EditableTitleBarV2.totalHeightV2,
             })
         }
         .margin({

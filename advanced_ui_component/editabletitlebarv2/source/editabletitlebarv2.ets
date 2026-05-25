@@ -40,9 +40,9 @@ export interface EditableLeftIconV2Options {
 
 @ObservedV2
 export class EditableLeftIconV2 {
-  @Trace iconType: EditableLeftIconTypeV2 = EditableLeftIconTypeV2.Back;
-  @Trace defaultFocus: boolean = false;
-  @Trace onAction?: () => void;
+  @Trace public iconType: EditableLeftIconTypeV2 = EditableLeftIconTypeV2.Back;
+  @Trace public defaultFocus: boolean = false;
+  @Trace public onAction?: () => void;
 
   constructor(options?: EditableLeftIconV2Options) {
     if (options) {
@@ -66,8 +66,8 @@ export interface EditableTitleV2Options {
 
 @ObservedV2
 export class EditableTitleV2 {
-  @Trace mainTitle: ResourceStr = '';
-  @Trace subTitle?: ResourceStr;
+  @Trace public mainTitle: ResourceStr = '';
+  @Trace public subTitle?: ResourceStr;
 
   constructor(options?: EditableTitleV2Options) {
     if (options) {
@@ -95,15 +95,15 @@ export interface EditableTitleBarMenuItemV2Options {
 
 @ObservedV2
 export class EditableTitleBarMenuItemV2 {
-  @Trace value: ResourceStr = '';
-  @Trace symbolStyle?: SymbolGlyphModifier;
-  @Trace isEnabled: boolean = true;
-  @Trace label?: ResourceStr;
-  @Trace action?: () => void;
-  @Trace accessibilityLevel: string = 'auto';
-  @Trace accessibilityText?: ResourceStr;
-  @Trace accessibilityDescription?: ResourceStr;
-  @Trace defaultFocus: boolean = false;
+  @Trace public value: ResourceStr = '';
+  @Trace public symbolStyle?: SymbolGlyphModifier;
+  @Trace public isEnabled: boolean = true;
+  @Trace public label?: ResourceStr;
+  @Trace public action?: () => void;
+  @Trace public accessibilityLevel: string = 'auto';
+  @Trace public accessibilityText?: ResourceStr;
+  @Trace public accessibilityDescription?: ResourceStr;
+  @Trace public defaultFocus: boolean = false;
 
   constructor(options?: EditableTitleBarMenuItemV2Options) {
     if (options) {
@@ -148,9 +148,9 @@ export interface EditableSaveButtonV2Options {
 
 @ObservedV2
 export class EditableSaveButtonV2 {
-  @Trace isRequired: boolean = true;
-  @Trace defaultFocus: boolean = false;
-  @Trace onAction?: () => void;
+  @Trace public isRequired: boolean = true;
+  @Trace public defaultFocus: boolean = false;
+  @Trace public onAction?: () => void;
 
   constructor(options?: EditableSaveButtonV2Options) {
     if (options) {
@@ -177,11 +177,11 @@ export interface EditableTitleBarStyleV2Options {
 
 @ObservedV2
 export class EditableTitleBarStyleV2 {
-  @Trace backgroundColor?: ResourceColor;
-  @Trace backgroundBlurStyle?: BlurStyle;
-  @Trace safeAreaTypes?: Array<SafeAreaType>;
-  @Trace safeAreaEdges?: Array<SafeAreaEdge>;
-  @Trace contentMargin?: LocalizedMargin;
+  @Trace public backgroundColor?: ResourceColor;
+  @Trace public backgroundBlurStyle?: BlurStyle;
+  @Trace public safeAreaTypes?: Array<SafeAreaType>;
+  @Trace public safeAreaEdges?: Array<SafeAreaEdge>;
+  @Trace public contentMargin?: LocalizedMargin;
 
   constructor(options?: EditableTitleBarStyleV2Options) {
     if (options) {
