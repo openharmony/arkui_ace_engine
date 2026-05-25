@@ -290,6 +290,7 @@ MouseEvent MouseEvent::operator-(const Offset& offset) const
     mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
     mouseEvent.isInjected = isInjected;
     mouseEvent.isPrivacyMode = isPrivacyMode;
+    mouseEvent.isStylusMouseMode = isStylusMouseMode;
     mouseEvent.rawDeltaX = rawDeltaX;
     mouseEvent.rawDeltaY = rawDeltaY;
     mouseEvent.pressedButtonsArray = pressedButtonsArray;
@@ -413,6 +414,7 @@ MouseEvent MouseEvent::CloneWith(float scale) const
     mouseEvent.isInjected = isInjected;
     mouseEvent.isPrivacyMode = isPrivacyMode;
     mouseEvent.mockFlushEvent = mockFlushEvent;
+    mouseEvent.isStylusMouseMode = isStylusMouseMode;
     mouseEvent.rawDeltaX = rawDeltaX;
     mouseEvent.rawDeltaY = rawDeltaY;
     mouseEvent.pressedButtonsArray = pressedButtonsArray;
@@ -482,6 +484,7 @@ TouchEvent MouseEvent::CreateTouchPoint() const
         .SetOriginalId(pointOriginalId)
         .SetIsInjected(isInjected);
     event.isPrivacyMode = isPrivacyMode;
+    event.isStylusMouseMode = isStylusMouseMode;
     event.pointers.emplace_back(std::move(point));
     event.pressedKeyCodes_ = pressedKeyCodes_;
     event.passThrough = passThrough;

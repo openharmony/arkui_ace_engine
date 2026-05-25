@@ -74,6 +74,7 @@ constexpr float DEFAULT_OPACITY = 0.95f;
 constexpr float MIN_OPACITY { 0.0f };
 constexpr float MAX_OPACITY { 1.0f };
 constexpr float MENU_DRAG_SCALE = 0.05f;
+constexpr Dimension DEFAULT_DRAG_DISTANCE = 10.0_vp;
 } // namespace
 
 DragEventActuator::DragEventActuator(
@@ -622,6 +623,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto appTheme = pipeline->GetTheme<AppTheme>();
     if (appTheme) {
         dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
+    }
+    if (touchRestrict.touchEvent.isStylusMouseMode) {
+        dragPanDistanceMouse = DEFAULT_DRAG_DISTANCE;
     }
     panRecognizer_->SetMouseDistance(dragPanDistanceMouse.ConvertToPx());
     actionCancel_ = actionCancel;
