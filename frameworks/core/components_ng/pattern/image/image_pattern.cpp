@@ -845,6 +845,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);
+    bool autoResizeExplicitlySet = props->GetAutoResize().has_value();
     bool autoResize = props->GetAutoResize().value_or(GetAutoResizeDefaultBeforeDecode());
     imageDfxConfig_.SetAutoResize(autoResize);
 
@@ -861,19 +862,25 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         loadingCtx_->SetImageQuality(GetImageQuality());
         loadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
-        loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+        loadingCtx_->MakeCanvasImageIfNeed(
+            dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, loadingCtx_), imageFit, sourceSize,
+            hasValidSlice);
     }
     if (altErrorCtx_) {
         altErrorCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         altErrorCtx_->SetImageQuality(GetImageQuality());
         altErrorCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
-        altErrorCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+        altErrorCtx_->MakeCanvasImageIfNeed(
+            dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, altErrorCtx_), imageFit, sourceSize,
+            hasValidSlice);
     }
     if (altLoadingCtx_) {
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
         altLoadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
-        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+        altLoadingCtx_->MakeCanvasImageIfNeed(
+            dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, altLoadingCtx_), imageFit, sourceSize,
+            hasValidSlice);
     }
 }
 
@@ -890,6 +897,30 @@ bool ImagePattern::GetAutoResizeDefaultBeforeDecode() const
         return false;
     }
     return SystemProperties::GetImageAutoResizeEnabled();
+}
+
+bool ImagePattern::GetAutoResizeForCtx(
+    bool autoResize, bool autoResizeExplicitlySet, const RefPtr<ImageLoadingContext>& ctx) const
+{
+    // If the app explicitly set autoResize, respect that value
+    if (autoResizeExplicitlySet) {
+        return autoResize;
+    }
+    CHECK_NULL_RETURN(ctx, autoResize);
+    // Memory protection for large images: force autoResize when pixel count exceeds this threshold
+    static constexpr double IMAGE_PIXEL_COUNT_THRESHOLD = 50000000.0;
+    auto originImageSize = ctx->GetOriginImageSize();
+    if (originImageSize.IsPositive() &&
+        static_cast<double>(originImageSize.Width()) * static_cast<double>(originImageSize.Height()) >
+            IMAGE_PIXEL_COUNT_THRESHOLD) {
+        if (!autoResize) {
+            TAG_LOGI(AceLogTag::ACE_IMAGE,
+                "AutoResize forced to true, image pixels(%{public}lf * %{public}lf) exceed threshold %{public}lf",
+                originImageSize.Width(), originImageSize.Height(), IMAGE_PIXEL_COUNT_THRESHOLD);
+        }
+        return true;
+    }
+    return autoResize;
 }
 
 void ImagePattern::UpdateSvgSmoothEdgeValue()
