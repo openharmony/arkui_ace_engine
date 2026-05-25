@@ -24,6 +24,7 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/depth_component/depth_component_paint_method.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -38,6 +39,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr uint32_t PERCENT_100 = 100;
+constexpr uint32_t NUM_9 = 9;
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
 constexpr uint32_t DEPTH_COMPONENT_NATIVE_WINDOW_COUNT = 2;
 constexpr uint32_t SURFACE_QUEUE_SIZE = 5;
@@ -246,6 +248,7 @@ void DepthComponentPattern::SetupBackgroundImageNode()
         CalcSize(CalcLength(PERCENT_100, DimensionUnit::PERCENT), CalcLength(PERCENT_100, DimensionUnit::PERCENT)));
     ApplyBackgroundOffset(backgroundImageNode);
     ApplyBackgroundScale(backgroundImageNode);
+    ApplyBackgroundImageMatrix(backgroundImageNode);
     backgroundImageNode->MarkModifyDone();
     backgroundImageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -290,6 +293,49 @@ void DepthComponentPattern::ApplyBackgroundScale(const RefPtr<FrameNode>& backgr
         renderContext->UpdateTransformScale(bgScale.value());
     } else {
         renderContext->UpdateTransformScale(NG::VectorF(1.0f, 1.0f));
+    }
+}
+
+void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode)
+{
+    CHECK_NULL_VOID(backgroundImageNode);
+    auto depthLayoutProperty = GetHost()->GetLayoutProperty<DepthComponentLayoutProperty>();
+    CHECK_NULL_VOID(depthLayoutProperty);
+    auto cameraParams = depthLayoutProperty->GetCameraParams();
+    if (!cameraParams.has_value() || !cameraParams->cameraBufferCrop.has_value()) {
+        // No cameraBufferCrop: reset to COVER fit, no matrix
+        auto imageLayoutProp = backgroundImageNode->GetLayoutProperty<ImageLayoutProperty>();
+        if (imageLayoutProp) {
+            imageLayoutProp->UpdateImageFit(ImageFit::COVER);
+        }
+        auto imageRenderProp = backgroundImageNode->GetPaintProperty<ImageRenderProperty>();
+        if (imageRenderProp) {
+            imageRenderProp->UpdateImageFit(ImageFit::COVER);
+            imageRenderProp->UpdateImageMatrix(Matrix4::CreateIdentity());
+        }
+        return;
+    }
+
+    const auto& crop = cameraParams->cameraBufferCrop.value();
+    float scale = (1.0 / crop.cropScale);
+    float offsetX = crop.cropOffset.x;
+    float offsetY = crop.cropOffset.y;
+
+    Matrix4 matrix4 = Matrix4(
+        scale, 0.0, 0.0, -scale * offsetX,
+        0.0, scale, 0.0, -scale * offsetY,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0);
+
+    auto imageLayoutProp = backgroundImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageRenderProperty = backgroundImageNode->GetPaintProperty<ImageRenderProperty>();
+    if (imageLayoutProp) {
+        imageLayoutProp->UpdateImageFit(ImageFit::MATRIX);
+        imageRenderProperty->UpdateImageFit(ImageFit::MATRIX);
+    }
+    auto imageRenderProp = backgroundImageNode->GetPaintProperty<ImageRenderProperty>();
+    if (imageRenderProp) {
+        imageRenderProp->UpdateImageMatrix(matrix4);
     }
 }
 
@@ -385,6 +431,9 @@ void DepthComponentPattern::OnDepthMapLoadSuccess(const RefPtr<CanvasImage>& can
     auto rsDepthNode = GetRSDepthNode();
     CHECK_NULL_VOID(rsDepthNode);
     rsDepthNode->SetDepthImage(rosenImage);
+    depthMapWidth_ = static_cast<float>(pixelMap->GetWidth());
+    depthMapHeight_ = static_cast<float>(pixelMap->GetHeight());
+    TransferImageMatrix(rsDepthNode);
 }
 
 void DepthComponentPattern::TransferDataToRosen()
@@ -394,6 +443,7 @@ void DepthComponentPattern::TransferDataToRosen()
     TransferDepthSpace(rsDepthNode);
     TransferCameraParams(rsDepthNode);
     TransferLightParams(rsDepthNode);
+    TransferImageMatrix(rsDepthNode);
 }
 
 std::shared_ptr<OHOS::Rosen::RSDepthNode> DepthComponentPattern::GetRSDepthNode() const
@@ -429,13 +479,19 @@ void DepthComponentPattern::TransferCameraParams(const std::shared_ptr<OHOS::Ros
     }
 
     const auto& camera = cameraParams.value();
+    auto geoNode = host->GetGeometryNode();
+    float dcW = geoNode->GetFrameSize().Width();
+    float dcH = geoNode->GetFrameSize().Height();
+    auto [fov, xOffset, yOffset] = ComputeTiltShift(camera, dcW, dcH);
+
     OHOS::Rosen::DepthCameraPara rosenCamera;
     rosenCamera.position = OHOS::Rosen::Vector3f{ camera.position.x, camera.position.y, camera.position.z };
     rosenCamera.quaternion =
         OHOS::Rosen::Vector4f{ camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w };
-    rosenCamera.yFov = camera.yFov;
+    rosenCamera.yFov = fov;
     rosenCamera.zNear = camera.zNear;
     rosenCamera.zFar = camera.zFar;
+    rosenCamera.offset = OHOS::Rosen::Vector2f{ xOffset, yOffset };
     rsDepthNode->SetDepthCameraPara(rosenCamera);
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     if (IsGltfBackground()) {
@@ -462,6 +518,67 @@ void DepthComponentPattern::TransferLightParams(const std::shared_ptr<OHOS::Rose
     rosenLight.color = OHOS::Rosen::Vector3f{ light.color.red, light.color.green, light.color.blue };
     rosenLight.intensity = light.intensity;
     rsDepthNode->SetDepthLightPara(rosenLight);
+}
+
+void DepthComponentPattern::TransferImageMatrix(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode)
+{
+    CHECK_NULL_VOID(rsDepthNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    OHOS::Rosen::Matrix3f matrix;
+    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
+    if (depthLayoutProperty) {
+        auto cameraParams = depthLayoutProperty->GetCameraParams();
+        if (cameraParams.has_value() && cameraParams->cameraBufferCrop.has_value()) {
+            const auto& crop = cameraParams->cameraBufferCrop.value();
+            float scale = (1.0 / crop.cropScale);
+            float offsetX = crop.cropOffset.x;
+            float offsetY = crop.cropOffset.y;
+            float vals[] = { scale, 0.0f, -scale * offsetX,
+                             0.0f,  scale, -scale * offsetY,
+                             0.0f,  0.0f,  1.0f };
+            auto* data = matrix.GetData();
+            for (size_t i = 0; i < NUM_9; i++) {
+                data[i] = vals[i];
+            }
+        }
+    }
+    rsDepthNode->SetDepthImageMatrix(matrix);
+    PropagateCropToChildren();
+}
+
+void DepthComponentPattern::PropagateCropToChildren()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
+    CHECK_NULL_VOID(depthLayoutProperty);
+    auto cameraParams = depthLayoutProperty->GetCameraParams();
+
+    for (const auto& childWeak : host->GetFrameChildren()) {
+        auto child = childWeak.Upgrade();
+        if (!child) {
+            continue;
+        }
+        auto renderCtx = child->GetRenderContext();
+        if (!renderCtx || !renderCtx->HasSpatialEffect()) {
+            continue;
+        }
+        auto spatialEffect = renderCtx->GetSpatialEffect();
+        if (!spatialEffect.has_value()) {
+            continue;
+        }
+        SpatialEffectParams params = spatialEffect.value();
+        if (cameraParams.has_value() && cameraParams->cameraBufferCrop.has_value()) {
+            params.cropOffset = cameraParams->cameraBufferCrop->cropOffset;
+            params.cropScale = cameraParams->cameraBufferCrop->cropScale;
+        } else {
+            params.cropOffset.reset();
+            params.cropScale = 1.0f;
+        }
+        renderCtx->UpdateSpatialEffect(params);
+    }
 }
 #endif
 
@@ -523,10 +640,19 @@ void DepthComponentPattern::UpdateGltfCamera()
         return;
     }
     const auto& camera = cameraParams.value();
+
+    auto geoNode = host->GetGeometryNode();
+    float dcW = geoNode->GetFrameSize().Width();
+    float dcH = geoNode->GetFrameSize().Height();
+    auto [fov, xOffset, yOffset] = ComputeTiltShift(camera, dcW, dcH);
+
     Render3D::CameraConfigs configs;
     configs.position_ = { camera.position.x, camera.position.y, camera.position.z };
     configs.rotation_ = { camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w };
-    configs.intrinsics_ = { camera.yFov, camera.zNear, camera.zFar };
+    configs.intrinsics_ = { fov, camera.zNear, camera.zFar };
+    configs.offsetX_ = xOffset;
+    configs.offsetY_ = yOffset;
+    configs.camModelType_ = Render3D::CameraModelType::FRUSTUM;
     mrtDepthAdapter_->SetCameraConfigs(configs);
 }
 
@@ -734,5 +860,32 @@ void DepthComponentPattern::MarkRender3D()
 }
 
 #endif
+
+DepthComponentPattern::TiltShiftResult DepthComponentPattern::ComputeTiltShift(
+    const OHOS::Ace::DepthCameraParams& camera, float dcW, float dcH)
+{
+    TiltShiftResult result = { camera.yFov, 0.0f, 0.0f };
+    if (!camera.cameraBufferCrop.has_value()) {
+        return result;
+    }
+    const auto& crop = camera.cameraBufferCrop.value();
+    if (crop.bufferWidth <= 0 || crop.bufferHeight <= 0 || crop.cropScale <= 0.0f) {
+        return result;
+    }
+
+    float roiH = dcH * crop.cropScale;
+    float roiW = dcW * crop.cropScale;
+    float roiX = crop.cropOffset.x;
+    float roiY = crop.cropOffset.y;
+
+    float halfFovRad = result.fov * 0.5f;
+    float newHalfFovRad = atanf((roiH / static_cast<float>(crop.bufferHeight)) * tanf(halfFovRad));
+    result.fov = 2.0f * newHalfFovRad;
+
+    result.xOffset = (roiX - (0.5f * crop.bufferWidth - 0.5f * roiW)) / roiW;
+    result.yOffset = (roiY - (0.5f * crop.bufferHeight - 0.5f * roiH)) / roiH;
+
+    return result;
+}
 
 } // namespace OHOS::Ace::NG

@@ -1685,14 +1685,17 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
     if (params.position.has_value()) {
         const auto& position = params.position.value();
         Rosen::SpatialEffectPara::CornerPositions corners;
-        corners[Rosen::SpatialEffectPara::LEFT_TOP_INDEX] =
-            Rosen::Vector3f { position.leftTop.x, position.leftTop.y, position.leftTop.z };
-        corners[Rosen::SpatialEffectPara::RIGHT_TOP_INDEX] =
-            Rosen::Vector3f { position.rightTop.x, position.rightTop.y, position.rightTop.z };
-        corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] =
-            Rosen::Vector3f { position.leftBottom.x, position.leftBottom.y, position.leftBottom.z };
-        corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] =
-            Rosen::Vector3f { position.rightBottom.x, position.rightBottom.y, position.rightBottom.z };
+        bool hasCrop = params.cropOffset.has_value() && params.cropScale > 0.0f;
+        float scale = hasCrop ? (1.0f / params.cropScale) : 1.0f;
+        float offX = hasCrop ? params.cropOffset->x : 0.0f;
+        float offY = hasCrop ? params.cropOffset->y : 0.0f;
+        auto transformCorner = [scale, offX, offY](const DepthVector3& v) -> Rosen::Vector3f {
+            return { scale * (v.x - offX), scale * (v.y - offY), v.z };
+        };
+        corners[Rosen::SpatialEffectPara::LEFT_TOP_INDEX] = transformCorner(position.leftTop);
+        corners[Rosen::SpatialEffectPara::RIGHT_TOP_INDEX] = transformCorner(position.rightTop);
+        corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] = transformCorner(position.leftBottom);
+        corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] = transformCorner(position.rightBottom);
         variantPara->position = corners;
     } else {
         variantPara->position = params.depth;

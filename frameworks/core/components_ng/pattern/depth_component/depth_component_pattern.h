@@ -204,6 +204,8 @@ private:
     void RemoveBackgroundImageNode();
     void ApplyBackgroundOffset(const RefPtr<FrameNode>& backgroundImageNode);
     void ApplyBackgroundScale(const RefPtr<FrameNode>& backgroundImageNode);
+    void ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode);
+    void PropagateCropToChildren();
     void OnPaint3D();
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -215,7 +217,15 @@ private:
     void TransferDepthSpace(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
     void TransferCameraParams(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
     void TransferLightParams(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
+    void TransferImageMatrix(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode);
 #endif
+
+    struct TiltShiftResult {
+        float fov;
+        float xOffset;
+        float yOffset;
+    };
+    TiltShiftResult ComputeTiltShift(const OHOS::Ace::DepthCameraParams& camera, float dcW, float dcH);
 
 #if defined(KIT_3D_ENABLE)  && !defined(PREVIEW)
     void InitGltfAdapter();
@@ -260,6 +270,8 @@ private:
 
     RefPtr<ImageLoadingContext> depthMapLoadingCtx_;
     std::string lastLoadedDepthMapKey_;
+    float depthMapWidth_ = 0.0f;
+    float depthMapHeight_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG
