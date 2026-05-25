@@ -21,11 +21,13 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
@@ -349,6 +351,26 @@ void JSSaveButton::SetSymbolFontWeight(const JSCallbackInfo& info)
     SaveButtonModelNG::SetSymbolFontWeight(ConvertStrToFontWeight(value));
 }
 
+void JSSaveButton::SetAccessibilityRole(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        return;
+    }
+    uint32_t roleValue = 0;
+    ParseJsInteger(info[0], roleValue);
+
+    auto secRoleType = static_cast<SecurityComponentRoleType>(roleValue);
+    AccessibilityRoleType accRoleType;
+    if (secRoleType == SecurityComponentRoleType::ROLE_NONE) {
+        accRoleType = AccessibilityRoleType::ROLE_NONE;
+    } else {
+        accRoleType = AccessibilityRoleType::BUTTON;
+    }
+
+    std::string roleStr = AccessibilityStaticUtils::GetRoleByType(accRoleType);
+    ViewAbstractModel::GetInstance()->SetAccessibilityRole(roleStr, false);
+}
+
 void JSSaveButton::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSaveButton>::Declare("SaveButton");
@@ -401,6 +423,11 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("symbolIconColor", &JSSaveButton::SetSymbolIconColor);
     JSClass<JSSaveButton>::StaticMethod("symbolRenderingStrategy", &JSSaveButton::SetSymbolRenderingStrategy);
     JSClass<JSSaveButton>::StaticMethod("symbolFontWeight", &JSSaveButton::SetSymbolFontWeight);
+    JSClass<JSSaveButton>::StaticMethod("fallbackLineSpacing", &JSSecButtonBase::SetFallbackLineSpacing);
+    JSClass<JSSaveButton>::StaticMethod("accessibilityRole", &JSSaveButton::SetAccessibilityRole);
+    JSClass<JSSaveButton>::StaticMethod("accessibilityNextFocusId", &JSViewAbstract::JsAccessibilityNextFocusId);
+    JSClass<JSSaveButton>::StaticMethod("accessibilityDefaultFocus", &JSViewAbstract::JsAccessibilityDefaultFocus);
+    JSClass<JSSaveButton>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

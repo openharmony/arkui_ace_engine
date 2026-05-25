@@ -48,6 +48,7 @@ public:
         PasteButtonIconStyle& icon, int32_t& bg);
     static void Create(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void SetAccessibilityRole(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PASTE_BUTTON_H
