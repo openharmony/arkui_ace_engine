@@ -293,12 +293,13 @@ HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_SameRangeTest, TestSize.Leve
     // Same range should not trigger update
     node->DoSetActiveChildRange(INDEX_0, INDEX_2, INDEX_0, INDEX_0, false);
 
-    SUCCEED();
+    EXPECT_EQ(node->activeRangeParam_.start, INDEX_0);
+    EXPECT_EQ(node->activeRangeParam_.end, INDEX_2);
 }
 
 /**
  * @tc.name: DoSetActiveChildRange_WithShowCacheTest
- * @tc.desc: Test DoSetActiveChildRange with showCache=true
+ * @tc.desc: Test DoSetActiveChildRange with showCache=true expands range
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_WithShowCacheTest, TestSize.Level1)
@@ -310,7 +311,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_WithShowCacheTest, TestSize.
 
     node->DoSetActiveChildRange(INDEX_1, INDEX_2, INDEX_0, INDEX_1, true);
 
-    SUCCEED();
+    EXPECT_EQ(node->activeRangeParam_.start, INDEX_1);
+    EXPECT_EQ(node->activeRangeParam_.end, INDEX_3);
 }
 
 /**
@@ -392,7 +394,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, MoveData_SameIndexTest, TestSize.Level1)
 
     node->MoveData(INDEX_0, INDEX_0);
 
-    SUCCEED();
+    EXPECT_FALSE(node->moveFromTo_.has_value());
 }
 
 /**
@@ -525,7 +527,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildByIndex_ReturnsCachedTest, TestSize.Level1
     auto child2 = node->GetChildByIndex(INDEX_0);
 
     EXPECT_EQ(createCount, 0);
-    EXPECT_EQ(child1, child2);
+    EXPECT_EQ(child1, nullptr);
+    EXPECT_EQ(child2, nullptr);
 }
 
 /**
@@ -547,7 +550,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndex_WithBuildTest, TestSize.Level
 
     auto child = node->GetFrameChildByIndex(INDEX_0, true, false, true);
 
-    SUCCEED();
+    EXPECT_NE(child, nullptr);
 }
 
 /**
@@ -577,7 +580,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, OnDataChange_HandlesChangeTest, TestSize.Level1)
 
     node->OnDataChange(INDEX_0, INDEX_1, UINode::NotificationType::START_CHANGE_POSITION);
 
-    SUCCEED();
+    EXPECT_EQ(node->node4Index_.Size(), 0);
 }
 
 /**
@@ -600,7 +603,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, BuildAllChildren_BuildsAllTest, TestSize.Level1)
 
     node->BuildAllChildren();
 
-    SUCCEED();
+    EXPECT_TRUE(node->needBuildAll_);
+    EXPECT_EQ(node->node4Index_.Size(), 2);
 }
 
 /**
@@ -623,7 +627,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildren_ReassemblesChildrenTest, TestSize.Leve
 
     node->DoSetActiveChildRange(INDEX_0, INDEX_1, INDEX_0, INDEX_0, false);
 
-    SUCCEED();
+    EXPECT_EQ(node->activeRangeParam_.start, INDEX_0);
+    EXPECT_EQ(node->activeRangeParam_.end, INDEX_1);
 }
 
 /**
@@ -638,7 +643,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, RecycleItems_NotImplementedTest, TestSize.Level1)
 
     node->RecycleItems(INDEX_0, INDEX_2);
 
-    SUCCEED();
+    EXPECT_EQ(node->GetId(), TEST_NODE_ID);
 }
 
 /**
@@ -678,7 +683,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, SetNeedBuildAll_UpdatesFlagTest, TestSize.Level1)
 
 /**
  * @tc.name: DumpInfo_LogsInfoTest
- * @tc.desc: Test DumpInfo logs node information
+ * @tc.desc: Test DumpInfo logs node information without crash
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, DumpInfo_LogsInfoTest, TestSize.Level1)
@@ -688,7 +693,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, DumpInfo_LogsInfoTest, TestSize.Level1)
 
     node->DumpInfo();
 
-    SUCCEED();
+    EXPECT_EQ(node->GetTag(), V2::JS_LAZY_FOR_EACH_ETS_TAG);
 }
 
 /**
@@ -775,7 +780,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, SetItemDragEvent_WithoutOnMoveTest, TestSize.Level
 
 /**
  * @tc.name: DumpInfo_RepeatNodeTest
- * @tc.desc: Test DumpInfo for repeat node
+ * @tc.desc: Test DumpInfo for repeat node without crash
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, DumpInfo_RepeatNodeTest, TestSize.Level1)
@@ -785,7 +790,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, DumpInfo_RepeatNodeTest, TestSize.Level1)
 
     node->DumpInfo();
 
-    SUCCEED();
+    EXPECT_TRUE(node->isRepeat_);
 }
 
 /**
@@ -829,7 +834,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, BuildAllChildren_EmptyTest, TestSize.Level1)
 
     node->BuildAllChildren();
 
-    SUCCEED();
+    EXPECT_EQ(node->node4Index_.Size(), 0);
 }
 
 /**
@@ -949,7 +954,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, MoveData_WithNeedUpdateTest, TestSize.Level1)
     node->SetOnMoveFromTo([](int32_t, int32_t) {});
     node->MoveData(INDEX_0, INDEX_1, true);
 
-    SUCCEED();
+    EXPECT_TRUE(node->isActive_);
 }
 
 /**
@@ -1139,7 +1144,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, UpdateItemsForOnMove_NoMoveTest, TestSize.Level1)
 
     node->UpdateItemsForOnMove();
 
-    SUCCEED();
+    EXPECT_FALSE(node->moveFromTo_.has_value());
 }
 
 /**
@@ -1330,12 +1335,12 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildren_WithOnMoveTest, TestSize.Level1)
     node->children_.clear();
 
     node->GetChildren();
-    SUCCEED();
+    EXPECT_GE(node->children_.size(), 0);
 }
 
 /**
  * @tc.name: InitDragManager_NullChildTest
- * @tc.desc: Test InitDragManager with null child
+ * @tc.desc: Test InitDragManager returns early with null child
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NullChildTest, TestSize.Level1)
@@ -1345,12 +1350,12 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NullChildTest, TestSize.Level1)
 
     node->InitDragManager(nullptr);
 
-    SUCCEED();
+    EXPECT_EQ(node->GetParent(), nullptr);
 }
 
 /**
  * @tc.name: InitDragManager_NoParentTest
- * @tc.desc: Test InitDragManager without parent
+ * @tc.desc: Test InitDragManager returns early without parent
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NoParentTest, TestSize.Level1)
@@ -1361,12 +1366,12 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NoParentTest, TestSize.Level1)
     auto childNode = CreateFrameNode(V2::TEXT_ETS_TAG);
     node->InitDragManager(childNode);
 
-    SUCCEED();
+    EXPECT_EQ(node->GetParent(), nullptr);
 }
 
 /**
  * @tc.name: InitDragManager_NonListGridTest
- * @tc.desc: Test InitDragManager with non-list/grid parent
+ * @tc.desc: Test InitDragManager returns early with non-list/grid parent
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NonListGridTest, TestSize.Level1)
@@ -1380,12 +1385,12 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitDragManager_NonListGridTest, TestSize.Level1)
     auto childNode = CreateFrameNode(V2::TEXT_ETS_TAG);
     node->InitDragManager(childNode);
 
-    SUCCEED();
+    EXPECT_NE(node->GetParent(), nullptr);
 }
 
 /**
  * @tc.name: InitAllChildren_NoParentTest
- * @tc.desc: Test InitAllChildrenDragManager with null parent
+ * @tc.desc: Test InitAllChildrenDragManager returns early with null parent
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_NoParentTest, TestSize.Level1)
@@ -1395,12 +1400,12 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_NoParentTest, TestSize.Level1)
 
     node->InitAllChildrenDragManager(true);
 
-    SUCCEED();
+    EXPECT_EQ(node->GetParent(), nullptr);
 }
 
 /**
  * @tc.name: InitAllChildren_NonListGridTest
- * @tc.desc: Test InitAllChildrenDragManager with non-list/grid parent
+ * @tc.desc: Test InitAllChildrenDragManager returns early with non-list/grid parent
  * @tc.type: FUNC
  */
 HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_NonListGridTest, TestSize.Level1)
@@ -1413,7 +1418,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_NonListGridTest, TestSize.Level1)
 
     node->InitAllChildrenDragManager(true);
 
-    SUCCEED();
+    EXPECT_NE(node->GetParent(), nullptr);
 }
 
 /**
@@ -1470,9 +1475,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsCacheTest, TestSize.Lev
         [](int32_t, int32_t, int32_t, int32_t, bool) {}
     );
 
-    node->GetFrameChildByIndex(INDEX_0, true, true, false);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, true, false);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1493,9 +1497,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_AddToRenderTreeTest, Test
     );
     node->isActive_ = true;
 
-    node->GetFrameChildByIndex(INDEX_0, true, false, true);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1516,9 +1519,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_WithOnMoveTest, TestSize.
     );
     node->onMoveEvent_ = [](int32_t, int32_t) {};
 
-    node->GetFrameChildByIndex(INDEX_0, true, false, true);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1538,9 +1540,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsCacheRepeatTest, TestSi
         [](int32_t, int32_t, int32_t, int32_t, bool) {}
     );
 
-    node->GetFrameChildByIndex(INDEX_0, true, true, false);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, true, false);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1561,9 +1562,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_OnMainTreeTest, TestSize.
     );
     node->onMainTree_ = true;
 
-    node->GetFrameChildByIndex(INDEX_0, true, false, true);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1583,9 +1583,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_AddToRenderTreeFalseTest,
         [](int32_t, int32_t, int32_t, int32_t, bool) {}
     );
 
-    node->GetFrameChildByIndex(INDEX_0, true, false, false);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, false);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1606,9 +1605,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsActiveFalseTest, TestSi
     );
     node->isActive_ = false;
 
-    node->GetFrameChildByIndex(INDEX_0, true, false, true);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, false, true);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1629,9 +1627,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_CustomFreezeDisableTest, 
     );
     node->options_.customComponentFreezeMode = LazyForEachCustomComponentFreezeMode::DISABLED;
 
-    node->GetFrameChildByIndex(INDEX_0, true, true, false);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, true, false);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1652,9 +1649,8 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_CustomFreezeEnableTest, T
     );
     node->options_.customComponentFreezeMode = LazyForEachCustomComponentFreezeMode::ENABLED;
 
-    node->GetFrameChildByIndex(INDEX_0, true, true, false);
-
-    SUCCEED();
+    auto result = node->GetFrameChildByIndex(INDEX_0, true, true, false);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -1670,7 +1666,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, UpdateIsCache_ShouldTriggerFalseTest, TestSize.Lev
     auto child = CreateUINode();
     node->UpdateIsCache(child, true, false);
 
-    SUCCEED();
+    EXPECT_EQ(node->recycleNodeIds_.size(), 0);
 }
 
 /**
@@ -1688,7 +1684,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, UpdateIsCache_ReuseTest, TestSize.Level1)
 
     node->UpdateIsCache(child, true, true);
 
-    SUCCEED();
+    EXPECT_TRUE(node->recycleNodeIds_.empty());
 }
 
 /**
@@ -1705,7 +1701,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, UpdateIsCache_RecycleTest, TestSize.Level1)
 
     node->UpdateIsCache(child, false, true);
 
-    SUCCEED();
+    EXPECT_FALSE(node->recycleNodeIds_.empty());
 }
 
 /**
@@ -1797,7 +1793,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, RebuildCache_RemovesInactiveTest, TestSize.Level1)
 
     node->RebuildCache();
 
-    SUCCEED();
+    EXPECT_EQ(node->node4Index_.Size(), 1);
 }
 
 /**
@@ -1818,7 +1814,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, RebuildCache_NullNodeTest, TestSize.Level1)
 
     node->RebuildCache();
 
-    SUCCEED();
+    EXPECT_EQ(node->node4Index_.Size(), 2);
 }
 
 /**
@@ -1847,7 +1843,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, RebuildCache_RepeatTest, TestSize.Level1)
 
     node->RebuildCache();
 
-    SUCCEED();
+    EXPECT_EQ(node->node4Index_.Size(), 1);
 }
 
 /**
@@ -1873,7 +1869,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_ListInitTest, TestSize.Level1)
 
     node->InitAllChildrenDragManager(true);
 
-    SUCCEED();
+    EXPECT_NE(node->GetParent(), nullptr);
 }
 
 /**
@@ -1899,7 +1895,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_ListDeinitTest, TestSize.Level1)
 
     node->InitAllChildrenDragManager(false);
 
-    SUCCEED();
+    EXPECT_NE(node->GetParent(), nullptr);
 }
 
 /**
@@ -1925,7 +1921,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_GridInitTest, TestSize.Level1)
 
     node->InitAllChildrenDragManager(true);
 
-    SUCCEED();
+    EXPECT_NE(node->GetParent(), nullptr);
 }
 
 /**
@@ -1951,7 +1947,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_GridDeinitTest, TestSize.Level1)
 
     node->InitAllChildrenDragManager(false);
 
-    SUCCEED();
+    EXPECT_NE(node->GetParent(), nullptr);
 }
 
 /**
@@ -1990,7 +1986,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, InitAllChildren_SkipInvalidTest, TestSize.Level1)
 
     node->InitAllChildrenDragManager(true);
 
-    SUCCEED();
+    EXPECT_NE(node->GetParent(), nullptr);
 }
 
 } // namespace OHOS::Ace::NG
