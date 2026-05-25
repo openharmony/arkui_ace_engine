@@ -3308,22 +3308,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_MouseEvent_TouchEventProxy_KeyEvent& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_PickerTextStyle_TextPickerTextStyle& src)
 {
     switch (src.selector) {
@@ -5459,7 +5443,6 @@ ASSIGN_OPT(Opt_Union_BadgeParamWithNumber_BadgeParamWithString)
 ASSIGN_OPT(Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions)
 ASSIGN_OPT(Opt_Union_Length_GutterOption)
 ASSIGN_OPT(Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions)
-ASSIGN_OPT(Opt_Union_MouseEvent_TouchEventProxy_KeyEvent)
 ASSIGN_OPT(Opt_Union_PickerTextStyle_TextPickerTextStyle)
 ASSIGN_OPT(Opt_CalendarDialogOptions)
 ASSIGN_OPT(Opt_DatePickerDialogOptions)

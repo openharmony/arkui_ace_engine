@@ -2015,29 +2015,6 @@ export class RawInputEventWrapper implements MaterializedBase {
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, RawInputEventWrapper.getFinalizer())
     }
-    constructor(event: MouseEvent | TouchEvent | KeyEvent) {
-        this(MaterializedBaseTag.NOP, RawInputEventWrapper.construct(event))
-    }
-    static construct(event: MouseEvent | TouchEvent | KeyEvent): KPointer {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (event instanceof MouseEvent) {
-            thisSerializer.writeInt8((0).toByte())
-            const eventForIdx0 = event as MouseEvent
-            MouseEvent_serializer.write(thisSerializer, eventForIdx0)
-        } else if (event instanceof TouchEvent) {
-            thisSerializer.writeInt8((1).toByte())
-            const eventForIdx1 = event as TouchEvent
-            const eventForIdx1Transformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(eventForIdx1)
-            TouchEventProxy_serializer.write(thisSerializer, eventForIdx1Transformed)
-        } else if (event instanceof KeyEvent) {
-            thisSerializer.writeInt8((2).toByte())
-            const eventForIdx2 = event as KeyEvent
-            KeyEvent_serializer.write(thisSerializer, eventForIdx2)
-        }
-        const retval = ArkUIGeneratedNativeModule._RawInputEventWrapper_construct(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RawInputEventWrapper_getFinalizer()
     }

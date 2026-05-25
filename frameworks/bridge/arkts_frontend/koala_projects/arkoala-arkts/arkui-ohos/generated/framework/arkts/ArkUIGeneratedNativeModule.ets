@@ -6129,7 +6129,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RadialGradientStyle_setOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _RawInputEventWrapper_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    native static _RawInputEventWrapper_construct(): KPointer
     @ani.unsafe.Direct
     native static _RawInputEventWrapper_getFinalizer(): KPointer
     @ani.unsafe.Direct
