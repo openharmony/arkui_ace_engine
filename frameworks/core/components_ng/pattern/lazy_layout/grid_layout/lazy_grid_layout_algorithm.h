@@ -117,6 +117,8 @@ private:
         float stickyFooterPos) const;
     // Explicitly mark header / footer as active so they are not collected by ActiveChildRange filtering.
     void SetHeaderFooterActive(LayoutWrapper* layoutWrapper, int32_t cachedStart, int32_t cachedEnd) const;
+    // Apply the item active range to content (non-header/footer) children only.
+    void ActivateContentItemRange(LayoutWrapper* layoutWrapper, int32_t rawStart, int32_t rawEnd) const;
     void MeasureGridItemAll(LayoutWrapper* layoutWrapper);
     void MeasureGridItemLazy(LayoutWrapper* layoutWrapper);
     void GetStartIndexInfo(int32_t& index, float& pos);

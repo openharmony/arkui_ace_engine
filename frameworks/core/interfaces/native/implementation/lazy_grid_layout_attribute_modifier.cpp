@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model_static.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -54,6 +55,47 @@ void SetColumnsGapImpl(Ark_NativePointer node,
     }
     LazyGridLayoutModelStatic::SetColumnGap(frameNode, convValue);
 }
+void SetHeaderImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        LazyGridLayoutModelStatic::RemoveHeader(frameNode);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto host = weakNode.Upgrade();
+            CHECK_NULL_VOID(host);
+            LazyGridLayoutModelStatic::SetHeader(AceType::RawPtr(host), uiNode);
+        }, node);
+}
+void SetFooterImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        LazyGridLayoutModelStatic::RemoveFooter(frameNode);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto host = weakNode.Upgrade();
+            CHECK_NULL_VOID(host);
+            LazyGridLayoutModelStatic::SetFooter(AceType::RawPtr(host), uiNode);
+        }, node);
+}
+void SetStickyImpl(Ark_NativePointer node, const Opt_StickyStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto style = Converter::OptConvertPtr<V2::StickyStyle>(value);
+    LazyGridLayoutModelStatic::SetSticky(frameNode, EnumToInt(style));
+}
 void SetOnVisibleIndexesChangeImpl(Ark_NativePointer node, const Opt_OnVisibleIndexesChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -77,6 +119,9 @@ const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttribute
         LazyGridLayoutAttributeModifier::ConstructImpl,
         LazyGridLayoutAttributeModifier::SetRowsGapImpl,
         LazyGridLayoutAttributeModifier::SetColumnsGapImpl,
+        LazyGridLayoutAttributeModifier::SetHeaderImpl,
+        LazyGridLayoutAttributeModifier::SetFooterImpl,
+        LazyGridLayoutAttributeModifier::SetStickyImpl,
         LazyGridLayoutAttributeModifier::SetOnVisibleIndexesChangeImpl,
     };
     return &ArkUILazyGridLayoutAttributeModifierImpl;

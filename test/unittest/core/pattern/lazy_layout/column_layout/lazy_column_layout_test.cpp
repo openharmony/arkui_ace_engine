@@ -1911,4 +1911,76 @@ HWTEST_F(LazyColumnLayoutTest, VisibleIndexWithSafeAreaPadding001, TestSize.Leve
     EXPECT_GT(visibleStart, pattern_->layoutInfo_->startIndex_);
     EXPECT_LE(visibleEnd, pattern_->layoutInfo_->endIndex_);
 }
+
+namespace {
+void CreateLazyEdge(float height)
+{
+    StackModelNG stackModel;
+    stackModel.Create();
+    ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+    ViewAbstract::SetHeight(CalcLength(height));
+    ViewStackProcessor::GetInstance()->Pop();
+}
+} // namespace
+
+/**
+ * @tc.name: NestedGridItemsRenderWithHeaderFooter001
+ * @tc.desc: A header/footer LazyVGridLayout nested under LazyColumnLayout must activate its content items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, NestedGridItemsRenderWithHeaderFooter001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyColumnLayout();
+    CreateLazyVGridLayout();
+    LazyGridLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyGridLayoutModel::SetHeader([]() { CreateLazyEdge(60.0f); });
+    CreateContent(30);
+    LazyGridLayoutModel::SetFooter([]() { CreateLazyEdge(40.0f); });
+    CreateDone();
+
+    ASSERT_NE(lazyGridPattern_, nullptr);
+    EXPECT_EQ(lazyGridPattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_GT(lazyGridPattern_->layoutInfo_->endIndex_, 0);
+
+    auto headerNode = lazyGridPattern_->GetHeaderNode();
+    auto footerNode = lazyGridPattern_->GetFooterNode();
+    ASSERT_NE(headerNode, nullptr);
+    ASSERT_NE(footerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_TRUE(footerNode->IsActive());
+
+    auto firstItemWrapper = lazyGridFrameNode_->GetChildByIndex(1);
+    ASSERT_NE(firstItemWrapper, nullptr);
+    auto firstItemNode = firstItemWrapper->GetHostNode();
+    ASSERT_NE(firstItemNode, nullptr);
+    EXPECT_TRUE(firstItemNode->IsActive());
+}
+
+/**
+ * @tc.name: ListBackScrollWithFooter001
+ * @tc.desc: A footer-backed LazyColumnLayout under a List must be able to scroll back from the bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, ListBackScrollWithFooter001, TestSize.Level1)
+{
+    CreateList();
+    CreateLazyColumnLayout();
+    CreateContent(20);
+    LazyColumnLayoutModel::SetFooter([]() { CreateLazyEdge(60.0f); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+
+    scrollablePattern_->UpdateCurrentOffset(-1500.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    const int32_t startAtBottom = pattern_->layoutInfo_->startIndex_;
+    EXPECT_GT(startAtBottom, 0);
+
+    // Back-scroll: the content must move back (start index decreases); the footer-leak bug pinned it at the bottom.
+    scrollablePattern_->UpdateCurrentOffset(700.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_LT(pattern_->layoutInfo_->startIndex_, startAtBottom);
+}
 } // namespace OHOS::Ace::NG

@@ -431,7 +431,7 @@ bool LazyColumnLayoutAlgorithm::MeasureItem(
 void LazyColumnLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos)
 {
     float currentPos = startPos;
-    int32_t curIndex = startIndex;
+    int32_t curIndex = std::max(startIndex, 0);
     auto estimateItemSize = layoutInfo_->GetEstimateItemSize();
     while (LessOrEqual(currentPos, endPos_) && curIndex < totalItemCount_) {
         auto mainSize = 0.0f;
