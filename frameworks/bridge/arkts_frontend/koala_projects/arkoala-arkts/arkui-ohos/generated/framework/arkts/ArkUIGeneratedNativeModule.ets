@@ -5225,6 +5225,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IMEClient_setNodeId(ptr: KPointer, nodeId: KLong): void
     @ani.unsafe.Direct
+    native static _ImmersiveHelper_ImmersiveConstruct(thisArray: KSerializerBuffer, thisLength: KInt): KLong
+    @ani.unsafe.Direct
     native static _Indicator_construct(): KPointer
     @ani.unsafe.Direct
     native static _Indicator_getFinalizer(): KPointer

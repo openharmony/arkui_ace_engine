@@ -284,6 +284,7 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
 const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor();
 const GENERATED_ArkUIIMEClientAccessor* GetIMEClientAccessor();
+const GENERATED_ArkUIImmersiveHelperAccessor* GetImmersiveHelperAccessor();
 const GENERATED_ArkUIIndicatorAccessor* GetIndicatorAccessor();
 const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor();
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor();
@@ -638,6 +639,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetImageAttachmentAccessor,
         GetImageBitmapAccessor,
         GetIMEClientAccessor,
+        GetImmersiveHelperAccessor,
         GetIndicatorAccessor,
         GetIndicatorComponentControllerAccessor,
         GetIUIContextAccessor,

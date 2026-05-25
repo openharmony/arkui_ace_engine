@@ -14,14 +14,35 @@
  */
 
 import { ArkUIAniModule } from 'arkui.ani';
+import { ResourceColor } from '/arkui/component/units';
+import { ImmersiveHelper, ImmersiveOptionsInner, LightEffectOptionsInner } from "arkui/component/idlize"
 
 namespace uiMaterial {
     export enum MaterialType {
         NONE = 0,
         SEMI_TRANSPARENT = 1,
+        IMMERSIVE = 2,
     }
     export interface MaterialOptions {
         type?: MaterialType,
+    }
+    export enum ImmersiveStyle {
+        ULTRA_THIN = 0,
+        THIN = 1,
+        REGULAR = 2,
+        THICK = 3,
+        ULTRA_THICK = 4,
+    }
+    export interface LightEffectOptions {
+        color?: ResourceColor,
+    }
+    export interface ImmersiveOptions {
+        style?: ImmersiveStyle,
+        materialColor?: ResourceColor,
+        colorInvert?: boolean,
+        applyShadow?: boolean,
+        interactive?: boolean,
+        lightEffect?: LightEffectOptions | null,
     }
     class Cleaner {
         private ptr: long = 0;
@@ -41,8 +62,8 @@ namespace uiMaterial {
     let destroyRegister = new FinalizationRegistry<Cleaner>(cleanCallback)
     let unregisterToken = new object()
     export class Material {
-        private materialObj_: long = 0;
-        private cleaner_: Cleaner | undefined = undefined;
+        protected materialObj_: long = 0;
+        protected cleaner_: Cleaner | undefined = undefined;
         constructor(options?: MaterialOptions) {
             let options_cast = options as MaterialOptions | undefined;
             this.materialObj_ = ArkUIAniModule._UiMaterial_ConstructMaterial(options_cast);
@@ -57,6 +78,34 @@ namespace uiMaterial {
         }
         getNativeObject(): long {
             return this.materialObj_;
+        }
+    }
+    export class ImmersiveMaterial extends Material {
+        constructor(options?: ImmersiveOptions) {
+            let val: ImmersiveOptionsInner | undefined = undefined;
+            if (options != undefined) {
+                let options_cast = options as ImmersiveOptions;
+                val = {
+                    style: (options_cast.style === undefined) ? undefined : (options_cast.style as ImmersiveStyle).valueOf(),
+                    materialColor: options_cast.materialColor,
+                    colorInvert: options_cast.colorInvert,
+                    applyShadow: options_cast.applyShadow,
+                    interactive: options_cast.interactive,
+                    lightEffect: ImmersiveMaterial.ConvertLightEffectOptions(options_cast.lightEffect),
+                } as ImmersiveOptionsInner;
+            }
+            this.materialObj_ = ImmersiveHelper.ImmersiveConstruct(val);
+            this.registerCleaner(this.materialObj_);
+        }
+        static ConvertLightEffectOptions(input: LightEffectOptions | null | undefined): LightEffectOptionsInner | null | undefined {
+            if (input === undefined) {
+                return null;
+            }
+            if (input === null) {
+                return null;
+            }
+            let val = input as LightEffectOptions;
+            return { color: val.color } as LightEffectOptionsInner;
         }
     }
 }

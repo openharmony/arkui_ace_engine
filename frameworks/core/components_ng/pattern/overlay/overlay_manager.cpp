@@ -4914,13 +4914,16 @@ void OverlayManager::UpdateSheetRender(
     if (!(sheetStyle.systemMaterial && sheetStyle.systemMaterial->IsForceShadow())) {
         if (sheetStyle.shadow.has_value()) {
             sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, sheetStyle.shadow.value(), sheetPageNode);
         } else if (sheetTheme->IsOuterBorderEnable()) {
             auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
             auto shadow = sheetNodePattern->GetShadowFromTheme(style);
             sheetRenderContext->UpdateBackShadow(shadow);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, sheetPageNode);
         } else if (!isPartialUpdate) {
             auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
             sheetRenderContext->UpdateBackShadow(shadow);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, sheetPageNode);
         }
     }
     sheetNodePattern->UpdateMaskBackgroundColor();

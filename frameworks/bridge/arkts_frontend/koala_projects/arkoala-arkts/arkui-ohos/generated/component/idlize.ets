@@ -3660,6 +3660,25 @@ export class GlobalScopeUicontextTextMenu {
         thisSerializer.release()
     }
 }
+export class ImmersiveHelper {
+    public static ImmersiveConstruct(options: ImmersiveOptionsInner | undefined): int64 {
+        const options_casted = options as (ImmersiveOptionsInner | undefined)
+        return ImmersiveHelper.ImmersiveConstruct_serialize(options_casted)
+    }
+    private static ImmersiveConstruct_serialize(options: ImmersiveOptionsInner | undefined): int64 {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            ImmersiveOptionsInner_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._ImmersiveHelper_ImmersiveConstruct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+}
 export class IUIContext {
     public static freezeUINode(id: string, isFrozen: boolean): void {
         const id_casted = id as (string)
@@ -7655,6 +7674,17 @@ export class ShaderStyleProxy {
 export interface TransformationMatrix {
     matrix4x4: Array<number>;
 }
+export interface LightEffectOptionsInner {
+    color?: ResourceColor;
+}
+export interface ImmersiveOptionsInner {
+    style?: int32;
+    materialColor?: ResourceColor;
+    colorInvert?: boolean;
+    applyShadow?: boolean;
+    interactive?: boolean;
+    lightEffect?: LightEffectOptionsInner | null;
+}
 export interface WaterFlowSectionsInterface {
     ptr: KPointer;
 }
@@ -9297,6 +9327,182 @@ export class ComponentInfo_serializer {
         const transformTmpBufValue15: number = (valueDeserializer.readNumber() as number)
         const transformTmpResult: Matrix4Result = ([transformTmpBufValue0, transformTmpBufValue1, transformTmpBufValue2, transformTmpBufValue3, transformTmpBufValue4, transformTmpBufValue5, transformTmpBufValue6, transformTmpBufValue7, transformTmpBufValue8, transformTmpBufValue9, transformTmpBufValue10, transformTmpBufValue11, transformTmpBufValue12, transformTmpBufValue13, transformTmpBufValue14, transformTmpBufValue15] as Matrix4Result)
         let value: ComponentInfo = ({size: sizeTmpResult, localOffset: localOffsetTmpResult, windowOffset: windowOffsetTmpResult, screenOffset: screenOffsetTmpResult, translate: translateTmpResult, scale: scaleTmpResult, rotate: rotateTmpResult, transform: transformTmpResult} as ComponentInfo)
+        return value
+    }
+}
+export class LightEffectOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: LightEffectOptionsInner): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForColor = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorTmpValueForIdx0 = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorTmpValueForIdx1 = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForColorTmpValueForIdx2 = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForColorTmpValueForIdx3 = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): LightEffectOptionsInner {
+        let valueDeserializer: DeserializerBase = buffer
+        const colorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorTmpBuf: ResourceColor | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
+            }
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        }
+        const colorTmpResult: ResourceColor | undefined = colorTmpBuf
+        let value: LightEffectOptionsInner = ({color: colorTmpResult} as LightEffectOptionsInner)
+        return value
+    }
+}
+export class ImmersiveOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: ImmersiveOptionsInner): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForStyle = value.style
+        if (valueHolderForStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStyleTmpValue = valueHolderForStyle!
+            valueSerializer.writeInt32(valueHolderForStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMaterialColor = value.materialColor
+        if (valueHolderForMaterialColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaterialColorTmpValue = valueHolderForMaterialColor!
+            if (valueHolderForMaterialColorTmpValue instanceof arkui_component_enums_Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForMaterialColorTmpValueForIdx0 = valueHolderForMaterialColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForMaterialColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForMaterialColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForMaterialColorTmpValueForIdx1 = valueHolderForMaterialColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForMaterialColorTmpValueForIdx1)
+            } else if (valueHolderForMaterialColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForMaterialColorTmpValueForIdx2 = valueHolderForMaterialColorTmpValue as string
+                valueSerializer.writeString(valueHolderForMaterialColorTmpValueForIdx2)
+            } else if (valueHolderForMaterialColorTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForMaterialColorTmpValueForIdx3 = valueHolderForMaterialColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForMaterialColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForColorInvert = value.colorInvert
+        if (valueHolderForColorInvert !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorInvertTmpValue = valueHolderForColorInvert!
+            valueSerializer.writeBoolean(valueHolderForColorInvertTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForApplyShadow = value.applyShadow
+        if (valueHolderForApplyShadow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForApplyShadowTmpValue = valueHolderForApplyShadow!
+            valueSerializer.writeBoolean(valueHolderForApplyShadowTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForInteractive = value.interactive
+        if (valueHolderForInteractive !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForInteractiveTmpValue = valueHolderForInteractive!
+            valueSerializer.writeBoolean(valueHolderForInteractiveTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLightEffect = value.lightEffect
+        if (valueHolderForLightEffect !== null) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLightEffectTmpValue = valueHolderForLightEffect!
+            LightEffectOptionsInner_serializer.write(valueSerializer, valueHolderForLightEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ImmersiveOptionsInner {
+        let valueDeserializer: DeserializerBase = buffer
+        const styleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let styleTmpBuf: int32 | undefined = undefined
+        if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            styleTmpBuf = valueDeserializer.readInt32()
+        }
+        const styleTmpResult: int32 | undefined = styleTmpBuf
+        const materialColorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let materialColorTmpBuf: ResourceColor | undefined = undefined
+        if ((materialColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const materialColorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let materialColorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (materialColorTmpBufOptUnionSelector == (0).toByte()) {
+                materialColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (materialColorTmpBufOptUnionSelector == (1).toByte()) {
+                materialColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (materialColorTmpBufOptUnionSelector == (2).toByte()) {
+                materialColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (materialColorTmpBufOptUnionSelector == (3).toByte()) {
+                materialColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for materialColorTmpBufOpt has to be chosen through deserialisation.')
+            }
+            materialColorTmpBuf = (materialColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        }
+        const materialColorTmpResult: ResourceColor | undefined = materialColorTmpBuf
+        const colorInvertTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorInvertTmpBuf: boolean | undefined = undefined
+        if ((colorInvertTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorInvertTmpBuf = valueDeserializer.readBoolean()
+        }
+        const colorInvertTmpResult: boolean | undefined = colorInvertTmpBuf
+        const applyShadowTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let applyShadowTmpBuf: boolean | undefined = undefined
+        if ((applyShadowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            applyShadowTmpBuf = valueDeserializer.readBoolean()
+        }
+        const applyShadowTmpResult: boolean | undefined = applyShadowTmpBuf
+        const interactiveTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let interactiveTmpBuf: boolean | undefined = undefined
+        if ((interactiveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            interactiveTmpBuf = valueDeserializer.readBoolean()
+        }
+        const interactiveTmpResult: boolean | undefined = interactiveTmpBuf
+        const lightEffectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let lightEffectTmpBuf: LightEffectOptionsInner | null = null
+        if ((lightEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            lightEffectTmpBuf = LightEffectOptionsInner_serializer.read(valueDeserializer)
+        }
+        const lightEffectTmpResult: LightEffectOptionsInner | null | undefined = lightEffectTmpBuf
+        let value: ImmersiveOptionsInner = ({style: styleTmpResult, materialColor: materialColorTmpResult, colorInvert: colorInvertTmpResult, applyShadow: applyShadowTmpResult, interactive: interactiveTmpResult, lightEffect: lightEffectTmpResult} as ImmersiveOptionsInner)
         return value
     }
 }

@@ -583,12 +583,7 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.systemMaterial) {
-        auto sheetRenderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(sheetRenderContext);
-        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
-        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial))) {
-            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
-        }
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
     }
 }
 
@@ -601,13 +596,7 @@ void SheetPresentationPattern::ClearSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (!sheetStyle.systemMaterial) {
-        auto sheetRenderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(sheetRenderContext);
-        sheetRenderContext->SetSystemMaterial(nullptr);
-        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), nullptr)) {
-            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), nullptr);
-        }
-        RemoveResObj("sheet.uiMaterial"); // check
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), nullptr);
     }
 }
 
@@ -723,13 +712,15 @@ void SheetPresentationPattern::SetShadowStyle(bool isFocused)
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.shadow.has_value() || sheetStyle.systemMaterial) {
-        return;
-    }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (sheetStyle.shadow.has_value() ||
+        (renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+        // Check if the sheetStyle has shadow or if the system material is set and apply material's shadow
+        return;
+    }
     auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());

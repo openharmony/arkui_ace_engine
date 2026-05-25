@@ -10241,6 +10241,20 @@ void ResetUseUnionEffect(ArkUINodeHandle node)
     ViewAbstract::SetUseUnion(frameNode, false);
 }
 
+void SetMaterialShadow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMaterialShadow(frameNode);
+}
+
+void ResetMaterialShadow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMaterialShadow(frameNode);
+}
+
 void SetDoubleSided(ArkUINodeHandle node, bool doubleSided)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11912,6 +11926,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .getIgnoreLayoutSafeAreaOpts = GetIgnoreLayoutSafeAreaOpts,
         .setUseUnionEffect = SetUseUnionEffect,
         .resetUseUnionEffect = ResetUseUnionEffect,
+        .setMaterialShadow = SetMaterialShadow,
+        .resetMaterialShadow = ResetMaterialShadow,
         .getCurrentLocation = GetCurrentLocation,
         .setDoubleSided = SetDoubleSided,
         .resetDoubleSided = ResetDoubleSided
