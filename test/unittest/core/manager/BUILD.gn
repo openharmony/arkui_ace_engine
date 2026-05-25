@@ -245,7 +245,6 @@ group("core_manager_unittest") {
     ":drag_animation_helper_test_ng",
     ":drag_drop_behavior_reporter_test_ng",
     ":drag_drop_controller_func_wrapper_test_ng",
-    ":drag_drop_func_wrapper_test_ng",
     ":drag_drop_initiating_state_test_ng",
     ":drag_drop_manager_test_ng",
     ":drag_drop_proxy_test_ng",
