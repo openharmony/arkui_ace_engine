@@ -3742,20 +3742,27 @@ void SliderPattern::UpdateSelectedTrackFrameNode()
     
     auto rect = sliderContentModifier_->GetSelectedTrackRect();
     float borderRadiusValue = sliderContentModifier_->GetSelectedBorderRadius();
+
+    const auto& content = host->GetGeometryNode()->GetContent();
+    auto contentOffsetF = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
     
     float width = rect.GetWidth();
     float height = rect.GetHeight();
-    float x = rect.GetLeft();
-    float y = rect.GetTop();
+    float x = rect.GetLeft() - contentOffsetF.GetX();
+    float y = rect.GetTop() - contentOffsetF.GetY();
+    
+    selectedTrackFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(width), CalcLength(height)));
     
     auto geometryNode = selectedTrackFrameNode_->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(SizeF(width, height));
-    geometryNode->SetFrameOffset(OffsetF(x, y));
     selectedTrackFrameNode_->ForceSyncGeometryNode();
     
     auto trackRC = selectedTrackFrameNode_->GetRenderContext();
     CHECK_NULL_VOID(trackRC);
+    
+    trackRC->UpdatePosition(OffsetT<Dimension>(Dimension(x), Dimension(y)));
     
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(borderRadiusValue, DimensionUnit::PX));
@@ -3767,22 +3774,25 @@ void SliderPattern::UpdateSelectedTrackFrameNode()
     
     auto blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
     
+    float circleCenterX = circleCenter_.GetX() - contentOffsetF.GetX();
+    float circleCenterY = circleCenter_.GetY() - contentOffsetF.GetY();
+    
     float lightPosX = 0.0f;
     float lightPosY = 0.0f;
     
     if (direction == Axis::HORIZONTAL) {
         if (!reverse) {
-            lightPosX = circleCenter_.GetX() - frameSize / NUMBER_TWO - x;
+            lightPosX = circleCenterX - frameSize / NUMBER_TWO - x;
         } else {
-            lightPosX = circleCenter_.GetX() + frameSize / NUMBER_TWO - x;
+            lightPosX = circleCenterX + frameSize / NUMBER_TWO - x;
         }
-        lightPosY = circleCenter_.GetY() - y;
+        lightPosY = circleCenterY - y;
     } else {
-        lightPosX = circleCenter_.GetX() - x;
+        lightPosX = circleCenterX - x;
         if (!reverse) {
-            lightPosY = circleCenter_.GetY() - frameSize / NUMBER_TWO - y;
+            lightPosY = circleCenterY - frameSize / NUMBER_TWO - y;
         } else {
-            lightPosY = circleCenter_.GetY() + frameSize / NUMBER_TWO - y;
+            lightPosY = circleCenterY + frameSize / NUMBER_TWO - y;
         }
     }
     
@@ -3824,6 +3834,10 @@ void SliderPattern::UpdateParticleFrameNode()
     
     auto trackRect = sliderContentModifier_->GetTrackRect();
     auto selectedRect = sliderContentModifier_->GetSelectedTrackRect();
+    
+    const auto& content = host->GetGeometryNode()->GetContent();
+    auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+    
     float trackY = trackRect.GetTop();
     float trackX = trackRect.GetLeft();
     float selectedX = selectedRect.GetLeft();
@@ -3833,18 +3847,21 @@ void SliderPattern::UpdateParticleFrameNode()
     float emitterNodeX = 0.0f;
     float emitterNodeY = 0.0f;
     
+    float circleCenterX = circleCenter_.GetX() + contentOffset.GetX();
+    float circleCenterY = circleCenter_.GetY() + contentOffset.GetY();
+    
     if (direction == Axis::HORIZONTAL) {
         if (!reverse) {
-            emitterNodeX = circleCenter_.GetX() - emitterLength - selectedX;
+            emitterNodeX = circleCenterX - emitterLength - selectedX;
         } else {
-            emitterNodeX = circleCenter_.GetX() - selectedX;
+            emitterNodeX = circleCenterX - selectedX;
         }
         emitterNodeY = trackY - selectedY;
     } else {
         if (!reverse) {
-            emitterNodeY = circleCenter_.GetY() - emitterLength - selectedY;
+            emitterNodeY = circleCenterY - emitterLength - selectedY;
         } else {
-            emitterNodeY = circleCenter_.GetY() - selectedY;
+            emitterNodeY = circleCenterY - selectedY;
         }
         emitterNodeX = trackX - selectedX;
     }
@@ -3858,11 +3875,14 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     
+    const auto& content = host->GetGeometryNode()->GetContent();
+    auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+    
     auto blockDiameter = blockRadius * NUMBER_TWO;
     auto frameSize = blockDiameter * GetDragFrameBaseScale();
     
-    float frameNodeX = centerX - frameSize / NUMBER_TWO;
-    float frameNodeY = centerY - frameSize / NUMBER_TWO;
+    float frameNodeX = centerX - contentOffset.GetX() - frameSize / NUMBER_TWO;
+    float frameNodeY = centerY - contentOffset.GetY() - frameSize / NUMBER_TWO;
     
     if (dragFrameNode_) {
         dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -3887,8 +3907,8 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
     if (dragPointNode_) {
         dragPointNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(blockDiameter), CalcLength(blockDiameter)));
-        float pointNodeX = centerX - blockRadius;
-        float pointNodeY = centerY - blockRadius;
+        float pointNodeX = centerX - contentOffset.GetX() - blockRadius;
+        float pointNodeY = centerY - contentOffset.GetY() - blockRadius;
         auto pointRC = dragPointNode_->GetRenderContext();
         if (pointRC) {
             pointRC->UpdatePosition(OffsetT<Dimension>(
@@ -3922,6 +3942,8 @@ void SliderPattern::ShowMaterialNode()
         return;
     }
     
+    needMeasureMaterial_ = true;
+    
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     
@@ -3935,8 +3957,10 @@ void SliderPattern::ShowMaterialNode()
         auto blockRadius = GetBlockRadius();
         auto pointRCNonNull = dragPointNode_->GetRenderContext();
         if (pointRCNonNull) {
-            float pointNodeX = circleCenter_.GetX() - blockRadius;
-            float pointNodeY = circleCenter_.GetY() - blockRadius;
+            const auto& content = host->GetGeometryNode()->GetContent();
+            auto contentOffset = content ? content->GetRect().GetOffset() : OffsetF(0.0f, 0.0f);
+            float pointNodeX = circleCenter_.GetX() - contentOffset.GetX() - blockRadius;
+            float pointNodeY = circleCenter_.GetY() - contentOffset.GetY() - blockRadius;
             pointRCNonNull->UpdatePosition(OffsetT<Dimension>(
                 Dimension(pointNodeX), Dimension(pointNodeY)));
         }
@@ -4002,6 +4026,7 @@ void SliderPattern::HideMaterialNodes()
     
     if (IsHighGradeMaterial() && selectedTrackFrameNode_) {
         host->RemoveChild(selectedTrackFrameNode_);
+        StopParticleEffect();
     }
     if (dragFrameNode_) {
         host->RemoveChild(dragFrameNode_);
@@ -4216,6 +4241,8 @@ void SliderPattern::HandleHighGradeLongPress()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     
+    needMeasureMaterial_ = true;
+    
     CreateDragFrameNode();
     CreateSelectedTrackFrameNode();
     CreateParticleFrameNode();
@@ -4299,8 +4326,7 @@ bool SliderPattern::IsContentModifierNode(const RefPtr<FrameNode>& node)
 bool SliderPattern::IsMaterialNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
-    auto isMaterialNode = node == dragFrameNode_ || node == dragPointNode_ || node == blurCoverNode_ ||
-                          node == selectedTrackFrameNode_;
+    auto isMaterialNode = node == dragFrameNode_ || node == dragPointNode_ || node == blurCoverNode_;
     return isMaterialNode;
 }
 
@@ -4315,5 +4341,11 @@ bool SliderPattern::IsImageBlockNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     return node == imageFrameNode_;
+}
+
+bool SliderPattern::IsSelectedTrackNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return node == selectedTrackFrameNode_;
 }
 } // namespace OHOS::Ace::NG

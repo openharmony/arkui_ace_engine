@@ -235,6 +235,9 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else if (pattern->IsMaterialNode(child->GetHostNode())) {
             auto childLayoutContraint = sliderLayoutProperty->CreateChildConstraint();
             child->Measure(childLayoutContraint);
+        } else if (pattern->IsSelectedTrackNode(child->GetHostNode()) && pattern->IsNeedMeasureMaterial()) {
+            auto childLayoutContraint = sliderLayoutProperty->CreateChildConstraint();
+            child->Measure(childLayoutContraint);
         } else if (pattern->IsPrefixOrSuffixNode(child->GetHostNode())) {
             auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
             auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
@@ -280,6 +283,9 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : children) {
         if (pattern->IsImageBlockNode(child->GetHostNode())) {
             CalculateBlockOffset(layoutWrapper, child);
+        } else if (pattern->IsSelectedTrackNode(child->GetHostNode()) && pattern->IsNeedMeasureMaterial()) {
+            child->Layout();
+            pattern->SetNeedMeasureMaterial(false);
         } else {
             child->Layout();
         }
