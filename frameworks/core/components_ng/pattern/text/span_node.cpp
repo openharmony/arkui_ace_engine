@@ -1423,7 +1423,11 @@ void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
     COPY_TEXT_STYLE(textLineStyle, TextDirection, UpdateTextDirection);
     COPY_TEXT_STYLE(textLineStyle, ColorShaderStyle, UpdateColorShaderStyle);
-    sameSpan->textLineStyle->SetOptGradient(textLineStyle->GetGradient());
+    if (textLineStyle->HasGradient()) {
+        sameSpan->textLineStyle->SetOptGradient(textLineStyle->GetOptGradient());
+    } else {
+        sameSpan->textLineStyle->ResetGradient();
+    }
 }
 
 void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const

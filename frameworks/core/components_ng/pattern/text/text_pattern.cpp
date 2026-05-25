@@ -6032,6 +6032,9 @@ void TextPattern::UpdateStyledStringByColorMode(bool needUpdateSpanStyleHash)
         if (!item) {
             continue;
         }
+        if (item->textLineStyle->HasGradient()) {
+            item->textLineStyle->GetOptGradient()->ReloadResources();
+        }
         auto resourceMgr = item->GetResourceMgr();
         if (!resourceMgr) {
             continue;
