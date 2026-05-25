@@ -263,7 +263,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
     auto onSurfaceChange = [&onSurfaceChangeEventKey](float /* width */,
                         float /* height */, float /* borderWidth */) { onSurfaceChangeEventKey = CHECK_KEY; };
     renderDelegate->SetSurfaceChangeEventHandler(std::move(onSurfaceChange));
-    auto ui_content = *((MockUIContent*)(formRenderer->uiContent_.get()));
+    auto& ui_content = ((MockUIContent)(formRenderer->uiContent_.get()));
 
     /**
      * @tc.steps: step3. call formRenderer's AddForm
@@ -274,9 +274,9 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
     EXPECT_CALL(ui_content, UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(ui_content, UpdateFormData(_)).WillOnce(Return());
 
-    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())),
+    EXPECT_CALL(ui_content,
         PreInitializeForm(An<OHOS::Rosen::Window *>(), "", _, _)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), RunFormPage()).Times(Exactly(1));
+    EXPECT_CALL(ui_content, RunFormPage()).Times(Exactly(1));
 
     EXPECT_CALL(ui_content, SetActionEventHandler(_)).WillOnce(Return());
     EXPECT_CALL(ui_content, SetErrorEventHandler(_)).WillOnce(Return());
