@@ -263,30 +263,31 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
     auto onSurfaceChange = [&onSurfaceChangeEventKey](float /* width */,
                         float /* height */, float /* borderWidth */) { onSurfaceChangeEventKey = CHECK_KEY; };
     renderDelegate->SetSurfaceChangeEventHandler(std::move(onSurfaceChange));
+    auto ui_content = *((MockUIContent*)(formRenderer->uiContent_.get()));
 
     /**
      * @tc.steps: step3. call formRenderer's AddForm
      * @tc.expected: step3. onSurfaceCreate has been called
      */
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(_)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(_)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormSharedImage(_)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
+    EXPECT_CALL(ui_content, SetFormWidth(_)).WillOnce(Return());
+    EXPECT_CALL(ui_content, SetFormHeight(_)).WillOnce(Return());
+    EXPECT_CALL(ui_content, UpdateFormSharedImage(_)).WillOnce(Return());
+    EXPECT_CALL(ui_content, UpdateFormData(_)).WillOnce(Return());
 
     EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())),
         PreInitializeForm(An<OHOS::Rosen::Window *>(), "", _, _)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), RunFormPage()).Times(Exactly(1));
 
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetErrorEventHandler(_)).WillOnce(Return());
+    EXPECT_CALL(ui_content, SetActionEventHandler(_)).WillOnce(Return());
+    EXPECT_CALL(ui_content, SetErrorEventHandler(_)).WillOnce(Return());
     sptr<IRemoteObject> connectToRender = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
     auto rsUIDirector = Rosen::RSUIDirector::Create(connectToRender);
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
     std::shared_ptr<Rosen::RSSurfaceNode> rsNode =
         Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsUIDirector->GetRSUIContext());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillRepeatedly(Return(rsNode));
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Foreground()).WillOnce(Return());
+    EXPECT_CALL(ui_content, GetFormRootNode()).WillRepeatedly(Return(rsNode));
+    EXPECT_CALL(ui_content, Foreground()).WillOnce(Return());
     formRenderer->AddForm(want, formJsInfo);
     EXPECT_EQ(onSurfaceCreateKey, CHECK_KEY);
 
@@ -305,9 +306,9 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
      */
     auto formRendererDispatcher = formRenderer->formRendererDispatcherImpl_;
     EXPECT_TRUE(formRendererDispatcher);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
+    EXPECT_CALL(ui_content, SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
+    EXPECT_CALL(ui_content, SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
+    EXPECT_CALL(ui_content, OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
         _, _)).WillOnce(Return());
     OHOS::AppExecFwk::FormSurfaceInfo formSurfaceInfo;
     formSurfaceInfo.width = FORM_WIDTH_2;
@@ -317,9 +318,9 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
     EXPECT_EQ(onSurfaceChangeEventKey, CHECK_KEY);
     // formRenderer is null
     formRendererDispatcher->formRenderer_.reset();
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
+    EXPECT_CALL(ui_content, SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
+    EXPECT_CALL(ui_content, SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
+    EXPECT_CALL(ui_content, OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
         _, _)).WillOnce(Return());
     onSurfaceChangeEventKey = "";
     formRendererDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo);
@@ -331,7 +332,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
      * @tc.expected: step4. uiContent.ProcessPointerEvent has been called
      */
     std::shared_ptr<OHOS::MMI::PointerEvent> event;
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), ProcessPointerEvent(event))
+    EXPECT_CALL(ui_content, ProcessPointerEvent(event))
         .WillOnce(Return(true));
     SerializedGesture serializedGesture;
     formRendererDispatcher->DispatchPointerEvent(event, serializedGesture);
