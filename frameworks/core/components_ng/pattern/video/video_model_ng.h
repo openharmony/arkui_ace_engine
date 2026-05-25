@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT VideoModelNG : public OHOS::Ace::VideoModel {
 public:
     void Create(const RefPtr<VideoControllerV2>& videoController) override;
+    void Create(const RefPtr<VideoControllerAsync>& videoControllerAsync) override;
     void SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     void SetShowFirstFrame(bool showFirstFrame) override;
     void SetProgressRate(double progressRate) override;

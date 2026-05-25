@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_STATE_MACHINE_FULL_SCREEN_PATTERN_H
 
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/video/video_controller_v2.h"
+#include "core/components_ng/pattern/video/video_controller_async.h"
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
 
@@ -27,7 +27,8 @@ class VideoStateMachineFullScreenPattern : public VideoStateMachinePattern, publ
 
 public:
     VideoStateMachineFullScreenPattern() = delete;
-    explicit VideoStateMachineFullScreenPattern(const RefPtr<VideoControllerV2>& videoController) : VideoStateMachinePattern(videoController) {}
+    explicit VideoStateMachineFullScreenPattern(const RefPtr<VideoControllerAsync>& videoControllerAsync)
+        : VideoStateMachinePattern(videoControllerAsync) {}
     ~VideoStateMachineFullScreenPattern() override = default;
     void InitFullScreenParam(const RefPtr<VideoStateMachinePattern>& video, const RefPtr<RenderSurface>& renderSurface,
         const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderContext>& context);

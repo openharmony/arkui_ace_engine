@@ -635,6 +635,8 @@ build_component_ng("pattern_ng") {
     "video/video_pattern.cpp",
     "video/video_state_machine_full_screen_pattern.cpp",
     "video/video_state_machine_pattern.cpp",
+    "video/video_state_manager.cpp",
+    "video/video_controller_async.cpp",
     "view_context/view_context_model_ng.cpp",
     "view_context/view_context_model_static.cpp",
   ]

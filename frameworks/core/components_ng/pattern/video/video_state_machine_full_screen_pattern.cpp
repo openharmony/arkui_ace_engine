@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,12 @@ void VideoStateMachineFullScreenPattern::InitFullScreenParam(const RefPtr<VideoS
     UpdateMediaParam(mediaPlayer, renderSurface, context);
     videoPattern->ResetMediaParam();
     videoPattern_ = AceType::WeakClaim(AceType::RawPtr(videoPattern));
+    
+    // Share the state manager from the original pattern to keep state synchronized.
+    // This ensures both patterns use the same state machine instance.
+    stateManager_ = videoPattern->stateManager_;
+    stateManager_->UpdateContext(WeakClaim(this));
+    
     RecoverState(videoPattern);
     auto video = videoPattern->GetHost();
     CHECK_NULL_VOID(video);
@@ -86,7 +92,18 @@ bool VideoStateMachineFullScreenPattern::ExitFullScreen()
     auto videoPattern = videoPattern_.Upgrade();
     CHECK_NULL_RETURN(videoPattern, false);
     videoPattern->UpdateMediaParam(mediaPlayer_, renderSurface_, renderContextForMediaPlayer_);
-    ResetMediaParam();
+    
+    // Restore the state manager context to the original pattern before exiting.
+    stateManager_->UpdateContext(AceType::WeakClaim(AceType::RawPtr(videoPattern)));
+    
+    // Reset fullscreen pattern references. ResetMediaParam() removes the surface
+    // from the fullscreen render context, but the surface object stays alive
+    // because the original pattern now holds a reference to it.
+    mediaPlayer_.Reset();
+    renderSurface_.Reset();
+    RemoveMediaPlayerSurfaceNode();
+    renderContextForMediaPlayer_.Reset();
+    
     // remove full screen node
     auto fullScreenNode = GetHost();
     CHECK_NULL_RETURN(fullScreenNode, false);
@@ -97,7 +114,7 @@ bool VideoStateMachineFullScreenPattern::ExitFullScreen()
 
     auto videoNode = AceType::DynamicCast<VideoNode>(videoPattern->GetHost());
     CHECK_NULL_RETURN(videoNode, false);
-    // change value about time and playing status
+    // Restore state and trigger surface re-add via OnRebuildFrame
     videoPattern->RecoverState(AceType::Claim(this));
     // change full screen button
     videoPattern->OnFullScreenChange(false);

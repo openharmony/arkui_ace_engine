@@ -605,6 +605,7 @@ void VideoPattern::OnTextureRefresh(void* surface)
     CHECK_NULL_VOID(renderContextForMediaPlayer);
     renderContextForMediaPlayer->MarkNewFrameAvailable(surface);
 }
+#endif
 
 void VideoPattern::UpdatePreparedVideoSize(const RefPtr<FrameNode>& host)
 {
@@ -618,7 +619,6 @@ void VideoPattern::UpdatePreparedVideoSize(const RefPtr<FrameNode>& host)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
-#endif
 
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 {
@@ -800,9 +800,9 @@ void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needF
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
 
-#ifdef RENDER_EXTRACT_SUPPORTED
-    UpdatePreparedVideoSize(host);
-#endif
+    if (showFirstFrame_) {
+        UpdatePreparedVideoSize(host);
+    }
 
     RefPtr<UINode> controlBar = nullptr;
     auto children = host->GetChildren();
@@ -2141,6 +2141,16 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
     }
     if (GreatOrEqual(currentPos, 0.0)) {
         SetIsSeeking(true);
+        // When showFirstFrame=false, videoSize may still hold the old video's
+        // resolution. Seek() will trigger MediaPlayer to render a frame at the
+        // target position, so we must update videoSize beforehand to ensure the
+        // seek preview uses the correct aspect ratio of the new video.
+        if (!showFirstFrame_) {
+            auto host = GetHost();
+            if (host) {
+                UpdatePreparedVideoSize(host);
+            }
+        }
         mediaPlayer_->Seek(static_cast<int32_t>(currentPos * MILLISECONDS_TO_SECONDS), seekMode);
     }
 }
