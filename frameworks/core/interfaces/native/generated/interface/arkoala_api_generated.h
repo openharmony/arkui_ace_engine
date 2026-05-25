@@ -4033,6 +4033,7 @@ typedef enum Ark_AttributeModifierState {
     ARK_ATTRIBUTE_MODIFIER_STATE_FOCUSED = 2,
     ARK_ATTRIBUTE_MODIFIER_STATE_DISABLED = 4,
     ARK_ATTRIBUTE_MODIFIER_STATE_SELECTED = 8,
+    ARK_ATTRIBUTE_MODIFIER_STATE_HOVERED = 16,
 } Ark_AttributeModifierState;
 typedef struct Opt_AttributeModifierState {
     Ark_Tag tag;

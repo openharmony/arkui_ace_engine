@@ -634,7 +634,8 @@ export enum AttributeModifierState {
     PRESSED = 1,
     FOCUSED = 2,
     DISABLED = 4,
-    SELECTED = 8
+    SELECTED = 8,
+    HOVERED = 16
 }
 export enum PresetFillType {
     BREAKPOINT_DEFAULT = 0,
