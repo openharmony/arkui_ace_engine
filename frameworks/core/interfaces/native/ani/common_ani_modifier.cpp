@@ -1191,7 +1191,7 @@ void GetAllInstanceIds(std::vector<int32_t>& instanceIds)
 
 void ResolveUIContext(std::vector<int32_t>& instnace)
 {
-    auto currnetId = ContainerScope::CurrentIdWithReason(false);
+    auto currnetId = ContainerScope::CurrentIdWithReason();
     instnace.push_back(GetMainInstanceId(currnetId.first));
     instnace.push_back(static_cast<int32_t>(currnetId.second));
 }

@@ -15,7 +15,6 @@
 
 #include "gtest/gtest.h"
 #include "vector"
-#include "unordered_map"
 
 #include "core/common/container_scope.h"
 
@@ -34,38 +33,12 @@ constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t TEST_INSTANCE_ID_CONTAINER = 100000;
 constexpr int32_t TEST_INSTANCE_ID_SUB_CONTAINER = 1000000;
 const std::vector<int32_t> TEST_CONTAINERS = { 100000, 100001, 100002, 100003 };
-std::unordered_map<int32_t, bool> g_mockThreadCheckResult;
-
-void MockThreadCheckResult(int32_t id, bool canRunOnCurrentThread)
-{
-    g_mockThreadCheckResult[id] = canRunOnCurrentThread;
-}
-
-void ClearMockThreadCheckResult()
-{
-    g_mockThreadCheckResult.clear();
-}
 } // namespace
-
-class Container {
-public:
-    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
-};
-
-bool Container::CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
-{
-    auto iter = g_mockThreadCheckResult.find(currentId);
-    if (iter != g_mockThreadCheckResult.end()) {
-        return iter->second;
-    }
-    return defaultRes;
-}
 
 class ContainerScopeTest : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        ContainerScope::RegisterThreadCheckFunc(&Container::CheckRunOnThreadByThreadId);
         ContainerScope::UpdateCurrent(INSTANCE_ID_PLATFORM);
     }
     static void TearDownTestSuite()
@@ -494,14 +467,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest011, TestSize.Level1)
     EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::UNDEFINED), "No valid instance exists");
 
     /**
-     * @tc.steps: step7. Test LOCAL reason description
-     * @tc.expected: Returns correct description for LOCAL
-     */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::LOCAL),
-        "No specific instance was specified, return the local thread instance");
-
-    /**
-     * @tc.steps: step8. Test invalid enum value (out of range)
+     * @tc.steps: step7. Test invalid enum value (out of range)
      * @tc.expected: Returns "Unknown reason"
      */
     EXPECT_EQ(ContainerScope::ReasonToDescription(static_cast<InstanceIdGenReason>(999)), "Unknown reason");
@@ -1062,89 +1028,6 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest042, TestSize.Level1)
 #endif // ENABLE_CONTAINER_SCOPE_TRACKING
 
 /**
- * @tc.name: ContainerScopeTest018
- * @tc.desc: SafelyId - local fallback and checkThread option
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerScopeTest, ContainerScopeTest018, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Prepare ids and thread check result
-     */
-    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
-    ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
-    ContainerScope::UpdateLocalCurrent(TEST_INSTANCE_ID_SUB_CONTAINER);
-    MockThreadCheckResult(TEST_INSTANCE_ID_CONTAINER, false);
-    MockThreadCheckResult(TEST_INSTANCE_ID_SUB_CONTAINER, true);
-
-    /**
-     * @tc.steps: step2. checkThread=true prefers local thread id
-     * @tc.expected: SafelyId equals local id
-     */
-    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
-
-    /**
-     * @tc.steps: step3. checkThread=false ignores local fallback
-     * @tc.expected: SafelyId equals active id
-     */
-    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_CONTAINER);
-
-    /**
-     * @tc.steps: step4. clear set value
-     */
-    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
-    ContainerScope::UpdateLocalCurrent(INSTANCE_ID_UNDEFINED);
-    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
-    ClearMockThreadCheckResult();
-}
-
-/**
- * @tc.name: ContainerScopeTest019
- * @tc.desc: CurrentIdWithReason - local fallback and checkThread option
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerScopeTest, ContainerScopeTest019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Prepare ids and thread check result
-     */
-    ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
-    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
-    ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
-    ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::UpdateLocalCurrent(TEST_INSTANCE_ID_SUB_CONTAINER);
-    MockThreadCheckResult(TEST_INSTANCE_ID_CONTAINER, false);
-    MockThreadCheckResult(TEST_INSTANCE_ID_SUB_CONTAINER, true);
-
-    /**
-     * @tc.steps: step2. checkThread=true returns local fallback with LOCAL reason
-     */
-    auto currentIdWithReason = ContainerScope::CurrentIdWithReason();
-    EXPECT_EQ(currentIdWithReason.first, TEST_INSTANCE_ID_SUB_CONTAINER);
-    EXPECT_EQ(currentIdWithReason.second, InstanceIdGenReason::LOCAL);
-
-    /**
-     * @tc.steps: step3. checkThread=false keeps foreground path and reason
-     */
-    auto currentIdWithReasonWithoutThreadCheck = ContainerScope::CurrentIdWithReason(false);
-    EXPECT_EQ(currentIdWithReasonWithoutThreadCheck.first, TEST_INSTANCE_ID_CONTAINER);
-    EXPECT_EQ(currentIdWithReasonWithoutThreadCheck.second, InstanceIdGenReason::FOREGROUND);
-
-    /**
-     * @tc.steps: step4. clear set value
-     */
-    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
-    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
-    ContainerScope::UpdateLocalCurrent(INSTANCE_ID_UNDEFINED);
-    ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
-    ClearMockThreadCheckResult();
-}
-
-/**
  * @tc.name: ContainerScopeTest020
  * @tc.desc: Isolated base query functions (ContainerCount, SingletonId, DefaultId)
  * @tc.type: FUNC
@@ -1235,14 +1118,14 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest022, TestSize.Level1)
      * @tc.expected: SafelyId = UNDEFINED
      */
     ContainerScope::MarkIsolatedThread();
-    EXPECT_EQ(ContainerScope::SafelyId(false), INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ContainerScope::SafelyId(), INSTANCE_ID_UNDEFINED);
 
     /**
      * @tc.steps: step2. Add one local container (singleton)
      * @tc.expected: SafelyId = that ID
      */
     ContainerScope::AddLocal(TEST_INSTANCE_ID_CONTAINER);
-    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
 
     /**
      * @tc.steps: step3. Add second, set local recent active
@@ -1250,7 +1133,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest022, TestSize.Level1)
      */
     ContainerScope::AddLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
     ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
-    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
 
     /**
      * @tc.steps: step4. Clear active, set local recent foreground
@@ -1258,7 +1141,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest022, TestSize.Level1)
      */
     ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
     ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_CONTAINER);
-    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
 
     /**
      * @tc.steps: step5. Clear both active and foreground
@@ -1266,7 +1149,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest022, TestSize.Level1)
      */
     ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
     ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
-    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
 
     /**
      * @tc.steps: step6. Cleanup
@@ -1288,7 +1171,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest023, TestSize.Level1)
     ContainerScope::MarkIsolatedThread();
     ContainerScope::AddLocal(TEST_INSTANCE_ID_CONTAINER);
     ContainerScope::UpdateCurrent(TEST_INSTANCE_ID_CONTAINER);
-    auto result = ContainerScope::CurrentIdWithReason(false);
+    auto result = ContainerScope::CurrentIdWithReason();
     EXPECT_EQ(result.first, TEST_INSTANCE_ID_CONTAINER);
     EXPECT_EQ(result.second, InstanceIdGenReason::SCOPE);
 
@@ -1296,7 +1179,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest023, TestSize.Level1)
      * @tc.steps: step2. SINGLETON - clear CurrentId, only one local container
      */
     ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
-    result = ContainerScope::CurrentIdWithReason(false);
+    result = ContainerScope::CurrentIdWithReason();
     EXPECT_EQ(result.first, TEST_INSTANCE_ID_CONTAINER);
     EXPECT_EQ(result.second, InstanceIdGenReason::SINGLETON);
 
@@ -1305,7 +1188,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest023, TestSize.Level1)
      */
     ContainerScope::AddLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
     ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_CONTAINER);
-    result = ContainerScope::CurrentIdWithReason(false);
+    result = ContainerScope::CurrentIdWithReason();
     EXPECT_EQ(result.first, TEST_INSTANCE_ID_CONTAINER);
     EXPECT_EQ(result.second, InstanceIdGenReason::ACTIVE);
 
@@ -1314,7 +1197,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest023, TestSize.Level1)
      */
     ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
     ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_SUB_CONTAINER);
-    result = ContainerScope::CurrentIdWithReason(false);
+    result = ContainerScope::CurrentIdWithReason();
     EXPECT_EQ(result.first, TEST_INSTANCE_ID_SUB_CONTAINER);
     EXPECT_EQ(result.second, InstanceIdGenReason::FOREGROUND);
 
@@ -1323,7 +1206,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest023, TestSize.Level1)
      */
     ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
     ContainerScope::UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
-    result = ContainerScope::CurrentIdWithReason(false);
+    result = ContainerScope::CurrentIdWithReason();
     EXPECT_EQ(result.first, TEST_INSTANCE_ID_SUB_CONTAINER);
     EXPECT_EQ(result.second, InstanceIdGenReason::DEFAULT);
 
@@ -1332,7 +1215,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest023, TestSize.Level1)
      */
     ContainerScope::RemoveLocal(TEST_INSTANCE_ID_CONTAINER);
     ContainerScope::RemoveLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
-    result = ContainerScope::CurrentIdWithReason(false);
+    result = ContainerScope::CurrentIdWithReason();
     EXPECT_EQ(result.first, INSTANCE_ID_UNDEFINED);
     EXPECT_EQ(result.second, InstanceIdGenReason::UNDEFINED);
 }
@@ -1357,7 +1240,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest024, TestSize.Level1)
     ContainerScope::AddLocal(TEST_INSTANCE_ID_SUB_CONTAINER);
     ContainerScope::UpdateRecentActive(TEST_INSTANCE_ID_SUB_CONTAINER);
     ContainerScope::UpdateRecentForeground(TEST_INSTANCE_ID_SUB_CONTAINER);
-    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_SUB_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_SUB_CONTAINER);
 
     /**
      * @tc.steps: step3. RemoveLocal clears active/foreground cache for that ID
@@ -1370,7 +1253,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest024, TestSize.Level1)
      */
     ContainerScope::ResetIsolatedThread();
     EXPECT_EQ(ContainerScope::ContainerCount(), 1);
-    EXPECT_EQ(ContainerScope::SafelyId(false), TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::SafelyId(), TEST_INSTANCE_ID_CONTAINER);
 
     /**
      * @tc.steps: step5. Cleanup global
@@ -1450,7 +1333,7 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest026, TestSize.Level1)
      */
     EXPECT_EQ(ContainerScope::ContainerCount(), 1);
     EXPECT_EQ(ContainerScope::SingletonId(), LOCAL_ONLY_ID);
-    EXPECT_EQ(ContainerScope::SafelyId(false), LOCAL_ONLY_ID);
+    EXPECT_EQ(ContainerScope::SafelyId(), LOCAL_ONLY_ID);
     EXPECT_EQ(ContainerScope::DefaultId(), LOCAL_ONLY_ID);
     EXPECT_EQ(ContainerScope::RecentActiveId(), INSTANCE_ID_UNDEFINED);
     EXPECT_EQ(ContainerScope::RecentForegroundId(), INSTANCE_ID_UNDEFINED);
