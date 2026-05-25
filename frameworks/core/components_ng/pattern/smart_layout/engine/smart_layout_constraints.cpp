@@ -97,7 +97,8 @@ void SmartLayoutConstraints::AddCrossAxisAlignmentConstraint(SmartLayoutNode& pa
     auto& parentSize = isRow ? parent.GetSize().height : parent.GetSize().width;
 
     if (context.crossAxisAlign == SmartLayoutAlign::FLEX_START) {
-        engine->Add(childOffset.expr == parentOffset.expr);
+        const auto& scaleInfo = parent.GetScaleInfo();
+        engine->Add(childOffset.expr == parentOffset.expr + childOffset.value * scaleInfo.sizeScale.expr);
     } else if (context.crossAxisAlign == SmartLayoutAlign::FLEX_END) {
         engine->Add(childOffset.expr + childSize.expr == parentOffset.expr + parentSize.expr);
     } else { // CENTER
@@ -121,7 +122,7 @@ void SmartLayoutConstraints::AddChildMainAxisPosition(SmartLayoutNode& parent, S
     auto& childSpace = isRow ? child.GetSpace().left : child.GetSpace().top;
 
     if (index == 0) {
-        if (context.avoidSafeArea) {
+        if (context.avoidSafeArea && !isRow) {
             engine->Add(childOffset.expr == parentOffset.expr + childSpace);
         } else {
             engine->Add(childOffset.expr == parentOffset.expr + childSpace * scaleInfo.mainAxisSpaceScale.expr);
