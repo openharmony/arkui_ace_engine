@@ -22,7 +22,7 @@ import { PeerNode } from './PeerNode'
 import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, SpatialEffectParams, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, GestureCollectInterceptCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, AreaChangeCallback, AreaChangeOptions, CommonMethod, GravityCenterOptions, EdgeLightParams } from './component/common'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
-import { Length, Resource as arkui_component_units_Resource, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, AccessibilityCustomAction } from './component/units'
+import { Length, Resource as arkui_component_units_Resource, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, AccessibilityCustomAction, AccessibilityNextFocusParams } from './component/units'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { HitTestMode, Color as arkui_component_enums_Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from './component/enums'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
@@ -189,6 +189,8 @@ export class CommonMethodModifier implements CommonMethod {
     public _spatialEffect_0_0value?: SpatialEffectParams | undefined
     public _pixelStretchEffect_0_0value?: PixelStretchEffectOptions | undefined
     public _accessibilityNextFocusId_0_0value?: string | undefined
+    public _accessibilityNextFocusId_1_0value?: string | undefined
+    public _accessibilityNextFocusId_1_1value?: AccessibilityNextFocusParams | undefined
     public _accessibilityDefaultFocus_0_0value?: boolean | undefined
     public _accessibilityUseSamePage_0_0value?: AccessibilitySamePageMode | undefined
     public _accessibilityScrollTriggerable_0_0value?: boolean | undefined
@@ -4215,6 +4217,21 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[219] != 0) {
+            switch (flagArray[219]) {
+                case 1: {
+                    peer.setAccessibilityNextFocusId1Attribute((this._accessibilityNextFocusId_1_0value as string), (this._accessibilityNextFocusId_1_1value as AccessibilityNextFocusParams | undefined));
+                    flagArray[219] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[219] = 2;
+                    break;
+                }
+                default: {
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6963,6 +6980,18 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[219] != 0) {
+            switch (flagArray[219]) {
+                case 1:
+                case 3: {
+                    this.accessibilityNextFocusId((modifier._accessibilityNextFocusId_1_0value as string | undefined), (modifier._accessibilityNextFocusId_1_1value as AccessibilityNextFocusParams | undefined));
+                    break;
+                }
+                default: {
+                    this.accessibilityNextFocusId(undefined, undefined);
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -9293,6 +9322,17 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[224] = 3
+        }
+        return this
+    }
+    accessibilityNextFocusId(nextId: string | undefined, nextFocusParams: AccessibilityNextFocusParams | undefined): this {
+        if (((this._flagArray[219]) == (0)) || ((this._accessibilityNextFocusId_1_0value) !== (nextId)) || ((this._accessibilityNextFocusId_1_1value) !== (nextFocusParams))) {
+            this._flagArray[219] = 1
+            this._accessibilityNextFocusId_1_0value = nextId
+            this._accessibilityNextFocusId_1_1value = nextFocusParams
+            this._state.fireChange()
+        } else {
+            this._flagArray[219] = 3
         }
         return this
     }

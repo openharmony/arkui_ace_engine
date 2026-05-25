@@ -5125,8 +5125,8 @@ void SetPixelStretchEffectImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetPixelStretchEffect(frameNode, convValue);
 }
-void SetAccessibilityNextFocusIdImpl(Ark_NativePointer node,
-                                     const Opt_String* value)
+void SetAccessibilityNextFocusId0Impl(Ark_NativePointer node,
+                                      const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -7356,6 +7356,27 @@ void SetDebugLineImpl(Ark_NativePointer node,
     ViewAbstractModelNG::SetDebugLineSta(uiNode, debugLine);
 }
 
+void SetAccessibilityNextFocusId1Impl(Ark_NativePointer node,
+                                      const Ark_String* nextId,
+                                      const Opt_AccessibilityNextFocusParams* nextFocusParams)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<std::string>(*nextId);
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, convValue);
+
+    auto optValue = Converter::GetOptPtr(nextFocusParams);
+    if (optValue) {
+        NG::AccessibilityNextFocusParams params;
+        params.nextFocusInspectorKey = convValue;
+        auto descOpt = Converter::OptConvert<bool>(optValue->isConsiderDescendants);
+        if (descOpt) {
+            params.descendantMode = *descOpt;
+        }
+        ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode, params);
+    }
+}
+
 void SetInspectorLabelImpl(Ark_NativePointer node,
                            const Opt_String* label)
 {
@@ -7502,7 +7523,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetLightUpEffectImpl,
         CommonMethodModifier::SetSpatialEffectImpl,
         CommonMethodModifier::SetPixelStretchEffectImpl,
-        CommonMethodModifier::SetAccessibilityNextFocusIdImpl,
+        CommonMethodModifier::SetAccessibilityNextFocusId0Impl,
         CommonMethodModifier::SetAccessibilityDefaultFocusImpl,
         CommonMethodModifier::SetAccessibilityUseSamePageImpl,
         CommonMethodModifier::SetAccessibilityScrollTriggerableImpl,
@@ -7588,6 +7609,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityGroupImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
         CommonMethodModifier::SetDebugLineImpl,
+        CommonMethodModifier::SetAccessibilityNextFocusId1Impl,
     };
     return &ArkUICommonMethodModifierImpl;
 }

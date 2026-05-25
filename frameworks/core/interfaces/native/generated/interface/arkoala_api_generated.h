@@ -2137,6 +2137,8 @@ typedef struct Ark_AcceptableFileType Ark_AcceptableFileType;
 typedef struct Opt_AcceptableFileType Opt_AcceptableFileType;
 typedef struct Ark_AccessibilityActionOptions Ark_AccessibilityActionOptions;
 typedef struct Opt_AccessibilityActionOptions Opt_AccessibilityActionOptions;
+typedef struct Ark_AccessibilityNextFocusParams Ark_AccessibilityNextFocusParams;
+typedef struct Opt_AccessibilityNextFocusParams Opt_AccessibilityNextFocusParams;
 typedef struct Ark_AccessibilityOptions Ark_AccessibilityOptions;
 typedef struct Opt_AccessibilityOptions Opt_AccessibilityOptions;
 typedef struct Ark_AdsBlockedDetails Ark_AdsBlockedDetails;
@@ -14850,6 +14852,14 @@ typedef struct Opt_AccessibilityActionOptions {
     Ark_Tag tag;
     Ark_AccessibilityActionOptions value;
 } Opt_AccessibilityActionOptions;
+typedef struct Ark_AccessibilityNextFocusParams {
+    /* kind: Interface */
+    Opt_Boolean isConsiderDescendants;
+} Ark_AccessibilityNextFocusParams;
+typedef struct Opt_AccessibilityNextFocusParams {
+    Ark_Tag tag;
+    Ark_AccessibilityNextFocusParams value;
+} Opt_AccessibilityNextFocusParams;
 typedef struct Ark_AccessibilityOptions {
     /* kind: Interface */
     Opt_Boolean accessibilityPreferred;
@@ -24574,8 +24584,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                              const Opt_SpatialEffectParams* value);
     void (*setPixelStretchEffect)(Ark_NativePointer node,
                                   const Opt_PixelStretchEffectOptions* value);
-    void (*setAccessibilityNextFocusId)(Ark_NativePointer node,
-                                        const Opt_String* value);
+    void (*setAccessibilityNextFocusId0)(Ark_NativePointer node,
+                                         const Opt_String* value);
     void (*setAccessibilityDefaultFocus)(Ark_NativePointer node,
                                          const Opt_Boolean* value);
     void (*setAccessibilityUseSamePage)(Ark_NativePointer node,
@@ -24808,6 +24818,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setDebugLine)(Ark_NativePointer node,
                          const Ark_String* sourceLine,
                          const Opt_String* moduleName);
+    void (*setAccessibilityNextFocusId1)(Ark_NativePointer node,
+                                         const Ark_String* nextId,
+                                         const Opt_AccessibilityNextFocusParams* nextFocusParams);
 } GENERATED_ArkUICommonMethodModifier;
 
 typedef struct GENERATED_ArkUICommonShapeMethodModifier {
