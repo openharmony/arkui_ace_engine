@@ -1819,6 +1819,15 @@ export interface ToolbarItem {
     activeIcon?: ResourceStr;
     activeSymbolIcon?: SymbolGlyphModifier;
 }
+export enum ScrollEffectType {
+    COMMON_BLUR = 0,
+    GRADUAL_BLUR = 1
+}
+export interface ScrollEffectOptions {
+    scrollEffectType?: ScrollEffectType;
+    blurEffectiveStartOffset?: arkui_Graphics_LengthMetrics;
+    blurEffectiveEndOffset?: arkui_Graphics_LengthMetrics;
+}
 export interface NavigationTitleOptions {
     backgroundColor?: ResourceColor;
     backgroundBlurStyle?: BlurStyle;
@@ -1830,6 +1839,7 @@ export interface NavigationTitleOptions {
     mainTitleModifier?: TextModifier;
     subTitleModifier?: TextModifier;
     enableHoverMode?: boolean;
+    scrollEffectOptions?: ScrollEffectOptions;
 }
 export enum BarStyle {
     STANDARD = 0,
@@ -2882,6 +2892,58 @@ export class NavigationMenuItem_serializer {
         return value
     }
 }
+export class ScrollEffectOptions_serializer {
+    public static write(buffer: SerializerBase, value: ScrollEffectOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForScrollEffectType = value.scrollEffectType
+        if (valueHolderForScrollEffectType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScrollEffectTypeTmpValue = (valueHolderForScrollEffectType as ScrollEffectType)
+            valueSerializer.writeInt32(valueHolderForScrollEffectTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBlurEffectiveStartOffset = value.blurEffectiveStartOffset
+        if (valueHolderForBlurEffectiveStartOffset !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBlurEffectiveStartOffsetTmpValue = valueHolderForBlurEffectiveStartOffset!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBlurEffectiveStartOffsetTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBlurEffectiveEndOffset = value.blurEffectiveEndOffset
+        if (valueHolderForBlurEffectiveEndOffset !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBlurEffectiveEndOffsetTmpValue = valueHolderForBlurEffectiveEndOffset!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBlurEffectiveEndOffsetTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ScrollEffectOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const scrollEffectTypeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let scrollEffectTypeTmpBuf: ScrollEffectType | undefined = undefined
+        if ((scrollEffectTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scrollEffectTypeTmpBuf = ScrollEffectType.fromValue(valueDeserializer.readInt32())
+        }
+        const scrollEffectTypeTmpResult: ScrollEffectType | undefined = scrollEffectTypeTmpBuf
+        const blurEffectiveStartOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let blurEffectiveStartOffsetTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
+        if ((blurEffectiveStartOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            blurEffectiveStartOffsetTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const blurEffectiveStartOffsetTmpResult: arkui_Graphics_LengthMetrics | undefined = blurEffectiveStartOffsetTmpBuf
+        const blurEffectiveEndOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let blurEffectiveEndOffsetTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
+        if ((blurEffectiveEndOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            blurEffectiveEndOffsetTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const blurEffectiveEndOffsetTmpResult: arkui_Graphics_LengthMetrics | undefined = blurEffectiveEndOffsetTmpBuf
+        let value: ScrollEffectOptions = ({scrollEffectType: scrollEffectTypeTmpResult, blurEffectiveStartOffset: blurEffectiveStartOffsetTmpResult, blurEffectiveEndOffset: blurEffectiveEndOffsetTmpResult} as ScrollEffectOptions)
+        return value
+    }
+}
 export class ToolbarItem_serializer {
     public static write(buffer: SerializerBase, value: ToolbarItem): void {
         let valueSerializer: SerializerBase = buffer
@@ -3401,6 +3463,14 @@ export class NavigationTitleOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForScrollEffectOptions = value.scrollEffectOptions
+        if (valueHolderForScrollEffectOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScrollEffectOptionsTmpValue = valueHolderForScrollEffectOptions!
+            ScrollEffectOptions_serializer.write(valueSerializer, valueHolderForScrollEffectOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): NavigationTitleOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -3477,7 +3547,13 @@ export class NavigationTitleOptions_serializer {
             enableHoverModeTmpBuf = valueDeserializer.readBoolean()
         }
         const enableHoverModeTmpResult: boolean | undefined = enableHoverModeTmpBuf
-        let value: NavigationTitleOptions = ({backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, barStyle: barStyleTmpResult, paddingStart: paddingStartTmpResult, paddingEnd: paddingEndTmpResult, mainTitleModifier: mainTitleModifierTmpResult, subTitleModifier: subTitleModifierTmpResult, enableHoverMode: enableHoverModeTmpResult} as NavigationTitleOptions)
+        const scrollEffectOptionsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let scrollEffectOptionsTmpBuf: ScrollEffectOptions | undefined = undefined
+        if ((scrollEffectOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scrollEffectOptionsTmpBuf = ScrollEffectOptions_serializer.read(valueDeserializer)
+        }
+        const scrollEffectOptionsTmpResult: ScrollEffectOptions | undefined = scrollEffectOptionsTmpBuf
+        let value: NavigationTitleOptions = ({backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, barStyle: barStyleTmpResult, paddingStart: paddingStartTmpResult, paddingEnd: paddingEndTmpResult, mainTitleModifier: mainTitleModifierTmpResult, subTitleModifier: subTitleModifierTmpResult, enableHoverMode: enableHoverModeTmpResult, scrollEffectOptions: scrollEffectOptionsTmpResult} as NavigationTitleOptions)
         return value
     }
 }

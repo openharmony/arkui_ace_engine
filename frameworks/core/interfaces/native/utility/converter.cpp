@@ -4027,6 +4027,23 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
         options.effectOption = effectOption;
     }
+    if (src.scrollEffectOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::ScrollEffectOptions scrollEffectOpt;
+        const auto& srcEffect = src.scrollEffectOptions.value;
+        if (srcEffect.scrollEffectType.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.scrollEffectType =
+                static_cast<NG::ScrollEffectType>(srcEffect.scrollEffectType.value);
+        }
+        if (srcEffect.blurEffectiveStartOffset.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.blurEffectiveStartOffset =
+                Converter::Convert<CalcDimension>(srcEffect.blurEffectiveStartOffset.value);
+        }
+        if (srcEffect.blurEffectiveEndOffset.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.blurEffectiveEndOffset =
+                Converter::Convert<CalcDimension>(srcEffect.blurEffectiveEndOffset.value);
+        }
+        options.scrollEffectOptions = scrollEffectOpt;
+    }
     return options;
 }
 

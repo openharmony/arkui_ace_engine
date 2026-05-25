@@ -3131,6 +3131,8 @@ typedef struct Ark_SceneOptions Ark_SceneOptions;
 typedef struct Opt_SceneOptions Opt_SceneOptions;
 typedef struct Ark_ScrollBarMargin Ark_ScrollBarMargin;
 typedef struct Opt_ScrollBarMargin Opt_ScrollBarMargin;
+typedef struct Ark_ScrollEffectOptions Ark_ScrollEffectOptions;
+typedef struct Opt_ScrollEffectOptions Opt_ScrollEffectOptions;
 typedef struct Ark_ScrollOptions Ark_ScrollOptions;
 typedef struct Opt_ScrollOptions Opt_ScrollOptions;
 typedef struct Ark_ScrollToIndexOptions Ark_ScrollToIndexOptions;
@@ -6804,6 +6806,14 @@ typedef struct Opt_ScrollDirectionalLockType {
     Ark_Tag tag;
     Ark_ScrollDirectionalLockType value;
 } Opt_ScrollDirectionalLockType;
+typedef enum Ark_ScrollEffectType {
+    ARK_SCROLL_EFFECT_TYPE_COMMON_BLUR = 0,
+    ARK_SCROLL_EFFECT_TYPE_GRADUAL_BLUR = 1,
+} Ark_ScrollEffectType;
+typedef struct Opt_ScrollEffectType {
+    Ark_Tag tag;
+    Ark_ScrollEffectType value;
+} Opt_ScrollEffectType;
 typedef enum Ark_ScrollSizeMode {
     ARK_SCROLL_SIZE_MODE_FOLLOW_DETENT = 0,
     ARK_SCROLL_SIZE_MODE_CONTINUOUS = 1,
@@ -20154,6 +20164,16 @@ typedef struct Opt_ScrollBarMargin {
     Ark_Tag tag;
     Ark_ScrollBarMargin value;
 } Opt_ScrollBarMargin;
+typedef struct Ark_ScrollEffectOptions {
+    /* kind: Interface */
+    Opt_ScrollEffectType scrollEffectType;
+    Opt_LengthMetrics blurEffectiveStartOffset;
+    Opt_LengthMetrics blurEffectiveEndOffset;
+} Ark_ScrollEffectOptions;
+typedef struct Opt_ScrollEffectOptions {
+    Ark_Tag tag;
+    Ark_ScrollEffectOptions value;
+} Opt_ScrollEffectOptions;
 typedef struct Ark_ScrollOptions {
     /* kind: Interface */
     Ark_Union_F64_String xOffset;
@@ -21504,6 +21524,7 @@ typedef struct Ark_NavigationTitleOptions {
     Opt_TextModifier mainTitleModifier;
     Opt_TextModifier subTitleModifier;
     Opt_Boolean enableHoverMode;
+    Opt_ScrollEffectOptions scrollEffectOptions;
 } Ark_NavigationTitleOptions;
 typedef struct Opt_NavigationTitleOptions {
     Ark_Tag tag;
