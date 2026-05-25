@@ -530,4 +530,83 @@ bool TextOverlayBase::IsSelectedText(const Offset& pos, const Offset& globalOffs
     return (tempText >= textValue_.selection.GetStart() && tempText <= textValue_.selection.GetEnd());
 }
 
+void CaretMetrics::Reset()
+{
+    offset.Reset();
+    height = 0.0;
+}
+
+std::string CaretMetrics::ToString() const
+{
+    std::string result = "Offset: ";
+    result += offset.ToString();
+    result += ", height: ";
+    result += std::to_string(height);
+    return result;
+}
+
+void TextOverlayBase::SetUpdateHandlePosition(const std::function<void(const OverlayShowOption&)>& updateHandlePosition)
+{
+    updateHandlePosition_ = updateHandlePosition;
+}
+
+void TextOverlayBase::SetUpdateHandleDiameter(const std::function<void(const double&)>& updateHandleDiameter)
+{
+    updateHandleDiameter_ = updateHandleDiameter;
+}
+
+void TextOverlayBase::SetUpdateHandleDiameterInner(const std::function<void(const double&)>& updateHandleDiameterInner)
+{
+    updateHandleDiameterInner_ = updateHandleDiameterInner;
+}
+
+void TextOverlayBase::SetOnClipRectChanged(const std::function<void(const Rect&)>& onClipRectChanged)
+{
+    onClipRectChanged_ = onClipRectChanged;
+}
+
+void TextOverlayBase::MarkIsOverlayShowed(bool isOverlayShowed)
+{
+    isOverlayShowed_ = isOverlayShowed;
+}
+
+void TextOverlayManager::SetTextOverlayBase(const WeakPtr<TextOverlayBase>& textOverlayBase)
+{
+    textOverlayBase_ = textOverlayBase;
+}
+
+const RefPtr<TextOverlayBase> TextOverlayManager::GetTextOverlayBase() const
+{
+    auto textOverlayBase = textOverlayBase_.Upgrade();
+    if (!textOverlayBase) {
+        return nullptr;
+    }
+    return textOverlayBase;
+}
+
+const std::vector<Rect>& TextOverlayManager::GetTextOverlayRect() const
+{
+    return textOverlayRect_;
+}
+
+void TextOverlayManager::AddTextOverlayRect(const Rect& textOverlayRect)
+{
+    textOverlayRect_.emplace_back(textOverlayRect);
+}
+
+void TextOverlayManager::ClearTextOverlayRect()
+{
+    textOverlayRect_.clear();
+}
+
+void TextOverlayManager::SetCoordinateOffset(const Offset& coordinateOffset)
+{
+    coordinateOffset_ = coordinateOffset;
+}
+
+const Offset& TextOverlayManager::GetCoordinateOffset() const
+{
+    return coordinateOffset_;
+}
+
 } // namespace OHOS::Ace

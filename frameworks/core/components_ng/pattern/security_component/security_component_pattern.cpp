@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_paint_property.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"

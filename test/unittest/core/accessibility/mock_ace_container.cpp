@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/view_data/ace_auto_fill_error.h"
 
 namespace OHOS::Ace::Platform {
 namespace {

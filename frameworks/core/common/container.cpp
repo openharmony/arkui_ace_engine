@@ -22,7 +22,11 @@
 
 #include "base/utils/utils.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/view_data/ace_auto_fill_error.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/common/container_handler.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -490,5 +494,21 @@ bool Container::IsCurrentUseNewPipeline()
 {
     auto container = Current();
     return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
+}
+
+HintToTypeWrap Container::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
+{
+    HintToTypeWrap hintToTypeWrap;
+    return hintToTypeWrap;
+}
+
+int32_t Container::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
+    bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish,
+    const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
+{
+    return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
 }
 } // namespace OHOS::Ace

@@ -21,6 +21,8 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_handler.h"
+#include "base/view_data/ace_auto_fill_error.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
 
@@ -192,6 +194,13 @@ int32_t MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAut
     return isPopup ? AceAutoFillError::ACE_AUTO_FILL_SUCCESS : AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
 }
 
+HintToTypeWrap MockContainer::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
+{
+    HintToTypeWrap hintToTypeWrap;
+    return hintToTypeWrap;
+}
+
 void MockContainer::SetDisplayInfo(RefPtr<DisplayInfo> displayInfo)
 {
     displayInfo_ = displayInfo;
@@ -203,6 +212,21 @@ RefPtr<DisplayInfo> Container::GetDisplayInfo()
 }
 
 void Container::InitIsFoldable() {}
+
+HintToTypeWrap Container::PlaceHolderToType(const std::string& onePlaceHolder,
+    const std::optional<std::string>& msdpType)
+{
+    HintToTypeWrap hintToTypeWrap;
+    return hintToTypeWrap;
+}
+
+int32_t Container::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
+{
+    return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
+}
 
 bool Container::IsFoldable()
 {

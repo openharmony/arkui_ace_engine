@@ -18,6 +18,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/box/box_component.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/image/image_component.h"
 #include "core/components/text/text_component.h"
 

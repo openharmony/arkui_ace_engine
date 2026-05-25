@@ -14,6 +14,8 @@
  */
 
 #include "core/components/declaration/text/text_declaration.h"
+#include "core/components/declaration/text/text_specialized_style.h"
+#include "core/components/common/properties/text_style.h"
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/declaration/common/declaration_constants.h"
@@ -347,6 +349,114 @@ std::vector<Shadow> TextDeclaration::ParseTextShadow(const std::string& val, Tex
         textShadowList.emplace_back(textShadow);
     }
     return textShadowList;
+}
+
+const std::string& TextDeclaration::GetData() const
+{
+    auto& attribute = static_cast<TextSpecializedAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+    return attribute.data;
+}
+
+void TextDeclaration::SetData(const std::string& data)
+{
+    auto& attribute = MaybeResetAttribute<TextSpecializedAttribute>(AttributeTag::SPECIALIZED_ATTR);
+    CheckIsChanged(attribute.data, data);
+    attribute.data = data;
+}
+
+const TextStyle& TextDeclaration::GetTextStyle() const
+{
+    auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+    return style.textStyle;
+}
+
+void TextDeclaration::SetTextStyle(const TextStyle& textStyle)
+{
+    auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+    if (style.IsValid()) {
+        CheckIsChanged(style.textStyle, textStyle);
+        style.textStyle = textStyle;
+    }
+}
+
+const Color& TextDeclaration::GetFocusColor() const
+{
+    auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+    return style.focusColor;
+}
+
+void TextDeclaration::SetFocusColor(const Color& focusColor)
+{
+    auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+    if (style.IsValid()) {
+        CheckIsChanged(style.focusColor, focusColor);
+        style.focusColor = focusColor;
+    }
+}
+
+const CopyOptions& TextDeclaration::GetCopyOption() const
+{
+    auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+    return style.copyOptions;
+}
+
+void TextDeclaration::SetCopyOption(const CopyOptions& copyOptions)
+{
+    auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+    if (style.IsValid()) {
+        CheckIsChanged(style.copyOptions, copyOptions);
+        style.copyOptions = copyOptions;
+    }
+}
+
+bool TextDeclaration::IsMaxWidthLayout() const
+{
+    auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+    return style.isMaxWidthLayout;
+}
+
+void TextDeclaration::SetIsMaxWidthLayout(bool isMaxWidthLayout)
+{
+    auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+    if (style.IsValid()) {
+        CheckIsChanged(style.isMaxWidthLayout, isMaxWidthLayout);
+        style.isMaxWidthLayout = isMaxWidthLayout;
+    }
+}
+
+bool TextDeclaration::GetAutoMaxLines() const
+{
+    auto& style = static_cast<TextSpecializedStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+    return style.autoMaxLines;
+}
+
+void TextDeclaration::SetAutoMaxLines(bool autoMaxLines)
+{
+    auto& style = MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+    if (style.IsValid()) {
+        CheckIsChanged(style.autoMaxLines, autoMaxLines);
+        style.autoMaxLines = autoMaxLines;
+    }
+}
+
+bool TextDeclaration::IsChanged() const
+{
+    return isChanged_;
+}
+
+void TextDeclaration::SetIsChanged(bool isChanged)
+{
+    isChanged_ = isChanged;
+}
+
+bool TextDeclaration::HasSetTextFontSize() const
+{
+    return hasSetTextFontSize_;
+}
+
+bool TextDeclaration::HasSetTextColor() const
+{
+    return hasSetTextColor_;
 }
 
 } // namespace OHOS::Ace

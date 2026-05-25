@@ -8054,6 +8054,7 @@ void PipelineContext::InitManagers()
     toolbarManager_ = MakeRefPtr<ToolbarManager>();
     environmentManager_ = MakeRefPtr<EnvironmentManager>();
     recycleManager_ = std::make_unique<RecycleManager>();
+    privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
 }
 
 const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
@@ -8186,4 +8187,5 @@ RefPtr<DynamicComponentSafeManager> PipelineContext::GetDynamicComponentSafeMana
     }
     return dynamicComponentSafeManager_;
 }
+
 } // namespace OHOS::Ace::NG

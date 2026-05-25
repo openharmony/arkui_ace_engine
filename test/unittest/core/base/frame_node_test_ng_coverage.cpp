@@ -14,6 +14,8 @@
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
+
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
