@@ -28,7 +28,8 @@
         "CustomSpan",
         "TouchEvent",
         "PanGestureOptions",
-        "ShaderStyle"
+        "ShaderStyle",
+        "XComponentController"
     ],
     "extendableComponents": [
         "arkui.component.button.ExtendableButton",
@@ -93,6 +94,10 @@
         {
             "from": "arkui.component.textCommon.ShaderStyle",
             "to": "arkui.component.idlize.ShaderStyleProxy"
+        },
+        {
+            "from": "arkui.component.xcomponent.XComponentController",
+            "to": "arkui.component.idlize.XComponentControllerWrapper"
         }
     ],
     "forceMaterialized": [
@@ -501,11 +506,6 @@
     ],
     "forceCallback": {
         "EditMenuOptions": [],
-        "XComponentController": [
-            "onSurfaceCreated",
-            "onSurfaceChanged",
-            "onSurfaceDestroyed"
-        ],
         "DrawModifier": [
             "drawBehind",
             "drawContent",
@@ -727,6 +727,7 @@
             "SaveButton",
             "PasteButton",
             "CustomSpan",
+            "XComponentController",
             "TouchEvent",
             "ContentSlot",
             "ContentSlotAttribute",
@@ -1114,12 +1115,6 @@
             },
             "getCanvas": {
                 "hookName": "hookGetCanvas",
-                "replaceImplementation": true
-            }
-        },
-        "XComponentController": {
-            "startImageAnalyzer": {
-                "hookName": "hookXComponentStartImageAnalyzer",
                 "replaceImplementation": true
             }
         },

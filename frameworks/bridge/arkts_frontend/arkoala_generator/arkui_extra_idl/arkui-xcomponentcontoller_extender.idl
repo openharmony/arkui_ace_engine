@@ -16,8 +16,38 @@ package arkui.component.idlize;
 
 import arkui.component.imageCommon.ImageAnalyzerConfig as ImageAnalyzerConfig;
 import arkui.component.xcomponent.XComponentController as XComponentController;
+import arkui.component.xcomponent.SurfaceRect as SurfaceRect;
+import arkui.component.xcomponent.SurfaceConfig as SurfaceConfig;
+import arkui.component.xcomponent.SurfaceRotationOptions as SurfaceRotationOptions;
+import arkui.component.units.DrawingCanvas as DrawingCanvas;
 
 [Entity=Class]
 interface XComponentControllerExtender {
     static Promise<void> startImageAnalyzer(XComponentController peer, ImageAnalyzerConfig config);
+};
+
+callback OnSurfaceCreatedCb = void (String surfaceId);
+callback OnSurfaceChangedCb = void (String surfaceId, SurfaceRect rect);
+callback OnSurfaceDestroyedCb = void (String surfaceId);
+
+interface XComponentControllerWrapper {
+    attribute Object managed;
+    attribute XComponentControllerNative nativeObj;
+    attribute OnSurfaceCreatedCb onSurfaceCreated;
+    attribute OnSurfaceChangedCb onSurfaceChanged;
+    attribute OnSurfaceDestroyedCb onSurfaceDestroyed;
+};
+
+[Entity=Class]
+interface XComponentControllerNative {
+    constructor();
+    String getXComponentSurfaceId();
+    void setXComponentSurfaceRect(SurfaceRect rect);
+    SurfaceRect getXComponentSurfaceRect();
+    void setXComponentSurfaceRotation(SurfaceRotationOptions rotationOptions);
+    SurfaceRotationOptions getXComponentSurfaceRotation();
+    void stopImageAnalyzer();
+    (DrawingCanvas or idlize.stdlib.Null) lockCanvas();
+    void unlockCanvasAndPost(DrawingCanvas canvas);
+    void setXComponentSurfaceConfig(SurfaceConfig config);
 };

@@ -422,8 +422,8 @@ const GENERATED_ArkUIWebKeyboardControllerAccessor* GetWebKeyboardControllerAcce
 const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor();
 const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor();
 const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor();
-const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor();
 const GENERATED_ArkUIXComponentControllerExtenderAccessor* GetXComponentControllerExtenderAccessor();
+const GENERATED_ArkUIXComponentControllerNativeAccessor* GetXComponentControllerNativeAccessor();
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
@@ -777,8 +777,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetWebResourceErrorAccessor,
         GetWebResourceRequestAccessor,
         GetWebResourceResponseAccessor,
-        GetXComponentControllerAccessor,
         GetXComponentControllerExtenderAccessor,
+        GetXComponentControllerNativeAccessor,
         GetGlobalScopeAccessor,
     };
     return &accessorsImpl;

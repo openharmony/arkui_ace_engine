@@ -26,18 +26,18 @@
 #endif // XCOMPONENT_SUPPORTED
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-struct XComponentControllerPeerImpl : public Referenced {
+struct XComponentControllerNativePeerImpl : public Referenced {
     std::shared_ptr<XComponentControllerNG> controller;
 #ifdef XCOMPONENT_SUPPORTED
     void TriggerStartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
         const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
-    void SetOnSurfaceCreatedEvent(const synthetic_Callback_String_Void& callback);
-    void SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback);
-    void SetOnSurfaceDestroyedEvent(const synthetic_Callback_String_Void& callback);
+    void SetOnSurfaceCreatedEvent(const OnSurfaceCreatedCb& callback);
+    void SetOnSurfaceChangedEvent(const OnSurfaceChangedCb& callback);
+    void SetOnSurfaceDestroyedEvent(const OnSurfaceDestroyedCb& callback);
     drawing_CanvasPeer* GetCanvas();
-    synthetic_Callback_String_Void arkOnSurfaceCreated = {};
-    Callback_String_SurfaceRect_Void arkOnSurfaceChanged = {};
-    synthetic_Callback_String_Void arkOnSurfaceDestroyed = {};
+    OnSurfaceCreatedCb arkOnSurfaceCreated = {};
+    OnSurfaceChangedCb arkOnSurfaceChanged = {};
+    OnSurfaceDestroyedCb arkOnSurfaceDestroyed = {};
     SurfaceCreatedEvent onSurfaceCreatedEvent = nullptr;
     SurfaceChangedEvent onSurfaceChangedEvent = nullptr;
     SurfaceDestroyedEvent onSurfaceDestroyedEvent = nullptr;
@@ -50,7 +50,7 @@ struct XComponentControllerPeerImpl : public Referenced {
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
 
-struct XComponentControllerPeer : public OHOS::Ace::NG::GeneratedModifier::XComponentControllerPeerImpl {
+struct XComponentControllerNativePeer : public OHOS::Ace::NG::GeneratedModifier::XComponentControllerNativePeerImpl {
 };
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H
