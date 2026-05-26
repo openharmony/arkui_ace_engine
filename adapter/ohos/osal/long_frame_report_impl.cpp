@@ -28,8 +28,9 @@ namespace {
 void LongFrameReportImpl::SubmitEvent()
 {
     int64_t tid = ResSchedReport::GetInstance().GetTid();
-    ffrtTask = ffrt::submit_h([tid] {
-        ResSchedReport::GetInstance().ResSchedDataReport("long_frame_start", {}, tid);
+    int64_t longTid = static_cast<int64_t>(pthread_self());
+    ffrtTask = ffrt::submit_h([tid, longTid] {
+        ResSchedReport::GetInstance().ResSchedDataReport("long_frame_start", {}, tid, longTid);
     }, {}, {}, ffrt::task_attr().delay(LONG_FRAME_EVENT_DELAY).qos(ffrt::qos_user_interactive));
 }
 
