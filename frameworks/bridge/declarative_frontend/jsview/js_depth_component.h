@@ -19,7 +19,6 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/image/image_source_info.h"
 
@@ -31,6 +30,8 @@ public:
     static void SetDepthMap(const JSCallbackInfo& info);
     static void SetCamera(const JSCallbackInfo& info);
     static void SetLight(const JSCallbackInfo& info);
+    static void SetOnComplete(const JSCallbackInfo& info);
+    static void SetOnError(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
 private:

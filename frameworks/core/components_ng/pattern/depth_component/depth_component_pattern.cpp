@@ -103,6 +103,9 @@ void DepthComponentPattern::OnAttachToFrameNode()
 
 void DepthComponentPattern::OnDetachFromFrameNode(FrameNode* node)
 {
+    onComplete_ = nullptr;
+    onError_ = nullptr;
+    onDepthMapError_ = nullptr;
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     if (node) {
         auto pipeline = node->GetContextRefPtr();
@@ -134,7 +137,6 @@ void DepthComponentPattern::OnModifyDone()
             CreateCustomNativeWindows(width3d_, height3d_);
         }
         UpdateGltfScene();
-        Update3DScale();
         UpdateWindowChangeSize(true);
         UpdateWindowInfo();
         MarkRender3D();
@@ -246,54 +248,43 @@ void DepthComponentPattern::SetupBackgroundImageNode()
     imageLayoutProperty->UpdateImageSourceInfo(backgroundImage);
     imageLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(PERCENT_100, DimensionUnit::PERCENT), CalcLength(PERCENT_100, DimensionUnit::PERCENT)));
-    ApplyBackgroundOffset(backgroundImageNode);
-    ApplyBackgroundScale(backgroundImageNode);
+    ApplyOnCompleteCallback(backgroundImageNode);
+    ApplyOnErrorCallback(backgroundImageNode);
     ApplyBackgroundImageMatrix(backgroundImageNode);
     backgroundImageNode->MarkModifyDone();
     backgroundImageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void DepthComponentPattern::ApplyBackgroundOffset(const RefPtr<FrameNode>& backgroundImageNode)
+void DepthComponentPattern::ApplyOnCompleteCallback(const RefPtr<FrameNode>& backgroundImageNode)
 {
     CHECK_NULL_VOID(backgroundImageNode);
-    auto imagePattern = backgroundImageNode->GetPattern<ImagePattern>();
-    CHECK_NULL_VOID(imagePattern);
-    if (imagePattern->GetIsAnimation()) {
-        return;
-    }
-
-    auto layoutProperty = backgroundImageNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    layoutProperty->UpdateNeedOffsetLocalizedEdges(false);
-    auto renderContext = backgroundImageNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto bgOffset = GetBackgroundOffset();
-    if (bgOffset.offsetEdges.has_value()) {
-        layoutProperty->UpdateNeedOffsetLocalizedEdges(bgOffset.useLocalizedOffset);
-        renderContext->ResetOffset();
-        renderContext->UpdateOffsetEdges(bgOffset.offsetEdges.value());
-    } else if (bgOffset.offset.has_value()) {
-        renderContext->ResetOffsetEdges();
-        renderContext->UpdateOffset(bgOffset.offset.value());
-    } else {
-        renderContext->ResetOffset();
-        renderContext->ResetOffsetEdges();
-    }
+    auto imageEventHub = backgroundImageNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    CHECK_NULL_VOID(onComplete_);
+    auto callback = onComplete_;
+    imageEventHub->SetOnComplete([callback = std::move(callback)](const LoadImageSuccessEvent& event) {
+        DepthComponentCompleteEvent completeEvent;
+        completeEvent.componentWidth = event.GetComponentWidth();
+        completeEvent.componentHeight = event.GetComponentHeight();
+        callback(completeEvent);
+    });
 }
 
-void DepthComponentPattern::ApplyBackgroundScale(const RefPtr<FrameNode>& backgroundImageNode)
+void DepthComponentPattern::ApplyOnErrorCallback(const RefPtr<FrameNode>& backgroundImageNode)
 {
     CHECK_NULL_VOID(backgroundImageNode);
-    auto renderContext = backgroundImageNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto bgScale = GetBackgroundScale();
-    if (bgScale.has_value()) {
-        renderContext->UpdateTransformScale(bgScale.value());
-    } else {
-        renderContext->UpdateTransformScale(NG::VectorF(1.0f, 1.0f));
-    }
+    auto imageEventHub = backgroundImageNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    CHECK_NULL_VOID(onError_);
+    auto callback = onError_;
+    imageEventHub->SetOnError([callback = std::move(callback)](const LoadImageFailEvent& event) {
+        DepthComponentErrorEvent errorEvent;
+        errorEvent.componentWidth = event.GetComponentWidth();
+        errorEvent.componentHeight = event.GetComponentHeight();
+        errorEvent.errorCode = static_cast<int32_t>(event.GetErrorInfo().errorCode);
+        errorEvent.errorMessage = event.GetErrorMessage();
+        callback(errorEvent);
+    });
 }
 
 void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode)
@@ -393,8 +384,33 @@ void DepthComponentPattern::LoadDepthMap()
             auto canvasImage = pattern->depthMapLoadingCtx_->MoveCanvasImage();
             CHECK_NULL_VOID(canvasImage);
             pattern->OnDepthMapLoadSuccess(canvasImage);
+            auto context = pattern->GetHost() ? pattern->GetHost()->GetContext() : nullptr;
+            CHECK_NULL_VOID(context);
+            auto onErrorCallback = pattern->onDepthMapError_;
+            context->GetTaskExecutor()->PostTask(
+                [onErrorCallback]() {
+                    if (onErrorCallback) {
+                        onErrorCallback(0, "");
+                    }
+                },
+                TaskExecutor::TaskType::JS, "ArkUIDepthMapLoadSuccess");
         },
-        nullptr);
+        [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg,
+            const ImageErrorInfo& errorInfo) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto context = pattern->GetHost() ? pattern->GetHost()->GetContext() : nullptr;
+            CHECK_NULL_VOID(context);
+            auto onErrorCallback = pattern->onDepthMapError_;
+            auto errorCode = static_cast<int32_t>(errorInfo.errorCode);
+            context->GetTaskExecutor()->PostTask(
+                [onErrorCallback, errorCode, errorMsg]() {
+                    if (onErrorCallback) {
+                        onErrorCallback(errorCode, errorMsg);
+                    }
+                },
+                TaskExecutor::TaskType::JS, "ArkUIDepthMapLoadError");
+        });
     depthMapLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(depthMap_, std::move(loadNotifier), false);
     depthMapLoadingCtx_->LoadImageData();
 }
@@ -613,7 +629,6 @@ void DepthComponentPattern::UpdateGltfScene()
     if (!backgroundSource.IsGltf()) {
         return;
     }
-
     CHECK_NULL_VOID(mrtDepthAdapter_);
     if (!gltfWindowsInitialized_) {
         return;
@@ -623,8 +638,46 @@ void DepthComponentPattern::UpdateGltfScene()
     }
 
     lastLoadedGltfPath_ = backgroundSource.resolvedPath;
-    mrtDepthAdapter_->CreateSceneByGltfUri(lastLoadedGltfPath_);
+    auto loadCallback = CreateGltfLoadCallback();
+    mrtDepthAdapter_->CreateSceneByGltfUri(lastLoadedGltfPath_, std::move(loadCallback));
     gltfSceneLoaded_ = true;
+}
+
+std::function<void(bool)> DepthComponentPattern::CreateGltfLoadCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, std::function<void(bool)>());
+    double componentWidth = 0.0;
+    double componentHeight = 0.0;
+    if (host->GetGeometryNode()) {
+        auto frameSize = host->GetGeometryNode()->GetFrameSize();
+        componentWidth = static_cast<double>(frameSize.Width());
+        componentHeight = static_cast<double>(frameSize.Height());
+    }
+    auto onComplete = onComplete_;
+    auto onError = onError_;
+    auto fireCallback = [onComplete, onError, componentWidth, componentHeight](bool success) {
+        if (success && onComplete) {
+            DepthComponentCompleteEvent completeEvent;
+            completeEvent.componentWidth = componentWidth;
+            completeEvent.componentHeight = componentHeight;
+            onComplete(completeEvent);
+        } else if (!success && onError) {
+            DepthComponentErrorEvent errorEvent;
+            errorEvent.componentWidth = componentWidth;
+            errorEvent.componentHeight = componentHeight;
+            onError(errorEvent);
+        }
+    };
+    return [weakNode = WeakClaim(AceType::RawPtr(host)), fireCallback](bool success) {
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto context = node->GetContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [fireCallback, success]() { fireCallback(success); },
+            TaskExecutor::TaskType::JS, "ArkUIDepthComponentGltfLoad");
+    };
 }
 
 void DepthComponentPattern::UpdateGltfCamera()
@@ -672,7 +725,7 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
 {
     ACE_SCOPED_TRACE("DepthComponent::CleanupGltfResources clearAdapter=%d windows=%zu surfaces=%zu", clearAdapter,
         nativeWindows_.size(), nativeSurfaces_.size());
-    
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -761,7 +814,6 @@ Render3D::WindowChangeInfo DepthComponentPattern::GetWindowChangeInfos(float wid
 
 void DepthComponentPattern::UpdateWindowChangeSize(bool recreateWindow)
 {
-    Update3DOffset();
     ACE_SCOPED_TRACE(
         "DepthComponent::UpdateWindowChangeSize width=%.1f height=%.1f", width3d_, height3d_);
     for (size_t index = 0; index < windowChangeInfos_.size(); ++index) {
@@ -786,51 +838,6 @@ void DepthComponentPattern::UpdateWindowChangeSize(bool recreateWindow)
     }
 }
 
-void DepthComponentPattern::Update3DOffset()
-{
-    auto bgOffset = GetBackgroundOffset();
-    if (bgOffset.offsetEdges.has_value()) {
-        auto offsetEdges = bgOffset.offsetEdges.value();
-        if (offsetEdges.left.has_value()) {
-            offsetX_ = offsetEdges.left->ConvertToPx();
-        } else if (offsetEdges.right.has_value()) {
-            offsetX_ = -offsetEdges.right->ConvertToPx();
-        }
-
-        if (offsetEdges.top.has_value()) {
-            offsetY_ = offsetEdges.top->ConvertToPx();
-        } else if (offsetEdges.bottom.has_value()) {
-            offsetY_ = -offsetEdges.bottom->ConvertToPx();
-        }
-
-        bool localized = bgOffset.useLocalizedOffset;
-        CHECK_NULL_VOID(localized);
-        float flag = AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0 : 1.0;
-        if (offsetEdges.start.has_value()) {
-            offsetX_ = offsetEdges.start->ConvertToPx() * flag;
-        } else if (offsetEdges.end.has_value()) {
-            offsetX_ = -offsetEdges.end->ConvertToPx() * flag;
-        }
-    } else if (bgOffset.offset.has_value()) {
-        offsetX_ = bgOffset.offset->GetX().ConvertToPx();
-        offsetY_ = bgOffset.offset->GetY().ConvertToPx();
-    } else {
-        offsetX_ = 0.0;
-        offsetY_ = 0.0;
-    }
-}
-
-void DepthComponentPattern::Update3DScale()
-{
-    auto bgScale = GetBackgroundScale();
-    if (!bgScale.has_value()) {
-        return;
-    }
-    for (size_t index = 0; index < surfaceRenderContext_.size(); ++index) {
-        surfaceRenderContext_[index]->UpdateTransformScale(bgScale.value());
-    }
-}
-
 bool DepthComponentPattern::NeedUpdateWindowInfo()
 {
     return !(nativeWindowSetUp_ && NearEqual(lastWidth3d_, width3d_) && NearEqual(lastHeight3d_, height3d_));
@@ -842,7 +849,6 @@ void DepthComponentPattern::UpdateWindowInfo()
     if (!NeedUpdateWindowInfo()) {
         return;
     }
-
     mrtDepthAdapter_->OnWindowChange(windowChangeInfos_);
     nativeWindowSetUp_ = true;
     lastWidth3d_ = width3d_;
