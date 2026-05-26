@@ -8419,5 +8419,6 @@ void SwiperPattern::CleanPreMakeNode()
             childNode->DetachFromMainTreeByPreMakeFlag();
         }
     }
+    premakeItems_.clear();
 }
 } // namespace OHOS::Ace::NG

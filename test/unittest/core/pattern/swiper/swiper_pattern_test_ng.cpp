@@ -3130,7 +3130,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel002, TestSize.Level1)
     pattern_->premakeItems_.emplace(0);
     pattern_->premakeItems_.emplace(1);
     pattern_->OnNotifyMemoryLevel(2);
-    EXPECT_FALSE(pattern_->premakeItems_.empty());
+    EXPECT_TRUE(pattern_->premakeItems_.empty());
 }
 
 /**
