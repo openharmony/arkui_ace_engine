@@ -525,8 +525,7 @@ public:
 
     virtual void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport = false) {}
 
-    virtual void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
-                                     const std::optional<AppForceSplitConfig>& appConfig) {}
+    virtual void SetForceSplitConfig(const std::optional<ForceSplitConfig>& splitConfig) {}
 
     virtual void EnableContainerModalGesture(bool isEnable) {};
 

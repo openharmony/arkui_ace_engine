@@ -47,14 +47,11 @@ constexpr int32_t HOME_PAGE_CHILD_NODE_COUNT_THRESHOLD = 100;
 constexpr char NAV_BAR_HOME_PAGE_NAME[] = "navBar";
 constexpr char HOME_PAGE_KEY[] = "homePage";
 constexpr char RELATED_PAGE_KEY[] = "relatedPage";
-constexpr char ENABLE_REDUCED_CONTAINER_SIZE_KEY[] = "enableReducedContainerSize";
+constexpr char ENABLE_HOOK_KEY[] = "enableReducedContainerSize";
 constexpr char HOME_NAVIGATION_ID_KEY[] = "homeNavigationId";
-constexpr char ENABLE_HOOK_KEY[] = "enableHook";
-constexpr char NAVIGATION_OPTIONS_KEY[] = "navigationOptions";
-constexpr char NAVIGATION_OPTIONS_ID_KEY[] = "id";
-constexpr char NAVIGATION_OPTIONS_DEPTH_KEY[] = "depth";
-constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholder";
-constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
+constexpr char HOME_NAVIGATION_DEPTH_KEY[] = "homeNavigationDepth";
+constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "navigationDisablePlaceholder";
+constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "navigationDisableDivider";
 constexpr char FULL_SCREEN_PAGES_KEY[] = "fullScreenPages";
 constexpr char DIALOG_SUPPORT_SPLIT_KEY[] = "dialogSupportSplit";
 constexpr char SPLIT_DIVIDER_COLOR[] = "splitDividerColor";
@@ -319,51 +316,6 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
     return phNode;
 }
 
-bool ForceSplitUtils::ParseNavigationOptions(
-    const std::unique_ptr<JsonValue>& navigationOptions, ForceSplitConfig& config)
-{
-    if (!navigationOptions || !navigationOptions->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions is an invalid json object!");
-        return false;
-    }
-    if (navigationOptions->Contains(NAVIGATION_OPTIONS_ID_KEY)) {
-        auto idJson = navigationOptions->GetValue(NAVIGATION_OPTIONS_ID_KEY);
-        if (!idJson->IsString()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.id is not string!");
-            return false;
-        }
-        auto idStr = idJson->GetString();
-        if (!idStr.empty()) {
-            config.navigationId = idStr;
-        }
-    }
-    if (navigationOptions->Contains(NAVIGATION_OPTIONS_DEPTH_KEY)) {
-        auto depthJson = navigationOptions->GetValue(NAVIGATION_OPTIONS_DEPTH_KEY);
-        if (!depthJson->IsNumber()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.depth is not number!");
-            return false;
-        }
-        config.navigationDepth = navigationOptions->GetInt(NAVIGATION_OPTIONS_DEPTH_KEY);
-    }
-    if (navigationOptions->Contains(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY)) {
-        auto disablePlaceholderJson = navigationOptions->GetValue(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
-        if (!disablePlaceholderJson->IsBool()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.disablePlaceholder is not bool!");
-            return false;
-        }
-        config.navigationDisablePlaceholder = disablePlaceholderJson->GetBool();
-    }
-    if (navigationOptions->Contains(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY)) {
-        auto disableDividerJson = navigationOptions->GetValue(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY);
-        if (!disableDividerJson->IsBool()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.disableDivider is not bool!");
-            return false;
-        }
-        config.navigationDisableDivider = disableDividerJson->GetBool();
-    }
-    return true;
-}
-
 bool ForceSplitUtils::ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitConfig& config)
 {
     if (!fullScreenPages || !fullScreenPages->IsArray()) {
@@ -584,33 +536,10 @@ bool ForceSplitUtils::ParseBehaviorModeConfig(
     return true;
 }
 
-bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
+bool ForceSplitUtils::ParseForceSplitConfig(
+    bool isRouterSplit, const std::string& configJsonStr, ForceSplitConfig& config)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse system forceSplit config: %{public}s", configJsonStr.c_str());
-    auto configJson = JsonUtil::ParseJsonString(configJsonStr);
-    if (!configJson) {
-        return false;
-    }
-    if (!configJson->IsObject()) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, arkUIOptions is an invalid json object!");
-        return false;
-    }
-    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, true);
-    if (configJson->Contains(NAVIGATION_OPTIONS_KEY)) {
-        if (!ParseNavigationOptions(configJson->GetValue(NAVIGATION_OPTIONS_KEY), config)) {
-            return false;
-        }
-    }
-    if (!ParseCommonConfig(configJson, config)) {
-        return false;
-    }
-    return true;
-}
-
-bool ForceSplitUtils::ParseAppForceSplitConfig(
-    bool isRouter, const std::string& configJsonStr, ForceSplitConfig& config)
-{
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse app forceSplit config: %{public}s", configJsonStr.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse forceSplit config: %{public}s", configJsonStr.c_str());
     if (configJsonStr.empty()) {
         return true;
     }
@@ -619,11 +548,10 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
         return false;
     }
     if (!configJson->IsObject()) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is an invalid json object!",
-            isRouter ? "routerSplitOptions" : "navigationSplitOptions");
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, ArkUIOption is an invalid json object!");
         return false;
     }
-    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_REDUCED_CONTAINER_SIZE_KEY, false);
+    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, false);
     if (configJson->Contains(HOME_PAGE_KEY)) {
         auto homePageJson = configJson->GetValue(HOME_PAGE_KEY);
         if (!homePageJson->IsString()) {
@@ -649,7 +577,7 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
     if (!ParseCommonConfig(configJson, config)) {
         return false;
     }
-    if (isRouter) {
+    if (isRouterSplit) {
         return true;
     }
     if (configJson->Contains(HOME_NAVIGATION_ID_KEY)) {
@@ -662,6 +590,14 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
         if (!idStr.empty()) {
             config.navigationId = idStr;
         }
+    }
+    if (configJson->Contains(HOME_NAVIGATION_DEPTH_KEY)) {
+        auto depthJson = configJson->GetValue(HOME_NAVIGATION_DEPTH_KEY);
+        if (!depthJson->IsNumber()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not number!", HOME_NAVIGATION_DEPTH_KEY);
+            return false;
+        }
+        config.navigationDepth = configJson->GetInt(HOME_NAVIGATION_DEPTH_KEY);
     }
     if (configJson->Contains(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY)) {
         auto disablePlaceholderJson = configJson->GetValue(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
@@ -684,40 +620,19 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
     return true;
 }
 
-void ForceSplitUtils::LogSystemForceSplitConfig(
-    bool isRouter, const std::string& homePage, const ForceSplitConfig& config)
+void ForceSplitUtils::LogForceSplitConfig(bool isRouterSplit, const ForceSplitConfig& config)
 {
-    TAG_LOGI(
-        AceLogTag::ACE_NAVIGATION,
-        "system ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, "
-        "fullScreenPages:%{public}s, enableHook:%{public}d, navId:%{public}s,"
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "ForceSplitConfig: isRouterSplit:%{public}d, homePage:%{public}s, relatedPage:%{public}s, "
+        "fullScreenPages:%{public}s, enableArkUIHook:%{public}d, navId:%{public}s,"
         "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d, "
         "dividerColorLight:%{public}s, dividerColorDark:%{public}s, "
         "wideSplit[ratio:%{public}s], squareSplit[ratio:%{public}s], "
         "behaviorMode:%{public}d, transPages:%{public}s",
-        isRouter, homePage.c_str(), JoinStringSet(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
-        (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider,
-        (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
-        (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"),
-        (config.wideSplitRatio.has_value() ? std::to_string(config.wideSplitRatio.value()).c_str() : "NA"),
-        (config.squareSplitRatio.has_value() ? std::to_string(config.squareSplitRatio.value()).c_str() : "NA"),
-        static_cast<int32_t>(config.behaviorMode), JoinStringSet(config.transPages).c_str());
-}
-
-void ForceSplitUtils::LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config)
-{
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "app ForceSplitConfig: isRouter:%{public}d, homePage:%{public}s, relatedPage:%{public}s, "
-        "fullScreenPages:%{public}s, enableArkUIHook:%{public}d, navId:%{public}s,"
-        "disablePlaceholder:%{public}d, disableDivider:%{public}d, "
-        "dividerColorLight:%{public}s, dividerColorDark:%{public}s, "
-        "wideSplit[ratio:%{public}s], squareSplit[ratio:%{public}s], "
-        "behaviorMode:%{public}d, transPages:%{public}s",
-        isRouter, config.homePage.c_str(), config.relatedPage.c_str(),
+        isRouterSplit, config.homePage.c_str(), config.relatedPage.c_str(),
         JoinStringSet(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
+        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
         config.navigationDisablePlaceholder, config.navigationDisableDivider,
         (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
         (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"),

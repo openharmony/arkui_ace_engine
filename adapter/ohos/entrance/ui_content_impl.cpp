@@ -5874,8 +5874,7 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, 
     taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI, "ArkUISetForceSplitEnable");
 }
 
-void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
-                                        const std::optional<AppForceSplitConfig>& appConfig)
+void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& splitConfig)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -5890,51 +5889,24 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     }
     auto navManager = context->GetNavigationManager();
     CHECK_NULL_VOID(navManager);
-    if (appConfig.has_value()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Using app forceSplitConfig");
-        NG::ForceSplitConfig config;
-        if (!NG::ForceSplitUtils::ParseAppForceSplitConfig(appConfig->isRouter, appConfig->configJsonStr, config)) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse app forceSplit config!");
-            return;
-        }
-        NG::ForceSplitUtils::LogAppForceSplitConfig(appConfig->isRouter, config);
-        context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
-        forceSplitMgr->SetIsRouter(appConfig->isRouter);
-        forceSplitMgr->SetDialogSupportSplit(config.dialogSupportSplit);
-        forceSplitMgr->SetHomePageName(config.homePage);
-        forceSplitMgr->SetRelatedPageName(config.relatedPage);
-        forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
-        forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
-        forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
-        forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
-            config.splitDividerColorDark);
-        forceSplitMgr->SetBehaviorMode(config.behaviorMode);
-        forceSplitMgr->SetPagePairs(std::move(config.pagePairs));
-        forceSplitMgr->SetTransPages(std::move(config.transPages));
-        if (!(appConfig->isRouter)) {
-            navManager->SetForceSplitNavigationId(config.navigationId);
-            navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
-            navManager->SetDividerDisabled(config.navigationDisableDivider);
-        }
-        return;
-    }
-    if (!systemConfig.has_value()) {
+    if (!splitConfig.has_value()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "forceSplit is not supported.");
         context->SetIsArkUIHookEnabled(false);
         forceSplitMgr->IsForceSplitEnable(false);
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Using system forceSplitConfig");
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "forceSplit is supported.");
     NG::ForceSplitConfig config;
-    if (!NG::ForceSplitUtils::ParseSystemForceSplitConfig(systemConfig->configJsonStr, config)) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse system forceSplit config!");
+    if (!NG::ForceSplitUtils::ParseForceSplitConfig(splitConfig->isRouter, splitConfig->configJsonStr, config)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
         return;
     }
-    NG::ForceSplitUtils::LogSystemForceSplitConfig(systemConfig->isRouter, systemConfig->homePage, config);
+    NG::ForceSplitUtils::LogForceSplitConfig(splitConfig->isRouter, config);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+    forceSplitMgr->SetIsRouter(splitConfig->isRouter);
     forceSplitMgr->SetDialogSupportSplit(config.dialogSupportSplit);
-    forceSplitMgr->SetIsRouter(systemConfig->isRouter);
-    forceSplitMgr->SetHomePageName(systemConfig->homePage);
+    forceSplitMgr->SetHomePageName(config.homePage);
+    forceSplitMgr->SetRelatedPageName(config.relatedPage);
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
     forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
     forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
@@ -5943,7 +5915,7 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     forceSplitMgr->SetBehaviorMode(config.behaviorMode);
     forceSplitMgr->SetPagePairs(std::move(config.pagePairs));
     forceSplitMgr->SetTransPages(std::move(config.transPages));
-    if (!(systemConfig->isRouter)) {
+    if (!(splitConfig->isRouter)) {
         navManager->SetForceSplitNavigationId(config.navigationId);
         navManager->SetForceSplitNavigationDepth(config.navigationDepth);
         navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
