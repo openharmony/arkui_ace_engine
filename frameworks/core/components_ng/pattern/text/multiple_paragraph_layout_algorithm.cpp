@@ -111,6 +111,13 @@ std::string MultipleParagraphLayoutAlgorithm::SpansToString()
     return ss.str();
 }
 
+bool MultipleParagraphLayoutAlgorithm::IsSpanStringCacheEnabled(
+    const RefPtr<TextLayoutProperty>& textLayoutProperty) const
+{
+    auto policy = textLayoutProperty->GetIncrementalUpdatePolicyValue(IncrementalUpdatePolicy::NONE);
+    return policy != IncrementalUpdatePolicy::NONE && isSpanStringMode_;
+}
+
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {
@@ -135,8 +142,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
-    auto policy = textLayoutProperty->GetIncrementalUpdatePolicyValue(IncrementalUpdatePolicy::NONE);
-    if (policy != IncrementalUpdatePolicy::NONE) {
+    isSpanStringCacheEnabled_ = IsSpanStringCacheEnabled(textLayoutProperty);
+    if (isSpanStringCacheEnabled_) {
         UpdateTextStyleFromProperty(textLayoutProperty, textTheme, textStyle, pattern);
     } else {
         CreateTextStyleUsingTheme(textLayoutProperty, textTheme,
@@ -654,8 +661,11 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
     // generally not allowed to be modified
     CHECK_NULL_RETURN(paragraphManager_, false);
     auto paragraphs = paragraphManager_->GetParagraphs();
+    float textWidth = isSpanStringCacheEnabled_
+        ? paragraphManager_->GetLongestLineWithIndent()
+        : paragraphManager_->GetTextWidthIncludeIndent();
     float paragraphNewWidth =
-        std::min(std::min(paragraphManager_->GetTextWidthIncludeIndent(), paragraphManager_->GetMaxWidth()),
+        std::min(std::min(textWidth, paragraphManager_->GetMaxWidth()),
             GetMaxMeasureSize(contentConstraint).Width());
     paragraphNewWidth =
         std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
@@ -664,8 +674,12 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
             auto paragraph = pIter->paragraph;
             CHECK_NULL_RETURN(paragraph, false);
             if (SystemProperties::GetTextTraceEnabled()) {
-                ACE_TEXT_SCOPED_TRACE("ParagraphReLayout[NewWidth:%f][MaxWidth:%f][IndentWidth:%f][Constraint:%s]",
-                    paragraphNewWidth, paragraph->GetMaxWidth(), paragraphManager_->GetTextWidthIncludeIndent(),
+                ACE_TEXT_SCOPED_TRACE(
+                    "ParagraphReLayout[NewWidth:%f][MaxWidth:%f][IndentWidth:%f]"
+                    "[LongestLineWithIndent:%f][Constraint:%s]",
+                    paragraphNewWidth, paragraph->GetMaxWidth(),
+                    paragraphManager_->GetTextWidthIncludeIndent(),
+                    paragraphManager_->GetLongestLineWithIndent(),
                     contentConstraint.ToString().c_str());
             }
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {

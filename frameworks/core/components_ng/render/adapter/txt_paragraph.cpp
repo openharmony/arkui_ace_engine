@@ -286,7 +286,7 @@ float TxtParagraph::GetHeight()
     auto paragrah = GetParagraph();
     CHECK_NULL_RETURN(paragrah, 0.0f);
     auto height = static_cast<float>(paragrah->GetHeight());
-    if (paraStyle_.isEndAddParagraphSpacing && text_.empty() && placeholderCnt_ == 0) {
+    if (paraStyle_.isEndAddParagraphSpacing && text_.empty() && placeholderCnt_ == 0 && paraStyle_.maxLines != 0) {
         height += static_cast<float>(paraStyle_.paragraphSpacing.ConvertToPx());
     }
     return height;

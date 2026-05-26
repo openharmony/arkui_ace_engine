@@ -1094,4 +1094,300 @@ HWTEST_F(ParagraphCacheTestNg, SetStyledStringWithIncrementalUpdatePolicy001, Te
     // Cache should be initialized due to PARAGRAPH_CACHE policy
     EXPECT_NE(pattern->GetParagraphCache(), nullptr);
 }
+
+// ==================== IsSpanStringCacheEnabled Tests ====================
+
+/**
+ * @tc.name: IsSpanStringCacheEnabledNonePolicy001
+ * @tc.desc: Test IsSpanStringCacheEnabled returns false when policy is NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, IsSpanStringCacheEnabledNonePolicy001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIncrementalUpdatePolicy(IncrementalUpdatePolicy::NONE);
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, true, textStyle);
+    alg.isSpanStringMode_ = true;
+
+    // NONE policy should return false even in spanString mode
+    EXPECT_FALSE(alg.IsSpanStringCacheEnabled(layoutProperty));
+}
+
+/**
+ * @tc.name: IsSpanStringCacheEnabledParagraphCachePolicy001
+ * @tc.desc: Test IsSpanStringCacheEnabled returns true when policy is PARAGRAPH_CACHE and in spanString mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, IsSpanStringCacheEnabledParagraphCachePolicy001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIncrementalUpdatePolicy(IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, true, textStyle);
+    alg.isSpanStringMode_ = true;
+
+    // PARAGRAPH_CACHE policy with spanString mode should return true
+    EXPECT_TRUE(alg.IsSpanStringCacheEnabled(layoutProperty));
+}
+
+/**
+ * @tc.name: IsSpanStringCacheEnabledNonSpanStringMode001
+ * @tc.desc: Test IsSpanStringCacheEnabled returns false even with PARAGRAPH_CACHE if not in spanString mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, IsSpanStringCacheEnabledNonSpanStringMode001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIncrementalUpdatePolicy(IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, false, textStyle);
+    alg.isSpanStringMode_ = false;
+
+    // Even with PARAGRAPH_CACHE, non-spanString mode should return false
+    EXPECT_FALSE(alg.IsSpanStringCacheEnabled(layoutProperty));
+}
+
+// ==================== ParagraphReLayout Cache Path Tests ====================
+
+/**
+ * @tc.name: ParagraphReLayoutUsesLongestLineWithIndent001
+ * @tc.desc: Test ParagraphReLayout uses GetLongestLineWithIndent when cache is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, ParagraphReLayoutUsesLongestLineWithIndent001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIncrementalUpdatePolicy(IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+    layoutProperty->UpdateContent(TEXT_CONTENT_HELLO);
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    constexpr float longestLineWithIndent = 400.0f;
+    constexpr float maxWidth = 500.0f;
+    constexpr float paragraphMaxWidth = 480.0f;
+
+    EXPECT_CALL(*mockParagraph, GetMaxWidth())
+        .WillRepeatedly(Return(paragraphMaxWidth));
+    EXPECT_CALL(*mockParagraph, GetLongestLineWithIndent())
+        .WillRepeatedly(Return(longestLineWithIndent));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AnyNumber());
+
+    ParagraphStyle paraStyle;
+    pManager->AddParagraph({ .paragraph = mockParagraph,
+        .paragraphStyle = paraStyle,
+        .start = 0,
+        .end = 10 });
+
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, true, textStyle);
+    alg.isSpanStringMode_ = true;
+
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    LayoutConstraintF constraint;
+    constraint.maxSize = { maxWidth, maxWidth };
+    constraint.minSize = { 0.0f, 0.0f };
+    constraint.percentReference = { maxWidth, maxWidth };
+
+    // Set isSpanStringCacheEnabled_ = true and trigger ParagraphReLayout via MeasureContent
+    auto result = alg.MeasureContent(constraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: ParagraphReLayoutUsesTextWidthIncludeIndent001
+ * @tc.desc: Test ParagraphReLayout uses GetTextWidthIncludeIndent when cache is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, ParagraphReLayoutUsesTextWidthIncludeIndent001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIncrementalUpdatePolicy(IncrementalUpdatePolicy::NONE);
+    layoutProperty->UpdateContent(TEXT_CONTENT_HELLO);
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(TEST_WIDTH_SAME));
+    EXPECT_CALL(*mockParagraph, GetTextWidth()).WillRepeatedly(Return(450.0f));
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(AnyNumber());
+
+    ParagraphStyle paraStyle;
+    pManager->AddParagraph({ .paragraph = mockParagraph,
+        .paragraphStyle = paraStyle,
+        .start = 0,
+        .end = 10 });
+
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, false, textStyle);
+    alg.isSpanStringMode_ = false;
+
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    LayoutConstraintF constraint;
+    constraint.maxSize = { TEST_WIDTH_SAME, TEST_WIDTH_SAME };
+    constraint.minSize = { 0.0f, 0.0f };
+    constraint.percentReference = { TEST_WIDTH_SAME, TEST_WIDTH_SAME };
+
+    auto result = alg.MeasureContent(constraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_TRUE(result.has_value());
+    // With NONE policy, isSpanStringCacheEnabled_ should be false
+    EXPECT_FALSE(alg.isSpanStringCacheEnabled_);
+}
+
+// ==================== UPDATE_DIMENSION_STYLE_TO_PX PERCENT Tests ====================
+
+/**
+ * @tc.name: UpdateTextStyleFromPropertyPercentFontSize001
+ * @tc.desc: Test UpdateTextStyleFromProperty preserves PERCENT unit for font size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, UpdateTextStyleFromPropertyPercentFontSize001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateFontSize(Dimension(50.0, DimensionUnit::PERCENT));
+
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    TextStyle textStyle;
+    UpdateTextStyleFromProperty(layoutProperty, textTheme, textStyle);
+    // PERCENT unit should be preserved, not converted to PX
+    EXPECT_EQ(textStyle.GetFontSize().Unit(), DimensionUnit::PERCENT);
+    EXPECT_EQ(textStyle.GetFontSize().Value(), 50.0);
+}
+
+/**
+ * @tc.name: UpdateTextStyleFromPropertyPxFontSize001
+ * @tc.desc: Test UpdateTextStyleFromProperty converts non-PERCENT units to PX
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, UpdateTextStyleFromPropertyPxFontSize001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateFontSize(Dimension(TEST_FONT_SIZE_VALUE, DimensionUnit::FP));
+
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    TextStyle textStyle;
+    UpdateTextStyleFromProperty(layoutProperty, textTheme, textStyle);
+    // FP unit should be converted to PX
+    EXPECT_EQ(textStyle.GetFontSize().Unit(), DimensionUnit::PX);
+}
+
+// ==================== LayoutParagraphs Zero MaxWidth Tests ====================
+
+/**
+ * @tc.name: LayoutParagraphsZeroMaxWidth001
+ * @tc.desc: Test LayoutParagraphs calls Layout when paragraph maxWidth is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, LayoutParagraphsZeroMaxWidth001, TestSize.Level1)
+{
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(0.0f));
+    // Layout SHOULD be called when maxWidth is 0
+    EXPECT_CALL(*mockParagraph, Layout(TEST_WIDTH_SAME)).Times(1);
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphStyle paraStyle;
+    pManager->AddParagraph({ .paragraph = mockParagraph,
+        .paragraphStyle = paraStyle,
+        .start = 0,
+        .end = 10 });
+
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, false, textStyle);
+    alg.LayoutParagraphs(TEST_WIDTH_SAME);
+}
+
+/**
+ * @tc.name: LayoutParagraphsSameWidthZeroWidth001
+ * @tc.desc: Test LayoutParagraphs when both paragraph maxWidth and target are zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, LayoutParagraphsSameWidthZeroWidth001, TestSize.Level1)
+{
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(0.0f));
+    // Even with NearEqual(0, 0) = true, the first check NearEqual(0.0f, 0.0f) triggers Layout
+    EXPECT_CALL(*mockParagraph, Layout(0.0f)).Times(1);
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphStyle paraStyle;
+    pManager->AddParagraph({ .paragraph = mockParagraph,
+        .paragraphStyle = paraStyle,
+        .start = 0,
+        .end = 10 });
+
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, false, textStyle);
+    alg.LayoutParagraphs(0.0f);
+}
+
+/**
+ * @tc.name: LayoutParagraphsSameNonZeroWidth001
+ * @tc.desc: Test LayoutParagraphs skips layout when widths are equal and non-zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, LayoutParagraphsSameNonZeroWidth001, TestSize.Level1)
+{
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetMaxWidth()).WillRepeatedly(Return(TEST_WIDTH_SAME));
+    // Layout should NOT be called when widths are equal and non-zero
+    EXPECT_CALL(*mockParagraph, Layout(_)).Times(0);
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphStyle paraStyle;
+    pManager->AddParagraph({ .paragraph = mockParagraph,
+        .paragraphStyle = paraStyle,
+        .start = 0,
+        .end = 10 });
+
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, false, textStyle);
+    alg.LayoutParagraphs(TEST_WIDTH_SAME);
+}
+
 } // namespace OHOS::Ace::NG

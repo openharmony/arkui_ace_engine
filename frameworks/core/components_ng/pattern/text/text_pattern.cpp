@@ -5836,7 +5836,6 @@ void TextPattern::DumpScaleInfo()
 void TextPattern::DumpTextEngineInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
-    dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
     dumpLog.AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
     if (pManager_) {
         dumpLog.AddDesc(std::string("from TextEngine paragraphs_ info :").append(pManager_->GetDumpInfo()));
@@ -5845,43 +5844,52 @@ void TextPattern::DumpTextEngineInfo()
             dumpLog.AddDesc(std::string("paragraphs is empty!"));
             return;
         }
-        dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines()))
-                        .append(" DidExceedMaxLinesInner:")
-                        .append(std::to_string(pManager_->DidExceedMaxLinesInner())));
         std::string paragraphHeights;
+        std::string paragraphMaxIntrinsicWidths;
+        std::string paragraphLineCounts;
+        std::string paragraphLongestLineWithIndents;
         for (size_t i = 0; i < paragraphs.size(); ++i) {
             auto paragraph = paragraphs[i].paragraph;
             if (paragraph) {
                 paragraphHeights.append(std::to_string(paragraph->GetHeight())).append(",");
+                paragraphMaxIntrinsicWidths.append(std::to_string(paragraph->GetMaxIntrinsicWidth())).append(",");
+                paragraphLineCounts.append(std::to_string(paragraph->GetLineCount())).append(",");
+                paragraphLongestLineWithIndents.append(std::to_string(paragraph->GetLongestLineWithIndent()))
+                    .append(",");
             }
         }
-        dumpLog.AddDesc(std::string("GetTextWidth:")
-                            .append(std::to_string(pManager_->GetTextWidth()))
-                            .append(" GetHeight:")
-                            .append(std::to_string(pManager_->GetHeight()))
-                            .append(" paragraphHeights:")
-                            .append(paragraphHeights)
-                            .append(" GetMaxWidth:")
-                            .append(std::to_string(pManager_->GetMaxWidth()))
+        dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines()))
+                            .append(" DidExceedMaxLinesInner:")
+                            .append(std::to_string(pManager_->DidExceedMaxLinesInner()))
+                            .append(" GetTextWidth:").append(std::to_string(pManager_->GetTextWidth()))
+                            .append(" GetHeight:").append(std::to_string(pManager_->GetHeight()))
+                            .append(" paragraphHeights:").append(paragraphHeights)
+                            .append(" GetMaxWidth:").append(std::to_string(pManager_->GetMaxWidth()))
                             .append(" GetMaxIntrinsicWidth:")
-                            .append(std::to_string(pManager_->GetMaxIntrinsicWidth())));
+                            .append(std::to_string(pManager_->GetMaxIntrinsicWidth()))
+                            .append(" paragraphMaxIntrinsicWidths:").append(paragraphMaxIntrinsicWidths));
         dumpLog.AddDesc(std::string("GetLineCount:")
                             .append(std::to_string(pManager_->GetLineCount()))
+                            .append(" paragraphLineCounts:")
+                            .append(paragraphLineCounts)
                             .append(" GetLongestLine:")
                             .append(std::to_string(pManager_->GetLongestLine()))
                             .append(" GetLongestLineWithIndent:")
-                            .append(std::to_string(pManager_->GetLongestLineWithIndent())));
+                            .append(std::to_string(pManager_->GetLongestLineWithIndent()))
+                            .append(" paragraphLongestLineWithIndents:")
+                            .append(paragraphLongestLineWithIndents));
     }
-    dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
-    if (!IsSetObscured() && !IsSensitiveEnable()) {
-        DumpParagraphsInfo();
-    }
+    DumpParagraphsInfo();
 }
 
 void TextPattern::DumpParagraphsInfo()
 {
-    CHECK_NULL_VOID(pManager_);
     auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
+    if (IsSetObscured() || IsSensitiveEnable()) {
+        return;
+    }
+    CHECK_NULL_VOID(pManager_);
     auto paragraphs = pManager_->GetParagraphs();
     if (paragraphs.empty()) {
         dumpLog.AddDesc(std::string("paragraphs is empty!"));

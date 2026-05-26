@@ -452,8 +452,11 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto contentRect = geometryNode->GetContentRect();
-    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s][paragraphs:%zu]", host->GetId(),
-        paintOffset_.GetX(), paintOffset_.GetY(), contentRect.ToString().c_str(), pManager->GetParagraphs().size());
+    const auto& paragraphs = pManager->GetParagraphs();
+    auto lastParagraphLength = paragraphs.back().paragraph ? paragraphs.back().paragraph->GetParagraphLength() : 0;
+    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s][paragraphs:%zu][lastParagraphLength:%zu]",
+        host->GetId(), paintOffset_.GetX(), paintOffset_.GetY(), contentRect.ToString().c_str(), paragraphs.size(),
+        lastParagraphLength);
 
     SetHybridRenderTypeIfNeeded(drawingContext, textPattern, pManager, host);
     PropertyChangeFlag flag = 0;

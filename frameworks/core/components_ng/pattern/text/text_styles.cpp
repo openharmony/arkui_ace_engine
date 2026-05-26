@@ -51,9 +51,13 @@ namespace {
         } else {                                                                                       \
             break;                                                                                     \
         }                                                                                              \
-        auto px = value.ConvertToPxDistribute(                                                         \
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());       \
-        textStyle.Set##styleName(Dimension(px, DimensionUnit::PX));                                    \
+        if (value.Unit() == DimensionUnit::PERCENT) {                                                  \
+            textStyle.Set##styleName(value);                                                           \
+        } else {                                                                                       \
+            auto px = value.ConvertToPxDistribute(                                                     \
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());   \
+            textStyle.Set##styleName(Dimension(px, DimensionUnit::PX));                                \
+        }                                                                                              \
     } while (false)
 
 void UpdateSymbolTextStyleWithTheme(const std::unique_ptr<SymbolStyle>& symbolStyle, TextStyle& textStyle,
