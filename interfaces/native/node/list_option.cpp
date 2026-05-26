@@ -16,6 +16,7 @@
 #include "list_option.h"
 
 
+#include "native_error_message_macros.h"
 #include "node_model.h"
 
 #include "base/error/error_code.h"
@@ -167,12 +168,15 @@ void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData(ArkUI_List
 
 int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData))
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     if (node->type != ARKUI_NODE_LIST) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, __FUNCTION__,
+            "node type is not List");
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND, __FUNCTION__, "native module not initialized");
 
     fullImpl->getNodeModifiers()->getListModifier()->setListCloseAllSwipeActions(
         node->uiNodeHandle, userData, onFinish);
@@ -193,8 +197,9 @@ void OH_ArkUI_ListChildrenMainSizeOption_Dispose(ArkUI_ListChildrenMainSize* opt
 int32_t OH_ArkUI_ListChildrenMainSizeOption_SetDefaultMainSize(
     ArkUI_ListChildrenMainSize* option, float defaultMainSize)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID;);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (defaultMainSize < 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "defaultMainSize is less than 0");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->defaultMainSize = defaultMainSize;
@@ -219,8 +224,19 @@ void OH_ArkUI_ListChildrenMainSizeOption_Resize(ArkUI_ListChildrenMainSize* opti
 int32_t OH_ArkUI_ListChildrenMainSizeOption_Splice(
     ArkUI_ListChildrenMainSize* option, int32_t index, int32_t deleteCount, int32_t addCount)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    if (index < 0 || deleteCount < 0 || addCount < 0 || static_cast<int32_t>(option->mainSize.size()) - 1 < index) {
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
+    std::string message;
+    if (index < 0) {
+        message = "index is less than 0";
+    } else if (deleteCount < 0) {
+        message = "deleteCount is less than 0";
+    } else if (addCount < 0) {
+        message = "addCount is less than 0";
+    } else if (static_cast<int32_t>(option->mainSize.size()) - 1 < index) {
+        message = "index exceeds the size of ChildrenMainSize";
+    }
+    if (!message.empty()) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, message.c_str());
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     while (deleteCount > 0) {
@@ -239,8 +255,17 @@ int32_t OH_ArkUI_ListChildrenMainSizeOption_Splice(
 int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(
     ArkUI_ListChildrenMainSize* option, int32_t index, float mainSize)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    if (index < 0 || mainSize < 0 || static_cast<int32_t>(option->mainSize.size()) - 1 < index) {
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
+    std::string message;
+    if (index < 0) {
+        message = "index is less than 0";
+    } else if (mainSize < 0) {
+        message = "mainSize is less than 0";
+    } else if (static_cast<int32_t>(option->mainSize.size()) - 1 < index) {
+        message = "index exceeds the size of ChildrenMainSize";
+    }
+    if (!message.empty()) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, message.c_str());
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->mainSize[index] = mainSize;
@@ -258,9 +283,10 @@ float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize
 
 int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListItemSwipeActionDirection direction)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND, __FUNCTION__, "native module not initialized");
 
     return fullImpl->getNodeModifiers()->getListItemModifier()->expand(
         node->uiNodeHandle, static_cast<int32_t>(direction));
@@ -268,9 +294,10 @@ int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListIte
 
 int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node)
 {
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND, __FUNCTION__, "native module not initialized");
 
     return fullImpl->getNodeModifiers()->getListItemModifier()->collapse(node->uiNodeHandle);
 }
