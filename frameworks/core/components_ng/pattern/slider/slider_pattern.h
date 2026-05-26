@@ -226,6 +226,17 @@ public:
     bool IsMaterialNode(const RefPtr<FrameNode>& node);
     bool IsPrefixOrSuffixNode(const RefPtr<FrameNode>& node);
     bool IsImageBlockNode(const RefPtr<FrameNode>& node);
+    bool IsSelectedTrackNode(const RefPtr<FrameNode>& node);
+
+    void SetNeedMeasureMaterial(bool needMeasureMaterial)
+    {
+        needMeasureMaterial_ = needMeasureMaterial;
+    }
+
+    bool IsNeedMeasureMaterial() const
+    {
+        return needMeasureMaterial_;
+    }
 
 private:
     void OnAttachToFrameNode() override;
@@ -546,6 +557,7 @@ private:
     CancelableCallback<void()> longPressTask_;
     CancelableCallback<void()> deformRestoreTask_;
     bool isDeformStarted_ = false;
+    bool needMeasureMaterial_ = false;
 
     bool bubbleFlag_ = false;
     RefPtr<SliderTipModifier> sliderTipModifier_;
