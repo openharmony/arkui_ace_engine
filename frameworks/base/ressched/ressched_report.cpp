@@ -185,7 +185,7 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
     if (tid == ResDefine::INVALID_DATA) {
         tid = GetTid();
     }
-    if (longTid == ResDefine::INVALID_DATA) {
+if (longTid == ResDefine::INVALID_DATA) {
         longTid = static_cast<int64_t>(GetPthreadSelf());
     }
     int64_t pid = GetPid();
