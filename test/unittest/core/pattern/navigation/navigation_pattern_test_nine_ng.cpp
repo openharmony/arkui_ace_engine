@@ -1206,4 +1206,39 @@ HWTEST_F(NavigationPatternTestNineNg, RebuildSplitDisplayNodes005, TestSize.Leve
     EXPECT_EQ(context.pattern->primaryNodes_[0].Upgrade(), detailDest1);
     ASSERT_EQ(context.pattern->splitPopEnterNode_.Upgrade(), detailDest1);
 }
+
+/**
+ * @tc.name: AdjustNodeForSplitDisplayReconfigureTopPrimaryToSecondary001
+ * @tc.desc: Branch: hasHomePage && idx == topNodeIndex && idx != homePageIndex => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, AdjustNodeForSplitDisplayReconfigureTopPrimaryToSecondary001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto topDest = CreateNavDestinationNode("TopPrimary", 1);
+    ASSERT_NE(homeDest, nullptr);
+    ASSERT_NE(topDest, nullptr);
+
+    topDest->SetColumnType(ForceSplitPageColumnType::PRIMARY);
+    AddDestinationToStack(context, PAGE01, homeDest);
+    AddDestinationToStack(context, PAGE02, topDest);
+    MountDestinationToNavContent(context, homeDest);
+    MountDestinationToNavContent(context, topDest);
+
+    context.pattern->forceSplitSuccess_ = true;
+    context.pattern->navBarIsHome_ = false;
+    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
+
+    EXPECT_EQ(topDest->GetColumnType(), ForceSplitPageColumnType::PRIMARY);
+
+    context.pattern->AdjustNodeForSplitDisplayReconfigure();
+
+    EXPECT_EQ(topDest->GetColumnType(), ForceSplitPageColumnType::SECONDARY);
+    ASSERT_EQ(context.pattern->primaryNodes_.size(), 1U);
+    ASSERT_EQ(context.pattern->secondaryNodes_.size(), 1U);
+}
 } // namespace OHOS::Ace::NG

@@ -6482,10 +6482,12 @@ void NavigationPattern::AdjustNodeForSplitDisplayReconfigure()
         }
         allDestNodes.push_back(destNode);
     }
+    int32_t topNodeIndex = static_cast<int32_t>(allDestNodes.size()) - 1;
     for (int32_t idx = 0; idx < static_cast<int32_t>(allDestNodes.size()); ++idx) {
         auto destNode = allDestNodes[idx];
         auto columnType = destNode->GetColumnType();
-        if (columnType == ForceSplitPageColumnType::NONE) {
+        if (columnType == ForceSplitPageColumnType::NONE
+            (hasHomePage && idx == topNodeIndex && idx != homePageIndex)) {
             destNode->SetColumnType(ForceSplitPageColumnType::SECONDARY);
             columnType = ForceSplitPageColumnType::SECONDARY;
         }
