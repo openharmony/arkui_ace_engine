@@ -2986,6 +2986,7 @@
       "OHOS::Ace::StrokeJoinStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::StrokeJoinStyle, Ark_StrokeJoinStyle>(Ark_StrokeJoinStyle const&)";
       "OHOS::Ace::StylusDetectorMgr::AddTextFieldFrameNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, OHOS::Ace::WeakPtr<OHOS::Ace::NG::LayoutInfoInterface> const&)";
       "OHOS::Ace::StylusDetectorMgr::GetInstance()";
+      "OHOS::Ace::StylusDetectorMgr::RemoveTextFieldFrameNode(int)";
       "OHOS::Ace::SubwindowManager::ClearMenu()";
       "OHOS::Ace::SubwindowManager::ClearMenuNG(int, int, bool, bool)";
       "OHOS::Ace::SubwindowManager::CloseMenu()";

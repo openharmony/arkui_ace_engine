@@ -39,11 +39,12 @@ void RichEditorPattern::OnDetachFromMainTreeMultiThread()
     TextPattern::OnDetachFromMainTreeMultiThread();
     ScrollablePattern::OnDetachFromMainTreeMultiThread();
 
+    StylusDetectorMgr::GetInstance()->RemoveTextFieldFrameNode(frameId_);
+    auto context = pipeline_.Upgrade();
+    IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ClearOnFocusTextField(AceType::RawPtr(host));
-    auto context = pipeline_.Upgrade();
-    IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
     CHECK_NULL_VOID(keyboardOverlay_);
     keyboardOverlay_->CloseKeyboard(host->GetId());
 }

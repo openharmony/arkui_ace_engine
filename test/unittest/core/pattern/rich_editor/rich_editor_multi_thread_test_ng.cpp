@@ -14,11 +14,12 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/frameworks/core/common/mock_container.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+
 #include "base/utils/multi_thread.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -66,7 +67,7 @@ HWTEST_F(RichEditorMultiThreadTestNg, OnAttachToFrameNodeMultiThread002, TestSiz
         V2::RICH_EDITOR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pattern);
     ASSERT_NE(frameNode, nullptr);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
-    pattern->AttachToFrameNode(frameNode);
+    pattern->frameNode_ = frameNode;
 
     pattern->OnAttachToFrameNodeMultiThread();
     EXPECT_EQ(pattern->frameId_, -1);
@@ -211,7 +212,7 @@ HWTEST_F(RichEditorMultiThreadTestNg, ThreadSafeNodeCheck001, TestSize.Level1)
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     auto pipeline = MockPipelineContext::GetCurrent();
     frameNode->AttachContext(AceType::RawPtr(pipeline), true);
-    pattern->AttachToFrameNode(frameNode);
+    pattern->frameNode_ = frameNode;
     frameNode->isThreadSafeNode_ = true;
     frameNode->SetIsFree(true);
 
@@ -257,7 +258,7 @@ HWTEST_F(RichEditorMultiThreadTestNg, OnAttachToMainTreeMultiThreadExtension003,
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     auto pipeline = MockPipelineContext::GetCurrent();
     frameNode->AttachContext(AceType::RawPtr(pipeline), true);
-    pattern->AttachToFrameNode(frameNode);
+    pattern->frameNode_ = frameNode;
 
     pattern->OnAttachToMainTreeMultiThreadExtension();
     EXPECT_NE(pattern->contentPattern_, nullptr);
