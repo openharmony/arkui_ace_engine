@@ -967,7 +967,21 @@ export class DatePickerComponent extends ViewPU {
     getSecondSelectedIndex() {
         return this.selectedSecond;
     }
+    isRTL() {
+        return i18n.isRTL(this.locale.toString()) ?? false;
+    }
     getFirstPickerIndicator(radius = 20) {
+        if (this.isRTL()) {
+            return {
+                type: PickerIndicatorType.BACKGROUND,
+                borderRadius: {
+                    topLeft: 0,
+                    topRight: radius,
+                    bottomLeft: 0,
+                    bottomRight: radius
+                }
+            };
+        }
         return {
             type: PickerIndicatorType.BACKGROUND,
             borderRadius: {
@@ -990,6 +1004,17 @@ export class DatePickerComponent extends ViewPU {
         };
     }
     getLastPickerIndicator(radius = 20) {
+        if (this.isRTL()) {
+            return {
+                type: PickerIndicatorType.BACKGROUND,
+                borderRadius: {
+                    topLeft: radius,
+                    topRight: 0,
+                    bottomLeft: radius,
+                    bottomRight: 0
+                }
+            };
+        }
         return {
             type: PickerIndicatorType.BACKGROUND,
             borderRadius: {
