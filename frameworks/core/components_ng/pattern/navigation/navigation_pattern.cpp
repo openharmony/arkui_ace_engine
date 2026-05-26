@@ -6486,7 +6486,7 @@ void NavigationPattern::AdjustNodeForSplitDisplayReconfigure()
     for (int32_t idx = 0; idx < static_cast<int32_t>(allDestNodes.size()); ++idx) {
         auto destNode = allDestNodes[idx];
         auto columnType = destNode->GetColumnType();
-        if (columnType == ForceSplitPageColumnType::NONE
+        if (columnType == ForceSplitPageColumnType::NONE ||
             (hasHomePage && idx == topNodeIndex && idx != homePageIndex)) {
             destNode->SetColumnType(ForceSplitPageColumnType::SECONDARY);
             columnType = ForceSplitPageColumnType::SECONDARY;
