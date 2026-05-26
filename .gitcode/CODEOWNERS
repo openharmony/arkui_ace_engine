@@ -3322,6 +3322,7 @@ frameworks/core/interfaces/native/implementation/accessibility_hover_event_acces
 frameworks/core/interfaces/native/implementation/drag_event_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/image_modifier_peer.h @arkui001
 frameworks/core/interfaces/native/implementation/raw_input_event_wrapper_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/raw_input_event_wrapper_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.h @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @ArkUI_Event
