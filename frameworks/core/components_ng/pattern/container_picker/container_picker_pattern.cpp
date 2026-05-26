@@ -72,9 +72,9 @@ void ContainerPickerPattern::SyncPickerParamsFromLayout()
     }
     Dimension itemDim = PICKER_ITEM_HEIGHT;
     if (props->HasItemHeight()) {
-        itemDim = ContainerPickerUtils::ClampPickerItemHeight(props->GetItemHeight().value());
+        itemDim = ContainerPickerUtils::ValidatePickerItemHeight(props->GetItemHeight().value());
     } else {
-        itemDim = ContainerPickerUtils::ClampPickerItemHeight(PICKER_ITEM_HEIGHT);
+        itemDim = ContainerPickerUtils::ValidatePickerItemHeight(PICKER_ITEM_HEIGHT);
     }
     pickerItemHeight_ = static_cast<float>(itemDim.ConvertToPx());
     const float totalHeight = static_cast<float>(displayCount_) * pickerItemHeight_;

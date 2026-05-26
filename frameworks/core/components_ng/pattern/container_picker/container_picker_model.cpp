@@ -166,7 +166,7 @@ void ContainerPickerModel::SetItemHeight(std::optional<Dimension> height)
         return;
     }
     ACE_CHECK_LPX_ATTRIBUTE(height.value(), LpxAttribute::LPX_PICKER_ITEM_HEIGHT);
-    Dimension d = ContainerPickerUtils::ClampPickerItemHeight(height.value());
+    Dimension d = ContainerPickerUtils::ValidatePickerItemHeight(height.value());
     ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, ItemHeight, d);
 }
 
@@ -217,7 +217,7 @@ void ContainerPickerModel::SetItemHeight(FrameNode* frameNode, std::optional<Dim
         return;
     }
     ACE_CHECK_NODE_LPX_ATTRIBUTE(height.value(), LpxAttribute::LPX_PICKER_ITEM_HEIGHT, frameNode);
-    Dimension d = ContainerPickerUtils::ClampPickerItemHeight(height.value());
+    Dimension d = ContainerPickerUtils::ValidatePickerItemHeight(height.value());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, ItemHeight, d, frameNode);
 }
 

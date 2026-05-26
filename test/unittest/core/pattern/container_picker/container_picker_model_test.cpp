@@ -60,7 +60,7 @@ namespace {
     constexpr int32_t DISPLAYED_COUNT_ODD_3 = 3;
     constexpr int32_t DISPLAYED_COUNT_ODD_5 = 5;
     
-    // Test constants for ClampPickerItemHeight
+    // Test constants for ValidatePickerItemHeight
     constexpr float ITEM_HEIGHT_MIN_VP = 40.0f;
     constexpr float ITEM_HEIGHT_MAX_VP = 64.0f;
     constexpr float ITEM_HEIGHT_UNDER_MIN_VP = 10.0f;
@@ -662,65 +662,65 @@ HWTEST_F(ContainerPickerModelTest, NormalizeDisplayedItemCount006, TestSize.Leve
 }
 
 /**
- * @tc.name: ClampPickerItemHeight001
- * @tc.desc: Test ClampPickerItemHeight with value under min
+ * @tc.name: ValidatePickerItemHeight001
+ * @tc.desc: Test ValidatePickerItemHeight with value under min
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight001, TestSize.Level1)
+HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight001, TestSize.Level1)
 {
-    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(
         Dimension(ITEM_HEIGHT_UNDER_MIN_VP, DimensionUnit::VP));
     auto expectedDefault = Dimension(DEFAULT_ITEM_HEIGHT_VP, DimensionUnit::PX);
     EXPECT_NEAR(result.ConvertToPx(), expectedDefault.ConvertToPx(), FLOAT_COMPARE_EPSILON);
 }
 
 /**
- * @tc.name: ClampPickerItemHeight002
- * @tc.desc: Test ClampPickerItemHeight with value over max
+ * @tc.name: ValidatePickerItemHeight002
+ * @tc.desc: Test ValidatePickerItemHeight with value over max
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight002, TestSize.Level1)
+HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight002, TestSize.Level1)
 {
-    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(
         Dimension(ITEM_HEIGHT_OVER_MAX_VP, DimensionUnit::VP));
     auto expectedDefault = Dimension(DEFAULT_ITEM_HEIGHT_VP, DimensionUnit::PX);
     EXPECT_NEAR(result.ConvertToPx(), expectedDefault.ConvertToPx(), FLOAT_COMPARE_EPSILON);
 }
 
 /**
- * @tc.name: ClampPickerItemHeight003
- * @tc.desc: Test ClampPickerItemHeight with min boundary value
+ * @tc.name: ValidatePickerItemHeight003
+ * @tc.desc: Test ValidatePickerItemHeight with min boundary value
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight003, TestSize.Level1)
+HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight003, TestSize.Level1)
 {
-    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(
         Dimension(ITEM_HEIGHT_MIN_VP, DimensionUnit::VP));
     auto expectedMin = Dimension(ITEM_HEIGHT_MIN_VP, DimensionUnit::VP);
     EXPECT_NEAR(result.ConvertToVp(), expectedMin.ConvertToVp(), FLOAT_COMPARE_EPSILON);
 }
 
 /**
- * @tc.name: ClampPickerItemHeight004
- * @tc.desc: Test ClampPickerItemHeight with max boundary value
+ * @tc.name: ValidatePickerItemHeight004
+ * @tc.desc: Test ValidatePickerItemHeight with max boundary value
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight004, TestSize.Level1)
+HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight004, TestSize.Level1)
 {
-    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(
         Dimension(ITEM_HEIGHT_MAX_VP, DimensionUnit::VP));
     auto expectedMax = Dimension(ITEM_HEIGHT_MAX_VP, DimensionUnit::VP);
     EXPECT_NEAR(result.ConvertToVp(), expectedMax.ConvertToVp(), FLOAT_COMPARE_EPSILON);
 }
 
 /**
- * @tc.name: ClampPickerItemHeight005
- * @tc.desc: Test ClampPickerItemHeight with value in range
+ * @tc.name: ValidatePickerItemHeight005
+ * @tc.desc: Test ValidatePickerItemHeight with value in range
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerModelTest, ClampPickerItemHeight005, TestSize.Level1)
+HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight005, TestSize.Level1)
 {
-    auto result = ContainerPickerUtils::ClampPickerItemHeight(
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(
         Dimension(ITEM_HEIGHT_IN_RANGE_VP, DimensionUnit::VP));
     auto expected = Dimension(ITEM_HEIGHT_IN_RANGE_VP, DimensionUnit::VP);
     EXPECT_NEAR(result.ConvertToVp(), expected.ConvertToVp(), FLOAT_COMPARE_EPSILON);
@@ -2996,6 +2996,42 @@ HWTEST_F(ContainerPickerModelTest, SetIndicatorStyleFrameNodeLpx003, TestSize.Le
     EXPECT_TRUE(
         frameNode_->lpxAttributes_.find(LpxAttribute::LPX_BORDER_RADIUS_BOTTOM_RIGHT) !=
         frameNode_->lpxAttributes_.end());
+}
+
+/**
+ * @tc.name: ValidatePickerItemHeight006
+ * @tc.desc: Test ValidatePickerItemHeight returns PICKER_ITEM_HEIGHT constant when input is below min
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight006, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(
+        Dimension(ITEM_HEIGHT_UNDER_MIN_VP, DimensionUnit::VP));
+    EXPECT_NEAR(result.ConvertToVp(), PICKER_ITEM_HEIGHT.ConvertToVp(), FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: ValidatePickerItemHeight007
+ * @tc.desc: Test ValidatePickerItemHeight returns input unchanged when within valid range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight007, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(
+        Dimension(ITEM_HEIGHT_IN_RANGE_VP, DimensionUnit::VP));
+    EXPECT_NEAR(result.ConvertToVp(), ITEM_HEIGHT_IN_RANGE_VP, FLOAT_COMPARE_EPSILON);
+}
+
+/**
+ * @tc.name: ValidatePickerItemHeight008
+ * @tc.desc: Test ValidatePickerItemHeight returns PICKER_ITEM_HEIGHT constant when input exceeds max
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerModelTest, ValidatePickerItemHeight008, TestSize.Level1)
+{
+    auto result = ContainerPickerUtils::ValidatePickerItemHeight(
+        Dimension(ITEM_HEIGHT_OVER_MAX_VP, DimensionUnit::VP));
+    EXPECT_NEAR(result.ConvertToVp(), PICKER_ITEM_HEIGHT.ConvertToVp(), FLOAT_COMPARE_EPSILON);
 }
 
 } // namespace OHOS::Ace::NG
