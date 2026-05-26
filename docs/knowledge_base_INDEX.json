@@ -1636,6 +1636,83 @@
       ],
       "file_path": "syntax/Repeat_Knowledge_Base.md",
       "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Accessibility",
+      "name_cn": "无障碍",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "accessibility",
+        "无障碍",
+        "屏幕阅读器",
+        "TalkBack",
+        "AccessibilityProvider",
+        "AccessibilityProperty",
+        "JsAccessibilityManager",
+        "AccessibilityManagerNG",
+        "AccessibilityFocusStrategy",
+        "ArkUI_AccessibilityElementInfo",
+        "hover",
+        "focus move"
+      ],
+      "aliases": [
+        "无障碍框架",
+        "Accessibility 桥接",
+        "辅助功能",
+        "读屏"
+      ],
+      "file_path": "accessibility/Accessibility_Knowledge_Base_CN.md",
+      "source_paths": {
+        "provider": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_provider.h",
+        "session_adapter": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_session_adapter.h",
+        "manager_ng": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_manager_ng.h",
+        "ng_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/accessibility_property.h",
+        "js_manager": "OpenHarmony/foundation/arkui/ace_engine/adapter/ohos/osal/js_accessibility_manager.h",
+        "focus_strategy": "OpenHarmony/foundation/arkui/ace_engine/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
+      },
+      "api_paths": {
+        "ndk": "OpenHarmony/foundation/arkui/ace_engine/interfaces/native/native_interface_accessibility.h"
+      },
+      "last_updated": "2026-05-25"
+    },
+    {
+      "name": "ArkUI_API_Paradigm",
+      "name_cn": "ArkUI API 范式",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "API 范式",
+        "类web",
+        "lite",
+        "full",
+        "动态ArkTS",
+        "静态ArkTS",
+        "ArkTS Dynamic",
+        "ArkTS Static",
+        "FeatureAbility",
+        "import",
+        "static.d.ets",
+        "d.ts",
+        "Modifier",
+        "调用面"
+      ],
+      "aliases": [
+        "API 口径",
+        "API 入口",
+        "Paradigm",
+        "调用方式"
+      ],
+      "file_path": "api/ArkUI_API_Paradigm_Knowledge_Base_CN.md",
+      "source_paths": {
+        "arkts_static_components": "OpenHarmony/interface/sdk-js/api/arkui/component",
+        "featureability_full": "OpenHarmony/interface/sdk-js/api/common/full/featureability.d.ts",
+        "featureability_lite": "OpenHarmony/interface/sdk-js/api/common/lite/featureability.d.ts"
+      },
+      "api_paths": {
+        "arkui_root": "OpenHarmony/interface/sdk-js/api/arkui"
+      },
+      "last_updated": "2026-05-25"
     }
   ],
   "categories": {

@@ -9,6 +9,7 @@
 
 - 元数据索引：`docs/knowledge_base_INDEX.json`
 - 推荐检索脚本：`docs/kb_search.py`
+- 新增文档模板：`docs/knowledge_base_TEMPLATE.md`
 
 常用命令：
 
@@ -36,20 +37,20 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：72
-- 命名符合 `*_Knowledge_Base*.md` 的知识库文档：56
+- `docs/` 下 Markdown 文档总数：73
+- 命名符合 `*_Knowledge_Base*.md` 的知识库文档：58
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计（`knowledge_base_INDEX.json`）
 
-- 索引条目总数：57
-- 索引路径有效性：57/57（全部存在）
+- 索引条目总数：59
+- 索引路径有效性：59/59（全部存在）
 - 类型分布：
   - `component`: 36
   - `sdk`: 4
-  - `feature`: 17
+  - `feature`: 19
 - 分类分布：
   - `basic`: 5
   - `advanced`: 5
@@ -60,13 +61,13 @@ rg -n "<关键字>" docs
   - `rich_text`: 3
   - `shape`: 1
   - `sdk`: 6
-  - `system`: 13
-- 关键词总数（索引内）：497
-- 别名总数（索引内）：177
+  - `system`: 15
+- 关键词总数（索引内）：521
+- 别名总数（索引内）：185
 
 ### 2.3 覆盖现状
 
-- 命名符合 `*_Knowledge_Base*` 的 56 个文档已全部纳入索引（56/56）。
+- 命名符合 `*_Knowledge_Base*` 的 58 个文档已全部纳入索引（58/58）。
 - 另有 1 个非 `*_Knowledge_Base*` 命名文档在索引中：
   - `docs/architecture/ThemeManager_Architecture_CN.md`
 
@@ -77,7 +78,8 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── api/ (1 KB)
+├── accessibility/ (1 KB)
+├── api/ (2 KB)
 ├── architecture/ (1 KB + 其他架构文档)
 ├── cj_frontend/ (1 KB)
 ├── common/ (4 KB)
@@ -98,6 +100,7 @@ docs/
 新增或更新知识库时，至少同步以下内容：
 
 1. 更新文档本体（建议遵循 `*_Knowledge_Base[_CN].md` 命名规范）。
+   - 可直接复制模板：`docs/knowledge_base_TEMPLATE.md`
 2. 更新 `docs/knowledge_base_INDEX.json`：
    - 必填：`name/name_cn/category/type/keywords/aliases/file_path/last_updated`
    - 推荐：`source_paths/api_paths`

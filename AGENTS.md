@@ -74,43 +74,56 @@ Main output dir: `out/rk3568/arkui/ace_engine/`
 - ArkTS bytecode files (`.abc`):
   - component/runtime bytecode such as `ark*.abc`, `modifier.abc`, `node.abc`, `statemanagement.abc`, `uicontext.abc`
 
-Other outputs:
-
-- Test binaries: `out/rk3568/tests/ace_engine/`
-- Logs: `out/rk3568/build.log`
-
 ### Frontend Support (Quick)
 
 | Frontend | Language | Use Case |
 |----------|----------|----------|
-| **Declarative Frontend** | ArkTS/TypeScript | Recommended - modern declarative UI |
+| **Declarative Frontend** | ArkTS dynamic version | Recommended - modern declarative UI |
 | **ArkTS Frontend** | ArkTS static version | Incremental engine-based frontend |
 | **JavaScript Frontend** | JavaScript | Legacy web-style development |
 
 - ArkTS dynamic version (Declarative Frontend):
   - Path: `frameworks/bridge/declarative_frontend/`
-  - Main mode for new apps; uses ArkTS/TS declarative syntax with state management (`@Watch`, `@Link`, `@Prop`) and modifier-based property updates.
+  - Main mode for most apps; uses ArkTS/TS declarative syntax with state management (`@Watch`, `@Link`, `@Prop`) and modifier-based property updates.
   - Corresponds to the dynamic version pipeline (Dynamic API): runtime bridge dispatch in `declarative_frontend`, mainly through `jsview/`, `ark_modifier/`, and `engine/jsi/nativeModule/`.
   - Dynamic API artifacts are typically `*.d.ts` (component APIs) and `*Modifier.d.ts` (modifier APIs), in parallel with static APIs.
 - ArkTS static version (ArkTS Frontend):
+  - "Static" means ArkTS syntax hardened with static-compilation-friendly constraints (strong typing, fully statically analyzable), executed on the new static ArkTS Runtime.
+  - For the static version, ArkUI rebuilds the frontend and state management on top of the koala_projects incremental engine, replacing the dynamic version's `declarative_frontend` runtime-dispatch model.
   - Path: `frameworks/bridge/arkts_frontend/`
   - Static frontend pipeline is based on `koala_projects/` + `arkoala_generator/`, bridged by `libarkts_frontend.z.so`.
   - `frameworks/bridge/arkts_frontend/arkoala_generator/BUILD.gn` provides `idlize_gen`, which installs generated ArkUI static bridge files into `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/`.
   - `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/BUILD.gn` depends on `../../arkoala_generator:idlize_gen` and uses `generate_static_abc("components_compile_abc")` to produce static `.abc` artifacts (e.g. `components.abc`).
 
-## 3. Knowledge Base First
+## 3. Knowledge Base
 
-Before deep code analysis, check:
+Use the KB as the first-stop context before any deep code analysis, and follow the authoring rules below when adding or updating entries. Always treat the KB as context — **then verify against real source code**.
 
-- Prefer using `docs/kb_search.py` for knowledge base lookup first.
+### 3.1 Lookup First
+
+- Prefer `docs/kb_search.py` for KB lookup:
   - `python3 docs/kb_search.py <keyword>`
   - `python3 docs/kb_search.py <keyword> --field name`
 - Use `rg` in `docs/` as a fallback when script results are insufficient.
-- `docs/knowledge_base_README.md`
-- `docs/knowledge_base_INDEX.json`
-- `docs/pattern/*`, `docs/architecture/`, `docs/best_practices/`
+- Entry points: `docs/knowledge_base_README.md`, `docs/knowledge_base_INDEX.json`, `docs/pattern/*`, `docs/architecture/`, `docs/best_practices/`.
 
-Use KB as context, then **verify against real source code**.
+### 3.2 Authoring Standard (Minimal)
+
+- Naming/location: use `XXX_Knowledge_Base.md` or `XXX_Knowledge_Base_CN.md`; place under `docs/pattern/<component>/`, `docs/sdk/`, or `docs/architecture/`.
+- Index metadata (`docs/knowledge_base_INDEX.json`) must include: `name`, `name_cn`, `category`, `type`, `file_path`, `last_updated`, `keywords` (5-15), `aliases` (2-5); recommend `source_paths` and `api_paths`.
+- Allowed categories: `basic`, `container`, `selector`, `shape`, `media`, `data_display`, `rich_text`, `advanced`, `sdk`.
+- Required sections in each KB doc: 概述, 目录结构, 核心类继承关系, Pattern层详解, Model层详解, 完整API清单, 关键实现细节, 使用示例, 调试指南, 常见问题.
+- Path rules: source/API paths use `OpenHarmony/` prefix; KB cross-links use repo-relative paths; do not use local absolute paths like `/home/...`.
+- Before submit: verify referenced files/line numbers, validate `knowledge_base_INDEX.json`, and update both `docs/knowledge_base_INDEX.json` and `docs/knowledge_base_README.md`.
+
+Quick checks:
+
+```bash
+find docs -name "*_Knowledge_Base*.md" -type f | wc -l
+python3 -m json.tool docs/knowledge_base_INDEX.json > /dev/null && echo "Valid JSON"
+```
+
+Detailed templates/rules: `docs/knowledge_base_README.md`.
 
 ## 4. Core Working Principles (Must Follow)
 
@@ -136,35 +149,20 @@ Use KB as context, then **verify against real source code**.
 - If a user correction reveals a doc error, update relevant knowledge base docs.
 - Record root cause and prevention in the knowledge base when appropriate.
 
-## 5. Knowledge Base Authoring Standard (Minimal)
-
-- Naming/location: use `XXX_Knowledge_Base.md` or `XXX_Knowledge_Base_CN.md`; place under `docs/pattern/<component>/`, `docs/sdk/`, or `docs/architecture/`.
-- Index metadata (`docs/knowledge_base_INDEX.json`) must include: `name`, `name_cn`, `category`, `type`, `file_path`, `last_updated`, `keywords` (5-15), `aliases` (2-5); recommend `source_paths` and `api_paths`.
-- Allowed categories: `basic`, `container`, `selector`, `shape`, `media`, `data_display`, `rich_text`, `advanced`, `sdk`.
-- Required sections in each KB doc: 概述, 目录结构, 核心类继承关系, Pattern层详解, Model层详解, 完整API清单, 关键实现细节, 使用示例, 调试指南, 常见问题.
-- Path rules: source/API paths use `OpenHarmony/` prefix; KB cross-links use repo-relative paths; do not use local absolute paths like `/home/...`.
-- Before submit: verify referenced files/line numbers, validate `knowledge_base_INDEX.json`, and update both `docs/knowledge_base_INDEX.json` and `docs/knowledge_base_README.md`.
-
-Quick checks:
-
-```bash
-find docs -name "*_Knowledge_Base*.md" -type f | wc -l
-python3 -m json.tool docs/knowledge_base_INDEX.json > /dev/null && echo "Valid JSON"
-```
-
-Detailed templates/rules: `docs/knowledge_base_README.md`.
-
-## 6. Project Map (Condensed)
+## 5. Project Map (Condensed)
 
 - `adapter/`: platform adaptation (`ohos/`, `preview/`)
+- `advanced_ui_component/`, `advanced_ui_component_static/`: advanced/composite components for the dynamic and static paradigms (counterparts of `@ohos.arkui.advanced.*`).
 - `frameworks/base/`: base utilities
 - `frameworks/bridge/`: frontend bridge (`declarative_frontend`, `arkts_frontend`, `js_frontend`, `cj_frontend`)
 - `frameworks/core/components_ng/`: new-generation component framework (preferred for new development), centered on `FrameNode` + `Pattern` + property/modifier pipelines.
 - `frameworks/core/components/`: legacy component framework (DOM/Component/Element/Render style), mainly for historical compatibility and older implementation paths.
-- `interfaces/`: internal/native APIs
+- `frameworks/core/pipeline_ng/` (+ legacy `pipeline/`): rendering pipeline, frame scheduling, and task dispatch for `components_ng`.
+- `interfaces/native/node/`: C API for components — entry point of the Modifier bridge consumed by NDK scenario (covered by `linux_unittest_capi`).
+- `interfaces/napi/kits/`: NAPI implementations for `@ohos.*` modules such as `router`, `promptAction`, `mediaquery`, `animator`, `font`, `measure`, `curves`, `matrix4` (31 subdirectories).
 - `test/unittest`, `test/benchmark`: tests
 
-## 7. Component Development Guidance
+## 6. Component Development Guidance
 
 - Prefer `components_ng` over legacy `components`.
 - Typical component files:
@@ -172,7 +170,7 @@ Detailed templates/rules: `docs/knowledge_base_README.md`.
 - Register new components in `frameworks/core/components_ng/components.gni` when needed.
 - Keep platform-specific logic in `adapter/`, not in core business logic.
 
-## 8. Testing Guidance
+## 7. Testing Guidance
 
 - Test path should mirror source layout.
 - Run targeted unit tests for changed modules first, then broader regression tests if impact is large.
