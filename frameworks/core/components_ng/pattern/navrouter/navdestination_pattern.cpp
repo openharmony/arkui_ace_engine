@@ -63,11 +63,15 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         if (hub) {
             isButtonEnabled = hub->IsEnabled();
         }
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
         if (navDestinationPattern->HasMenuNodeId()) {
             auto menuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetMenuNodeId(),
                 titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD,
                 titleBarNode->GetInnerParentId(), false);
             CHECK_NULL_VOID(menuNode);
+            if (menuNode == titleBarNode->GetMenu() && titleBarPattern) {
+                titleBarPattern->MarkMenuUIEffectNeedUpdate();
+            }
             navDestinationGroupNode->SetMenu(menuNode);
         }
 
@@ -76,6 +80,9 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
             titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId(),
             true);
         CHECK_NULL_VOID(landscapeMenuNode);
+        if (landscapeMenuNode == titleBarNode->GetMenu() && titleBarPattern) {
+            titleBarPattern->MarkMenuUIEffectNeedUpdate();
+        }
         navDestinationGroupNode->SetLandscapeMenu(landscapeMenuNode);
     }
 }

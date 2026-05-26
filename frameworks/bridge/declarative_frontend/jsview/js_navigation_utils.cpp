@@ -38,6 +38,7 @@ constexpr char SCROLL_EFFECT_OPTIONS_PROPERTY[] = "scrollEffectOptions";
 constexpr char SCROLL_EFFECT_TYPE_PROPERTY[] = "scrollEffectType";
 constexpr char BLUR_EFFECTIVE_START_OFFSET_PROPERTY[] = "blurEffectiveStartOffset";
 constexpr char BLUR_EFFECTIVE_END_OFFSET_PROPERTY[] = "blurEffectiveEndOffset";
+constexpr char SYSTEM_MATERIAL[] = "systemMaterial";
 
 void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
     const JSRef<JSObject>& itemObject)
@@ -225,6 +226,17 @@ void ParseTitleBarScrollEffectOptions(const JSRef<JSObject>& optObj, NG::Navigat
     options.scrollEffectOptions = scrollEffectOptions;
 }
 
+RefPtr<UiMaterial> ParseSystemMaterial(const JSCallbackInfo& info, const JSRef<JSVal>& obj)
+{
+    if (!obj->IsObject()) {
+        return nullptr;
+    }
+    auto optObj = JSRef<JSObject>::Cast(obj);
+    auto systemMaterailObj = optObj->GetProperty(SYSTEM_MATERIAL);
+    auto material = CreateUiMaterialFromNapiValue(systemMaterailObj);
+    return material ? material->Copy() : nullptr;
+}
+
 void ParseToolBarItemAction(const WeakPtr<NG::FrameNode>& targetNode,
     const JSCallbackInfo& info, const JSRef<JSObject>& itemObject, NG::BarItem& toolBarItem)
 {
@@ -359,6 +371,7 @@ void JSNavigationUtils::ParseTitleBarOptions(
         ParseTextOptions(info, info[1], options.textOptions);
         JSRef<JSObject> jsObjOption = JSRef<JSObject>::Cast(info[1]);
         ParseTitleBarScrollEffectOptions(jsObjOption, options.bgOptions);
+        options.material = ParseSystemMaterial(info, info[1]);
         auto enableHoverModeProperty = jsObjOption->GetProperty("enableHoverMode");
         if (enableHoverModeProperty->IsBoolean()) {
             options.enableHoverMode = enableHoverModeProperty->ToBoolean();

@@ -84,6 +84,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
+#include "core/components_ng/render/adapter/rosen_luminance_sampling_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
@@ -401,6 +402,17 @@ void InitNavigationManagerCallback(const RefPtr<NG::PipelineContext>& context)
         return true;
     };
     navMgr->SetGetSystemColorCallback(std::move(getColorCallback));
+    auto registerCallback = [](const RefPtr<NG::FrameNode>& node, int32_t samplingInterval,
+        int32_t brightThreshold, int32_t darkThreshold, NG::ColorPickerCallback&& callback) {
+        NG::LuminanceSamplingHelper::SetSamplingOptions(node, samplingInterval,
+            brightThreshold, darkThreshold, std::nullopt);
+        NG::LuminanceSamplingHelper::RegisterSamplingCallback(node, std::move(callback));
+    };
+    navMgr->SetRegisterColorPickerCallback(std::move(registerCallback));
+    auto unregisterCallback = [](const RefPtr<NG::FrameNode>& node) {
+        NG::LuminanceSamplingHelper::UnRegisterSamplingCallback(node);
+    };
+    navMgr->SetUnregisterColorPickerCallback(std::move(unregisterCallback));
 }
 
 std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
