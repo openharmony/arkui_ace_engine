@@ -267,6 +267,7 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
             auto taskExecutor = Container::CurrentTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
             auto onFinish = [weak, needSecondPlay, playCount, animationId]() {
+                TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation onfinish", animationId);
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (animationId != pattern->animationId_) {
@@ -287,11 +288,13 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 pattern->PlayMarqueeAnimation(newStart, newPlayCount, false, false);
             };
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+                TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation go onfinish", animationId);
                 onFinish();
                 return;
             }
-            taskExecutor->PostTask(
-                [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUIMarqueePlayAnimation");
+            TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation oosttask onfinish", animationId);
+            taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI,
+                "ArkUIMarqueePlayAnimation", PriorityType::VIP);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -986,6 +989,14 @@ void MarqueePattern::CalcAnimationStart(float& firstStart, float& secondStart,
     auto marqueeSize = geoNode->GetFrameSize();
     auto visibleAreaStart = 0;
     auto visibleAreaEnd = marqueeSize.Width() - padding.right.value_or(0) - padding.left.value_or(0);
+    TAG_LOGI(AceLogTag::ACE_MARQUEE, "CalcAnimationStart before clamp, nodeId:%{public}d"
+        "firstStart:%{public}f secondStart:%{public}f textWidth:%{public}f textTotalLen:%{public}f "
+        "visibleArea:[%{public}d,%{public}f] directionMoveLeft:%{public}d",
+        host->GetId(), firstStart, secondStart, textWidth, textTotalLen,
+        visibleAreaStart, visibleAreaEnd, directionMoveLeft);
+    firstStart = std::min(textTotalLen, std::max(firstStart, -textTotalLen));
+    secondStart = std::min(textTotalLen, std::max(secondStart, -textTotalLen));
+
     if (InRegion(visibleAreaStart, firstStart, firstStart + textWidth) ||
         InRegion(visibleAreaEnd, firstStart, firstStart + textWidth)) {
         if (directionMoveLeft) {
