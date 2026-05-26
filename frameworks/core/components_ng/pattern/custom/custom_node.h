@@ -40,6 +40,7 @@ public:
     ~CustomNode() override
     {
         ACE_SCOPED_TRACE("CustomNode:Destroy [%d]", GetId());
+        FinishMemOpt();
     }
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
@@ -231,6 +232,26 @@ public:
     }
 
     bool FireOnCleanup();
+
+    ReusableMemOptStrategy GetMemOptStrategy();
+    void OnWindowHide() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    void RegisterMemoryLevelChangedCallback();
+    void UnregisterMemoryLevelChangedCallback();
+    bool CheckParentFrameNodeVisibility();
+    void ScheduleCleanCacheTask();
+    void CancelScheduledCleanCacheTask();
+    void TryExecuteScheduledCacheTask();
+    void CleanCache(bool syncClean, bool clearAll = true);
+    void CleanCacheOnIdle(int32_t remainingTimeMs);
+    void SetParentVisibility(bool visibility);
+    bool GetParentVisibility();
+    void StartMemOpt();
+    void FinishMemOpt();
+    void PostMemOptTask();
+    void PostIdleTask();
 private:
     // for DFX
     void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
@@ -248,6 +269,15 @@ private:
     WeakPtr<UINode> navigationNode_;
     std::unique_ptr<ViewStackProcessor> prebuildViewStackProcessor_;
     int32_t prebuildFrameRounds_ = 0;
+
+    ReusableMemOptStrategy memOptStrategy_ = ReusableMemOptStrategy::DEFAULT;
+    bool pendingCleanCache_ = false;
+    bool isParentVisible_ = false;
+    bool runningMemOpt_ = false;
+    bool needCleanCacheOnIdle_ = false;
+    bool hasPreparedProgressiveRelease_ = false;
+    bool stopMemOptAfterRelease_ = true;
+    int64_t cacheTaskPostTime_ = 0;
 
     std::function<void()> onPageShowFunc_ = nullptr;
     std::function<void()> onPageHideFunc_ = nullptr;

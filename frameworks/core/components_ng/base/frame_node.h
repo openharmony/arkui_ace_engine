@@ -532,6 +532,8 @@ public:
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
 
+    bool IsDisappearOrNoVisibleArea(uint64_t timestamp);
+
     bool IsPrivacySensitive() const
     {
         return isPrivacySensitive_;

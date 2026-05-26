@@ -124,7 +124,8 @@ HWTEST_F(ListPositionMapTestNg, CalculateUINode003, TestSize.Level1)
     ASSERT_NE(listNode, nullptr);
     auto node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, listItemGroupPattern);
     ASSERT_NE(node, nullptr);
-    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index = [](int32_t index, bool inAnimation) {
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)> onGetRid4Index = [](int32_t index,
+        bool inAnimation, bool forceCreateNewChild) {
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
@@ -132,9 +133,10 @@ HWTEST_F(ListPositionMapTestNg, CalculateUINode003, TestSize.Level1)
         [](int32_t start, int32_t end, int32_t vStart, int32_t vEnd, bool isCache, bool forceUpdate) {};
     std::function<void(IndexType, IndexType)> onMoveFromTo = [](int32_t start, int32_t end) {};
     std::function<void()> onPurge = []() {};
+    std::function<void()> onPurgeAll = []() {};
     std::function<void()> onUpdateDirty = []() {};
     RefPtr<RepeatVirtualScroll2Node> repeatVirtualScroll2Node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
-        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+        2, 2, 5, 0, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     ASSERT_NE(repeatVirtualScroll2Node, nullptr);
     repeatVirtualScroll2Node->children_ = { node };
     RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();

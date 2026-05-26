@@ -47,6 +47,7 @@ struct NodeInfoPU {
     std::function<void(int32_t)> nodeUpdateFunc;
     std::function<bool(int32_t)> hasNodeUpdateFunc;
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
+    std::function<bool(int32_t, bool, bool)> releaseRecyclePoolFunc;
     std::function<void(bool, bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<std::string()> onDumpInspectorFunc;
@@ -65,6 +66,7 @@ struct NodeInfoPU {
     int64_t creatorId = -1;
     std::string jsViewName;
     bool isV2 = false;
+    int32_t reusableMemOptStrategy = 0;
     NG::ExtraInfo extraInfo;
 };
 
@@ -86,6 +88,8 @@ public:
     {
         return false;
     };
+    virtual void StartMemOpt(const WeakPtr<AceType>& node) = 0;
+    virtual void RequestProgressiveRelease(const WeakPtr<AceType>& node) = 0;
 };
 
 } // namespace OHOS::Ace

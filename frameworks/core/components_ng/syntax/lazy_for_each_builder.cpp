@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -787,7 +787,9 @@ namespace OHOS::Ace::NG {
             ProcessOffscreenNodesNotInExpiring(cache);
             if (GetLazyForEachReleaseStrategy() == LazyForEachReleaseStrategy::PROGRESSIVE) {
                 CollectNodesForDelayedRelease(cache);
-                RemovingExpiringItem(deadline);
+            }
+            if (reduceCache_) {
+                ProcessNodesForCleanCache(cache);
             }
             return result;
         }
@@ -802,8 +804,11 @@ namespace OHOS::Ace::NG {
         ProcessOffscreenNodesNotInExpiring(cache);
         if (GetLazyForEachReleaseStrategy() == LazyForEachReleaseStrategy::PROGRESSIVE) {
             CollectNodesForDelayedRelease(cache);
-            RemovingExpiringItem(deadline);
         }
+        if (reduceCache_) {
+            ProcessNodesForCleanCache(cache);
+        }
+        reduceCache_ = result ? false : reduceCache_;
         return result;
     }
 
@@ -999,7 +1004,11 @@ namespace OHOS::Ace::NG {
         if (count == 0) {
             return;
         }
-        for (int32_t i = 1; i <= cacheCount_ - endShowCached_; i++) {
+        int32_t range = cacheCount_ - endShowCached_;
+        if (reduceCache_) {
+            range = ReduceCacheCount(range);
+        }
+        for (int32_t i = 1; i <= range; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
                     startIndex_ > endIndex_ + i) {
@@ -1013,7 +1022,11 @@ namespace OHOS::Ace::NG {
                 }
             }
         }
-        for (int32_t i = 1; i <= cacheCount_ - startShowCached_; i++) {
+        range = cacheCount_ - startShowCached_;
+        if (reduceCache_) {
+            range = ReduceCacheCount(range);
+        }
+        for (int32_t i = 1; i <= range; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
                     startIndex_ > endIndex_ + i) {
@@ -1394,6 +1407,57 @@ namespace OHOS::Ace::NG {
                 continue;
             }
             node.second->UpdateThemeScopeUpdate(themeScopeId);
+        }
+    }
+    
+    void LazyForEachBuilder::CleanCache(bool syncClean)
+    {
+        reduceCache_ = true;
+        if (!syncClean) {
+            return;
+        }
+        auto count = OnGetTotalCount();
+        std::unordered_map<std::string, LazyForEachCacheChild> cache;
+        std::set<int32_t> idleIndexes;
+        if (startIndex_ != -1 && endIndex_ != -1) {
+            CheckCacheIndex(idleIndexes, count);
+        }
+        ProcessCachedIndex(cache, idleIndexes);
+        expiringItem_.swap(cache);
+        ProcessOffscreenNodesNotInExpiring(cache);
+        ProcessNodesForCleanCache(cache);
+        removingNodeList_.clear();
+        reduceCache_ = false;
+    }
+
+    void LazyForEachBuilder::RestoreCache()
+    {
+        reduceCache_ = false;
+    }
+
+    int32_t LazyForEachBuilder::ReduceCacheCount(int32_t count)
+    {
+        const int32_t maxCacheCount = 2;
+        return count < maxCacheCount ? count : maxCacheCount;
+    }
+
+    void LazyForEachBuilder::ProcessNodesForCleanCache(
+        const std::unordered_map<std::string, LazyForEachCacheChild>& cache)
+    {
+        auto enableDebugTrace = SystemProperties::GetSyntaxTraceEnabled();
+        for (const auto& [key, node] : cache) {
+            if (expiringItem_.find(key) != expiringItem_.end()) {
+                continue;
+            }
+            ForEachBaseNode::DisableRecycle(node.second);
+            removingNodeList_[node.second->GetId()] = node.second;
+            if (enableDebugTrace) {
+                TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH,
+                    "LazyForEachBuilder.ProcessNodesForCleanCache tag[%{public}s] id[%{public}d]",
+                    node.second->GetTag().c_str(), node.second->GetId());
+                ACE_SCOPED_TRACE("LazyForEachBuilder.ProcessNodesForCleanCache tag[%s] id[%d]",
+                    node.second->GetTag().c_str(), node.second->GetId());
+            }
         }
     }
 }
