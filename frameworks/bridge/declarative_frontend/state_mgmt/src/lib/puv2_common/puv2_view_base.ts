@@ -43,6 +43,11 @@ enum PrebuildPhase {
   PrebuildDone = 3,
 }
 
+enum ReusableMemOptStrategy {
+  DEFAULT = 0,
+  ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+}
+
 //API Version 18
 const API_VERSION_ISOLATION_FOR_5_1: number = 18;
 const CUSTOM_ENV_DECO_META = '__custom_env_deco_meta__';
@@ -160,6 +165,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   static getCurrentPreRenderPool(): __ReusePool_Internal__ | undefined {
     return PUV2ViewBase.preRenderingPool_;
   }
+
+  protected __reusableMemOptStrategy__Internal: number = 0;
+
+  protected __hasStartMemOpt__Internal: boolean = false;
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
@@ -392,6 +401,43 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
  
   public setIsV2(isV2: boolean): void {
     return this.nativeViewPartialUpdate.setIsV2(isV2);
+  }
+
+  public __setReusableMemOptStrategy__Internal(reusableMemOptStrategy: ReusableMemOptStrategy): void {
+    let val: number = 0;
+    if (reusableMemOptStrategy === ReusableMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION) {
+      val = 1;
+    }
+    this.__reusableMemOptStrategy__Internal = val;
+    return this.nativeViewPartialUpdate.setReusableMemOptStrategy(val);
+  }
+
+  public __getReusableMemOptStrategy__Internal(): number {
+    return this.__reusableMemOptStrategy__Internal;
+  }
+
+  public __setHasStartMemOpt__Internal(hasStartMemOpt: boolean): void {
+    this.__hasStartMemOpt__Internal = hasStartMemOpt;
+  }
+
+  public __startMemOpt__Internal(): void {
+    if (this.__hasStartMemOpt__Internal) {
+      return;
+    }
+    this.__hasStartMemOpt__Internal = true;
+    this.nativeViewPartialUpdate.startMemOpt();
+  }
+
+  public __releaseRecyclePool__Internal(remainingTimeMs: number, isProgressive: boolean, shouldCollect: boolean): boolean { return true; }
+
+  /**
+   * @function __requestProgressiveRelease__Internal
+   * @description
+   * Requests progressive release from C++ side by posting an idle task.
+   * This is called from RecycleManager when it has nodes to release.
+   */
+  public __requestProgressiveRelease__Internal(): void {
+    this.nativeViewPartialUpdate.requestProgressiveRelease();
   }
 
   public getDialogController(): object {

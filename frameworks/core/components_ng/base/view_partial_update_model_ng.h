@@ -40,6 +40,9 @@ public:
 
     bool RegisterUpdateJSInstanceCallback(
         const WeakPtr<AceType>& node, std::function<void(int32_t)>&& instanceChangeCallback) override;
+
+    void StartMemOpt(const WeakPtr<AceType>& node) override;
+    void RequestProgressiveRelease(const WeakPtr<AceType>& node) override;
 };
 
 } // namespace OHOS::Ace::NG

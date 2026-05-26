@@ -19,8 +19,15 @@
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/dump_log.h"
+#include "base/thread/task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
+namespace {
+constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000;
+constexpr int32_t MEMORY_LEVEL_LOW = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
+}
 
 namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
@@ -366,4 +373,204 @@ bool CustomNode::FireOnCleanup()
     }
     return false;
 }
+
+ReusableMemOptStrategy CustomNode::GetMemOptStrategy()
+{
+    return memOptStrategy_;
+}
+
+void CustomNode::OnWindowHide()
+{
+    CleanCache(true);
+}
+
+void CustomNode::OnNotifyMemoryLevel(int32_t level)
+{
+    if (level == MEMORY_LEVEL_LOW || level == MEMORY_LEVEL_CRITICAL) {
+        CleanCache(false);
+    }
+}
+
+void CustomNode::RegisterWindowStateChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowStateChangedCallback(GetId());
+}
+
+void CustomNode::UnregisterWindowStateChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveWindowStateChangedCallback(GetId());
+}
+
+void CustomNode::RegisterMemoryLevelChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddNodesToNotifyMemoryLevel(GetId());
+}
+
+void CustomNode::UnregisterMemoryLevelChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveNodesToNotifyMemoryLevel(GetId());
+}
+
+bool CustomNode::CheckParentFrameNodeVisibility()
+{
+    auto parent = GetParentFrameNode();
+    CHECK_NULL_RETURN(parent, false);
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    return !(parent->IsDisappearOrNoVisibleArea(context->GetVsyncTime()));
+}
+
+void CustomNode::ScheduleCleanCacheTask()
+{
+    CHECK_EQUAL_VOID(pendingCleanCache_, true);
+    TAG_LOGI(AceLogTag::ACE_STATE_MGMT, "CustomNode.ScheduleCleanCacheTask id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("CustomNode.ScheduleCleanCacheTask id[%d]", GetId());
+    pendingCleanCache_ = true;
+    cacheTaskPostTime_ = GetSysTimestamp();
+}
+
+void CustomNode::CancelScheduledCleanCacheTask()
+{
+    TAG_LOGI(AceLogTag::ACE_STATE_MGMT, "CustomNode.CancelScheduledCleanCacheTask id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("CustomNode.CancelScheduledCleanCacheTask id[%d]", GetId());
+    pendingCleanCache_ = false;
+}
+
+void CustomNode::TryExecuteScheduledCacheTask()
+{
+    CHECK_EQUAL_VOID(pendingCleanCache_, false);
+    auto timeStamp = GetSysTimestamp();
+    CHECK_EQUAL_VOID(timeStamp - cacheTaskPostTime_ < CACHE_TASK_DELAY_TIME, true);
+    CleanCache(false);
+}
+
+void CustomNode::CleanCache(bool syncClean, bool clearAll)
+{
+    TAG_LOGI(AceLogTag::ACE_STATE_MGMT,
+        "CustomNode.CleanCache id[%{public}d] syncClean[%{public}d]", GetId(), syncClean);
+    ACE_SCOPED_TRACE("CustomNode.CleanCache id[%d] syncClean[%d]", GetId(), syncClean);
+    if (!syncClean) {
+        needCleanCacheOnIdle_ = true;
+        stopMemOptAfterRelease_ = clearAll;
+        hasPreparedProgressiveRelease_ = !clearAll;
+        PostIdleTask();
+        return;
+    }
+    if (releaseRecyclePoolFunc_) {
+        // Sync mode: no time limit, batch release, collect nodes
+        releaseRecyclePoolFunc_(0, false, true);
+    }
+    FinishMemOpt();
+}
+
+void CustomNode::CleanCacheOnIdle(int32_t remainingTimeMs)
+{
+    CHECK_EQUAL_VOID(needCleanCacheOnIdle_, false);
+
+    TAG_LOGI(AceLogTag::ACE_STATE_MGMT,
+        "CustomNode.CleanCacheOnIdle id[%{public}d] remainingTimeMs[%{public}d]", GetId(), remainingTimeMs);
+    ACE_SCOPED_TRACE("CustomNode.CleanCacheOnIdle id[%d] remainingTimeMs[%d]", GetId(), remainingTimeMs);
+    if (releaseRecyclePoolFunc_) {
+        if (releaseRecyclePoolFunc_(remainingTimeMs, true, !hasPreparedProgressiveRelease_)) {
+            if (stopMemOptAfterRelease_) {
+                FinishMemOpt();
+            }
+        } else {
+            // Timeout occurred, repost idle task to continue cleanup in next frame
+            hasPreparedProgressiveRelease_ = true;
+            PostIdleTask();
+        }
+    } else {
+        FinishMemOpt();
+    }
+}
+
+void CustomNode::SetParentVisibility(bool visibility)
+{
+    isParentVisible_ = visibility;
+}
+
+bool CustomNode::GetParentVisibility()
+{
+    return isParentVisible_;
+}
+
+void CustomNode::StartMemOpt()
+{
+    CHECK_EQUAL_VOID(runningMemOpt_, true);
+    runningMemOpt_ = true;
+    RegisterWindowStateChangedCallback();
+    RegisterMemoryLevelChangedCallback();
+    PostMemOptTask();
+}
+
+void CustomNode::FinishMemOpt()
+{
+    CHECK_EQUAL_VOID(runningMemOpt_, false);
+    runningMemOpt_ = false;
+    needCleanCacheOnIdle_ = false;
+    hasPreparedProgressiveRelease_ = false;
+    UnregisterWindowStateChangedCallback();
+    UnregisterMemoryLevelChangedCallback();
+}
+
+void CustomNode::PostMemOptTask()
+{
+    CHECK_EQUAL_VOID(runningMemOpt_, false);
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    const uint32_t delay = 1000; // 1 seconds in milliseconds
+    auto weakNode = AceType::WeakClaim(this);
+    taskExecutor->PostDelayedTask(
+        [weakNode]() {
+            auto node = weakNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pipeline = node->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            CHECK_EQUAL_VOID(pipeline->GetOnShow(), false);
+            auto visible = node->CheckParentFrameNodeVisibility();
+            if (visible != node->GetParentVisibility()) {
+                node->SetParentVisibility(visible);
+                visible ? node->CancelScheduledCleanCacheTask() : node->ScheduleCleanCacheTask();
+            }
+            node->TryExecuteScheduledCacheTask();
+            node->PostMemOptTask();
+        },
+        TaskExecutor::TaskType::UI,
+        delay,
+        "CustomNodeMemOptTask");
+}
+
+void CustomNode::PostIdleTask()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddPredictTask([weak = AceType::WeakClaim(this)] (int64_t deadline, bool /*canUseLongPredictTask*/) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        TAG_LOGI(AceLogTag::ACE_STATE_MGMT, "CustomNode.OnIdle id[%{public}d]", node->GetId());
+        ACE_SCOPED_TRACE("CustomNode.OnIdle id[%d]", node->GetId());
+
+        // Calculate remaining time in milliseconds
+        int64_t currentTime = GetSysTimestamp();
+        int64_t remainingTimeMs = 0;
+        int64_t nsToMs = 1000000;
+        remainingTimeMs = (deadline - currentTime) / nsToMs; // Convert nanoseconds to milliseconds
+
+        // Call CleanCacheOnIdle with remaining time
+        node->CleanCacheOnIdle(static_cast<int32_t>(remainingTimeMs));
+    });
+}
+
 } // namespace OHOS::Ace::NG

@@ -1480,6 +1480,27 @@ bool FrameNode::IsVisibleAndActive() const
     return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
 }
 
+bool FrameNode::IsDisappearOrNoVisibleArea(uint64_t timestamp)
+{
+    if (IsFrameDisappear(timestamp)) {
+        return true;
+    }
+    CacheVisibleRectResult visibleResult = GetCacheVisibleRect(timestamp, false);
+    const RectF& visibleRect = visibleResult.visibleRect;
+    const RectF& frameRect = visibleResult.frameRect;
+    if (visibleRect.IsEmpty() || frameRect.IsEmpty()) {
+        return true;
+    }
+    double totalArea = frameRect.Width() * frameRect.Height();
+    if (totalArea <= 0.0) {
+        return true;
+    }
+    double visibleArea = visibleRect.Width() * visibleRect.Height();
+    double visibleRatio = visibleArea / totalArea;
+    visibleRatio = std::clamp(visibleRatio, 0.0, 1.0);
+    return NearEqual(visibleRatio, VISIBLE_RATIO_MIN);
+}
+
 void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(json);

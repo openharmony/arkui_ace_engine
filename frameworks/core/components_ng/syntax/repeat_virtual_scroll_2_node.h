@@ -82,6 +82,7 @@
 #include <cstdint>
 #include <list>
 #include <string>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -90,27 +91,36 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
 
 namespace OHOS::Ace::NG {
+
+enum class RepeatMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+};
+
 class ACE_EXPORT RepeatVirtualScroll2Node : public ForEachBaseNode {
     DECLARE_ACE_TYPE(RepeatVirtualScroll2Node, ForEachBaseNode);
 
 public:
     static RefPtr<RepeatVirtualScroll2Node> GetOrCreateRepeatNode(int32_t nodeId, uint32_t arrLen, uint32_t totalCount,
-        const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index,
+        int32_t memOptStrategy,
+        const std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge,
+        const std::function<void()>& onPurgeAll,
         const std::function<void()>& onUpdateDirty);
 
-    RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
-        const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index,
+    RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount, int32_t memOptStrategy,
+        const std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge,
+        const std::function<void()>& onPurgeAll,
         const std::function<void()>& onUpdateDirty);
 
-    ~RepeatVirtualScroll2Node() override = default;
+    ~RepeatVirtualScroll2Node() override;
 
     // Number of children that Repeat can product
     uint32_t GetTotalCount() const
@@ -231,6 +241,15 @@ public:
         caches_.RemoveNode(rid);
     }
 
+    /**
+     * @brief Add pending remove nodes with their corresponding indexes.
+     * @param rids Vector of RIDs to remove.
+     * @param indexes Vector of indexes corresponding to the RIDs.
+     */
+    void AddPendingRemoveNodes(const std::vector<uint32_t>& rids, const std::vector<int32_t>& indexes);
+
+    bool RemovingExpiringItem(int64_t deadline);
+
     void SetInvalid(RIDType rid)
     {
         caches_.SetInvalid(rid);
@@ -248,6 +267,26 @@ public:
 
     void fireOnUpdateDirty();
 
+    RepeatMemOptStrategy GetMemOptStrategy();
+    void OnWindowShow() override;
+    void OnWindowHide() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    void RegisterMemoryLevelChangedCallback();
+    void UnregisterMemoryLevelChangedCallback();
+    bool CheckParentFrameNodeVisibility();
+    void ScheduleCleanCacheTask();
+    void ScheduleRestoreCacheTask();
+    void TryExecuteScheduledCacheTask();
+    void CleanCache(bool syncClean);
+    void StartRestoreCache();
+    void RestoreCache(int64_t deadline, bool canUseLongPredictTask);
+    void SetParentVisibility(bool visibility);
+    bool GetParentVisibility();
+    void PostMemOptTask();
+    void DisableChildrenAndCachesRecycle() override;
+
     void DumpInfo() override;
     
 
@@ -263,6 +302,7 @@ private:
 
     // tell TS to purge nodes exceeding cachedCount
     void Purge();
+    void PurgeAll();
 
     // freeze spare node in L2
     void FreezeSpareNode();
@@ -309,6 +349,18 @@ private:
     int32_t prevRecycleFrom_ = -1;
     int32_t prevRecycleTo_ = -1;
 
+    RepeatMemOptStrategy memOptStrategy_ = RepeatMemOptStrategy::DEFAULT;
+    bool pendingCleanCache_ = false;
+    bool pendingRestoreCache_ = false;
+    bool isParentVisible_ = false;
+    bool restoringCache_ = false;
+    int64_t cacheTaskPostTime_ = 0;
+    int64_t setActiveRangeTime_ = 0;
+
+    // pending rids to be removed
+    std::vector<uint32_t> pendingRemoveRids_;
+    std::vector<int32_t> cleanedCacheIndexes_;
+
     // run next DoSetActiveChild range even if range unchanged
     bool forceRunDoSetActiveRange_ = false;
 
@@ -316,6 +368,7 @@ private:
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange_;
     std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
+    std::function<void()> onPurgeAll_;
     std::function<void()> onUpdateDirty_;
 
     // true in the time from requesting idle / predict task until exec predict tsk.

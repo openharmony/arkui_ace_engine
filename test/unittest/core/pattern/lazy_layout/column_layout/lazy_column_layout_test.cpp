@@ -67,22 +67,25 @@ private:
 };
 
 void LazyColumnLayoutTest::CreateRepeatVirtualScrollNode(
-    int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& onGetRid4Index)
+    int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& onGetRid4Index)
 {
     RepeatVirtualScroll2ModelNG repeatModel;
     auto onActiveRange = [](int32_t start, int32_t end, int32_t cacheStart,
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     auto onRecycleItems = [](int32_t start, int32_t end) {};
     repeatModel.Create(
         itemNumber,
         itemNumber,
+        0,
         onGetRid4Index,
         onRecycleItems,
         onActiveRange,
         nullptr,
         onPurge,
+        onPurgeAll,
         onUpdateDirty);
 }
 
@@ -1703,7 +1706,7 @@ HWTEST_F(LazyColumnLayoutTest, RepeatVirtualScrollTest001, TestSize.Level1)
     CreateScroll();
     CreateLazyColumnLayout();
     CreateRepeatVirtualScrollNode(10,
-        [](uint32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+        [](uint32_t index, bool inAnimation, bool restoreCache) -> std::pair<uint32_t, uint32_t> {
             StackModelNG stackModel;
             stackModel.Create();
             ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));

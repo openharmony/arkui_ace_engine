@@ -229,6 +229,31 @@ LazyForEachCustomComponentFreezeMode ParseLazyForEachCustomComponentFreezeMode(c
     return LazyForEachCustomComponentFreezeMode::AUTO;
 }
 
+LazyForEachMemOptStrategy ParseLazyForEachMemOptStrategy(const JSRef<JSVal>& value)
+{
+    // try to convert to number
+    int32_t intValue = 0;
+    if (ConvertFromJSValue(value, intValue)) {
+        if (intValue == 1) {
+            return LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+        }
+        return LazyForEachMemOptStrategy::DEFAULT;
+    }
+    
+    // try to convert to string
+    std::string strValue;
+    if (ConvertFromJSValue(value, strValue)) {
+        if (strValue == "ENABLE_AUTO_CACHE_OPTIMIZATION" || strValue == "1") {
+            return LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+        }
+        if (strValue == "DEFAULT" || strValue == "0") {
+            return LazyForEachMemOptStrategy::DEFAULT;
+        }
+    }
+    
+    return LazyForEachMemOptStrategy::DEFAULT;
+}
+
 LazyForEachOptions ParseOptions(const JSRef<JSVal>& optionsVal)
 {
     LazyForEachOptions options;
@@ -244,7 +269,9 @@ LazyForEachOptions ParseOptions(const JSRef<JSVal>& optionsVal)
     
     JSRef<JSVal> strategyVal = optionsObj->GetProperty("releaseStrategy");
     options.releaseStrategy = ParseLazyForEachReleaseStrategy(strategyVal);
-    
+
+    JSRef<JSVal> memOptVal = optionsObj->GetProperty("memoryOptimizationStrategy");
+    options.memOptStrategy = ParseLazyForEachMemOptStrategy(memOptVal);
     return options;
 }
 
