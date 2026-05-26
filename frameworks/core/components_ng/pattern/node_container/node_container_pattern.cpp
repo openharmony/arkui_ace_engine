@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,41 +200,35 @@ void NodeContainerPattern::OnMountToParentDone()
 RefPtr<NodeContainerEventHub> NodeContainerPattern::GetNodeContainerEventHub()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (frameNode) {
-        return frameNode->GetEventHub<NodeContainerEventHub>();
-    }
-    return nullptr;
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetEventHub<NodeContainerEventHub>();
 }
 
 void NodeContainerPattern::FireOnWillBind(int32_t containerId)
 {
     auto nodeContainerEventHub = GetNodeContainerEventHub();
-    if (nodeContainerEventHub) {
-        nodeContainerEventHub->FireOnWillBind(containerId);
-    }
+    CHECK_NULL_VOID(nodeContainerEventHub);
+    nodeContainerEventHub->FireOnWillBind(containerId);
 }
 
 void NodeContainerPattern::FireOnWillUnbind(int32_t containerId)
 {
     auto nodeContainerEventHub = GetNodeContainerEventHub();
-    if (nodeContainerEventHub) {
-        nodeContainerEventHub->FireOnWillUnbind(containerId);
-    }
+    CHECK_NULL_VOID(nodeContainerEventHub);
+    nodeContainerEventHub->FireOnWillUnbind(containerId);
 }
 
 void NodeContainerPattern::FireOnBind(int32_t containerId)
 {
     auto nodeContainerEventHub = GetNodeContainerEventHub();
-    if (nodeContainerEventHub) {
-        nodeContainerEventHub->FireOnBind(containerId);
-    }
+    CHECK_NULL_VOID(nodeContainerEventHub);
+    nodeContainerEventHub->FireOnBind(containerId);
 }
 
 void NodeContainerPattern::FireOnUnbind(int32_t containerId)
 {
     auto nodeContainerEventHub = GetNodeContainerEventHub();
-    if (nodeContainerEventHub) {
-        nodeContainerEventHub->FireOnUnbind(containerId);
-    }
+    CHECK_NULL_VOID(nodeContainerEventHub);
+    nodeContainerEventHub->FireOnUnbind(containerId);
 }
 } // namespace OHOS::Ace::NG
