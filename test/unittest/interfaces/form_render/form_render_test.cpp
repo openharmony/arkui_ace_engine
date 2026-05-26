@@ -50,8 +50,6 @@ const std::string CHECK_KEY = "CHECK_KEY";
 constexpr double FORM_WIDTH = 100.0f;
 constexpr double FORM_HEIGHT = 100.0f;
 constexpr double FORM_VIEW_SCALE = 1.0f;
-constexpr double FORM_WIDTH_2 = 200.0f;
-constexpr double FORM_HEIGHT_2 = 200.0f;
 } // namespace
 class FormRenderTest : public testing::Test {
 public:
