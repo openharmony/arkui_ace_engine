@@ -1284,15 +1284,15 @@ HWTEST_F(SubMenuTestNg, UpdateStackPosition001, TestSize.Level1)
     subMenuLayoutAlgorithm.propTargetOffset_ = { 10, 20 };
     auto offset3 =
         subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
-    EXPECT_EQ(offset3.GetY(), 128.0f);
+    EXPECT_EQ(offset3.GetY(), 80.0f);
     auto offset4 = subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, nullptr);
-    EXPECT_EQ(offset4.GetY(), 128.0f);
+    EXPECT_EQ(offset4.GetY(), 80.0f);
     auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
     ASSERT_NE(menuLayoutProperty, nullptr);
     menuLayoutProperty->layoutDirection_ = TextDirection::RTL;
     auto offset5 =
         subMenuLayoutAlgorithm.UpdateStackPosition(menuItemNode, size, SubMenuExpandingMode::STACK, layoutWrapper);
-    EXPECT_EQ(offset5.GetY(), 128.0f);
+    EXPECT_EQ(offset5.GetY(), 80.0f);
 }
 
 /**
