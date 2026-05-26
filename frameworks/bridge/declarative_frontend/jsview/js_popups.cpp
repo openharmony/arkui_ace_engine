@@ -772,6 +772,16 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
     }
     SetPopupSystemMaterial(popupObj, popupParam);
+    if (!popupParam->IsShowInSubWindow()) {
+        auto levelModeValue = popupObj->GetProperty("levelMode");
+        if (levelModeValue->IsNumber()) {
+            auto levelMode = levelModeValue->ToNumber<int32_t>();
+            if (levelMode >= static_cast<int32_t>(LevelMode::OVERLAY) &&
+                levelMode <= static_cast<int32_t>(LevelMode::EMBEDDED)) {
+                popupParam->SetLevelMode(static_cast<LevelMode>(levelMode));
+            }
+        }
+    }
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)

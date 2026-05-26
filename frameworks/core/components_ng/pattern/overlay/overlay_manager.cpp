@@ -1150,6 +1150,14 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
     }
 }
 
+const WeakPtr<UINode>& OverlayManager::GetEmbeddedNode(const PopupInfo& popupInfo) const
+{
+    if (popupInfo.embeddedOveraly) {
+        return popupInfo.embeddedOveraly->GetRootNode();
+    }
+    return rootNodeWeak_;
+}
+
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
@@ -1159,7 +1167,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
             popupInfo.target.Upgrade()->GetTag().c_str());
         return;
     }
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
     if (frameNode && !frameNode->IsLayoutComplete()) {
@@ -1484,7 +1492,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
     auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
@@ -1602,7 +1610,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
     auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
@@ -1720,7 +1728,7 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
     if (!autoCancel && !isForceClear) {
         return nullptr;
     }
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     CHECK_NULL_RETURN(rootNode, nullptr);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
@@ -1887,7 +1895,8 @@ void OverlayManager::ErasePopup(int32_t targetId)
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
     auto it = popupMap_.find(targetId);
     if (it != popupMap_.end()) {
-        auto rootNode = rootNodeWeak_.Upgrade();
+        auto popupInfo = GetPopupInfo(targetId);
+        auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
         CHECK_NULL_VOID(rootNode);
         auto popupNode = it->second.popupNode;
         CHECK_NULL_VOID(popupNode);
