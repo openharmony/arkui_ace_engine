@@ -2327,6 +2327,8 @@ typedef struct Ark_EffectComponentOptions Ark_EffectComponentOptions;
 typedef struct Opt_EffectComponentOptions Opt_EffectComponentOptions;
 typedef struct Ark_EmbedOptions Ark_EmbedOptions;
 typedef struct Opt_EmbedOptions Opt_EmbedOptions;
+typedef struct Ark_EmbeddedOptions Ark_EmbeddedOptions;
+typedef struct Opt_EmbeddedOptions Opt_EmbeddedOptions;
 typedef struct Ark_ErrorEvent Ark_ErrorEvent;
 typedef struct Opt_ErrorEvent Opt_ErrorEvent;
 typedef struct Ark_ErrorInformation Ark_ErrorInformation;
@@ -17899,6 +17901,16 @@ typedef struct Opt_uiEffect_HdrDarkenBlender {
     Ark_Tag tag;
     Ark_uiEffect_HdrDarkenBlender value;
 } Opt_uiEffect_HdrDarkenBlender;
+typedef struct Ark_EmbeddedOptions {
+    Opt_ComponentContentBase placeholder;
+    Opt_Map_String_ComponentContentBase areaChangePlaceholder;
+    Opt_DpiFollowStrategy dpiFollowStrategy;
+    Opt_WindowModeFollowStrategy windowModeFollowStrategy;
+} Ark_EmbeddedOptions;
+typedef struct Opt_EmbeddedOptions {
+    Ark_Tag tag;
+    Ark_EmbeddedOptions value;
+} Opt_EmbeddedOptions;
 typedef struct Ark_UIExtensionOptions {
     /* kind: Interface */
     Opt_Boolean isTransferringCaller;
@@ -25064,13 +25076,19 @@ typedef struct GENERATED_ArkUIEllipseModifier {
 typedef struct GENERATED_ArkUIEmbeddedComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setEmbeddedComponentOptions)(Ark_NativePointer node,
+    void (*setEmbeddedComponentOptions0)(Ark_NativePointer node,
                                         Ark_Want loader,
                                         const Opt_EmbeddedType* type);
+    void (*setEmbeddedComponentOptions1)(Ark_NativePointer node,
+                                        Ark_Want loader,
+                                        const Opt_EmbeddedType* type,
+                                        const Opt_EmbeddedOptions* options);
     void (*setOnTerminated)(Ark_NativePointer node,
                             const Opt_Callback_TerminationInfo* value);
     void (*setOnError)(Ark_NativePointer node,
                        const Opt_ErrorCallback_BusinessErrorInterface_Void* value);
+    void (*setOnDrawReady)(Ark_NativePointer node,
+                           const Opt_VoidCallback* value);
 } GENERATED_ArkUIEmbeddedComponentModifier;
 
 typedef struct GENERATED_ArkUIFlexModifier {
