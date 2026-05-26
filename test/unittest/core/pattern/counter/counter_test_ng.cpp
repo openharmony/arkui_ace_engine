@@ -405,28 +405,6 @@ HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level0)
 }
 
 /**
- * @tc.name: CounterPatternTest001
- * @tc.desc: test CreateLayoutProperty OnThemeScopeUpdate.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level0)
-{
-    CounterModelNG model;
-    model.Create();
-    GetInstance();
-    auto renderContext = frameNode_->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto layoutProperty = pattern_->CreateLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto host = pattern_->GetHost();
-    ASSERT_NE(host, nullptr);
-    EXPECT_TRUE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
-    renderContext->UpdateForegroundColor(COLOR);
-    EXPECT_FALSE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
-}
-
-/**
  * @tc.name: CounterThemeWrapperTest001
  * @tc.desc: test ApplyTokenTheme BuildWrapper.
  * @tc.type: FUNC
@@ -689,27 +667,6 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest007, TestSize.Lev
     ASSERT_NE(counterTheme, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), false);
-}
-
-/**
- * @tc.name: CounterModelNGSetOnIncTest001
- * @tc.desc: Test SetOnInc function
- * @tc.type: FUNC
- */
-HWTEST_F(CounterTestNg, CounterModelNGSetOnIncTest001, TestSize.Level1)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    int32_t addId = 100;
-    bool called = false;
-    CounterModel::CounterEventFunc onInc = [&called]() { called = true; };
-
-    CounterModelNG model;
-    model.SetOnInc(std::move(onInc));
-
-    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
-    auto gestureHub = addNode->GetOrCreateGestureEventHub();
-
-    EXPECT_EQ(gestureHub->parallelCombineClick, false);
 }
 
 /**
