@@ -313,7 +313,7 @@ void SetListSpace(ArkUINodeHandle node, ArkUI_Float32 space)
     ListModelNG::SetListSpace(frameNode, Dimension(space, DimensionUnit::VP));
 }
 
-void ResetListSpace(ArkUINodeHandle node)
+void ResetListSpaceWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -321,7 +321,7 @@ void ResetListSpace(ArkUINodeHandle node)
     ListModelNG::CreateWithResourceObjSpace(frameNode, nullptr);
 }
 
-void ResetListSpaceWidth(ArkUINodeHandle node)
+void ResetListSpace(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1151,8 +1151,8 @@ const ArkUIListModifier* GetListModifier()
         .resetChainAnimationOptions = ResetChainAnimationOptions,
         .getListSpace = GetListSpace,
         .setListSpaceWidth = SetListSpaceWidth,
-        .resetListSpaceWidth = ResetListSpaceWidth,
         .setListSpace = SetListSpace,
+        .resetListSpaceWidth = ResetListSpaceWidth,
         .resetListSpace = ResetListSpace,
         .setNodeAdapter = SetNodeAdapter,
         .resetNodeAdapter = ResetNodeAdapter,
