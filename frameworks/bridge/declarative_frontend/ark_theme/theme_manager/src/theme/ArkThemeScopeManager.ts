@@ -507,7 +507,7 @@ class ArkThemeScopeManager {
             ArkColorsImpl.expandByBrandColor(theme.colors);
         }
         if (theme?.darkColors) {
-            ArkColorsImpl.expandByBrandColor(theme.darkColors);
+            ArkColorsImpl.expandByBrandColor(theme.darkColors, true);
         }
         return theme;
     }

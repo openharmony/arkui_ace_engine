@@ -379,6 +379,9 @@ export class ArkThemeScopeManager {
         if (theme?.colors) {
             ArkColorsImpl.expandByBrandColor(theme!.colors!);
         }
+        if (theme?.darkColors) {
+            ArkColorsImpl.expandByBrandColor(theme!.darkColors!, true);
+        }
         return theme;
     }
 

@@ -126,6 +126,9 @@ class ArkThemeNativeHelper {
             theme.colors.interactiveActive,
             theme.colors.interactiveSelect,
             theme.colors.interactiveClick,
+            theme.colors.primary,
+            theme.colors.onPrimary,
+            theme.colors.container,
         ];
     }
     static convertColorsToArray(colors) {
@@ -383,6 +386,9 @@ class ArkSystemColors {
         this.interactiveActive = ArkResourcesHelper.$r('sys.color.interactive_active', 125831022);
         this.interactiveSelect = ArkResourcesHelper.$r('sys.color.interactive_select', 125831023);
         this.interactiveClick = ArkResourcesHelper.$r('sys.color.interactive_click', 125831024);
+        this.primary = ArkResourcesHelper.$r('sys.color.primary', 125836896);
+        this.onPrimary = ArkResourcesHelper.$r('sys.color.on_primary', 125836897);
+        this.container = ArkResourcesHelper.$r('sys.color.container', 125836898);
     }
 }
 class ArkSystemCornerRadius {
@@ -566,8 +572,8 @@ class ArkColorsImpl {
     constructor(colors, baselineColors) {
         Object.assign(this, baselineColors, colors);
     }
-    static expandByBrandColor(colors) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    static expandByBrandColor(colors, isDark = false) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7;
         if (colors.brand) {
             const brandColors = ArkColorsImpl.makeBrandColors(colors.brand);
             colors.fontEmphasize = (_a = colors.fontEmphasize) !== null && _a !== void 0 ? _a : brandColors.primary;
@@ -579,6 +585,34 @@ class ArkColorsImpl {
             colors.compEmphasizeTertiary = (_g = colors.compEmphasizeTertiary) !== null && _g !== void 0 ? _g : brandColors.fifth;
             colors.interactiveFocus = (_h = colors.interactiveFocus) !== null && _h !== void 0 ? _h : brandColors.primary;
             colors.interactiveActive = (_j = colors.interactiveActive) !== null && _j !== void 0 ? _j : brandColors.primary;
+        }
+        if (colors.primary) {
+            colors.fontPrimary = (_k = colors.fontPrimary) !== null && _k !== void 0 ? _k : ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.9);
+            colors.fontSecondary = (_l = colors.fontSecondary) !== null && _l !== void 0 ? _l : ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.6);
+            colors.fontTertiary = (_m = colors.fontTertiary) !== null && _m !== void 0 ? _m : ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.4);
+            colors.fontFourth = (_o = colors.fontFourth) !== null && _o !== void 0 ? _o : ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.2);
+            colors.iconPrimary = (_p = colors.iconPrimary) !== null && _p !== void 0 ? _p : ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.9);
+            colors.iconSecondary = (_q = colors.iconSecondary) !== null && _q !== void 0 ? _q : ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.6);
+            colors.iconTertiary = (_r = colors.iconTertiary) !== null && _r !== void 0 ? _r : ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.4);
+            colors.iconFourth = (_s = colors.iconFourth) !== null && _s !== void 0 ? _s : ArkColorsImpl.makeColorWithOpacity(colors.primary, 0.2);
+        }
+        if (colors.onPrimary) {
+            colors.fontOnPrimary = (_t = colors.fontOnPrimary) !== null && _t !== void 0 ? _t : ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 1.0);
+            colors.fontOnSecondary = (_u = colors.fontOnSecondary) !== null && _u !== void 0 ? _u : ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.6);
+            colors.fontOnTertiary = (_v = colors.fontOnTertiary) !== null && _v !== void 0 ? _v : ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.4);
+            colors.fontOnFourth = (_w = colors.fontOnFourth) !== null && _w !== void 0 ? _w : ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.2);
+            colors.iconOnPrimary = (_x = colors.iconOnPrimary) !== null && _x !== void 0 ? _x : ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 1.0);
+            colors.iconOnSecondary = (_y = colors.iconOnSecondary) !== null && _y !== void 0 ? _y : ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.6);
+            colors.iconOnTertiary = (_z = colors.iconOnTertiary) !== null && _z !== void 0 ? _z : ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.4);
+            colors.iconOnFourth = (_0 = colors.iconOnFourth) !== null && _0 !== void 0 ? _0 : ArkColorsImpl.makeColorWithOpacity(colors.onPrimary, 0.2);
+        }
+        if (colors.container) {
+            colors.compBackgroundSecondary = (_1 = colors.compBackgroundSecondary) !== null && _1 !== void 0 ? _1 : ArkColorsImpl.makeColorWithOpacity(colors.container, 0.1);
+            colors.compBackgroundTertiary = (_2 = colors.compBackgroundTertiary) !== null && _2 !== void 0 ? _2 : ArkColorsImpl.makeColorWithOpacity(colors.container, isDark ? 0.1 : 0.05);
+            colors.compDivider = (_3 = colors.compDivider) !== null && _3 !== void 0 ? _3 : ArkColorsImpl.makeColorWithOpacity(colors.container, 0.2);
+            colors.interactiveHover = (_4 = colors.interactiveHover) !== null && _4 !== void 0 ? _4 : ArkColorsImpl.makeColorWithOpacity(colors.container, isDark ? 0.1 : 0.05);
+            colors.interactivePressed = (_5 = colors.interactivePressed) !== null && _5 !== void 0 ? _5 : ArkColorsImpl.makeColorWithOpacity(colors.container, isDark ? 0.15 : 0.1);
+            colors.interactiveClick = (_6 = colors.interactiveClick) !== null && _6 !== void 0 ? _6 : ArkColorsImpl.makeColorWithOpacity(colors.container, isDark ? 0.15 : 0.1);
         }
     }
     static makeBrandColors(brandColor) {
@@ -620,6 +654,19 @@ class ArkColorsImpl {
             'moduleName': resourceColor.moduleName,
             'opacityRatio': opacityRatio
         };
+    }
+    static makeColorWithOpacity(color, opacityRatio) {
+        if (!color) {
+            return undefined;
+        }
+        if (opacityRatio >= 1.0) {
+            return color;
+        }
+        if (color instanceof Object) {
+            return ArkColorsImpl.makeResourceWithOpacity(color, opacityRatio);
+        }
+        const argbColor = getUINativeModule().resource.getColorValue(color);
+        return ArkColorsImpl.blendOpacity(argbColor, opacityRatio);
     }
     static blendOpacity(argbColor, opacityRatio) {
         if (opacityRatio < 0 || opacityRatio > 1.0) {
@@ -1068,7 +1115,7 @@ class ArkThemeScopeManager {
             ArkColorsImpl.expandByBrandColor(theme.colors);
         }
         if (theme === null || theme === void 0 ? void 0 : theme.darkColors) {
-            ArkColorsImpl.expandByBrandColor(theme.darkColors);
+            ArkColorsImpl.expandByBrandColor(theme.darkColors, true);
         }
         return theme;
     }
