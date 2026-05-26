@@ -240,10 +240,13 @@ void ListPattern::OnModifyDone()
     if (!needSwipeSelect && swipeSelectPanEvent_) {
         UninitSwipeSelectEvent();
     }
-    if (IsDefaultMultiSelectStyleEnabled()) {
-        ApplyEditModeToVisibleItems();
-    } else {
-        RemoveEditModeFromItems();
+    if (IsEditModeChanged()) {
+        if (IsDefaultMultiSelectStyleEnabled()) {
+            ApplyEditModeToVisibleItems();
+        } else {
+            RemoveEditModeFromItems();
+        }
+        ResetEditModeChanged();
     }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
