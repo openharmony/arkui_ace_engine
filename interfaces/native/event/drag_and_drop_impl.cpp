@@ -80,6 +80,8 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* b
     CHECK_NULL_RETURN_WITH_MESSAGE(dragEvent, ARKUI_ERROR_CODE_PARAM_INVALID,
         "OH_ArkUI_DragEvent_GetDragSource", "dragEvent is null");
     if (static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID,
+            "OH_ArkUI_DragEvent_GetDragSource", "strlen(dragEvent->bundleName) >= length");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int32_t err = strcpy_s(bundleName, length, dragEvent->bundleName);
