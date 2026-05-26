@@ -2137,8 +2137,7 @@ export struct SegmentButton {
               const startX = Math.min(alg.getButtonX(0), alg.getButtonX(buttonLength - 1))
               const endX = Math.max(alg.getButtonX(0), alg.getButtonX(buttonLength - 1))
 
-              const fingerOffset = this.isShouldMirror() ? this.panGestureStartPoint.x - fingerInfo.globalX :
-                fingerInfo.globalX - this.panGestureStartPoint.x
+              const fingerOffset = this.getUIContext().vp2px(fingerInfo.globalX - this.panGestureStartPoint.x)
               const currentButtonX = alg.getButtonX(this.selectedIndexes[0])
               let nowX = fingerOffset + currentButtonX
               nowX = Math.max(startX, nowX)
