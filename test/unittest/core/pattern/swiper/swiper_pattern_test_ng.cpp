@@ -2943,7 +2943,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent001, TestSize.Level
     auto frame = geometryNode->frame_;
     auto rect = frame.rect_;
     rect.width_ = 100.0;
-    rect.height = 100.0;
+    rect.height_ = 100.0;
 
     auto context = pattern_->GetContext();
     CHECK_NULL_VOID(context);
@@ -2979,7 +2979,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent002, TestSize.Level
     auto frame = geometryNode->frame_;
     auto rect = frame.rect_;
     rect.width_ = 100.0;
-    rect.height = 100.0;
+    rect.height_ = 100.0;
 
     auto context = pattern_->GetContext();
     CHECK_NULL_VOID(context);
@@ -3015,7 +3015,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent003, TestSize.Level
     auto frame = geometryNode->frame_;
     auto rect = frame.rect_;
     rect.width_ = 100.0;
-    rect.height = 100.0;
+    rect.height_ = 100.0;
 
     auto context = pattern_->GetContext();
     CHECK_NULL_VOID(context);
@@ -3060,7 +3060,7 @@ HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent004, TestSize.Level
     auto frame = geometryNode->frame_;
     auto rect = frame.rect_;
     rect.width_ = 100.0;
-    rect.height = 100.0;
+    rect.height_ = 100.0;
 
     auto context = pattern_->GetContext();
     CHECK_NULL_VOID(context);
