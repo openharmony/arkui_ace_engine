@@ -134,7 +134,7 @@ class LengthMetrics {
   private unit_: LengthUnit;
   private value_: number;
   private res_: Resource | undefined;
-  private autoRefresh_: boolean = false;
+  private autoRefresh_: boolean | undefined;
   constructor(value: number, unit?: LengthUnit, res?: Resource) {
     if (unit in LengthUnit) {
         this.unit_ = unit;
@@ -185,6 +185,9 @@ class LengthMetrics {
   public autoRefresh(value: boolean): LengthMetrics {
     this.autoRefresh_ = value;
     return this;
+  }
+  toJSON() {
+    return { unit: this.unit_, value: this.value_, res: this.res_ , autoRefresh_: this.autoRefresh_ };
   }
 }
 
