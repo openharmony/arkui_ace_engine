@@ -1166,6 +1166,39 @@ HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: setMenuBgBlurStyleWithOptionTest
+ * @tc.desc: Test setMenuBgBlurStyleWithOption function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setMenuBgBlurStyleWithOptionTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMenuBackgroundBlurStyle, nullptr);
+    ASSERT_NE(modifier_->setMenuBackgroundBlurStyleOptions, nullptr);
+
+    auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
+    modifier_->setMenuBackgroundBlurStyle(node_, &style);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto options = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(Ark_BackgroundBlurStyleOptions {
+        .scale = Converter::ArkValue<Opt_Float64>(2.2999999523162842),
+        .colorMode = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+        .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+    });
+    modifier_->setMenuBackgroundBlurStyleOptions(node_, &options);
+
+    auto menu = pattern->GetMenuNode();
+    ASSERT_NE(menu, nullptr);
+    auto renderContext = menu->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_DOUBLE_EQ(renderContext->GetBackBlurStyle()->scale, 1.0);
+}
+
+/**
  * @tc.name: setDividerTest
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
