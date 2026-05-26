@@ -35,6 +35,11 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TEST_ITEM_COUNT = 10;
+constexpr float TEST_SCALE_FACTOR = 0.95f;
+constexpr float SCALE_TOLERANCE = 0.001f;
+constexpr int32_t TEST_INVALID_ROW = 100;
+constexpr int32_t TEST_INVALID_COL = 50;
+constexpr float TEST_DISTANCE_TOLERANCE = 0.001f;
 } // namespace
 
 class GridItemDragManagerTestNg : public GridTestNg {
@@ -62,6 +67,48 @@ public:
         auto itemPattern = gridItemNode->GetPattern<GridItemPattern>();
         CHECK_NULL_RETURN(itemPattern, nullptr);
         auto manager = AceType::MakeRefPtr<GridItemDragManager>(gridItemNode, nullptr);
+        return manager;
+    }
+
+    RefPtr<GridItemDragManager> CreateDragManagerWithForEach()
+    {
+        auto model = CreateGrid();
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateFixedItems(TEST_ITEM_COUNT);
+        CreateDone();
+        auto host = pattern_->GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto gridItemNode = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(0));
+        CHECK_NULL_RETURN(gridItemNode, nullptr);
+        auto forEach = ForEachNode::GetOrCreateForEachNode(-1);
+        CHECK_NULL_RETURN(forEach, nullptr);
+        forEach->SetParent(AceType::WeakClaim(AceType::RawPtr(host)));
+        host->AddChild(forEach);
+        auto manager = AceType::MakeRefPtr<GridItemDragManager>(gridItemNode, forEach);
+        return manager;
+    }
+
+    RefPtr<GridItemDragManager> CreateDragManagerWithForEachAndChildren()
+    {
+        auto model = CreateGrid();
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateFixedItems(TEST_ITEM_COUNT);
+        CreateDone();
+        auto host = pattern_->GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto gridItemNode = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(0));
+        CHECK_NULL_RETURN(gridItemNode, nullptr);
+        auto forEach = ForEachNode::GetOrCreateForEachNode(-1);
+        CHECK_NULL_RETURN(forEach, nullptr);
+        auto children = host->GetChildren();
+        std::vector<RefPtr<UINode>> items(children.begin(), children.end());
+        for (auto& child : items) {
+            host->RemoveChild(child, true);
+            forEach->AddChild(child);
+        }
+        forEach->SetParent(AceType::WeakClaim(AceType::RawPtr(host)));
+        host->AddChild(forEach);
+        auto manager = AceType::MakeRefPtr<GridItemDragManager>(gridItemNode, forEach);
         return manager;
     }
 
@@ -822,7 +869,11 @@ HWTEST_F(GridItemDragManagerTestNg, CalculateFromNewPositionNullForEach001, Test
     auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
     ASSERT_NE(manager, nullptr);
     GridLayoutInfo info;
-    auto result = manager->CalculateFromNewPosition(0, 1, info);
+    std::vector<GridItemDragManager::SimSpanInfo> spans;
+    std::vector<double> crossLens;
+    float mainGap = 0.0f;
+    float adjustedCrossGap = 0.0f;
+    auto result = manager->CalculateFromNewPosition(0, 1, info, spans, mainGap, crossLens, adjustedCrossGap);
     EXPECT_FALSE(result.has_value());
 }
 
@@ -1077,6 +1128,1005 @@ HWTEST_F(GridItemDragManagerTestNg, ConstructorValidHost001, TestSize.Level1)
     EXPECT_NE(manager->GetHost(), nullptr);
     auto grid = manager->gridNode_.Upgrade();
     EXPECT_NE(grid, nullptr);
+}
+
+// ============================================================
+// FindNeighborIndex
+// ============================================================
+
+/**
+ * @tc.name: FindNeighborIndexRowNotFound001
+ * @tc.desc: Test FindNeighborIndex with non-existent row returns -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindNeighborIndexRowNotFound001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    int32_t result = manager->FindNeighborIndex(TEST_INVALID_ROW, 0, info);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: FindNeighborIndexColNotFound001
+ * @tc.desc: Test FindNeighborIndex with non-existent col returns -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindNeighborIndexColNotFound001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    int32_t result = manager->FindNeighborIndex(0, TEST_INVALID_COL, info);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: FindNeighborIndexValidPosition001
+ * @tc.desc: Test FindNeighborIndex returns correct index for valid positions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindNeighborIndexValidPosition001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    EXPECT_EQ(manager->FindNeighborIndex(0, 0, info), 0);
+    EXPECT_EQ(manager->FindNeighborIndex(0, 1, info), 1);
+    EXPECT_EQ(manager->FindNeighborIndex(1, 0, info), 2);
+    EXPECT_EQ(manager->FindNeighborIndex(1, 1, info), 3);
+}
+
+/**
+ * @tc.name: FindNeighborIndexNegativeValue001
+ * @tc.desc: Test FindNeighborIndex with negative value in matrix (span marker) returns abs value
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindNeighborIndexNegativeValue001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    info.gridMatrix_[TEST_INVALID_ROW][0] = -5;
+    int32_t result = manager->FindNeighborIndex(TEST_INVALID_ROW, 0, info);
+    EXPECT_EQ(result, 5);
+}
+
+// ============================================================
+// SetNearbyNodeScale
+// ============================================================
+
+/**
+ * @tc.name: SetNearbyNodeScaleNullNode001
+ * @tc.desc: Test SetNearbyNodeScale with null node does not crash and scaleNode_ stays empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SetNearbyNodeScaleNullNode001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_NO_FATAL_FAILURE(manager->SetNearbyNodeScale(nullptr, TEST_SCALE_FACTOR));
+    EXPECT_TRUE(manager->scaleNode_.empty());
+}
+
+/**
+ * @tc.name: SetNearbyNodeScaleDefaultScale001
+ * @tc.desc: Test SetNearbyNodeScale applies scale to node with default transform scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SetNearbyNodeScaleDefaultScale001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<GridItemPattern>(shallowBuilder));
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    manager->SetNearbyNodeScale(node, TEST_SCALE_FACTOR);
+    auto scale = renderContext->GetTransformScaleValue({1.0f, 1.0f});
+    EXPECT_NEAR(scale.x, TEST_SCALE_FACTOR, SCALE_TOLERANCE);
+    EXPECT_NEAR(scale.y, TEST_SCALE_FACTOR, SCALE_TOLERANCE);
+}
+
+/**
+ * @tc.name: SetNearbyNodeScaleWithPrevScale001
+ * @tc.desc: Test SetNearbyNodeScale uses prevScaleNode_ as base when present
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SetNearbyNodeScaleWithPrevScale001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<GridItemPattern>(shallowBuilder));
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    VectorF prevScale{2.0f, 2.0f};
+    manager->prevScaleNode_.emplace(WeakPtr<RenderContext>(renderContext), prevScale);
+    manager->SetNearbyNodeScale(node, TEST_SCALE_FACTOR);
+
+    auto scale = renderContext->GetTransformScaleValue({1.0f, 1.0f});
+    EXPECT_NEAR(scale.x, 2.0f * TEST_SCALE_FACTOR, SCALE_TOLERANCE);
+    EXPECT_NEAR(scale.y, 2.0f * TEST_SCALE_FACTOR, SCALE_TOLERANCE);
+}
+
+/**
+ * @tc.name: SetNearbyNodeScaleRecordsInScaleNode001
+ * @tc.desc: Test SetNearbyNodeScale records the original scale in scaleNode_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SetNearbyNodeScaleRecordsInScaleNode001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<GridItemPattern>(shallowBuilder));
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    manager->SetNearbyNodeScale(node, TEST_SCALE_FACTOR);
+    EXPECT_EQ(manager->scaleNode_.size(), 1u);
+    auto it = manager->scaleNode_.find(renderContext);
+    EXPECT_NE(it, manager->scaleNode_.end());
+    EXPECT_NEAR(it->second.x, 1.0f, SCALE_TOLERANCE);
+    EXPECT_NEAR(it->second.y, 1.0f, SCALE_TOLERANCE);
+}
+
+// ============================================================
+// ResetPrevScaleNode
+// ============================================================
+
+/**
+ * @tc.name: ResetPrevScaleNodeEmptyMaps001
+ * @tc.desc: Test ResetPrevScaleNode with empty maps does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ResetPrevScaleNodeEmptyMaps001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_NO_FATAL_FAILURE(manager->ResetPrevScaleNode());
+    EXPECT_TRUE(manager->prevScaleNode_.empty());
+    EXPECT_TRUE(manager->scaleNode_.empty());
+}
+
+/**
+ * @tc.name: ResetPrevScaleNodeResetsOldNode001
+ * @tc.desc: Test ResetPrevScaleNode restores node not in scaleNode_ to previous scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ResetPrevScaleNodeResetsOldNode001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<GridItemPattern>(shallowBuilder));
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    renderContext->UpdateTransformScale({TEST_SCALE_FACTOR, TEST_SCALE_FACTOR});
+    VectorF originalScale{1.0f, 1.0f};
+    manager->prevScaleNode_.emplace(WeakPtr<RenderContext>(renderContext), originalScale);
+
+    manager->ResetPrevScaleNode();
+
+    auto scale = renderContext->GetTransformScaleValue({0.0f, 0.0f});
+    EXPECT_NEAR(scale.x, originalScale.x, SCALE_TOLERANCE);
+    EXPECT_NEAR(scale.y, originalScale.y, SCALE_TOLERANCE);
+}
+
+/**
+ * @tc.name: ResetPrevScaleNodeKeepsCurrentNode001
+ * @tc.desc: Test ResetPrevScaleNode does not restore node present in scaleNode_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ResetPrevScaleNodeKeepsCurrentNode001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<GridItemPattern>(shallowBuilder));
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    VectorF originalScale{1.0f, 1.0f};
+    VectorF currentScale{TEST_SCALE_FACTOR, TEST_SCALE_FACTOR};
+    WeakPtr<RenderContext> weakRender(renderContext);
+    manager->prevScaleNode_.emplace(weakRender, originalScale);
+    manager->scaleNode_.emplace(weakRender, originalScale);
+    renderContext->UpdateTransformScale(currentScale);
+
+    manager->ResetPrevScaleNode();
+
+    auto scale = renderContext->GetTransformScaleValue({0.0f, 0.0f});
+    EXPECT_NEAR(scale.x, currentScale.x, SCALE_TOLERANCE);
+    EXPECT_NEAR(scale.y, currentScale.y, SCALE_TOLERANCE);
+}
+
+/**
+ * @tc.name: ResetPrevScaleNodeSwapsMaps001
+ * @tc.desc: Test ResetPrevScaleNode swaps scaleNode_ into prevScaleNode_ and clears scaleNode_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ResetPrevScaleNodeSwapsMaps001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<GridItemPattern>(shallowBuilder));
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    VectorF prevScale{1.0f, 1.0f};
+    VectorF currScale{2.0f, 2.0f};
+    WeakPtr<RenderContext> weakRender(renderContext);
+    manager->prevScaleNode_.emplace(weakRender, prevScale);
+    manager->scaleNode_.emplace(weakRender, currScale);
+
+    manager->ResetPrevScaleNode();
+
+    EXPECT_EQ(manager->prevScaleNode_.size(), 1u);
+    auto it = manager->prevScaleNode_.find(weakRender);
+    EXPECT_NE(it, manager->prevScaleNode_.end());
+    EXPECT_NEAR(it->second.x, currScale.x, SCALE_TOLERANCE);
+    EXPECT_TRUE(manager->scaleNode_.empty());
+}
+
+// ============================================================
+// ScaleNearbyItems
+// ============================================================
+
+/**
+ * @tc.name: ScaleNearbyItemsNullGrid001
+ * @tc.desc: Test ScaleNearbyItems with null grid does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleNearbyItemsNullGrid001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    OffsetF delta(10.0f, 10.0f);
+    EXPECT_NO_FATAL_FAILURE(manager->ScaleNearbyItems(0, rect, delta));
+}
+
+/**
+ * @tc.name: ScaleNearbyItemsNullForEach001
+ * @tc.desc: Test ScaleNearbyItems with null forEach returns early without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleNearbyItemsNullForEach001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    OffsetF delta(10.0f, 10.0f);
+    EXPECT_NO_FATAL_FAILURE(manager->ScaleNearbyItems(0, rect, delta));
+}
+
+/**
+ * @tc.name: ScaleNearbyItemsInvalidPosition001
+ * @tc.desc: Test ScaleNearbyItems with invalid item position resets and returns early
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleNearbyItemsInvalidPosition001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    info.gridMatrix_.clear();
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    OffsetF delta(10.0f, 10.0f);
+    EXPECT_NO_FATAL_FAILURE(manager->ScaleNearbyItems(0, rect, delta));
+}
+
+/**
+ * @tc.name: ScaleNearbyItemsZeroDelta001
+ * @tc.desc: Test ScaleNearbyItems with zero delta performs no scaling
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleNearbyItemsZeroDelta001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    OffsetF delta(0.0f, 0.0f);
+    EXPECT_NO_FATAL_FAILURE(manager->ScaleNearbyItems(0, rect, delta));
+    EXPECT_TRUE(manager->prevScaleNode_.empty());
+}
+
+/**
+ * @tc.name: ScaleNearbyItemsPositiveMainDelta001
+ * @tc.desc: Test ScaleNearbyItems with positive main delta scales main-axis neighbor
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleNearbyItemsPositiveMainDelta001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEachAndChildren();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto host = manager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    auto rect = geometry->GetMarginFrameRect();
+    OffsetF delta(0.0f, rect.Height());
+
+    EXPECT_NO_FATAL_FAILURE(manager->ScaleNearbyItems(0, rect, delta));
+    EXPECT_FALSE(manager->prevScaleNode_.empty());
+}
+
+/**
+ * @tc.name: ScaleNearbyItemsPositiveCrossDelta001
+ * @tc.desc: Test ScaleNearbyItems with positive cross delta scales cross-axis neighbor
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleNearbyItemsPositiveCrossDelta001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEachAndChildren();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto host = manager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    auto rect = geometry->GetMarginFrameRect();
+    OffsetF delta(rect.Width(), 0.0f);
+
+    EXPECT_NO_FATAL_FAILURE(manager->ScaleNearbyItems(0, rect, delta));
+    EXPECT_FALSE(manager->prevScaleNode_.empty());
+}
+
+// ============================================================
+// CalculateDistance
+// ============================================================
+
+/**
+ * @tc.name: CalculateDistanceBasic001
+ * @tc.desc: Test CalculateDistance returns correct Euclidean distance (3-4-5 triangle)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, CalculateDistanceBasic001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    OffsetF pos1(0.0f, 0.0f);
+    OffsetF pos2(3.0f, 4.0f);
+    float distance = manager->CalculateDistance(pos1, pos2);
+    EXPECT_NEAR(distance, 5.0f, TEST_DISTANCE_TOLERANCE);
+}
+
+/**
+ * @tc.name: CalculateDistanceZero001
+ * @tc.desc: Test CalculateDistance returns zero for identical points
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, CalculateDistanceZero001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    OffsetF pos(5.0f, 5.0f);
+    float distance = manager->CalculateDistance(pos, pos);
+    EXPECT_NEAR(distance, 0.0f, TEST_DISTANCE_TOLERANCE);
+}
+
+// ============================================================
+// SelectBestCandidate
+// ============================================================
+
+/**
+ * @tc.name: SelectBestCandidateCloser001
+ * @tc.desc: Test SelectBestCandidate returns candidate when it is closer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SelectBestCandidateCloser001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    int32_t result = manager->SelectBestCandidate(0, true, 1, 2, 5.0f, 10.0f);
+    EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: SelectBestCandidateFarther001
+ * @tc.desc: Test SelectBestCandidate returns currentBest when candidate is farther
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SelectBestCandidateFarther001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    int32_t result = manager->SelectBestCandidate(0, true, 1, 2, 15.0f, 10.0f);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: SelectBestCandidateEqualCandidateIsCurrent001
+ * @tc.desc: Test SelectBestCandidate returns candidate when it equals currentIndex at tie
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SelectBestCandidateEqualCandidateIsCurrent001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    float dist = 10.0f;
+    int32_t result = manager->SelectBestCandidate(2, true, 1, 2, dist, dist);
+    EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: SelectBestCandidateEqualBestIsCurrent001
+ * @tc.desc: Test SelectBestCandidate returns currentBest when it equals currentIndex at tie
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SelectBestCandidateEqualBestIsCurrent001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    float dist = 10.0f;
+    int32_t result = manager->SelectBestCandidate(1, true, 1, 3, dist, dist);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: SelectBestCandidateEqualMovingDown001
+ * @tc.desc: Test SelectBestCandidate returns larger index when movingDown at tie
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SelectBestCandidateEqualMovingDown001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    float dist = 10.0f;
+    int32_t result = manager->SelectBestCandidate(0, true, 2, 5, dist, dist);
+    EXPECT_EQ(result, 5);
+}
+
+/**
+ * @tc.name: SelectBestCandidateEqualMovingUp001
+ * @tc.desc: Test SelectBestCandidate returns smaller index when moving up at tie
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, SelectBestCandidateEqualMovingUp001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    float dist = 10.0f;
+    int32_t result = manager->SelectBestCandidate(0, false, 5, 2, dist, dist);
+    EXPECT_EQ(result, 2);
+}
+
+// ============================================================
+// CalculateCrossPosition
+// ============================================================
+
+/**
+ * @tc.name: CalculateCrossPositionColZero001
+ * @tc.desc: Test CalculateCrossPosition returns zero for column 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, CalculateCrossPositionColZero001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    std::vector<double> crossLens = {100.0, 200.0};
+    float crossPos = manager->CalculateCrossPosition(0, 10.0f, crossLens, nullptr);
+    EXPECT_FLOAT_EQ(crossPos, 0.0f);
+}
+
+/**
+ * @tc.name: CalculateCrossPositionColTwo001
+ * @tc.desc: Test CalculateCrossPosition sums crossLens and gaps for column 2
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, CalculateCrossPositionColTwo001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    std::vector<double> crossLens = {100.0, 200.0};
+    float adjustedCrossGap = 10.0f;
+    float crossPos = manager->CalculateCrossPosition(2, adjustedCrossGap, crossLens, nullptr);
+    EXPECT_FLOAT_EQ(crossPos, 100.0f + 200.0f + 2.0f * adjustedCrossGap);
+}
+
+// ============================================================
+// FindMaxIndexRow
+// ============================================================
+
+/**
+ * @tc.name: FindMaxIndexRowBasic001
+ * @tc.desc: Test FindMaxIndexRow returns row containing the largest positive index
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindMaxIndexRowBasic001, TestSize.Level1)
+{
+    GridItemDragManager::SimMatrix matrix;
+    matrix[0] = { {0, 5}, {1, 3} };
+    matrix[2] = { {0, 10} };
+    int32_t result = GridItemDragManager::FindMaxIndexRow(matrix);
+    EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: FindMaxIndexRowEmpty001
+ * @tc.desc: Test FindMaxIndexRow returns 0 for empty matrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindMaxIndexRowEmpty001, TestSize.Level1)
+{
+    GridItemDragManager::SimMatrix matrix;
+    int32_t result = GridItemDragManager::FindMaxIndexRow(matrix);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: FindMaxIndexRowNegativeOnly001
+ * @tc.desc: Test FindMaxIndexRow skips negative values, returns 0 when only negatives exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindMaxIndexRowNegativeOnly001, TestSize.Level1)
+{
+    GridItemDragManager::SimMatrix matrix;
+    matrix[3] = { {0, -1}, {1, -2} };
+    int32_t result = GridItemDragManager::FindMaxIndexRow(matrix);
+    EXPECT_EQ(result, 0);
+}
+
+// ============================================================
+// FindPlacementStartRow
+// ============================================================
+
+/**
+ * @tc.name: FindPlacementStartRowEmptyMatrix001
+ * @tc.desc: Test FindPlacementStartRow with empty matrix and empty gridMatrix returns 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindPlacementStartRowEmptyMatrix001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    GridItemDragManager::SimMatrix matrix;
+    auto& info = GetLayoutInfo();
+    info.gridMatrix_.clear();
+    int32_t result = manager->FindPlacementStartRow(matrix, info);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: FindPlacementStartRowFromMatrix001
+ * @tc.desc: Test FindPlacementStartRow uses matrix when non-empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindPlacementStartRowFromMatrix001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    GridItemDragManager::SimMatrix matrix;
+    matrix[5] = { {0, 10} };
+    auto& info = GetLayoutInfo();
+    int32_t result = manager->FindPlacementStartRow(matrix, info);
+    EXPECT_EQ(result, 5);
+}
+
+// ============================================================
+// GetColSpanForIrregularItem
+// ============================================================
+
+/**
+ * @tc.name: GetColSpanForIrregularItemNullGrid001
+ * @tc.desc: Test GetColSpanForIrregularItem returns crossSpan when grid is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, GetColSpanForIrregularItemNullGrid001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_EQ(manager->GetColSpanForIrregularItem(3), 3);
+}
+
+/**
+ * @tc.name: GetColSpanForIrregularItemValidGrid001
+ * @tc.desc: Test GetColSpanForIrregularItem returns crossSpan when crossCount > 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, GetColSpanForIrregularItemValidGrid001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_EQ(manager->GetColSpanForIrregularItem(2), 2);
+}
+
+// ============================================================
+// ComputeMovementBounds
+// ============================================================
+
+/**
+ * @tc.name: ComputeMovementBoundsZeroMove001
+ * @tc.desc: Test ComputeMovementBounds with zero delta sets zeroMove flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ComputeMovementBoundsZeroMove001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto& info = GetLayoutInfo();
+    auto bounds = manager->ComputeMovementBounds(0, 0, 0, OffsetF(0.0f, 0.0f), info);
+    EXPECT_TRUE(bounds.zeroMove);
+}
+
+/**
+ * @tc.name: ComputeMovementBoundsPositiveDelta001
+ * @tc.desc: Test ComputeMovementBounds with positive delta computes correct row range
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ComputeMovementBoundsPositiveDelta001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto& info = GetLayoutInfo();
+    auto bounds = manager->ComputeMovementBounds(0, 0, 0, OffsetF(0.0f, 500.0f), info);
+    EXPECT_FALSE(bounds.zeroMove);
+    EXPECT_EQ(bounds.startRow, 0);
+    EXPECT_GT(bounds.endRow, 0);
+    EXPECT_EQ(bounds.startCol, 0);
+    EXPECT_EQ(bounds.endCol, info.crossCount_ - 1);
+}
+
+/**
+ * @tc.name: ComputeMovementBoundsNegativeDelta001
+ * @tc.desc: Test ComputeMovementBounds with negative delta computes correct bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ComputeMovementBoundsNegativeDelta001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto& info = GetLayoutInfo();
+    auto bounds = manager->ComputeMovementBounds(4, 0, 2, OffsetF(0.0f, -500.0f), info);
+    EXPECT_FALSE(bounds.zeroMove);
+    EXPECT_EQ(bounds.endRow, 2);
+    EXPECT_EQ(bounds.startRow, -3);
+}
+
+// ============================================================
+// IsRowInViewport
+// ============================================================
+
+/**
+ * @tc.name: IsRowInViewportNotInMap001
+ * @tc.desc: Test IsRowInViewport returns false for row not in lineHeightMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, IsRowInViewportNotInMap001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    EXPECT_FALSE(manager->IsRowInViewport(TEST_INVALID_ROW, 0.0f, 1000.0f, info));
+}
+
+/**
+ * @tc.name: IsRowInViewportVisibleRow001
+ * @tc.desc: Test IsRowInViewport returns true for visible row after layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, IsRowInViewportVisibleRow001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    auto grid = manager->gridNode_.Upgrade();
+    ASSERT_NE(grid, nullptr);
+    auto gridGeometry = grid->GetGeometryNode();
+    ASSERT_NE(gridGeometry, nullptr);
+    float mainSize = gridGeometry->GetFrameSize().MainSize(Axis::VERTICAL);
+    EXPECT_TRUE(manager->IsRowInViewport(0, 0.0f, mainSize, info));
+}
+
+// ============================================================
+// CancelDragOnGridChange
+// ============================================================
+
+/**
+ * @tc.name: CancelDragOnGridChangeNullGrid001
+ * @tc.desc: Test CancelDragOnGridChange returns false with null grid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, CancelDragOnGridChangeNullGrid001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_FALSE(manager->CancelDragOnGridChange());
+}
+
+// ============================================================
+// StopAutoScroll
+// ============================================================
+
+/**
+ * @tc.name: StopAutoScrollNullGrid001
+ * @tc.desc: Test StopAutoScroll does not crash with null grid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, StopAutoScrollNullGrid001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<GridItemDragManager>(nullptr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    EXPECT_NO_FATAL_FAILURE(manager->StopAutoScroll());
+}
+
+// ============================================================
+// IsItemInViewport (with non-null forEach)
+// ============================================================
+
+/**
+ * @tc.name: IsItemInViewportVisibleItem001
+ * @tc.desc: Test IsItemInViewport returns true for item in viewport with valid forEach
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, IsItemInViewportVisibleItem001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto& info = GetLayoutInfo();
+    EXPECT_TRUE(manager->IsItemInViewport(0, info));
+}
+
+/**
+ * @tc.name: IsItemInViewportOutOfRange001
+ * @tc.desc: Test IsItemInViewport returns false for index outside startIndex_..endIndex_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, IsItemInViewportOutOfRange001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto& info = GetLayoutInfo();
+    int32_t outOfRange = info.endIndex_ - manager->forEachStartIndex_ + 1;
+    EXPECT_FALSE(manager->IsItemInViewport(outOfRange, info));
+}
+
+// ============================================================
+// GetRowRangeForItem (with non-null forEach)
+// ============================================================
+
+/**
+ * @tc.name: GetRowRangeForItemFirstItem001
+ * @tc.desc: Test GetRowRangeForItem returns correct row range for item 0 with valid forEach
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, GetRowRangeForItemFirstItem001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    auto [startRow, endRow] = manager->GetRowRangeForItem(0, info);
+    EXPECT_EQ(startRow, 0);
+    EXPECT_EQ(endRow, 0);
+}
+
+/**
+ * @tc.name: GetRowRangeForItemThirdItem001
+ * @tc.desc: Test GetRowRangeForItem returns correct row range for item 2 (row 1 in 2-col grid)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, GetRowRangeForItemThirdItem001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    auto& info = GetLayoutInfo();
+    auto [startRow, endRow] = manager->GetRowRangeForItem(2, info);
+    EXPECT_EQ(startRow, 1);
+    EXPECT_EQ(endRow, 1);
+}
+
+// ============================================================
+// ScaleMainAxisNeighbor
+// ============================================================
+
+/**
+ * @tc.name: ScaleMainAxisNeighborNeighborNotFound001
+ * @tc.desc: Test ScaleMainAxisNeighbor returns false when neighbor row does not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleMainAxisNeighborNeighborNotFound001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto forEach = AceType::DynamicCast<ForEachBaseNode>(manager->forEachNode_.Upgrade());
+    ASSERT_NE(forEach, nullptr);
+    auto& info = GetLayoutInfo();
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    // Row TEST_INVALID_ROW does not exist in gridMatrix_
+    auto result = manager->ScaleMainAxisNeighbor(0, 0, 0, TEST_INVALID_ROW, 1,
+        rect, 50.0f, 0, TEST_ITEM_COUNT - 1, info, forEach);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ScaleMainAxisNeighborSelfIndex001
+ * @tc.desc: Test ScaleMainAxisNeighbor returns false when neighbor equals currentIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleMainAxisNeighborSelfIndex001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto forEach = AceType::DynamicCast<ForEachBaseNode>(manager->forEachNode_.Upgrade());
+    ASSERT_NE(forEach, nullptr);
+    auto& info = GetLayoutInfo();
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    // mainRowStep=0, so FindNeighborIndex(0+0, 0) finds item 0 which == currentIndex 0
+    auto result = manager->ScaleMainAxisNeighbor(0, 0, 0, 0, 1,
+        rect, 50.0f, 0, TEST_ITEM_COUNT - 1, info, forEach);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ScaleMainAxisNeighborScalesSuccessfully001
+ * @tc.desc: Test ScaleMainAxisNeighbor scales neighbor and returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleMainAxisNeighborScalesSuccessfully001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEachAndChildren();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto forEach = AceType::DynamicCast<ForEachBaseNode>(manager->forEachNode_.Upgrade());
+    ASSERT_NE(forEach, nullptr);
+    auto& info = GetLayoutInfo();
+    auto host = manager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    auto rect = geometry->GetMarginFrameRect();
+    // Item 0 at row 0, step=1 finds item 2 at row 1 (different center)
+    auto result = manager->ScaleMainAxisNeighbor(0, 0, 0, 1, 1,
+        rect, rect.Height(), 0, TEST_ITEM_COUNT - 1, info, forEach);
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(manager->scaleNode_.empty());
+}
+
+// ============================================================
+// ScaleCrossAxisNeighbor
+// ============================================================
+
+/**
+ * @tc.name: ScaleCrossAxisNeighborNeighborNotFound001
+ * @tc.desc: Test ScaleCrossAxisNeighbor returns false when neighbor col does not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleCrossAxisNeighborNeighborNotFound001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto forEach = AceType::DynamicCast<ForEachBaseNode>(manager->forEachNode_.Upgrade());
+    ASSERT_NE(forEach, nullptr);
+    auto& info = GetLayoutInfo();
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    // Cross step to TEST_INVALID_COL which does not exist
+    auto result = manager->ScaleCrossAxisNeighbor(0, 0, 0, TEST_INVALID_COL, 1,
+        rect, 50.0f, 0, TEST_ITEM_COUNT - 1, info, forEach);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ScaleCrossAxisNeighborOutOfRange001
+ * @tc.desc: Test ScaleCrossAxisNeighbor returns false when neighbor is out of range
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleCrossAxisNeighborOutOfRange001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto forEach = AceType::DynamicCast<ForEachBaseNode>(manager->forEachNode_.Upgrade());
+    ASSERT_NE(forEach, nullptr);
+    auto& info = GetLayoutInfo();
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    // endIdx=0 means only item 0 is valid; item 1 at col 1 is out of range
+    auto result = manager->ScaleCrossAxisNeighbor(0, 0, 0, 1, 1,
+        rect, 50.0f, 0, 0, info, forEach);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ScaleCrossAxisNeighborScalesSuccessfully001
+ * @tc.desc: Test ScaleCrossAxisNeighbor scales neighbor in same row and returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleCrossAxisNeighborScalesSuccessfully001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEachAndChildren();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto forEach = AceType::DynamicCast<ForEachBaseNode>(manager->forEachNode_.Upgrade());
+    ASSERT_NE(forEach, nullptr);
+    auto& info = GetLayoutInfo();
+    auto host = manager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    auto rect = geometry->GetMarginFrameRect();
+    // Item 0 at (row=0, col=0), step=1 finds item 1 at (row=0, col=1), same row
+    auto result = manager->ScaleCrossAxisNeighbor(0, 0, 0, 1, 1,
+        rect, rect.Width(), 0, TEST_ITEM_COUNT - 1, info, forEach);
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(manager->scaleNode_.empty());
+}
+
+// ============================================================
+// ScaleDiagonalNeighbor
+// ============================================================
+
+/**
+ * @tc.name: ScaleDiagonalNeighborNeighborNotFound001
+ * @tc.desc: Test ScaleDiagonalNeighbor does not crash when neighbor does not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleDiagonalNeighborNeighborNotFound001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEach();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto forEach = AceType::DynamicCast<ForEachBaseNode>(manager->forEachNode_.Upgrade());
+    ASSERT_NE(forEach, nullptr);
+    auto& info = GetLayoutInfo();
+    RectF rect(0.0f, 0.0f, 100.0f, 100.0f);
+    OffsetF delta(10.0f, 10.0f);
+    EXPECT_NO_FATAL_FAILURE(manager->ScaleDiagonalNeighbor(0, 0, 0, TEST_INVALID_ROW, TEST_INVALID_COL,
+        rect, delta, 0, TEST_ITEM_COUNT - 1, info, forEach));
+}
+
+/**
+ * @tc.name: ScaleDiagonalNeighborScalesSuccessfully001
+ * @tc.desc: Test ScaleDiagonalNeighbor scales diagonal neighbor when main and cross both valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, ScaleDiagonalNeighborScalesSuccessfully001, TestSize.Level1)
+{
+    auto manager = CreateDragManagerWithForEachAndChildren();
+    ASSERT_NE(manager, nullptr);
+    manager->axis_ = Axis::VERTICAL;
+    auto forEach = AceType::DynamicCast<ForEachBaseNode>(manager->forEachNode_.Upgrade());
+    ASSERT_NE(forEach, nullptr);
+    auto& info = GetLayoutInfo();
+    auto host = manager->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometry = host->GetGeometryNode();
+    ASSERT_NE(geometry, nullptr);
+    auto rect = geometry->GetMarginFrameRect();
+    // Item 0 at (0,0), step (1,1) finds item 3 at (1,1)
+    OffsetF delta(rect.Width(), rect.Height());
+    EXPECT_NO_FATAL_FAILURE(manager->ScaleDiagonalNeighbor(0, 0, 0, 1, 1,
+        rect, delta, 0, TEST_ITEM_COUNT - 1, info, forEach));
+    EXPECT_FALSE(manager->scaleNode_.empty());
 }
 
 } // namespace OHOS::Ace::NG
