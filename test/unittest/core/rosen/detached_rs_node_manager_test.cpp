@@ -30,6 +30,7 @@
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
@@ -47,12 +48,14 @@ public:
         auto& mgr = DetachedRsNodeManager::GetInstance();
         std::lock_guard<std::mutex> lock(mgr.registeredMutex_);
         mgr.registeredInstances_.clear();
+        mgr.externalClearRegistered_ = false;
     }
     void TearDown() override
     {
         auto& mgr = DetachedRsNodeManager::GetInstance();
         std::lock_guard<std::mutex> lock(mgr.registeredMutex_);
         mgr.registeredInstances_.clear();
+        mgr.externalClearRegistered_ = false;
     }
 
     static void SetUpFullEnvironment(bool withWindow)
@@ -236,6 +239,30 @@ HWTEST_F(DetachedRsNodeManagerTest, RegisterPreFreezeInstance_AllBranches, TestS
     mgr.UnregisterPreFreezeInstance(id1);
     EXPECT_TRUE(mgr.registeredInstances_.empty());
     mgr.externalClearRegistered_ = false;
+
+    // Branch 5: MockFrontend returns false (base class default, SetExternalClearCallback not supported)
+    SetUpFullEnvironment(false);
+    auto mockFrontend = AceType::MakeRefPtr<NiceMock<MockFrontend>>();
+    EXPECT_CALL(*MockContainer::Current(), GetFrontend())
+        .WillRepeatedly(Return(mockFrontend));
+    mgr.RegisterPreFreezeInstance(id1);
+    EXPECT_EQ(mgr.registeredInstances_.count(id1), 1);
+    EXPECT_FALSE(mgr.externalClearRegistered_);
+    mgr.UnregisterPreFreezeInstance(id1);
+    TearDownFullEnvironment();
+
+    // Branch 6: MockFrontend SetExternalClearCallback returns true
+    SetUpFullEnvironment(true);
+    auto mockFrontendTrue = AceType::MakeRefPtr<NiceMock<MockFrontend>>();
+    EXPECT_CALL(*MockContainer::Current(), GetFrontend())
+        .WillRepeatedly(Return(mockFrontendTrue));
+    EXPECT_CALL(*mockFrontendTrue, SetExternalClearCallback(_))
+        .WillOnce(Return(true));
+    mgr.RegisterPreFreezeInstance(id1);
+    EXPECT_EQ(mgr.registeredInstances_.count(id1), 1);
+    EXPECT_TRUE(mgr.externalClearRegistered_);
+    mgr.UnregisterPreFreezeInstance(id1);
+    TearDownFullEnvironment();
 }
 
 /**

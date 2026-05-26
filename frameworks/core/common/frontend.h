@@ -479,6 +479,11 @@ public:
     virtual void NotifyArkoalaConfigurationChange(bool isNeedUpdate) {}
     virtual void InitXBarProxy() {}
 
+    virtual bool SetExternalClearCallback(std::function<void()>&& func)
+    {
+        return false;
+    }
+
     // Create ArkTS dynamic page in ArkTS static
     virtual void* CreateDynamicPage(int32_t pageId, const std::string& url, const std::string& params, bool recoverable)
     {
