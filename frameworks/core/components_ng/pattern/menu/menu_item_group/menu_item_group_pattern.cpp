@@ -207,7 +207,7 @@ void MenuItemGroupPattern::ModifyDividerColor(const RefPtr<FrameNode> &host, con
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         paintProperty->UpdateDividerColor(dividerColor);
     } else {
         if (dividerColor != Color::FOREGROUND) {
@@ -357,7 +357,7 @@ bool MenuItemGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
         return false;
     }
     UpdateFooterColor();

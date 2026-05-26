@@ -1409,7 +1409,7 @@ int32_t MenuView::UpdateNodeThemeScopeId(
     const RefPtr<FrameNode> &node, int32_t targetId, const std::string& targetTag, bool isColorModeFollowTarget)
 {
     CHECK_NULL_RETURN(node, 0);
-    if (node->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !isColorModeFollowTarget) {
+    if (!node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !isColorModeFollowTarget) {
         return 0;
     }
     auto targetNode = FrameNode::GetFrameNodeOnly(targetTag, targetId);
@@ -2308,7 +2308,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
 static void NodeThemeScopeIdUpdate(
     const RefPtr<FrameNode>& node, int32_t themeScopeId, bool isColorModeFollowTarget = true)
 {
-    if (node->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return;
     }
     if (isColorModeFollowTarget) {
