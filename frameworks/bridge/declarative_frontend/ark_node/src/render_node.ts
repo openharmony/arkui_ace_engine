@@ -179,8 +179,11 @@ class LengthMetrics {
     this.updateValue();
     return this.value_;
   }
-  get unit() : LengthUnit {
+  get unit(): LengthUnit {
     return this.unit_;
+  }
+  get res(): Resource | undefined {
+    return this.res_;
   }
   public autoRefresh(value: boolean): LengthMetrics {
     this.autoRefresh_ = value;
