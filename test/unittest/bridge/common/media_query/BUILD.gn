@@ -27,12 +27,10 @@ ace_unittest("media_query_test_ng") {
     sources = []
     sources = [
       "media_query_test_min.cpp",
-      "media_query_test_core.cpp",
     ]
   } else {
     sources += [
       "media_query_test_min.cpp",
-      "media_query_test_core.cpp",
     ]
   }
 }
