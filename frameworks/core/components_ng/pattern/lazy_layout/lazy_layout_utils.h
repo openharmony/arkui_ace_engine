@@ -33,7 +33,10 @@ struct WaterFlowAncestorInfo {
 struct ACE_FORCE_EXPORT LazyLayoutUtils {
     static bool IsAllowedIntermediateNode(const RefPtr<UINode>& node);
     static bool IsVerticalScrollableParent(const RefPtr<UINode>& node);
+    static bool IsScrollableParent(const RefPtr<UINode>& node, Axis axis);
     static void ValidateLazyLayoutParent(const RefPtr<FrameNode>& host, const std::string& componentName);
+    static void ValidateLazyLayoutParentWithAxis(
+        const RefPtr<FrameNode>& host, const std::string& componentName, Axis axis);
     static std::optional<ViewPosReference> GetViewPosReference(
         const RefPtr<FrameNode>& frameNode,
         const std::vector<std::string>& extraAllowedTags = {});

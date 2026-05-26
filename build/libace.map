@@ -3330,6 +3330,8 @@
       construction?vtable?for?OHOS::Ace::NG::LayoutProperty-in-OHOS::Ace::NG::LinearLayoutProperty;
       construction?vtable?for?OHOS::Ace::NG::LayoutProperty-in-OHOS::Ace::NG::MovingPhotoLayoutProperty;
       construction?vtable?for?OHOS::Ace::NG::LayoutWrapper-in-OHOS::Ace::NG::MovingPhotoNode;
+      construction?vtable?for?OHOS::Ace::NG::LazyLayoutPattern-in-OHOS::Ace::NG::LazyDynamicLayoutPattern;
+      construction?vtable?for?OHOS::Ace::NG::LazyLayoutPattern-in-OHOS::Ace::NG::LazyGridLayoutPattern;
       construction?vtable?for?OHOS::Ace::NG::UINode-in-OHOS::Ace::NG::MovingPhotoNode;
       construction?vtable?for?OHOS::Ace::ScheduleTask-in-OHOS::Ace::Scheduler;
       construction?vtable?for?OHOS::Ace::UIServiceStub-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
@@ -4131,6 +4133,7 @@
       vtable?for?OHOS::Ace::NG::ImageSpanItem;
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
       vtable?for?OHOS::Ace::NG::LayoutProperty;
+      vtable?for?OHOS::Ace::NG::LazyDynamicLayoutPattern;
       vtable?for?OHOS::Ace::NG::LazyGridLayoutPattern;
       vtable?for?OHOS::Ace::NG::LinearLayoutAlgorithm;
       vtable?for?OHOS::Ace::NG::LinearLayoutProperty;
@@ -4277,6 +4280,7 @@
       VTT?for?OHOS::Ace::NG::GestureGroup;
       VTT?for?OHOS::Ace::NG::ImageSpanItem;
       VTT?for?OHOS::Ace::NG::LayoutProperty;
+      VTT?for?OHOS::Ace::NG::LazyDynamicLayoutPattern;
       VTT?for?OHOS::Ace::NG::LazyGridLayoutPattern;
       VTT?for?OHOS::Ace::NG::ListItemPattern;
       VTT?for?OHOS::Ace::NG::ListPattern;

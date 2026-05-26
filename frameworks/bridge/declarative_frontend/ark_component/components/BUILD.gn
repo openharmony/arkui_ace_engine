@@ -46,6 +46,7 @@ arkui_components_modules = ["containerreader",]
 
 arkui_modules = [
   "dynamiclayout",
+  "lazydynamiclayout",
   "flowitem",
   "sidebarcontainer",
   "checkbox",

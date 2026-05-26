@@ -136,7 +136,7 @@ private:
         bool needAlign = false, float rowHeight = 0.0f, Alignment align = Alignment::TOP_CENTER);
     void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     // cached
-    void LayoutCachedItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
+    virtual void LayoutCachedItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void LayoutCachedItemsForward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void LayoutCachedItemsBackward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     bool InitPredictForwardState(int32_t& currIndex, int32_t& currLane,

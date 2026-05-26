@@ -16,11 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_DYNAMIC_LAYOUT_ALGORITHM_PARAM_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_DYNAMIC_LAYOUT_ALGORITHM_PARAM_BASE_H
 
+#include <algorithm>
 #include <optional>
+#include <vector>
 #include "base/geometry/calc_dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_offset.h"
+#include "ui/base/geometry/axis.h"
 #include "ui/properties/flex.h"
 
 namespace OHOS::Ace::NG {
@@ -140,6 +144,88 @@ public:
 private:
     DynamicLayoutAlgorithmFunc onMeasureSizeFunc_;
     DynamicLayoutAlgorithmFunc onPlaceChildrenFunc_;
+};
+
+using OnVisibleIndexesChangeEvent = std::function<void(const std::vector<int32_t>&)>;
+
+class ACE_EXPORT LazyCustomLayoutAlgorithmParam: public CustomLayoutAlgorithmParam {
+    DECLARE_ACE_TYPE(LazyCustomLayoutAlgorithmParam, CustomLayoutAlgorithmParam);
+public:
+    LazyCustomLayoutAlgorithmParam() = default;
+
+    void SetAxis(Axis axis)
+    {
+        axis_ = axis;
+    }
+
+    Axis GetAxis() const
+    {
+        return axis_;
+    }
+
+    void SetOnVisibleIndexesChange(OnVisibleIndexesChangeEvent&& onVisibleIndexesChange)
+    {
+        onVisibleIndexesChangeEvent_ = std::move(onVisibleIndexesChange);
+    }
+
+    const OnVisibleIndexesChangeEvent& GetOnVisibleIndexesChange() const
+    {
+        return onVisibleIndexesChangeEvent_;
+    }
+
+    bool HasOnVisibleIndexesChange() const
+    {
+        return static_cast<bool>(onVisibleIndexesChangeEvent_);
+    }
+
+    void FireOnVisibleIndexesChange(const std::vector<int32_t>& indexes) const
+    {
+        if (onVisibleIndexesChangeEvent_) {
+            onVisibleIndexesChangeEvent_(indexes);
+        }
+    }
+
+    void SetAdjustedOffset(float offset)
+    {
+        devAdjustedOffset_ = offset;
+    }
+
+    float GetAdjustedOffset() const
+    {
+        return devAdjustedOffset_;
+    }
+
+    void SetAdjustOffset(AdjustOffset offset)
+    {
+        adjustOffset_ = offset;
+    }
+
+    AdjustOffset GetAdjustOffset() const
+    {
+        return adjustOffset_;
+    }
+
+    void SetInActiveChildren(const std::vector<int32_t>& children)
+    {
+        inActiveChildren_ = children;
+    }
+
+    const std::vector<int32_t>& GetInActiveChildren() const
+    {
+        return inActiveChildren_;
+    }
+
+    bool IsChildInActive(int32_t index) const
+    {
+        return std::find(inActiveChildren_.begin(), inActiveChildren_.end(), index) != inActiveChildren_.end();
+    }
+
+private:
+    Axis axis_ = Axis::VERTICAL;
+    OnVisibleIndexesChangeEvent onVisibleIndexesChangeEvent_;
+    float devAdjustedOffset_ = 0.0f; // adjusted offset set by developer
+    AdjustOffset adjustOffset_;
+    std::vector<int32_t> inActiveChildren_;
 };
 
 // Grid layout algorithm parameters

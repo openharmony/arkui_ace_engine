@@ -1164,6 +1164,7 @@ public:
     void DoSetActiveChildRange(
         int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
+    void RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes);
     const std::string& GetHostTag() const override
     {
         return GetTag();
