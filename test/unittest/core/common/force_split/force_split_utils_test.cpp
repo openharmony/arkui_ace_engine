@@ -64,7 +64,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig001, TestSize.Level1)
 {
     std::string configStr = "";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     config.homePage = "HomePage";
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
@@ -80,7 +80,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig002, TestSize.Level1)
 {
     std::string configStr = "{";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -94,7 +94,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig003, TestSize.Level1)
 {
     std::string configStr = "[ ]";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -108,7 +108,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig004, TestSize.Level1)
 {
     std::string configStr = "{ \"enableReducedContainerSize\": true }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     config.isArkUIHookEnabled = false;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
@@ -125,7 +125,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig005, TestSize.Level1)
 {
     std::string configStr = "{ \"homePage\": 1 }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -140,7 +140,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig006, TestSize.Level1)
 {
     std::string configStr = "{ \"relatedPage\": 1 }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -157,7 +157,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig007, TestSize.Level1)
         "\"dialogSupportSplit\": false, \"homeNavigationId\": true, \"homeNavigationDepth\": \"3\", "
         "\"navigationDisablePlaceholder\": true, \"navigationDisableDivider\": true }";
     bool isRouterSplit = ROUTER_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.isArkUIHookEnabled);
@@ -180,7 +180,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig008, TestSize.Level1)
 {
     std::string configStr = "{ \"fullScreenPages\": {} }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -194,7 +194,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig009, TestSize.Level1)
 {
     std::string configStr = "{ \"fullScreenPages\": [\"DetailPage\", 1, \"\"] }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_EQ(config.fullScreenPages.size(), 1);
@@ -211,7 +211,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig010, TestSize.Level1)
 {
     std::string configStr = "{ \"splitDividerColor\": [] }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -225,7 +225,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig011, TestSize.Level1)
 {
     std::string configStr = "{ \"splitDividerColor\": { \"light\": \"#FFFF0000\", \"dark\": \"#FF00FF00\" } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     ASSERT_TRUE(config.splitDividerColorLight.has_value());
@@ -243,7 +243,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig012, TestSize.Level1)
 {
     std::string configStr = "{ \"splitDividerColor\": { \"light\": \"ABCD\", \"dark\": \"ABCD\" } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     ASSERT_TRUE(config.splitDividerColorLight.has_value());
@@ -261,7 +261,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig013, TestSize.Level1)
 {
     std::string configStr = "{ \"splitDividerColor\": { \"light\": 1, \"dark\": 2 } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
     EXPECT_FALSE(config.splitDividerColorLight.has_value());
@@ -277,7 +277,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig014, TestSize.Level1)
 {
     std::string configStr = "{ \"wideSplit\": { \"ratio\": \"1 | 2\" } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     ASSERT_TRUE(config.wideSplitRatio.has_value());
@@ -293,7 +293,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig015, TestSize.Level1)
 {
     std::string configStr = "{ \"squareSplit\": { \"ratio\": \"1 | 1\" } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     ASSERT_TRUE(config.squareSplitRatio.has_value());
@@ -310,7 +310,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig016, TestSize.Level1)
     std::string configStr = "{ \"wideSplit\": { \"ratio\": \"100 | 1\" },"
                             "\"squareSplit\": { \"ratio\": \"1 | 100\" } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     ASSERT_TRUE(config.wideSplitRatio.has_value());
@@ -328,7 +328,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig017, TestSize.Level1)
 {
     std::string configStr = "{ \"wideSplit\": { \"ratio\": \"12\" } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -342,7 +342,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig018, TestSize.Level1)
 {
     std::string configStr = "{ \"wideSplit\": { \"ratio\": \"0 | 1\" } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -356,7 +356,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig019, TestSize.Level1)
 {
     std::string configStr = "{ \"wideSplit\": {} }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_FALSE(config.wideSplitRatio.has_value());
@@ -371,7 +371,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig020, TestSize.Level1)
 {
     std::string configStr = "{ \"mode\": \"1\" }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -385,7 +385,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig021, TestSize.Level1)
 {
     std::string configStr = "{ \"mode\": 2 }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -399,7 +399,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig022, TestSize.Level1)
 {
     std::string configStr = "{ \"pagePairs\": {} }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -420,7 +420,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig023, TestSize.Level1)
         "{ \"from\": \"PageD\" },"
         "1 ], \"transPages\": [\"TransitionPage\", \"\", 1] }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_EQ(config.behaviorMode, NG::ForceSplitBehaviorMode::NAVIGATION);
@@ -440,7 +440,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig024, TestSize.Level1)
 {
     std::string configStr = "{ \"transPages\": {} }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -455,7 +455,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig025, TestSize.Level1)
 {
     std::string configStr = "{ \"homeNavigationId\": true }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
     EXPECT_FALSE(config.navigationId.has_value());
@@ -471,7 +471,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig026, TestSize.Level1)
 {
     std::string configStr = "{ \"homeNavigationDepth\": \"3\" }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
     EXPECT_FALSE(config.navigationDepth.has_value());
@@ -486,7 +486,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig027, TestSize.Level1)
 {
     std::string configStr = "{ \"navigationDisablePlaceholder\": 1 }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -500,7 +500,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig028, TestSize.Level1)
 {
     std::string configStr = "{ \"navigationDisableDivider\": 1 }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_FALSE(ret);
 }
@@ -517,7 +517,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig029, TestSize.Level1)
         "\"homeNavigationId\": \"mainNav\", \"homeNavigationDepth\": 3, "
         "\"navigationDisablePlaceholder\": true, \"navigationDisableDivider\": true }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.isArkUIHookEnabled);
@@ -542,7 +542,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig030, TestSize.Level1)
         "{ \"homePage\": \"\", \"relatedPage\": \"\", \"homeNavigationId\": \"\", \"wideSplit\": {}, "
         "\"dialogSupportSplit\": true }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     config.homePage = "HomePage";
     config.relatedPage = "RelatedPage";
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);

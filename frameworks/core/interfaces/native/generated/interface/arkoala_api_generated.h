@@ -3649,8 +3649,6 @@ typedef struct Ark_Union_Length_GutterOption Ark_Union_Length_GutterOption;
 typedef struct Opt_Union_Length_GutterOption Opt_Union_Length_GutterOption;
 typedef struct Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
 typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
-typedef struct Ark_Union_MouseEvent_TouchEventProxy_KeyEvent Ark_Union_MouseEvent_TouchEventProxy_KeyEvent;
-typedef struct Opt_Union_MouseEvent_TouchEventProxy_KeyEvent Opt_Union_MouseEvent_TouchEventProxy_KeyEvent;
 typedef struct Ark_Union_PickerTextStyle_TextPickerTextStyle Ark_Union_PickerTextStyle_TextPickerTextStyle;
 typedef struct Opt_Union_PickerTextStyle_TextPickerTextStyle Opt_Union_PickerTextStyle_TextPickerTextStyle;
 typedef struct Ark_CalendarDialogOptions Ark_CalendarDialogOptions;
@@ -23543,19 +23541,6 @@ typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions
     Ark_Tag tag;
     Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions value;
 } Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
-typedef struct Ark_Union_MouseEvent_TouchEventProxy_KeyEvent {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_MouseEvent value0;
-        Ark_TouchEventProxy value1;
-        Ark_KeyEvent value2;
-    };
-} Ark_Union_MouseEvent_TouchEventProxy_KeyEvent;
-typedef struct Opt_Union_MouseEvent_TouchEventProxy_KeyEvent {
-    Ark_Tag tag;
-    Ark_Union_MouseEvent_TouchEventProxy_KeyEvent value;
-} Opt_Union_MouseEvent_TouchEventProxy_KeyEvent;
 typedef struct Ark_Union_PickerTextStyle_TextPickerTextStyle {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -31002,7 +30987,7 @@ typedef struct GENERATED_ArkUIRadialGradientStyleAccessor {
 
 typedef struct GENERATED_ArkUIRawInputEventWrapperAccessor {
     void (*destroyPeer)(Ark_RawInputEventWrapper peer);
-    Ark_RawInputEventWrapper (*construct)(const Ark_Union_MouseEvent_TouchEventProxy_KeyEvent* event);
+    Ark_RawInputEventWrapper (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isMouseEvent)(Ark_RawInputEventWrapper peer);
     Ark_Boolean (*isTouchEvent)(Ark_RawInputEventWrapper peer);

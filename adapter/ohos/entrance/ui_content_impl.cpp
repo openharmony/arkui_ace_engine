@@ -5896,7 +5896,7 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& s
         return;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "forceSplit is supported.");
-    NG::ForceSplitConfig config;
+    NG::ForceSplitParam config;
     if (!NG::ForceSplitUtils::ParseForceSplitConfig(splitConfig->isRouter, splitConfig->configJsonStr, config)) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
         return;
