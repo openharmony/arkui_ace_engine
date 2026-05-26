@@ -2616,6 +2616,22 @@ void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
     RequestNextFrame();
 }
 
+void RosenRenderContext::UpdateMaterialInteractionEffect(float scaleX, float scaleY, float offsetX, float offsetY)
+{
+    FREE_RS_CONTEXT_CHECK(UpdateMaterialInteractionEffect, scaleX, scaleY, offsetX, offsetY);
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector2f xyTranslateValue { offsetX, offsetY };
+    Rosen::Vector2f xyScaleValue { scaleX, scaleY };
+
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
+        Rosen::Vector2f>(materialInteractionEffectModifier_, xyTranslateValue);
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+        Rosen::Vector2f>(materialInteractionEffectModifier_, xyScaleValue);
+
+    NotifyHostTransformUpdated();
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
 {
     FREE_RS_CONTEXT_CHECK(OnTransformMatrixUpdate, matrix);
