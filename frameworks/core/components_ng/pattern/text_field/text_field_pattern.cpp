@@ -8298,7 +8298,8 @@ void TextFieldPattern::SetSelectionFlag(
         NotifyOnEditChanged(true);
     }
     SetIsSingleHandle(!IsSelected());
-    if (!IsShowHandle()) {
+    bool forceShowHandle = options.has_value() ? options.value().forceShowHandle : false;
+    if (!IsShowHandle() && !forceShowHandle) {
         CloseSelectOverlay(true);
     } else {
         isShowMenu = IsShowMenu(options, isShowMenu);

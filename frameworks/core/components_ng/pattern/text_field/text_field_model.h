@@ -204,6 +204,7 @@ enum class CancelButtonStyle {
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
     HandlePolicy handlePolicy = HandlePolicy::DEFAULT;
+    bool forceShowHandle = false; // Used to force show the selection menu when stylus selects text on PC.
 };
 
 enum class PreviewTextStyle {

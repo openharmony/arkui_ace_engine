@@ -793,4 +793,67 @@ HWTEST_F(TextInputMenuTestNg, SetTextSelection009, TestSize.Level1)
     ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: ForceShowHandle001
+ * @tc.desc: Test SetSelectionFlag with forceShowHandle when IsShowHandle returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputMenuTestNg, ForceShowHandle001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
+
+    auto theme = GetTheme();
+    ASSERT_NE(theme, nullptr);
+    theme->textfieldShowHandle_ = true;
+    EXPECT_FALSE(pattern_->IsShowHandle());
+
+    auto start = 0;
+    auto end = 5;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    options.forceShowHandle = true;
+    pattern_->SetSelectionFlag(start, end, options);
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_TRUE(ret);
+
+    theme->textfieldShowHandle_ = false;
+}
+
+/**
+ * @tc.name: ForceShowHandle002
+ * @tc.desc: Test SetSelectionFlag without forceShowHandle when IsShowHandle returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputMenuTestNg, ForceShowHandle002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
+
+    auto theme = GetTheme();
+    ASSERT_NE(theme, nullptr);
+    theme->textfieldShowHandle_ = true;
+    EXPECT_FALSE(pattern_->IsShowHandle());
+
+    auto start = 0;
+    auto end = 5;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    pattern_->SetSelectionFlag(start, end, options);
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_FALSE(ret);
+
+    theme->textfieldShowHandle_ = false;
+}
 } // namespace OHOS::Ace::NG
