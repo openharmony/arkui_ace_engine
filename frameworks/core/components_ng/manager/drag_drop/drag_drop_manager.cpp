@@ -2829,14 +2829,7 @@ void DragDropManager::DragStartAnimation(
         StartDragTransitionAnimation(newOffset, option, overlayManager, animateProperty, point);
     }
     if (info_.disableArkuiAnimation) {
-        renderContext->UpdateOpacity(0.0f);
-        auto overlayManager = GetDragAnimationOverlayManager(containerId);
-        CHECK_NULL_VOID(overlayManager);
-        auto gatherNode = overlayManager->GetGatherNode();
-        CHECK_NULL_VOID(gatherNode);
-        auto gatherNodeRender = gatherNode->GetRenderContext();
-        CHECK_NULL_VOID(gatherNodeRender);
-        gatherNodeRender->UpdateOpacity(0.0f);
+        DisableArkuiAnimation(containerId, renderContext);
     }
 }
 
@@ -2895,6 +2888,25 @@ void DragDropManager::StartDragTransitionAnimation(const Offset& newOffset, Anim
     auto pipeline = info_.relativeContainerNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->Animate(option, option.GetCurve(), callback, option.GetOnFinishEvent());
+}
+
+void DragDropManager::DisableArkuiAnimation(int32_t containerId, const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateOpacity(0.0f);
+    auto overlayManager = GetDragAnimationOverlayManager(containerId);
+    CHECK_NULL_VOID(overlayManager);
+    auto gatherNode = overlayManager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto gatherNodeRender = gatherNode->GetRenderContext();
+    CHECK_NULL_VOID(gatherNodeRender);
+    gatherNodeRender->UpdateOpacity(0.0f);
+    auto badgeNode = overlayManager->GetDragPixelMapBadgeNode();
+    if (badgeNode) {
+        auto badgeNodeRender = badgeNode->GetRenderContext();
+        CHECK_NULL_VOID(badgeNodeRender);
+        badgeNodeRender->UpdateOpacity(0.0f);
+    }
 }
 
 void DragDropManager::HandleStartDragAnimationFinish(int32_t containerId)
