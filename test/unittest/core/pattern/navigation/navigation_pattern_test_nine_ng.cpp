@@ -1212,7 +1212,7 @@ HWTEST_F(NavigationPatternTestNineNg, RebuildSplitDisplayNodes005, TestSize.Leve
  * @tc.desc: Branch: hasHomePage && idx == topNodeIndex && idx != homePageIndex => true
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestEightNg, AdjustNodeForSplitDisplayReconfigure001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestNineNg, AdjustNodeForSplitDisplayReconfigure001, TestSize.Level1)
 {
     auto context = CreateNavigationTestContext(true);
     ASSERT_NE(context.navNode, nullptr);
