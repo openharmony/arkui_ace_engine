@@ -7540,7 +7540,7 @@ struct ArkUISearchModifier {
     void (*setSearchDefaultIcon)(ArkUINodeHandle node);
     void (*resetSearchSearchIcon)(ArkUINodeHandle node);
     void (*setSearchSearchButton)(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
-        ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView);
+        const ArkUI_InnerColor* fontColor, ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView);
     void (*resetSearchSearchButton)(ArkUINodeHandle node);
     void (*setSearchFontColor)(ArkUINodeHandle node, const ArkUI_InnerColor* value, void* resRawPtr);
     void (*resetSearchFontColor)(ArkUINodeHandle node);

@@ -325,16 +325,17 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     UnRegisterResource("placeholderColor");
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    Color color = theme->GetPlaceholderColor();
+    Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor", resourceObject)) {
+    if (!info[0]->IsUndefined() && !info[0]->IsNull() &&
+        ParseJsColorForMaterial(info[0], color, resourceObject)) {
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("placeholderColor", resourceObject, color);
+        }
+        TextFieldModel::GetInstance()->SetPlaceholderColor(color);
+    } else {
         TextFieldModel::GetInstance()->ResetPlaceholderColor();
-        return;
     }
-    if (SystemProperties::ConfigChangePerform() && resourceObject) {
-        RegisterResource<Color>("placeholderColor", resourceObject, color);
-    }
-    TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
 void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
@@ -744,14 +745,15 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     RefPtr<ResourceObject> resourceObject;
     UnRegisterResource("fontColor");
-    if (!ParseJsColor(info[0], textColor, resourceObject)) {
+    if (!info[0]->IsUndefined() && !info[0]->IsNull() &&
+        ParseJsColorForMaterial(info[0], textColor, resourceObject)) {
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("fontColor", resourceObject, textColor);
+        }
+        TextFieldModel::GetInstance()->SetTextColor(textColor);
+    } else {
         TextFieldModel::GetInstance()->ResetTextColor();
-        return;
     }
-    if (SystemProperties::ConfigChangePerform() && resourceObject) {
-        RegisterResource<Color>("fontColor", resourceObject, textColor);
-    }
-    TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
 
 void JSTextField::SetWordBreak(const JSCallbackInfo& info)
