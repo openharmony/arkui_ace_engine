@@ -708,7 +708,8 @@ bool ListPattern::UpdateEndListItemIndex()
     int32_t endArea = -1;
     int32_t endItemIndexInGroup = -1;
     bool endFlagChanged = (endInfo_.index != endIndex_);
-    bool endIsGroup = endWrapper && endWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    bool endIsGroup =
+        endWrapper && endWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG && endWrapper->GetHostNode();
     if (endIsGroup) {
         auto endPattern = endWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo endGroupInfo = GetEndListItemIndex(endPattern);
