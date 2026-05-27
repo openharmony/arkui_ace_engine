@@ -858,6 +858,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest033, TestSize.Leve
     /**
      * @tc.steps: step2. Test UpdateGatherAnimatePosition function with FrameNode.
      */
+    renderContext->UpdatePaintRect(RectF(POINT_X, POINT_Y, WIDTH, HEIGHT));
+    EXPECT_EQ(renderContext->GetPaintRectWithoutTransform().GetOffset(), OffsetF(POINT_X, POINT_Y));
+
     auto tempOffset = OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f));
     auto targetOffset = OffsetT<Dimension>(Dimension(COORDINATE_OFFSET.GetX()), Dimension(COORDINATE_OFFSET.GetY()));
     EXPECT_EQ(renderContext->GetPositionValue(tempOffset), tempOffset);
@@ -958,5 +961,36 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetFilterTest001, TestSize.Level1)
     MockContainer::TearDown();
     EXPECT_EQ(manager->hasFilter_, false);
     manager->rootNodeWeak_ = tmpRootNode;
+}
+
+/**
+ * @tc.name: UpdateGatherAnimatePosition001
+ * @tc.desc: Test UpdateGatherAnimatePosition with zero offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, UpdateGatherAnimatePosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a FrameNode with ImagePattern.
+     */
+    auto gatherNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(gatherNode, nullptr);
+    auto renderContext = gatherNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateGatherAnimatePosition with zero offset.
+     * @tc.expected: Position is updated to zero offset.
+     */
+    auto tempOffset = OffsetT<Dimension>(Dimension(POINT_X), Dimension(POINT_Y));
+    auto targetOffset = OffsetT<Dimension>(Dimension(GESTURE_EVENT_PROPERTY_DEFAULT_VALUE),
+        Dimension(GESTURE_EVENT_PROPERTY_DEFAULT_VALUE));
+
+    DragEventActuator::UpdateGatherAnimatePosition(
+        gatherNode, OffsetF(GESTURE_EVENT_PROPERTY_DEFAULT_VALUE, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE));
+
+    EXPECT_EQ(renderContext->GetPositionValue(tempOffset), targetOffset);
 }
 } // namespace OHOS::Ace::NG
