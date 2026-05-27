@@ -15012,7 +15012,7 @@ HWTEST_F(NativeNodeTest, FocusRequest_NullNode, TestSize.Level1)
     EXPECT_EQ(result, ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT);
 }
 
-HWTEST_F(NativeNodeTest, FocusRequest_NullNode, TestSize.Level1)
+HWTEST_F(NativeNodeTest, VisibleAreaEventOptions_GetMeasureFromViewport_NullOption, TestSize.Level1)
 {
     auto result = OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(nullptr);
     EXPECT_EQ(result, false);
