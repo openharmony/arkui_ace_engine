@@ -288,8 +288,12 @@ int32_t OH_ArkUI_ListItemSwipeAction_Expand(ArkUI_NodeHandle node, ArkUI_ListIte
     CHECK_NULL_RETURN_WITH_MESSAGE(
         fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND, __FUNCTION__, "native module not initialized");
 
-    return fullImpl->getNodeModifiers()->getListItemModifier()->expand(
+    auto errorCode = fullImpl->getNodeModifiers()->getListItemModifier()->expand(
         node->uiNodeHandle, static_cast<int32_t>(direction));
+    if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return errorCode;
 }
 
 int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node)
@@ -299,7 +303,11 @@ int32_t OH_ArkUI_ListItemSwipeAction_Collapse(ArkUI_NodeHandle node)
     CHECK_NULL_RETURN_WITH_MESSAGE(
         fullImpl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND, __FUNCTION__, "native module not initialized");
 
-    return fullImpl->getNodeModifiers()->getListItemModifier()->collapse(node->uiNodeHandle);
+    auto errorCode = fullImpl->getNodeModifiers()->getListItemModifier()->collapse(node->uiNodeHandle);
+    if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
+    }
+    return errorCode;
 }
 #ifdef __cplusplus
 };
