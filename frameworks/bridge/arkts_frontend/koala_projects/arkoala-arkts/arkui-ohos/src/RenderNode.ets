@@ -542,6 +542,11 @@ export class RenderNode implements MaterializedBase {
         if (this.isDisposed()) {
             return;
         }
+        if (this.peer?.ptr) {
+            ArkUIAniModule._FireArkUIObjectLifecycleCallback(
+                new WeakRef<RenderNode>(this),
+                'RenderNode', 'RenderNode', this.peer!.ptr!);
+        }
         this.frameNode_?.deref()?.resetNodePtr()
         if (this.peer?.ptr) {
             this.peer?.close();

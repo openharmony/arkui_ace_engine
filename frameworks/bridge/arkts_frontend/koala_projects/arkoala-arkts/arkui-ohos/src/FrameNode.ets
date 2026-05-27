@@ -543,6 +543,10 @@ export class FrameNode implements MaterializedBase {
         }
         if (this.peer?.ptr) {
             ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr!);
+            const weakRef: WeakRef<FrameNode> = new WeakRef<FrameNode>(this)
+            ArkUIAniModule._FireArkUIObjectLifecycleCallback(
+                weakRef as object,
+                'FrameNode', this.getNodeType(), this.peer!.ptr!);
             this.peer?.close();
         }
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);

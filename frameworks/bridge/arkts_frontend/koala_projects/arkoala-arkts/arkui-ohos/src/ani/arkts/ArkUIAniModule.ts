@@ -403,6 +403,8 @@ export class ArkUIAniModule {
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
     native static _CheckThreadValid(checkUIThread: boolean, ptr: KPointer): void
+    native static _FireArkUIObjectLifecycleCallback(
+        weakRef: object, className: string, nodeType: string, nodePtr: KPointer): void
     native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
         getCallback: (name: string) => string | undefined,
         getAllCustomPropertiesCallback: () => string): void

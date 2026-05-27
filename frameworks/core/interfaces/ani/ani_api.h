@@ -680,6 +680,7 @@ struct ArkUIAniCommonModifier {
     ani_long (*getPageRootNode)();
     ani_boolean(*isEasySplit)(ArkUI_Int32 instanceId);
     void(*dumpLogPrint)(int32_t depth, const char* content);
+    void(*fireArkUIObjectLifecycleCallback)(ani_long nodePtr, const std::string& className, void* data);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
