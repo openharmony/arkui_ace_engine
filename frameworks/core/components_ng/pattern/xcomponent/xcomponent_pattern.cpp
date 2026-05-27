@@ -403,6 +403,12 @@ void XComponentPattern::OnDetachFromMainTree()
         }
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
+    CHECK_NULL_VOID(renderSurface_);
+    auto customNode = host->GetParentCustomNode();
+    auto bundleName = pipelineContext ? pipelineContext->GetBundleName() : "";
+    PerfMonitor::GetPerfMonitor()->ReportComponentDetach(renderSurface_->GetUniqueIdNum(),
+        renderSurface_->GetPSurfaceName(), customNode->GetJSViewName(), bundleName.c_str(), getpid());
+    CHECK_NULL_VOID(customNode);
     host->UnregisterNodeChangeListener();
 }
 
