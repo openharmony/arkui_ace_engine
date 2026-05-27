@@ -6592,6 +6592,18 @@
         "name": "OH_ArkUI_Swiper_ShowNext"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ArcSwiper_ShowNext"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ArcSwiper_ShowPrevious"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ArcSwiper_FinishAnimation"
+    },
+    {
         "first_introduced": "24",
         "name": "OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier"
     },

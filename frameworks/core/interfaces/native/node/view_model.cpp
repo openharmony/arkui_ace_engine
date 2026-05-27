@@ -230,6 +230,15 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createArcSwiperNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SwiperModelNG::CreateArcSwiperFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    SwiperModelNG::SetIndicatorType(AceType::RawPtr(frameNode), SwiperIndicatorType::ARC_DOT);
+    return AceType::RawPtr(frameNode);
+}
+
 void* createTextAreaNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, u"", u"");
@@ -820,6 +829,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createArcListNode,
     createArcListItemNode,
     createArcScrollBarNode,
+    createArcSwiperNode
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

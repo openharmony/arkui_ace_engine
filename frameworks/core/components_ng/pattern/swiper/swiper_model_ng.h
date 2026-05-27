@@ -101,6 +101,7 @@ public:
     void ResetFillType() override;
     void ResetDisplayCountWithObject() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateArcSwiperFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
     static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlankn = false);

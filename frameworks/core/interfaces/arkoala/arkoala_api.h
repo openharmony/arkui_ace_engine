@@ -1488,6 +1488,7 @@ enum ArkUINodeType {
     ARKUI_ARC_LIST,
     ARKUI_ARC_LIST_ITEM,
     ARKUI_ARC_SCROLL_BAR,
+    ARKUI_ARC_SWIPER,
 };
 
 enum ArkUIEventCategory {
@@ -1636,6 +1637,11 @@ enum ArkUIEventSubKind {
     ON_SWIPER_UNSELECTED,
     ON_SWIPER_CONTENT_WILL_SCROLL,
     ON_SWIPER_SCROLL_STATE_CHANGED,
+
+    ON_ARC_SWIPER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_ARC_SWIPER,
+    ON_ARC_SWIPER_ANIMATION_START,
+    ON_ARC_SWIPER_ANIMATION_END,
+    ON_ARC_SWIPER_GESTURE_SWIPE,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
     ON_SCROLL_FRAME_BEGIN,
@@ -2318,6 +2324,14 @@ struct ArkUISwiperDigitIndicator {
     ArkUIOptionalUint fontWeight;
     ArkUIOptionalUint selectedFontWeight;
     ArkUIOptionalInt ignoreSizeValue;
+};
+
+struct ArkUIArcSwiperIndicatorOptions {
+    ArkUI_Int32 show;
+    ArkUI_Int32 arcDirection;
+    ArkUI_Uint32 unselectedColor;
+    ArkUI_Uint32 selectedColor;
+    ArkUI_Uint32 backgroundColor;
 };
 
 struct ArkUISwiperArrowStyle {
@@ -4800,6 +4814,46 @@ struct ArkUISwiperControllerModifier {
     ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);
     void (*showNext)(ArkUINodeHandle node);
     void (*showPrevious)(ArkUINodeHandle node);
+};
+
+struct ArkUIArcSwiperModifier {
+    void (*setArcSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
+    void (*resetArcSwiperIndex)(ArkUINodeHandle node);
+    void (*setArcSwiperDuration)(ArkUINodeHandle node, ArkUI_Float32 duration);
+    void (*resetArcSwiperDuration)(ArkUINodeHandle node);
+    void (*setArcSwiperVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
+    void (*resetArcSwiperVertical)(ArkUINodeHandle node);
+    void (*setArcSwiperDisableSwipe)(ArkUINodeHandle node, ArkUI_Bool disableSwipe);
+    void (*resetArcSwiperDisableSwipe)(ArkUINodeHandle node);
+    void (*setArcSwiperEffectMode)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect);
+    void (*resetArcSwiperEffectMode)(ArkUINodeHandle node);
+    void (*setArcSwiperIndicator)(ArkUINodeHandle node, ArkUI_Int32 show,
+        ArkUI_Int32 arcDirection, ArkUI_Uint32 unselectedColor,
+        ArkUI_Uint32 selectedColor, ArkUI_Uint32 backgroundColor);
+    void (*resetArcSwiperIndicator)(ArkUINodeHandle node);
+    void (*setArcSwiperDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 sensitivity);
+    void (*resetArcSwiperDigitalCrownSensitivity)(ArkUINodeHandle node);
+    void (*setArcSwiperDisableTransitionAnimation)(ArkUINodeHandle node, ArkUI_Bool disable);
+    void (*resetArcSwiperDisableTransitionAnimation)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getArcSwiperIndex)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getArcSwiperDuration)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getArcSwiperVertical)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getArcSwiperDisableSwipe)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getArcSwiperEffectMode)(ArkUINodeHandle node);
+    void (*getArcSwiperIndicator)(ArkUINodeHandle node, ArkUIArcSwiperIndicatorOptions* options);
+    ArkUI_Int32 (*getArcSwiperDigitalCrownSensitivity)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getArcSwiperDisableTransitionAnimation)(ArkUINodeHandle node);
+    void (*setArcSwiperOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetArcSwiperOnChange)(ArkUINodeHandle node);
+    void (*setArcSwiperOnAnimationStart)(ArkUINodeHandle node, void* callback);
+    void (*resetArcSwiperOnAnimationStart)(ArkUINodeHandle node);
+    void (*setArcSwiperOnAnimationEnd)(ArkUINodeHandle node, void* callback);
+    void (*resetArcSwiperOnAnimationEnd)(ArkUINodeHandle node);
+    void (*setArcSwiperOnGestureSwipe)(ArkUINodeHandle node, void* callback);
+    void (*resetArcSwiperOnGestureSwipe)(ArkUINodeHandle node);
+    void (*callArcSwiperShowNext)(ArkUINodeHandle node);
+    void (*callArcSwiperShowPrevious)(ArkUINodeHandle node);
+    void (*callArcSwiperFinishAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUIIndicatorComponentModifier {
@@ -9688,6 +9742,7 @@ struct ArkUINodeModifiers {
     const ArkUIShapeModifier* (*getShapeModifier)();
     const ArkUIRectModifier* (*getRectModifier)();
     const ArkUISwiperModifier* (*getSwiperModifier)();
+    const ArkUIArcSwiperModifier* (*getArcSwiperModifier)();
     const ArkUIListItemModifier* (*getListItemModifier)();
     const ArkUIListModifier* (*getListModifier)();
     const ArkUIListItemGroupModifier* (*getListItemGroupModifier)();

@@ -85,6 +85,16 @@ RefPtr<FrameNode> SwiperModelNG::CreateFrameNode(int32_t nodeId)
     return swiperNode;
 }
 
+RefPtr<FrameNode> SwiperModelNG::CreateArcSwiperFrameNode(int32_t nodeId)
+{
+    ACE_UINODE_TRACE(nodeId);
+    auto swiperNode = AceType::MakeRefPtr<SwiperNode>(
+        V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<ArcSwiperPattern>());
+    swiperNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(swiperNode);
+    return swiperNode;
+}
+
 void SwiperModelNG::SetDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, Direction, axis);

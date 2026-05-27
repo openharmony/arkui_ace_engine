@@ -6887,6 +6887,33 @@ typedef enum {
      */
     OH_ARKUI_NODE_MOUNT_POLICY_MIXED = 1,
 } OH_ArkUI_NodeMountPolicy;
+
+/**
+ * @brief Enumerates the ArcDirection.
+ *
+ * @since 26.0.0
+ */
+typedef enum {
+    /**
+     * 3 o'clock direction.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_ARCDIRECTION_THREE_CLOCK_DIRECTION = 0,
+    /**
+     * 6 o'clock direction.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_ARCDIRECTION_SIX_CLOCK_DIRECTION = 1,
+    /**
+     * 9 o'clock direction.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_ARCDIRECTION_NINE_CLOCK_DIRECTION = 2
+} OH_ArkUI_ArcDirection;
+
 #ifdef __cplusplus
 };
 #endif

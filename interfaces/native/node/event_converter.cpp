@@ -302,6 +302,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SWIPER_ANIMATION_END;
         case NODE_SWIPER_EVENT_ON_GESTURE_SWIPE:
             return ON_SWIPER_GESTURE_SWIPE;
+        case NODE_ARC_SWIPER_EVENT_ON_CHANGE:
+            return ON_ARC_SWIPER_CHANGE;
+        case NODE_ARC_SWIPER_EVENT_ON_ANIMATION_START:
+            return ON_ARC_SWIPER_ANIMATION_START;
+        case NODE_ARC_SWIPER_EVENT_ON_ANIMATION_END:
+            return ON_ARC_SWIPER_ANIMATION_END;
+        case NODE_ARC_SWIPER_EVENT_ON_GESTURE_SWIPE:
+            return ON_ARC_SWIPER_GESTURE_SWIPE;
         case NODE_ON_WILL_SCROLL:
             return ON_WATER_FLOW_WILL_SCROLL;
         case NODE_ON_TOUCH_INTERCEPT:
@@ -648,6 +656,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SWIPER_EVENT_ON_ANIMATION_END;
         case ON_SWIPER_GESTURE_SWIPE:
             return NODE_SWIPER_EVENT_ON_GESTURE_SWIPE;
+        case ON_ARC_SWIPER_CHANGE:
+            return NODE_ARC_SWIPER_EVENT_ON_CHANGE;
+        case ON_ARC_SWIPER_ANIMATION_START:
+            return NODE_ARC_SWIPER_EVENT_ON_ANIMATION_START;
+        case ON_ARC_SWIPER_ANIMATION_END:
+            return NODE_ARC_SWIPER_EVENT_ON_ANIMATION_END;
+        case ON_ARC_SWIPER_GESTURE_SWIPE:
+            return NODE_ARC_SWIPER_EVENT_ON_GESTURE_SWIPE;
         case ON_LIST_SCROLL:
             return NODE_SCROLL_EVENT_ON_SCROLL;
         case ON_LIST_SCROLL_FRAME_BEGIN:

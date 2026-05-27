@@ -169,6 +169,10 @@ typedef enum {
      * @since 26.0.0
      */
     ARKUI_NODE_ARC_SCROLL_BAR = 1021,
+    /** Arc swiper.
+     *  @since 26.0.0
+     */
+    ARKUI_NODE_ARC_SWIPER = 1022,
 } ArkUI_NodeType;
 
 /**
@@ -9566,6 +9570,138 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_ARC_SCROLL_BAR_DISPLAY_MODE = 1021001,
+
+    /**
+     * @brief Defines the index of the child component currently displayed in the ArcSwiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: index value of the child component. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: index value of the child component. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_SWIPER,
+
+    /**
+     * @brief Defines the indicator type of the ArcSwiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to show indicator. The value <b>1</b> means to show indicator, \n
+     * and <b>0</b> means the opposite. The default value is <b>1</b>. \n
+     * .value[1].i32: direction of the ArcSwiper indicator. The parameter type is {@link OH_ArkUI_ArcDirection}. \n
+     * The default value is <b>OH_ARKUI_ARCDIRECTION_SIX_CLOCK_DIRECTION</b>. Optional. \n
+     * .value[2].i32: color of the unselected points, in 0xARGB format, \n
+     * and the default value is <b>0xA9FFFFFF</b>. Optional. \n
+     * .value[3].i32: color of the selected point, in 0xARGB format, \n
+     * and the default value is <b>0xFF5EA1FF</b>. Optional. \n
+     * .value[4].i32: background color of the ArcSwiper indicator after long pressed, in 0xARGB format, \n
+     * and the default value is <b>0xFF5EA1FF</b>. Optional. \n
+     * .object: gradient color for the mask. Optional. \n
+     * Array of color stops, each of which consists of a color and its stop position. \n
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
+     * colors: colors of the color stops. \n
+     * stops: stop positions of the color stops. \n
+     * size: number of colors. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to show indicator. \n
+     * .value[1].i32: direction of the ArcSwiper indicator. \n
+     * .value[2].i32: color of the unselected points. \n
+     * .value[3].i32: color of the selected point. \n
+     * .value[4].i32: background color of the ArcSwiper indicator after long pressed. \n
+     * .object: gradient color for the mask. \n
+     *
+     * @since 26.0.0 
+     *
+     */
+    NODE_ARC_SWIPER_INDICATOR,
+
+    /**
+     * @brief Defines the animation duration.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: the animation duration, in ms. The default value is <b>400</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: the animation duration. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_DURATION,
+
+    /**
+     * @brief Defines whether to display vertically.
+     * The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to display vertically. The value <b>1</b> means to display vertically, \n
+     * and <b>0</b> means the opposite. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to display vertically. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_VERTICAL,
+
+    /**
+     * @brief Defines whether to disable the swipe feature.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to disable the swipe feature. The value <b>1</b> means to disable \n
+     * the swipe feature, and <b>0</b> means the opposite. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to disable the swipe feature. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_DISABLE_SWIPE,
+
+    /**
+     * @brief Defines the sensitivity of rotating crown.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: the sensitivity of rotating crown. The parameter type is {@link ArkUI_CrownSensitivity}. \n
+     * The default value is <b>ARKUI_CROWN_SENSITIVITY_MEDIUM</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: the sensitivity of rotating crown. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_DIGITAL_CROWN_SENSITIVITY,
+
+    /**
+     * @brief Defines the effect used at the edges of the ArcSwiper when the boundary of the scrollable content is reached.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: effect used at the edges of the swiper when the boundary of the scrollable content is reached. \n
+     * The parameter type is {@link ArkUI_EdgeEffect}. \n
+     * The default value is <b>ARKUI_EDGE_EFFECT_SPRING</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: effect used at the edges of the swiper when the boundary of the scrollable content is reached. \n
+     * The parameter type is {@link ArkUI_EdgeEffect}. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_EFFECT_MODE,
+
+    /**
+     * @brief Defines whether to disable the transition animation.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: whether to disable the transition animation. The value <b>1</b> means to disable \n
+     * the transition animation, and <b>0</b> means the opposite. The default value is <b>0</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: whether to disable the transition animation. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_DISABLE_TRANSITION_ANIMATION,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -11825,6 +11961,66 @@ typedef enum {
      * @since 26.0.0
      */
     NODE_ARC_LIST_ON_DID_SCROLL = 1019006,
+
+    /**
+     * @brief Defines the event triggered when the index of the currently displayed element of this
+     * <b>ARKUI_NODE_ARC_SWIPER</b> instance changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ARC_SWIPER,
+
+    /**
+     * @brief Defines the event triggered when the switching animation of this <b>ARKUI_NODE_ARC_SWIPER</b> instance starts.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains five parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: index of the target element to switch to. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>: offset of the currently displayed element relative to the \n
+     * start position of the swiper along the main axis. \n
+     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>: offset of the target element relative to the start position \n
+     * of the swiper along the main axis. \n
+     * <b>ArkUI_NodeComponentEvent.data[4].f32</b>: hand-off velocity. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_EVENT_ON_ANIMATION_START,
+
+    /**
+     * @brief Defines the event triggered when the switching animation of this <b>ARKUI_NODE_ARC_SWIPER</b> instance ends.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: offset of the currently displayed element relative to the \n
+     * start position of the swiper along the main axis. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_EVENT_ON_ANIMATION_END,
+
+    /**
+     * @brief Defines the event triggered on a frame-by-frame basis when the page is turned by a swipe in this
+     * <b>ARKUI_NODE_ARC_SWIPER</b> instance.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the currently displayed element. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: offset of the currently displayed element relative to the \n
+     * start position of the swiper along the main axis. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_ARC_SWIPER_EVENT_ON_GESTURE_SWIPE,
 } ArkUI_NodeEventType;
 
 /**
@@ -13862,6 +14058,42 @@ int32_t OH_ArkUI_Swiper_ShowPrevious(ArkUI_NodeHandle node);
  * @since 23
  */
 int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
+
+/**
+ * @brief Show the previous page of the ArcSwiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @systemapi
+ * @since 26.0.0
+ */
+int32_t OH_ArkUI_ArcSwiper_ShowPrevious(ArkUI_NodeHandle node);
+
+/**
+ * @brief Show the next page of the ArcSwiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @systemapi
+ * @since 26.0.0
+ */
+int32_t OH_ArkUI_ArcSwiper_ShowNext(ArkUI_NodeHandle node);
+
+/**
+ * @brief Stop the animation executed by the ArcSwiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @systemapi
+ * @since 26.0.0
+ */
+int32_t OH_ArkUI_ArcSwiper_FinishAnimation(ArkUI_NodeHandle node);
 
 /**
  * @brief Get the root node handle of the corresponding page of the Context.

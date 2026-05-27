@@ -176,6 +176,48 @@ int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node)
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_ArcSwiper_ShowNext(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_ARC_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto arcSwiperModifier = nodeModifiers->getArcSwiperModifier();
+    CHECK_NULL_RETURN(arcSwiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    arcSwiperModifier->callArcSwiperShowNext(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_ArcSwiper_ShowPrevious(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_ARC_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto arcSwiperModifier = nodeModifiers->getArcSwiperModifier();
+    CHECK_NULL_RETURN(arcSwiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    arcSwiperModifier->callArcSwiperShowPrevious(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_ArcSwiper_FinishAnimation(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_ARC_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto arcSwiperModifier = nodeModifiers->getArcSwiperModifier();
+    CHECK_NULL_RETURN(arcSwiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    arcSwiperModifier->callArcSwiperFinishAnimation(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif

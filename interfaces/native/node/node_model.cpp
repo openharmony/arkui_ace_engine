@@ -236,7 +236,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_CHECK_BOX_GROUP, ARKUI_RICH_EDITOR, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
         ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM,
         ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN, ARKUI_EMBEDDED_COMPONENT,
-        ARKUI_UNDEFINED, ARKUI_PICKER, ARKUI_ARC_LIST, ARKUI_ARC_LIST_ITEM, ARKUI_ARC_SCROLL_BAR };
+        ARKUI_UNDEFINED, ARKUI_PICKER, ARKUI_ARC_LIST, ARKUI_ARC_LIST_ITEM, ARKUI_ARC_SCROLL_BAR, ARKUI_ARC_SWIPER };
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     const auto* impl = GetFullImpl();
@@ -1694,6 +1694,7 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         { OHOS::Ace::V2::ARC_LIST_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_LIST },
         { OHOS::Ace::V2::ARC_LIST_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_LIST_ITEM },
         { OHOS::Ace::V2::ARC_SCROLL_BAR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_SCROLL_BAR },
+        { OHOS::Ace::V2::SWIPER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ARC_SWIPER },
         { OHOS::Ace::V2::RICH_EDITOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR  },
         { OHOS::Ace::V2::CUSTOM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM },
     };
@@ -1752,6 +1753,7 @@ std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType)
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_LIST), OHOS::Ace::V2::ARC_LIST_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_LIST_ITEM), OHOS::Ace::V2::ARC_LIST_ITEM_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_SCROLL_BAR), OHOS::Ace::V2::ARC_SCROLL_BAR_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_ARC_SWIPER), OHOS::Ace::V2::SWIPER_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_UNDEFINED), OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_CUSTOM), OHOS::Ace::V2::CUSTOM_ETS_TAG },
