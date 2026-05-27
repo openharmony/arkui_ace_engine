@@ -711,7 +711,7 @@ struct SimpleSegmentButtonV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          const index = this.getIndexByPosition(finger.localX, finger.localY);
           if (!this.isItemEnabled(index)) {
             return;
           }
@@ -754,7 +754,7 @@ struct SimpleSegmentButtonV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          const index = this.getIndexByPosition(finger.localX, finger.localY);
           if (!this.isItemEnabled(index)) {
             return;
           }
@@ -768,7 +768,7 @@ struct SimpleSegmentButtonV2 {
           if (this.isPressing) {
             this.dragWithPress = true;
           }
-          this.panStartGlobalX = finger.globalX;
+          this.panStartGlobalX = finger.localX;
           this.panStartIndex = index;
 
           if (this.isBackgroundSystemMaterialEnabled() && this.isDragging) {
@@ -800,7 +800,7 @@ struct SimpleSegmentButtonV2 {
             return;
           }
           if (this.isBackgroundSystemMaterialEnabled()) {
-            let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect!.position.x as number;
+            let nowX = finger.localX - this.panStartGlobalX + this.selectedItemRect!.position.x as number;
             let startX = this.itemRects[0]!.position.x as number;
             let endX = this.itemRects[this.items.length - 1]!.position.x as number;
             if (this.isRTL()) {
@@ -815,7 +815,7 @@ struct SimpleSegmentButtonV2 {
               y: this.backplatePosition!.y
             }
           } else {
-            const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+            const index = this.getIndexByPosition(finger.localX, finger.localY);
             this.updateSelectedIndex(index);
           }
         })
@@ -884,7 +884,7 @@ struct SimpleSegmentButtonV2 {
           if (!finger) {
             return;
           }
-          let deltaIndex = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
+          let deltaIndex = finger.localX - this.panStartGlobalX < 0 ? -1 : 1;
           if (this.isRTL()) {
             deltaIndex = -deltaIndex;
           }
@@ -1182,9 +1182,9 @@ struct SimpleSegmentButtonV2 {
     return -1;
   }
 
-  private isPointOnRect(globalX: number, globalY: number, rect: SegmentButtonV2ItemRect): boolean {
-    return globalX >= rect.globalPosition.x && globalX <= rect.globalPosition.x + rect.size.width &&
-      globalY >= rect.globalPosition.y && globalY <= rect.globalPosition.y + rect.size.height;
+  private isPointOnRect(localX: number, localY: number, rect: SegmentButtonV2ItemRect): boolean {
+    return localX >= rect.position.x && localX <= rect.position.x + rect.size.width &&
+      localY >= rect.position.y && localY <= rect.position.y + rect.size.height;
   }
 
   private updateSelectedIndex(selectedIndex: number) {
