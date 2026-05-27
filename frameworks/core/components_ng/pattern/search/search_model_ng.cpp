@@ -121,6 +121,11 @@ void SearchModelNG::UpdateSearchNodeBorderProps(const RefPtr<SearchNode>& frameN
     const RefPtr<SearchTheme>& searchTheme)
 {
     CHECK_NULL_VOID(searchTheme);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->IsTV()) {
+        return;
+    }
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
