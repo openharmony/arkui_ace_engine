@@ -410,7 +410,6 @@ void XComponentPattern::OnDetachFromMainTree()
     auto bundleName = pipelineContext ? pipelineContext->GetBundleName() : "";
     PerfMonitor::GetPerfMonitor()->ReportComponentDetach(renderSurface_->GetUniqueIdNum(),
         renderSurface_->GetPSurfaceName(), customNode->GetJSViewName(), bundleName.c_str(), getpid());
-    CHECK_NULL_VOID(pipelineContext);
     host->UnregisterNodeChangeListener();
 }
 
