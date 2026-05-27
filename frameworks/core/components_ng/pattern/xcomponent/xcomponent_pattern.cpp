@@ -403,13 +403,17 @@ void XComponentPattern::OnDetachFromMainTree()
         }
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
-    CHECK_NULL_VOID(renderSurface_);
+    uint64_t uniqueId = 0;
+    std::string surfaceName;
+    if (renderSurface_) {
+        uniqueId = renderSurface_->GetUniqueIdNum();
+        surfaceName = renderSurface_->GetPSurfaceName();
+    }
     auto customNode = host->GetParentCustomNode();
-    CHECK_NULL_VOID(customNode);
+    std::string viewName = customNode ? customNode->GetJSViewName() : "";
     auto pipelineContext = host->GetContextRefPtr();
     auto bundleName = pipelineContext ? pipelineContext->GetBundleName() : "";
-    PerfMonitor::GetPerfMonitor()->ReportComponentDetach(renderSurface_->GetUniqueIdNum(),
-        renderSurface_->GetPSurfaceName(), customNode->GetJSViewName(), bundleName.c_str(), getpid());
+    PerfMonitor::GetPerfMonitor()->ReportComponentDetach(uniqueId, surfaceName, viewName, bundleName, getpid());
     host->UnregisterNodeChangeListener();
 }
 
