@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "base/utils/feature_manager.h"
+
+namespace OHOS::Ace {
+FeatureManager& FeatureManager::GetInstance()
+{
+    static FeatureManager instance;
+    return instance;
+}
+
+FeatureManager::FeatureManager()
+{
+    Init();
+}
+
+void FeatureManager::Init()
+{
+    initialized_ = false;
+    bundleName_.clear();
+}
+
+int32_t FeatureManager::GetFeatureParam(const std::string& key, std::string& value)
+{
+    value.clear();
+    return key.empty() ? KEY_NOT_FOUND : INIT_FAILED;
+}
+
+#ifdef ACE_UNITTEST
+void FeatureManager::ResetForTest()
+{
+    Init();
+}
+#endif
+} // namespace OHOS::Ace

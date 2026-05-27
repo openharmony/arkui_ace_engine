@@ -443,6 +443,8 @@
       "OHOS::Ace::EventReport::SendComponentException(OHOS::Ace::ComponentExcepType)";
       "OHOS::Ace::EventReport::SendJsException(OHOS::Ace::JsExcepType)";
       "OHOS::Ace::EventReport::SendRenderException(OHOS::Ace::RenderExcepType)";
+      "OHOS::Ace::FeatureManager::GetFeatureParam(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::Ace::FeatureManager::GetInstance()";
       "OHOS::Ace::FeatureParam::IsSyncLoadEnabled()";
       "OHOS::Ace::FileUriHelper::GetRealPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
       "OHOS::Ace::FlexElement::AcceptFocusByRectOfLastFocus(OHOS::Ace::Rect const&)";
