@@ -232,6 +232,7 @@ template("ace_core_source_set") {
 
       # declarative
       "gestures/gesture_group.cpp",
+      "gestures/gesture_event.cpp",
       "gestures/long_press_gesture.cpp",
       "gestures/pan_gesture.cpp",
       "gestures/pinch_gesture.cpp",
@@ -838,6 +839,7 @@ template("ace_core_ng_source_set") {
 
       # declarative gestures
       "gestures/gesture_group.cpp",
+      "gestures/gesture_event.cpp",
       "gestures/long_press_gesture.cpp",
       "gestures/pan_gesture.cpp",
       "gestures/pinch_gesture.cpp",

@@ -324,6 +324,11 @@ const std::shared_ptr<const MMI::PointerEvent>& AxisInfo::GetPointerEvent() cons
     return pointerEvent_;
 }
 
+size_t AxisInfo::GetApproximateSize() const
+{
+    return sizeof(*this) + GetApproximateBaseEventSize() + InputManager::GetApproximatePointerEventSize();
+}
+
 void AxisEventTarget::SetOnAxisCallback(const OnAxisEventFunc& onAxisCallback)
 {
     onAxisCallback_ = onAxisCallback;

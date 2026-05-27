@@ -293,11 +293,7 @@ public:
         return isRightButtonEventFromDoulbeTap_;
     }
 
-    size_t GetSize() const
-    {
-        static constexpr size_t MOUSE_INFO_SIZE = 3080;
-        return MOUSE_INFO_SIZE;
-    }
+    size_t GetApproximateSize() const;
 
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
@@ -384,10 +380,9 @@ public:
         return mouseAction_;
     }
 
-    size_t GetSize() const
+    size_t GetApproximateSize() const
     {
-        static constexpr size_t HOVER_INFO_SIZE = 1080;
-        return HOVER_INFO_SIZE;
+        return sizeof(*this) + GetApproximateBaseEventSize();
     }
 
 private:
