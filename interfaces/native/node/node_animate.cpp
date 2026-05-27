@@ -19,6 +19,7 @@
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
+#include "interfaces/native/native_error_message_macros.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #ifdef __cplusplus
@@ -206,16 +207,17 @@ void OH_ArkUI_KeyframeAnimateOption_Dispose(ArkUI_KeyframeAnimateOption* option)
 
 int32_t OH_ArkUI_KeyframeAnimateOption_SetDelay(ArkUI_KeyframeAnimateOption* option, int32_t value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     option->delay = value;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_KeyframeAnimateOption_SetIterations(ArkUI_KeyframeAnimateOption* option, int32_t value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     //取值范围：[-1, +∞)
     if (value < -1) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is less than -1");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->iterations = value;
@@ -225,7 +227,7 @@ int32_t OH_ArkUI_KeyframeAnimateOption_SetIterations(ArkUI_KeyframeAnimateOption
 int32_t OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback(
     ArkUI_KeyframeAnimateOption* option, void* userData, void (*onFinish)(void* userData))
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     option->onFinish = onFinish;
     option->userData = userData;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
@@ -234,6 +236,7 @@ int32_t OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback(
 int32_t OH_ArkUI_KeyframeAnimateOption_SetDuration(ArkUI_KeyframeAnimateOption* option, int32_t value, int32_t index)
 {
     if (option == nullptr || index < 0 || index >= static_cast<int32_t>(option->keyframes.size())) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null or index is invalid");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (value < 0) {
@@ -247,14 +250,17 @@ int32_t OH_ArkUI_KeyframeAnimateOption_SetCurve(
     ArkUI_KeyframeAnimateOption* option, ArkUI_CurveHandle value, int32_t index)
 {
     if (option == nullptr || index < 0 || index >= static_cast<int32_t>(option->keyframes.size())) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null or index is invalid");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (!value || !value->curve) {
         option->keyframes[index].curve = nullptr;
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value or value->curve is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (value->type == ARKUI_CURVE_TYPE_SPRING_MOTION || value->type == ARKUI_CURVE_TYPE_RESPONSIVE_SPRING_MOTION ||
         value->type == ARKUI_CURVE_TYPE_INTERPOLATING_SPRING) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "curve type is invalid");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->keyframes[index].curve = value;
@@ -265,6 +271,7 @@ int32_t OH_ArkUI_KeyframeAnimateOption_RegisterOnEventCallback(
     ArkUI_KeyframeAnimateOption* option, void* userData, void (*event)(void* userData), int32_t index)
 {
     if (option == nullptr || index < 0 || index >= static_cast<int32_t>(option->keyframes.size())) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null or index is invalid");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->keyframes[index].event = event;
@@ -343,8 +350,9 @@ void OH_ArkUI_AnimatorOption_Dispose(ArkUI_AnimatorOption* option)
 
 int32_t OH_ArkUI_AnimatorOption_SetDuration(ArkUI_AnimatorOption* option, int32_t value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (value < 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is negative");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->duration = value;
@@ -353,14 +361,14 @@ int32_t OH_ArkUI_AnimatorOption_SetDuration(ArkUI_AnimatorOption* option, int32_
 
 int32_t OH_ArkUI_AnimatorOption_SetDelay(ArkUI_AnimatorOption* option, int32_t value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     option->delay = value;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_AnimatorOption_SetIterations(ArkUI_AnimatorOption* option, int32_t value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (value < -1) {
         value = 1;
     }
@@ -370,8 +378,9 @@ int32_t OH_ArkUI_AnimatorOption_SetIterations(ArkUI_AnimatorOption* option, int3
 
 int32_t OH_ArkUI_AnimatorOption_SetFill(ArkUI_AnimatorOption* option, ArkUI_AnimationFillMode value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (value > ARKUI_ANIMATION_FILL_MODE_BOTH || value < ARKUI_ANIMATION_FILL_MODE_NONE) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->fill = value;
@@ -380,8 +389,9 @@ int32_t OH_ArkUI_AnimatorOption_SetFill(ArkUI_AnimatorOption* option, ArkUI_Anim
 
 int32_t OH_ArkUI_AnimatorOption_SetDirection(ArkUI_AnimatorOption* option, ArkUI_AnimationDirection value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (value > ARKUI_ANIMATION_DIRECTION_ALTERNATE_REVERSE || value < ARKUI_ANIMATION_DIRECTION_NORMAL) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->direction = value;
@@ -390,12 +400,13 @@ int32_t OH_ArkUI_AnimatorOption_SetDirection(ArkUI_AnimatorOption* option, ArkUI
 
 int32_t OH_ArkUI_AnimatorOption_SetCurve(ArkUI_AnimatorOption* option, ArkUI_CurveHandle value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (value) {
         if (value->type == ARKUI_CURVE_TYPE_SPRING || value->type == ARKUI_CURVE_TYPE_SPRING_MOTION ||
             value->type == ARKUI_CURVE_TYPE_RESPONSIVE_SPRING_MOTION ||
             value->type == ARKUI_CURVE_TYPE_INTERPOLATING_SPRING || value->type == ARKUI_CURVE_TYPE_CUSTOM) {
             option->easing = nullptr;
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "curve type is invalid");
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
     }
@@ -406,8 +417,9 @@ int32_t OH_ArkUI_AnimatorOption_SetCurve(ArkUI_AnimatorOption* option, ArkUI_Cur
 
 int32_t OH_ArkUI_AnimatorOption_SetBegin(ArkUI_AnimatorOption* option, float value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (option->keyframes.size() > 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "keyframes exist, cannot set begin");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->begin = value;
@@ -416,8 +428,9 @@ int32_t OH_ArkUI_AnimatorOption_SetBegin(ArkUI_AnimatorOption* option, float val
 
 int32_t OH_ArkUI_AnimatorOption_SetEnd(ArkUI_AnimatorOption* option, float value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (option->keyframes.size() > 0) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "keyframes exist, cannot set end");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->end = value;
@@ -427,16 +440,17 @@ int32_t OH_ArkUI_AnimatorOption_SetEnd(ArkUI_AnimatorOption* option, float value
 int32_t OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange(
     ArkUI_AnimatorOption* option, ArkUI_ExpectedFrameRateRange* value)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(value, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(value, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
     option->expectedFrameRateRange = new ArkUI_ExpectedFrameRateRange { value->min, value->max, value->expected };
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_AnimatorOption_SetKeyframe(ArkUI_AnimatorOption* option, float time, float value, int32_t index)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (time < 0 || time > 1) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "time is out of range");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (index >= 0 && static_cast<size_t>(index) < option->keyframes.size()) {
@@ -444,17 +458,19 @@ int32_t OH_ArkUI_AnimatorOption_SetKeyframe(ArkUI_AnimatorOption* option, float 
         option->keyframes[index].keyValue = value;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "index is invalid");
     return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
 }
 
 int32_t OH_ArkUI_AnimatorOption_SetKeyframeCurve(ArkUI_AnimatorOption* option, ArkUI_CurveHandle value, int32_t index)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (value) {
         if (value->type == ARKUI_CURVE_TYPE_SPRING || value->type == ARKUI_CURVE_TYPE_SPRING_MOTION ||
             value->type == ARKUI_CURVE_TYPE_RESPONSIVE_SPRING_MOTION ||
             value->type == ARKUI_CURVE_TYPE_INTERPOLATING_SPRING || value->type == ARKUI_CURVE_TYPE_CUSTOM) {
             option->keyframes[index].curve = nullptr;
+            SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "curve type is invalid");
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
         }
     }
@@ -463,6 +479,7 @@ int32_t OH_ArkUI_AnimatorOption_SetKeyframeCurve(ArkUI_AnimatorOption* option, A
         option->keyframes[index].curve = value;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "index is invalid");
     return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
 }
 
@@ -583,8 +600,8 @@ float OH_ArkUI_AnimatorOnFrameEvent_GetValue(ArkUI_AnimatorOnFrameEvent* event)
 int32_t OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate(
     ArkUI_KeyframeAnimateOption* option, ArkUI_ExpectedFrameRateRange* frameRate)
 {
-    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(frameRate, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(frameRate, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "frameRate is null");
     option->expectedFrameRateRange =
         new ArkUI_ExpectedFrameRateRange { frameRate->min, frameRate->max, frameRate->expected };
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
@@ -603,7 +620,11 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnFrameCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorOnFrameEvent* event))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !option || !callback) {
+    if (!impl) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!option || !callback) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option or callback is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->onFrame = callback;
@@ -615,7 +636,11 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnFinishCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !option || !callback) {
+    if (!impl) 
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!option || !callback) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option or callback is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
@@ -628,7 +653,11 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnCancelCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !option || !callback) {
+    if (!impl) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!option || !callback) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option or callback is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
@@ -641,7 +670,11 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !option || !callback) {
+    if (!impl) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!option || !callback) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option or callback is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
 
@@ -753,6 +786,7 @@ void OH_ArkUI_MotionPathOptions_Dispose(ArkUI_MotionPathOptions* options)
 ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetPath(ArkUI_MotionPathOptions* options, const char* svgPath)
 {
     if (!options || !svgPath) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or svgPath is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (options->path != nullptr) {
@@ -766,6 +800,7 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetPath(ArkUI_MotionPathOptions* opti
         path = nullptr;
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_ANIMATION,
             "OH_ArkUI_MotionPathOptions_SetPath: strcpy_s copy svgPath failed, svgPath length: %zu", len);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "strcpy_s copy svgPath failed");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     options->path = path;
@@ -776,6 +811,8 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetPath(
     const ArkUI_MotionPathOptions* options, char* svgPathBuffer, const int32_t bufferSize, int32_t* writeLength)
 {
     if (!options || !options->path || !svgPathBuffer || bufferSize <= 0 || !writeLength) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "options, options->path, svgPathBuffer or writeLength is null, or bufferSize <= 0");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
 
@@ -784,11 +821,13 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetPath(
     const size_t requiredSize = srcLen + 1;
     *writeLength = requiredSize;
     if (requiredSize > bufferSizeU) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size is too small", );
         return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     if (strcpy_s(svgPathBuffer, bufferSizeU, options->path) != 0) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_ANIMATION,
             "OH_ArkUI_MotionPathOptions_GetPath: strcpy_s copy path failed, required size: %zu", requiredSize);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "strcpy_s copy path failed");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -797,9 +836,11 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetPath(
 ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetFrom(ArkUI_MotionPathOptions* options, const float from)
 {
     if (!options) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (from < 0 || from > 1 || from > options->to) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "from is out of range");
         return ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     options->from = from;
@@ -809,6 +850,7 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetFrom(ArkUI_MotionPathOptions* opti
 ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetFrom(const ArkUI_MotionPathOptions* options, float* from)
 {
     if (!options || !from) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or from is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *from = options->from;
@@ -818,9 +860,11 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetFrom(const ArkUI_MotionPathOptions
 ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetTo(ArkUI_MotionPathOptions* options, const float to)
 {
     if (!options) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (to < 0 || to > 1 || to < options->from) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE, __FUNCTION__, "to is out of range");
         return ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     options->to = to;
@@ -830,6 +874,7 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetTo(ArkUI_MotionPathOptions* option
 ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetTo(const ArkUI_MotionPathOptions* options, float* to)
 {
     if (!options || !to) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or to is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *to = options->to;
@@ -839,6 +884,7 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetTo(const ArkUI_MotionPathOptions* 
 ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetRotatable(ArkUI_MotionPathOptions* options, const bool rotatable)
 {
     if (!options) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     options->rotatable = rotatable;
@@ -848,6 +894,7 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetRotatable(ArkUI_MotionPathOptions*
 ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetRotatable(const ArkUI_MotionPathOptions* options, bool* rotatable)
 {
     if (!options || !rotatable) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or rotatable is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *rotatable = options->rotatable;

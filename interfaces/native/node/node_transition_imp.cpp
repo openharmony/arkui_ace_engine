@@ -17,6 +17,7 @@
 #include "node/node_transition.h"
 
 #include "base/utils/utils.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -124,7 +125,7 @@ void OH_ArkUI_TransitionEffect_Dispose(ArkUI_TransitionEffect* option)
 
 int32_t OH_ArkUI_TransitionEffect_Combine(ArkUI_TransitionEffect* option, ArkUI_TransitionEffect* combine)
 {
-    CHECK_NULL_RETURN(option, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     auto* currentOption = option;
     while (currentOption->combine) {
         currentOption = currentOption->combine;
@@ -135,7 +136,7 @@ int32_t OH_ArkUI_TransitionEffect_Combine(ArkUI_TransitionEffect* option, ArkUI_
 
 int32_t OH_ArkUI_TransitionEffect_SetAnimation(ArkUI_TransitionEffect* option, ArkUI_AnimateOption* animation)
 {
-    CHECK_NULL_RETURN(option, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     option->animation = animation;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
