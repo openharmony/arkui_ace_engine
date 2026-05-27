@@ -140,6 +140,9 @@ void NavigationLayoutUtil::UpdateTitleBarMenuNode(
     }
     RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? nodeBase->GetLandscapeMenu() : nodeBase->GetMenu();
     if (preMenuNode == newMenuNode) {
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_VOID(titleBarPattern);
+        titleBarPattern->UpdateMenuUIEffect(newMenuNode);
         return;
     }
     auto nodeBasePattern = nodeBase->GetPattern<NavDestinationPatternBase>();
@@ -151,6 +154,12 @@ void NavigationLayoutUtil::UpdateTitleBarMenuNode(
     titleBarNode->RemoveChild(preMenuNode);
     titleBarNode->SetMenu(newMenuNode);
     titleBarNode->AddChild(newMenuNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto options = titleBarPattern->GetTitleBarOptions();
+    auto material = titleBarPattern->GetCurrentMaterial();
+    bool forceUpdate = options.bgOptions.scrollEffectOptions.has_value() || material != nullptr;
+    titleBarPattern->UpdateMenuUIEffect(newMenuNode, forceUpdate);
 }
 
 float NavigationLayoutUtil::MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
