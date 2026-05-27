@@ -633,7 +633,20 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
             }
         }
         contentOffset = alignPosition + paddingOffset;
+        // SetOffset does not include alignOffsetY, which is applied separately during painting
+        // by TextContentModifier::SetTextContentAlingOffsetY
         content->SetOffset(contentOffset);
+        // Add alignOffsetY to the return value so that child nodes (e.g. image spans) are positioned
+        // consistently with the actual paragraph paint position
+        if (textLayoutProperty && textLayoutProperty->HasTextContentAlign() && paragraphManager_) {
+            auto contentHeight = size.Height() + std::fabs(baselineOffset_);
+            if (contentHeight < paragraphManager_->GetHeight()) {
+                auto textContentAlign = textLayoutProperty->GetTextContentAlign().value();
+                auto alignOffsetY = static_cast<int32_t>(textContentAlign) *
+                    (contentHeight - paragraphManager_->GetHeight()) / 2.0f;
+                contentOffset.SetY(contentOffset.GetY() + alignOffsetY);
+            }
+        }
     }
     return contentOffset;
 }
