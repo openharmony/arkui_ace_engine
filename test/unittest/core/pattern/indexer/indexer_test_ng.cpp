@@ -412,4 +412,36 @@ HWTEST_F(IndexerTestNg, OnThemeScopeUpdate001, TestSize.Level1)
 
     frameNode_->apiVersion_ = oriApiVersion;
 }
+
+/**
+ * @tc.name: IndexerPatternCoverage002
+ * @tc.desc: Test isTouch branch in ApplyIndexChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerPatternCoverage002, TestSize.Level0)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+    pattern_->OnModifyDone();
+
+    /**
+     * @tc.steps: step1. Call ApplyIndexChanged with selectChanged=true, isTouch=true.
+     */
+    pattern_->enableHapticFeedback_ = true;
+    pattern_->selectedChangedForHaptic_ = true;
+    pattern_->ApplyIndexChanged(true, true, false, false, true);
+
+    /**
+     * @tc.steps: step2. Call ApplyIndexChanged with selectChanged=true, isTouch=false.
+     */
+    pattern_->ApplyIndexChanged(true, true, false, false, false);
+
+    /**
+     * @tc.steps: step3. Call ApplyIndexChanged with selectChanged=false.
+     * @tc.expected: Neither TEXT_CHANGE event nor haptic/ShowBubble fired.
+     */
+    pattern_->ApplyIndexChanged(true, false, false, false, false);
+    pattern_->ApplyIndexChanged(true, false, false, false, true);
+}
 } // namespace OHOS::Ace::NG

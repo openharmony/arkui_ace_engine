@@ -184,8 +184,8 @@ private:
     void MoveIndexByOffset(const Offset& offset, bool isTouch = true);
     bool KeyIndexByStep(int32_t step);
     bool MoveIndexBySearch(const std::string& searchStr);
-    void ApplyIndexChanged(
-        bool isTextNodeInTree, bool selectChanged = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
+    void ApplyIndexChanged(bool isTextNodeInTree, bool selectChanged = true,
+        bool fromTouchUp = false, bool indexerSizeChanged = false, bool isTouch = false);
     void UpdateChildTextStyle(RefPtr<IndexerLayoutProperty>& layoutProperty,
         RefPtr<IndexerPaintProperty>& paintProperty, bool isTextNodeInTree, bool fromTouchUp);
     void UpdateFontStyle(RefPtr<IndexerLayoutProperty>& layoutProperty, RefPtr<IndexerTheme>& indexerTheme,

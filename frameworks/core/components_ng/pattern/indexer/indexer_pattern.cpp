@@ -614,7 +614,7 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset, bool isTouch)
     }
     childFocusIndex_ = -1;
     childHoverIndex_ = -1;
-    ApplyIndexChanged(true, true);
+    ApplyIndexChanged(true, true, false, false, isTouch);
 }
 
 int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset, bool isTouch)
@@ -824,7 +824,7 @@ void IndexerPattern::ItemSelectedChangedAnimation()
 }
 
 void IndexerPattern::ApplyIndexChanged(
-    bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
+    bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged, bool isTouch)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -853,8 +853,10 @@ void IndexerPattern::ApplyIndexChanged(
         AccessibilityEventType type = AccessibilityEventType::SELECTED;
         host->OnAccessibilityEvent(type);
     }
-    if (selectChanged) {
+    if (selectChanged && !isTouch) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+    }
+    if (selectChanged) {
         if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
             VibratorUtils::StartVibraFeedback();
         }
