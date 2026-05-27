@@ -40,7 +40,11 @@
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -92,6 +96,12 @@ const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
 const SizeF TEST_SIZE_100 = SizeF(100.0f, 100.0f);
 const SizeF TEST_SIZE_10 = SizeF(10.0f, 10.0f);
 constexpr float TEST_WIDTH_50 = 50.0f;
+// Resource path test constants
+const int32_t TEST_RES_ID = 100;
+const std::string TEST_RESOLVED_PATH = "/data/test/resolved_image.png";
+const std::string TEST_BUNDLE_NAME = "com.example.test";
+const std::string TEST_MODULE_NAME = "entry";
+const int32_t TEST_INSTANCE_ID = 0;
 } // namespace
 
 class RatingTwoTestNg : public testing::Test {
@@ -1268,5 +1278,95 @@ HWTEST_F(RatingTwoTestNg, MeasureTest005, TestSize.Level1)
     contentConstraint.selfIdealSize.SetSize(TEST_SIZE_200);
     ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(ret, TEST_SIZE_200);
+}
+
+/**
+ * @tc.name: SetForegroundSrc_ResetWithNullResObj
+ * @tc.desc: When flag is true and resObj is nullptr, the image source property should be reset successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTwoTestNg, SetForegroundSrc_ResetWithNullResObj, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetBackgroundSrc(RATING_BACKGROUND_URL);
+    rating.SetForegroundSrc(RATING_FOREGROUND_URL);
+    rating.SetSecondarySrc(RATING_SECONDARY_URL);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    EXPECT_TRUE(ratingLayoutProperty->GetBackgroundImageSourceInfo().has_value());
+    EXPECT_TRUE(ratingLayoutProperty->GetForegroundImageSourceInfo().has_value());
+    EXPECT_TRUE(ratingLayoutProperty->GetSecondaryImageSourceInfo().has_value());
+
+    rating.SetBackgroundSrc("", true, nullptr);
+    rating.SetForegroundSrc("", true, nullptr);
+    rating.SetSecondarySrc("", true, nullptr);
+    EXPECT_FALSE(ratingLayoutProperty->GetBackgroundImageSourceInfo().has_value());
+    EXPECT_FALSE(ratingLayoutProperty->GetForegroundImageSourceInfo().has_value());
+    EXPECT_FALSE(ratingLayoutProperty->GetSecondaryImageSourceInfo().has_value());
+
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: SetBackgroundSrc_ResetThenSetWithUrl
+ * @tc.desc: After resetting, setting a URL string without resObj correctly updates the property via fallback path
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTwoTestNg, SetBackgroundSrc_ResetThenSetWithUrl, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetBackgroundSrc(RATING_BACKGROUND_URL);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_BACKGROUND_URL);
+
+    rating.SetBackgroundSrc(frameNode, "", true, nullptr);
+    EXPECT_FALSE(ratingLayoutProperty->GetBackgroundImageSourceInfo().has_value());
+
+    rating.SetBackgroundSrc(frameNode, RATING_SECONDARY_URL, false, nullptr);
+    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_SECONDARY_URL);
+
+    rating.SetBackgroundSrc(frameNode, "", true, nullptr);
+    EXPECT_FALSE(ratingLayoutProperty->GetBackgroundImageSourceInfo().has_value());
+}
+
+/**
+ * @tc.name: SetForegroundSrc_WithResourceObj
+ * @tc.desc: When valid resObj is provided, GetResMediaPath should resolve the path via ResourceAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTwoTestNg, SetForegroundSrc_WithResourceObj, TestSize.Level1)
+{
+    AddMockResourceData(TEST_RES_ID, std::string(TEST_RESOLVED_PATH));
+    auto mockAdapter = AceType::MakeRefPtr<MockResourceAdapterV2>();
+    RefPtr<ResourceAdapter> adapter = mockAdapter;
+    ResourceManager::GetInstance().AddResourceAdapter(
+        TEST_BUNDLE_NAME, TEST_MODULE_NAME, TEST_INSTANCE_ID, adapter, true);
+
+    RatingModelNG rating;
+    rating.Create();
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        TEST_RES_ID, static_cast<int32_t>(ResourceType::STRING), params,
+        TEST_BUNDLE_NAME, TEST_MODULE_NAME, TEST_INSTANCE_ID);
+    rating.SetForegroundSrc("", false, resObj);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    EXPECT_EQ(ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        TEST_RESOLVED_PATH);
+
+    ResourceManager::GetInstance().RemoveResourceAdapter(
+        TEST_BUNDLE_NAME, TEST_MODULE_NAME, TEST_INSTANCE_ID);
+    ResetMockResourceData();
 }
 } // namespace OHOS::Ace::NG
