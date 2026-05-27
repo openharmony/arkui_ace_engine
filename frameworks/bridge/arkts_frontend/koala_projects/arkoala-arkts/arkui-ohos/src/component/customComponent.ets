@@ -270,6 +270,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return ArkUIAniModule._CustomNode_QueryRouterPageInfo(this.getPeer()!.peer.ptr);
     }
 
+    findCustomValueByKey(key: int32): Any | undefined {
+        return ArkUIAniModule._CustomNode_findCustomValueByKey(this.getPeer()!.peer.ptr, key);
+    }
+
+    findSystemEnvValueByKey(key: string): Any | undefined {
+        return ArkUIAniModule._CustomNode_findSystemEnvValueByKey(this.getPeer()!.peer.ptr, key);
+    }
+
+    registerOnCustomEnvUpdateCallback(callback: (key: int32, value: Any) => void): void {
+        ArkUIAniModule._CustomNode_registerOnCustomEnvUpdateCallback(this.getPeer()!.peer.ptr, callback);
+    }
+
+    registerOnSystemEnvUpdateCallback(callback: (key: string, value: Any) => void): void {
+        ArkUIAniModule._CustomNode_registerOnSystemEnvUpdateCallback(this.getPeer()!.peer.ptr, callback);
+    }
+
     queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo {
         if (isInner == undefined) {
             return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr);

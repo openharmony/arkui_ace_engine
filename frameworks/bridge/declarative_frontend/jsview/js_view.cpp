@@ -14,8 +14,10 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_view.h"
-#include "frameworks/core/components_ng/syntax/with_env_node.h"
 #include "core/pipeline_ng/environment_manager.h"
+
+#include <any>
+#include <optional>
 
 #include "base/log/ace_checker.h"
 #include "base/log/ace_scoring_log.h"
@@ -41,6 +43,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/layout_inspector.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_full_update_model.h"
@@ -107,32 +110,29 @@ RefPtr<NG::EnvironmentManager> GetEnvironmentManager(const RefPtr<NG::UINode>& n
     return pipeline->GetEnvironmentManager();
 }
 
-void SetEnvironmentQueryReturnValue(const JSCallbackInfo& info, const NG::EnvironmentQueryResult& result)
+void SetSystemEnvQueryReturnValue(const JSCallbackInfo& info, const NG::SystemEnvValue& result)
 {
-    switch (result.type) {
-        case NG::EnvironmentValueType::BOOLEAN:
-            info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result.boolValue)));
-            return;
-        case NG::EnvironmentValueType::NUMBER:
-            info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result.numberValue)));
-            return;
-        case NG::EnvironmentValueType::STRING:
-            info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result.stringValue)));
-            return;
-        case NG::EnvironmentValueType::CUSTOM: {
-            auto* anyPtr = result.value;
-            if (anyPtr != nullptr) {
-                info.SetReturnValue(std::any_cast<JSRef<JSVal>>(*anyPtr));
-            } else {
+    if (auto direction = result.GetDirection()) {
+        switch (*direction) {
+            case TextDirection::LTR:
+                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Ltr"))));
+                return;
+            case TextDirection::RTL:
+                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Rtl"))));
+                return;
+            case TextDirection::AUTO:
+                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Auto"))));
+                return;
+            default:
                 info.SetReturnValue(JSVal::Undefined());
-            }
-            return;
+                return;
         }
-        case NG::EnvironmentValueType::NONE:
-        default:
-            info.SetReturnValue(JSVal::Undefined());
-            return;
     }
+    if (auto doubleValue = result.GetDouble()) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(*doubleValue)));
+        return;
+    }
+    info.SetReturnValue(JSVal::Undefined());
 }
 } // namespace
 
@@ -1505,16 +1505,13 @@ void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
     }
 
     auto key = info[0]->ToNumber<int32_t>();
-    auto withEnvNode = environmentManager->FindWithEnvNode(node);
-    NG::EnvironmentQueryResult queryResult;
     auto stringKey = std::to_string(key);
-    bool found = environmentManager->FindValueByKey(
-        withEnvNode, node, NG::EnvironmentPropertyKind::CUSTOM, stringKey, queryResult);
-    if (!found) {
+    std::any customValue;
+    if (!environmentManager->FindCustomEnvValueByKey(node, stringKey, customValue)) {
         info.SetReturnValue(JSVal::Undefined());
         return;
     }
-    SetEnvironmentQueryReturnValue(info, queryResult);
+    info.SetReturnValue(std::any_cast<JSRef<JSVal>>(customValue));
 }
 
 void JSViewPartialUpdate::JSFindSystemEnvValueByKey(const JSCallbackInfo& info)
@@ -1538,71 +1535,77 @@ void JSViewPartialUpdate::JSFindSystemEnvValueByKey(const JSCallbackInfo& info)
         return;
     }
 
-    auto withEnvNode = environmentManager->FindWithEnvNode(node);
-    NG::EnvironmentQueryResult queryResult;
-    bool found = environmentManager->FindValueByKey(
-        withEnvNode, node, NG::EnvironmentPropertyKind::ENV, key, queryResult);
+    NG::SystemEnvValue queryResult;
+    bool found = environmentManager->FindSystemEnvValueByKey(node, key, queryResult);
     if (!found) {
         info.SetReturnValue(JSVal::Undefined());
         return;
     }
-    SetEnvironmentQueryReturnValue(info, queryResult);
+    SetSystemEnvQueryReturnValue(info, queryResult);
 }
 
 void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>& onCustomEnvUpdateFunc)
 {
-    updateCustomEnvCallback_ = [weak = WeakClaim(this), func = std::move(onCustomEnvUpdateFunc)](int32_t key) {
+    updateCustomEnvCallback_ = [weak = WeakClaim(this), func = std::move(onCustomEnvUpdateFunc)](
+                                   int32_t key, const std::optional<JSRef<JSVal>>& value) {
         JAVASCRIPT_EXECUTION_SCOPE_STATIC;
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         ContainerScope scope(self->GetInstanceId());
         JSRef<JSVal> jsKey = JSRef<JSVal>::Make(ToJSValue(key));
-        JSRef<JSVal> params[1] = { jsKey };
         auto jsFunc = JSRef<JSFunc>::Cast(func);
-        if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
-            jsFunc->Call(self->jsViewObject_, 1, params);
+        if (self->jsViewObject_.IsEmpty() || self->jsViewObject_->IsUndefined()) {
+            return;
         }
+        JSRef<JSVal> params[1] = { jsKey };
+        jsFunc->Call(self->jsViewObject_, 1, params);
     };
 
     auto customNode = AceType::DynamicCast<NG::CustomNode>(this->GetViewNode());
     CHECK_NULL_VOID(customNode);
-    customNode->SetOnCustomEnvUpdateFunc([weak = WeakClaim(this)](const std::string& key) {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self);
-        auto customEnvKey = StringUtils::StringToInt(key, INT_MAX);
-        if (customEnvKey == INT_MAX) {
-            TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "key is not a valid integer");
-        }
-        if (self->updateCustomEnvCallback_) {
-            self->updateCustomEnvCallback_(customEnvKey);
-        }
-    });
+    customNode->SetOnCustomEnvUpdateFunc(
+        [weak = WeakClaim(this)](const std::string& key, const std::optional<std::any>& value) {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto customEnvKey = StringUtils::StringToInt(key, INT_MAX);
+            if (customEnvKey == INT_MAX) {
+                TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "key is not a valid integer");
+            }
+            std::optional<JSRef<JSVal>> jsValue;
+            if (self->updateCustomEnvCallback_) {
+                self->updateCustomEnvCallback_(customEnvKey, jsValue);
+            }
+        });
 }
 
 void JSViewPartialUpdate::RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>& onSystemEnvUpdateFunc_)
 {
-    updateEnvCallback_ = [weak = WeakClaim(this), func = std::move(onSystemEnvUpdateFunc_)](const std::string& key) {
+    updateEnvCallback_ = [weak = WeakClaim(this), func = std::move(onSystemEnvUpdateFunc_)](
+                             const std::string& key, const std::optional<JSRef<JSVal>>& value) {
         JAVASCRIPT_EXECUTION_SCOPE_STATIC;
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         ContainerScope scope(self->GetInstanceId());
         JSRef<JSVal> jsKey = JSRef<JSVal>::Make(ToJSValue(key));
-        JSRef<JSVal> params[1] = { jsKey };
         auto jsFunc = JSRef<JSFunc>::Cast(func);
-        if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
-            jsFunc->Call(self->jsViewObject_, 1, params);
+        if (self->jsViewObject_.IsEmpty() || self->jsViewObject_->IsUndefined()) {
+            return;
         }
+        JSRef<JSVal> params[1] = { jsKey };
+        jsFunc->Call(self->jsViewObject_, 1, params);
     };
 
     auto customNode = AceType::DynamicCast<NG::CustomNode>(this->GetViewNode());
     CHECK_NULL_VOID(customNode);
-    customNode->SetOnSystemEnvUpdateFunc([weak = WeakClaim(this)](const std::string& key) {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self);
-        if (self->updateEnvCallback_) {
-            self->updateEnvCallback_(key);
-        }
-    });
+    customNode->SetOnSystemEnvUpdateFunc(
+        [weak = WeakClaim(this)](const std::string& key, const std::optional<NG::SystemEnvValue>& value) {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            std::optional<JSRef<JSVal>> jsValue;
+            if (self->updateEnvCallback_) {
+                self->updateEnvCallback_(key, jsValue);
+            }
+        });
 }
 
 void JSViewPartialUpdate::JSBind(BindingTarget object)

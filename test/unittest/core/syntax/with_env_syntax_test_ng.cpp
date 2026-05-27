@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
+#include <any>
 #include <string>
 
 #include "gtest/gtest.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/with_env_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/environment_manager.h"
 
 #define private public
 #include "core/components_ng/syntax/with_env_node.h"
@@ -32,13 +36,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t WITH_ENV_NODE_ID = 100;
 constexpr int32_t WITH_ENV_NODE_ID_ALT = 200;
-const std::string ENV_KEY_DIRECTION = "system.arkui.layout.direction";
-const std::string ENV_VALUE_TRUE = "true";
-const std::string ENV_VALUE_FALSE = "false";
 const std::string CUSTOM_KEY_THEME = "app.theme";
 const std::string CUSTOM_VALUE_DARK = "dark";
 constexpr double CUSTOM_DOUBLE_VALUE = 3.14;
-constexpr double CUSTOM_DOUBLE_INT_VALUE = 42.0;
 constexpr bool CUSTOM_BOOL_VALUE = true;
 constexpr bool IS_ATOMIC_NODE = false;
 constexpr bool IS_SYNTAX_NODE = true;
@@ -65,6 +65,10 @@ void WithEnvSyntaxTestNg::TearDownTestSuite()
 void WithEnvSyntaxTestNg::SetUp()
 {
     MockPipelineContext::SetUp();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    if (pipeline) {
+        pipeline->environmentManager_ = AceType::MakeRefPtr<EnvironmentManager>();
+    }
 }
 
 void WithEnvSyntaxTestNg::TearDown()
@@ -119,63 +123,8 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: WithEnvSyntaxTest004
- * @tc.desc: SetEnvProperty with string value and verify HasEnvProperty.
- * @tc.type: FUNC
- */
-HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest004, TestSize.Level1)
-{
-    WithEnvModelNG model;
-    model.Create();
-
-    model.SetEnvProperty(ENV_KEY_DIRECTION, ENV_VALUE_TRUE);
-
-    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(node, nullptr);
-
-    EXPECT_TRUE(node->HasEnvProperty(ENV_KEY_DIRECTION));
-    EXPECT_FALSE(node->HasEnvProperty("non.existent.key"));
-}
-
-/**
- * @tc.name: WithEnvSyntaxTest005
- * @tc.desc: SetEnvProperty with double value and verify HasEnvProperty.
- * @tc.type: FUNC
- */
-HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest005, TestSize.Level1)
-{
-    WithEnvModelNG model;
-    model.Create();
-
-    model.SetEnvProperty(CUSTOM_KEY_THEME, CUSTOM_DOUBLE_VALUE);
-
-    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(node, nullptr);
-
-    EXPECT_TRUE(node->HasEnvProperty(CUSTOM_KEY_THEME));
-}
-
-/**
- * @tc.name: WithEnvSyntaxTest006
- * @tc.desc: SetEnvProperty with bool value and verify HasEnvProperty.
- * @tc.type: FUNC
- */
-HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest006, TestSize.Level1)
-{
-    WithEnvModelNG model;
-    model.Create();
-
-    model.SetEnvProperty(ENV_KEY_DIRECTION, CUSTOM_BOOL_VALUE);
-
-    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(node, nullptr);
-
-    EXPECT_TRUE(node->HasEnvProperty(ENV_KEY_DIRECTION));
-}
-
-/**
  * @tc.name: WithEnvSyntaxTest007
- * @tc.desc: SetCustomEnvProperty with std::any, then GetCustomEnvPropertyAny returns valid pointer.
+ * @tc.desc: SetCustomEnvProperty with std::any, then GetCustomEnvPropertyAny returns valid value.
  * @tc.type: FUNC
  */
 HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest007, TestSize.Level1)
@@ -188,18 +137,18 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest007, TestSize.Level1)
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
 
-    EXPECT_TRUE(node->HasEnvProperty(CUSTOM_KEY_THEME));
+    EXPECT_TRUE(node->HasCustomEnvProperty(CUSTOM_KEY_THEME));
 
-    auto* anyPtr = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
-    ASSERT_NE(anyPtr, nullptr);
+    auto anyValue = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
+    ASSERT_TRUE(anyValue.has_value());
 
-    auto retrieved = std::any_cast<std::string>(*anyPtr);
+    auto retrieved = std::any_cast<std::string>(*anyValue);
     EXPECT_EQ(retrieved, CUSTOM_VALUE_DARK);
 }
 
 /**
  * @tc.name: WithEnvSyntaxTest008
- * @tc.desc: GetCustomEnvPropertyAny returns nullptr for non-existent key.
+ * @tc.desc: GetCustomEnvPropertyAny returns nullopt for non-existent key.
  * @tc.type: FUNC
  */
 HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest008, TestSize.Level1)
@@ -210,8 +159,8 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest008, TestSize.Level1)
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
 
-    auto* anyPtr = node->GetCustomEnvPropertyAny("non.existent.key");
-    EXPECT_EQ(anyPtr, nullptr);
+    auto anyValue = node->GetCustomEnvPropertyAny("non.existent.key");
+    EXPECT_FALSE(anyValue.has_value());
 }
 
 /**
@@ -229,10 +178,10 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest009, TestSize.Level1)
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
 
-    auto* anyPtr = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
-    ASSERT_NE(anyPtr, nullptr);
+    auto anyValue = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
+    ASSERT_TRUE(anyValue.has_value());
 
-    auto retrieved = std::any_cast<double>(*anyPtr);
+    auto retrieved = std::any_cast<double>(*anyValue);
     EXPECT_DOUBLE_EQ(retrieved, CUSTOM_DOUBLE_VALUE);
 }
 
@@ -246,28 +195,15 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest010, TestSize.Level1)
     WithEnvModelNG model;
     model.Create();
 
-    model.SetCustomEnvProperty(ENV_KEY_DIRECTION, std::any(CUSTOM_BOOL_VALUE));
+    model.SetCustomEnvProperty(CUSTOM_KEY_THEME, std::any(CUSTOM_BOOL_VALUE));
 
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
 
-    auto* anyPtr = node->GetCustomEnvPropertyAny(ENV_KEY_DIRECTION);
-    ASSERT_NE(anyPtr, nullptr);
-    auto retrieved = std::any_cast<bool>(*anyPtr);
+    auto anyValue = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
+    ASSERT_TRUE(anyValue.has_value());
+    auto retrieved = std::any_cast<bool>(*anyValue);
     EXPECT_EQ(retrieved, CUSTOM_BOOL_VALUE);
-}
-
-/**
- * @tc.name: WithEnvSyntaxTest011
- * @tc.desc: HasEnvProperty returns false when no properties are set.
- * @tc.type: FUNC
- */
-HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest011, TestSize.Level1)
-{
-    auto node = WithEnvNode::CreateWithEnvNode(WITH_ENV_NODE_ID);
-    ASSERT_NE(node, nullptr);
-    EXPECT_FALSE(node->HasEnvProperty(ENV_KEY_DIRECTION));
-    EXPECT_FALSE(node->HasEnvProperty(CUSTOM_KEY_THEME));
 }
 
 /**
@@ -286,79 +222,106 @@ HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest012, TestSize.Level1)
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
 
-    auto* anyPtr = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
-    ASSERT_NE(anyPtr, nullptr);
-    auto retrieved = std::any_cast<std::string>(*anyPtr);
+    auto anyValue = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
+    ASSERT_TRUE(anyValue.has_value());
+    auto retrieved = std::any_cast<std::string>(*anyValue);
     EXPECT_EQ(retrieved, "dark");
 }
 
 /**
- * @tc.name: WithEnvSyntaxTest013
- * @tc.desc: SetEnvProperty with double integer-like value stored correctly.
+ * @tc.name: WithEnvNodeSystemEnvProperty001
+ * @tc.desc: SetSystemEnvProperty accepts direction values and rejects mismatched or unsupported system keys.
  * @tc.type: FUNC
  */
-HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest013, TestSize.Level1)
+HWTEST_F(WithEnvSyntaxTestNg, WithEnvNodeSystemEnvProperty001, TestSize.Level1)
+{
+    auto node = WithEnvNode::GetOrCreateWithEnvNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+
+    EXPECT_TRUE(node->SetSystemEnvProperty(ENV_KEY_DIRECTION, SystemEnvValue::FromDirection(TextDirection::RTL)));
+    auto directionValue = node->GetSystemEnvProperty(ENV_KEY_DIRECTION);
+    ASSERT_TRUE(directionValue.has_value());
+    auto direction = directionValue->GetDirection();
+    ASSERT_TRUE(direction.has_value());
+    EXPECT_EQ(direction.value(), TextDirection::RTL);
+
+    EXPECT_FALSE(node->SetSystemEnvProperty(ENV_KEY_DIRECTION, SystemEnvValue::FromDouble(1.0)));
+    EXPECT_FALSE(
+        node->SetSystemEnvProperty("arkui.test.unsupported", SystemEnvValue::FromDirection(TextDirection::LTR)));
+}
+
+/**
+ * @tc.name: WithEnvModelSystemDirection001
+ * @tc.desc: WithEnvModelNG sets system direction property on current WithEnvNode through EnvironmentManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithEnvSyntaxTestNg, WithEnvModelSystemDirection001, TestSize.Level1)
 {
     WithEnvModelNG model;
     model.Create();
 
-    model.SetEnvProperty(CUSTOM_KEY_THEME, CUSTOM_DOUBLE_INT_VALUE);
+    model.SetSystemEnvProperty(ENV_KEY_DIRECTION, TextDirection::RTL);
 
     auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
-    EXPECT_TRUE(node->HasEnvProperty(CUSTOM_KEY_THEME));
-
-    auto* anyPtr = node->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
-    EXPECT_EQ(anyPtr, nullptr); // double goes to envPropertiesDoubleType_, not customEnvObjProperties_
+    auto value = node->GetSystemEnvProperty(ENV_KEY_DIRECTION);
+    ASSERT_TRUE(value.has_value());
+    auto direction = value->GetDirection();
+    ASSERT_TRUE(direction.has_value());
+    EXPECT_EQ(direction.value(), TextDirection::RTL);
 }
 
 /**
- * @tc.name: WithEnvSyntaxTest014
- * @tc.desc: ModelNG GetCustomEnvPropertyAny delegates to node correctly.
+ * @tc.name: WithEnvModelSystemDirectionInvalidKey001
+ * @tc.desc: WithEnvModelNG ignores direction value when system key is unsupported.
  * @tc.type: FUNC
  */
-HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest014, TestSize.Level1)
+HWTEST_F(WithEnvSyntaxTestNg, WithEnvModelSystemDirectionInvalidKey001, TestSize.Level1)
 {
     WithEnvModelNG model;
     model.Create();
 
-    auto* instance = WithEnvModel::GetInstance();
-    ASSERT_NE(instance, nullptr);
+    model.SetSystemEnvProperty("arkui.test.unsupported", TextDirection::RTL);
 
-    instance->SetCustomEnvProperty(CUSTOM_KEY_THEME, std::any(CUSTOM_VALUE_DARK));
-
-    auto* anyPtr = instance->GetCustomEnvPropertyAny(CUSTOM_KEY_THEME);
-    ASSERT_NE(anyPtr, nullptr);
-    auto retrieved = std::any_cast<std::string>(*anyPtr);
-    EXPECT_EQ(retrieved, CUSTOM_VALUE_DARK);
-
-    // Non-existent key returns nullptr
-    auto* notFound = instance->GetCustomEnvPropertyAny("non.existent.key");
-    EXPECT_EQ(notFound, nullptr);
-
-    ViewStackProcessor::GetInstance()->Finish();
-}
-
-/**
- * @tc.name: WithEnvSyntaxTest015
- * @tc.desc: RemoveEnvProperty via model removes property and HasEnvProperty returns false.
- * @tc.type: FUNC
- */
-HWTEST_F(WithEnvSyntaxTestNg, WithEnvSyntaxTest015, TestSize.Level1)
-{
-    WithEnvModelNG model;
-    model.Create();
-
-    model.SetEnvProperty(ENV_KEY_DIRECTION, ENV_VALUE_TRUE);
-
-    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(node, nullptr);
-    EXPECT_TRUE(node->HasEnvProperty(ENV_KEY_DIRECTION));
+    EXPECT_FALSE(node->HasSystemEnvProperty("arkui.test.unsupported"));
+}
 
-    model.RemoveEnvProperty(ENV_KEY_DIRECTION);
-    EXPECT_FALSE(node->HasEnvProperty(ENV_KEY_DIRECTION));
+/**
+ * @tc.name: WithEnvModelRemoveSystemEnvProperty001
+ * @tc.desc: WithEnvModelNG removes an existing system direction property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithEnvSyntaxTestNg, WithEnvModelRemoveSystemEnvProperty001, TestSize.Level1)
+{
+    WithEnvModelNG model;
+    model.Create();
 
-    ViewStackProcessor::GetInstance()->Finish();
+    model.SetSystemEnvProperty(ENV_KEY_DIRECTION, TextDirection::LTR);
+    model.RemoveSystemEnvProperty(ENV_KEY_DIRECTION);
+
+    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(node, nullptr);
+    EXPECT_FALSE(node->HasSystemEnvProperty(ENV_KEY_DIRECTION));
+}
+
+/**
+ * @tc.name: WithEnvModelRemoveCustomEnvProperty001
+ * @tc.desc: WithEnvModelNG removes an existing custom env property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithEnvSyntaxTestNg, WithEnvModelRemoveCustomEnvProperty001, TestSize.Level1)
+{
+    WithEnvModelNG model;
+    model.Create();
+
+    model.SetCustomEnvProperty(CUSTOM_KEY_THEME, std::any(CUSTOM_VALUE_DARK));
+    model.RemoveCustomEnvProperty(CUSTOM_KEY_THEME);
+
+    auto node = AceType::DynamicCast<WithEnvNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(node, nullptr);
+    EXPECT_FALSE(node->HasCustomEnvProperty(CUSTOM_KEY_THEME));
 }
 
 } // namespace OHOS::Ace::NG

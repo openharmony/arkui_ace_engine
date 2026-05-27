@@ -43,6 +43,7 @@ build_component_ng("manager_ng") {
     "drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_machine.cpp",
     "drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_update.cpp",
     "drag_drop/utils/drag_animation_helper.cpp",
+    "environment/system_env_dispatcher.cpp",
     "event/json_child_report.cpp",
     "focus/focus_manager.cpp",
     "focus/focus_view.cpp",

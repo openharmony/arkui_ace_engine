@@ -60,6 +60,10 @@ export interface IExtendableComponent {
     queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo;
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
     queryRouterPageInfo(): uiObserver.RouterPageInfo;
+    findCustomValueByKey(key: int32): Any | undefined;
+    findSystemEnvValueByKey(key: string): Any | undefined;
+    registerOnCustomEnvUpdateCallback(callback: (key: int32, value: Any) => void): void;
+    registerOnSystemEnvUpdateCallback(callback: (key: string, value: Any) => void): void;
     getDialogController(): promptAction.DialogController | undefined;
     __removeChildWhenDispose__IExtendableComponent_Internal(): void;
     __addMeToParent__IExtendableComponent_Internal(): void;
@@ -457,6 +461,18 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
         return this.delegate_!.queryNavDestinationInfo();
+    }
+    findCustomValueByKey(key: int32): Any | undefined {
+        return this.delegate_!.findCustomValueByKey(key);
+    }
+    findSystemEnvValueByKey(key: string): Any | undefined {
+        return this.delegate_!.findSystemEnvValueByKey(key);
+    }
+    registerOnCustomEnvUpdateCallback(callback: (key: int32, value: Any) => void): void {
+        this.delegate_!.registerOnCustomEnvUpdateCallback(callback);
+    }
+    registerOnSystemEnvUpdateCallback(callback: (key: string, value: Any) => void): void {
+        this.delegate_!.registerOnSystemEnvUpdateCallback(callback);
     }
 
     getDialogController(): promptAction.DialogController | undefined {

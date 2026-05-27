@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/syntax/with_env_node.h"
+
+#include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -41,76 +43,60 @@ RefPtr<WithEnvNode> WithEnvNode::GetOrCreateWithEnvNode(int32_t nodeId)
     return WithEnvNode::CreateWithEnvNode(nodeId);
 }
 
-void WithEnvNode::RemoveEnvProperty(const std::string& key)
-{
-    envPropertiesStringType_.erase(key);
-    envPropertiesDoubleType_.erase(key);
-    envPropertiesBoolType_.erase(key);
-}
-
-void WithEnvNode::SetEnvProperty(const std::string& key, const std::string& value)
-{
-    envPropertiesStringType_[key] = value;
-}
-
-void WithEnvNode::SetEnvProperty(const std::string& key, double value)
-{
-    envPropertiesDoubleType_[key] = value;
-}
-
-void WithEnvNode::SetEnvProperty(const std::string& key, bool value)
-{
-    envPropertiesBoolType_[key] = value;
-}
-
 void WithEnvNode::SetCustomEnvProperty(const std::string& key, std::any value)
 {
     customEnvObjProperties_[key] = std::move(value);
 }
 
-bool WithEnvNode::GetEnvProperty(const std::string& key, std::string& value) const
+void WithEnvNode::RemoveCustomEnvProperty(const std::string& key)
 {
-    auto it = envPropertiesStringType_.find(key);
-    if (it == envPropertiesStringType_.end()) {
-        return false;
-    }
-    value = it->second;
-    return true;
-}
- 
-bool WithEnvNode::GetEnvProperty(const std::string& key, double& value) const
-{
-    auto it = envPropertiesDoubleType_.find(key);
-    if (it == envPropertiesDoubleType_.end()) {
-        return false;
-    }
-    value = it->second;
-    return true;
-}
- 
-bool WithEnvNode::GetEnvProperty(const std::string& key, bool& value) const
-{
-    auto it = envPropertiesBoolType_.find(key);
-    if (it == envPropertiesBoolType_.end()) {
-        return false;
-    }
-    value = it->second;
-    return true;
+    customEnvObjProperties_.erase(key);
 }
 
-const std::any* WithEnvNode::GetCustomEnvPropertyAny(const std::string& key) const
+std::optional<std::any> WithEnvNode::GetCustomEnvPropertyAny(const std::string& key) const
 {
     auto it = customEnvObjProperties_.find(key);
     if (it != customEnvObjProperties_.end()) {
-        return &(it->second);
+        return it->second;
     }
-    return nullptr;
+    return std::nullopt;
 }
 
-bool WithEnvNode::HasEnvProperty(const std::string& key) const
+bool WithEnvNode::HasCustomEnvProperty(const std::string& key) const
 {
-    return envPropertiesStringType_.count(key) > 0 || envPropertiesDoubleType_.count(key) > 0
-        || envPropertiesBoolType_.count(key) > 0 || customEnvObjProperties_.count(key) > 0;
+    return customEnvObjProperties_.count(key) > 0;
+}
+
+void WithEnvNode::RemoveSystemEnvProperty(const std::string& key)
+{
+    systemEnvProperties_.erase(key);
+}
+
+bool WithEnvNode::SetSystemEnvProperty(const std::string& key, SystemEnvValue property)
+{
+    if (key == ENV_KEY_DIRECTION && property.GetDirection()) {
+        systemEnvProperties_[key] = property;
+        return true;
+    }
+    if (key == ENV_KEY_FONT_SCALE && property.GetDouble()) {
+        systemEnvProperties_[key] = property;
+        return true;
+    }
+    return false;
+}
+
+std::optional<SystemEnvValue> WithEnvNode::GetSystemEnvProperty(const std::string& key) const
+{
+    auto iter = systemEnvProperties_.find(key);
+    if (iter == systemEnvProperties_.end()) {
+        return std::nullopt;
+    }
+    return iter->second;
+}
+
+bool WithEnvNode::HasSystemEnvProperty(const std::string& key) const
+{
+    return systemEnvProperties_.count(key) > 0;
 }
 
 } // namespace OHOS::Ace::NG

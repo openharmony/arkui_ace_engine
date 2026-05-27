@@ -26,6 +26,7 @@
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/ressched/taihang_optimizer.h"
+#include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
@@ -1971,15 +1972,15 @@ void PipelineContext::ChangeSensitiveNodes(bool flag)
 {
 }
 
-void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
+ACE_WEAK_SYM void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
 {
 }
 
-void EnvironmentManager::OnNodeDetached(const RefPtr<UINode>& node)
+ACE_WEAK_SYM void EnvironmentManager::OnNodeDetached(const RefPtr<UINode>& node)
 {
 }
 
-ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase)
+ACE_WEAK_SYM ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase)
 {
     if (!node) {
         return;
@@ -1987,7 +1988,7 @@ ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhas
     active_ = true;
 }
 
-ScopedEnvConsumer::~ScopedEnvConsumer()
+ACE_WEAK_SYM ScopedEnvConsumer::~ScopedEnvConsumer()
 {
 }
 
