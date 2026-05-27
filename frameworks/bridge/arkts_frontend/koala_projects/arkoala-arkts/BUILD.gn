@@ -19,6 +19,10 @@ import("./components.gni")
 koala_root = ".."
 koala_path = ""
 
+arkui_path_keys += [ "@ohos.windowenv" ]
+arkui_path_values += [ rebase_path("$ohos_ets_inner_path/window/@ohos.windowenv.ets") ]
+ 
+
 node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 
@@ -177,6 +181,9 @@ generate_static_abc("components_compile_abc") {
   ui_enable = "True"
   only_memo = "True"
   dependencies = [ ":arkoala_process" ]
+  external_dependencies = [ 
+    "window_manager:copy_window_env_static_ets"
+   ]
   dst_file = target_out_dir + "/components_compile_abc/modules_static.abc"
   out_puts = [ target_out_dir + "/components_compile_abc/modules_static.abc" ]
 }

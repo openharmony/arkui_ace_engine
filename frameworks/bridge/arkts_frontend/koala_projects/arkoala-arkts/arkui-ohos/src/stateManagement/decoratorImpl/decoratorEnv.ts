@@ -15,7 +15,7 @@
 
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
-import { EnvOptions, IEnvDecoratedVariable, IVariableOwner, OBSERVE } from '../decorator';
+import { EnvOptions, IEnvDecoratedVariable, IVariableOwner, OBSERVE, SystemEnvKey, ReadonlyEnvKey } from '../decorator';
 import { DecoratedVariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
@@ -26,6 +26,7 @@ import { default as window } from '@ohos.window';
 import { UIObserver } from '@ohos.arkui.UIContext';
 import { HeightBreakpoint, WidthBreakpoint } from '@ohos.arkui.component';
 import { int32 } from '@koalaui/common';
+import { WindowStaticEnv } from '@ohos.windowenv';
 
 export interface IEnvironmentValueBase {
     onWatchFunc(): void;
@@ -600,35 +601,114 @@ export class WindowSizeVpEnv implements window.SizeInVP, IEnvironmentValue<windo
     }
 }
 
+export class EnvUtils {
+    public static windowStaticEnvMap: Map<int32, WindowStaticEnv> = new Map<int32, WindowStaticEnv>();
+ 
+ 
+    public static isSimpleEnvKey(key: string): boolean {
+        return key === 'system.window.focused' || key === 'system.window.highlighted' ||
+               key === 'system.window.density.system' || key === 'system.window.displayid';
+    }
+ 
+    public static getOrCreateWindowStaticEnv(uiContext: UIContext): WindowStaticEnv {
+        const instanceId: int32 = uiContext.getInstanceId();
+        let env = EnvUtils.windowStaticEnvMap.get(instanceId);
+        if (env === undefined) {
+            env = new WindowStaticEnv(instanceId, uiContext);
+            EnvUtils.windowStaticEnvMap.set(instanceId, env);
+        }
+        return env;
+    }
+ 
+    public static registerCallbackOnWindowStaticEnv(env: WindowStaticEnv, key: string , callback: (value: Any) => void): void {
+        switch (key) {
+            case 'system.window.focused':
+                env.registerFocusEnv(callback as (value: boolean) => void);
+                break;
+            case 'system.window.highlighted':
+                env.registerHighlightedEnv(callback as (value: boolean) => void);
+                break;
+            case 'system.window.density.system':
+                env.registerSystemDensityEnv(callback as (value: double) => void);
+                break;
+            case 'system.window.displayid':
+                env.registerDisplayIdEnv(callback as (value: long) => void);
+                break;
+            default:
+                break;
+        }
+    }
+ 
+    public static unregisterCallbackFromWindowStaticEnv(env: WindowStaticEnv, key: string, callback: (value: Any) => void): void {
+        switch (key) {
+            case 'system.window.focused':
+                env.unregisterFocusEnv(callback as (value: boolean) => void); break;
+            case 'system.window.highlighted':
+                env.unregisterHighlightedEnv(callback as (value: boolean) => void); break;
+            case 'system.window.density.system':
+                env.unregisterSystemDensityEnv(callback as (value: double) => void); break;
+            case 'system.window.displayid':
+                env.unregisterDisplayIdEnv(callback as (value: long) => void); break;
+            default: break;
+        }
+    }
+ 
+}
+
 export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IEnvDecoratedVariable<T>, IEnvVariable {
     private owningViewInternal: IVariableOwner;
-    private envValue: string;
+    private envValue: string | SystemEnvKey<T>;
+    private envSystemEnvString: string | undefined;
     public static instanceIdSet: Set<int32> = new Set<int32>();
     private latestInstanceId: int32 | undefined = undefined;
-    private finalResultBackingValue: IBackingValue<IEnvironmentValue<T> | undefined>;
+    private finalResultBackingValue?: IBackingValue<IEnvironmentValue<T> | undefined>;
+    private systemEnvKeyBackingValue?: IBackingValue<T> | undefined;
+    // need to register to view's dispatch function
+    private systemEnvKeyCallback: ((value: Any) => void) | undefined;
 
-    constructor(owningView: IVariableOwner, envValue: string, varName: string, envOptions?: EnvOptions<T>) {
+    constructor(owningView: IVariableOwner, envValue: string | SystemEnvKey<T>, varName: string, envOptions?: EnvOptions<T>) {
         super('@Env', owningView, varName);
         this.owningViewInternal = owningView;
         this.envValue = envValue;
-        this.finalResultBackingValue = FactoryInternal.mkDecoratorValue<IEnvironmentValue<T> | undefined>('EnvFinalResult', undefined);
+
+        const isSystemEnvKey = !(typeof envValue === 'string');
+
+        if (isSystemEnvKey) {
+            const envkey: SystemEnvKey<T> =  this.envValue as SystemEnvKey<T>;
+            this.envSystemEnvString = envkey.key;
+            const windowStaticEnv = EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
+            this.systemEnvKeyBackingValue = FactoryInternal.mkDecoratorValue<T>(
+                `SystemEnvKey`, windowStaticEnv.getEnvValueByKey(this.envSystemEnvString as string) as T
+            );
+        } else {
+            this.finalResultBackingValue = FactoryInternal.mkDecoratorValue<IEnvironmentValue<T> | undefined>(
+                'EnvFinalResult', undefined
+            );
+        }
         this.registerEnv();
     }
 
     public registerEnv(instanceId?: int32): void {
         const tempInstanceId: int32 = instanceId? instanceId : UIContextUtil.getCurrentInstanceId();
-        const envPropertyFromUIContext: Object | undefined = UIContextUtil.getEnvContextById(tempInstanceId, this.envValue);
+
+        if (this.envSystemEnvString) {
+            this.registerSimpleEnv(tempInstanceId, instanceId === undefined);
+            this.latestInstanceId = tempInstanceId;
+            return;
+        }
+
+        const envPropertyFromUIContext: Object | undefined = UIContextUtil.getEnvContextById(tempInstanceId, this.envValue as string);
         if (envPropertyFromUIContext !== undefined) {
             this.finalResult = envPropertyFromUIContext as IEnvironmentValue<T>;
             this.finalResult!.reConstructor(tempInstanceId);
         } else {
             if (this.latestInstanceId === undefined) {
-                this.finalResult = this.getEnvProperty(this.envValue, tempInstanceId);
+                this.finalResult = this.getEnvProperty(this.envValue as string, tempInstanceId);
             } else {
-                this.finalResult = this.getEnvProperty(this.envValue, this.latestInstanceId!);
+                this.finalResult = this.getEnvProperty(this.envValue as string, this.latestInstanceId!);
                 this.finalResult!.reConstructor(tempInstanceId);
             }
-            UIContextUtil.setEnvContextById(tempInstanceId, this.envValue, this.finalResult! as Object);
+            UIContextUtil.setEnvContextById(tempInstanceId, this.envValue as string, this.finalResult! as Object);
         }
         this.finalResult!.onWatchFunc();
         if (instanceId === undefined) {
@@ -638,8 +718,65 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         this.latestInstanceId = tempInstanceId;
     }
 
+    private registerSimpleEnv(instanceId: int32, shouldAddToSet: boolean): void {
+        this.systemEnvKeyCallback = (value: Any): void => {
+            const oldValue = this.systemEnvKeyBackingValue!.get(false);
+            if (oldValue !== (value as T)) {
+                this.systemEnvKeyBackingValue!.setNoCheck(value as T);
+                EnvDecoratedVariable.instanceIdSet.add(instanceId);
+            }
+        };
+
+        const isFirst = this.owningViewInternal.__addSimpleEnvCallback__Internal(this.envSystemEnvString!, this.systemEnvKeyCallback!);
+
+        if (isFirst) {
+            const callbackSet = this.owningViewInternal.__getSimpleEnvCallbackSet__Internal(this.envSystemEnvString!);
+            const dispatchFunc = (value: Any): void => {
+                if (callbackSet !== undefined) {
+                    for (const cb of callbackSet) {
+                        cb(value);
+                    }
+                }
+            };
+
+            this.owningViewInternal.__setSimpleEnvDispatchFunc__Internal(this.envSystemEnvString!, dispatchFunc);
+
+            const windowStaticEnv = EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
+            this.registerCallbackOnWindowStaticEnv(windowStaticEnv, this.envSystemEnvString!, dispatchFunc);
+        }
+
+        if (shouldAddToSet) {
+            this.owningViewInternal.__addEnvInstance__Internal(this as IEnvVariable);
+        }
+        EnvDecoratedVariable.instanceIdSet.add(instanceId);
+    }
+
     public unRegisterEnv(instanceId?: int32): void {
-        this.finalResult!.offWatchFunc(instanceId);
+        if (this.envSystemEnvString) {
+            this.unregisterSystemEnvKey();
+        } else {
+            this.finalResult!.offWatchFunc(instanceId);
+        }
+    }
+
+    private unregisterSystemEnvKey(): void {
+        if (this.systemEnvKeyCallback === undefined) {
+            return;
+        }
+
+        const setEmpty = this.owningViewInternal.__removeSimpleEnvCallback__Internal(this.envSystemEnvString!, this.systemEnvKeyCallback!);
+
+        if (setEmpty) {
+            const dispatchFunc = this.owningViewInternal.__getAndClearSimpleEnvDispatchFunc__Internal(this.envSystemEnvString!);
+            if (dispatchFunc !== undefined) {
+                const effectiveInstanceId = this.latestInstanceId ?? UIContextUtil.getCurrentInstanceId();
+                const windowStaticEnv = EnvUtils.windowStaticEnvMap.get(effectiveInstanceId);
+                if (windowStaticEnv !== undefined) {
+                    EnvUtils.unregisterCallbackFromWindowStaticEnv(windowStaticEnv, this.envSystemEnvString!, dispatchFunc);
+                }
+            }
+        }
+        this.systemEnvKeyCallback = undefined;
     }
 
     public resetOnReuse(newValue: T): void {
@@ -652,13 +789,13 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
 
     get finalResult(): IEnvironmentValue<T> | undefined {
         const shouldAddRef = this.shouldAddRef();
-        return this.finalResultBackingValue.get(shouldAddRef);
+        return this.finalResultBackingValue!.get(shouldAddRef);
     }
 
     set finalResult(newValue: IEnvironmentValue<T> | undefined) {
-        const oldFinalResultValue = this.finalResultBackingValue.get(false);
+        const oldFinalResultValue = this.finalResultBackingValue!.get(false);
         if (oldFinalResultValue !== newValue) {
-            this.finalResultBackingValue.setNoCheck(newValue);
+            this.finalResultBackingValue!.setNoCheck(newValue);
         }
     }
 
@@ -667,8 +804,31 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
     }
 
     public get(): T {
+        if (this.envSystemEnvString) {
+            return this.systemEnvKeyBackingValue!.get(this.shouldAddRef());
+        }
         return this.finalResult!.get();
     }
+
+    private registerCallbackOnWindowStaticEnv(env: WindowStaticEnv, key: string, callback: (value: Any) => void): void {
+        switch (key) {
+            case 'system.window.focused':
+                env.registerFocusEnv(callback as (value: boolean) => void);
+                break;
+            case 'system.window.highlighted':
+                env.registerHighlightedEnv(callback as (value: boolean) => void);
+                break;
+            case 'system.window.density.system':
+                env.registerSystemDensityEnv(callback as (value: double) => void);
+                break;
+            case 'system.window.displayid':
+                env.registerDisplayIdEnv(callback as (value: long) => void);
+                break;
+            default:
+                break;
+        }
+    }
+
 
     private windowSizeLayoutBreakpointActivate(instanceId: int32): IEnvironmentValue<T> {
         return new WindowSizeLayoutBreakpoint(instanceId) as IEnvironmentValue<T>;
