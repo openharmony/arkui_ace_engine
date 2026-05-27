@@ -278,6 +278,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     InitPageHeight();
     sheetObject_->DirtyLayoutProcess(layoutAlgorithmWrapper);
+    ReachToBottomWhenCloseAndRotate();
     UpdateFontScaleStatus();
     UpdateCloseIconStatus();
     UpdateTitlePadding();
@@ -2632,6 +2633,30 @@ bool SheetPresentationPattern::IsWindowSizeChangedWithUndefinedReason(
                            (windowSize_->Width() != width || windowSize_->Height() != height));
     }
     return isWindowChanged;
+}
+
+void SheetPresentationPattern::ReachToBottomWhenCloseAndRotate()
+{
+    if (isOnDisappearing_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE ||
+            sheetType_ == SheetType::SHEET_CENTER) {
+            renderContext->UpdateTransformTranslate({ 0.0f, pageHeight_, 0.0f });
+        }
+        auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+        if (sheetType_ == SheetType::SHEET_CONTENT_COVER &&
+            sheetStyle.modalTransition.value_or(ModalTransition::DEFAULT) == ModalTransition::DEFAULT) {
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto height = geometryNode->GetFrameSize().Height();
+            renderContext->UpdateTransformTranslate({ 0.0f, height, 0.0f });
+        }
+    }
 }
 
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
