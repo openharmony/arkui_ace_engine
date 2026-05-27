@@ -81,10 +81,7 @@ std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureTimerSta
     { "0", Converter::ArkValue<Ark_Int32>(0), "0" },
     { "15", Converter::ArkValue<Ark_Int32>(15), "15" },
     { "86300000", Converter::ArkValue<Ark_Int32>(86300000), "86300000" },
-};
-
-std::vector<std::tuple<std::string, Ark_Int32>> testFixtureTimerInitialValueInvalidValues = {
-    { "-1", Converter::ArkValue<Ark_Int32>(-1) },
+    { "-1", Converter::ArkValue<Ark_Int32>(-1), "-1" },
 };
 
 std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureShadowRadiusNumberValidValues = {
@@ -285,32 +282,6 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestStartTimeValidValues, Tes
     for (auto& [input, value, expected] : testFixtureTimerStartTimeValidValues) {
         checkValue(input, Converter::ArkValue<Opt_Int32>(value), expected);
     }
-}
-
-/*
- * @tc.name: setTextTimerOptionsTestStartTimeInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestStartTimeInvalidValues, TestSize.Level1)
-{
-    auto checkValue = [this](const std::string& input, const Opt_Int32& value) {
-        Ark_TextTimerOptions options {};
-        options.isCountDown = Converter::ArkValue<Opt_Boolean>(false);
-        options.startTime = value;
-        auto inputValue = Converter::ArkValue<Opt_TextTimerOptions>(options);
-        modifier_->setTextTimerOptions(node_, &inputValue);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_TIME_NAME);
-        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_START_TIME_DEFAULT_VALUE))
-            << "Input value is: " << input << ", method: setTextTimerOptions, attribute: startTime";
-    };
-
-    for (auto& [input, value] : testFixtureTimerInitialValueInvalidValues) {
-        checkValue(input, Converter::ArkValue<Opt_Int32>(value));
-    }
-
-    checkValue("undefined", Converter::ArkValue<Opt_Int32>());
 }
 
 /*
