@@ -46,7 +46,10 @@ void NavDestinationPattern::OnAttachToMainTreeMultiThread()
 
     pipeline->AddWindowStateChangedCallback(id);
     pipeline->AddWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->AddRecyclePageNode(host);
+    auto memoryManager = pipeline->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->AddRecyclePageNode(host);
+    }
 }
 
 void NavDestinationPattern::OnDetachFromMainTreeMultiThread()
@@ -69,7 +72,10 @@ void NavDestinationPattern::OnDetachFromMainTreeMultiThread()
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
+    auto memoryManager = pipeline->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->RemoveRecyclePageNode(id);
+    }
     NavDestinationPatternBase::RemoveOnTouchEvent(AceType::RawPtr(host));
 }
 

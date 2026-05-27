@@ -439,7 +439,10 @@ void NavDestinationPattern::OnAttachToFrameNode()
 
     pipeline->AddWindowStateChangedCallback(id);
     pipeline->AddWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->AddRecyclePageNode(host);
+    auto memoryManager = pipeline->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->AddRecyclePageNode(host);
+    }
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -451,7 +454,10 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
+    auto memoryManager = pipeline->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->RemoveRecyclePageNode(id);
+    }
     NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
