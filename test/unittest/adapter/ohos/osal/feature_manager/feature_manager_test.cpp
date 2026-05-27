@@ -15,6 +15,7 @@
 
 #include "app_space_comp_config_reader.h"
 #include "gtest/gtest.h"
+#include "mock_extra_modules_manager.h"
 
 #include "base/utils/feature_manager.h"
 #include "core/common/ace_application_info.h"
@@ -42,9 +43,11 @@ public:
     void SetUp() override
     {
         AceApplicationInfo::GetInstance().SetPackageName(TEST_BUNDLE_NAME);
-        auto& manager = FeatureManager::GetInstance();
         CompConfigClient::AppSpaceCompConfigReaderMock::Reset();
-        manager.ResetForTest();
+        MockExtraModulesManager::Reset();
+        MockExtraModulesManager::SetAppSpaceCompConfigFuncs(
+            &CompConfigClient::AppSpaceCompConfigReader::Init, &CompConfigClient::AppSpaceCompConfigReader::GetConfig);
+        FeatureManager::GetInstance().ResetForTest();
     }
 
     void TearDown() override
@@ -52,6 +55,7 @@ public:
         AceApplicationInfo::GetInstance().SetPackageName("");
         FeatureManager::GetInstance().ResetForTest();
         CompConfigClient::AppSpaceCompConfigReaderMock::Reset();
+        MockExtraModulesManager::Reset();
     }
 };
 

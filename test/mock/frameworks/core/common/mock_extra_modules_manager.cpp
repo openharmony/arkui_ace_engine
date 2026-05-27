@@ -13,9 +13,38 @@
  * limitations under the License.
  */
 
-#include "app_space_comp_config_reader.h"
+#include "mock_extra_modules_manager.h"
 
 #include "frameworks/core/common/extra_modules/extra_modules_manager.h"
+
+namespace OHOS::Ace::MockExtraModulesManager {
+namespace {
+AppSpaceCompConfigInitFunc g_initFunc = nullptr;
+AppSpaceCompConfigGetConfigFunc g_getConfigFunc = nullptr;
+} // namespace
+
+void Reset()
+{
+    g_initFunc = nullptr;
+    g_getConfigFunc = nullptr;
+}
+
+void SetAppSpaceCompConfigFuncs(AppSpaceCompConfigInitFunc initFunc, AppSpaceCompConfigGetConfigFunc getConfigFunc)
+{
+    g_initFunc = initFunc;
+    g_getConfigFunc = getConfigFunc;
+}
+
+AppSpaceCompConfigInitFunc GetAppSpaceCompConfigInitFunc()
+{
+    return g_initFunc;
+}
+
+AppSpaceCompConfigGetConfigFunc GetAppSpaceCompConfigGetConfigFunc()
+{
+    return g_getConfigFunc;
+}
+} // namespace OHOS::Ace::MockExtraModulesManager
 
 namespace OHOS::Ace {
 namespace {
@@ -27,7 +56,7 @@ constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] =
     "_ZN4OHOS16CompConfigClient24AppSpaceCompConfigReader9GetConfigERKNSt3__h12basic_stringIcNS2_11char_traitsIcEENS2_"
     "9allocatorIcEEEE";
 
-class MockExtraModulesManager final : public ExtraModulesManager {
+class MockExtraModulesManagerImpl final : public ExtraModulesManager {
 public:
     ErrCode Init() override
     {
@@ -48,15 +77,19 @@ public:
             return ErrCode::FEATURE_NOT_FOUND;
         }
         if (capabilityName == APP_SPACE_COMP_CONFIG_INIT_SYMBOL) {
-            using InitFunc = int32_t (*)(const std::string&);
-            *outFuncPtr =
-                reinterpret_cast<void*>(static_cast<InitFunc>(&OHOS::CompConfigClient::AppSpaceCompConfigReader::Init));
+            auto initFunc = MockExtraModulesManager::GetAppSpaceCompConfigInitFunc();
+            if (initFunc == nullptr) {
+                return ErrCode::SYMBOL_NOT_FOUND;
+            }
+            *outFuncPtr = reinterpret_cast<void*>(initFunc);
             return ErrCode::SUCCESS;
         }
         if (capabilityName == APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL) {
-            using GetConfigFunc = std::pair<int32_t, std::string> (*)(const std::string&);
-            *outFuncPtr = reinterpret_cast<void*>(
-                static_cast<GetConfigFunc>(&OHOS::CompConfigClient::AppSpaceCompConfigReader::GetConfig));
+            auto getConfigFunc = MockExtraModulesManager::GetAppSpaceCompConfigGetConfigFunc();
+            if (getConfigFunc == nullptr) {
+                return ErrCode::SYMBOL_NOT_FOUND;
+            }
+            *outFuncPtr = reinterpret_cast<void*>(getConfigFunc);
             return ErrCode::SUCCESS;
         }
         return ErrCode::SYMBOL_NOT_FOUND;
@@ -85,7 +118,7 @@ private:
 
 ExtraModulesManager& ExtraModulesManager::GetInstance()
 {
-    static MockExtraModulesManager instance;
+    static MockExtraModulesManagerImpl instance;
     return instance;
 }
 } // namespace OHOS::Ace

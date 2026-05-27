@@ -39,10 +39,4 @@ int32_t FeatureManager::GetFeatureParam(const std::string& key, std::string& val
     return key.empty() ? KEY_NOT_FOUND : INIT_FAILED;
 }
 
-#ifdef ACE_UNITTEST
-void FeatureManager::ResetForTest()
-{
-    Init();
-}
-#endif
 } // namespace OHOS::Ace

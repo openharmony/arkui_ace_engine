@@ -16,7 +16,6 @@
 #include "base/utils/feature_manager.h"
 
 #include <cstdint>
-#include <mutex>
 #include <utility>
 
 #include "base/log/log.h"
@@ -52,38 +51,29 @@ bool EnsureExtraModulesManagerInitialized()
     return false;
 }
 
-template<typename FuncType, const char* CapabilityName>
-FuncType GetOrCreateAppSpaceCompConfigFunc()
+template<typename FuncType>
+FuncType LoadAppSpaceCompConfigFunc(const char* capabilityName)
 {
-    static FuncType loadedFunc = nullptr;
-    static std::mutex mutex;
-    if (loadedFunc != nullptr) {
-        return loadedFunc;
-    }
-    std::lock_guard<std::mutex> lock(mutex);
-    if (loadedFunc != nullptr) {
-        return loadedFunc;
-    }
     if (!EnsureExtraModulesManagerInitialized()) {
         return nullptr;
     }
     void* funcPtr = nullptr;
     auto& extraModuleManager = ExtraModulesManager::GetInstance();
-    auto errCode = extraModuleManager.GetCapability(APP_SPACE_COMP_CONFIG_FEATURE_NAME, CapabilityName, &funcPtr);
+    auto errCode = extraModuleManager.GetCapability(APP_SPACE_COMP_CONFIG_FEATURE_NAME, capabilityName, &funcPtr);
     if (errCode == ErrCode::SUCCESS) {
-        loadedFunc = reinterpret_cast<FuncType>(funcPtr);
+        return reinterpret_cast<FuncType>(funcPtr);
     } else if (errCode == ErrCode::SYMBOL_NOT_FOUND) {
         extraModuleManager.UnloadModule(APP_SPACE_COMP_CONFIG_FEATURE_NAME);
         LOGW("FeatureManager load symbol failed, ret:%{public}d", static_cast<int32_t>(errCode));
     } else {
         LOGW("FeatureManager load capability failed, ret:%{public}d", static_cast<int32_t>(errCode));
     }
-    return loadedFunc;
+    return nullptr;
 }
 
 int32_t InitAppSpaceCompConfigReader(const std::string& bundleName)
 {
-    auto initFunc = GetOrCreateAppSpaceCompConfigFunc<AppSpaceCompConfigInitFunc, APP_SPACE_COMP_CONFIG_INIT_SYMBOL>();
+    auto initFunc = LoadAppSpaceCompConfigFunc<AppSpaceCompConfigInitFunc>(APP_SPACE_COMP_CONFIG_INIT_SYMBOL);
     if (initFunc == nullptr) {
         return COMP_CONFIG_LOAD_FAILED;
     }
@@ -93,7 +83,7 @@ int32_t InitAppSpaceCompConfigReader(const std::string& bundleName)
 std::pair<int32_t, std::string> GetAppSpaceCompConfig(const std::string& key)
 {
     auto getConfigFunc =
-        GetOrCreateAppSpaceCompConfigFunc<AppSpaceCompConfigGetConfigFunc, APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL>();
+        LoadAppSpaceCompConfigFunc<AppSpaceCompConfigGetConfigFunc>(APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL);
     if (getConfigFunc == nullptr) {
         return { COMP_CONFIG_LOAD_FAILED, "" };
     }
