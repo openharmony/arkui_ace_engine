@@ -125,7 +125,8 @@
                 "request",
                 "qrcodegen",
                 "sdk",
-                "screenlock_mgr"
+                "screenlock_mgr",
+                "video_processing_engine"
             ],
             "third_party": []
         },

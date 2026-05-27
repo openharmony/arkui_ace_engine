@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACE_INNERAPI_DRAWABLE_BRIDGE_H
-#define FOUNDATION_ACE_INTERFACE_INNERAPI_DRAWABLE_BRIDGE_H
-
-#include <cstdint>
-#include <memory>
-#include <vector>
-
-#include "drawable_api.h"
-#include "resource_manager.h"
+#include "contrast_enhancer_image_preview.h"
 
 namespace OHOS::Ace {
-void* ParseResourceObject(void* object);
-std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager();
-const ArkUIDrawableDescriptor* GetArkUIDrawableModifier();
-int32_t ParseDimensionToPx(void* value);
+
+RefPtr<ContrastEnhancerImage> ContrastEnhancerImage::Create()
+{
+    return nullptr;
+}
+
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_INTERFACE_INNERAPI_DRAWABLE_BRIDGE_H

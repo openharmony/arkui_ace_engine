@@ -85,6 +85,10 @@ Media::PixelFormat PixelMapOhos::ConvertToMediaPixelFormat(Ace::PixelFormat pixe
             return Media::PixelFormat::NV12;
         case PixelFormat::CMYK:
             return Media::PixelFormat::CMYK;
+        case PixelFormat::YCBCR_P010:
+            return Media::PixelFormat::YCBCR_P010;
+        case PixelFormat::YCRCB_P010:
+            return Media::PixelFormat::YCRCB_P010;
         default:
             return Media::PixelFormat::UNKNOWN;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_PICTURE_H
+#define FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_PICTURE_H
+#include "gmock/gmock.h"
 
-#ifndef FOUNDATION_ACE_INTERFACE_INNERAPI_DRAWABLE_BRIDGE_H
-#define FOUNDATION_ACE_INTERFACE_INNERAPI_DRAWABLE_BRIDGE_H
-
-#include <cstdint>
-#include <memory>
-#include <vector>
-
-#include "drawable_api.h"
-#include "resource_manager.h"
+#include "base/image/picture.h"
 
 namespace OHOS::Ace {
-void* ParseResourceObject(void* object);
-std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager();
-const ArkUIDrawableDescriptor* GetArkUIDrawableModifier();
-int32_t ParseDimensionToPx(void* value);
+class MockPicture : public Picture {
+public:
+    MOCK_METHOD(RefPtr<PixelMap>, GetMainPixel, (), (override));
+    MOCK_METHOD(RefPtr<PixelMap>, GetAuxPicturePixelMap, (AuxiliaryPictureType type), (override));
+    MOCK_METHOD(RefPtr<PixelMap>, GetHdrComposedPixelMap, (PixelFormat format), (override));
+};
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_INTERFACE_INNERAPI_DRAWABLE_BRIDGE_H
+#endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_PICTURE_H

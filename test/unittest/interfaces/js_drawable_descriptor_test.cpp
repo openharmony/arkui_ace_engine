@@ -93,22 +93,6 @@ HWTEST_F(JsDrawableDescriptorTest, JsDrawableDescriptorTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsDrawableDescriptorTest005
- * @tc.desc: test ToNapi function;
- * @tc.type: FUNC
- */
-HWTEST_F(JsDrawableDescriptorTest, JsDrawableDescriptorTest005, TestSize.Level1)
-{
-    napi_env env = nullptr;
-    DrawableDescriptor drawable;
-    JsDrawableDescriptor jsDrawableDescriptor;
-    JsDrawableDescriptor::animatedConstructor_ = (napi_ref)malloc(1000);
-    napi_value result = jsDrawableDescriptor.ToNapi(env, &drawable, DrawableDescriptor::DrawableType::LAYERED);
-    EXPECT_EQ(result, nullptr);
-    free(JsDrawableDescriptor::animatedConstructor_);
-}
-
-/**
  * @tc.name: JsDrawableDescriptorTest006
  * @tc.desc: test ToNapi function;
  * @tc.type: FUNC

@@ -63,6 +63,9 @@ struct ArkUIDrawableDescriptor {
     int32_t (*getAnimatedStatus)(void* object);
     void (*setAnimatedStopMode)(void* object, int32_t stopMode);
     int32_t (*getAnimatedStopMode)(void* object);
+    void (*setPicture)(void* object, void* picture);
+    void (*setHdrComposition)(void* object, int32_t x, int32_t y, int32_t width, int32_t height);
+    void (*invalidate)(void* object);
 };
 
 __attribute__((visibility("default"))) const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor(void);

@@ -302,18 +302,19 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     napi_get_named_property(env, value, "typeName", &typeName);
     std::string typenameStr;
     GetStringFromNapiValue(env, typeName, typenameStr);
-    if (typenameStr == "AnimatedDrawableDescriptor" || typenameStr == "PixelMapDrawableDescriptor") {
-        OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
-        drawable->newDrawableDescriptor = objectNapi;
+    if (typenameStr == "LayeredDrawableDescriptor") {
+        auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
+        if (!descriptor) {
+            delete drawable;
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
         *drawableDescriptor = drawable;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
-    auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
-    if (!descriptor) {
-        delete drawable;
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
+
+    OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
+    drawable->newDrawableDescriptor = objectNapi;
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

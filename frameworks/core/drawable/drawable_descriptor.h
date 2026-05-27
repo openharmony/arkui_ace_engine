@@ -20,11 +20,18 @@
 #include "core/drawable/drawable_descriptor_info.h"
 
 namespace OHOS::Ace {
+
+extern const char DRAWABLE_DESCRIPTOR_NAME[];
+extern const char LAYERED_DRAWABLE_DESCRIPTOR_NAME[];
+extern const char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[];
+extern const char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[];
+extern const char PICTURE_DRAWABLE_DESCRIPTOR_NAME[];
 enum class DrawableType {
     BASE = 0,
     LAYERED = 1,
     ANIMATED = 2,
     PIXELMAP = 3,
+    PICTURE = 4,
 };
 
 struct MediaData {
@@ -83,6 +90,8 @@ public:
     virtual void RegisterUpdateCallback(int32_t nodeId, const UpdateCallback&& callback) {}
 
     virtual void UnRegisterUpdateCallback(int32_t nodeId) {}
+
+    virtual void Invalidate() {}
 
     void SetDrawableDescriptorInfo(const RefPtr<DrawableDescriptorInfo>& info)
     {
