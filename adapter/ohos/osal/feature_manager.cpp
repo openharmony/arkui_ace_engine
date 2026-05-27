@@ -27,15 +27,18 @@ namespace {
 constexpr int32_t COMP_CONFIG_OK = 0;
 constexpr int32_t COMP_CONFIG_LOAD_FAILED = -1;
 constexpr char APP_SPACE_COMP_CONFIG_FEATURE_NAME[] = "app_space_comp_config";
-constexpr char APP_SPACE_COMP_CONFIG_INIT_SYMBOL[] =
-    "_ZN4OHOS16CompConfigClient24AppSpaceCompConfigReader4InitERKNSt3__h12basic_stringIcNS2_11char_traitsIcEENS2_"
-    "9allocatorIcEEEE";
-constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] =
-    "_ZN4OHOS16CompConfigClient24AppSpaceCompConfigReader9GetConfigERKNSt3__h12basic_stringIcNS2_11char_traitsIcEENS2_"
-    "9allocatorIcEEEE";
+constexpr char APP_SPACE_COMP_CONFIG_INIT_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader";
+constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig";
+constexpr char APP_SPACE_COMP_CONFIG_DESTROY_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig";
 
-using AppSpaceCompConfigInitFunc = int32_t (*)(const std::string& bundleName);
-using AppSpaceCompConfigGetConfigFunc = std::pair<int32_t, std::string> (*)(const std::string& key);
+struct AppSpaceCompConfigResult {
+    int32_t code;
+    char* value;
+};
+
+using AppSpaceCompConfigInitFunc = int32_t (*)(const char* bundleName);
+using AppSpaceCompConfigGetConfigFunc = AppSpaceCompConfigResult* (*)(const char* key);
+using AppSpaceCompConfigDestroyFunc = void (*)(AppSpaceCompConfigResult* result);
 
 bool EnsureExtraModulesManagerInitialized()
 {
@@ -77,7 +80,7 @@ int32_t InitAppSpaceCompConfigReader(const std::string& bundleName)
     if (initFunc == nullptr) {
         return COMP_CONFIG_LOAD_FAILED;
     }
-    return initFunc(bundleName);
+    return initFunc(bundleName.c_str());
 }
 
 std::pair<int32_t, std::string> GetAppSpaceCompConfig(const std::string& key)
@@ -87,7 +90,20 @@ std::pair<int32_t, std::string> GetAppSpaceCompConfig(const std::string& key)
     if (getConfigFunc == nullptr) {
         return { COMP_CONFIG_LOAD_FAILED, "" };
     }
-    return getConfigFunc(key);
+
+    auto destroyFunc =
+        LoadAppSpaceCompConfigFunc<AppSpaceCompConfigDestroyFunc>(APP_SPACE_COMP_CONFIG_DESTROY_SYMBOL);
+    if (destroyFunc == nullptr) {
+        return { COMP_CONFIG_LOAD_FAILED, "" };
+    }
+
+    auto resultPtr = getConfigFunc(key.c_str());
+    if (resultPtr == nullptr) {
+        return { COMP_CONFIG_LOAD_FAILED, "" };
+    }
+    std::pair<int32_t, std::string> result = { resultPtr->code, resultPtr->value ? resultPtr->value : "" };
+    destroyFunc(resultPtr);
+    return result;
 }
 } // namespace
 

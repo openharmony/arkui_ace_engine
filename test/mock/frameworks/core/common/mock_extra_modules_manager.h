@@ -18,14 +18,17 @@
 
 #include <cstdint>
 #include <string>
-#include <utility>
+
+struct AppSpaceCompConfigResult;
 
 namespace OHOS::Ace::MockExtraModulesManager {
-using AppSpaceCompConfigInitFunc = int32_t (*)(const std::string&);
-using AppSpaceCompConfigGetConfigFunc = std::pair<int32_t, std::string> (*)(const std::string&);
+using AppSpaceCompConfigInitFunc = int32_t (*)(const char*);
+using AppSpaceCompConfigGetConfigFunc = AppSpaceCompConfigResult* (*)(const char*);
+using AppSpaceCompConfigDestroyFunc = void (*)(AppSpaceCompConfigResult*);
 
 void Reset();
-void SetAppSpaceCompConfigFuncs(AppSpaceCompConfigInitFunc initFunc, AppSpaceCompConfigGetConfigFunc getConfigFunc);
+void SetAppSpaceCompConfigFuncs(AppSpaceCompConfigInitFunc initFunc, AppSpaceCompConfigGetConfigFunc getConfigFunc,
+    AppSpaceCompConfigDestroyFunc destroyFunc);
 } // namespace OHOS::Ace::MockExtraModulesManager
 
 #endif // FOUNDATION_ACE_TEST_MOCK_FRAMEWORKS_CORE_COMMON_MOCK_EXTRA_MODULES_MANAGER_H

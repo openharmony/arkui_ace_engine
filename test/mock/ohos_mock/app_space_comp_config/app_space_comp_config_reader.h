@@ -20,6 +20,8 @@
 #include <string>
 #include <utility>
 
+struct AppSpaceCompConfigResult;
+
 namespace OHOS::CompConfigClient {
 class AppSpaceCompConfigReader {
 public:
@@ -37,5 +39,11 @@ const std::string& GetLastInitBundleName();
 const std::string& GetLastConfigKey();
 } // namespace AppSpaceCompConfigReaderMock
 } // namespace OHOS::CompConfigClient
+
+extern "C" {
+int32_t OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader(const char* bundleName);
+AppSpaceCompConfigResult* OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig(const char* key);
+void OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig(AppSpaceCompConfigResult* result);
+}
 
 #endif // FOUNDATION_ACE_TEST_MOCK_OHOS_MOCK_APP_SPACE_COMP_CONFIG_APP_SPACE_COMP_CONFIG_READER_H

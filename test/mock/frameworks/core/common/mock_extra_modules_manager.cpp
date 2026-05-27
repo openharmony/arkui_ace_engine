@@ -21,18 +21,22 @@ namespace OHOS::Ace::MockExtraModulesManager {
 namespace {
 AppSpaceCompConfigInitFunc g_initFunc = nullptr;
 AppSpaceCompConfigGetConfigFunc g_getConfigFunc = nullptr;
+AppSpaceCompConfigDestroyFunc g_destroyFunc = nullptr;
 } // namespace
 
 void Reset()
 {
     g_initFunc = nullptr;
     g_getConfigFunc = nullptr;
+    g_destroyFunc = nullptr;
 }
 
-void SetAppSpaceCompConfigFuncs(AppSpaceCompConfigInitFunc initFunc, AppSpaceCompConfigGetConfigFunc getConfigFunc)
+void SetAppSpaceCompConfigFuncs(AppSpaceCompConfigInitFunc initFunc, AppSpaceCompConfigGetConfigFunc getConfigFunc,
+    AppSpaceCompConfigDestroyFunc destroyFunc)
 {
     g_initFunc = initFunc;
     g_getConfigFunc = getConfigFunc;
+    g_destroyFunc = destroyFunc;
 }
 
 AppSpaceCompConfigInitFunc GetAppSpaceCompConfigInitFunc()
@@ -44,17 +48,19 @@ AppSpaceCompConfigGetConfigFunc GetAppSpaceCompConfigGetConfigFunc()
 {
     return g_getConfigFunc;
 }
+
+AppSpaceCompConfigDestroyFunc GetAppSpaceCompConfigDestroyFunc()
+{
+    return g_destroyFunc;
+}
 } // namespace OHOS::Ace::MockExtraModulesManager
 
 namespace OHOS::Ace {
 namespace {
 constexpr char APP_SPACE_COMP_CONFIG_FEATURE_NAME[] = "app_space_comp_config";
-constexpr char APP_SPACE_COMP_CONFIG_INIT_SYMBOL[] =
-    "_ZN4OHOS16CompConfigClient24AppSpaceCompConfigReader4InitERKNSt3__h12basic_stringIcNS2_11char_traitsIcEENS2_"
-    "9allocatorIcEEEE";
-constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] =
-    "_ZN4OHOS16CompConfigClient24AppSpaceCompConfigReader9GetConfigERKNSt3__h12basic_stringIcNS2_11char_traitsIcEENS2_"
-    "9allocatorIcEEEE";
+constexpr char APP_SPACE_COMP_CONFIG_INIT_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader";
+constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig";
+constexpr char APP_SPACE_COMP_CONFIG_DESTROY_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig";
 
 class MockExtraModulesManagerImpl final : public ExtraModulesManager {
 public:
@@ -90,6 +96,14 @@ public:
                 return ErrCode::SYMBOL_NOT_FOUND;
             }
             *outFuncPtr = reinterpret_cast<void*>(getConfigFunc);
+            return ErrCode::SUCCESS;
+        }
+        if (capabilityName == APP_SPACE_COMP_CONFIG_DESTROY_SYMBOL) {
+            auto destroyFunc = MockExtraModulesManager::GetAppSpaceCompConfigDestroyFunc();
+            if (destroyFunc == nullptr) {
+                return ErrCode::SYMBOL_NOT_FOUND;
+            }
+            *outFuncPtr = reinterpret_cast<void*>(destroyFunc);
             return ErrCode::SUCCESS;
         }
         return ErrCode::SYMBOL_NOT_FOUND;

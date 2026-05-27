@@ -15,6 +15,14 @@
 
 #include "app_space_comp_config_reader.h"
 
+#include <cstdlib>
+#include <cstring>
+
+struct AppSpaceCompConfigResult {
+    int32_t code;
+    char* value;
+};
+
 namespace OHOS::CompConfigClient {
 namespace {
 constexpr int32_t DEFAULT_SUCCESS = 0;
@@ -86,3 +94,37 @@ const std::string& GetLastConfigKey()
 }
 } // namespace AppSpaceCompConfigReaderMock
 } // namespace OHOS::CompConfigClient
+
+extern "C" int32_t OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader(const char* bundleName)
+{
+    return OHOS::CompConfigClient::AppSpaceCompConfigReader::Init(bundleName ? bundleName : "");
+}
+
+extern "C" AppSpaceCompConfigResult* OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig(const char* key)
+{
+    auto result = OHOS::CompConfigClient::AppSpaceCompConfigReader::GetConfig(key ? key : "");
+    auto* config = static_cast<AppSpaceCompConfigResult*>(std::malloc(sizeof(AppSpaceCompConfigResult)));
+    if (config == nullptr) {
+        return nullptr;
+    }
+
+    auto valueSize = result.second.size() + 1;
+    config->value = static_cast<char*>(std::malloc(valueSize));
+    if (config->value == nullptr) {
+        std::free(config);
+        return nullptr;
+    }
+
+    config->code = result.first;
+    std::memcpy(config->value, result.second.c_str(), valueSize);
+    return config;
+}
+
+extern "C" void OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig(AppSpaceCompConfigResult* result)
+{
+    if (result == nullptr) {
+        return;
+    }
+    std::free(result->value);
+    std::free(result);
+}
