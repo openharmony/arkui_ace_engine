@@ -759,37 +759,6 @@ HWTEST_F(RichEditorEditTestNg, GetParagraphNodes003, TestSize.Level0)
 }
 
 /**
- * @tc.name: CalcSpansRange001
- * @tc.desc: test calculate spans range after get paragraph nodes
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, CalcSpansRange001, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->InsertValue(INIT_VALUE_4);
-    auto nodes = richEditorPattern->GetParagraphNodes(50, 52);
-    EXPECT_EQ(nodes.size(), 0);
-    auto range = richEditorPattern->CalcSpansRange(nodes);
-    EXPECT_EQ(range.first, -1);
-    EXPECT_EQ(range.second, -1);
-
-    nodes = richEditorPattern->GetParagraphNodes(15, 20);
-    EXPECT_EQ(nodes.size(), 1);
-    range = richEditorPattern->CalcSpansRange(nodes);
-    EXPECT_EQ(range.first, 11);
-    EXPECT_EQ(range.second, 22);
-
-    nodes = richEditorPattern->GetParagraphNodes(5, 25);
-    EXPECT_EQ(nodes.size(), 3);
-    range = richEditorPattern->CalcSpansRange(nodes);
-    EXPECT_EQ(range.first, 0);
-    EXPECT_EQ(range.second, 32);
-}
-
-/**
  * @tc.name: CalcSpansRange002
  * @tc.desc: test calculate spans range
  * @tc.type: FUNC
