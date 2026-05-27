@@ -159,6 +159,12 @@ public:
         return imageDfxConfig_;
     }
 
+    void SetTraceInfo(int32_t id, const std::string& tag)
+    {
+        traceId_ = id;
+        traceTag_ = tag;
+    }
+
     void DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal);
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> GetOnProgressCallback()
@@ -245,6 +251,9 @@ private:
     // save the least recent makeCanvasImage task and trigger it when the previous makeCanvasImage task end
     // and state becomes MAKE_CANVAS_IMAGE_SUCCESS
     PendingMakeCanvasImageTask pendingMakeCanvasImageTask_ = nullptr;
+
+    int32_t traceId_ = -1;
+    std::string traceTag_;
 
     friend class ImageStateManager;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLoadingContext);

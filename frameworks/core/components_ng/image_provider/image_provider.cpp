@@ -383,6 +383,10 @@ void ImageProvider::DownLoadImage(UriDownLoadConfig& downLoadConfig)
         "ACE_DOWNLOAD_MANAGER, function: DownLoadImage " + downLoadConfig.imageDfxConfig.ToStringWithSrc();
     ACE_SCOPED_TRACE("PerformDownload %s", downLoadConfig.imageDfxConfig.ToStringWithSrc().c_str());
     AceAsyncTraceBeginCommercial(currentTraceTaskId, traceTag.c_str());
+    auto ctx = downLoadConfig.ctxWp.Upgrade();
+    if (ctx) {
+        ctx->SetTraceInfo(currentTraceTaskId, traceTag);
+    }
     auto queryData = QueryDataFromCache(downLoadConfig.src);
     if (queryData) {
         ImageErrorInfo errorInfo;
@@ -443,8 +447,8 @@ void ImageProvider::DownLoadImage(UriDownLoadConfig& downLoadConfig)
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), downLoadConfig.src.GetSrc(), downLoadConfig.sync);
 }
 
-void ImageProvider::CreateImageObject(
-    const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync, bool isSceneBoardWindow)
+void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync,
+    bool isSceneBoardWindow)
 {
     if (src.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled()) {
         auto ctx = ctxWp.Upgrade();
@@ -459,15 +463,14 @@ void ImageProvider::CreateImageObject(
             .imageDfxConfig = ctx->GetImageDfxConfig(),
             .taskKey = taskKey,
             .sync = sync,
-            .hasProgressCallback = static_cast<bool>(ctx->GetOnProgressCallback())
+            .hasProgressCallback = static_cast<bool>(ctx->GetOnProgressCallback()),
+            .ctxWp = ctxWp,
         };
         if (sync) {
             DownLoadImage(downloadConfig);
         } else {
             auto downloadConfigPtr = std::make_shared<UriDownLoadConfig>(std::move(downloadConfig));
-            auto downloadImageTask = [downloadConfigPtr]() {
-                DownLoadImage(*downloadConfigPtr);
-            };
+            auto downloadImageTask = [downloadConfigPtr]() { DownLoadImage(*downloadConfigPtr); };
             ImageUtils::PostToBg(downloadImageTask, "ArkUIImageDownload", src.GetContainerId());
         }
         return;
@@ -488,11 +491,10 @@ void ImageProvider::CreateImageObject(
         std::scoped_lock lock(std::adopt_lock, taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset(
-            [src, isSceneBoardWindow]() {
-                auto mutableSrc = src;
-                ImageProvider::CreateImageObjHelper(mutableSrc, false, isSceneBoardWindow);
-            });
+        task.Reset([src, isSceneBoardWindow]() {
+            auto mutableSrc = src;
+            ImageProvider::CreateImageObjHelper(mutableSrc, false, isSceneBoardWindow);
+        });
         tasks_[src.GetTaskKey()].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
@@ -622,12 +624,19 @@ void ImageProvider::PrepareNetworkImageData(const RefPtr<ImageObject>& obj, cons
     std::string traceTag =
         "ACE_DOWNLOAD_MANAGER, function: PrepareNetworkImageData " + imageDfxConfig.ToStringWithSrc();
     AceAsyncTraceBeginCommercial(currentTraceTaskId, traceTag.c_str());
+    auto ctx = imageDecoderOptions.ctxWp.Upgrade();
+    if (ctx) {
+        ctx->SetTraceInfo(currentTraceTaskId, traceTag);
+    }
     auto cachedData = QueryDataFromCache(obj->GetSourceInfo());
     if (cachedData) {
         obj->SetData(cachedData);
+        AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
+        if (ctx) {
+            ctx->SetTraceInfo(-1, "");
+        }
         // Data ready, decode directly on current thread (no need to post task)
         MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
-        AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
         return;
     }
 
@@ -644,6 +653,10 @@ void ImageProvider::PrepareNetworkImageData(const RefPtr<ImageObject>& obj, cons
         TAG_LOGI(AceLogTag::ACE_IMAGE, "Network image downloaded for MakeCanvasImage. %{private}s, [%zu]",
             obj->GetSourceInfo().ToString().c_str(), imageData.size());
         AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
+        auto cbCtx = imageDecoderOptions.ctxWp.Upgrade();
+        if (cbCtx) {
+            cbCtx->SetTraceInfo(-1, "");
+        }
         ImageErrorInfo errorInfo;
         if (!GreatNotEqual(imageData.size(), 0)) {
             FailCallback(key, "The length of imageData from netStack is not positive",
@@ -662,12 +675,17 @@ void ImageProvider::PrepareNetworkImageData(const RefPtr<ImageObject>& obj, cons
         obj->SetData(data);
         MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
     };
-    downloadCallback.failCallback = [key, obj, currentTraceTaskId, traceTag](std::string errorMessage,
+    downloadCallback.failCallback = [key, obj, currentTraceTaskId, traceTag,
+                                        ctxWp = imageDecoderOptions.ctxWp](std::string errorMessage,
                                         ImageErrorInfo errorInfo, bool async, int32_t instanceId) {
         ContainerScope scope(instanceId);
         TAG_LOGE(AceLogTag::ACE_IMAGE, "Network image download failed for MakeCanvasImage. %{public}s",
             obj->GetSourceInfo().ToString().c_str());
         AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
+        auto cbCtx = ctxWp.Upgrade();
+        if (cbCtx) {
+            cbCtx->SetTraceInfo(-1, "");
+        }
         FailCallback(
             key, errorMessage, errorInfo, false, obj->GetSourceInfo().GetContainerId());
     };
