@@ -3817,6 +3817,7 @@ test/unittest/interfaces/ace_ui_input_event/ @ArkUI_Event
 test/unittest/interfaces/ace_gesture/ @ArkUI_Event
 test/unittest/interfaces/form_render/ @form_framework
 test/unittest/interfaces/native_styled_string_test.cpp @arkui_rich_editor
+test/unittest/interfaces/scrollable_option_test.cpp @arkuiscroll
 test/unittest/frameworks/core/common/ace_engine_test.cpp @arkui_framework_xnode
 test/unittest/frameworks/core/common/container_scope_test.cpp @arkui_framework_xnode
 test/unittest/frameworks/core/common/BUILD.gn @arkui_framework_xnode

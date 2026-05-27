@@ -156,7 +156,10 @@ void ResetListItemStyle(ArkUINodeHandle node)
 ArkUI_Int32 Expand(ArkUINodeHandle node, ArkUI_Int32 direction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (frameNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
         SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_ERROR, "node type is not ListItem");
         return ERROR_CODE_PARAM_ERROR;
@@ -178,7 +181,10 @@ ArkUI_Int32 Expand(ArkUINodeHandle node, ArkUI_Int32 direction)
 ArkUI_Int32 Collapse(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (frameNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
         SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_ERROR, "node type is not ListItem");
         return ERROR_CODE_PARAM_ERROR;
