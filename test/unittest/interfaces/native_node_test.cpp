@@ -1420,6 +1420,158 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetChildWithExpandMode001, TestSize.
 }
 
 /**
+ * @tc.name: NativeNodeTestTextPunctuationOverflow
+ * @tc.desc: Test NODE_TEXT_PUNCTUATION_OVERFLOW attribute set, reset and get functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestTextPunctuationOverflow, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+
+    value[0].i32 = false;
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    EXPECT_EQ(attrValue->value[0].i32, false);
+
+    result = nodeAPI->resetAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(rootNode);
+
+    auto nonTextNode = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    nodeAPI->setAttribute(nonTextNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &item);
+    attrValue = nodeAPI->getAttribute(nonTextNode, NODE_TEXT_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(attrValue, nullptr);
+    nodeAPI->disposeNode(nonTextNode);
+}
+
+/**
+ * @tc.name: NativeNodeTestTextInputPunctuationOverflow
+ * @tc.desc: Test NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW attribute set, reset and get functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestTextInputPunctuationOverflow, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT_INPUT, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+
+    value[0].i32 = false;
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    EXPECT_EQ(attrValue->value[0].i32, false);
+
+    result = nodeAPI->resetAttribute(rootNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(rootNode);
+
+    auto nonTextInputNode = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    nodeAPI->setAttribute(nonTextInputNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW, &item);
+    attrValue = nodeAPI->getAttribute(nonTextInputNode, NODE_TEXT_INPUT_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(attrValue, nullptr);
+    nodeAPI->disposeNode(nonTextInputNode);
+}
+
+/**
+ * @tc.name: NativeNodeTestTextAreaPunctuationOverflow
+ * @tc.desc: Test NODE_TEXT_AREA_PUNCTUATION_OVERFLOW attribute set, reset and get functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestTextAreaPunctuationOverflow, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT_AREA, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+
+    value[0].i32 = false;
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    attrValue = nodeAPI->getAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW);
+    EXPECT_NE(attrValue, nullptr);
+    EXPECT_EQ(attrValue->value[0].i32, false);
+
+    result = nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(rootNode);
+
+    auto nonTextAreaNode = new ArkUI_Node({ARKUI_NODE_STACK, nullptr, true});
+    nodeAPI->setAttribute(nonTextAreaNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW, &item);
+    attrValue = nodeAPI->getAttribute(nonTextAreaNode, NODE_TEXT_AREA_PUNCTUATION_OVERFLOW);
+    EXPECT_EQ(attrValue, nullptr);
+    nodeAPI->disposeNode(nonTextAreaNode);
+}
+
+/**
+ * @tc.name: NativeNodeTestPunctuationOverflowInvalidParam
+ * @tc.desc: Test PunctuationOverflow attribute with invalid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestPunctuationOverflowInvalidParam, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr, true});
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue invalidValue[] = {{.i32 = true}, {.i32 = false}};
+    ArkUI_AttributeItem invalidItem = {invalidValue, sizeof(invalidValue) / sizeof(ArkUI_NumberValue)};
+    auto result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &invalidItem);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_NumberValue value[] = {{.i32 = 2}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, &item);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    result = nodeAPI->setAttribute(rootNode, NODE_TEXT_PUNCTUATION_OVERFLOW, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
  * @tc.name: OH_ArkUI_NodeUtils_GetPositionToParent001
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionToParent.
  * @tc.type: FUNC

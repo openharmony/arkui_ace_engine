@@ -2606,6 +2606,15 @@ void JSTextField::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCompressLeadingPunctuation(enabled);
 }
 
+void JSTextField::SetPunctuationOverflow(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetPunctuationOverflow(enabled);
+}
+
 void JSTextField::SetIncludeFontPadding(const JSCallbackInfo& info)
 {
     bool enabled = false;

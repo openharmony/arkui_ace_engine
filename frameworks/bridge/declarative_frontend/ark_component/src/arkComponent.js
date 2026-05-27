@@ -5747,6 +5747,24 @@ class TextCompressLeadingPunctuationModifier extends ModifierWithKey {
 }
 TextCompressLeadingPunctuationModifier.identity = Symbol('textCompressLeadingPunctuation');
 
+class TextPunctuationOverflowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetPunctuationOverflow(node);
+    }
+    else {
+      getUINativeModule().text.setPunctuationOverflow(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextPunctuationOverflowModifier.identity = Symbol('textPunctuationOverflow');
+
 class TextOptimizeTrailingSpaceModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6577,6 +6595,11 @@ class ArkTextComponent extends ArkComponent {
   compressLeadingPunctuation(value) {
     modifierWithKey(this._modifiersWithKeys, TextCompressLeadingPunctuationModifier.identity,
       TextCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  punctuationOverflow(value) {
+    modifierWithKey(this._modifiersWithKeys, TextPunctuationOverflowModifier.identity,
+      TextPunctuationOverflowModifier, value);
     return this;
   }
   optimizeTrailingSpace(value) {
@@ -8190,6 +8213,24 @@ class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey {
 }
 TextAreaCompressLeadingPunctuationModifier.identity = Symbol('textAreaCompressLeadingPunctuation');
 
+class TextAreaPunctuationOverflowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetPunctuationOverflow(node);
+    }
+    else {
+      getUINativeModule().textArea.setPunctuationOverflow(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaPunctuationOverflowModifier.identity = Symbol('textAreaPunctuationOverflow');
+
 class TextAreaIncludeFontPaddingModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8776,6 +8817,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   compressLeadingPunctuation(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaCompressLeadingPunctuationModifier.identity, TextAreaCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  punctuationOverflow(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaPunctuationOverflowModifier.identity, TextAreaPunctuationOverflowModifier, value);
     return this;
   }
   includeFontPadding(value) {
@@ -10466,6 +10511,24 @@ class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey {
 }
 TextInputCompressLeadingPunctuationModifier.identity = Symbol('textInputCompressLeadingPunctuation');
 
+class TextInputPunctuationOverflowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetPunctuationOverflow(node);
+    }
+    else {
+      getUINativeModule().textInput.setPunctuationOverflow(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputPunctuationOverflowModifier.identity = Symbol('textInputPunctuationOverflow');
+
 class TextInputIncludeFontPaddingModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11080,6 +11143,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   compressLeadingPunctuation(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputCompressLeadingPunctuationModifier.identity, TextInputCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  punctuationOverflow(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputPunctuationOverflowModifier.identity, TextInputPunctuationOverflowModifier, value);
     return this;
   }
   includeFontPadding(value) {

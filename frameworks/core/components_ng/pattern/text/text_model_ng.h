@@ -117,6 +117,7 @@ public:
     void SetOptimizeTrailingSpace(bool trim) override;
     void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetPunctuationOverflow(bool enabled) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetColorShaderStyle(const Color& value) override;
     void ResetGradientShaderStyle() override;
@@ -281,6 +282,8 @@ public:
     static bool GetOrphanCharOptimization(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
+    static void SetPunctuationOverflow(FrameNode* frameNode, bool enabled);
+    static bool GetPunctuationOverflow(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
     static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
     static Color GetColorShaderStyle(FrameNode* frameNode);

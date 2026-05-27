@@ -172,6 +172,7 @@ public:
     void ResetGradientShaderStyle() override;
     void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetPunctuationOverflow(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
     void SetFallbackLineSpacing(bool enabled) override;
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
@@ -418,6 +419,8 @@ public:
     static bool GetOrphanCharOptimization(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
+    static void SetPunctuationOverflow(FrameNode* frameNode, bool enabled);
+    static bool GetPunctuationOverflow(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
     static bool GetIncludeFontPadding(FrameNode* frameNode);
     static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);

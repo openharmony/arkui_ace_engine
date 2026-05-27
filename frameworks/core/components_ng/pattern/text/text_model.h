@@ -258,6 +258,7 @@ public:
     virtual void SetOptimizeTrailingSpace(bool trim) = 0;
     virtual void SetOrphanCharOptimization(bool isOrphanChar) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
+    virtual void SetPunctuationOverflow(bool enabled) = 0;
     virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
     virtual void SetColorShaderStyle(const Color& value) = 0;
     virtual void ResetGradientShaderStyle() = 0;

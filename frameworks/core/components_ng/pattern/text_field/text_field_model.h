@@ -481,6 +481,7 @@ public:
     virtual void ResetGradientShaderStyle() = 0;
     virtual void SetOrphanCharOptimization(bool isOrphanChar) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
+    virtual void SetPunctuationOverflow(bool enabled) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) = 0;
     virtual void SetTextAreaScrollBarColor(const Color& value) {};
     virtual void ResetTextAreaScrollBarColor() {};

@@ -61,6 +61,7 @@ public:
     void ResetGradientShaderStyle() override;
     void SetOptimizeTrailingSpace(bool trim) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetPunctuationOverflow(bool enabled) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;

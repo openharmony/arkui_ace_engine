@@ -27210,6 +27210,8 @@ typedef struct GENERATED_ArkUITextModifier {
                               const Opt_Array_text_FontVariation* value);
     void (*setIncrementalUpdatePolicy)(Ark_NativePointer node,
                                        const Opt_IncrementalUpdatePolicy* value);
+    void (*setPunctuationOverflow)(Ark_NativePointer node,
+                                   const Opt_Boolean* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_arkui_component_units_Font* fontValue,
                     const Opt_FontSettingOptions* options);
@@ -27382,6 +27384,8 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                                const Opt_StrokeJoinStyle* value);
     void (*setShaderStyle)(Ark_NativePointer node,
                            const Opt_ShaderStyleProxy* value);
+    void (*setPunctuationOverflow)(Ark_NativePointer node,
+                                   const Opt_Boolean* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_synthetic_Callback_String_Void* error);
@@ -27603,6 +27607,8 @@ typedef struct GENERATED_ArkUITextInputModifier {
                                const Opt_StrokeJoinStyle* value);
     void (*setShaderStyle)(Ark_NativePointer node,
                            const Opt_ShaderStyleProxy* value);
+    void (*setPunctuationOverflow)(Ark_NativePointer node,
+                                   const Opt_Boolean* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);

@@ -559,6 +559,20 @@ class TextCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextPunctuationOverflowModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textPunctuationOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetPunctuationOverflow(node);
+    } else {
+      getUINativeModule().text.setPunctuationOverflow(node, this.value!);
+    }
+  }
+}
+
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   constructor(value: { overflow: TextOverflow }) {
     super(value);
@@ -1339,6 +1353,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   compressLeadingPunctuation(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextCompressLeadingPunctuationModifier.identity, TextCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  punctuationOverflow(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextPunctuationOverflowModifier.identity, TextPunctuationOverflowModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {
