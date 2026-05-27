@@ -862,6 +862,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_context_part_mock.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_texteffect.cpp",
+    "$ace_root/test/mock/frameworks/core/event/mock_point_event.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_statusbar_event_proxy.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_time_event_proxy.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_touch_event.cpp",

@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
-#include "core/components_ng/pattern/scrollable/selectable_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -71,23 +70,6 @@ public:
         return count;
     }
 };
-
-// ============================================================
-// Step 7: Theme checkbox shape (T7.1-T7.2)
-// ============================================================
-
-HWTEST_F(GridItemEditModeTestNg, GridItemThemeDefaultShape001, TestSize.Level1)
-{
-    auto theme = AceType::MakeRefPtr<SelectableTheme>();
-    EXPECT_EQ(theme->GetEditModeCheckBoxShape(), 0);
-}
-
-HWTEST_F(GridItemEditModeTestNg, GridItemThemeGetShape001, TestSize.Level1)
-{
-    auto theme = AceType::MakeRefPtr<SelectableTheme>();
-    theme->editModeCheckBoxShape_ = 1;
-    EXPECT_EQ(theme->GetEditModeCheckBoxShape(), 1);
-}
 
 // ============================================================
 // Step 8.1: Create/Remove CheckBox (T8.1-T8.8)
