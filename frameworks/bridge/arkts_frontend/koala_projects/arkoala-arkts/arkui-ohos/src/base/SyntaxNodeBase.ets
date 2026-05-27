@@ -93,7 +93,14 @@ export class LazyNodePeer extends PeerNode {
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+        console.log(`GlobalReuse: SyntaxNodeBase.recycle disposing=${this.disposing} hasParent=${this.parent !== undefined}`);
         if (this.disposing) { // do not recycle if repeat is disposed
+            // When this container is disposing, try to delegate to the parent
+            // so that reusable children can still be recycled to an ancestor's
+            // GlobalReusePool instead of being destroyed.
+            if (this.parent !== undefined) {
+                return this.parent!.recycle(reuseKey, child, id);
+            }
             return false
         }
         if (!this._reusePool) {

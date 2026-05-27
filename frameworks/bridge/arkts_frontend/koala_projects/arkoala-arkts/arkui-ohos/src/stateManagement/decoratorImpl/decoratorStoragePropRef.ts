@@ -79,6 +79,11 @@ export class StoragePropRefDecoratedVariable<T>
         this.updateValueFromStorage();
     }
 
+    public resetOnReuse(): void {
+        // Re-sync local copy from the backing storage value
+        this.updateValueFromStorage();
+    }
+
     get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${this.getTraceInfo()}`);
         const shouldAddRef = this.shouldAddRef();

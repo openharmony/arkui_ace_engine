@@ -53,6 +53,7 @@ class IfElsePeer extends PeerNode {
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+        console.log(`GlobalReuse: IfBranch.recycle hasReuseKey=${reuseKey !== undefined} disposing=${this.disposing}`);
         if (reuseKey !== undefined) {
             return super.recycle(reuseKey, child, id);
         }

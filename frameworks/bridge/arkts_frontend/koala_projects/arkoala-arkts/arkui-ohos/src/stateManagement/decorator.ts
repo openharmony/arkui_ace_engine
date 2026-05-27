@@ -135,14 +135,16 @@ export interface IObjectLinkDecoratedVariable<T>
 export interface IStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
 export interface ILocalStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface ILocalStoragePropRefDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(): void;
+}
 
-export interface IStoragePropRefDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+
+export interface IStoragePropRefDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(): void;
+}
 
 export interface IStoragePropDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
-
-export interface ILocalStoragePropRefDecoratedVariable<T>
-    extends IDecoratedMutableVariable<T>,
-        IDecoratedV1Variable<T> {}
 
 export type LinkSourceType<T> = IDecoratedV1Variable<T>;
 

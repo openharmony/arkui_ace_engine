@@ -47,6 +47,11 @@ export class StorageLinkDecoratedVariable<T>
         this.decorator = decoratroName;
         this.propertyNameInAppStorage_ = propertyNameInAppStorage;
     }
+
+    public resetOnReuse(): void {
+        // StorageLink is bound to AppStorage/LocalStorage by key,
+        // no reset needed — the link stays valid across reuse
+    }
     public aboutToBeDeletedInternal(): void {
         (this.getSource() as StorageProperty<T>).__unregister(this.getMyTriggerFromSourceWatchId());
         super.aboutToBeDeletedInternal();
