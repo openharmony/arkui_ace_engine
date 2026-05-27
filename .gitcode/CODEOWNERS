@@ -1165,6 +1165,8 @@ frameworks/bridge/declarative_frontend/jsview/js_data_panel.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_data_panel.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_datepicker.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_datepicker.h @arkui001
+frameworks/bridge/declarative_frontend/jsview/js_depth_component.cpp @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/jsview/js_depth_component.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_divider.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_divider.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_dump_log.cpp @arkui_framework_xnode
@@ -2045,6 +2047,7 @@ frameworks/core/components/common/properties/color.h @arkuicodepulse
 frameworks/core/components/common/properties/common_decoration.h @ArkUI_Event
 frameworks/core/components/common/properties/decoration.cpp @ArkUI_Event
 frameworks/core/components/common/properties/decoration.h @ArkUI_Event
+frameworks/core/components/common/properties/depth_option.h @arkuipopupwindow_all
 frameworks/core/components/common/properties/edge.cpp @arkuilayout1
 frameworks/core/components/common/properties/edge.h @arkuilayout1
 frameworks/core/components/common/properties/input_option.h @ArkUI_Event
@@ -2508,6 +2511,7 @@ frameworks/core/components_ng/pattern/custom/ @arkuilayout1
 frameworks/core/components_ng/pattern/custom_frame_node/ @arkui_framework_xnode
 frameworks/core/components_ng/pattern/custom_node_ext/
 frameworks/core/components_ng/pattern/data_panel/ @huawei_g_five
+frameworks/core/components_ng/pattern/depth_component/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/divider/ @arkuilayout1
 frameworks/core/components_ng/pattern/effect_component/ @arkuicodepulse
