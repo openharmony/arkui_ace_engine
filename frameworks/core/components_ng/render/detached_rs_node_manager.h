@@ -74,12 +74,14 @@ private:
 
     /**
      * @brief Try to register ExternalClearCallback to NativeEngine once per process.
-     * Uses bool flag + mutex instead of std::call_once because EngineHelper::GetCurrentEngine()
-     * may return nullptr on first call. Subsequent calls will retry until engine becomes available.
-     * Early returns if: externalClearRegistered_ is true, engine is null, or nativeEngine is null.
+     * Gets NativeEngine via Container->Frontend->JsEngine chain to avoid EngineHelper's weak reference issues.
+     * Uses bool flag instead of std::call_once because Frontend/JsEngine may not be available on first call.
+     * Subsequent calls will retry until NativeEngine becomes available.
+     * Early returns if: externalClearRegistered_ is true, container/frontend/jsEngine/nativeEngine is null.
      * Called under registeredMutex_ protection from RegisterPreFreezeInstance.
+     * @param instanceId The instance ID to use for getting Container and Frontend.
      */
-    void TryRegisterExternalClearCallback();
+    void TryRegisterExternalClearCallback(int32_t instanceId);
 
     std::mutex mutex_;
     std::unordered_set<Rosen::RSUIContext*> rsUIContexts_;

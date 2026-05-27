@@ -317,4 +317,14 @@ bool JsEngine::IsLayoutChildrenCallbackFuncExist(int32_t uniqueId)
     return false;
 }
 
+bool JsEngine::SetExternalClearCallback(std::function<void()>&& func)
+{
+    if (nativeEngine_) {
+        nativeEngine_->SetExternalClearCallback(std::move(func));
+        return true;
+    }
+    LOGW("SetExternalClearCallback failed, nativeEngine is null");
+    return false;
+}
+
 } // namespace OHOS::Ace::Framework
