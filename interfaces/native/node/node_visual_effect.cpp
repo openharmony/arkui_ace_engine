@@ -412,6 +412,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Invert(ArkUI_Matrix4* matrix)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!matrix) {
@@ -426,6 +427,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Combine(ArkUI_Matrix4* oriMatrix, const ArkUI_M
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!oriMatrix || !anotherMatrix) {
@@ -440,6 +442,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Translate(ArkUI_Matrix4* matrix, const ArkUI_Ma
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!matrix || !translate) {
@@ -454,6 +457,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Scale(ArkUI_Matrix4* matrix, const ArkUI_Matrix
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!matrix || !scale) {
@@ -468,6 +472,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Rotate(ArkUI_Matrix4* matrix, const ArkUI_Matri
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!matrix || !rotate) {
@@ -482,6 +487,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Skew(ArkUI_Matrix4* matrix, const float skewX, 
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!matrix) {
@@ -497,6 +503,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_TransformPoint(
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!matrix || !oriPoint || !result) {
@@ -513,6 +520,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_SetPolyToPoly(
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!matrix || !src || !dst) {
@@ -537,6 +545,7 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_GetElements(const ArkUI_Matrix4* matrix, float*
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!matrix || !result) {

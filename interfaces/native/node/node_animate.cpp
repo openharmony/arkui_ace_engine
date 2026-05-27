@@ -621,6 +621,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnFrameCallback(
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (!option || !callback) {
@@ -636,7 +637,8 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnFinishCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl) 
+    if (!impl) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (!option || !callback) {
@@ -654,6 +656,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnCancelCallback(
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (!option || !callback) {
@@ -671,6 +674,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback(
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     if (!option || !callback) {
@@ -821,7 +825,7 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetPath(
     const size_t requiredSize = srcLen + 1;
     *writeLength = requiredSize;
     if (requiredSize > bufferSizeU) {
-        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size is too small", );
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size is too small");
         return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     if (strcpy_s(svgPathBuffer, bufferSizeU, options->path) != 0) {
