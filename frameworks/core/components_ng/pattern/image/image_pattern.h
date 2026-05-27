@@ -106,12 +106,8 @@ public:
     OffsetF GetParentGlobalOffset() const;
     void CheckHandles(SelectHandleInfo& handleInfo);
     // for drawable descriptor
-    void LoadPixelMapDrawable();
-    void LoadPixelMapDrawableSync();
-    void OnPixelMapDrawableLoaded(DrawableDescriptorLoadResult result);
-    void SetPixelMapDrawable(const RefPtr<DrawableDescriptor>& drawable);
     void UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& newDrawable);
-    void InitializeStatus(DrawableDescriptorLoadResult loadResult);
+    void OnDrawableLoadComplete(DrawableDescriptorLoadResult result);
     void AnimatedDrawableControllAnimation(const int32_t id);
     void DrawableRegisterUpdateCallback();
     void ResetDrawableDescriptor();

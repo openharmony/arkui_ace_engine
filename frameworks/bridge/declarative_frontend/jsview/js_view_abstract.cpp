@@ -13967,6 +13967,20 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_ParseResourceObject(void* value)
     return reinterpret_cast<void*>(AceType::RawPtr(resourceObject));
 }
 
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_ParseDimensionToPx(void* value)
+{
+    napi_value napiValue = reinterpret_cast<napi_value>(value);
+    if (!napiValue) {
+        return 0;
+    }
+    JSRef<JSVal> jsVal = JsConverter::ConvertNapiValueToJsVal(napiValue);
+    CalcDimension result;
+    if (!JSViewAbstract::ParseJsDimensionNG(jsVal, result, DimensionUnit::PX)) {
+        return 0;
+    }
+    return static_cast<int32_t>(result.ConvertToPx());
+}
+
 void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
     std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj)
 {

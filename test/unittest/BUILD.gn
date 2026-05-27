@@ -718,6 +718,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/drawable/drawable_descriptor_info.cpp",
     "$ace_root/frameworks/core/drawable/drawable_descriptor_loader.cpp",
     "$ace_root/frameworks/core/drawable/layered_drawable_descriptor.cpp",
+    "$ace_root/frameworks/core/drawable/picture_drawable_descriptor.cpp",
     "$ace_root/frameworks/core/drawable/pixel_map_drawable_descriptor.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/event/key_event.cpp",

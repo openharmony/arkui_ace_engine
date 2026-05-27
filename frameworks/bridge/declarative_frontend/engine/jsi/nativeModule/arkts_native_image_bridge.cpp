@@ -186,8 +186,23 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     RefPtr<PixelMap> pixmap = nullptr;
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (Framework::IsDrawable(info[1])) {
-            pixmap = Framework::GetDrawablePixmap(info[1]);
+        if (ArkTSUtils::IsDrawable(vm, secondArg)) {
+            auto jsObj = secondArg->ToObject(vm);
+            auto jsTypeName = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "typeName"));
+            if (jsTypeName->IsString(vm)) {
+                auto typeName = jsTypeName->ToString(vm)->ToString(vm);
+                if (typeName == ANIMATED_DRAWABLE_DESCRIPTOR_NAME ||
+                    typeName == PICTURE_DRAWABLE_DESCRIPTOR_NAME) {
+                    auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(
+                        ArkTSUtils::UnwrapNapiValue(vm, secondArg));
+                    if (drawableAddr) {
+                        ImageModelNG::SetDrawableDescriptor(
+                            reinterpret_cast<FrameNode*>(nativeNode), drawableAddr);
+                        return panda::JSValueRef::Undefined(vm);
+                    }
+                }
+            }
+            pixmap = ArkTSUtils::GetDrawablePixmap(vm, secondArg);
         } else {
             pixmap = Framework::CreatePixelMapFromNapiValue(info[1]);
         }

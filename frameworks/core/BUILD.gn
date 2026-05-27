@@ -297,6 +297,7 @@ template("ace_core_source_set") {
       "drawable/drawable_descriptor_info.cpp",
       "drawable/drawable_descriptor_loader.cpp",
       "drawable/layered_drawable_descriptor.cpp",
+      "drawable/picture_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
 
       # list
@@ -968,6 +969,7 @@ template("ace_core_ng_source_set") {
       "drawable/drawable_descriptor_info.cpp",
       "drawable/drawable_descriptor_loader.cpp",
       "drawable/layered_drawable_descriptor.cpp",
+      "drawable/picture_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
     ]
 

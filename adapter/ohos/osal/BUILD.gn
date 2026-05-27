@@ -110,6 +110,10 @@ template("ace_osal_ohos_source_set") {
       "websocket_manager.cpp",
       "window_utils.cpp",
     ]
+    if (vpe_enabled) {
+      sources += [ "contrast_enhancer_image_ohos.cpp" ]
+      external_deps += [ "video_processing_engine:videoprocessingengine" ]
+    }
     if (defined(config.enable_standard_input) && config.enable_standard_input) {
       sources += [ "ime_extra_config_ohos.cpp" ]
     }
@@ -220,6 +224,7 @@ template("ace_osal_ohos_source_set") {
       "navigation_route_ohos.cpp",
       "page_url_checker_ohos.cpp",
       "page_viewport_config_ohos.cpp",
+      "picture_ohos.cpp",
       "pixel_map_ohos.cpp",
       "system_bar_style_ohos.cpp",
     ]
@@ -237,6 +242,7 @@ template("ace_osal_ohos_source_set") {
       "bundle_framework:appexecfwk_core",
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
+      "graphic_surface:surface",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",
