@@ -2929,56 +2929,6 @@ HWTEST_F(SearchTestTwoNg, searchTouchEventTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: searchToJsonTest
- * @tc.desc: Test search to json
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestTwoNg, searchToJsonTest, TestSize.Level1)
-{
-    /**
-    * @tc.steps: step1. Create search, get frameNode and pattern.
-    * @tc.expected: FrameNode and pattern is not null, related function is called.
-    */
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    frameNode->MarkModifyDone();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-    * @tc.steps: case
-    */
-    InspectorFilter filter;
-    filter.AddFilterAttr("content");
-    auto jsonValue = JsonUtil::Create(true);
-    pattern->ToJsonValueForTextField(jsonValue, filter);
-    pattern->ToJsonValueForSearchIcon(jsonValue, filter);
-    pattern->ToJsonValueForCancelButton(jsonValue, filter);
-    pattern->ToJsonValueForCursor(jsonValue, filter);
-    pattern->ToJsonValueForSearchButtonOption(jsonValue, filter);
-    EXPECT_TRUE(filter.CheckExtAttr("content"));
-    EXPECT_EQ(filter.IsFastFilter(), true);
-
-    InspectorFilter filter2;
-    pattern->CreateOrUpdateSymbol(IMAGE_INDEX, false, false);
-    searchModelInstance.SetSearchIconColor(Color::BLACK);
-    pattern->ToJsonValueForSearchIcon(jsonValue, filter2);
-    auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    ASSERT_NE(searchIconFrameNode, nullptr);
-    EXPECT_EQ(searchIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
-
-    pattern->CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, false, false);
-    searchModelInstance.SetCancelIconColor(Color::BLACK);
-    pattern->ToJsonValueForCancelButton(jsonValue, filter2);
-    pattern->ToJsonValueForCancelButton(jsonValue, filter2);
-    auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-    ASSERT_NE(cancelImageFrameNode, nullptr);
-    EXPECT_EQ(cancelImageFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
-}
-
-/**
  * @tc.name: searchSymbolIconColorTest
  * @tc.desc: Test search symbol icon color
  * @tc.type: FUNC

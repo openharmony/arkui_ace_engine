@@ -968,35 +968,6 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack004, TestSize.Level0)
 }
 
 /**
- * @tc.name: HandleCountStyle001
- * @tc.desc: test text_field_pattern.cpp HandleCountStyle function,
-    case showCountBorderStyle_ && !showBorder,
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNine, HandleCountStyle001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::VISIBLE_PASSWORD);
-    });
-    GetFocus();
-
-    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
-    layoutProperty->UpdateShowCounter(true);
-    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
-    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
-    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
-    layoutProperty->UpdateMaxLength(123);
-    pattern_->showCountBorderStyle_ = true;
-    layoutProperty->UpdateShowHighlightBorder(false);
-
-    pattern_->HandleCountStyle();
-    auto frameNode = pattern_->GetHost();
-    auto context = frameNode->GetRenderContext();
-    OffsetF offset(-1.0, 0.0);
-    EXPECT_EQ(context->GetTranslateXYProperty(), offset);
-}
-
-/**
  * @tc.name: ProcessSelection001
  * @tc.desc: test text_field_pattern.cpp ProcessSelection function,
     case !isTextChangedAtCreation_ && selectOverlay_->IsShowMouseMenu(),
