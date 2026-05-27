@@ -19,8 +19,7 @@
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 
-#include "base/image/drawing_color_filter.h"
-#include "base/image/drawing_lattice.h"
+#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -31,6 +30,7 @@ class RSNode;
 }
 
 namespace OHOS::Ace {
+class DrawingColorFilter;
 class WantWrap;
 }
 #endif

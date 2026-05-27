@@ -15,6 +15,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/bottom_tab_bar_style_peer.h"

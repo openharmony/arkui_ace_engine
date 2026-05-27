@@ -17,6 +17,7 @@
 
 #include "scope_manager/native_scope_manager.h"
 
+#include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 
 #if !defined(PREVIEW)

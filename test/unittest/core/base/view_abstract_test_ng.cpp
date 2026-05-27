@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+
 #include "core/common/event_manager.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
