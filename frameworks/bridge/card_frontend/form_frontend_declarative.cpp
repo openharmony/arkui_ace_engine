@@ -41,14 +41,18 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
 
 UIContentErrorCode FormFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
 {
-    return RunDynamicPage(url, params, "");
+    DynamicOptions options;
+    options.content = url;
+    options.params = params;
+    options.entryPoint = "";
+    options.hapPath = "";
+    return RunDynamicPage(options);
 }
 
-UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
-    const std::string& url, const std::string& params, const std::string& entryPoint)
+UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(const DynamicOptions& options)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "FormFrontendDeclarative run page url = %{public}s, entryPoint = %{public}s",
-        url.c_str(), entryPoint.c_str());
+        options.content.c_str(), options.entryPoint.c_str());
     auto container = Container::Current();
     if (!container) {
         return UIContentErrorCode::NULL_POINTER;
@@ -56,10 +60,10 @@ UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
 
     auto uiContentType = container->GetUIContentType();
     if (uiContentType == UIContentType::DYNAMIC_COMPONENT) {
-        return InnerRunDynamicPage(url, params, entryPoint);
+        return InnerRunDynamicPage(options.content, options.params, options.entryPoint);
     }
 
-    return InnerRunCardPage(url, params, entryPoint);
+    return InnerRunCardPage(options.content, options.params, options.entryPoint);
 }
 
 UIContentErrorCode FormFrontendDeclarative::InnerRunCardPage(

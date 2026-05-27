@@ -44,8 +44,7 @@ public:
     void OnMediaFeatureUpdate();
 
     UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;
-    UIContentErrorCode RunDynamicPage(
-        const std::string& url, const std::string& params, const std::string& entryPoint) override;
+    UIContentErrorCode RunDynamicPage(const DynamicOptions& options) override;
 
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
