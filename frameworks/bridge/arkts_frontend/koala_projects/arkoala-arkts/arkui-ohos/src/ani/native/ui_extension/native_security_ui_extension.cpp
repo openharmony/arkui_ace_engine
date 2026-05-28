@@ -16,7 +16,13 @@
 #include "native_security_ui_extension.h"
 
 #include "ani_callback_info.h"
+#if defined(PREVIEW)
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#else
 #include "ani_common_want.h"
+#include "want.h"
+#endif
 #include "../utils/ani_utils.h"
 #include "base/log/log_wrapper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -26,9 +32,10 @@
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.h"
 #endif //WINDOW_SCENE_SUPPORTED
-#include "want.h"
+#include <array>
 
 namespace OHOS::Ace::Ani {
+#ifdef WINDOW_SCENE_SUPPORTED
 namespace {
 constexpr int32_t FOLLOW_HOST_DPI = 0;
 const char UI_EXTENSION_PLACEHOLDER_TYPE_INITIAL[] = "initPlaceholder";
@@ -36,6 +43,7 @@ const char UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED[] = "undefinedPlaceholder";
 const char UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION[] = "rotationPlaceholder";
 const char UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND[] = "flodPlaceholder";
 }
+#endif //WINDOW_SCENE_SUPPORTED
 
 class JSSecurityUIExtensionProxy final {
 public:
@@ -117,6 +125,7 @@ private:
 };
 
 struct SecurityUIExtensionProxyPeer final {
+#ifdef WINDOW_SCENE_SUPPORTED
 public:
     SecurityUIExtensionProxyPeer(const RefPtr<NG::SecurityUIExtensionProxy>& proxy): proxy_(proxy)
     {
@@ -138,6 +147,7 @@ public:
 
 private:
     RefPtr<NG::SecurityUIExtensionProxy> proxy_;
+#endif
 };
 
 ani_long GetFinalizer(
@@ -151,6 +161,7 @@ ani_status SendData(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     auto peer = reinterpret_cast<SecurityUIExtensionProxyPeer*>(pointer);
     if (peer == nullptr) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
@@ -167,6 +178,7 @@ ani_status SendData(
     }
 
     peer->SendData(requestparams);
+#endif
     return ANI_OK;
 }
 
@@ -174,6 +186,7 @@ ani_object SendDataSync(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     ani_object result_obj = {};
     auto peer = reinterpret_cast<SecurityUIExtensionProxyPeer*>(pointer);
     if (peer == nullptr) {
@@ -200,6 +213,9 @@ ani_object SendDataSync(
     }
 
     return static_cast<ani_object>(wantParamsObj);
+#else
+    return {};
+#endif
 }
 
 ani_status BindNativeSecurityUiExtensionProxy(ani_env* env)
@@ -235,6 +251,7 @@ ani_status BindNativeSecurityUiExtensionProxy(ani_env* env)
     return ANI_OK;
 }
 
+#ifdef WINDOW_SCENE_SUPPORTED
 ani_ref CreateSecurityUIExtensionProxyObject(ani_env* env, const RefPtr<NG::SecurityUIExtensionProxy>& proxy)
 {
     auto pattern = proxy->GetPattern();
@@ -277,6 +294,7 @@ ani_ref CreateSecurityUIExtensionProxyObject(ani_env* env, const RefPtr<NG::Secu
         { [jsProxyObj](const RefPtr<NG::SecurityUIExtensionProxy>&) { jsProxyObj->JsCallback(ANI_TRUE); } });
     return proxyObjectRef;
 }
+#endif
 
 ani_status NativeSecurityUiExtension::BindNativeSecurityUiExtension(ani_env *env)
 {
@@ -308,7 +326,7 @@ ani_status NativeSecurityUiExtension::BindNativeSecurityUiExtensionComponent(ani
             "BindNativeSecurityUiExtensionComponent FindClass failed, className: %{public}s", className);
         return ANI_ERROR;
     }
-
+#if !defined(PREVIEW)
     std::array methods = {
         ani_native_function {
             "_SecurityUiextension_Construct",
@@ -348,6 +366,7 @@ ani_status NativeSecurityUiExtension::BindNativeSecurityUiExtensionComponent(ani
             " className: %{public}s", className);
         return ANI_ERROR;
     };
+#endif
     return ANI_OK;
 }
 
@@ -363,8 +382,13 @@ ani_long NativeSecurityUiExtension::Construct(
             NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
     frameNode->IncRefCount();
     return reinterpret_cast<ani_long>(AceType::RawPtr(frameNode));
+#elif defined(PREVIEW)
+    auto frameNode = NG::CreatePreviewPlaceholder(V2::UI_EXTENSION_COMPONENT_ETS_TAG, id);
+    CHECK_NULL_RETURN(frameNode, {});
+    frameNode->IncRefCount();
+    return reinterpret_cast<ani_long>(AceType::RawPtr(frameNode));
 #else
-    return nullptr;
+    return {};
 #endif //WINDOW_SCENE_SUPPORTED
 }
 
@@ -374,6 +398,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object obj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityUiextensionOption start");
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
@@ -432,7 +457,6 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
         "SetSecurityUiextensionOption isTransferringCaller: %{public}d, dpiFollowStrategy: %{public}d,"
         "isWindowModeFollowHost: %{public}d, placeholderMap size: %{public}d",
         isTransferringCaller, dpiFollowStrategy, isWindowModeFollowHost, static_cast<int32_t>(placeholderMap.size()));
-#ifdef WINDOW_SCENE_SUPPORTED
     bool densityDpi = (dpiFollowStrategy == FOLLOW_HOST_DPI) ? true : false;
     NG::SecurityUIExtensionStatic::UpdateSecurityUecConfig(
         frameNode, isTransferringCaller, densityDpi, isWindowModeFollowHost, placeholderMap);
@@ -449,6 +473,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionWant(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object obj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityUiextensionWant start");
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
@@ -474,7 +499,6 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionWant(
             "UnwrapWant failed when SetSecurityUiextensionWant");
         return ANI_ERROR;
     }
-#ifdef WINDOW_SCENE_SUPPORTED
     NG::SecurityUIExtensionStatic::UpdateSecurityWant(frameNode, want);
 #endif //WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
@@ -488,6 +512,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object callbackObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnError start");
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
@@ -538,7 +563,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
         };
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
     };
-#ifdef WINDOW_SCENE_SUPPORTED
     NG::SecurityUIExtensionStatic::SetSecurityOnError(frameNode, std::move(onErrorCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
@@ -552,6 +576,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object callbackObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnRecive start");
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
@@ -600,7 +625,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
     };
 
-#ifdef WINDOW_SCENE_SUPPORTED
     NG::SecurityUIExtensionStatic::SetSecurityOnReceive(frameNode, std::move(onReciveCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
@@ -614,6 +638,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object callbackObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnTerminate start");
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
@@ -668,7 +693,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
             };
             env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
         };
-#ifdef WINDOW_SCENE_SUPPORTED
     NG::SecurityUIExtensionStatic::SetSecurityOnTerminated(frameNode, std::move(onTerminateCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
@@ -680,6 +704,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRemoteReady(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
         "NativeUiExtension SetSecurityOnRemoteReady start");
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
@@ -727,7 +752,6 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRemoteReady(
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
     };
 
-#ifdef WINDOW_SCENE_SUPPORTED
     NG::SecurityUIExtensionStatic::SetSecurityOnRemoteReady(frameNode, std::move(onRemoteReadyCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
