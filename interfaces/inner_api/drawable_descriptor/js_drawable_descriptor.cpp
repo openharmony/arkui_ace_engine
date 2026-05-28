@@ -1258,10 +1258,12 @@ napi_value JsDrawableDescriptor::PictureConstructor(napi_env env, napi_callback_
     }
     auto* drawable = modifier->createDrawableDescriptorByType(PICTURE_TYPE);
     if (argc > 0 && argv[0] != nullptr) {
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         auto picture = Media::PictureNapi::GetPicture(env, argv[0]);
         if (picture) {
             modifier->setPicture(drawable, &picture);
         }
+#endif
     }
     modifier->increaseRef(drawable);
     auto napi_status = napi_wrap(env, thisVar, drawable, NewDestructor, nullptr, nullptr);
@@ -1399,6 +1401,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetBaseDrawableDescr
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
@@ -1412,6 +1415,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetPixelMapDrawableD
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
@@ -1425,6 +1429,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetLayeredDrawableDe
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("getForeground", GetForeground),
         DECLARE_NAPI_FUNCTION("getBackground", GetBackground),
         DECLARE_NAPI_FUNCTION("getMask", GetMask),
@@ -1443,6 +1448,7 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetAnimatedDrawableD
         DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
         DECLARE_NAPI_FUNCTION("load", Load),
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
+        DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
         DECLARE_NAPI_FUNCTION("getAnimationController", GetAnimationController),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
@@ -1459,6 +1465,8 @@ std::vector<napi_property_descriptor> JsDrawableDescriptor::GetPictureDrawableDe
         DECLARE_NAPI_FUNCTION("loadSync", LoadSync),
         DECLARE_NAPI_FUNCTION("setHdrComposition", SetHdrComposition),
         DECLARE_NAPI_FUNCTION("invalidate", Invalidate),
+        DECLARE_NAPI_FUNCTION("release", Release),
+        DECLARE_NAPI_FUNCTION("isReleased", IsReleased),
         DECLARE_NAPI_PROPERTY("typeName", typeName)
     };
 }
