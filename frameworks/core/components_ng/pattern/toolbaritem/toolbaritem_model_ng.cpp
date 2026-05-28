@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr const char* TOOLBAR_ETS_TAG = "Tool_Bar";
 
 void ToolBarItemModelNG::Create(int32_t value)
 {
@@ -29,12 +30,12 @@ void ToolBarItemModelNG::Create(int32_t value)
     if (isFirstCreate) {
         auto nodeId = stack->ClaimNodeId();
         toolbarNode = FrameNode::GetOrCreateFrameNode(
-            V2::TOOLBAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+            TOOLBAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
         stack->Push(toolbarNode);
         isFirstCreate = false;
     }
 
-    auto toolbaritemNode = FrameNode::GetOrCreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
+    auto toolbaritemNode = FrameNode::GetOrCreateFrameNode(TOOLBARITEM_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ToolBarItemPattern>(); });
     toolbarNode->AddChild(toolbaritemNode);
     stack->Push(toolbaritemNode);

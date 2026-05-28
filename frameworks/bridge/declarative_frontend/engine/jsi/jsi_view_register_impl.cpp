@@ -124,7 +124,6 @@
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_texttimer_controller.h"
-#include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
 #include "bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
@@ -519,7 +518,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
     { "ScrollBar", JSScrollBar::JSBind },
-    { "ToolBarItem", JSToolBarItem::JSBind },
     { "Calendar", JSCalendar::JSBind },
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },

@@ -933,3 +933,17 @@ if (globalThis.Panel === undefined) {
     name: 'JSPanel'
   }
 }
+
+// @ts-ignore
+if (globalThis.ToolBarItem === undefined) {
+  globalThis.ToolBarItem = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('ToolBarItem');
+      let module = globalThis.requireNapi('arkui.components.arktoolbaritem');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().toolBarItem.create(params);
+    },
+    name: 'JSToolBarItem'
+  };
+}

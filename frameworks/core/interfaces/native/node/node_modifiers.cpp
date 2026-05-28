@@ -123,6 +123,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/toolbaritem_modifier.h"
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
@@ -181,6 +182,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
         .getTextPickerModifier = NodeModifier::GetTextPickerModifier,
+        .getToolBarItemModifier = NodeModifier::GetToolbaritemModifier,
         .getRatingModifier = NodeModifier::GetRatingModifier,
         .getSliderModifier = NodeModifier::GetSliderModifier,
         .getDividerModifier = NodeModifier::GetDividerModifier,

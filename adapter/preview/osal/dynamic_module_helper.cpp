@@ -120,6 +120,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "ImageSpan", "span" },
         { "SymbolSpan", "span" },
         { "TimePickerDialog", "timepicker" },
+        { "ToolBarItem", "toolbaritem" },
         {"CalendarPicker", "calendarpicker"},
         {"CalendarPickerDialog", "calendarpicker"},
         {"RelativeContainer", "relativecontainer"},

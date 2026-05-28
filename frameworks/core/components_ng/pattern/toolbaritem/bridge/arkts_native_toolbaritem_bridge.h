@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_STATIC_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_STATIC_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_BRIDGE_ARKTS_NATIVE_TOOLBARITEM_BRIDGE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_BRIDGE_ARKTS_NATIVE_TOOLBARITEM_BRIDGE_H
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ToolBarItemModelStatic {
+class ToolBarItemBridge {
 public:
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetPlacement(FrameNode* frameNode, int32_t placement);
+    static void RegisterToolBarItemAttributes(panda::Local<panda::ObjectRef> object, panda::ecmascript::EcmaVM* vm);
+    static panda::Local<panda::JSValueRef> Create(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOOLBARITEM_TOOLBARITEM_MODEL_STATIC_H
+
+#endif
