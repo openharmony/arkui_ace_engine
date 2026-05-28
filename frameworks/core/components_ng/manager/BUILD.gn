@@ -17,6 +17,7 @@ import(
 build_component_ng("manager_ng") {
   sources = [
     "avoid_info/avoid_info_manager.cpp",
+    "content_change_manager/content_change_manager.cpp",
     "display_sync/ui_display_sync.cpp",
     "display_sync/ui_display_sync_manager.cpp",
     "drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
@@ -57,8 +58,6 @@ build_component_ng("manager_ng") {
     "post_event/post_event_manager.cpp",
     "safe_area/safe_area_manager.cpp",
     "scroll_adjust/scroll_adjust_manager.cpp",
-    "smart_gesture/smart_gesture_decider.cpp",
-    "smart_gesture/smart_gesture_manager.cpp",
     "select_content_overlay/select_content_overlay_manager.cpp",
     "select_overlay/select_overlay_client.cpp",
     "select_overlay/select_overlay_manager.cpp",
@@ -66,7 +65,6 @@ build_component_ng("manager_ng") {
     "shared_overlay/shared_overlay_manager.cpp",
     "shared_overlay/shared_transition_effect.cpp",
     "toolbar/toolbar_manager.cpp",
-    "content_change_manager/content_change_manager.cpp",
   ]
 
   gesture_debug_sources = [ "gesture_debug/gesture_debug_boundary_manager.cpp" ]

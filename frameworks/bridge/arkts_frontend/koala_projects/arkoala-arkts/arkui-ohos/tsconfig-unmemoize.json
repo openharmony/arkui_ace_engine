@@ -58,9 +58,6 @@
             "@ohos/arkui/UIContext": [
                 "./@ohos.arkui.UIContext.ts"
             ],
-            "@ohos/arkui/smartGestureController": [
-                "./@ohos.arkui.smartGestureController.ts"
-            ],
             "@ohos/measure": [
                 "./@ohos.measure.ts"
             ],
@@ -105,7 +102,6 @@
         "./@ohos.measure.ts",
         "./@ohos.font.ts",
         "./@ohos.arkui.UIContext.ts",
-        "./@ohos.arkui.smartGestureController.ts",
         "./@ohos.animator.ts",
         "./@ohos.arkui.componentUtils.ts",
         "./@ohos.arkui.focusController.ts",

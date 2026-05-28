@@ -35,7 +35,6 @@
 #include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/gesture/gesture_model_ng_static.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
@@ -726,7 +725,6 @@ void registerGestureEventExt(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
 void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
 
@@ -744,11 +742,6 @@ void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 p
     }
     gesturePtr->SetGestureMask(gestureMask);
     gestureHub->AttachGesture(gesturePtr);
-    GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
-    if (clickEvent) {
-        auto commonClickEvent = clickEvent;
-        gestureHub->SetCommonClickEvent(std::move(commonClickEvent));
-    }
 }
 
 void addGestureToNodeWithRefCountDecrease(
@@ -773,11 +766,6 @@ void addGestureToNodeWithRefCountDecrease(
     }
     gesturePtr->SetGestureMask(gestureMask);
     gestureHub->AttachGesture(gesturePtr);
-    GestureEventFunc clickEvent = GestureModelNGStatic::GetTapGestureEventFunc(gesturePtr);
-    if (clickEvent) {
-        auto commonClickEvent = clickEvent;
-        gestureHub->SetCommonClickEvent(std::move(commonClickEvent));
-    }
     // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
     gesturePtr->DecRefCount();
 }

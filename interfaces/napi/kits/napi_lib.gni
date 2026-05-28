@@ -20,7 +20,6 @@ common_napi_libs = [
   "arkui/component_snapshot",
   "arkui/drag_controller",
   "arkui/focus_controller",
-  "arkui/smart_gesture_controller",
   "arkui/inspector",
   "arkui/observer",
   "arkui/performancemonitor",

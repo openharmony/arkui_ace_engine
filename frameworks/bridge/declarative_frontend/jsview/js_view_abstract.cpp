@@ -164,7 +164,6 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
-constexpr int32_t SMART_GESTURE_SHORTCUT_PRIMARY = 0;
 constexpr int32_t SECOND_INDEX = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
@@ -10262,7 +10261,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod(
         "onVisibleAreaApproximateChange", &JSViewAbstract::JsOnVisibleAreaApproximateChange);
-    JSClass<JSViewAbstract>::StaticMethod("smartGestureShortcut", &JSViewAbstract::JsSmartGestureShortcut);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
@@ -11931,41 +11929,6 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
     };
     ViewAbstractModel::GetInstance()->SetOnVisibleAreaApproximateChange(
         std::move(onVisibleChange), ratioVec, expectedUpdateInterval, measureFromViewport);
-}
-
-void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
-{
-    if (info.Length() != PARAMETER_LENGTH_FIRST) {
-        return;
-    }
-
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        return;
-    }
-
-    auto options = JSRef<JSObject>::Cast(info[0]);
-    auto actionValue = options->GetProperty("action");
-    auto enabledValue = options->GetProperty("enabled");
-    if (!actionValue->IsNumber() || !enabledValue->IsBoolean()) {
-        return;
-    }
-
-    int32_t action = actionValue->ToNumber<int32_t>();
-    if (action != SMART_GESTURE_SHORTCUT_PRIMARY) {
-        return;
-    }
-    bool enabled = enabledValue->ToBoolean();
-    bool selectable = false;
-    auto selectableValue = options->GetProperty("selectable");
-    if (selectableValue->IsBoolean()) {
-        selectable = selectableValue->ToBoolean();
-    }
-    ViewAbstractModel::GetInstance()->SetSmartGestureShortcut(action, enabled, selectable);
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)

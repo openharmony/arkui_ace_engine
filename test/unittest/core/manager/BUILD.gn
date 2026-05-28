@@ -53,13 +53,13 @@ ace_unittest("drag_drop_manager_test_ng") {
   if (!ace_enable_full_test_suite) {
     sources = []
     sources = [
-      "manager_test_min.cpp",
       "manager_test_core.cpp",
+      "manager_test_min.cpp",
     ]
   } else {
     sources += [
-      "manager_test_min.cpp",
       "manager_test_core.cpp",
+      "manager_test_min.cpp",
     ]
   }
 }
@@ -136,12 +136,6 @@ ace_unittest("shared_overlay_manager_test_ng") {
   sources = [ "shared_overlay_manager_test_ng.cpp" ]
 }
 
-ace_unittest("smart_gesture_decider_test_ng") {
-  module_name = "SmartGesture-Decider"
-  type = "new"
-  sources = [ "smart_gesture_decider_test_ng.cpp" ]
-}
-
 ace_unittest("display_sync_manager_test_ng") {
   module_name = "DrawingSet-Line"
   type = "new"
@@ -188,9 +182,9 @@ ace_unittest("scroll_adjust_manager_test_ng") {
 ace_unittest("safe_area_manager_test_ng") {
   module_name = "StateManagement-ComponentExtention"
   type = "new"
-  sources = [ 
+  sources = [
     "safe_area_manager_test_ng.cpp",
-    "safe_area_manager_test_ng_part_two.cpp" 
+    "safe_area_manager_test_ng_part_two.cpp",
   ]
 }
 
@@ -254,8 +248,8 @@ group("core_manager_unittest") {
     ":focus_view_test_ng",
     ":force_split_manager_test_ng",
     ":frame_rate_manager_test_ng",
-    ":gesture_debug_boundary_manager_test_ng",
     ":full_screen_manager_test_ng",
+    ":gesture_debug_boundary_manager_test_ng",
     ":json_report_test_ng",
     ":navigation_manager_test_ng",
     ":post_event_manager_test_ng",
@@ -264,7 +258,6 @@ group("core_manager_unittest") {
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",
-    ":smart_gesture_decider_test_ng",
     ":theme_manager_test_ng",
   ]
 }

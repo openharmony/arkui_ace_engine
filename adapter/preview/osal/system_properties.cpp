@@ -118,7 +118,6 @@ bool SystemProperties::gridIrregularLayoutEnable_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
-bool SystemProperties::smartGestureEnabled_ = false;
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
