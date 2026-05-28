@@ -27,6 +27,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/components_ng/syntax/repeat_node.h"
 #include "core/components_ng/syntax/repeat_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_caches.h"
@@ -61,11 +62,13 @@ public:
     void SetUp() override
     {
         MockPipelineContext::SetUp();
+        LazyForEachUtils::SetEnableRepeatAnimation(true);
     }
 
     void TearDown() override
     {
         MockPipelineContext::TearDown();
+        LazyForEachUtils::SetEnableRepeatAnimation(false);
     }
 
     RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(bool createItems);
@@ -1521,6 +1524,42 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimation003, TestSize.Level1)
     auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(repeatNode, nullptr);
     EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+}
+
+/**
+ * @tc.name: RepeatNodeIsAllowAnimation004
+ * @tc.desc: IsAllowAnimation returns true when enableRepeatAnimation is true and parent is List
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimationTest004, TestSize.Level1)
+{
+    LazyForEachUtils::SetEnableRepeatAnimation(false);
+    auto listNode = CreateNode(V2::LIST_ETS_TAG, 100);
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+    listNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+    LazyForEachUtils::SetEnableRepeatAnimation(true);
+}
+
+/**
+ * @tc.name: RepeatNodeIsAllowAnimationTest005
+ * @tc.desc: IsAllowAnimation returns false when enableRepeatAnimation is false even if parent is List
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimationTest005, TestSize.Level1)
+{
+    LazyForEachUtils::SetEnableRepeatAnimation(false);
+    auto gridNode = CreateNode(V2::GRID_ETS_TAG, 100);
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+    gridNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+    LazyForEachUtils::SetEnableRepeatAnimation(true);
 }
 
 /**

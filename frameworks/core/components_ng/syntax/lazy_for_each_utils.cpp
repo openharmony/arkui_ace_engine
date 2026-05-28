@@ -19,6 +19,8 @@ namespace OHOS::Ace::NG {
 
 bool LazyForEachUtils::enableCustomComponentFreeze_ = false;
 
+bool LazyForEachUtils::enableRepeatAnimation_ = false;
+
 void LazyForEachUtils::SetEnableCustomComponentFreeze(bool enableCustomComponentFreeze)
 {
     enableCustomComponentFreeze_ = enableCustomComponentFreeze;
@@ -27,6 +29,16 @@ void LazyForEachUtils::SetEnableCustomComponentFreeze(bool enableCustomComponent
 bool LazyForEachUtils::GetEnableCustomComponentFreeze()
 {
     return enableCustomComponentFreeze_;
+}
+
+void LazyForEachUtils::SetEnableRepeatAnimation(bool enableRepeatAnimation)
+{
+    enableRepeatAnimation_ = enableRepeatAnimation;
+}
+
+bool LazyForEachUtils::GetEnableRepeatAnimation()
+{
+    return enableRepeatAnimation_;
 }
 
 } // namespace OHOS::Ace::NG
