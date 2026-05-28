@@ -92,7 +92,7 @@ public:
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetHalfLeading(bool halfLeading) override;
-    void SetEnableHapticFeedback(bool state) override {};
+    void SetEnableHapticFeedback(bool state, bool flagByUser) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
     void SetLineThicknessScale(float value) override {};
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override {};

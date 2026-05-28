@@ -105,6 +105,10 @@ interface MarqueeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface SelectionContainerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface MenuComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

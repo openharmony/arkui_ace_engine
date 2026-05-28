@@ -62,6 +62,7 @@ void TextModelNG::Create(const std::u16string& content)
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();
+    textPattern->SetDirectlyCreatedByTextModel(true);
 }
 
 void TextModelNG::Create(const std::string& content)
@@ -110,6 +111,7 @@ RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::u16str
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();
+    textPattern->SetDirectlyCreatedByTextModel(true);
     return frameNode;
 }
 
@@ -682,6 +684,11 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
+void TextModelNG::SetCopyOptionFlagByUser(bool flag)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOptionFlagByUser, flag);
+}
+
 void TextModelNG::SetOnWillCopy(std::function<bool(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
@@ -713,6 +720,16 @@ void TextModelNG::SetTextCaretColor(const Color& value)
 void TextModelNG::SetSelectedBackgroundColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value);
+}
+
+void TextModelNG::SetSelectedBackgroundColorFlagByUser(bool flag)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColorFlagByUser, flag);
+}
+
+void TextModelNG::SetSelectedBackgroundColorFlagByUser(FrameNode* frameNode, bool flag)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColorFlagByUser, flag, frameNode);
 }
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
@@ -803,6 +820,11 @@ void TextModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::str
 void TextModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption, frameNode);
+}
+
+void TextModelNG::SetCopyOptionFlagByUser(FrameNode* frameNode, bool flag)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOptionFlagByUser, flag, frameNode);
 }
 
 void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
@@ -1564,6 +1586,7 @@ void TextModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     if (textLayoutProperty) {
         textLayoutProperty->ResetSelectedBackgroundColor();
+        textLayoutProperty->ResetSelectedBackgroundColorFlagByUser();
     }
 }
 
@@ -1755,19 +1778,19 @@ bool TextModelNG::GetHalfLeading(FrameNode* frameNode)
     return value;
 }
 
-void TextModelNG::SetEnableHapticFeedback(bool state)
+void TextModelNG::SetEnableHapticFeedback(bool state, bool flagByUser)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetEnableHapticFeedback(state);
+    textPattern->SetEnableHapticFeedback(state, flagByUser);
 }
 
-void TextModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+void TextModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state, bool flagByUser)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetEnableHapticFeedback(state);
+    textPattern->SetEnableHapticFeedback(state, flagByUser);
 }
 
 size_t TextModelNG::GetLineCount(FrameNode* frameNode)

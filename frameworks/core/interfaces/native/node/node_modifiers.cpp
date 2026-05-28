@@ -107,6 +107,7 @@
 #include "core/interfaces/native/node/row_split_modifier.h"
 #include "core/interfaces/native/node/scrollable_modifier.h"
 #include "core/interfaces/native/node/scroller_modifier.h"
+#include "core/interfaces/native/node/selection_container_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
 #include "core/interfaces/native/node/shape_modifier.h"
@@ -322,6 +323,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getLazyColumnLayoutModifier = NodeModifier::GetLazyColumnLayoutModifier,
         .getLazyWaterFlowLayoutModifier = NodeModifier::GetLazyWaterFlowLayoutModifier,
         .getMaterialModifier = NodeModifier::GetMaterialModifier,
+        .getSelectionContainerModifier = NodeModifier::GetSelectionContainerModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

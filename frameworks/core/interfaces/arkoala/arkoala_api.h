@@ -7986,6 +7986,32 @@ struct ArkUIMarqueeModifier {
         ArkUI_Int32 expectValue, ArkUI_Int32 value);
 };
 
+struct ArkUISelectionContainerModifier {
+    void (*create)();
+    void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetCopyOption)(ArkUINodeHandle node);
+    void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setTextJoinStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextJoinStyle)(ArkUINodeHandle node);
+    void (*setCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resourceRawPtr);
+    void (*resetCaretColor)(ArkUINodeHandle node);
+    void (*setSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resourceRawPtr);
+    void (*resetSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*setOnWillCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWillCopy)(ArkUINodeHandle node);
+    void (*setOnCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetOnCopy)(ArkUINodeHandle node);
+    void (*setOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnTextSelectionChange)(ArkUINodeHandle node);
+    void (*setSelectionMenuOptions)(ArkUINodeHandle node, void* onCreateMenu, void* onMenuItemClick,
+        void* onPrepareMenu);
+    void (*resetSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setBindSelectionMenu)(ArkUINodeHandle node, ArkUI_Int32 spanType, ArkUI_Int32 responseType, void* buildFunc,
+        void* menuParam);
+    void (*resetBindSelectionMenu)(ArkUINodeHandle node, ArkUI_Int32 spanType, ArkUI_Int32 responseType);
+};
+
 struct ArkUIDatePickerModifier {
     ArkUI_CharPtr (*getSelectedTextStyle)(ArkUINodeHandle node);
     void (*setSelectedTextStyle)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Uint32 color, ArkUI_Int32 style);
@@ -9435,6 +9461,7 @@ struct ArkUINodeModifiers {
     const ArkUILazyColumnLayoutModifier* (*getLazyColumnLayoutModifier)();
     const ArkUILazyWaterFlowLayoutModifier* (*getLazyWaterFlowLayoutModifier)();
     const ArkUIMaterialModifier* (*getMaterialModifier)();
+    const ArkUISelectionContainerModifier* (*getSelectionContainerModifier)();
 };
 
 // same as inner defines in property.h

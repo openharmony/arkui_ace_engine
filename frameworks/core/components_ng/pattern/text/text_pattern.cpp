@@ -49,6 +49,7 @@
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/span/span_group_hash_calculator.h"
+#include "core/components_ng/pattern/text/text_selection_child.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/text/html_utils.h"
@@ -191,6 +192,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     if (dataDetectorAdapter_) {
         dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
     }
+    ClearSelectionChild();
     if (selectOverlay_) {
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
@@ -226,6 +228,7 @@ void TextPattern::OnAttachToMainTree()
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
     isDetachFromMainTree_ = false;
+    UpdateSelectionChildRegistration();
     if (!GetEnvFontScale()) {
         ReadFontScaleFromEnv();
         if (GetEnvFontScale()) {
@@ -238,7 +241,40 @@ void TextPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);  // call OnDetachFromMainTreeMultiThread() by multi thread
+    ClearSelectionChild();
     isDetachFromMainTree_ = true;
+}
+
+void TextPattern::UpdateSelectionChildRegistration()
+{
+    CHECK_NULL_VOID(directlyCreatedByTextModel_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetSelectionContainerId() <= 0) {
+        ClearSelectionChild();
+        return;
+    }
+    if (selectionChild_) {
+        if (selectionChild_->GetSelectionContainer()) {
+            return;
+        }
+        ClearSelectionChild();
+    }
+    auto selectionChild = AceType::MakeRefPtr<TextSelectionChild>(WeakClaim(this));
+    selectionChild->RegisterChild();
+    if (selectionChild->GetSelectionContainer()) {
+        selectionChild_ = selectionChild;
+    }
+}
+
+void TextPattern::ClearSelectionChild()
+{
+    CHECK_NULL_VOID(directlyCreatedByTextModel_);
+    if (!selectionChild_) {
+        return;
+    }
+    selectionChild_->UnregisterChild();
+    selectionChild_.Reset();
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -248,6 +284,11 @@ void TextPattern::CloseSelectOverlay()
 
 void TextPattern::CloseSelectOverlay(bool animation)
 {
+    if (selectionChild_) {
+        selectionChild_->CloseSelectOverlay(animation, CloseReason::CLOSE_REASON_NORMAL);
+        return;
+    }
+
     auto host = GetHost();
     FREE_NODE_CHECK(host, CloseSelectOverlay, animation);  // call CloseSelectOverlayMultiThread() by multi thread
     // Deprecated use selectOverlay_ instead.
@@ -262,7 +303,14 @@ void TextPattern::CloseSelectOverlay(bool animation)
 
 void TextPattern::ResetSelection()
 {
-    if (textSelector_.IsValid() && !shiftFlag_) {
+    if (shiftFlag_) {
+        return;
+    }
+    if (selectionChild_) {
+        selectionChild_->ResetAllSelection();
+        return;
+    }
+    if (textSelector_.IsValid()) {
         HandleSelectionChange(-1, -1);
         ReportSelectedText();
         auto host = GetHost();
@@ -465,7 +513,7 @@ void TextPattern::ShowAIEntityMenuForCancel()
         return;
     }
     HandleSelectionChange(start, end);
-    textResponseType_ = TextResponseType::LONG_PRESS;
+    SetTextResponseType(TextResponseType::LONG_PRESS);
     UpdateSelectionSpanType(start, end);
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay({ .animation = true });
@@ -680,10 +728,17 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     ResetAISelected(AIResetSelectionReason::LONG_PRESS);
     gestureHub->SetIsTextDraggable(false);
     InitSelectionOnLongPress(localOffset);
-    textResponseType_ = TextResponseType::LONG_PRESS;
+    if (selectionChild_) {
+        auto selectedText = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), false, false,
+            true);
+        if (!selectedText.empty()) {
+            selectionChild_->NotifySelectionChanged(selectedText);
+        }
+    }
+    SetTextResponseType(TextResponseType::LONG_PRESS);
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
-    oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
+    SaveOldSelectedType();
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
     if (GetOrCreateMagnifier() && HasContent()) {
@@ -1194,14 +1249,68 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
 
 void TextPattern::HandleOnCopySpanString()
 {
-    auto [start, end] = GetSelectedStartAndEnd();
-    auto subSpanString = styledString_->GetSubSpanString(start, end - start);
-    subSpanString->isFromStyledStringMode = true;
+    auto subSpanString = GetSelectedSpanString();
+    CHECK_NULL_VOID(subSpanString);
 #if defined(PREVIEW)
     clipboard_->SetData(subSpanString->GetString(), copyOption_);
     return;
 #endif
     AsyncHandleOnCopySpanStringHtml(subSpanString);
+}
+
+RefPtr<SpanString> TextPattern::GetSelectedSpanString()
+{
+    CHECK_NULL_RETURN(isSpanStringMode_ && !externalParagraph_, nullptr);
+    CHECK_NULL_RETURN(styledString_, nullptr);
+    auto [start, end] = GetSelectedStartAndEnd();
+    CHECK_NULL_RETURN(end > start, nullptr);
+    auto subSpanString = styledString_->GetSubSpanString(start, end - start);
+    CHECK_NULL_RETURN(subSpanString, nullptr);
+    subSpanString->isFromStyledStringMode = true;
+    return subSpanString;
+}
+
+SelectionCopyPayload TextPattern::GetSelectionCopyPayload()
+{
+    SelectionCopyPayload payload;
+    auto [start, end] = GetSelectedStartAndEnd();
+    CHECK_NULL_RETURN(end > start, payload);
+    auto selectedText = GetSelectedText(start, end, false, false, true);
+    CHECK_NULL_RETURN(!selectedText.empty(), payload);
+    payload.plainText = selectedText;
+
+    auto selectedSpanString = GetSelectedSpanString();
+    if (selectedSpanString) {
+        payload.spanString = selectedSpanString;
+        return payload;
+    }
+
+    auto spanString = MakeRefPtr<SpanString>(selectedText);
+    if (!spans_.empty()) {
+        auto spans = GetSpanSelectedContent();
+        if (!spans.empty()) {
+            spanString->SetSpanItems(std::move(spans));
+            payload.spanString = spanString;
+            return payload;
+        }
+    }
+
+    if (textStyle_.has_value()) {
+        auto spanItem = MakeRefPtr<SpanItem>();
+        FontStyle fontStyle;
+        TextLineStyle textLineStyle;
+        NG::SymbolStyle symbolStyle;
+        GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, symbolStyle, textStyle_);
+        spanItem->fontStyle = std::make_unique<FontStyle>(fontStyle);
+        spanItem->textLineStyle = std::make_unique<TextLineStyle>(textLineStyle);
+        spanItem->symbolStyle = std::make_unique<SymbolStyle>(symbolStyle);
+        spanItem->content = selectedText;
+        std::list<RefPtr<SpanItem>> spans;
+        spans.emplace_back(spanItem);
+        spanString->SetSpanItems(std::move(spans));
+        payload.spanString = spanString;
+    }
+    return payload;
 }
 
 std::list<RefPtr<SpanItem>> TextPattern::GetSpanSelectedContent()
@@ -1445,9 +1554,36 @@ void TextPattern::HiddenMenu()
 {
     if (IsUsingMouse()) {
         CloseSelectOverlay();
-    } else if (selectOverlay_) {
-        selectOverlay_->HideMenu();
+    } else {
+        HideSelectionMenu();
     }
+}
+
+void TextPattern::HideSelectionMenu(bool noAnimation, bool showSubMenu)
+{
+    if (selectionChild_) {
+        selectionChild_->HideMenu(noAnimation, showSubMenu);
+        return;
+    }
+    if (selectOverlay_) {
+        selectOverlay_->HideMenu(noAnimation, showSubMenu);
+    }
+}
+
+bool TextPattern::SelectOverlayIsOn()
+{
+    if (selectionChild_) {
+        return selectionChild_->SelectOverlayIsOn();
+    }
+    return selectOverlay_ && selectOverlay_->SelectOverlayIsOn();
+}
+
+bool TextPattern::IsSelectOverlayUsingMouse()
+{
+    if (selectionChild_) {
+        return selectionChild_->IsUsingMouse();
+    }
+    return selectOverlay_->IsUsingMouse();
 }
 
 void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
@@ -1634,6 +1770,11 @@ void TextPattern::UpdateAIMenuOptions()
 void TextPattern::ProcessOverlay(const OverlayRequest& request)
 {
     SelectAIDetect();
+    if (selectionChild_) {
+        selectionChild_->ProcessOverlay(request);
+        return;
+    }
+
     auto selectOverlay = GetSelectOverlay();
     CHECK_NULL_VOID(selectOverlay);
     selectOverlay->ProcessOverlay(request);
@@ -1660,9 +1801,7 @@ void TextPattern::HandleOnSelectAll()
     CloseSelectOverlay(true);
     if (IsUsingMouse()) {
         if (IsSelected()) {
-            auto selectOverlay = GetSelectOverlay();
-            CHECK_NULL_VOID(selectOverlay);
-            selectOverlay->SetSelectionHoldCallback();
+            SetSelectionHoldCallback();
         }
     } else {
         ShowSelectOverlay({ .animation = true });
@@ -1721,7 +1860,7 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->sourceType_ = info.GetSourceDevice();
+        pattern->UpdateSourceType(info.GetSourceDevice());
         pattern->HandleLongPress(info);
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
@@ -1815,22 +1954,25 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     if (HandleUrlClick()) {
         return;
     }
-    if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
+    if (SelectOverlayIsOn() && !IsSelectOverlayUsingMouse() &&
         GlobalOffsetInSelectedArea(info.GetGlobalLocation())) {
         if (!IsLocationInFrameRegion(info.GetLocalLocation())) {
             return;
         }
-        selectOverlay_->SwitchToOverlayMode();
-        selectOverlay_->ToggleMenu();
+        if (selectionChild_) {
+            selectionChild_->SwitchToOverlayMode();
+            selectionChild_->ToggleMenu();
+        } else {
+            selectOverlay_->SwitchToOverlayMode();
+            selectOverlay_->ToggleMenu();
+        }
         return;
     }
     if (!isMousePressed_ && !isTryEntityDragging_) {
         HandleClickAISpanEvent(textOffset);
     }
     if (GetDataDetectorAdapter()->hasClickedAISpan_) {
-        if (selectOverlay_) {
-            selectOverlay_->HideMenu();
-        }
+        HideSelectionMenu();
         return;
     }
     HandleClickOnTextAndSpan(info);
@@ -1838,7 +1980,8 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 
 void TextPattern::HandleClickOnTextAndSpan(GestureEvent& info)
 {
-    if (textSelector_.IsValid() && mouseStatus_ != MouseStatus::MOVE && !isMousePressed_) {
+    if ((textSelector_.IsValid() || (selectionChild_ && SelectOverlayIsOn())) &&
+        mouseStatus_ != MouseStatus::MOVE && !isMousePressed_) {
         CloseSelectOverlay(true);
         ResetSelection();
     }
@@ -2312,7 +2455,14 @@ void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     InitSelection(textOffset);
-    textResponseType_ = TextResponseType::NONE;
+    if (selectionChild_) {
+        auto selectedText = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), false, false,
+            true);
+        if (!selectedText.empty()) {
+            selectionChild_->NotifySelectionChanged(selectedText);
+        }
+    }
+    SetTextResponseType(TextResponseType::NONE);
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
     CalculateHandleOffsetAndShowOverlay();
@@ -2342,7 +2492,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->sourceType_ = info.GetSourceDevice();
+        pattern->UpdateSourceType(info.GetSourceDevice());
         pattern->HandleClickEvent(info);
     };
     auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
@@ -2715,7 +2865,139 @@ void TextPattern::InitHoverEvent()
     hoverInitialized_ = true;
 }
 
+void TextPattern::SaveOldSelectedType()
+{
+    oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
+    if (selectionChild_) {
+        selectionChild_->NotifySelectedTypeSave();
+    }
+}
+
+void TextPattern::SetTextResponseType(TextResponseType type)
+{
+    textResponseType_ = type;
+    if (selectionChild_) {
+        selectionChild_->NotifyResponseTypeChanged(type);
+    }
+}
+
+void TextPattern::RecoverEnableHapticFeedback()
+{
+    if (!selectionChild_) {
+        return;
+    }
+    RecoverEnableHapticFeedback(CalcEnableHapticFeedback());
+}
+
+void TextPattern::RecoverEnableHapticFeedback(bool enableHapticFeedback)
+{
+    if (hapticFeedbackFlagByUser_) {
+        return;
+    }
+    isEnableHapticFeedback_ = enableHapticFeedback;
+}
+
+bool TextPattern::CalcEnableHapticFeedback()
+{
+    return selectionChild_->GetContainerEnableHapticFeedback().value_or(true);
+}
+
+void TextPattern::OnContainerEnableHapticFeedbackUpdate()
+{
+    if (hapticFeedbackFlagByUser_ || !selectionChild_) {
+        return;
+    }
+    bool newValue = CalcEnableHapticFeedback();
+    if (newValue == isEnableHapticFeedback_) {
+        return;
+    }
+    RecoverEnableHapticFeedback(newValue);
+}
+
+void TextPattern::RecoverSelectedBackgroundColor()
+{
+    if (!selectionChild_) {
+        return;
+    }
+    selectedBackgroundColor_ = CalcSelectedBackgroundColor();
+}
+
+Color TextPattern::CalcSelectedBackgroundColor()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, Color::TRANSPARENT);
+    if (textLayoutProperty->HasSelectedBackgroundColorFlagByUser() &&
+        textLayoutProperty->GetSelectedBackgroundColorFlagByUserValue(false)) {
+        return textLayoutProperty->GetSelectedBackgroundColor().value_or(Color::TRANSPARENT);
+    }
+    if (selectionChild_) {
+        auto containerColor = selectionChild_->GetContainerSelectedBackgroundColor();
+        if (containerColor.has_value()) {
+            return containerColor.value();
+        }
+    }
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, Color::TRANSPARENT);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
+    return theme->GetSelectedColor();
+}
+
+void TextPattern::OnContainerSelectedBackgroundColorUpdate()
+{
+    if (!selectionChild_) {
+        return;
+    }
+    Color newColor = CalcSelectedBackgroundColor();
+    if (newColor == selectedBackgroundColor_) {
+        return;
+    }
+    selectedBackgroundColor_ = newColor;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+CopyOptions TextPattern::CalcCopyOption()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, CopyOptions::None);
+    auto contentHost = GetContentHost();
+    CHECK_NULL_RETURN(contentHost, CopyOptions::None);
+
+    CopyOptions result = CopyOptions::None;
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        result = CopyOptions::None;
+    } else if (!selectionChild_ ||
+        (textLayoutProperty->HasCopyOptionFlagByUser() && textLayoutProperty->GetCopyOptionFlagByUserValue(false))) {
+        result = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+    } else {
+        result = selectionChild_->GetContainerCopyOption().value_or(CopyOptions::None);
+    }
+
+    const auto& children = contentHost->GetChildren();
+    if (children.empty() && IsSetObscured() && !isSpanStringMode_) {
+        result = CopyOptions::None;
+    }
+    return result;
+}
+
+void TextPattern::OnContainerCopyOptionUpdate()
+{
+    CopyOptions newCopyOption = CalcCopyOption();
+    if (newCopyOption == copyOption_) {
+        return;
+    }
+
+    RecoverCopyOption(newCopyOption);
+}
+
 void TextPattern::RecoverCopyOption()
+{
+    RecoverCopyOption(CalcCopyOption());
+}
+
+void TextPattern::RecoverCopyOption(CopyOptions copyOption)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -2724,14 +3006,9 @@ void TextPattern::RecoverCopyOption()
     CHECK_NULL_VOID(host && contentHost);
     ACE_UINODE_TRACE(host);
 
-    copyOption_ = textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE
-                      ? CopyOptions::None
-                      : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+    copyOption_ = copyOption;
     UnBindPreviewMenuByCopyOption();
     const auto& children = contentHost->GetChildren();
-    if (children.empty() && IsSetObscured() && !isSpanStringMode_) {
-        copyOption_ = CopyOptions::None;
-    }
     if (copyOption_ == CopyOptions::None && !textDetectEnable_ && !textLayoutProperty->GetTextOverflow() &&
         !onClick_ && !longPressEvent_) { // performance prune
         auto eventHub = host->GetEventHubOnly<EventHub>();
@@ -2767,7 +3044,7 @@ void TextPattern::InitCopyOptionAndOverlay()
     CHECK_NULL_VOID(eventHub);
     InitCopyOption(gestureEventHub, eventHub);
     bool enabledCache = eventHub->IsEnabled();
-    if (selectOverlay_) {
+    if (!selectionChild_ && selectOverlay_) {
         selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
         selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
         selectOverlay_->UpdateHandleColor();
@@ -2861,14 +3138,12 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         lastLeftMouseMoveLocation_ = info.GetGlobalLocation();
         HandleMouseLeftButton(info, textOffset);
         if (IsSelected()) {
-            auto selectOverlay = GetSelectOverlay();
-            CHECK_NULL_VOID(selectOverlay);
-            selectOverlay->SetSelectionHoldCallback();
+            SetSelectionHoldCallback();
         }
-        sourceType_ = info.GetSourceDevice();
+        UpdateSourceType(info.GetSourceDevice());
     } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleMouseRightButton(info, textOffset);
-        sourceType_ = info.GetSourceDevice();
+        UpdateSourceType(info.GetSourceDevice());
     }
     if (!IsSelected()) {
         ResetOriginCaretPosition();
@@ -2896,19 +3171,16 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     CheckPressedSpanPosition(textOffset);
     leftMousePressed_ = true;
     ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlPressColor());
-    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (BetweenContainerSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
     }
     mouseStatus_ = MouseStatus::PRESSED;
     lastLeftMouseClickStyle_ = currentMouseStyle_;
-    CHECK_NULL_VOID(pManager_);
-    if (shiftFlag_) {
-        auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
-        HandleSelectionChange(textSelector_.lastValidStart, end);
+    if (selectionChild_) {
+        HandleMouseLeftPressForContainer(textOffset);
     } else {
-        auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
-        textSelector_.Update(start, start);
+        HandleMouseLeftPressForLocal(textOffset);
     }
     // auto scroll.
     auto selectOverlay = GetSelectOverlay();
@@ -2931,6 +3203,115 @@ void TextPattern::ResetMouseLeftPressedState()
     leftMousePressed_ = false;
 }
 
+void TextPattern::UpdateSourceType(SourceType sourceType)
+{
+    sourceType_ = sourceType;
+    if (selectionChild_) {
+        selectionChild_->NotifySourceTypeChanged(sourceType_);
+    }
+}
+
+void TextPattern::SetMouseMenuOffset(const OffsetF& mouseMenuOffset)
+{
+    if (selectionChild_) {
+        selectionChild_->SetMouseMenuOffset(mouseMenuOffset);
+    } else {
+        auto selectOverlay = GetSelectOverlay();
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->SetMouseMenuOffset(mouseMenuOffset);
+    }
+}
+
+void TextPattern::SetSelectionHoldCallback()
+{
+    if (selectionChild_) {
+        selectionChild_->SetSelectionHoldCallback();
+        return;
+    }
+    auto selectOverlay = GetSelectOverlay();
+    CHECK_NULL_VOID(selectOverlay);
+    selectOverlay->SetSelectionHoldCallback();
+}
+
+void TextPattern::UpdateSelectedTypeForRightClick(const MouseInfo& info)
+{
+    auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(GetSelectionSpanItemIndex(info)));
+    if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        selectedType_ = TextSpanType::IMAGE;
+    } else {
+        selectedType_ = TextSpanType::TEXT;
+    }
+    if (selectionChild_) {
+        ChildSelectionSummary summary;
+        summary.contributes = true;
+        summary.type = selectedType_.value_or(TextSpanType::NONE);
+        selectionChild_->NotifyContainerSelectionSpanTypeChanged(summary);
+    }
+}
+
+bool TextPattern::HandleMouseLeftPressForContainer(const Offset& textOffset)
+{
+    CHECK_NULL_RETURN(selectionChild_, false);
+    CHECK_NULL_RETURN(pManager_, false);
+    SetTextResponseType(TextResponseType::SELECTED_BY_MOUSE);
+    if (shiftFlag_) {
+        return selectionChild_->ExtendSelectionFromFixedAnchor(textOffset);
+    } else {
+        auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
+        selectionChild_->HandleSelectionStart(textOffset, start, start);
+        selectionChild_->HandleSelectionUpdate(textOffset);
+        return true;
+    }
+}
+
+void TextPattern::HandleMouseLeftPressForLocal(const Offset& textOffset)
+{
+    CHECK_NULL_VOID(pManager_);
+    if (shiftFlag_) {
+        auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
+        HandleSelectionChange(textSelector_.lastValidStart, end);
+    } else {
+        auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
+        textSelector_.Update(start, start);
+    }
+}
+
+void TextPattern::HandleMouseLeftReleaseForLocal(
+    const MouseInfo& info, MouseStatus oldMouseStatus, int32_t start, int32_t end)
+{
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
+        HandleSelectionChange(start, end);
+        ReportSelectedText();
+    }
+
+    if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
+        SetMouseMenuOffset(OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY())));
+        SetTextResponseType(TextResponseType::SELECTED_BY_MOUSE);
+        ShowSelectOverlay({ .animation = true });
+    }
+}
+
+void TextPattern::HandleMouseLeftReleaseForContainer(
+    const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, int32_t start, int32_t end)
+{
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
+        if (start == -1 && end == -1) {
+            ResetSelection();
+            return;
+        }
+        selectionChild_->HandleSelectionUpdate(textOffset);
+        selectionChild_->ProcessMouseLeftRelease(textOffset);
+    }
+    if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
+        SetMouseMenuOffset(OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()),
+            static_cast<float>(info.GetGlobalLocation().GetY())));
+        SetTextResponseType(TextResponseType::SELECTED_BY_MOUSE);
+        ShowSelectOverlay({ .animation = true });
+    }
+}
+
 void TextPattern::ContentChangeByDetaching(PipelineContext* context)
 {
     CHECK_NULL_VOID(context);
@@ -2949,6 +3330,12 @@ void TextPattern::ContentChangeByDetaching(PipelineContext* context)
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
 {
+    // Mouse release can be dispatched to both the press target and the current hit target.
+    // In selection-container scenarios, only the fixed-anchor child that started the session
+    // should finalize the cross-node selection on release.
+    if (selectionChild_ && !selectionChild_->IsSelectionSessionOwner()) {
+        return;
+    }
     bool pressBetweenSelectedPosition = blockPress_;
     blockPress_ = false;
     auto oldMouseStatus = mouseStatus_;
@@ -2982,18 +3369,10 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
         end = -1;
     }
 
-    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
-        HandleSelectionChange(start, end);
-        ReportSelectedText();
-    }
-
-    if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
-        auto selectOverlay = GetSelectOverlay();
-        CHECK_NULL_VOID(selectOverlay);
-        selectOverlay->SetMouseMenuOffset(OffsetF(
-            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY())));
-        textResponseType_ = TextResponseType::SELECTED_BY_MOUSE;
-        ShowSelectOverlay({ .animation = true });
+    if (selectionChild_) {
+        HandleMouseLeftReleaseForContainer(info, textOffset, oldMouseStatus, start, end);
+    } else {
+        HandleMouseLeftReleaseForLocal(info, oldMouseStatus, start, end);
     }
     ResetMouseReleaseState(info);
 }
@@ -3008,7 +3387,7 @@ void TextPattern::ResetMouseReleaseState(const MouseInfo& info)
     CHECK_NULL_VOID(host);
     auto selectOverlay = GetSelectOverlay();
     CHECK_NULL_VOID(selectOverlay);
-    if (host && scrollableParent_.Upgrade() && !selectOverlay->SelectOverlayIsOn()) {
+    if (host && scrollableParent_.Upgrade() && !SelectOverlayIsOn()) {
         host->UnregisterNodeChangeListener();
     }
     selectOverlay->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), true);
@@ -3028,9 +3407,13 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
     }
     if (isMousePressed_) {
         mouseStatus_ = MouseStatus::MOVE;
-        CHECK_NULL_VOID(pManager_);
-        auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
-        HandleSelectionChange(textSelector_.baseOffset, end);
+        if (selectionChild_) {
+            selectionChild_->HandleSelectionUpdate(textOffset);
+        } else {
+            CHECK_NULL_VOID(pManager_);
+            auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
+            HandleSelectionChange(textSelector_.baseOffset, end);
+        }
         auto selectOverlay = GetSelectOverlay();
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), false);
@@ -3047,9 +3430,10 @@ void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& te
     if (info.GetAction() == MouseAction::RELEASE) {
         auto selectOverlay = GetSelectOverlay();
         CHECK_NULL_VOID(selectOverlay);
-        selectOverlay->SetMouseMenuOffset(OffsetF(
-            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY())));
-        if (!BetweenSelectedPosition(info.GetGlobalLocation())) {
+        auto rightClickOffset = OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
+        SetMouseMenuOffset(rightClickOffset);
+        if (!BetweenContainerSelectedPosition(info.GetGlobalLocation())) {
             HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
             if (GetDataDetectorAdapter()->hasClickedAISpan_) {
                 isMousePressed_ = false;
@@ -3061,17 +3445,12 @@ void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& te
         }
 
         CalculateHandleOffsetAndShowOverlay(true);
-        if (selectOverlay->SelectOverlayIsOn()) {
+        if (SelectOverlayIsOn()) {
             CloseSelectOverlay(true);
         }
-        textResponseType_ = TextResponseType::RIGHT_CLICK;
+        SetTextResponseType(TextResponseType::RIGHT_CLICK);
         if (!IsSelected()) {
-            auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(GetSelectionSpanItemIndex(info)));
-            if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG) {
-                selectedType_ = TextSpanType::IMAGE;
-            } else {
-                selectedType_ = TextSpanType::TEXT;
-            }
+            UpdateSelectedTypeForRightClick(info);
         }
         ShowSelectOverlay({ .animation = true });
         isMousePressed_ = false;
@@ -3095,7 +3474,7 @@ void TextPattern::InitTouchEvent()
     auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->sourceType_ = info.GetSourceDevice();
+        pattern->UpdateSourceType(info.GetSourceDevice());
         pattern->HandleTouchEvent(info);
     };
     auto touchListener = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -3251,11 +3630,17 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     }
 
     if (keyEvent.IsCtrlWith(KeyCode::KEY_C)) {
+        if (selectionChild_ && selectionChild_->HandleOnCopy()) {
+            return true;
+        }
         HandleOnCopy();
         return true;
     }
 
     if (keyEvent.IsCtrlWith(KeyCode::KEY_A)) {
+        if (selectionChild_ && selectionChild_->HandleOnSelectAll()) {
+            return true;
+        }
         auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
         HandleSelectionChange(0, textSize);
         CloseSelectOverlay();
@@ -3438,6 +3823,7 @@ bool TextPattern::IsSelectableAndCopy()
 
 bool TextPattern::IsDraggable(const Offset& offset)
 {
+    CHECK_NULL_RETURN(!selectionChild_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -3724,6 +4110,7 @@ void TextPattern::OnDragMove(const RefPtr<Ace::DragEvent>& event)
 
 void TextPattern::InitDragEvent()
 {
+    CHECK_NULL_VOID(!selectionChild_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -3802,7 +4189,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         CHECK_NULL_VOID(pattern);
         pattern->blockPress_ = false;
         pattern->InitAiSelection(point);
-        if (pattern->BetweenSelectedPosition(point) || pattern->IsAiSelected()) {
+        if (pattern->BetweenContainerSelectedPosition(point) || pattern->IsAiSelected()) {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             const auto& children = pattern->GetChildNodes();
@@ -4189,6 +4576,14 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
     return result;
 }
 
+bool TextPattern::BetweenContainerSelectedPosition(const Offset& globalOffset)
+{
+    if (selectionChild_) {
+        return selectionChild_->BetweenContainerSelectedPosition(globalOffset);
+    }
+    return BetweenSelectedPosition(globalOffset);
+}
+
 void TextPattern::LogForFormRender(const std::string& logTag)
 {
     auto host = GetHost();
@@ -4216,6 +4611,7 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(textLayoutProperty);
     auto contentHost = GetContentHost();
     CHECK_NULL_VOID(host && contentHost);
+    UpdateSelectionChildRegistration();
     ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -4258,6 +4654,8 @@ void TextPattern::OnModifyDone()
     }
     ResetTextEffectBeforeLayout();
     RecoverCopyOption();
+    RecoverEnableHapticFeedback();
+    RecoverSelectedBackgroundColor();
     RegisterFormVisibleChangeCallback();
     RegisterVisibleAreaChangeCallback();
     CHECK_NULL_VOID(GetDataDetectorAdapter());
@@ -4630,9 +5028,7 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     } else {
         CloseSelectOverlay();
         if (IsSelected()) {
-            auto selectOverlay = GetSelectOverlay();
-            CHECK_NULL_VOID(selectOverlay);
-            selectOverlay->SetSelectionHoldCallback();
+            SetSelectionHoldCallback();
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -4758,7 +5154,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void TextPattern::ProcessOverlayAfterLayout()
 {
-    if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+    if (SelectOverlayIsOn()) {
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
         selectOverlay_->UpdateViewPort();
@@ -5225,7 +5621,7 @@ void TextPattern::HandleSurfaceChanged(
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }
-    CHECK_NULL_VOID(selectOverlay_ && selectOverlay_->SelectOverlayIsOn());
+    CHECK_NULL_VOID(SelectOverlayIsOn());
     if (selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay();
     } else {
@@ -6024,7 +6420,7 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         UpdateStyledStringByColorMode();
-        if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+        if (SelectOverlayIsOn()) {
             selectOverlay_->UpdateMenuFromThemeChange(themeScopeId);
         }
     }
@@ -6293,7 +6689,7 @@ int32_t TextPattern::GetHandleIndex(const Offset& offset) const
 
 void TextPattern::OnHandleAreaChanged()
 {
-    if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+    if (SelectOverlayIsOn()) {
         auto parentGlobalOffset = GetParentGlobalOffset();
         if (parentGlobalOffset != parentGlobalOffset_) {
             parentGlobalOffset_ = parentGlobalOffset;
@@ -6423,6 +6819,9 @@ bool TextPattern::MaybeNeedShowSelectAIDetect()
 void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,
     std::function<void()>& menuBuilder, const SelectMenuParam& menuParam)
 {
+    if (selectionChild_) {
+        return;
+    }
     auto key = std::make_pair(spanType, responseType);
     auto it = selectionMenuMap_.find(key);
     if (it != selectionMenuMap_.end()) {
@@ -6491,7 +6890,7 @@ void TextPattern::UnBindPreviewMenuByCopyOption()
 
 void TextPattern::CloseSelectionMenu()
 {
-    textResponseType_ = TextResponseType::NONE;
+    SetTextResponseType(TextResponseType::NONE);
     CloseSelectOverlay(true);
 }
 
@@ -6608,6 +7007,9 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
 void TextPattern::OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
     const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
+    if (selectionChild_) {
+        return;
+    }
     auto selectOverlay = GetSelectOverlay();
     CHECK_NULL_VOID(selectOverlay);
     selectOverlay->OnSelectionMenuOptionsUpdate(
@@ -6660,6 +7062,9 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
 
 bool TextPattern::IsSelectedBindSelectionMenu()
 {
+    if (selectionChild_) {
+        return selectionChild_->IsSelectedBindSelectionMenu();
+    }
     auto currentSpanType = selectedType_.value_or(TextSpanType::TEXT);
     return GetMenuParams(currentSpanType, TextResponseType::SELECTED_BY_MOUSE) != nullptr;
 }
@@ -6670,6 +7075,12 @@ void TextPattern::UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd
     if ((selectedType_ == TextSpanType::NONE && !textSelector_.StartEqualToDest()) ||
         textSelector_.StartEqualToDest()) {
         selectedType_ = TextSpanType::TEXT;
+    }
+    if (selectionChild_) {
+        ChildSelectionSummary summary;
+        summary.contributes = !GetSelectedText(selectStart, selectEnd, false, false, true).empty();
+        summary.type = selectedType_.value_or(TextSpanType::NONE);
+        selectionChild_->NotifyContainerSelectionSpanTypeChanged(summary);
     }
 }
 
@@ -6818,9 +7229,7 @@ void TextPattern::ActSetSelectionFlag(int32_t selectionStart, int32_t selectionE
     if (!IsShowHandle()) {
         CloseSelectOverlay();
         if (IsSelected()) {
-            auto selectOverlay = GetSelectOverlay();
-            CHECK_NULL_VOID(selectOverlay);
-            selectOverlay->SetSelectionHoldCallback();
+            SetSelectionHoldCallback();
         }
     } else {
         auto selectOverlay = GetSelectOverlay();
@@ -7610,7 +8019,7 @@ void TextPattern::OnTextOverflowChanged()
 
 void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+    if (SelectOverlayIsOn()) {
         selectOverlay_->OnAncestorNodeChanged(flag);
     }
     if (leftMousePressed_ && mouseStatus_ == MouseStatus::MOVE && scrollableParent_.Upgrade()) {
@@ -7698,6 +8107,11 @@ void TextPattern::BeforeCreatePaintWrapper()
 
 void TextPattern::StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
 {
+    if (selectionChild_) {
+        TextGestureSelector::StartGestureSelection(start, end, startOffset);
+        selectionChild_->HandleSelectionStart(startOffset, start, end);
+        return;
+    }
     auto selectOverlay = GetSelectOverlay();
     CHECK_NULL_VOID(selectOverlay);
     scrollableParent_ = selectOverlay->FindScrollableParent();
@@ -7720,6 +8134,11 @@ int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
 
 void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
+    if (selectionChild_) {
+        auto localOffset = info.GetTouches().front().GetLocalLocation();
+        selectionChild_->HandleSelectionUpdate(localOffset);
+        return;
+    }
     if (!HasContent()) {
         return;
     }
@@ -7753,6 +8172,11 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
 
 void TextPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo)
 {
+    if (selectionChild_) {
+        auto localOffset = locationInfo.GetLocalLocation();
+        selectionChild_->HandleSelectionEnd(localOffset);
+        return;
+    }
     auto selectOverlay = GetSelectOverlay();
     CHECK_NULL_VOID(selectOverlay);
     selectOverlay->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), Offset(), true);
@@ -7762,7 +8186,7 @@ void TextPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInf
     }
     if (HasContent()) {
         CalculateHandleOffsetAndShowOverlay();
-        oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
+        SaveOldSelectedType();
         ShowSelectOverlay({ .animation = true });
     }
     ReportSelectedText();
@@ -7982,6 +8406,9 @@ std::string TextPattern::GetCaretColor() const
 
 std::string TextPattern::GetSelectedBackgroundColor() const
 {
+    if (selectionChild_) {
+        return selectedBackgroundColor_.ColorToString();
+    }
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, "");
     auto theme = context->GetTheme<TextTheme>();
@@ -7989,6 +8416,14 @@ std::string TextPattern::GetSelectedBackgroundColor() const
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
     return textLayoutProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor()).ColorToString();
+}
+
+std::optional<Color> TextPattern::GetSelectedBgColorWhenAcrossText() const
+{
+    if (!selectionChild_) {
+        return std::nullopt;
+    }
+    return selectedBackgroundColor_;
 }
 
 void TextPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -8702,11 +9137,6 @@ OffsetF TextPattern::GetTextPaintOffset() const
     return parentGlobalOffset_;
 }
 
-void TextPattern::SetTextResponseType(TextResponseType type)
-{
-    textResponseType_ = type;
-}
-
 bool TextPattern::IsSelectedTypeChange()
 {
     return selectedType_.has_value() && oldSelectedType_ != selectedType_.value();
@@ -8841,9 +9271,10 @@ uint64_t TextPattern::GetSystemTimestamp()
             .count());
 }
 
-void TextPattern::SetEnableHapticFeedback(bool isEnabled)
+void TextPattern::SetEnableHapticFeedback(bool isEnabled, bool flagByUser)
 {
     isEnableHapticFeedback_ = isEnabled;
+    hapticFeedbackFlagByUser_ = flagByUser;
 }
 
 bool TextPattern::IsEnabledObscured() const
@@ -8863,6 +9294,9 @@ void TextPattern::UnRegisterAfterLayoutCallback()
 
 RefPtr<MagnifierController> TextPattern::GetOrCreateMagnifier()
 {
+    if (selectionChild_) {
+        return nullptr;
+    }
     if (!magnifierController_) {
         auto host = GetHost();
         if (host) {

@@ -1298,6 +1298,9 @@ public:
     {
         return uiNodeType_;
     }
+    int32_t GetSelectionContainerId() const;
+    virtual void SetSelectionContainerId(int32_t selectionContainerId);
+    virtual void UpdateSelectionContainerId(int32_t selectionContainerId);
 
 private:
     bool uiNodeGcEnable_ = false;
@@ -1401,6 +1404,7 @@ protected:
     int32_t layoutPriority_ = 0;
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
     int32_t themeScopeId_ = 0;
+    int32_t selectionContainerId_ = 0;
     int32_t subtreeIgnoreCount_ = 0;
     std::list<RefPtr<FrameNode>> adoptedChildren_;
 private:
