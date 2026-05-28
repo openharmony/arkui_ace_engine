@@ -40,6 +40,13 @@ void FeatureManager::ResetForTest()
 
 class FeatureManagerTest : public testing::Test {
 public:
+    static void SetUpTestSuite()
+    {
+        // Construct the singleton before per-test mock counters are reset.
+        AceApplicationInfo::GetInstance().SetPackageName("");
+        FeatureManager::GetInstance().ResetForTest();
+    }
+
     void SetUp() override
     {
         AceApplicationInfo::GetInstance().SetPackageName(TEST_BUNDLE_NAME);
@@ -61,30 +68,10 @@ public:
 
 /**
  * @tc.name: GetFeatureParam001
- * @tc.desc: GetFeatureParam returns success and string value from AppSpaceCompConfigReader.
- * @tc.type: FUNC
- */
-HWTEST_F(FeatureManagerTest, GetFeatureParam001, TestSize.Level1)
-{
-    CompConfigClient::AppSpaceCompConfigReaderMock::SetConfigResult(0, TEST_VALUE);
-
-    std::string value;
-    auto result = FeatureManager::GetInstance().GetFeatureParam(TEST_KEY, value);
-
-    EXPECT_EQ(result, FeatureManager::SUCCESS);
-    EXPECT_EQ(value, TEST_VALUE);
-    EXPECT_EQ(CompConfigClient::AppSpaceCompConfigReaderMock::GetInitCallCount(), 1);
-    EXPECT_EQ(CompConfigClient::AppSpaceCompConfigReaderMock::GetConfigCallCount(), 1);
-    EXPECT_EQ(CompConfigClient::AppSpaceCompConfigReaderMock::GetLastInitBundleName(), TEST_BUNDLE_NAME);
-    EXPECT_EQ(CompConfigClient::AppSpaceCompConfigReaderMock::GetLastConfigKey(), TEST_KEY);
-}
-
-/**
- * @tc.name: GetFeatureParam002
  * @tc.desc: GetFeatureParam returns key_not_found for empty key and does not read config.
  * @tc.type: FUNC
  */
-HWTEST_F(FeatureManagerTest, GetFeatureParam002, TestSize.Level1)
+HWTEST_F(FeatureManagerTest, GetFeatureParam001, TestSize.Level1)
 {
     std::string value = TEST_VALUE;
     auto result = FeatureManager::GetInstance().GetFeatureParam("", value);
@@ -96,11 +83,11 @@ HWTEST_F(FeatureManagerTest, GetFeatureParam002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFeatureParam003
+ * @tc.name: GetFeatureParam002
  * @tc.desc: GetFeatureParam returns init_failed when reader init fails.
  * @tc.type: FUNC
  */
-HWTEST_F(FeatureManagerTest, GetFeatureParam003, TestSize.Level1)
+HWTEST_F(FeatureManagerTest, GetFeatureParam002, TestSize.Level1)
 {
     CompConfigClient::AppSpaceCompConfigReaderMock::Reset();
     CompConfigClient::AppSpaceCompConfigReaderMock::SetInitResult(ERROR_CODE);
@@ -116,11 +103,11 @@ HWTEST_F(FeatureManagerTest, GetFeatureParam003, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFeatureParam004
+ * @tc.name: GetFeatureParam003
  * @tc.desc: GetFeatureParam returns key_not_found when GetConfig fails.
  * @tc.type: FUNC
  */
-HWTEST_F(FeatureManagerTest, GetFeatureParam004, TestSize.Level1)
+HWTEST_F(FeatureManagerTest, GetFeatureParam003, TestSize.Level1)
 {
     CompConfigClient::AppSpaceCompConfigReaderMock::SetConfigResult(ERROR_CODE, TEST_VALUE);
 
@@ -134,11 +121,11 @@ HWTEST_F(FeatureManagerTest, GetFeatureParam004, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFeatureParam005
+ * @tc.name: GetFeatureParam004
  * @tc.desc: GetFeatureParam uses the reader initialized by FeatureManager singleton.
  * @tc.type: FUNC
  */
-HWTEST_F(FeatureManagerTest, GetFeatureParam005, TestSize.Level1)
+HWTEST_F(FeatureManagerTest, GetFeatureParam004, TestSize.Level1)
 {
     CompConfigClient::AppSpaceCompConfigReaderMock::SetConfigResult(0, TEST_VALUE);
 
@@ -157,11 +144,11 @@ HWTEST_F(FeatureManagerTest, GetFeatureParam005, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFeatureParam006
+ * @tc.name: GetFeatureParam005
  * @tc.desc: GetFeatureParam does not reinitialize reader after singleton initialization.
  * @tc.type: FUNC
  */
-HWTEST_F(FeatureManagerTest, GetFeatureParam006, TestSize.Level1)
+HWTEST_F(FeatureManagerTest, GetFeatureParam005, TestSize.Level1)
 {
     CompConfigClient::AppSpaceCompConfigReaderMock::SetConfigResult(0, TEST_VALUE);
 
