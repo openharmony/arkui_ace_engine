@@ -33,6 +33,7 @@ ace_unittest("text_input_test") {
     "text_field_overlay_modifier_test.cpp",
     "text_field_pattern_func_test.cpp",
     "text_field_pattern_onwill.cpp",
+    "text_free_scroll_controller_test.cpp",
     "text_input_area_model_test.cpp",
     "text_input_base.cpp",
     "text_input_check_test.cpp",
