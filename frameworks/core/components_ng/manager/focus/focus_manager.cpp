@@ -457,7 +457,7 @@ void FocusManager::ArrangeModalFocusViewStack()
     CHECK_NULL_VOID(frameNode);
     auto focusPattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(focusPattern);
-    if (!focusPattern->GetModalFlag()) { // GetIsFixFocus()
+    if (!focusPattern->GetIsModalFixFocus()) {
         return;
     }
     for (RefPtr<UINode> node = focusRef->GetFrameNode(); node; node = node->GetParent()) {
