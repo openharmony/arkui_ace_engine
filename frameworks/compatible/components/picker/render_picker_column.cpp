@@ -38,7 +38,6 @@ void RenderPickerColumn::Update(const RefPtr<Component>& component)
     auto theme = column->GetTheme();
     if (!theme) {
         LOGE("theme of component is null.");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
 
