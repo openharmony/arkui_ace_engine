@@ -6129,8 +6129,7 @@ void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& tas
             [command]() {
                 auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
                 if (pipelineContext == nullptr) {
-                    TAG_LOGE(
-                        AceLogTag::ACE_UIEVENT, "Failed to process relaxed command because pipelineContext is nullptr");
+                    LOGE("Failed to process relaxed command because pipelineContext is nullptr");
                     return;
                 }
                 pipelineContext->ProcessCommand(command);

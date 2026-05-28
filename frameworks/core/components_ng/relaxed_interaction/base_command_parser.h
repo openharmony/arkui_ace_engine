@@ -34,8 +34,17 @@ public:
 
     virtual std::vector<std::unique_ptr<BaseExecutor>> Parse(const std::unique_ptr<JsonValue>& json) = 0;
 
+    std::string GetLastError() const
+    {
+        return lastError_;
+    }
+
 protected:
     WeakPtr<PipelineContext> context_;
+    std::string lastError_;
+
+    void SetLastError(const std::string& error);
+    bool ValidateRequiredField(const std::unique_ptr<JsonValue>& json, const std::string& field);
 };
 
 } // namespace OHOS::Ace::NG

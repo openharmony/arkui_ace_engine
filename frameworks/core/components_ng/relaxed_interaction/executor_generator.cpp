@@ -17,10 +17,6 @@
 
 #include "base/log/log.h"
 #include "core/components_ng/relaxed_interaction/parsers/backpress_command_parser.h"
-#include "core/components_ng/relaxed_interaction/parsers/click_command_parser.h"
-#include "core/components_ng/relaxed_interaction/parsers/content_switch_command_parser.h"
-#include "core/components_ng/relaxed_interaction/parsers/fallback_command_parser.h"
-#include "core/components_ng/relaxed_interaction/parsers/scroll_command_parser.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,11 +29,7 @@ ExecutorGenerator::~ExecutorGenerator() = default;
 
 void ExecutorGenerator::RegisterDefaultParsers()
 {
-    parserRegistry_[BACKPRESS] = std::make_unique<BackpressCommandParser>(context_);
-    parserRegistry_[FALLBACK] = std::make_unique<FallbackCommandParser>(context_);
-    parserRegistry_[CLICK] = std::make_unique<ClickCommandParser>(context_);
-    parserRegistry_[CONTENT_SWITCH] = std::make_unique<ContentSwitchCommandParser>(context_);
-    parserRegistry_[SCROLL] = std::make_unique<ScrollCommandParser>(context_);
+    parserRegistry_[BACKPRESS_PARSER] = std::make_unique<BackpressCommandParser>(context_);
 }
 
 std::vector<std::unique_ptr<BaseExecutor>> ExecutorGenerator::ParseCommand(const std::unique_ptr<JsonValue>& json)
@@ -52,27 +44,21 @@ std::vector<std::unique_ptr<BaseExecutor>> ExecutorGenerator::ParseCommand(const
 
 std::vector<std::unique_ptr<BaseExecutor>> ExecutorGenerator::ParseFallbackCmd(const std::unique_ptr<JsonValue>& json)
 {
-    if (parserRegistry_.find(FALLBACK) == parserRegistry_.end()) {
-        return {};
-    }
-
-    auto jsonCmd = json->GetValue(FALLBACK_CMD_KEY);
-    if (!jsonCmd || !jsonCmd->IsValid() || !jsonCmd->IsObject()) {
-        return {};
-    }
-    return parserRegistry_[FALLBACK]->Parse(jsonCmd);
+    return {};
 }
 
 std::vector<std::unique_ptr<BaseExecutor>> ExecutorGenerator::ParseRegularCmd(const std::unique_ptr<JsonValue>& json)
 {
     auto jsonCmd = json->GetValue(CMD_KEY);
     if (!jsonCmd || !jsonCmd->IsValid() || !jsonCmd->IsObject()) {
+        lastError_ = "Invalid command format";
         return {};
     }
 
     std::string type = jsonCmd->GetString(TYPE_KEY);
     auto parserIt = parserRegistry_.find(type);
     if (parserIt == parserRegistry_.end()) {
+        lastError_ = "No parser registered for command type: " + type;
         return {};
     }
 

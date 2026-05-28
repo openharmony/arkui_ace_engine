@@ -26,6 +26,7 @@ BackpressExecutor::BackpressExecutor(WeakPtr<PipelineContext> context) : BaseExe
 
 ExecutorResult BackpressExecutor::ExecuteStep()
 {
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "BackpressExecutor::ExecuteStep called");
     auto context = context_.Upgrade();
     if (!context) {
         return ExecutorResult::FAILED;
@@ -37,6 +38,21 @@ ExecutorResult BackpressExecutor::ExecuteStep()
     }
     bool result = uiContent->ProcessBackPressed();
     return result ? ExecutorResult::SUCCESS : ExecutorResult::FAILED;
+}
+
+std::string BackpressExecutor::GetType() const
+{
+    return BACKPRESS_PARSER;
+}
+
+std::string BackpressExecutor::GetDescription() const
+{
+    return "backpress executor";
+}
+
+bool BackpressExecutor::IsSingleStep() const
+{
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

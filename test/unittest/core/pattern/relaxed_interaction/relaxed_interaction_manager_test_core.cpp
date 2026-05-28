@@ -18,6 +18,7 @@
 using namespace testing;
 using namespace testing::ext;
 
+
 namespace OHOS::Ace::NG {
 
 class RelaxedInteractionManagerTestCore : public RelaxedInteractionManagerTestBase {};

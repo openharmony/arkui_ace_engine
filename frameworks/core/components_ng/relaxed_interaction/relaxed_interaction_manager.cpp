@@ -21,7 +21,6 @@
 #include "core/components_ng/relaxed_interaction/executor_choreographer.h"
 #include "core/components_ng/relaxed_interaction/executor_generator.h"
 #include "core/components_ng/relaxed_interaction/executors/backpress_executor.h"
-#include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -34,43 +33,35 @@ RelaxedInteractionManager::RelaxedInteractionManager(WeakPtr<PipelineContext> co
 
 ProcessResult RelaxedInteractionManager::ProcessCommand(const std::string& jsonStr)
 {
-    WorkflowDumper::GetInstance().AddLog("Processing command: " + jsonStr);
     auto json = JsonUtil::ParseJsonString(jsonStr);
     if (!json || !json->IsValid() || !json->IsObject()) {
-        WorkflowDumper::GetInstance().AddLog("Failed to parse command because of invalid JSON format");
-        TAG_LOGE(AceLogTag::ACE_UIEVENT, "Failed to parse command because of invalid JSON format");
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "Invalid command format: %{public}s", jsonStr.c_str());
         return ProcessResult::PARSE_ERROR;
     }
 
     std::vector<std::unique_ptr<BaseExecutor>> executors = executorGenerator_->ParseCommand(json);
     if (executors.empty()) {
-        WorkflowDumper::GetInstance().AddLog("No valid executor parsed from command");
-        TAG_LOGE(AceLogTag::ACE_UIEVENT, "No valid executor parsed from command");
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "No valid executor parsed from command: %{public}s, error: %{public}s",
+            jsonStr.c_str(), executorGenerator_->GetLastError().c_str());
         return ProcessResult::VALIDATION_ERROR;
     }
 
     if (SystemProperties::GetDebugEnabled()) {
+        std::ostringstream oss;
+        for (size_t i = 0; i < executors.size(); ++i) {
+            if (i != 0) {
+                oss << ",";
+            }
+            oss << executors[i]->GetType();
+        }
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "executors size: %{public}zu, types: %{public}s", executors.size(),
-            ExecutorsToString(executors).c_str());
+            oss.str().c_str());
     }
-
-    WorkflowDumper::GetInstance().AddLog("Parsed executors: " + ExecutorsToString(executors));
     choreographer_->Enqueue(std::move(executors));
     return ProcessResult::SUCCESS;
 }
 
 ExecutionState RelaxedInteractionManager::ExecuteNextStep()
-{
-    if (!choreographer_->HasCurrent() && !choreographer_->HasNext()) {
-        return ExecutionState::FAILED;
-    }
-
-    ExecutionState state = DoExecuteNextStep();
-    WorkflowDumper::GetInstance().AddLog("Current workflow state changed to: " + ExecutionStateToString(state));
-    return state;
-}
-
-ExecutionState RelaxedInteractionManager::DoExecuteNextStep()
 {
     ExecutorResult result = choreographer_->ExecuteNext();
 
@@ -99,35 +90,6 @@ void RelaxedInteractionManager::Clear()
 {
     if (choreographer_) {
         choreographer_->Clear();
-    }
-}
-
-std::string RelaxedInteractionManager::ExecutorsToString(
-    const std::vector<std::unique_ptr<BaseExecutor>>& executors)
-{
-    std::ostringstream buffer;
-    for (size_t i = 0; i < executors.size(); ++i) {
-        if (i != 0) {
-            buffer << ",";
-        }
-        buffer << executors[i]->GetDescription();
-    }
-    return buffer.str();
-}
-
-std::string RelaxedInteractionManager::ExecutionStateToString(ExecutionState state)
-{
-    switch (state) {
-        case ExecutionState::NONE:
-            return "NONE";
-        case ExecutionState::RUNNING:
-            return "RUNNING";
-        case ExecutionState::SUCCESS:
-            return "SUCCESS";
-        case ExecutionState::FAILED:
-            return "FAILED";
-        default:
-            return "UNKNOWN";
     }
 }
 
