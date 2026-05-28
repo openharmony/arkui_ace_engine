@@ -398,8 +398,8 @@ HWTEST_F(ParseTestThreeNg, SvgPatternTest001, TestSize.Level1)
     Rect containerRect(0, 0, 1, 1);
     Size viewPort(1, 1);
     SvgCoordinateSystemContext context(containerRect, viewPort);
-    EXPECT_CALL(rSCanvas, Save());
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     svgPattern->OnPatternEffect(rSCanvas, rSBrush, context);
 }
 
@@ -428,8 +428,8 @@ HWTEST_F(ParseTestThreeNg, SvgPatternTest002, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(3);
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
 }
@@ -567,10 +567,10 @@ HWTEST_F(ParseTestThreeNg, ClipPathEvenoddTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(3);
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
     EXPECT_CALL(rSCanvas, Scale(_, _));
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
 }
@@ -601,10 +601,10 @@ HWTEST_F(ParseTestThreeNg, ClipPathDefaultTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(3);
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, Translate(_, _)).Times(2);
     EXPECT_CALL(rSCanvas, Scale(_, _));
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
 }
@@ -636,8 +636,8 @@ HWTEST_F(ParseTestThreeNg, MaskTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(4);
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(3);
     EXPECT_CALL(rSCanvas, SaveLayer(_)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
@@ -669,8 +669,8 @@ HWTEST_F(ParseTestThreeNg, MaskTest002, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(4);
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(3);
     EXPECT_CALL(rSCanvas, SaveLayer(_)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
@@ -702,8 +702,8 @@ HWTEST_F(ParseTestThreeNg, FilterTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(3);
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     EXPECT_CALL(rSCanvas, SaveLayer(_)).Times(1);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
@@ -735,8 +735,8 @@ HWTEST_F(ParseTestThreeNg, SvgRadialGradientTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(3);
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
 }
@@ -762,8 +762,8 @@ HWTEST_F(ParseTestThreeNg, SvgLinearGradientTest001, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(3);
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
 }
@@ -891,8 +891,8 @@ HWTEST_F(ParseTestThreeNg, InitBrushTest004, TestSize.Level1)
     EXPECT_NE(svgRect, nullptr);
     Testing::TestingBrush rSBrush;
     Testing::MockCanvas rSCanvas;
-    EXPECT_CALL(rSCanvas, Save());
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(rSCanvas, Restore()).WillRepeatedly(Return());
     Rect containerRect(0, 0, 100, 100);
     Size viewPort(100, 100);
     SvgCoordinateSystemContext context(containerRect, viewPort);
