@@ -1655,7 +1655,7 @@ class JSSearch extends JSViewAbstract {
   }
   static shaderStyle(value) {
     if (value === undefined || value === null) {
-      getUINativeModule().search.resetShaderStyle(node, undefined);
+      getUINativeModule().search.resetShaderStyle(true, null);
     } else if (value.options) {
       getUINativeModule().search.setShaderStyle(true, value.options.center, value.options.radius, value.options.angle,
         value.options.direction, value.options.repeating, value.options.colors, value.options.color);
