@@ -30,7 +30,6 @@ class RSNode;
 }
 
 namespace OHOS::Ace {
-class DrawingColorFilter;
 class WantWrap;
 }
 #endif
@@ -42,6 +41,7 @@ class Blender;
 }
 
 namespace OHOS::Ace {
+class DrawingColorFilter;
 class UiMaterial;
 } // namespace OHOS::Ace
 
