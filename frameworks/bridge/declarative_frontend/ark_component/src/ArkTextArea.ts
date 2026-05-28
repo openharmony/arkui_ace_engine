@@ -1570,6 +1570,20 @@ class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey<boolean
   }
 }
 
+class TextAreaPunctuationOverflowModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaPunctuationOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetPunctuationOverflow(node);
+    } else {
+      getUINativeModule().textArea.setPunctuationOverflow(node, this.value!);
+    }
+  }
+}
+
 class TextAreaIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -2113,6 +2127,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   orphanCharOptimization(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaOrphanCharOptimizationModifier.identity,
       TextAreaOrphanCharOptimizationModifier, value);
+    return this;
+  }
+  punctuationOverflow(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaPunctuationOverflowModifier.identity,
+        TextAreaPunctuationOverflowModifier, value);
     return this;
   }
   includeFontPadding(value: boolean): this {

@@ -1336,6 +1336,15 @@ void JSText::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetCompressLeadingPunctuation(state);
 }
 
+void JSText::SetPunctuationOverflow(const JSCallbackInfo& info)
+{
+    bool state = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetPunctuationOverflow(state);
+}
+
 void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
 {
     bool state = false;
@@ -1536,6 +1545,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
     JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
     JSClass<JSText>::StaticMethod("compressLeadingPunctuation", &JSText::SetCompressLeadingPunctuation);
+    JSClass<JSText>::StaticMethod("punctuationOverflow", &JSText::SetPunctuationOverflow);
     JSClass<JSText>::StaticMethod("includeFontPadding", &JSText::SetIncludeFontPadding);
     JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
     JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);

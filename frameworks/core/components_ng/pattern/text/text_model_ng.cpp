@@ -1911,6 +1911,26 @@ bool TextModelNG::GetCompressLeadingPunctuation(FrameNode* frameNode)
     return value;
 }
 
+void TextModelNG::SetPunctuationOverflow(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PunctuationOverflow, enabled);
+}
+
+void TextModelNG::SetPunctuationOverflow(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PunctuationOverflow, enabled, frameNode);
+}
+
+bool TextModelNG::GetPunctuationOverflow(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, PunctuationOverflow, value, frameNode,
+        value);
+    return value;
+}
+
 void TextModelNG::SetEnableAutoSpacing(bool enabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableAutoSpacing, enabled);

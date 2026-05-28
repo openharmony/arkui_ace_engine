@@ -2406,6 +2406,27 @@ void ResetTextCompressLeadingPunctuation(ArkUINodeHandle node)
     TextModelNG::SetCompressLeadingPunctuation(frameNode, false);
 }
 
+void SetTextPunctuationOverflow(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetPunctuationOverflow(frameNode, value);
+}
+
+ArkUI_Int32 GetTextPunctuationOverflow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetPunctuationOverflow(frameNode));
+}
+
+void ResetTextPunctuationOverflow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetPunctuationOverflow(frameNode, false);
+}
+
 void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3113,8 +3134,11 @@ const ArkUITextModifier* GetTextModifier()
         .getTextOrphanCharOptimization = GetTextOrphanCharOptimization,
         .resetTextOrphanCharOptimization = ResetTextOrphanCharOptimization,
         .setTextCompressLeadingPunctuation = SetTextCompressLeadingPunctuation,
-        .getTextCompressLeadingPunctuation = GetTextCompressLeadingPunctuation,
         .resetTextCompressLeadingPunctuation = ResetTextCompressLeadingPunctuation,
+        .getTextCompressLeadingPunctuation = GetTextCompressLeadingPunctuation,
+        .setTextPunctuationOverflow = SetTextPunctuationOverflow,
+        .resetTextPunctuationOverflow = ResetTextPunctuationOverflow,
+        .getTextPunctuationOverflow = GetTextPunctuationOverflow,
         .setTextDirection = SetTextDirection,
         .getTextDirection = GetTextDirection,
         .resetTextDirection = ResetTextDirection,

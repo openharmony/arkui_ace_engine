@@ -4041,6 +4041,9 @@ struct ArkUITextModifier {
     void (*setTextCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextCompressLeadingPunctuation)(ArkUINodeHandle node);
+    void (*setTextPunctuationOverflow)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextPunctuationOverflow)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextPunctuationOverflow)(ArkUINodeHandle node);
     ArkUI_Int32 (*getLineCount)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
@@ -6013,6 +6016,9 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node);
+    void (*setTextAreaPunctuationOverflow)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextAreaPunctuationOverflow)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextAreaPunctuationOverflow)(ArkUINodeHandle node);
     void (*setTextAreaScrollBarColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     ArkUI_Uint32 (*getTextAreaScrollBarColor)(ArkUINodeHandle node);
     void (*resetTextAreaScrollBarColor)(ArkUINodeHandle node);
@@ -6306,6 +6312,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextInputCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputCompressLeadingPunctuation)(ArkUINodeHandle node);
+    void (*setTextInputPunctuationOverflow)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextInputPunctuationOverflow)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputPunctuationOverflow)(ArkUINodeHandle node);
     void (*resetTextInputOnSecurityStateChange)(ArkUINodeHandle node);
     void (*scrollToVisible)(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end);
     void (*setTextInputOnWillAttachIME)(ArkUINodeHandle node, void* callback);

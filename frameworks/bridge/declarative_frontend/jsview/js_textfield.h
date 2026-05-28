@@ -156,6 +156,7 @@ public:
     static void SetShaderStyle(const JSCallbackInfo& info);
     static void SetOrphanCharOptimization(const JSCallbackInfo& info);
     static void SetCompressLeadingPunctuation(const JSCallbackInfo& info);
+    static void SetPunctuationOverflow(const JSCallbackInfo& info);
     static NG::KeyboardAppearanceConfig ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);

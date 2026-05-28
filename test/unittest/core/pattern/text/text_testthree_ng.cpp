@@ -1545,6 +1545,68 @@ HWTEST_F(TextTestThreeNg, TextLineHeightMultiply004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPunctuationOverflow001
+ * @tc.desc: Test TextPunctuationOverflow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextPunctuationOverflow001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetPunctuationOverflow(true);
+    EXPECT_EQ(textLayoutProperty->GetPunctuationOverflow().value(), true);
+    textLayoutProperty->UpdatePunctuationOverflow(false);
+    EXPECT_EQ(textLayoutProperty->GetPunctuationOverflow().value(), false);
+}
+
+/**
+ * @tc.name: TextPunctuationOverflow002
+ * @tc.desc: Test TextPunctuationOverflow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextPunctuationOverflow002, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetPunctuationOverflow(frameNode, true);
+    EXPECT_EQ(textLayoutProperty->GetPunctuationOverflow().value(), true);
+    EXPECT_EQ(TextModelNG::GetPunctuationOverflow(frameNode), true);
+    textLayoutProperty->UpdatePunctuationOverflow(false);
+    EXPECT_EQ(textLayoutProperty->GetPunctuationOverflow().value(), false);
+    EXPECT_EQ(TextModelNG::GetPunctuationOverflow(frameNode), false);
+}
+
+/**
+ * @tc.name: TextPunctuationOverflow003
+ * @tc.desc: Test TextPunctuationOverflow with nullptr frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextPunctuationOverflow003, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(TextModelNG::GetPunctuationOverflow(nullptr), false);
+}
+
+/**
  * @tc.name: TextCompressLeadingPunctuation001
  * @tc.desc: Test TextCompressLeadingPunctuation
  * @tc.type: FUNC
