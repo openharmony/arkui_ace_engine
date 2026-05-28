@@ -1688,7 +1688,6 @@ export class TreeViewV2 extends ViewV2 {
                     setTimeout(() => {
                         this.accessibilityNodeType = AccessibilityNodeType.TEXT;
                     }, ENTER_EXIT_DURATION);
-                    console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(eventInfo)}`);
                 });
             });
         }, List);
