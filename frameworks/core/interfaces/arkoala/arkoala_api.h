@@ -6934,6 +6934,8 @@ struct ArkUIMenuItemModifier {
     void (*resetOnChange)(ArkUINodeHandle node);
     ArkUINodeHandle (*createMenuItemFrameNode)(ArkUI_Int32 nodeId);
     void (*setLabelFontColorInt)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal);
+    void (*setSubMenuBuilder)(ArkUINodeHandle node, void* callback);
+    void (*resetSubMenuBuilder)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemGroupModifier {

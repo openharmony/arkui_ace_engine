@@ -25491,6 +25491,8 @@ typedef struct GENERATED_ArkUIMenuItemModifier {
                          const Opt_arkui_component_units_Font* value);
     void (*setLabelFontColor)(Ark_NativePointer node,
                               const Opt_ResourceColor* value);
+    void (*setSubMenuBuilder)(Ark_NativePointer node,
+                              const Opt_CustomNodeBuilder* value);
 } GENERATED_ArkUIMenuItemModifier;
 
 typedef struct GENERATED_ArkUIMenuItemGroupModifier {
