@@ -45,7 +45,6 @@ public:
     using NotifySendCommandFunction = std::function<void(int32_t id, const std::string& command)>;
     using NotifySendCommandAsyncFunction = std::function<int32_t(int32_t id, const std::string& command)>;
     using SendCommandFunction = std::function<void(int32_t value)>;
-    using RelaxedCommandFunction = std::function<void(const std::string& command)>;
     using GetHitTestInfoFunction = std::function<void(InteractionParamConfig config)>;
     using GetStateMgmtInfoFunction = std::function<void(const std::string& componentName,
         const std::string& propertyName, const std::string& jsonPath, bool onlyVisible)>;
@@ -209,7 +208,6 @@ public:
         const std::map<int32_t, std::vector<int32_t>>& arkWebs) {};
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
-    virtual void SaveRelaxedCommandFunction(RelaxedCommandFunction&& function) {};
     virtual void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) {};
 
     virtual void SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback) {};
@@ -307,7 +305,6 @@ protected:
     std::mutex stopContentChangeDetectCallbackMutex_;
     GetWebInfoByRequestFunction getWebInfoByRequestCallback_;
     std::mutex getWebInfoByRequestCallbackMutex_;
-    RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

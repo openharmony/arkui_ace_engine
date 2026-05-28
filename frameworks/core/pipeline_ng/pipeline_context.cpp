@@ -90,9 +90,6 @@
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/base/inspector.h"
-#ifdef RELAXED_INTERACTION_SUPPORT
-#include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
-#endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
@@ -990,9 +987,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
-#ifdef RELAXED_INTERACTION_SUPPORT
-    FlushRelaxedInteraction();
-#endif
     FrameMetrics frameMetrics;
     frameMetrics.vsyncTimestamp = nanoTimestamp;
     int64_t startTimestamp = GetSysTimestamp();
@@ -4339,12 +4333,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-contentChange") {
         std::string info = contentChangeMgr_ ? contentChangeMgr_->DumpInfo() : "No available ContentChangeManager";
         DumpLog::GetInstance().Print(info);
-#endif
-#ifdef RELAXED_INTERACTION_SUPPORT
-    } else if (params[0] == "-relaxedinteractioncmd" && params.size() >= PARAM_NUM) {
-        UiSessionManager::GetInstance()->SendCommand(params[1]);
-    } else if (params[0] == "-relaxedinteractionlog") {
-        DumpLog::GetInstance().Print(WorkflowDumper::GetInstance().Dump());
 #endif
     }
     return true;
@@ -8063,21 +8051,6 @@ void PipelineContext::UnregisterTouchTimingCallback()
     eventManager_->UnregisterTouchTimingCallback();
 }
 
-void PipelineContext::ProcessCommand(const std::string& command)
-{
-#ifdef RELAXED_INTERACTION_SUPPORT
-    CHECK_NULL_VOID(eventManager_);
-    eventManager_->ProcessCommand(command, [this]() { RequestFrame(); });
-#endif
-}
-
-void PipelineContext::FlushRelaxedInteraction()
-{
-#ifdef RELAXED_INTERACTION_SUPPORT
-    CHECK_NULL_VOID(eventManager_);
-    eventManager_->FlushRelaxedInteraction([this]() { RequestFrame(); });
-#endif
-}
 void PipelineContext::SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager)
 {
     dynamicComponentSafeManager_ = manager;

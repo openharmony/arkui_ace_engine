@@ -342,12 +342,6 @@ void SmartGestureManager::SetMonitor(SmartGestureMonitor&& callback)
     monitorCallback_ = std::move(callback);
 }
 
-bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger)
-{
-    KeyEvent event;
-    return HandleTrigger(trigger, event);
-}
-
 bool SmartGestureManager::HandleTrigger(SmartGestureTrigger trigger, const KeyEvent& event)
 {
     RefreshSelectedNodeState();

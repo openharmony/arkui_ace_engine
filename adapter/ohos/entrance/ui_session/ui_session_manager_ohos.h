@@ -120,7 +120,6 @@ public:
     void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) override;
     void SendCommand(const std::string& command) override;
     void SaveSendCommandFunction(SendCommandFunction&& function) override;
-    void SaveRelaxedCommandFunction(RelaxedCommandFunction&& function) override;
     void RegisterPipeLineExeAppAIFunction(
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) override;
     void ExeAppAIFunction(const std::string& funcName, const std::string& params) override;
