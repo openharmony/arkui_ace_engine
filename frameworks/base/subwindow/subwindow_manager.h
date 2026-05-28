@@ -137,8 +137,8 @@ public:
         int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1, bool isForceClear = false);
     void ClearAllMenuPopup(int32_t instanceId);
-    ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(
-        const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
+    ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps,
+        std::function<void()>&& buildFunc, std::function<void(int32_t)> callback = nullptr);
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
         const RefPtr<NG::UINode>& customNode);
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);

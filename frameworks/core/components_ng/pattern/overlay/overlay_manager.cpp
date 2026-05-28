@@ -465,7 +465,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
 }
 
 void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
-    bool isReadFirstNode)
+    bool isReadFirstNode, std::function<void(int32_t)> mountCallback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "open dialog animation");
     CHECK_NULL_VOID(node);
@@ -481,6 +481,23 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const Di
     CHECK_NULL_VOID(root);
     auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
     MountToParentWithService(root, node, levelOrder);
+    if (!node->GetParent()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node mount failed, parent is null.");
+        if (dialogProps.isDialogNapiCall && mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (!node->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node is not on main tree after mount.");
+        if (dialogProps.isDialogNapiCall && mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (dialogProps.isDialogNapiCall && mountCallback) {
+        mountCallback(ERROR_CODE_NO_ERROR);
+    }
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     OpenDialogAnimationInner(node, dialogProps, isReadFirstNode);
@@ -617,7 +634,8 @@ void OverlayManager::SetTransitionCallbacks(const RefPtr<FrameNode>& node, const
     }
 }
 
-void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
+void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+    std::function<void(int32_t)> mountCallback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "set dialog transition");
     CHECK_NULL_VOID(node);
@@ -663,6 +681,23 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
 
     CHECK_NULL_VOID(root);
     MountToParentWithService(root, node, levelOrder);
+    if (!node->GetParent()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node mount failed in SetDialogTransitionEffect, parent is null.");
+        if (dialogProps.isDialogNapiCall && mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (!node->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node is not on main tree after mount.");
+        if (dialogProps.isDialogNapiCall && mountCallback) {
+            mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
+            return;
+        }
+    }
+    if (dialogProps.isDialogNapiCall && mountCallback) {
+        mountCallback(ERROR_CODE_NO_ERROR);
+    }
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     if (isTopOrder) {
@@ -2149,8 +2184,8 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
     return ShowDialog(Maskarg, nullptr, false);
 }
 
-RefPtr<FrameNode> OverlayManager::ShowDialog(
-    const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
+RefPtr<FrameNode> OverlayManager::ShowDialog(const DialogProperties& dialogProps,
+    std::function<void()>&& buildFunc, bool isRightToLeft, std::function<void(int32_t)> callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     RefPtr<UINode> customNode;
@@ -2173,11 +2208,16 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     ACE_UINODE_TRACE(dialog);
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
     BeforeShowDialog(dialog);
-    if (dialogProps.transitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, dialogProps);
+
+    auto mountCallback =
+        dialogProps.isDialogNapiCall ? std::move(callback) : std::function<void(int32_t)>();
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
     } else {
-        OpenDialogAnimation(dialog, dialogProps);
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
     }
+
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
@@ -2193,8 +2233,8 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     return dialog;
 }
 
-RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
-    const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
+RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(const DialogProperties& dialogProps,
+    const RefPtr<UINode>& customNode, bool isRightToLeft, std::function<void(int32_t)> callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
@@ -2202,11 +2242,16 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
     ACE_UINODE_TRACE(dialog);
     BeforeShowDialog(dialog);
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
-    if (dialogProps.transitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, dialogProps);
+
+    auto mountCallback =
+        dialogProps.isDialogNapiCall ? std::move(callback) : std::function<void(int32_t)>();
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
     } else {
-        OpenDialogAnimation(dialog, dialogProps);
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
     }
+
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
@@ -2365,13 +2410,16 @@ void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
         dialogProps.dialogCallback(dialog);
     }
 
-    callback(showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId());
-
+    int32_t successCode = showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId();
+    if (!dialogProps.isDialogNapiCall) {
+        callback(successCode);
+    }
+    auto mountCallback = dialogProps.isDialogNapiCall ? std::move(callback) : std::function<void(int32_t)>();
     if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
         dialogProps.maskTransitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, dialogProps);
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
     } else {
-        OpenDialogAnimation(dialog, dialogProps);
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
     }
 
     dialogCount_++;

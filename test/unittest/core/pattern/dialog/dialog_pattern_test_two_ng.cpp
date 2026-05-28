@@ -421,7 +421,7 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogModelTestNgShowActionSheet002, 
     ASSERT_NE(dialogTheme, nullptr);
     RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
         V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    EXPECT_CALL(*mockSubwindow, ShowDialogNG(_, _)).WillRepeatedly(Return(dialog));
+    EXPECT_CALL(*mockSubwindow, ShowDialogNG(_, _, _)).WillRepeatedly(Return(dialog));
     EXPECT_CALL(*mockSubwindow, GetChildContainerId()).WillRepeatedly(Return(containerId));
     SubwindowManager::GetInstance()->AddSubwindow(containerId, SubwindowType::TYPE_DIALOG, mockSubwindow);
     actionSheetModelNg.ShowActionSheet(props);

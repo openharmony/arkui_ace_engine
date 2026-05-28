@@ -1435,7 +1435,8 @@ int32_t SubwindowOhos::CloseBindSheetByUIContext(
 }
 
 RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
-    const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc,
+    std::function<void(int32_t)> callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1461,7 +1462,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
+    auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc), false, std::move(callback));
     CHECK_NULL_RETURN(dialog, nullptr);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
         SetNodeId(dialog->GetId());

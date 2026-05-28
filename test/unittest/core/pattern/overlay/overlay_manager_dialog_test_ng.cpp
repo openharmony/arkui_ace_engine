@@ -1394,4 +1394,216 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest010, TestSize.Level1)
     controller->Close();
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
+
+/**
+ * @tc.name: OpenDialogAnimationMountCallbackTest001
+ * @tc.desc: Test OpenDialogAnimation with isDialogNapiCall=true, mount succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerDialogTestNg, OpenDialogAnimationMountCallbackTest001, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step1. create dialog node and dialogProperties with isDialogNapiCall=true.
+     */
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    DialogProperties dialogProps;
+    dialogProps.isDialogNapiCall = true;
+
+    /**
+     * @tc.steps: step2. call OpenDialogAnimation with mountCallback.
+     * @tc.expected: mountCallback receives ERROR_CODE_NO_ERROR on successful mount.
+     */
+    int32_t receivedCode = -1;
+    auto mountCallback = [&receivedCode](int32_t code) {
+        receivedCode = code;
+    };
+    overlayManager->OpenDialogAnimation(dialogNode, dialogProps, true, std::move(mountCallback));
+    EXPECT_EQ(receivedCode, ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OpenDialogAnimationMountCallbackTest002
+ * @tc.desc: Test OpenDialogAnimation with isDialogNapiCall=false, callback not invoked for mount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerDialogTestNg, OpenDialogAnimationMountCallbackTest002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step1. create dialog node and dialogProperties with isDialogNapiCall=false.
+     */
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, 101, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    DialogProperties dialogProps;
+    dialogProps.isDialogNapiCall = false;
+
+    /**
+     * @tc.steps: step2. call OpenDialogAnimation with mountCallback.
+     * @tc.expected: mountCallback is NOT invoked when isDialogNapiCall=false.
+     */
+    int32_t receivedCode = -1;
+    auto mountCallback = [&receivedCode](int32_t code) {
+        receivedCode = code;
+    };
+    overlayManager->OpenDialogAnimation(dialogNode, dialogProps, true, std::move(mountCallback));
+    EXPECT_EQ(receivedCode, -1);
+}
+
+/**
+ * @tc.name: SetDialogTransitionEffectMountCallbackTest001
+ * @tc.desc: Test SetDialogTransitionEffect with isDialogNapiCall=true, mount succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerDialogTestNg, SetDialogTransitionEffectMountCallbackTest001, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step1. create dialog node and dialogProperties with isDialogNapiCall=true.
+     */
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, 102, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    DialogProperties dialogProps;
+    dialogProps.isDialogNapiCall = true;
+
+    /**
+     * @tc.steps: step2. call SetDialogTransitionEffect with mountCallback.
+     * @tc.expected: mountCallback receives ERROR_CODE_NO_ERROR on successful mount.
+     */
+    int32_t receivedCode = -1;
+    auto mountCallback = [&receivedCode](int32_t code) {
+        receivedCode = code;
+    };
+    overlayManager->SetDialogTransitionEffect(dialogNode, dialogProps, std::move(mountCallback));
+    EXPECT_EQ(receivedCode, ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: SetDialogTransitionEffectMountCallbackTest002
+ * @tc.desc: Test SetDialogTransitionEffect with isDialogNapiCall=false, callback not invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerDialogTestNg, SetDialogTransitionEffectMountCallbackTest002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step1. create dialog node and dialogProperties with isDialogNapiCall=false.
+     */
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, 103, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    DialogProperties dialogProps;
+    dialogProps.isDialogNapiCall = false;
+
+    /**
+     * @tc.steps: step2. call SetDialogTransitionEffect with mountCallback.
+     * @tc.expected: mountCallback is NOT invoked when isDialogNapiCall=false.
+     */
+    int32_t receivedCode = -1;
+    auto mountCallback = [&receivedCode](int32_t code) {
+        receivedCode = code;
+    };
+    overlayManager->SetDialogTransitionEffect(dialogNode, dialogProps, std::move(mountCallback));
+    EXPECT_EQ(receivedCode, -1);
+}
+
+/**
+ * @tc.name: OpenCustomDialogNapiCallTest001
+ * @tc.desc: Test OpenCustomDialog with isDialogNapiCall=true, callback flows to mount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogNapiCallTest001, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step1. create content node and dialogProperties with isDialogNapiCall=true.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 110, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.isShowInSubWindow = false;
+    dialogParam.contentNode = contentNode;
+    dialogParam.isDialogNapiCall = true;
+
+    /**
+     * @tc.steps: step2. call OpenCustomDialog with callback.
+     * @tc.expected: callback receives ERROR_CODE_NO_ERROR when isDialogNapiCall=true.
+     */
+    int32_t receivedCode = -1;
+    auto openCallback = [&receivedCode](int32_t errorCode) {
+        receivedCode = errorCode;
+    };
+    overlayManager->OpenCustomDialog(dialogParam, std::move(openCallback));
+    EXPECT_EQ(receivedCode, ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OpenCustomDialogNapiCallTest002
+ * @tc.desc: Test OpenCustomDialog with isDialogNapiCall=false, callback gets dialogId directly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerDialogTestNg, OpenCustomDialogNapiCallTest002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step1. create content node and dialogProperties with isDialogNapiCall=false.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 111, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.isShowInSubWindow = false;
+    dialogParam.contentNode = contentNode;
+    dialogParam.isDialogNapiCall = false;
+
+    /**
+     * @tc.steps: step2. call OpenCustomDialog with callback.
+     * @tc.expected: callback receives dialog id (>0) when isDialogNapiCall=false.
+     */
+    int32_t receivedCode = -1;
+    auto openCallback = [&receivedCode](int32_t errorCode) {
+        receivedCode = errorCode;
+    };
+    overlayManager->OpenCustomDialog(dialogParam, std::move(openCallback));
+    EXPECT_TRUE(receivedCode >= 0);
+}
 } // namespace OHOS::Ace::NG

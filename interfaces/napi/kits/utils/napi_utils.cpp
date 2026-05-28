@@ -44,8 +44,10 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
     { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
     { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
     { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
+    { ERROR_CODE_DIALOG_CANNOT_OPEN, "The dialog cannot be opened due to node mount failure. " },
     { ERROR_CODE_OVERLAY_CANNOT_OPEN_DUE_TO_SYSTEM_WINDOW,
         "The overlay cannot be opened due to the system pop-up window." },
+    { ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED, "The dialog cannot be opened due to subwindow create failure. " },
     { ERROR_CODE_TOAST_NOT_FOUND, "Toast not found. " }
 };
 
@@ -1383,5 +1385,81 @@ int32_t GetUIContextInstanceId(napi_env env, napi_value uiContext)
     napi_get_named_property(env, uiContext, "instanceId_", &instanceId);
     napi_get_value_int32(env, instanceId, &result);
     return result;
+}
+
+bool GetBoolProperty(napi_env env, napi_value object, const char* name, bool& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, value, &result);
+        return true;
+    }
+    return false;
+}
+
+bool GetInt32Property(napi_env env, napi_value object, const char* name, int32_t& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, value, &result);
+        return true;
+    }
+    return false;
+}
+
+bool GetDoubleProperty(napi_env env, napi_value object, const char* name, double& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_double(env, value, &result);
+        return true;
+    }
+    return false;
+}
+
+bool GetStringProperty(napi_env env, napi_value object, const char* name, std::string& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    return GetNapiString(env, value, result, valueType);
+}
+
+bool GetFunctionProperty(napi_env env, napi_value object, const char* name, napi_ref& result)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, object, name, &value);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, value, 1, &result);
+        return true;
+    }
+    return false;
+}
+
+bool GetVoidCallbackProperty(napi_env env, napi_value object, const char* name, std::function<void()>& result)
+{
+    napi_ref ref = nullptr;
+    if (!GetFunctionProperty(env, object, name, ref)) {
+        return false;
+    }
+    result = [env, ref]() {
+        napi_value fn = nullptr;
+        napi_get_reference_value(env, ref, &fn);
+        napi_value retVal = nullptr;
+        napi_call_function(env, nullptr, fn, 0, nullptr, &retVal);
+        napi_delete_reference(env, ref);
+    };
+    return true;
 }
 } // namespace OHOS::Ace::Napi

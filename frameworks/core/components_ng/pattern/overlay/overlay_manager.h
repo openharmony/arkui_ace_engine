@@ -220,10 +220,11 @@ public:
     RefPtr<FrameNode> GetDialog(int32_t dialogId);
     RefPtr<FrameNode> SetDialogMask(const DialogProperties& dialogProps);
     // customNode only used by customDialog, pass in nullptr if not customDialog
-    RefPtr<FrameNode> ShowDialog(
-        const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
-    RefPtr<FrameNode> ShowDialogWithNode(
-        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode, bool isRightToLeft = false);
+    RefPtr<FrameNode> ShowDialog(const DialogProperties& dialogProps, std::function<void()>&& buildFunc,
+        bool isRightToLeft = false, std::function<void(int32_t)> callback = nullptr);
+    RefPtr<FrameNode> ShowDialogWithNode(const DialogProperties& dialogProps,
+        const RefPtr<NG::UINode>& customNode, bool isRightToLeft = false,
+        std::function<void(int32_t)> callback = nullptr);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -829,12 +830,13 @@ private:
     void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
         bool isReadFirstNode = true);
     void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
-        bool isReadFirstNode = true);
+        bool isReadFirstNode = true, std::function<void(int32_t)> mountCallback = nullptr);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
     void UpdateChildVisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& childNode);
     void SetTransitionCallbacks(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& contentNode,
         const RefPtr<FrameNode>& maskNode, const DialogProperties& dialogProps);
-    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
+    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)> mountCallback = nullptr);
     void SendDialogAccessibilityEvent(const RefPtr<FrameNode>& node, AccessibilityEventType eventType);
     void UpdateChildInvisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& child);
     void CloseMaskAndContentMatchTransition(const RefPtr<FrameNode>& node);
