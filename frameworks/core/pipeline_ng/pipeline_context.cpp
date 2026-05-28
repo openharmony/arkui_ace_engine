@@ -63,6 +63,7 @@
 #include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
+#include "base/utils/feature_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/back_press_handler_manager.h"
@@ -4339,6 +4340,19 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true });
         DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-featuremanager") {
+        if (params.size() < PARAM_NUM) {
+            DumpLog::GetInstance().Print("Error: -featuremanager needs key");
+        } else {
+            std::string value;
+            auto ret = FeatureManager::GetInstance().GetFeatureParam(params[1], value);
+            if (ret == FeatureManager::SUCCESS) {
+                DumpLog::GetInstance().Print(value);
+            } else {
+                DumpLog::GetInstance().Print(
+                    "Error: FeatureManager get feature param failed, ret: " + std::to_string(ret));
+            }
+        }
     } else if (params[0] == "-resource") {
         DumpResLoadError();
     } else if (params[0] == "-start") {
