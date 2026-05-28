@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+#include "core/common/back_press_handler_manager.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
@@ -99,6 +100,92 @@ void SelectableContainerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, c
         editModeOptions_.enableFingerMultiSelect ? "true" : "false", filter);
     json->PutExtAttr("editModeOptions", editModeOptionsJson, filter);
     json->PutExtAttr("enableEditMode", enableEditMode_ ? "true" : "false", filter);
+}
+
+void SelectableContainerPattern::OnDetachFromMainTree()
+{
+    ScrollablePattern::OnDetachFromMainTree();
+    RemoveBackPressCallback();
+}
+
+void SelectableContainerPattern::OnEnableEditModeChanged(bool)
+{
+    UpdateBackPressCallback();
+}
+
+void SelectableContainerPattern::OnEditModeOptionsChanged()
+{
+    UpdateBackPressCallback();
+}
+
+bool SelectableContainerPattern::NeedBackPressHandler() const
+{
+    return GetEnableEditMode();
+}
+
+bool SelectableContainerPattern::HandleBackPress()
+{
+    return ExitSwipeSelectModeOnBackPressed();
+}
+
+void SelectableContainerPattern::RemoveBackPressCallback()
+{
+    if (!hasBackPressHandlerRegistered_) {
+        return;
+    }
+    auto pipeline = GetContext();
+    auto host = GetHost();
+    if (!pipeline || !host) {
+        hasBackPressHandlerRegistered_ = false;
+        return;
+    }
+    pipeline->GetBackPressHandlerManager()->RemoveBackPressHandler(AceType::WeakClaim(AceType::RawPtr(host)));
+    hasBackPressHandlerRegistered_ = false;
+}
+
+void SelectableContainerPattern::UpdateBackPressCallback()
+{
+    bool needRegister = NeedBackPressHandler();
+    if (needRegister == hasBackPressHandlerRegistered_) {
+        return;
+    }
+    auto pipeline = GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(host);
+    auto weakHost = AceType::WeakClaim(AceType::RawPtr(host));
+    if (!needRegister) {
+        pipeline->GetBackPressHandlerManager()->RemoveBackPressHandler(weakHost);
+        hasBackPressHandlerRegistered_ = false;
+        return;
+    }
+    auto weak = AceType::WeakClaim(this);
+    pipeline->GetBackPressHandlerManager()->AddBackPressHandler(weakHost, [weak]() -> bool {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            return false;
+        }
+        pattern->hasBackPressHandlerRegistered_ = false;
+        return pattern->HandleBackPress();
+    });
+    hasBackPressHandlerRegistered_ = true;
+}
+
+bool SelectableContainerPattern::ExitSwipeSelectModeOnBackPressed()
+{
+    if (!GetEnableEditMode()) {
+        return false;
+    }
+    HandleSwipeSelectEnd();
+    SetEnableEditMode(false);
+    if (!GetEnableEditMode()) {
+        RemoveEditModeFromItems();
+    }
+    if (!GetEnableEditMode() && !ShouldEnableTwoFingerSelect() && swipeSelectPanEvent_) {
+        UninitSwipeSelectEvent();
+    }
+    UpdateBackPressCallback();
+    return true;
 }
 
 void SelectableContainerPattern::UninitMouseEvent()
@@ -492,6 +579,7 @@ void SelectableContainerPattern::SetEnableEditMode(bool enable)
     enableEditMode_ = enable;
     if (changed) {
         editModeChanged_ = true;
+        OnEnableEditModeChanged(enable);
         FireEnableEditModeChangeEvent(enable);
     }
 }
@@ -516,6 +604,7 @@ void SelectableContainerPattern::TryEnterEditModeForSwipeSelect()
     }
     enableEditMode_ = true;
     editModeChanged_ = true;
+    OnEnableEditModeChanged(true);
     if (IsDefaultMultiSelectStyleEnabled()) {
         ApplyEditModeToVisibleItems();
     }

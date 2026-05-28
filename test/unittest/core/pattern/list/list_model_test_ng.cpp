@@ -1972,4 +1972,42 @@ HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction007, TestSize.Level1)
     EXPECT_FALSE(manager.HandleBackPressed());
 }
 
+/**
+ * @tc.name: BackPressCloseSwipeAction008
+ * @tc.desc: Test back press exits list swipe-select edit mode before page navigation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, BackPressCloseSwipeAction008, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EditModeOptions options;
+    options.enableFingerMultiSelect = false;
+    pattern->SetEditModeOptions(options);
+
+    int32_t callbackCount = 0;
+    bool lastEnableEditMode = false;
+    ListModelNG::SetEnableEditModeChangeEvent(
+        listNode, [&callbackCount, &lastEnableEditMode](bool enableEditMode) {
+            ++callbackCount;
+            lastEnableEditMode = enableEditMode;
+        });
+    ListModelNG::SetEnableEditMode(listNode, true);
+    CreateDone();
+    EXPECT_TRUE(pattern->GetEnableEditMode());
+    EXPECT_TRUE(pattern->hasBackPressHandlerRegistered_);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetBackPressHandlerManager();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_TRUE(manager->HandleBackPressed());
+    EXPECT_FALSE(pattern->GetEnableEditMode());
+    EXPECT_FALSE(pattern->hasBackPressHandlerRegistered_);
+    EXPECT_FALSE(lastEnableEditMode);
+    EXPECT_EQ(callbackCount, 2);
+}
+
 } // namespace OHOS::Ace::NG

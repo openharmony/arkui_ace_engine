@@ -75,6 +75,7 @@ public:
         bool useDefaultMultiSelectStyleChanged =
             (editModeOptions_.useDefaultMultiSelectStyle != editModeOptions.useDefaultMultiSelectStyle);
         editModeOptions_ = editModeOptions;
+        OnEditModeOptionsChanged();
         if (useDefaultMultiSelectStyleChanged) {
             editModeChanged_ = true;
         }
@@ -86,6 +87,7 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void OnDetachFromMainTree() override;
 
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -192,6 +194,13 @@ public:
     virtual void RemoveEditModeFromItems();
 
 protected:
+    virtual void OnEnableEditModeChanged(bool enable);
+    virtual void OnEditModeOptionsChanged();
+    virtual bool NeedBackPressHandler() const;
+    virtual bool HandleBackPress();
+    void UpdateBackPressCallback();
+    void RemoveBackPressCallback();
+    bool ExitSwipeSelectModeOnBackPressed();
     virtual void ApplyEditModeToCachedItems(bool enabled) {}
     void RecordSwipeOriginalStatesInRange(const std::vector<SwipeSelectStateKey>& stateKeysInRange);
     void ApplySwipeSelectionForFirstRange(const std::vector<SwipeSelectStateKey>& stateKeysInRange, bool isSelected);
@@ -235,6 +244,7 @@ protected:
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
     RefPtr<PanEvent> swipeSelectPanEvent_;
+    bool hasBackPressHandlerRegistered_ = false;
 
 private:
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};

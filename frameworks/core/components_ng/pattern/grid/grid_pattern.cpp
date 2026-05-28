@@ -194,6 +194,7 @@ void GridPattern::OnModifyDone()
         }
         ResetEditModeChanged();
     }
+    UpdateBackPressCallback();
 
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();

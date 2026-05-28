@@ -790,31 +790,18 @@ void ListLayoutAlgorithm::UpdateListItemEditModeCheckBoxSpace(const RefPtr<Layou
     listItemPattern->SetNeedReserveEditModeCheckBoxSpace(NeedReserveEditModeCheckBoxSpace());
 }
 
-bool ListLayoutAlgorithm::NeedReserveEditModeCheckBoxSpaceForList(const RefPtr<FrameNode>& listNode)
-{
-    CHECK_NULL_RETURN(listNode, false);
-    auto pattern = listNode->GetPattern<ListPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    if (!pattern->IsDefaultMultiSelectStyleEnabled()) {
-        return false;
-    }
-
-    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, true);
-    auto lanes = layoutProperty->GetLanes();
-    return !lanes.has_value() || lanes.value() == 1;
-}
-
 void ListLayoutAlgorithm::UpdateListItemEditModeCheckBoxSpaceForPredictBuild(
     const RefPtr<LayoutWrapper>& wrapper, const RefPtr<FrameNode>& listNode)
 {
+    CHECK_NULL_VOID(listNode);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
     CHECK_NULL_VOID(wrapper);
     auto itemNode = wrapper->GetHostNode();
     CHECK_NULL_VOID(itemNode);
     auto listItemPattern = itemNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(listItemPattern);
-    listItemPattern->SetNeedReserveEditModeCheckBoxSpace(
-        NeedReserveEditModeCheckBoxSpaceForList(listNode));
+    listItemPattern->SetNeedReserveEditModeCheckBoxSpace(listPattern->NeedJudgeWithHotZone());
 }
 
 float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex,
