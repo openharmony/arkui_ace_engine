@@ -326,7 +326,7 @@ void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     CHECK_NULL_VOID(indicatorIconLoadingCtx_);
     indicatorIconLoadingCtx_->MakeCanvasImage(
-        SizeF(INDICATOR_WIDTH_RADIO * diameter, INDICATOR_HEIGHT_RADIO * diameter), true, ImageFit::FILL);
+        SizeF(CUSTOM_INDICATOR_SIZE_RATIO * diameter, CUSTOM_INDICATOR_SIZE_RATIO * diameter), true, ImageFit::FILL);
 }
 
 bool GaugeLayoutAlgorithm::CheckDescriptionIsImageNode(const RefPtr<LayoutWrapper>& layoutWrapper) const
