@@ -1582,6 +1582,19 @@ HWTEST_F(UIExtensionComponentTestTwoNg, PluginComponentTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EmbeddedComponentTest002
+ * @tc.desc: Test EmbeddedComponent Creation
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, EmbeddedComponentTest002, TestSize.Level1)
+{
+    NG::SessionType sessionType = NG::SessionType::EMBEDDED_UI_EXTENSION;
+    auto pattern = AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType);
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_FALSE(pattern->GetIsModalFixFocus());
+}
+
+/**
  * @tc.name: EmbeddedComponentTest001
  * @tc.desc: Test EmbeddedComponent Creation
  * @tc.type: FUNC
