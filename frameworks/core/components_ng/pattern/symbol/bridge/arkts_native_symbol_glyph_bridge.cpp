@@ -641,7 +641,9 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontWeight(ArkUIRuntimeCallInfo* ru
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsString(vm)) {
         std::string weight = secondArg->ToString(vm)->ToString(vm);
-        auto parseResult = Framework::ParseFontWeight(weight);
+        auto theme = ArkTSUtils::GetTheme<TextTheme>();
+        auto defaultWeight = theme ? theme->GetTextStyle().GetFontWeight() : FontWeight::NORMAL;
+        auto parseResult = Framework::ParseFontWeight(weight, defaultWeight);
         int32_t variableFontWeight;
         FontWeight fontWeightEnum = parseResult.second;
         if (parseResult.first) {

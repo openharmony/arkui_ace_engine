@@ -208,14 +208,18 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest001, TestSize.Level1)
 HWTEST_F(SymbolTestNg, SymbolPropertyTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create symbol node
+     * @tc.steps: step1. create symbol node and set fontWeight to W100
+     * @tc.expected: symbol node created successfully with W100 fontWeight configured
+     * @tc.note: W100 corresponds to numeric value 100, represents lightest weight
      */
     SymbolModelNG symbolModelNG;
     symbolModelNG.Create(CREATE_VALUE);
     symbolModelNG.SetFontWeight(FontWeight::W100);
 
     /**
-     * @tc.steps: step2. get symbol node and layoutProperty
+     * @tc.steps: step2. extract frameNode and layoutProperty for validation
+     * @tc.expected: frameNode exists with correct tag, all property pointers valid
+     * @tc.note: ViewStackProcessor maintains current node being built during test
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -225,7 +229,10 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest002, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. test get fontWeight property
+     * @tc.steps: step3. verify fontWeight property persisted correctly in FontStyle
+     * @tc.expected: GetFontWeight() returns FontWeight::W100 as set in step1
+     * @tc.importance: Validates SetFontWeight → TextLayoutProperty persistence chain
+     * @tc.coverage: Covers basic fontWeight property setter and getter functionality
      */
     const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
     ASSERT_NE(symbolStyle, nullptr);
