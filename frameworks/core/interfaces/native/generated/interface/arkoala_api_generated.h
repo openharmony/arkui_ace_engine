@@ -830,8 +830,6 @@ typedef struct Opt_RotationGestureEvent Opt_RotationGestureEvent;
 typedef struct RotationRecognizerPeer RotationRecognizerPeer;
 typedef struct RotationRecognizerPeer* Ark_RotationRecognizer;
 typedef struct Opt_RotationRecognizer Opt_RotationRecognizer;
-typedef struct Ark_RowOptionsV2 Ark_RowOptionsV2;
-typedef struct Opt_RowOptionsV2 Opt_RowOptionsV2;
 typedef struct Ark_RRect Ark_RRect;
 typedef struct Opt_RRect Opt_RRect;
 typedef struct Ark_ScaleResult Ark_ScaleResult;
@@ -2249,8 +2247,6 @@ typedef struct Ark_ColorMetricsExt Ark_ColorMetricsExt;
 typedef struct Opt_ColorMetricsExt Opt_ColorMetricsExt;
 typedef struct Ark_ColumnOptions Ark_ColumnOptions;
 typedef struct Opt_ColumnOptions Opt_ColumnOptions;
-typedef struct Ark_ColumnOptionsV2 Ark_ColumnOptionsV2;
-typedef struct Opt_ColumnOptionsV2 Opt_ColumnOptionsV2;
 typedef struct Ark_CommandPath Ark_CommandPath;
 typedef struct Opt_CommandPath Opt_CommandPath;
 typedef struct Ark_common2D_Color Ark_common2D_Color;
@@ -2671,6 +2667,8 @@ typedef struct Ark_SmartGestureShortcutOptions Ark_SmartGestureShortcutOptions;
 typedef struct Opt_SmartGestureShortcutOptions Opt_SmartGestureShortcutOptions;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
+typedef struct Ark_SpaceType Ark_SpaceType;
+typedef struct Opt_SpaceType Opt_SpaceType;
 typedef struct Ark_SpatialPosition Ark_SpatialPosition;
 typedef struct Opt_SpatialPosition Opt_SpatialPosition;
 typedef struct Ark_SslErrorEvent Ark_SslErrorEvent;
@@ -2779,8 +2777,6 @@ typedef struct Ark_Union_BorderStyle_EdgeStyles Ark_Union_BorderStyle_EdgeStyles
 typedef struct Opt_Union_BorderStyle_EdgeStyles Opt_Union_BorderStyle_EdgeStyles;
 typedef struct Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
 typedef struct Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
-typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 Ark_Union_ColumnOptions_ColumnOptionsV2;
-typedef struct Opt_Union_ColumnOptions_ColumnOptionsV2 Opt_Union_ColumnOptions_ColumnOptionsV2;
 typedef struct Ark_Union_CustomNodeBuilder_Array_MenuElement Ark_Union_CustomNodeBuilder_Array_MenuElement;
 typedef struct Opt_Union_CustomNodeBuilder_Array_MenuElement Opt_Union_CustomNodeBuilder_Array_MenuElement;
 typedef struct Ark_Union_CustomNodeBuilder_ComponentContentBase Ark_Union_CustomNodeBuilder_ComponentContentBase;
@@ -2877,8 +2873,6 @@ typedef struct Ark_Union_ResourceStr_TabBarSymbol Ark_Union_ResourceStr_TabBarSy
 typedef struct Opt_Union_ResourceStr_TabBarSymbol Opt_Union_ResourceStr_TabBarSymbol;
 typedef struct Ark_Union_RotateOptions_RotateAngleOptions Ark_Union_RotateOptions_RotateAngleOptions;
 typedef struct Opt_Union_RotateOptions_RotateAngleOptions Opt_Union_RotateOptions_RotateAngleOptions;
-typedef struct Ark_Union_RowOptions_RowOptionsV2 Ark_Union_RowOptions_RowOptionsV2;
-typedef struct Opt_Union_RowOptions_RowOptionsV2 Opt_Union_RowOptions_RowOptionsV2;
 typedef struct Ark_Union_ScrollAnimationOptions_Boolean Ark_Union_ScrollAnimationOptions_Boolean;
 typedef struct Opt_Union_ScrollAnimationOptions_Boolean Opt_Union_ScrollAnimationOptions_Boolean;
 typedef struct Ark_Union_String_Array_String Ark_Union_String_Array_String;
@@ -2989,6 +2983,8 @@ typedef struct Ark_CircleStyleOptions Ark_CircleStyleOptions;
 typedef struct Opt_CircleStyleOptions Opt_CircleStyleOptions;
 typedef struct Ark_CloseSwipeActionOptions Ark_CloseSwipeActionOptions;
 typedef struct Opt_CloseSwipeActionOptions Opt_CloseSwipeActionOptions;
+typedef struct Ark_ColumnOptionsV2 Ark_ColumnOptionsV2;
+typedef struct Opt_ColumnOptionsV2 Opt_ColumnOptionsV2;
 typedef struct Ark_ComponentInfo Ark_ComponentInfo;
 typedef struct Opt_ComponentInfo Opt_ComponentInfo;
 typedef struct Ark_ContentCoverOptions Ark_ContentCoverOptions;
@@ -3133,6 +3129,8 @@ typedef struct Ark_RichEditorUrlStyle Ark_RichEditorUrlStyle;
 typedef struct Opt_RichEditorUrlStyle Opt_RichEditorUrlStyle;
 typedef struct Ark_RippleFieldOptionsInner Ark_RippleFieldOptionsInner;
 typedef struct Opt_RippleFieldOptionsInner Opt_RippleFieldOptionsInner;
+typedef struct Ark_RowOptionsV2 Ark_RowOptionsV2;
+typedef struct Opt_RowOptionsV2 Opt_RowOptionsV2;
 typedef struct Ark_SceneOptions Ark_SceneOptions;
 typedef struct Opt_SceneOptions Opt_SceneOptions;
 typedef struct Ark_ScrollBarMargin Ark_ScrollBarMargin;
@@ -3237,6 +3235,8 @@ typedef struct Ark_Union_Boolean_MenuMaskType Ark_Union_Boolean_MenuMaskType;
 typedef struct Opt_Union_Boolean_MenuMaskType Opt_Union_Boolean_MenuMaskType;
 typedef struct Ark_Union_Boolean_PopupMaskType Ark_Union_Boolean_PopupMaskType;
 typedef struct Opt_Union_Boolean_PopupMaskType Opt_Union_Boolean_PopupMaskType;
+typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 Ark_Union_ColumnOptions_ColumnOptionsV2;
+typedef struct Opt_Union_ColumnOptions_ColumnOptionsV2 Opt_Union_ColumnOptions_ColumnOptionsV2;
 typedef struct Ark_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions Ark_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions;
 typedef struct Opt_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions Opt_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions;
 typedef struct Ark_Union_Dimension_Array_Dimension Ark_Union_Dimension_Array_Dimension;
@@ -3269,6 +3269,8 @@ typedef struct Ark_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bind
 typedef struct Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String;
 typedef struct Ark_Union_ResourceStr_Bindable_String_Bindable_Resource Ark_Union_ResourceStr_Bindable_String_Bindable_Resource;
 typedef struct Opt_Union_ResourceStr_Bindable_String_Bindable_Resource Opt_Union_ResourceStr_Bindable_String_Bindable_Resource;
+typedef struct Ark_Union_RowOptions_RowOptionsV2 Ark_Union_RowOptions_RowOptionsV2;
+typedef struct Opt_Union_RowOptions_RowOptionsV2 Opt_Union_RowOptions_RowOptionsV2;
 typedef struct Ark_Union_ShadowOptions_Array_ShadowOptions Ark_Union_ShadowOptions_Array_ShadowOptions;
 typedef struct Opt_Union_ShadowOptions_Array_ShadowOptions Opt_Union_ShadowOptions_Array_ShadowOptions;
 typedef struct Ark_Union_ShadowOptions_ShadowStyle Ark_Union_ShadowOptions_ShadowStyle;
@@ -9107,14 +9109,6 @@ typedef struct Opt_RotationRecognizer {
     Ark_Tag tag;
     Ark_RotationRecognizer value;
 } Opt_RotationRecognizer;
-typedef struct Ark_RowOptionsV2 {
-    /* kind: Interface */
-    Ark_Int32 _stub;
-} Ark_RowOptionsV2;
-typedef struct Opt_RowOptionsV2 {
-    Ark_Tag tag;
-    Ark_RowOptionsV2 value;
-} Opt_RowOptionsV2;
 typedef struct Ark_RRect {
     /* kind: Interface */
     Ark_Float64 left;
@@ -15415,14 +15409,6 @@ typedef struct Opt_ColumnOptions {
     Ark_Tag tag;
     Ark_ColumnOptions value;
 } Opt_ColumnOptions;
-typedef struct Ark_ColumnOptionsV2 {
-    /* kind: Interface */
-    Ark_Int32 _stub;
-} Ark_ColumnOptionsV2;
-typedef struct Opt_ColumnOptionsV2 {
-    Ark_Tag tag;
-    Ark_ColumnOptionsV2 value;
-} Opt_ColumnOptionsV2;
 typedef struct Ark_CommandPath {
     /* kind: Interface */
     Ark_String commands;
@@ -17564,6 +17550,19 @@ typedef struct Opt_SnapshotOptions {
     Ark_Tag tag;
     Ark_SnapshotOptions value;
 } Opt_SnapshotOptions;
+typedef struct Ark_SpaceType {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        Ark_Float64 value1;
+        Ark_Resource value2;
+    };
+} Ark_SpaceType;
+typedef struct Opt_SpaceType {
+    Ark_Tag tag;
+    Ark_SpaceType value;
+} Opt_SpaceType;
 typedef struct Ark_SpatialPosition {
     /* kind: Interface */
     Ark_DepthVector3 leftTop;
@@ -18158,18 +18157,6 @@ typedef struct Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor {
     Ark_Tag tag;
     Ark_Union_ColorFilter_drawing_ColorFilter_ResourceColor value;
 } Opt_Union_ColorFilter_drawing_ColorFilter_ResourceColor;
-typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_ColumnOptions value0;
-        Ark_ColumnOptionsV2 value1;
-    };
-} Ark_Union_ColumnOptions_ColumnOptionsV2;
-typedef struct Opt_Union_ColumnOptions_ColumnOptionsV2 {
-    Ark_Tag tag;
-    Ark_Union_ColumnOptions_ColumnOptionsV2 value;
-} Opt_Union_ColumnOptions_ColumnOptionsV2;
 typedef struct Ark_Union_CustomNodeBuilder_Array_MenuElement {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -18763,18 +18750,6 @@ typedef struct Opt_Union_RotateOptions_RotateAngleOptions {
     Ark_Tag tag;
     Ark_Union_RotateOptions_RotateAngleOptions value;
 } Opt_Union_RotateOptions_RotateAngleOptions;
-typedef struct Ark_Union_RowOptions_RowOptionsV2 {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_RowOptions value0;
-        Ark_RowOptionsV2 value1;
-    };
-} Ark_Union_RowOptions_RowOptionsV2;
-typedef struct Opt_Union_RowOptions_RowOptionsV2 {
-    Ark_Tag tag;
-    Ark_Union_RowOptions_RowOptionsV2 value;
-} Opt_Union_RowOptions_RowOptionsV2;
 typedef struct Ark_Union_ScrollAnimationOptions_Boolean {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -19412,6 +19387,14 @@ typedef struct Opt_CloseSwipeActionOptions {
     Ark_Tag tag;
     Ark_CloseSwipeActionOptions value;
 } Opt_CloseSwipeActionOptions;
+typedef struct Ark_ColumnOptionsV2 {
+    /* kind: Interface */
+    Opt_SpaceType space;
+} Ark_ColumnOptionsV2;
+typedef struct Opt_ColumnOptionsV2 {
+    Ark_Tag tag;
+    Ark_ColumnOptionsV2 value;
+} Opt_ColumnOptionsV2;
 typedef struct Ark_ComponentInfo {
     /* kind: Interface */
     Ark_Size size;
@@ -20183,6 +20166,14 @@ typedef struct Opt_RippleFieldOptionsInner {
     Ark_Tag tag;
     Ark_RippleFieldOptionsInner value;
 } Opt_RippleFieldOptionsInner;
+typedef struct Ark_RowOptionsV2 {
+    /* kind: Interface */
+    Opt_SpaceType space;
+} Ark_RowOptionsV2;
+typedef struct Opt_RowOptionsV2 {
+    Ark_Tag tag;
+    Ark_RowOptionsV2 value;
+} Opt_RowOptionsV2;
 typedef struct Ark_SceneOptions {
     /* kind: Interface */
     Opt_Union_ResourceStr_Scene scene;
@@ -20732,6 +20723,18 @@ typedef struct Opt_Union_Boolean_PopupMaskType {
     Ark_Tag tag;
     Ark_Union_Boolean_PopupMaskType value;
 } Opt_Union_Boolean_PopupMaskType;
+typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ColumnOptions value0;
+        Ark_ColumnOptionsV2 value1;
+    };
+} Ark_Union_ColumnOptions_ColumnOptionsV2;
+typedef struct Opt_Union_ColumnOptions_ColumnOptionsV2 {
+    Ark_Tag tag;
+    Ark_Union_ColumnOptions_ColumnOptionsV2 value;
+} Opt_Union_ColumnOptions_ColumnOptionsV2;
 typedef struct Ark_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -20937,6 +20940,18 @@ typedef struct Opt_Union_ResourceStr_Bindable_String_Bindable_Resource {
     Ark_Tag tag;
     Ark_Union_ResourceStr_Bindable_String_Bindable_Resource value;
 } Opt_Union_ResourceStr_Bindable_String_Bindable_Resource;
+typedef struct Ark_Union_RowOptions_RowOptionsV2 {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_RowOptions value0;
+        Ark_RowOptionsV2 value1;
+    };
+} Ark_Union_RowOptions_RowOptionsV2;
+typedef struct Opt_Union_RowOptions_RowOptionsV2 {
+    Ark_Tag tag;
+    Ark_Union_RowOptions_RowOptionsV2 value;
+} Opt_Union_RowOptions_RowOptionsV2;
 typedef struct Ark_Union_ShadowOptions_Array_ShadowOptions {
     /* kind: UnionType */
     Ark_Int32 selector;
