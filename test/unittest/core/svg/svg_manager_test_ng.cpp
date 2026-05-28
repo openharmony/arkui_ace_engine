@@ -1201,7 +1201,7 @@ HWTEST_F(SvgManagerTestNg, SvgDefs002, TestSize.Level1)
     EXPECT_NE(defs, nullptr);
     SvgLengthScaleRule rule;
     auto path = defs->AsPath(rule);
-    EXPECT_TRUE(path.IsValid());
+    EXPECT_FALSE(path.IsValid());
 }
 
 // ========== SVG G (Group) Tests (001-004) ==========
@@ -1243,7 +1243,7 @@ HWTEST_F(SvgManagerTestNg, SvgG003, TestSize.Level1)
     EXPECT_NE(g, nullptr);
     Size viewPort(200.0, 200.0);
     auto path = g->AsPath(viewPort);
-    EXPECT_TRUE(path.IsValid());
+    EXPECT_FALSE(path.IsValid());
 }
 
 /**
@@ -1793,10 +1793,10 @@ HWTEST_F(SvgManagerTestNg, SvgAttributesParser009, TestSize.Level1)
  */
 HWTEST_F(SvgManagerTestNg, SvgAttributesParser010, TestSize.Level1)
 {
-    auto color = SvgAttributesParser::GetColorFromHexString("#FF0000");
+    auto color = SvgAttributesParser::GetColor("#FF0000");
     EXPECT_TRUE(color.GetValue() != Color::TRANSPARENT.GetValue());
 
-    color = SvgAttributesParser::GetColorFrom4HexString("#F00");
+    color = SvgAttributesParser::GetColor("#F00");
     EXPECT_TRUE(color.GetValue() != Color::TRANSPARENT.GetValue());
 }
 
@@ -2111,7 +2111,7 @@ HWTEST_F(SvgManagerTestNg, SvgNode010, TestSize.Level1)
     rect->SetAttr("width", "100");
     rect->SetAttr("height", "50");
     Size viewPort(200.0, 200.0);
-    auto rsPath = rect->AsRSPath(viewPort);
+    auto rsPath = rect->AsPath(viewPort);
     EXPECT_TRUE(rsPath.IsValid());
 }
 

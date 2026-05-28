@@ -48,6 +48,8 @@ const auto ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE = "SymbolRenderingStrategy
 class SymbolSpanModifierTest : public ModifierTestBase<GENERATED_ArkUISymbolSpanModifier,
                                    &GENERATED_ArkUINodeModifiers::getSymbolSpanModifier, GENERATED_ARKUI_SYMBOL_SPAN> {
 public:
+    RefPtr<FrameNode> spanNode;
+    RefPtr<TextPattern> spanPattern;
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
@@ -62,10 +64,18 @@ public:
     void SetUp() override
     {
         ModifierTestBase::SetUp();
-        static auto node = TextModelNG::CreateFrameNode(0, u"");
-        static auto pattern = AceType::MakeRefPtr<TextPattern>();
-        pattern->AttachToFrameNode(node);
-        reinterpret_cast<SpanNode*>(node_)->GetSpanItem()->SetTextPattern(pattern);
+        if (!spanNode) {
+            spanNode = TextModelNG::CreateFrameNode(0, u"");
+            spanPattern = AceType::MakeRefPtr<TextPattern>();
+            spanPattern->AttachToFrameNode(spanNode);
+        }
+        reinterpret_cast<SpanNode*>(node_)->GetSpanItem()->SetTextPattern(spanPattern);
+    }
+    void TearDown() override
+    {
+        spanNode = nullptr;
+        spanPattern = nullptr;
+        ModifierTestBase::TearDown();
     }
 };
 

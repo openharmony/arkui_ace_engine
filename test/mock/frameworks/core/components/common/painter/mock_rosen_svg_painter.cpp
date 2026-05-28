@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <sstream>
+#include <string>
+
 #include "test/mock/frameworks/core/rosen/testing_canvas.h"
 #include "test/mock/frameworks/core/rosen/testing_matrix.h"
 #include "test/mock/frameworks/core/rosen/testing_point.h"
@@ -20,7 +23,6 @@
 #include "core/components/common/painter/rosen_svg_painter.h"
 
 namespace OHOS::Ace {
-constexpr int32_t DEFAULT_LENGTH = 50;
 void RosenSvgPainter::SetMask(RSCanvas* canvas) {}
 RSMatrix RosenSvgPainter::ToDrawingMatrix(const Matrix4& matrix4)
 {
@@ -30,13 +32,21 @@ RSMatrix RosenSvgPainter::ToDrawingMatrix(const Matrix4& matrix4)
 
 void RosenSvgPainter::StringToPoints(const char str[], std::vector<Testing::TestingPoint>& points)
 {
-    if (strlen(str) > 0 && strlen(str) == DEFAULT_LENGTH) {
-        Testing::TestingPoint point;
-        Testing::TestingPoint point1;
-        Testing::TestingPoint point2;
-        points.emplace_back(point);
-        points.emplace_back(point1);
-        points.emplace_back(point2);
+    // parse space-separated "x,y" pairs into points
+    if (!str || strlen(str) == 0) {
+        return;
+    }
+    std::string s(str);
+    std::istringstream stream(s);
+    std::string token;
+    while (stream >> token) {
+        auto comma = token.find(',');
+        if (comma != std::string::npos) {
+            Testing::TestingPoint pt;
+            pt.SetX(std::stof(token.substr(0, comma)));
+            pt.SetY(std::stof(token.substr(comma + 1)));
+            points.push_back(pt);
+        }
     }
 }
 } // namespace OHOS::Ace

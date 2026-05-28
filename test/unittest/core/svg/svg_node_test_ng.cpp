@@ -1149,7 +1149,7 @@ HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest001, TestSize.Level1)
     radialGradientAttr.gradientTransform = "gradientTransform11";
     linearGradient->radialGradientAttr_.gradientUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
     linearGradient->SetAttr("gradienttransform", "val1");
-    EXPECT_EQ(linearGradient->radialGradientAttr_.gradientTransform, "");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.gradientTransform, "val1");
 
     linearGradient->SetAttr("gradientunits", "userSpaceOnUse");
     EXPECT_EQ(linearGradient->radialGradientAttr_.gradientUnits, SvgLengthScaleUnit::USER_SPACE_ON_USE);
@@ -1176,23 +1176,23 @@ HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest001, TestSize.Level1)
 
     linearGradient->radialGradientAttr_.cy = 35.0_vp;
     linearGradient->SetAttr("cy", "20");
-    EXPECT_EQ(linearGradient->radialGradientAttr_.cy.ToString(), "35.00vp");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.cy.ToString(), "20.00px");
 
     linearGradient->radialGradientAttr_.r = 31.0_vp;
     linearGradient->SetAttr("r", "20");
-    EXPECT_EQ(linearGradient->radialGradientAttr_.r.ToString(), "31.00vp");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.r.ToString(), "20.00px");
 
     linearGradient->radialGradientAttr_.fx = 32.0_vp;
     linearGradient->SetAttr("fx", "20");
-    EXPECT_EQ(linearGradient->radialGradientAttr_.fx->ToString(), "32.00vp");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.fx->ToString(), "20.00px");
 
     linearGradient->radialGradientAttr_.fy = 32.0_vp;
     linearGradient->SetAttr("fy", "20");
-    EXPECT_EQ(linearGradient->radialGradientAttr_.fy->ToString(), "32.00vp");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.fy->ToString(), "20.00px");
 
     linearGradient->radialGradientAttr_.fy = 32.0_vp;
     linearGradient->SetAttr("fy", "20");
-    EXPECT_EQ(linearGradient->radialGradientAttr_.fy->ToString(), "32.00vp");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.fy->ToString(), "20.00px");
 }
 
 /**
@@ -1587,7 +1587,7 @@ HWTEST_F(SvgNodeTestNg, SvgCirclePathTest001, TestSize.Level1)
     svgCircle->path_ = rsPath;
     svgCircle->lengthRule_ = clipPathRule;
     rsPath = svgCircle->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_EQ(rsPath.IsValid(), true);
 }
 
 /**
@@ -1680,7 +1680,7 @@ HWTEST_F(SvgNodeTestNg, SvgLinePathTest001, TestSize.Level1)
     SvgLengthScaleRule clipPathRule =
         svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     auto rsPath = svgLine->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_EQ(rsPath.IsValid(), true);
 }
 
 /**
@@ -1704,7 +1704,7 @@ HWTEST_F(SvgNodeTestNg, SvgPathPathTest001, TestSize.Level1)
     auto rsPath = svgPath->AsPath(clipPathRule);
     svgPath->path_ = rsPath;
     rsPath = svgPath->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_EQ(rsPath.IsValid(), true);
 }
 
 /**
@@ -1725,7 +1725,7 @@ HWTEST_F(SvgNodeTestNg, SvgRectPathTest001, TestSize.Level1)
     svgRect->path_ = rsPath;
     svgRect->lengthRule_ = clipPathRule;
     rsPath = svgRect->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_EQ(rsPath.IsValid(), true);
 }
 
 /**

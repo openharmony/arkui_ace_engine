@@ -81,6 +81,8 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE = "false";
 class SpanModifierTest : public ModifierTestBase<GENERATED_ArkUISpanModifier,
                              &GENERATED_ArkUINodeModifiers::getSpanModifier, GENERATED_ARKUI_SPAN> {
 public:
+    RefPtr<FrameNode> spanNode;
+    RefPtr<TextPattern> spanPattern;
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
@@ -95,10 +97,18 @@ public:
     void SetUp() override
     {
         ModifierTestBase::SetUp();
-        static auto node = TextModelNG::CreateFrameNode(0, u"");
-        static auto pattern = AceType::MakeRefPtr<TextPattern>();
-        pattern->AttachToFrameNode(node);
-        reinterpret_cast<SpanNode*>(node_)->GetSpanItem()->SetTextPattern(pattern);
+        if (!spanNode) {
+            spanNode = TextModelNG::CreateFrameNode(0, u"");
+            spanPattern = AceType::MakeRefPtr<TextPattern>();
+            spanPattern->AttachToFrameNode(spanNode);
+        }
+        reinterpret_cast<SpanNode*>(node_)->GetSpanItem()->SetTextPattern(spanPattern);
+    }
+    void TearDown() override
+    {
+        spanNode = nullptr;
+        spanPattern = nullptr;
+        ModifierTestBase::TearDown();
     }
 };
 

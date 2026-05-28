@@ -114,7 +114,7 @@ namespace {
         bool fired;
     };
     static std::optional<CheckNestedEvent> checkNestedEvent = std::nullopt;
-    static std::optional<RefPtr<UINode>> uiNode = nullptr;
+    static std::optional<RefPtr<UINode>> builderUiNode = std::nullopt;
 }
 namespace Converter {
 
@@ -127,6 +127,11 @@ class CommonMethodModifierTest8 : public ModifierTestBase<GENERATED_ArkUICommonM
 public:
     RefPtr<RenderContext> render_;
 
+    void TearDown() override
+    {
+        builderUiNode = std::nullopt;
+        ModifierTestBase::TearDown();
+    }
     void *CreateNodeImpl() override
     {
         return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
@@ -134,7 +139,9 @@ public:
     CustomNodeBuilder CreateCustomNodeBuilder(RefPtr<FrameNode>& node)
     {
         checkBuilderEvent.reset();
-        static std::optional<RefPtr<UINode>> uiNode = node;
+        if (!builderUiNode.has_value()) {
+            builderUiNode = node;
+        }
         auto checkCallback = [](
             Ark_VMContext context,
             const Ark_Int32 resourceId,
@@ -144,8 +151,8 @@ public:
                 .resourceId = resourceId,
                 .parentNode = parentNode
             };
-            if (uiNode) {
-                CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode.value()));
+            if (builderUiNode) {
+                CallbackHelper(continuation).InvokeSync(AceType::RawPtr(builderUiNode.value()));
             }
         };
         auto checkCallbackAsync = [](
@@ -156,8 +163,8 @@ public:
                 .resourceId = resourceId,
                 .parentNode = parentNode
             };
-            if (uiNode) {
-                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            if (builderUiNode) {
+                CallbackHelper(continuation).Invoke(AceType::RawPtr(builderUiNode.value()));
             }
         };
         CustomNodeBuilder customBuilder =
