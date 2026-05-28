@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -308,12 +308,6 @@ class TreeViewNodeItemFactory implements NodeItemViewFactory {
     };
   }
 
-  /**
-   * TreeViewNodeItemFactory create node by node parameter
-   *
-   * @param nodeParam node parameter
-   * @returns NodeItemView
-   */
   public createNodeByNodeParam(nodeParam: NodeParamV2): NodeItemView {
     let nodeItemView: NodeItemView = this.createNode();
     if (nodeParam.icon) {
@@ -399,8 +393,7 @@ export class NodeInfo {
   @Trace private isShowInputText: boolean;
   @Trace private isSelected: boolean;
   public readonly borderWidth: BorderWidth =
-    { has: BORDER_WIDTH_HAS/* 2vp */, none: BORDER_WIDTH_NONE/* 0vp */ }
-  /* parameter of the drag event.*/
+    { has: BORDER_WIDTH_HAS, none: BORDER_WIDTH_NONE }
   @Trace private nodeParam: NodeParamV2;
   @Trace private node: NodeItem;
   @Trace private canShowFlagLine: boolean = false;
@@ -409,7 +402,7 @@ export class NodeInfo {
   @Trace private isHighLight: boolean = false;
   @Trace private flagLineLeftMargin: number;
   @Trace private isModify: boolean = false;
-  @Trace private treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
+  private treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   @Trace public fontColor: ResourceColor = '';
 
   constructor(node: NodeItem, nodeParam: NodeParamV2) {
@@ -424,7 +417,7 @@ export class NodeInfo {
       popUpTextColor: undefined,
     };
     this.nodeHeight = NODE_HEIGHT;
-    this.nodeLeftPadding = node.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET; // calculate left padding
+    this.nodeLeftPadding = node.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
     this.nodeColor = $r('sys.color.ohos_id_color_background');
     this.nodeIsShow = (this.node.nodeLevel > 0) ? false : true;
     this.listItemHeight = (this.node.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
@@ -609,7 +602,6 @@ export class NodeInfo {
     return this.isSelected;
   }
 
-  /* To gain the information while to alter node. */
   getNodeInfoData(): NodeParamV2 {
     return this.nodeParam;
   }
@@ -679,247 +671,277 @@ export class NodeInfo {
   }
 }
 
-/**
- * Control style of operation element.
- * @enum { TreeListenTypeV2 }
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 10
- */
-/**
- * Control style of operation element.
- * @enum { TreeListenTypeV2 }
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @atomicservice
- * @since 11
- */
-export enum TreeListenTypeV2 {
-  /**
-   * register listener after a node is clicked.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * register listener after a node is clicked.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
-   */
-  NODE_CLICK = 'NodeClick',
-
-  /**
-   * register listener after a node is add.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * register listener after a node is add.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
-   */
-  NODE_ADD = 'NodeAdd',
-
-  /**
-   * register listener after a node is deleted.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * register listener after a node is deleted.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
-   */
-  NODE_DELETE = 'NodeDelete',
-
-  /**
-   * register listener after a node is modified.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * register listener after a node is modified.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
-   */
-  NODE_MODIFY = 'NodeModify',
-
-  /**
-   * register listener after a node is moved.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * register listener after a node is moved.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
-   */
-  NODE_MOVE = 'NodeMove',
-}
+type OnChangedCallback = (callbackParam: CallbackParamV2) => void;
 
 /**
  * Declare class TreeListenerV2.
  * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 10
- */
-/**
- * Declare class TreeListenerV2.
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @atomicservice
- * @since 11
+ * @since 26
  */
 export class TreeListenerV2 {
-  public _events: [(callbackParam: CallbackParamV2) => void] | [] = [];
-  _once_events: [(callbackParam: CallbackParamV2) => void] | [] = [];
+  private nodeClickEvents: OnChangedCallback[] = [];
+  private nodeClickOnceEvents: OnChangedCallback[] = [];
+  private nodeAddEvents: OnChangedCallback[] = [];
+  private nodeAddOnceEvents: OnChangedCallback[] = [];
+  private nodeDeleteEvents: OnChangedCallback[] = [];
+  private nodeDeleteOnceEvents: OnChangedCallback[] = [];
+  private nodeModifyEvents: OnChangedCallback[] = [];
+  private nodeModifyOnceEvents: OnChangedCallback[] = [];
+  private nodeMoveEvents: OnChangedCallback[] = [];
+  private nodeMoveOnceEvents: OnChangedCallback[] = [];
 
   constructor() {
   }
 
   /**
-   * Event registration and processing.
-   *
-   * The event will not be destroyed after being processed.
-   *
-   * @param { type } event Registered Events.
-   * @param callback.
+   * Node click event registration and processing.
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
+   * @since 26
    */
+  public onNodeClick(callback: OnChangedCallback): void {
+    this.nodeClickEvents.push(callback);
+  }
+
   /**
-   * Event registration and processing.
-   *
-   * The event will not be destroyed after being processed.
-   *
-   * @param { type } event Registered Events.
-   * @param callback.
+   * Node click event registration and processing (once).
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
-  public on(type: TreeListenTypeV2, callback: (callbackParam: CallbackParamV2) => void): void {
-    if (Array.isArray(type)) {
-      for (let i = 0, l = type.length; i < l; i++) {
-        this.on((type as TreeListenTypeV2[])[i], callback);
-      }
+  public onceNodeClick(callback: OnChangedCallback): void {
+    this.nodeClickOnceEvents.push(callback);
+  }
+
+  /**
+   * Destroy node click callback event.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public offNodeClick(callback?: OnChangedCallback): void {
+    if (callback === undefined) {
+      this.nodeClickEvents = [];
+      this.nodeClickOnceEvents = [];
     } else {
-      (this._events[type] || (this._events[type] = [])).push(callback);
+      let index = this.nodeClickEvents.indexOf(callback);
+      if (index >= 0) {
+        this.nodeClickEvents.splice(index, 1);
+      }
     }
   }
 
   /**
-   * Event registration and processing.
-   *
-   * After the event is processed once, it will be destroyed.
-   *
-   * @param { type } event Registered Events.
-   * @param callback.
+   * Node add event registration and processing.
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
+   * @since 26
    */
+  public onNodeAdd(callback: OnChangedCallback): void {
+    this.nodeAddEvents.push(callback);
+  }
+
   /**
-   * Event registration and processing.
-   *
-   * After the event is processed once, it will be destroyed.
-   *
-   * @param { type } event Registered Events.
-   * @param callback.
+   * Node add event registration and processing (once).
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
-  public once(type: TreeListenTypeV2, callback?: (callbackParam: CallbackParamV2) => void): void {
-    if (Array.isArray(type)) {
-      this.off(type, callback);
+  public onceNodeAdd(callback: OnChangedCallback): void {
+    this.nodeAddOnceEvents.push(callback);
+  }
+
+  /**
+   * Destroy node add callback event.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public offNodeAdd(callback?: OnChangedCallback): void {
+    if (callback === undefined) {
+      this.nodeAddEvents = [];
+      this.nodeAddOnceEvents = [];
     } else {
-      (this._once_events[type] || (this._once_events[type] = [])).push(callback);
-    }
-  }
-
-  /**
-   * Destroy event.
-   *
-   * @param type Registered Events.
-   * @param callback Event callback.
-   * @since 10
-   */
-  public off(type: TreeListenTypeV2, callback?: (callbackParam: CallbackParamV2) => void): void {
-    if (type === null) {
-      this._events = [];
-    }
-    if (Array.isArray(type)) {
-      for (let i: number = 0, l: number = type.length; i < l; i++) {
-        this.off((type as TreeListenTypeV2[])[i], callback);
-      }
-    }
-    let cbs: [(callbackParam: CallbackParamV2) => void] = this._events[type];
-    if (!cbs) {
-      return;
-    }
-    if (callback === null) {
-      this._events[type] = null;
-    }
-    let i: number = cbs.length;
-    while (i--) {
-      let cb: (callbackParam: CallbackParamV2) => void = cbs[i];
-      if (cb === callback) {
-        cbs.splice(i, 1);
-        break;
+      let index = this.nodeAddEvents.indexOf(callback);
+      if (index >= 0) {
+        this.nodeAddEvents.splice(index, 1);
       }
     }
   }
 
   /**
-   * Triggers all callbacks of an event with parameters.
-   *
-   * @param event Registered Events.
-   * @param argument Parameters returned by the callback event.
-   * @since 10
+   * Node delete event registration and processing.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
    */
-  public emit(event: TreeListenTypeV2, argument: CallbackParamV2) {
-    if (this._once_events[event]) {
-      let cbsOnce: ((callbackParam: CallbackParamV2) => void)[] =
-        Array.from<(callbackParam: CallbackParamV2) => void>(this._once_events[event]);
-      if (cbsOnce) {
-        for (let i: number = 0, l: number = cbsOnce.length; i < l; i++) {
-          try {
-            cbsOnce[i](argument);
-          } catch (e) {
-            throw new Error('once function callbacks error.');
-          }
-        }
-        this._once_events[event] = null;
-      }
-    } else if (this._events[event]) {
-      let cbsOn: ((callbackParam: CallbackParamV2) => void)[] =
-        Array.from<(callbackParam: CallbackParamV2) => void>(this._events[event]);
-      if (cbsOn) {
-        for (let i: number = 0, l: number = cbsOn.length; i < l; i++) {
-          try {
-            cbsOn[i](argument);
-          } catch (e) {
-            throw new Error('on function callbacks error.');
-          }
-        }
+  public onNodeDelete(callback: OnChangedCallback): void {
+    this.nodeDeleteEvents.push(callback);
+  }
+
+  /**
+   * Node delete event registration and processing (once).
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public onceNodeDelete(callback: OnChangedCallback): void {
+    this.nodeDeleteOnceEvents.push(callback);
+  }
+
+  /**
+   * Destroy node delete callback event.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public offNodeDelete(callback?: OnChangedCallback): void {
+    if (callback === undefined) {
+      this.nodeDeleteEvents = [];
+      this.nodeDeleteOnceEvents = [];
+    } else {
+      let index = this.nodeDeleteEvents.indexOf(callback);
+      if (index >= 0) {
+        this.nodeDeleteEvents.splice(index, 1);
       }
     }
+  }
+
+  /**
+   * Node modify event registration and processing.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public onNodeModify(callback: OnChangedCallback): void {
+    this.nodeModifyEvents.push(callback);
+  }
+
+  /**
+   * Node modify event registration and processing (once).
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public onceNodeModify(callback: OnChangedCallback): void {
+    this.nodeModifyOnceEvents.push(callback);
+  }
+
+  /**
+   * Destroy node modify callback event.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public offNodeModify(callback?: OnChangedCallback): void {
+    if (callback === undefined) {
+      this.nodeModifyEvents = [];
+      this.nodeModifyOnceEvents = [];
+    } else {
+      let index = this.nodeModifyEvents.indexOf(callback);
+      if (index >= 0) {
+        this.nodeModifyEvents.splice(index, 1);
+      }
+    }
+  }
+
+  /**
+   * Node move event registration and processing.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public onNodeMove(callback: OnChangedCallback): void {
+    this.nodeMoveEvents.push(callback);
+  }
+
+  /**
+   * Node move event registration and processing (once).
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public onceNodeMove(callback: OnChangedCallback): void {
+    this.nodeMoveOnceEvents.push(callback);
+  }
+
+  /**
+   * Destroy node move callback event.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @since 26
+   */
+  public offNodeMove(callback?: OnChangedCallback): void {
+    if (callback === undefined) {
+      this.nodeMoveEvents = [];
+      this.nodeMoveOnceEvents = [];
+    } else {
+      let index = this.nodeMoveEvents.indexOf(callback);
+      if (index >= 0) {
+        this.nodeMoveEvents.splice(index, 1);
+      }
+    }
+  }
+
+  /**
+   * Triggers all callbacks of node click event.
+   * @since 26
+   */
+  public emitNodeClick(argument: CallbackParamV2): void {
+    this.triggerCallbacks(this.nodeClickEvents, argument);
+    this.triggerOnceCallbacks(this.nodeClickOnceEvents, argument);
+  }
+
+  /**
+   * Triggers all callbacks of node add event.
+   * @since 26
+   */
+  public emitNodeAdd(argument: CallbackParamV2): void {
+    this.triggerCallbacks(this.nodeAddEvents, argument);
+    this.triggerOnceCallbacks(this.nodeAddOnceEvents, argument);
+  }
+
+  /**
+   * Triggers all callbacks of node delete event.
+   * @since 26
+   */
+  public emitNodeDelete(argument: CallbackParamV2): void {
+    this.triggerCallbacks(this.nodeDeleteEvents, argument);
+    this.triggerOnceCallbacks(this.nodeDeleteOnceEvents, argument);
+  }
+
+  /**
+   * Triggers all callbacks of node modify event.
+   * @since 26
+   */
+  public emitNodeModify(argument: CallbackParamV2): void {
+    this.triggerCallbacks(this.nodeModifyEvents, argument);
+    this.triggerOnceCallbacks(this.nodeModifyOnceEvents, argument);
+  }
+
+  /**
+   * Triggers all callbacks of node move event.
+   * @since 26
+   */
+  public emitNodeMove(argument: CallbackParamV2): void {
+    this.triggerCallbacks(this.nodeMoveEvents, argument);
+    this.triggerOnceCallbacks(this.nodeMoveOnceEvents, argument);
+  }
+
+  private triggerCallbacks(callbacks: OnChangedCallback[], argument: CallbackParamV2): void {
+    for (let i = 0; i < callbacks.length; i++) {
+      try {
+        callbacks[i](argument);
+      } catch (e) {
+        hilog.error(LOG_CODE, TAG, 'triggerCallbacks error');
+      }
+    }
+  }
+
+  private triggerOnceCallbacks(callbacks: OnChangedCallback[], argument: CallbackParamV2): void {
+    for (let i = 0; i < callbacks.length; i++) {
+      try {
+        callbacks[i](argument);
+      } catch (e) {
+        hilog.error(LOG_CODE, TAG, 'triggerOnceCallbacks error');
+      }
+    }
+    callbacks.splice(0, callbacks.length);
   }
 }
 
 /**
  * Declare class TreeListenerManagerV2.
  * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 10
- */
-/**
- * Declare class TreeListenerManagerV2.
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @atomicservice
- * @since 11
+ * @since 26
  */
 export class TreeListenerManagerV2 {
-  public static readonly APP_KEY_EVENT_BUS = 'app_key_event_bus';
+  public static readonly APP_KEY_EVENT_BUS = 'app_key_event_bus_v2';
   private appEventBus: TreeListenerV2;
 
   private constructor() {
@@ -927,41 +949,26 @@ export class TreeListenerManagerV2 {
   }
 
   /**
-   * Get instance of treeListenerManager.
-   * @return treeListenerManager instance.
+   * Get instance of treeListenerManagerV2.
+   * @return treeListenerManagerV2 instance.
    * @static
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Get instance of treeListenerManager.
-   * @return treeListenerManager instance.
-   * @static
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   static getInstance(): TreeListenerManagerV2 {
-    if (AppStorage.Get('app_key_event_bus') === undefined) {
-      AppStorage.SetOrCreate('app_key_event_bus', new TreeListenerManagerV2())
+    if (AppStorage.Get('app_key_event_bus_v2') === undefined) {
+      AppStorage.SetOrCreate('app_key_event_bus_v2', new TreeListenerManagerV2())
     }
-    return AppStorage.Get('app_key_event_bus') as TreeListenerManagerV2;
+    return AppStorage.Get('app_key_event_bus_v2') as TreeListenerManagerV2;
   }
 
   /**
-   * Get treeListener.
-   * @return treeListener object
+   * Get treeListenerV2.
+   * @return treeListenerV2 object
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
+   * @since 26
    */
-  /**
-   * Get treeListener.
-   * @return treeListener object
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
-   */
-  public getTreeListenerV2(): TreeListenerV2 {
+  public getTreeListener(): TreeListenerV2 {
     return this.appEventBus;
   }
 }
@@ -969,7 +976,7 @@ export class TreeListenerManagerV2 {
 /**
  * Declare TreeViewV2 Component
  * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 10
+ * @since 26
  */
 @ComponentV2
 export struct TreeViewV2 {
@@ -977,16 +984,10 @@ export struct TreeViewV2 {
    * Node data source of TreeViewV2
    * @type TreeControllerV2
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
+   * @since 26
    */
-  /**
-   * Node data source of TreeViewV2
-   * @type TreeControllerV2
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
-   */
-  @Param treeControllerV2: TreeControllerV2 = new TreeControllerV2();
+  @Param
+  treeControllerV2: TreeControllerV2 = new TreeControllerV2();
   @Local nodeList: NodeInfo[] = [];
   listNodeDataSource: ListNodeDataSource = new ListNodeDataSource();
   @Local item: NodeInfo[] | null = null;
@@ -997,10 +998,10 @@ export struct TreeViewV2 {
   @Local maxAppFontScale: number = 1;
   @Local listItemBgColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @Local allParentNode: number[] = [];
-  @Provider() treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
-  @Provider() clickButtonFlag: boolean = true;
-  @Provider() accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
-  @Provider() isAccessibilityEnabled: boolean = accessibility.isScreenReaderOpenSync();
+  @Provider('treeViewThemeV2') treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
+  @Provider('clickButtonFlagV2') clickButtonFlag: boolean = true;
+  @Provider('accessibilityNodeTypeV2') accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
+  @Provider('isAccessibilityEnabledV2') isAccessibilityEnabled: boolean = accessibility.isScreenReaderOpenSync();
 
   @Builder
   NullBuilder() {
@@ -1013,7 +1014,7 @@ export struct TreeViewV2 {
   private readonly MAX_TOUCH_DOWN_COUNT = 0;
   private isMultiPress: boolean = false;
   private touchDownCount: number = this.INITIAL_INVALID_VALUE;
-  private appEventBus: TreeListenerV2 = TreeListenerManagerV2.getInstance().getTreeListenerV2();
+  private appEventBus: TreeListenerV2 = TreeListenerManagerV2.getInstance().getTreeListener();
   private readonly itemPadding: ItemPadding = {
     left: $r('sys.float.ohos_id_card_margin_start'),
     right: $r('sys.float.ohos_id_card_margin_end'),
@@ -1183,7 +1184,8 @@ export struct TreeViewV2 {
     this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.NORMAL);
     this.nodeList[this.viewLastIndex].setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
     this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
-    this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
+    this.listNodeDataSource.listNode[this.viewLastIndex]
+      .setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
     this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
     this.listNodeDataSource.listNode[this.viewLastIndex].setIsSelected(false);
     this.listNodeDataSource.listNode[this.viewLastIndex].imageSource =
@@ -1298,7 +1300,7 @@ export struct TreeViewV2 {
             TreeViewInner({
               item: itemInner,
               listNodeDataSource: this.listNodeDataSource,
-              index: this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId()),
+              initialIndex: this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId()),
               listTreeViewMenu: this.listTreeViewMenu,
               callBackClick: (): void => this.clickInner(itemInner),
             })
@@ -1358,8 +1360,8 @@ export struct TreeViewV2 {
           let primaryTitleText = this.listNodeDataSource.getAccessibleTitleText(primaryTitle);
           let secondaryTitleText = this.listNodeDataSource.getAccessibleTitleText(secondaryTitle);
           let title: string = `${primaryTitleText}, ${secondaryTitleText}`;
-          this.listNodeDataSource.sendAccessibility(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
-            title));
+          this.listNodeDataSource.sendAccessibility(
+            this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node', title));
 
           let allParentNode: number[] = [];
           for (let i = 0; i < this.listNodeDataSource.listNode.length; i++) {
@@ -1630,133 +1632,72 @@ export struct TreeViewV2 {
  * Declare CallbackParamV2
  * @type CallbackParamV2
  * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 10
- */
-/**
- * Declare CallbackParamV2
- * @type CallbackParamV2
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @atomicservice
- * @since 11
+ * @since 26
  */
 export interface CallbackParamV2 {
   /**
    * Get the currentNodeId.
    * @type { number }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Get the currentNodeId.
-   * @type { number }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   currentNodeId: number,
 
   /**
    * Get the parentNodeId.
-   * @type { number }
+   * @type { ?number }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Get the parentNodeId.
-   * @type { number }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   parentNodeId?: number,
 
   /**
    * Get the childIndex.
-   * @type { number }
+   * @type { ?number }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Get the childIndex.
-   * @type { number }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   childIndex?: number,
 }
 
+type OnContainerCallback = () => void;
+
 /**
  * Declare NodeParamV2
  * @typedef NodeParamV2
  * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 10
- */
-/**
- * Declare NodeParamV2
- * @typedef NodeParamV2
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @atomicservice
- * @since 11
+ * @since 26
  */
 export interface NodeParamV2 {
   /**
    * Set the parentNodeId.
-   * @type { number }
+   * @type { ?number }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Set the parentNodeId.
-   * @type { number }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   parentNodeId?: number,
 
   /**
    * Set currentNodeId.
-   * @type { number }
+   * @type { ?number }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Set currentNodeId.
-   * @type { number }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   currentNodeId?: number,
 
   /**
    * Set catalog whether is floder.
-   * @type { boolean }
+   * @type { ?boolean }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Set catalog whether is floder.
-   * @type { boolean }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   isFolder?: boolean,
 
   /**
    * Set the icon resource.
-   * @type { ResourceStr }
+   * @type { ?ResourceStr }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Set the icon resource.
-   * @type { ResourceStr }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   icon?: ResourceStr,
 
@@ -1764,23 +1705,15 @@ export interface NodeParamV2 {
    * Set the symbol resource.
    * @type { ?SymbolGlyphModifier }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
    * @since 16
    */
   symbolIconStyle?: SymbolGlyphModifier;
 
   /**
    * Set selected icon resource.
-   * @type { ResourceStr }
+   * @type { ?ResourceStr }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Set selected icon resource.
-   * @type { ResourceStr }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   selectedIcon?: ResourceStr,
 
@@ -1788,23 +1721,15 @@ export interface NodeParamV2 {
    * Set selected symbol resource.
    * @type { ?SymbolGlyphModifier }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
    * @since 16
    */
   symbolSelectedIconStyle?: SymbolGlyphModifier;
 
   /**
    * Set edit icon resource.
-   * @type { ResourceStr }
+   * @type { ?ResourceStr }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Set edit icon resource.
-   * @type { ResourceStr }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   editIcon?: ResourceStr,
 
@@ -1812,67 +1737,39 @@ export interface NodeParamV2 {
    * Set edit symbol resource.
    * @type { ?SymbolGlyphModifier }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
    * @since 16
    */
   symbolEditIconStyle?: SymbolGlyphModifier;
 
   /**
    * Set primary title content.
-   * @type { ResourceStr }
+   * @type { ?ResourceStr }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Set primary title content.
-   * @type { ResourceStr }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   primaryTitle?: ResourceStr,
 
   /**
    * Set secondary title content.
-   * @type { ResourceStr }
+   * @type { ?ResourceStr }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Set secondary title content.
-   * @type { ResourceStr }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   secondaryTitle?: ResourceStr,
 
   /**
    * Set subcomponent binded on tree item.
-   * @type { () => void }
+   * @type { ?OnContainerCallback }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
+   * @since 26
    */
-  /**
-   * Set subcomponent binded on tree item.
-   * @type { () => void }
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
-   */
-  container?: () => void,
+  container?: OnContainerCallback,
 }
 
 /**
  * Declare TreeControllerV2.
  * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 10
- */
-/**
- * Declare TreeControllerV2.
- * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @atomicservice
- * @since 11
+ * @since 26
  */
 export class TreeControllerV2 {
   public readonly ROOT_NODE_ID: number = -1;
@@ -1899,14 +1796,7 @@ export class TreeControllerV2 {
    * Delete a node.
    * Register an ON_ITEM_DELETE callback through the EventBus mechanism to obtain the IDs of all deleted nodes.
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Delete a node.
-   * Register an ON_ITEM_DELETE callback through the EventBus mechanism to obtain the IDs of all deleted nodes.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   public removeNode(): void {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
@@ -1928,14 +1818,7 @@ export class TreeControllerV2 {
    * Modify the node name.
    * Register an ON_ITEM_MODIFY callback to obtain the ID, parent node ID, and node name of the modified node.
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Modify the node name.
-   * Register an ON_ITEM_MODIFY callback to obtain the ID, parent node ID, and node name of the modified node.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   public modifyNode(): void {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
@@ -2004,21 +1887,7 @@ export class TreeControllerV2 {
    * For details, see the comment description of NodeParamV2.
    * @return ListTreeNode Tree view component proxy class.
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * Initialize the interface of the tree view. This interface is used to generate ListNodeDataSource data.
-   * addNode is only designed for initialization. It can only be invoked during initialization.
-   *
-   * A maximum of 50 directory levels can be added.
-   *
-   * @param nodeParam Configuration information of the newly added node.
-   *
-   * For details, see the comment description of NodeParamV2.
-   * @return ListTreeNode Tree view component proxy class.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   public addNode(nodeParam?: NodeParamV2): TreeControllerV2 {
     if (nodeParam === undefined) {
@@ -2080,18 +1949,7 @@ export class TreeControllerV2 {
    * @Param currentSubTitle secondaryTitle of current node.
    *
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * this interface is called when a secondaryTitle needs to be updated.
-   *
-   * @Param parentId ID of the parent node.
-   * @Param parentSubTitle secondaryTitle of parent node.
-   * @Param currentSubTitle secondaryTitle of current node.
-   *
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   public refreshNode(parentId: number, parentSubTitle: ResourceStr, CurrentSubtitle: ResourceStr): void {
     this.listNodeDataSource.setNodeSubtitlePara(parentId, parentSubTitle, CurrentSubtitle);
@@ -2101,18 +1959,9 @@ export class TreeControllerV2 {
    * After the initialization is complete by calling the addNode interface,
    * call this interface to complete initialization.
    *
-   * This interface must be called when you finish initializing the ListTreeView by addNode.
+   * This interface must be called when you finish initializing the ListTreeViewV2 by addNode.
    * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @since 10
-   */
-  /**
-   * After the initialization is complete by calling the addNode interface,
-   * call this interface to complete initialization.
-   *
-   * This interface must be called when you finish initializing the ListTreeView by addNode.
-   * @syscap SystemCapability.ArkUI.ArkUI.Full
-   * @atomicservice
-   * @since 11
+   * @since 26
    */
   public buildDone(): void {
     this.listNodeDataSource.initSection();
@@ -2246,16 +2095,16 @@ class ListNodeDataSource extends BasicDataSource {
   public loadedListNode: NodeInfo[] = [];
   public nodeIdNodeItemMap: Map<number, NodeItem> = new Map<number, NodeItem>();
   public nodeIdNodeParamMap: Map<number, NodeParamV2> = new Map<number, NodeParamV2>();
-  public lastIndex: number = -1; // record the last focused node.
-  public thisIndex: number = -1; // records clicked nodes in the current period.
-  private modifyNodeIndex: number = -1; // records the nodes edited in the current period.
+  public lastIndex: number = -1;
+  public thisIndex: number = -1;
+  private modifyNodeIndex: number = -1;
   public modifyNodeId: number = -1;
   private currentOperation?: MenuOperation;
   private expandAndCollapseInfo: Map<number, NodeStatus> = new Map<number, NodeStatus>();
   public loadedNodeIdAndIndexMap: Map<number, number> = new Map<number, number>();
   public nodeIdAndNodeIndexMap: Map<number, number> = new Map<number, number>();
   private isTouchDown: boolean = false;
-  private appEventBus: TreeListenerV2 = TreeListenerManagerV2.getInstance().getTreeListenerV2();
+  private appEventBus: TreeListenerV2 = TreeListenerManagerV2.getInstance().getTreeListener();
   /* parameter of the drag event. */
   private isInnerDrag: boolean = false; // Judge whether it is an internal drag event.
   // It is used to handle events(For example, prevent press events) during global drag.
@@ -2694,7 +2543,7 @@ class ListNodeDataSource extends BasicDataSource {
         currentNodeId: modifyNodeInfo?.getNodeCurrentNodeId(),
         parentNodeId: modifyNodeInfo?.getNodeParentNodeId(),
       };
-      this.appEventBus.emit(TreeListenTypeV2.NODE_MODIFY, backParamModify);
+      this.appEventBus.emitNodeModify(backParamModify);
     } else if (operation === MenuOperation.ADD_NODE) {
       let addNodeInfo: NodeInfo = this.listNode[addNodeId];
       if (addNodeInfo === undefined) {
@@ -2710,7 +2559,7 @@ class ListNodeDataSource extends BasicDataSource {
         currentNodeId: addNodeInfo?.getNodeCurrentNodeId(),
         parentNodeId: addNodeInfo?.getNodeParentNodeId(),
       };
-      this.appEventBus.emit(TreeListenTypeV2.NODE_ADD, callbackParam);
+      this.appEventBus.emitNodeAdd(callbackParam);
     }
   }
 
@@ -3469,7 +3318,7 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     /* export inner drag node Id. */
-    this.appEventBus.emit(TreeListenTypeV2.NODE_MOVE, callbackParam);
+    this.appEventBus.emitNodeMove(callbackParam);
 
     /* To store dragging node information by the array named 'dragNodeParam'. */
     dragNodeParam.push({ parentId: parentNodeId, currentId: currentNodeId, data: nodeParam });
@@ -3767,19 +3616,18 @@ class ListNodeDataSource extends BasicDataSource {
         deleteNode = null;
       }
       if (this.expandAndCollapseInfo.has(removeNodeIdList[i])) {
-        this.expandAndCollapseInfo.delete(removeNodeIdList[i]); // delete deleteNode expandAndCollapseInfo.
+        this.expandAndCollapseInfo.delete(removeNodeIdList[i]);
       }
     }
     deleteIndexList.forEach((value) => {
-      this.notifyDataDelete(value); // notifyDataDelete do not  update data.
-      this.notifyDataChange(value); // call notifyDataChange to update data.
+      this.notifyDataDelete(value);
+      this.notifyDataChange(value);
     })
     if (parentNodeInfo.getNodeItem().imageCollapse === null) {
       if (this.nodeIdAndNodeIndexMap.has(parentNodeInfo.getNodeCurrentNodeId())) {
         let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()) as number;
         this.listNode[parentIndex]?.handleImageCollapseAfterAddNode(false);
       }
-      // delete deleteNode parentNode expandAndCollapseInfo.
       this.expandAndCollapseInfo.delete(parentNodeInfo.getNodeCurrentNodeId());
       this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()));
     }
@@ -3788,7 +3636,7 @@ class ListNodeDataSource extends BasicDataSource {
       parentNodeId: parentNodeInfo.getNodeParentNodeId(),
     };
     this.loadedListNodeFunction();
-    this.appEventBus.emit(TreeListenTypeV2.NODE_DELETE, callbackParam);
+    this.appEventBus.emitNodeDelete(callbackParam);
   }
 
   private refreshAddNodeData(addNodeIdList: number[]): void {
@@ -3890,14 +3738,6 @@ class ListNodeDataSource extends BasicDataSource {
     }
   }
 
-  /**
-   * add nodeItem in params
-   *
-   * @param parentNodeId parent node id
-   * @param currentNodeId current node id
-   * @param data  node param
-   * @param initBuild whether in initialization process
-   */
   public addNode(parentNodeId: number,
     currentNodeId: number,
     data: NodeParamV2, initBuild: boolean): boolean {
@@ -3987,11 +3827,6 @@ class ListNodeDataSource extends BasicDataSource {
     return this.listNode[index];
   }
 
-  /**
-   * get node param by node id
-   * @param nodeId node id
-   * @returns node param
-   */
   public getNewNodeParam(nodeId: number): NodeParamV2 {
     let parent: NodeItem = new NodeItem(emptyNodeInfo);
     if (this.nodeIdNodeItemMap.has(nodeId)) {
@@ -4248,19 +4083,20 @@ class ButtonGestureModifier implements GestureModifier {
 
 @ComponentV2
 export struct TreeViewInner {
-  @Param @Require item: NodeInfo;
+  @Require @Param item: NodeInfo;
   @Param listNodeDataSource: ListNodeDataSource = new ListNodeDataSource();
   @Local columnWidth: number = 0;
   @Local isFocused: boolean = false;
-  @Param @Once index: number = -1;
+  @Param initialIndex: number = -1;
+  @Local index: number = -1;
   @Local lastIndex: number = -1;
   @Local count: number = 0;
   @Local followingSystemFontScale: boolean = false;
   @Local maxAppFontScale: number = 1;
-  @Consumer() treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
-  @Consumer() clickButtonFlag: boolean = true;
-  @Consumer() accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
-  @Consumer() isAccessibilityEnabled: boolean = false;
+  @Consumer('treeViewThemeV2') treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance()
+  @Consumer('clickButtonFlagV2') clickButtonFlag: boolean = true
+  @Consumer('accessibilityNodeTypeV2') accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT
+  @Consumer('isAccessibilityEnabledV2') isAccessibilityEnabled: boolean = false
   @BuilderParam private listTreeViewMenu: () => void;
   @Param callBackClick: () => void = () => {
 
@@ -4271,7 +4107,7 @@ export struct TreeViewInner {
   private readonly MAX_TOUCH_DOWN_COUNT = 0;
   private isMultiPress: boolean = false;
   private touchDownCount: number = this.INITIAL_INVALID_VALUE;
-  private appEventBus: TreeListenerV2 = TreeListenerManagerV2.getInstance().getTreeListenerV2();
+  private appEventBus: TreeListenerV2 = TreeListenerManagerV2.getInstance().getTreeListener();
   private readonly itemPadding: ItemPadding = {
     left: $r('sys.float.ohos_id_card_margin_start'),
     right: $r('sys.float.ohos_id_card_margin_end'),
@@ -4287,6 +4123,7 @@ export struct TreeViewInner {
   private inputFontSize: number = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
 
   aboutToAppear(): void {
+    this.index = this.initialIndex;
     if (this.item.getNodeItem().imageNode) {
       this.item.imageSource = this.item.getNodeItem().imageNode?.source;
       this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
@@ -4450,7 +4287,7 @@ export struct TreeViewInner {
 
       this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
       let callParam: CallbackParamV2 = { currentNodeId: currentId };
-      this.appEventBus.emit(TreeListenTypeV2.NODE_CLICK, callParam);
+      this.appEventBus.emitNodeClick(callParam);
 
       this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
         ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
@@ -4498,7 +4335,7 @@ export struct TreeViewInner {
 
     this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
     let callParam: CallbackParamV2 = { currentNodeId: currentId };
-    this.appEventBus.emit(TreeListenTypeV2.NODE_CLICK, callParam);
+    this.appEventBus.emitNodeClick(callParam);
 
     this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
       ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
