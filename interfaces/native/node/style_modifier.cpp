@@ -12893,6 +12893,8 @@ void ResetLayoutRect(ArkUI_NodeHandle node)
 
 int32_t SetFocusOnTouch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -12904,12 +12906,14 @@ int32_t SetFocusOnTouch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
 void ResetFocusOnTouch(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_RETURN(node);
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusOnTouch(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetFocusOnTouch(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_RETURN(node, nullptr);
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getFocusOnTouch(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
