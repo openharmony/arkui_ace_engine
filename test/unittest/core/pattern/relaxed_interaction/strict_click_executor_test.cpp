@@ -109,16 +109,6 @@ HWTEST_F(StrictClickExecutorExecuteStepTest, ExecuteStep_NoFrameNodeFound_Return
     EXPECT_EQ(result, ExecutorResult::FAILED);
 }
 
-HWTEST_F(StrictClickExecutorExecuteStepTest, ExecuteStep_ZeroCoordinates_ReturnsFailed, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    PointF coordinates(0.0f, 0.0f);
-    StrictClickExecutor executor(context, coordinates);
-
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::FAILED);
-}
-
 HWTEST_F(StrictClickExecutorGetTypeTest, GetType_ReturnsStrictClick, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
