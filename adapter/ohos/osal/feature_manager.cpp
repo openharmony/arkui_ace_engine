@@ -27,18 +27,18 @@ namespace {
 constexpr int32_t COMP_CONFIG_OK = 0;
 constexpr int32_t COMP_CONFIG_LOAD_FAILED = -1;
 constexpr char APP_SPACE_COMP_CONFIG_FEATURE_NAME[] = "app_space_comp_config";
-constexpr char APP_SPACE_COMP_CONFIG_INIT_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader";
-constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig";
-constexpr char APP_SPACE_COMP_CONFIG_DESTROY_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig";
+constexpr char APP_SPACE_COMP_CONFIG_INIT_SYMBOL[] = "AppSpaceCompConfigReader_Init";
+constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] = "AppSpaceCompConfigReader_GetConfig";
+constexpr char APP_SPACE_COMP_CONFIG_FREE_RESULT_SYMBOL[] = "CompConfigFreeStringResult";
 
-struct AppSpaceCompConfigResult {
-    int32_t code;
-    char* value;
-};
+typedef struct {
+    const int32_t ret;
+    const char* value;
+} CompConfigStringResult;
 
 using AppSpaceCompConfigInitFunc = int32_t (*)(const char* bundleName);
-using AppSpaceCompConfigGetConfigFunc = AppSpaceCompConfigResult* (*)(const char* key);
-using AppSpaceCompConfigDestroyFunc = void (*)(AppSpaceCompConfigResult* result);
+using AppSpaceCompConfigGetConfigFunc = CompConfigStringResult (*)(const char* key);
+using CompConfigFreeStringResultFunc = void (*)(CompConfigStringResult* result);
 
 bool EnsureExtraModulesManagerInitialized()
 {
@@ -91,18 +91,15 @@ std::pair<int32_t, std::string> GetAppSpaceCompConfig(const std::string& key)
         return { COMP_CONFIG_LOAD_FAILED, "" };
     }
 
-    auto destroyFunc =
-        LoadAppSpaceCompConfigFunc<AppSpaceCompConfigDestroyFunc>(APP_SPACE_COMP_CONFIG_DESTROY_SYMBOL);
-    if (destroyFunc == nullptr) {
+    auto freeResultFunc =
+        LoadAppSpaceCompConfigFunc<CompConfigFreeStringResultFunc>(APP_SPACE_COMP_CONFIG_FREE_RESULT_SYMBOL);
+    if (freeResultFunc == nullptr) {
         return { COMP_CONFIG_LOAD_FAILED, "" };
     }
 
-    auto resultPtr = getConfigFunc(key.c_str());
-    if (resultPtr == nullptr) {
-        return { COMP_CONFIG_LOAD_FAILED, "" };
-    }
-    std::pair<int32_t, std::string> result = { resultPtr->code, resultPtr->value ? resultPtr->value : "" };
-    destroyFunc(resultPtr);
+    auto config = getConfigFunc(key.c_str());
+    std::pair<int32_t, std::string> result = { config.ret, config.value ? config.value : "" };
+    freeResultFunc(&config);
     return result;
 }
 } // namespace

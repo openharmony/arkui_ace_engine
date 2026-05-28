@@ -16,12 +16,8 @@
 #include "app_space_comp_config_reader.h"
 
 #include <cstdlib>
-#include <cstring>
 
-struct AppSpaceCompConfigResult {
-    int32_t code;
-    char* value;
-};
+#include "securec.h"
 
 namespace OHOS::CompConfigClient {
 namespace {
@@ -95,36 +91,32 @@ const std::string& GetLastConfigKey()
 } // namespace AppSpaceCompConfigReaderMock
 } // namespace OHOS::CompConfigClient
 
-extern "C" int32_t OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader(const char* bundleName)
+extern "C" int32_t AppSpaceCompConfigReader_Init(const char* bundleName)
 {
     return OHOS::CompConfigClient::AppSpaceCompConfigReader::Init(bundleName ? bundleName : "");
 }
 
-extern "C" AppSpaceCompConfigResult* OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig(const char* key)
+extern "C" CompConfigStringResult AppSpaceCompConfigReader_GetConfig(const char* key)
 {
     auto result = OHOS::CompConfigClient::AppSpaceCompConfigReader::GetConfig(key ? key : "");
-    auto* config = static_cast<AppSpaceCompConfigResult*>(std::malloc(sizeof(AppSpaceCompConfigResult)));
-    if (config == nullptr) {
-        return nullptr;
-    }
 
     auto valueSize = result.second.size() + 1;
-    config->value = static_cast<char*>(std::malloc(valueSize));
-    if (config->value == nullptr) {
-        std::free(config);
-        return nullptr;
+    auto value = static_cast<char*>(std::malloc(valueSize));
+    if (value == nullptr) {
+        return { result.first, nullptr };
     }
 
-    config->code = result.first;
-    std::memcpy(config->value, result.second.c_str(), valueSize);
-    return config;
+    if (memcpy_s(value, valueSize, result.second.c_str(), valueSize) != EOK) {
+        std::free(value);
+        return { result.first, nullptr };
+    }
+    return { result.first, value };
 }
 
-extern "C" void OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig(AppSpaceCompConfigResult* result)
+extern "C" void CompConfigFreeStringResult(CompConfigStringResult* result)
 {
     if (result == nullptr) {
         return;
     }
-    std::free(result->value);
-    std::free(result);
+    std::free(const_cast<char*>(result->value));
 }

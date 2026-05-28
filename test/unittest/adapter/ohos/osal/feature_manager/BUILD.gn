@@ -41,6 +41,7 @@ ohos_unittest("feature_manager_unittest") {
   deps = [ "$ace_root/test/unittest:ace_unittest_log" ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
     "googletest:gmock",
     "googletest:gtest_main",
   ]

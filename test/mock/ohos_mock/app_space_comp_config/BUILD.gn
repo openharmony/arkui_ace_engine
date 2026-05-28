@@ -22,4 +22,5 @@ ohos_source_set("mock_app_space_comp_config") {
   sources = [ "$ace_root/test/mock/ohos_mock/app_space_comp_config/app_space_comp_config_reader.cpp" ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
   public_configs = [ ":mock_app_space_comp_config_config" ]
+  external_deps = [ "bounds_checking_function:libsec_static" ]
 }

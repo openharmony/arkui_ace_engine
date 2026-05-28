@@ -46,7 +46,7 @@ public:
         CompConfigClient::AppSpaceCompConfigReaderMock::Reset();
         MockExtraModulesManager::Reset();
         MockExtraModulesManager::SetAppSpaceCompConfigFuncs(
-            OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader, OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig, OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig);
+            AppSpaceCompConfigReader_Init, AppSpaceCompConfigReader_GetConfig, CompConfigFreeStringResult);
         FeatureManager::GetInstance().ResetForTest();
     }
 

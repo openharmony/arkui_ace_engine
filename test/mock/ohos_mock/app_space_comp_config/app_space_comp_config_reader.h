@@ -20,7 +20,13 @@
 #include <string>
 #include <utility>
 
-struct AppSpaceCompConfigResult;
+#ifndef COMP_CONFIG_STRING_RESULT_DEFINED
+#define COMP_CONFIG_STRING_RESULT_DEFINED
+typedef struct {
+    const int32_t ret;
+    const char* value;
+} CompConfigStringResult;
+#endif
 
 namespace OHOS::CompConfigClient {
 class AppSpaceCompConfigReader {
@@ -41,9 +47,9 @@ const std::string& GetLastConfigKey();
 } // namespace OHOS::CompConfigClient
 
 extern "C" {
-int32_t OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader(const char* bundleName);
-AppSpaceCompConfigResult* OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig(const char* key);
-void OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig(AppSpaceCompConfigResult* result);
+int32_t AppSpaceCompConfigReader_Init(const char* bundleName);
+CompConfigStringResult AppSpaceCompConfigReader_GetConfig(const char* key);
+void CompConfigFreeStringResult(CompConfigStringResult* result);
 }
 
 #endif // FOUNDATION_ACE_TEST_MOCK_OHOS_MOCK_APP_SPACE_COMP_CONFIG_APP_SPACE_COMP_CONFIG_READER_H

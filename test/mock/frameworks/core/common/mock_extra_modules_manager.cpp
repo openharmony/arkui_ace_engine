@@ -21,22 +21,22 @@ namespace OHOS::Ace::MockExtraModulesManager {
 namespace {
 AppSpaceCompConfigInitFunc g_initFunc = nullptr;
 AppSpaceCompConfigGetConfigFunc g_getConfigFunc = nullptr;
-AppSpaceCompConfigDestroyFunc g_destroyFunc = nullptr;
+CompConfigFreeStringResultFunc g_freeResultFunc = nullptr;
 } // namespace
 
 void Reset()
 {
     g_initFunc = nullptr;
     g_getConfigFunc = nullptr;
-    g_destroyFunc = nullptr;
+    g_freeResultFunc = nullptr;
 }
 
 void SetAppSpaceCompConfigFuncs(AppSpaceCompConfigInitFunc initFunc, AppSpaceCompConfigGetConfigFunc getConfigFunc,
-    AppSpaceCompConfigDestroyFunc destroyFunc)
+    CompConfigFreeStringResultFunc freeResultFunc)
 {
     g_initFunc = initFunc;
     g_getConfigFunc = getConfigFunc;
-    g_destroyFunc = destroyFunc;
+    g_freeResultFunc = freeResultFunc;
 }
 
 AppSpaceCompConfigInitFunc GetAppSpaceCompConfigInitFunc()
@@ -49,18 +49,18 @@ AppSpaceCompConfigGetConfigFunc GetAppSpaceCompConfigGetConfigFunc()
     return g_getConfigFunc;
 }
 
-AppSpaceCompConfigDestroyFunc GetAppSpaceCompConfigDestroyFunc()
+CompConfigFreeStringResultFunc GetCompConfigFreeStringResultFunc()
 {
-    return g_destroyFunc;
+    return g_freeResultFunc;
 }
 } // namespace OHOS::Ace::MockExtraModulesManager
 
 namespace OHOS::Ace {
 namespace {
 constexpr char APP_SPACE_COMP_CONFIG_FEATURE_NAME[] = "app_space_comp_config";
-constexpr char APP_SPACE_COMP_CONFIG_INIT_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_InitAppSpaceCompConfigReader";
-constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_GetAppSpaceCompConfig";
-constexpr char APP_SPACE_COMP_CONFIG_DESTROY_SYMBOL[] = "OHOS_COMPCONFIGCLIENT_DestroyAppSpaceCompConfig";
+constexpr char APP_SPACE_COMP_CONFIG_INIT_SYMBOL[] = "AppSpaceCompConfigReader_Init";
+constexpr char APP_SPACE_COMP_CONFIG_GET_CONFIG_SYMBOL[] = "AppSpaceCompConfigReader_GetConfig";
+constexpr char APP_SPACE_COMP_CONFIG_FREE_RESULT_SYMBOL[] = "CompConfigFreeStringResult";
 
 class MockExtraModulesManagerImpl final : public ExtraModulesManager {
 public:
@@ -98,12 +98,12 @@ public:
             *outFuncPtr = reinterpret_cast<void*>(getConfigFunc);
             return ErrCode::SUCCESS;
         }
-        if (capabilityName == APP_SPACE_COMP_CONFIG_DESTROY_SYMBOL) {
-            auto destroyFunc = MockExtraModulesManager::GetAppSpaceCompConfigDestroyFunc();
-            if (destroyFunc == nullptr) {
+        if (capabilityName == APP_SPACE_COMP_CONFIG_FREE_RESULT_SYMBOL) {
+            auto freeResultFunc = MockExtraModulesManager::GetCompConfigFreeStringResultFunc();
+            if (freeResultFunc == nullptr) {
                 return ErrCode::SYMBOL_NOT_FOUND;
             }
-            *outFuncPtr = reinterpret_cast<void*>(destroyFunc);
+            *outFuncPtr = reinterpret_cast<void*>(freeResultFunc);
             return ErrCode::SUCCESS;
         }
         return ErrCode::SYMBOL_NOT_FOUND;
