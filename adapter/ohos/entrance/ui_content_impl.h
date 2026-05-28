@@ -430,7 +430,6 @@ public:
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor);
-    void RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor);

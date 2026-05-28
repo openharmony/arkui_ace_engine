@@ -50,9 +50,6 @@ class GestureDebugBoundaryManager;
 class SelectOverlayManager;
 class SmartGestureManager;
 class ResponseCtrl;
-#ifdef RELAXED_INTERACTION_SUPPORT
-class RelaxedInteractionManager;
-#endif
 class TouchDelegate : public virtual AceType {
     DECLARE_ACE_TYPE(TouchDelegate, AceType);
 public:
@@ -486,8 +483,6 @@ public:
     {
         touchTimingCallback_ = nullptr;
     }
-    void ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback);
-    void FlushRelaxedInteraction(std::function<void()> requestFrameCallback);
 
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
@@ -540,10 +535,6 @@ private:
     void AxisTouchTestResultsClear(int32_t eventHandleId);
     void TouchTestResultsClear(int32_t eventHandleId);
     void DownFingerIdsClear(int32_t eventHandleId);
-#ifdef RELAXED_INTERACTION_SUPPORT
-    RefPtr<NG::RelaxedInteractionManager> GetOrCreateRelaxedInteractionManager();
-#endif
-
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     std::unordered_map<int32_t, MouseTestResult> currMouseTestResultsMap_;
@@ -625,9 +616,6 @@ private:
     std::unique_ptr<RectCallbackListImpl> rectCallbackListImpl_;
     std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>
         touchTimingCallback_;
-#ifdef RELAXED_INTERACTION_SUPPORT
-    RefPtr<NG::RelaxedInteractionManager> relaxedInteractionManager_;
-#endif
 };
 
 } // namespace OHOS::Ace

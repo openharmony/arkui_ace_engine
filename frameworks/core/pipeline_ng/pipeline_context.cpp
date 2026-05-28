@@ -987,9 +987,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
-#ifdef RELAXED_INTERACTION_SUPPORT
-    FlushRelaxedInteraction();
-#endif
     FrameMetrics frameMetrics;
     frameMetrics.vsyncTimestamp = nanoTimestamp;
     int64_t startTimestamp = GetSysTimestamp();
@@ -8054,21 +8051,6 @@ void PipelineContext::UnregisterTouchTimingCallback()
     eventManager_->UnregisterTouchTimingCallback();
 }
 
-void PipelineContext::ProcessCommand(const std::string& command)
-{
-#ifdef RELAXED_INTERACTION_SUPPORT
-    CHECK_NULL_VOID(eventManager_);
-    eventManager_->ProcessCommand(command, [this]() { RequestFrame(); });
-#endif
-}
-
-void PipelineContext::FlushRelaxedInteraction()
-{
-#ifdef RELAXED_INTERACTION_SUPPORT
-    CHECK_NULL_VOID(eventManager_);
-    eventManager_->FlushRelaxedInteraction([this]() { RequestFrame(); });
-#endif
-}
 void PipelineContext::SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager)
 {
     dynamicComponentSafeManager_ = manager;

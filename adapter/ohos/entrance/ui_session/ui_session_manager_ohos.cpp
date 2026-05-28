@@ -944,20 +944,15 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
 
 void UiSessionManagerOhos::SendCommand(const std::string& command)
 {
-    auto json = InspectorJsonUtil::ParseJsonString(command);
-    if (!json || json->IsNull()) {
-        LOGW("SendCommand ParseJsonString failed");
-        return;
-    }
+    if (sendCommandFunction_) {
+        auto json = InspectorJsonUtil::ParseJsonString(command);
+        if (!json || json->IsNull()) {
+            LOGW("SendCommand ParseJsonString failed");
+            return;
+        }
 
-    auto value = json->GetValue("cmd");
-    if (sendCommandFunction_ && value && value->IsNumber()) {
-        int32_t cmdNumber = value->GetInt();
-        sendCommandFunction_(cmdNumber);
-    } else if (relaxedCommandFunction_) {
-        relaxedCommandFunction_(command);
-    } else {
-        LOGW("SendCommand failed");
+        int32_t value = json->GetInt("cmd");
+        sendCommandFunction_(value);
     }
 }
 
@@ -965,11 +960,6 @@ void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& functio
 {
     std::lock_guard<std::mutex> lock(sendCommandFunctionMutex_);
     sendCommandFunction_ = std::move(function);
-}
-
-void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& function)
-{
-    relaxedCommandFunction_ = std::move(function);
 }
 
 void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(
