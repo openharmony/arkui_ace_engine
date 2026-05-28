@@ -47,11 +47,72 @@ protected:
     inline static RefPtr<MockPipelineContext> mockPipelineContext_ = nullptr;
 };
 
+class ScrollTouchExecutorToPointTest : public ScrollTouchExecutorTest {};
 class ScrollTouchExecutorConstructorTest : public ScrollTouchExecutorTest {};
 class ScrollTouchExecuteStepTest : public ScrollTouchExecutorTest {};
 class ScrollTouchExecuteGetTypeTest : public ScrollTouchExecutorTest {};
 class ScrollTouchExecuteGetDescriptionTest : public ScrollTouchExecutorTest {};
 class ScrollTouchExecuteIsSingleStepTest : public ScrollTouchExecutorTest {};
+
+HWTEST_F(ScrollTouchExecutorToPointTest, StrictClickExecutor_ToPointUp_LargeCoordinates, TestSize.Level1)
+{
+    ScrollActionInfo actionInfo = {};
+    actionInfo.direction = RelaxedScrollDirection::UP;
+    actionInfo.distance = 100.0f;
+    PointF point = ScrollTouchExecutor::ToPoint(actionInfo);
+    EXPECT_FLOAT_EQ(point.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(point.GetY(), -100.0f);
+}
+
+HWTEST_F(ScrollTouchExecutorToPointTest, StrictClickExecutor_ToPointDown_LargeCoordinates, TestSize.Level1)
+{
+    ScrollActionInfo actionInfo = {};
+    actionInfo.direction = RelaxedScrollDirection::DOWN;
+    actionInfo.distance = 100.0f;
+    PointF point = ScrollTouchExecutor::ToPoint(actionInfo);
+    EXPECT_FLOAT_EQ(point.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(point.GetY(), 100.0f);
+}
+
+HWTEST_F(ScrollTouchExecutorToPointTest, StrictClickExecutor_ToPointLeft_LargeCoordinates, TestSize.Level1)
+{
+    ScrollActionInfo actionInfo = {};
+    actionInfo.direction = RelaxedScrollDirection::LEFT;
+    actionInfo.distance = 100.0f;
+    PointF point = ScrollTouchExecutor::ToPoint(actionInfo);
+    EXPECT_FLOAT_EQ(point.GetX(), -100.0f);
+    EXPECT_FLOAT_EQ(point.GetY(), 0.0f);
+}
+
+HWTEST_F(ScrollTouchExecutorToPointTest, StrictClickExecutor_ToPointRight_LargeCoordinates, TestSize.Level1)
+{
+    ScrollActionInfo actionInfo = {};
+    actionInfo.direction = RelaxedScrollDirection::RIGHT;
+    actionInfo.distance = 100.0f;
+    PointF point = ScrollTouchExecutor::ToPoint(actionInfo);
+    EXPECT_FLOAT_EQ(point.GetX(), 100.0f);
+    EXPECT_FLOAT_EQ(point.GetY(), 0.0f);
+}
+
+HWTEST_F(ScrollTouchExecutorToPointTest, StrictClickExecutor_ToPointForward_LargeCoordinates, TestSize.Level1)
+{
+    ScrollActionInfo actionInfo = {};
+    actionInfo.direction = RelaxedScrollDirection::FORWARD;
+    actionInfo.distance = 100.0f;
+    PointF point = ScrollTouchExecutor::ToPoint(actionInfo);
+    EXPECT_FLOAT_EQ(point.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(point.GetY(), -100.0f);
+}
+
+HWTEST_F(ScrollTouchExecutorToPointTest, StrictClickExecutor_ToPointBackward_LargeCoordinates, TestSize.Level1)
+{
+    ScrollActionInfo actionInfo = {};
+    actionInfo.direction = RelaxedScrollDirection::BACKWARD;
+    actionInfo.distance = 100.0f;
+    PointF point = ScrollTouchExecutor::ToPoint(actionInfo);
+    EXPECT_FLOAT_EQ(point.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(point.GetY(), 100.0f);
+}
 
 HWTEST_F(ScrollTouchExecutorConstructorTest, StrictClickExecutor_Constructor_LargeCoordinates, TestSize.Level1)
 {

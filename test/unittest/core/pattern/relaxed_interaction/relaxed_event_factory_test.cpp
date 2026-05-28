@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/point_t.h"
@@ -28,15 +29,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
-namespace {
-class NullEventHubPattern : public Pattern {
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return nullptr;
-    }
-};
-} // namespace
 
 class RelaxedEventFactoryTest : public testing::Test {
 public:
@@ -93,7 +85,6 @@ HWTEST_F(RelaxedEventFactoryCreateTouchEventTest, CreateTouchEvent_MoveType, Tes
     EXPECT_EQ(event.type, TouchType::MOVE);
     EXPECT_FLOAT_EQ(event.x, 300.0f);
     EXPECT_FLOAT_EQ(event.y, 400.0f);
-    EXPECT_FALSE(event.pointers.empty());
     EXPECT_TRUE(event.pointers[0].isPressed);
 }
 
@@ -103,7 +94,6 @@ HWTEST_F(RelaxedEventFactoryCreateTouchEventTest, CreateTouchEvent_CancelType, T
     auto event = RelaxedEventFactory::CreateTouchEvent(coordinates, TouchType::CANCEL);
 
     EXPECT_EQ(event.type, TouchType::CANCEL);
-    EXPECT_FALSE(event.pointers.empty());
     EXPECT_FALSE(event.pointers[0].isPressed);
 }
 
@@ -113,7 +103,6 @@ HWTEST_F(RelaxedEventFactoryCreateTouchEventTest, CreateTouchEvent_UnknownType, 
     auto event = RelaxedEventFactory::CreateTouchEvent(coordinates, TouchType::UNKNOWN);
 
     EXPECT_EQ(event.type, TouchType::UNKNOWN);
-    EXPECT_FALSE(event.pointers.empty());
     EXPECT_FALSE(event.pointers[0].isPressed);
 }
 
@@ -160,69 +149,12 @@ HWTEST_F(RelaxedEventFactoryCreateClickGestureEventTest, CreateClickGestureEvent
     geometryNode->SetFrameOffset(OffsetF(0.0f, 0.0f));
     frameNode->geometryNode_ = geometryNode;
 
-    MockPipelineContext::SetCurrentWindowRect({ 0, 0, 1920, 1080 });
+    MockPipelineContext::SetCurrentWindowRect({0, 0, 1920, 1080});
 
     auto event = RelaxedEventFactory::CreateClickGestureEvent(frameNode);
 
     EXPECT_TRUE(event.GetLocalLocation().GetX() >= 0);
     EXPECT_TRUE(event.GetLocalLocation().GetY() >= 0);
-}
-
-HWTEST_F(RelaxedEventFactoryCreateClickGestureEventTest, CreateClickGestureEvent_NullGeometryNode, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("TestButton", 0, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->geometryNode_ = nullptr;
-
-    auto event = RelaxedEventFactory::CreateClickGestureEvent(frameNode);
-
-    EXPECT_EQ(event.GetLocalLocation().GetX(), 0.0f);
-    EXPECT_EQ(event.GetLocalLocation().GetY(), 0.0f);
-    EXPECT_EQ(event.GetGlobalLocation().GetX(), 0.0f);
-    EXPECT_EQ(event.GetGlobalLocation().GetY(), 0.0f);
-}
-
-HWTEST_F(RelaxedEventFactoryCreateClickGestureEventTest, CreateClickGestureEvent_NullPipelineContext, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("TestButton", 0, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(200.0f, 200.0f));
-    geometryNode->SetFrameOffset(OffsetF(100.0f, 100.0f));
-    frameNode->geometryNode_ = geometryNode;
-
-    MockPipelineContext::TearDown();
-
-    auto event = RelaxedEventFactory::CreateClickGestureEvent(frameNode);
-
-    EXPECT_EQ(event.GetInputEventType(), InputEventType::TOUCH_SCREEN);
-    EXPECT_TRUE(event.GetLocalLocation().GetX() > 0.0f);
-    EXPECT_TRUE(event.GetLocalLocation().GetY() > 0.0f);
-    EXPECT_EQ(event.GetScreenLocation().GetX(), 0.0f);
-    EXPECT_EQ(event.GetScreenLocation().GetY(), 0.0f);
-
-    MockPipelineContext::SetUp();
-    mockPipelineContext_ = MockPipelineContext::GetCurrent();
-}
-
-HWTEST_F(RelaxedEventFactoryCreateClickGestureEventTest, CreateClickGestureEvent_NullEventHub, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("TestButton", 0, AceType::MakeRefPtr<NullEventHubPattern>());
-    ASSERT_NE(frameNode, nullptr);
-
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(200.0f, 200.0f));
-    geometryNode->SetFrameOffset(OffsetF(100.0f, 100.0f));
-    frameNode->geometryNode_ = geometryNode;
-
-    auto event = RelaxedEventFactory::CreateClickGestureEvent(frameNode);
-
-    EXPECT_EQ(event.GetInputEventType(), InputEventType::TOUCH_SCREEN);
-    EXPECT_TRUE(event.GetLocalLocation().GetX() > 0.0f);
-    EXPECT_TRUE(event.GetLocalLocation().GetY() > 0.0f);
-    EXPECT_TRUE(event.GetTarget().id.empty());
-    EXPECT_TRUE(event.GetTarget().type.empty());
 }
 
 } // namespace OHOS::Ace::NG

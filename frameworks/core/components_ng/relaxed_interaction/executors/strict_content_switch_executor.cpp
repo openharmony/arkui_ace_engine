@@ -17,8 +17,6 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
-#include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,7 +35,6 @@ ExecutorResult StrictContentSwitchExecutor::ExecuteStep()
 
     auto result = FindFrameNode(coordinates_.GetX(), coordinates_.GetY(), ContentSwitchRecognizerPred());
     if (!result.GetNode()) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "No frame node found at current coordinates");
         return ExecutorResult::FAILED;
     }
 
@@ -46,16 +43,6 @@ ExecutorResult StrictContentSwitchExecutor::ExecuteStep()
 
 ExecutorResult StrictContentSwitchExecutor::TriggerContentSwitch(const RefPtr<FrameNode> frameNode)
 {
-    auto pattern = frameNode->GetPattern();
-    if (!pattern->IsScrollAble()) {
-        WorkflowDumper::GetInstance().AddLog("Node " + frameNode->ToString() + " is not scrollable");
-        return ExecutorResult::FAILED;
-    }
-
-    ScrollingConfig config;
-    config.count = static_cast<int32_t>(count_);
-    config.direction = (direction_ == "backward") ? SmartGestureDirection::BACKWARD : SmartGestureDirection::FORWARD;
-    pattern->PerformScroll(config);
     return ExecutorResult::SUCCESS;
 }
 

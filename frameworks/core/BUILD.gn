@@ -333,9 +333,6 @@ template("ace_core_source_set") {
         "components_ng/relaxed_interaction/utils/json_utils.cpp",
         "components_ng/relaxed_interaction/utils/relaxed_event_factory.cpp",
         "components_ng/relaxed_interaction/utils/workflow_dumper.cpp",
-        "components_ng/relaxed_interaction/executors/smart_gesture_executor.cpp",
-        "components_ng/relaxed_interaction/parsers/slide_command_parser.cpp",
-        "components_ng/relaxed_interaction/parsers/tap_command_parser.cpp",
       ]
     }
 
@@ -996,9 +993,6 @@ template("ace_core_ng_source_set") {
         "components_ng/relaxed_interaction/utils/json_utils.cpp",
         "components_ng/relaxed_interaction/utils/relaxed_event_factory.cpp",
         "components_ng/relaxed_interaction/utils/workflow_dumper.cpp",
-        "components_ng/relaxed_interaction/executors/smart_gesture_executor.cpp",
-        "components_ng/relaxed_interaction/parsers/slide_command_parser.cpp",
-        "components_ng/relaxed_interaction/parsers/tap_command_parser.cpp",
       ]
     }
 

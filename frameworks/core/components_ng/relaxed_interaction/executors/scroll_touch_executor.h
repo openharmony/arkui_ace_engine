@@ -45,6 +45,8 @@ public:
         return true;
     }
 
+    static PointF ToPoint(const ScrollActionInfo& actionInfo);
+
 private:
     bool ExecuteTargetMode();
 

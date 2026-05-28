@@ -21,8 +21,6 @@
 #include "core/components_ng/relaxed_interaction/parsers/content_switch_command_parser.h"
 #include "core/components_ng/relaxed_interaction/parsers/fallback_command_parser.h"
 #include "core/components_ng/relaxed_interaction/parsers/scroll_command_parser.h"
-#include "core/components_ng/relaxed_interaction/parsers/tap_command_parser.h"
-#include "core/components_ng/relaxed_interaction/parsers/slide_command_parser.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,8 +38,6 @@ void ExecutorGenerator::RegisterDefaultParsers()
     parserRegistry_[CLICK] = std::make_unique<ClickCommandParser>(context_);
     parserRegistry_[CONTENT_SWITCH] = std::make_unique<ContentSwitchCommandParser>(context_);
     parserRegistry_[SCROLL] = std::make_unique<ScrollCommandParser>(context_);
-    parserRegistry_[TAP] = std::make_unique<TapCommandParser>(context_);
-    parserRegistry_[SLIDE] = std::make_unique<SlideCommandParser>(context_);
 }
 
 std::vector<std::unique_ptr<BaseExecutor>> ExecutorGenerator::ParseCommand(const std::unique_ptr<JsonValue>& json)

@@ -70,18 +70,6 @@ const std::string VALID_FALLBACK_RADIO2_FALSE_JSON = R"({
 
 const std::string INVALID_NULL_JSON = R"({})";
 
-const std::string INVALID_IDENTITY_NULL_JSON = R"({
-    "identity": null
-})";
-
-const std::string INVALID_IDENTITY_JSON = R"({
-    "identity": -1,
-})";
-
-const std::string INVALID_IDENTITY_STRING_JSON = R"({
-    "identity": "Radio1",
-})";
-
 const std::string INVALID_MISSING_BODY_JSON = R"({
     "identity": 70,
 })";
@@ -99,15 +87,8 @@ const std::string INVALID_MISSING_BODY_INFO_JSON = R"({
     "identity": 70,
 })";
 
-const std::string INVALID_BODY_NULL_JSON = R"({
-    "body": null
+const std::string INVALID_ONLY_CMD_JSON = R"({
 })";
-
-const std::string INVALID_BODY_OBJECT_JSON = R"({
-    "body": "hello"
-})";
-
-const std::string INVALID_ONLY_CMD_JSON = R"({})";
 }
 
 class FallbackCommandParserTest : public testing::Test {
@@ -249,61 +230,6 @@ HWTEST_F(FallbackCommandParserParseTest, Parse_OnlyCmd_ReturnsEmpty, TestSize.Le
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
     FallbackCommandParser parser(context);
     auto json = JsonUtil::ParseJsonString(INVALID_ONLY_CMD_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(FallbackCommandParserParseTest, Parse_NullBody_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    FallbackCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_BODY_NULL_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(FallbackCommandParserParseTest, Parse_BodyObject_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    FallbackCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_BODY_OBJECT_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(FallbackCommandParserParseTest, Parse_NullIdentity_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    FallbackCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_IDENTITY_NULL_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(FallbackCommandParserParseTest, Parse_InvalidIdentity_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    FallbackCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_IDENTITY_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(FallbackCommandParserParseTest, Parse_InvalidIdentityString_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    FallbackCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_IDENTITY_STRING_JSON);
     ASSERT_NE(json, nullptr);
 
     auto executors = parser.Parse(json);

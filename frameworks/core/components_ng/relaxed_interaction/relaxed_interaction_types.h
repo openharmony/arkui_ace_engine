@@ -29,8 +29,6 @@ inline constexpr char CONTENT_SWITCH[] = "content_switch";
 inline constexpr char FALLBACK[] = "fallback";
 inline constexpr char CLICK[] = "click";
 inline constexpr char SCROLL[] = "scroll";
-inline constexpr char TAP[] = "tap";
-inline constexpr char SLIDE[] = "slide";
 
 // Return status of ExecuteNextStep.
 enum class ExecutionState {

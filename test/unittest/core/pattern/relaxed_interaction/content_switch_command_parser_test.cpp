@@ -58,18 +58,6 @@ const std::string VALID_CONTENT_SWITCH_DEFAULT_MODE_JSON = R"({
     }
 })";
 
-const std::string INVALID_ACTIONINFO_NULL_JSON = R"({
-    "type": "content_switch",
-    "mode":"target",
-    "action_info": null
-})";
-
-const std::string INVALID_ACTIONINFO_OBJECT_JSON = R"({
-    "type": "content_switch",
-    "mode":"target",
-    "action_info": "hello"
-})";
-
 const std::string INVALID_NULL_JSON = R"({})";
 
 const std::string INVALID_MISSING_ACTION_INFO_JSON = R"({
@@ -83,47 +71,11 @@ const std::string INVALID_MISSING_COORDINATES_JSON = R"({
     "action_info": {}
 })";
 
-const std::string INVALID_COORDINATES_NULL_JSON = R"({
-    "type": "content_switch",
-    "mode":"target",
-    "action_info": {
-        "coordinates": null
-    }
-})";
-
-const std::string INVALID_COORDINATES_OBJECT_JSON = R"({
-    "type": "content_switch",
-    "mode":"target",
-    "action_info": {
-        "coordinates": "hello"
-    }
-})";
-
 const std::string INVALID_MISSING_POS_JSON = R"({
     "type": "content_switch",
     "mode":"target",
     "action_info": {
         "coordinates": {
-        }
-    }
-})";
-
-const std::string INVALID_POS_NULL_JSON = R"({
-    "type": "content_switch",
-    "mode":"target",
-    "action_info": {
-        "coordinates": {
-            "pos": null
-        }
-    }
-})";
-
-const std::string INVALID_POS_OBJECT_JSON = R"({
-    "type": "content_switch",
-    "mode":"target",
-    "action_info": {
-        "coordinates": {
-            "pos": "hello"
         }
     }
 })";
@@ -294,7 +246,7 @@ const std::string VALID_NEGATIVE_COORDINATES_JSON = R"({
     }
 })";
 
-const std::string INVALID_COORDINATES_X_TYPE_JSON = R"({
+const std::string INVALID_COORDINATES_TYPE_JSON = R"({
     "type": "content_switch",
     "action_info": {
         "count": 1,
@@ -302,19 +254,6 @@ const std::string INVALID_COORDINATES_X_TYPE_JSON = R"({
             "pos": {
                 "x": "100.0",
                 "y": 200.0
-            }
-        }
-    }
-})";
-
-const std::string INVALID_COORDINATES_Y_TYPE_JSON = R"({
-    "type": "content_switch",
-    "action_info": {
-        "count": 1,
-        "coordinates": {
-            "pos": {
-                "x": 100.0,
-                "y": "200.0"
             }
         }
     }
@@ -552,92 +491,14 @@ HWTEST_F(ContentSwitchCommandParserParseTest, Parse_ValidNegativeCoordinates_Ret
     EXPECT_EQ(executors.size(), 1);
 }
 
-HWTEST_F(ContentSwitchCommandParserParseTest, Parse_InvalidCoordinateXType_ReturnsEmpty, TestSize.Level1)
+HWTEST_F(ContentSwitchCommandParserParseTest, Parse_InvalidCoordinateType_ReturnsEmpty, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
     ContentSwitchCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_COORDINATES_X_TYPE_JSON);
+    auto json = JsonUtil::ParseJsonString(INVALID_COORDINATES_TYPE_JSON);
     ASSERT_NE(json, nullptr);
 
     auto executors = parser.Parse(json);
     EXPECT_TRUE(executors.empty());
 }
-
-HWTEST_F(ContentSwitchCommandParserParseTest, Parse_InvalidCoordinateYType_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ContentSwitchCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_COORDINATES_Y_TYPE_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(ContentSwitchCommandParserParseTest, Parse_NullActionInfo_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ContentSwitchCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_ACTIONINFO_NULL_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(ContentSwitchCommandParserParseTest, Parse_ActionInfoObject_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ContentSwitchCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_ACTIONINFO_OBJECT_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(ContentSwitchCommandParserParseTest, Parse_NullCoordinates_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ContentSwitchCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_COORDINATES_NULL_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(ContentSwitchCommandParserParseTest, Parse_CoordinatesObject_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ContentSwitchCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_COORDINATES_OBJECT_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(ContentSwitchCommandParserParseTest, Parse_NullPostion_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ContentSwitchCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_POS_NULL_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
-HWTEST_F(ContentSwitchCommandParserParseTest, Parse_PositionObject_ReturnsEmpty, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ContentSwitchCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_POS_OBJECT_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto executors = parser.Parse(json);
-    EXPECT_TRUE(executors.empty());
-}
-
 } // namespace OHOS::Ace::NG

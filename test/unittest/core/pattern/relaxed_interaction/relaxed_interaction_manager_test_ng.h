@@ -36,22 +36,12 @@ public:
     static void TearDownTestCase()
     {
         mockPipelineContext_.Reset();
-    }
-
-    void SetUp() override
-    {
-        manager_ = AceType::MakeRefPtr<RelaxedInteractionManager>(WeakPtr<PipelineContext>(mockPipelineContext_));
-        ASSERT_NE(manager_, nullptr);
-    }
-
-    void TearDown() override
-    {
         manager_.Reset();
     }
 
 protected:
     inline static RefPtr<PipelineContext> mockPipelineContext_ = nullptr;
-    RefPtr<RelaxedInteractionManager> manager_ = nullptr;
+    inline static RefPtr<RelaxedInteractionManager> manager_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

@@ -43,8 +43,6 @@ public:
 
     void RefreshProductGestureEnabled();
 
-    bool HandleTrigger(SmartGestureTrigger trigger);
-
     bool HandleTrigger(SmartGestureTrigger trigger, const KeyEvent& event);
 
     bool IsProductGestureEnabled() const

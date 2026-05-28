@@ -29,9 +29,6 @@ public:
 
     static bool IsUint(const std::unique_ptr<JsonValue>& json);
     static bool IsUint(const JsonValue* json);
-
-    static bool IsString(const std::unique_ptr<JsonValue>& json);
-    static bool IsString(const JsonValue* json);
 };
 
 } // namespace OHOS::Ace::NG

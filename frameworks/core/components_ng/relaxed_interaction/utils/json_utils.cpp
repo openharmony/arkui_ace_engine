@@ -36,18 +36,4 @@ bool JsonUtils::IsUint(const JsonValue* json)
     return value >= 0.0 && std::fabs(value - std::floor(value)) < 1e-10;
 }
 
-bool JsonUtils::IsString(const std::unique_ptr<JsonValue>& json)
-{
-    return IsString(json.get());
-}
-
-bool JsonUtils::IsString(const JsonValue* json)
-{
-    if (!json || !json->IsString()) {
-        return false;
-    }
-
-    return !json->GetString().empty();
-}
-
 } // namespace OHOS::Ace::NG
