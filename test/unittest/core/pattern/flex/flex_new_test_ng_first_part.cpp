@@ -988,4 +988,29 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest001, TestSize.Level0)
      */
     EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: FlexLpxAttribute001
+ * @tc.desc: Test SetMainSpace/SetCrossSpace with LPX unit registers/unregisters LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, FlexLpxAttribute001, TestSize.Level1)
+{
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    auto frameNode = CreateFlexRow([lpxDim](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+        model.SetMainSpace(lpxDim);
+        model.SetCrossSpace(lpxDim);
+    });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    FlexModelNG::SetMainSpace(frameNode.GetRawPtr(), vpDim);
+    FlexModelNG::SetCrossSpace(frameNode.GetRawPtr(), vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
 } // namespace OHOS::Ace::NG
