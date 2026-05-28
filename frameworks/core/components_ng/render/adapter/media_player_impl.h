@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@ public:
     int32_t Stop() override;
     int32_t Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode) override;
     int32_t FullScreenChange(bool isFullScreen) override;
+    int32_t SetRenderFirstFrame(bool display) override;
 
     void ProcessSurfaceCreate() override;
     void ProcessSurfaceChange(int32_t width, int32_t height) override;
@@ -70,7 +71,6 @@ private:
     CommonEvent resolutionChangeCallback_;
     CommonEvent startRenderFrameCallback_;
     TextureRefreshEnVent textureRefreshCallback_;
-
     ACE_DISALLOW_COPY_AND_MOVE(MediaPlayerImpl);
 };
 

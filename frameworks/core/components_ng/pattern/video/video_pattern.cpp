@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,9 @@
 
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/common/ace_view.h"
+#ifdef RS_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#endif
 #endif
 
 namespace OHOS::Ace::NG {
@@ -580,6 +583,19 @@ void VideoPattern::OnTextureRefresh(void* surface)
     CHECK_NULL_VOID(renderContextForMediaPlayer);
     renderContextForMediaPlayer->MarkNewFrameAvailable(surface);
 }
+
+void VideoPattern::UpdatePreparedVideoSize(const RefPtr<FrameNode>& host)
+{
+    auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(videoLayoutProperty);
+    SizeF videoSize(
+        static_cast<float>(mediaPlayer_->GetVideoWidth()),
+        static_cast<float>(mediaPlayer_->GetVideoHeight()));
+    if (GreatNotEqual(videoSize.Width(), 0.0f) && GreatNotEqual(videoSize.Height(), 0.0f)) {
+        videoLayoutProperty->UpdateVideoSize(videoSize);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
 #endif
 
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
@@ -758,6 +774,10 @@ void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needF
     SetIsPrepared(true);
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    UpdatePreparedVideoSize(host);
+#endif
 
     RefPtr<UINode> controlBar = nullptr;
     auto children = host->GetChildren();
@@ -1062,6 +1082,18 @@ void VideoPattern::RegisterRenderContextCallBack()
         }
     };
     renderContextForMediaPlayer_->AddUpdateCallBack(OnUpdateCallBack);
+#if defined(ANDROID_PLATFORM) && defined (RS_ENABLE_VK)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+        auto OnInitTypeCallBack = [weak = WeakClaim(this)](int32_t& type) {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(videoPattern);
+            if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface != nullptr) {
+                renderSurface->AddInitTypeCallBack(type);
+            }
+        };
+        renderContextForMediaPlayer_->AddInitTypeCallBack(OnInitTypeCallBack);
+    }
+#endif
 #endif
 }
 
@@ -2094,6 +2126,11 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
 
     fullScreenNodeId_.reset();
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
+#if defined(ANDROID_PLATFORM)
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        RegisterRenderContextCallBack();
+    }
+#endif
     auto videoNode = GetHost();
     CHECK_NULL_VOID(videoNode);
     // change event hub to the origin video node

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,7 +125,7 @@ constexpr uint32_t VIDEO_DURATION = 10u;
 constexpr uint32_t VIDEO_CURRENT_TIME = 5u;
 constexpr float VOLUME_STEP = 0.05f;
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
-TestProperty testProperty;
+TestProperty g_globalTestProperty;
 } // namespace
 
 class VideoPropertyTestNg : public testing::Test {
@@ -141,13 +141,13 @@ protected:
 
 void VideoPropertyTestNg::SetUpTestSuite()
 {
-    testProperty.progressRate = VIDEO_PROGRESS_RATE;
-    testProperty.showFirstFrame = SHOW_FIRST_FRAME;
-    testProperty.muted = MUTED_VALUE;
-    testProperty.autoPlay = AUTO_PLAY;
-    testProperty.controls = CONTROL_VALUE;
-    testProperty.loop = LOOP_VALUE;
-    testProperty.objectFit = VIDEO_IMAGE_FIT;
+    g_globalTestProperty.progressRate = VIDEO_PROGRESS_RATE;
+    g_globalTestProperty.showFirstFrame = SHOW_FIRST_FRAME;
+    g_globalTestProperty.muted = MUTED_VALUE;
+    g_globalTestProperty.autoPlay = AUTO_PLAY;
+    g_globalTestProperty.controls = CONTROL_VALUE;
+    g_globalTestProperty.loop = LOOP_VALUE;
+    g_globalTestProperty.objectFit = VIDEO_IMAGE_FIT;
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1095,7 +1095,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest026, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_globalTestProperty);
     ASSERT_TRUE(frameNode);
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(videoPattern);
@@ -1437,5 +1437,58 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest033, TestSize.Level1)
     pixelMap = PixelMap::CreatePixelMap(voidPtr);
     video.SetPosterSourceByPixelMap(pixelMap);
     EXPECT_EQ(videoPatternTemp->showImagePreview_, true);
+}
+
+/**
+ * @tc.name: VideoPatternTest034
+ * @tc.desc: Test reset-related callback order, update should be fired before prepared.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a video and get videoPattern.
+     * @tc.expected: step1. Create successfully.
+     */
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+    auto videoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Register onUpdate and onPrepared callbacks, then initialize the video state.
+     * @tc.expected: step2. The test can record the callback firing order during reset-related status changes.
+     */
+    std::vector<std::string> callbackOrder;
+    video.SetOnUpdate([&callbackOrder](const std::string& /*event*/) {
+        callbackOrder.emplace_back("update");
+    });
+    video.SetOnPrepared([&callbackOrder](const std::string& /*event*/) {
+        callbackOrder.emplace_back("prepared");
+    });
+
+    videoPattern->currentPos_ = VIDEO_CURRENT_TIME;
+    videoPattern->duration_ = VIDEO_DURATION;
+    videoPattern->isStop_ = false;
+    videoPattern->isPrepared_ = true;
+
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), GetDuration(_))
+        .WillOnce(DoAll(SetArgReferee<0>(VIDEO_DURATION * MILLISECONDS_TO_SECONDS), Return(0)));
+
+    /**
+     * @tc.steps: step3. Trigger the shared-layer reset callback sequence.
+     * @tc.expected: step3. onUpdate is fired before onPrepared.
+     */
+    videoPattern->OnCurrentTimeChange(0);
+    videoPattern->OnPlayerStatus(PlaybackStatus::PREPARED);
+
+    ASSERT_EQ(callbackOrder.size(), 2u);
+    EXPECT_EQ(callbackOrder[0], "update");
+    EXPECT_EQ(callbackOrder[1], "prepared");
 }
 } // namespace OHOS::Ace::NG
