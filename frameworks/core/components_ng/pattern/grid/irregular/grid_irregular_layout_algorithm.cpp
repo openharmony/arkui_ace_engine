@@ -774,6 +774,9 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             auto& info = pattern->GetMutableLayoutInfo();
             GridIrregularFiller filler(&info, RawPtr(host));
             const auto pos = info.GetItemPos(itemIdx);
+            if (pos.first < 0 || pos.second < 0) {
+                return false;
+            }
             auto constraint = filler.MeasureItem(GetFillParameters(host, info, originalWidth),
                 itemIdx, pos.first, pos.second, true).second;
 
