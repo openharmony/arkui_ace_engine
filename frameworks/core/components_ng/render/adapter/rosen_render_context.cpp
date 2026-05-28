@@ -8968,6 +8968,8 @@ void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
     constexpr float MAXBLOOMINTENSITY_MAX = 19.3f;
     constexpr float INNERBORDERBLOOMWIDTH_RATIO = 0.8f;
     constexpr float OUTERBORDERBLOOMWIDTH_RATIO = 0.2f;
+    constexpr float MENU_INNERBORDERBLOOMWIDTH_RATIO = 0.1f;
+    constexpr float MENU_OUTERBORDERBLOOMWIDTH_RATIO = 0.0f;
     constexpr float COLOR_RATIO = 255.0f;
 
     auto edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
@@ -8989,10 +8991,18 @@ void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectMaxBorderWidthTag>(MAXBORDERWIDTH_DEFAULT);
     // Thickness affects InnerBorderBloomWidth & OuterBorderBloomWidth.
     // InnerBorderBloomWidth has a coefficient of 0.8, OuterBorderBloomWidth has a coefficient of 0.2.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isMenuNode = host->GetTag() == V2::MENU_ETS_TAG;
+    if (host->GetParentFrameNode()) {
+        auto tag = host->GetParentFrameNode()->GetTag();
+        isMenuNode = isMenuNode || tag == V2::DIALOG_ETS_TAG || tag == V2::ALERT_DIALOG_ETS_TAG ||
+                     tag == V2::ACTION_SHEET_DIALOG_ETS_TAG;
+    }
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectInnerBorderBloomWidthTag>(
-        edgeLightThicknessValue * INNERBORDERBLOOMWIDTH_RATIO);
+        edgeLightThicknessValue * (isMenuNode ? MENU_INNERBORDERBLOOMWIDTH_RATIO : INNERBORDERBLOOMWIDTH_RATIO));
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectOuterBorderBloomWidthTag>(
-        edgeLightThicknessValue * OUTERBORDERBLOOMWIDTH_RATIO);
+        edgeLightThicknessValue * (isMenuNode ? MENU_OUTERBORDERBLOOMWIDTH_RATIO : OUTERBORDERBLOOMWIDTH_RATIO));
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectColorTag>(
         Rosen::Vector3f(edgeLightParam->color.GetRed() / COLOR_RATIO, edgeLightParam->color.GetGreen() / COLOR_RATIO,
             edgeLightParam->color.GetBlue() / COLOR_RATIO));

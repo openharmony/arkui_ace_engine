@@ -105,6 +105,14 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
+constexpr float EDGELIGHT_THICKNESS = 250.0f;
+constexpr float EDGELIGHT_LENGTH_RATIO = 0.4f;
+constexpr float EDGELIGHT_INTENSITY = 0.5f;
+constexpr uint32_t EDGELIGHT_MOVING_TIME = 568;
+constexpr uint32_t HIGHLIGHT_ANIMATION_TIME = 220;
+constexpr uint32_t HIGHLIGHT_ANIMATION_DELAY_TIME = 305;
+constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_TIME = 221;
+constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME = 443;
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.20f, 0.00f, 0.83f, 0.83f);
 const DistortionParam TERMINAL_DISTORTION_PARAM {
     .luCorner = { 0, 0 },
@@ -3369,26 +3377,27 @@ void DialogPattern::PlayFlowLight()
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto length = renderContext->GetPaintRectWithoutTransform().Height()*EDGELIGHT_LENGTH_RATIO;
     
     EdgeLightParam param  {
         .edgeLightPosition = EdgeLightPosition::BOTTOM,
-        .length = 300,
-        .intensity = 0.1,
+        .length = length,
+        .intensity = 0,
         .color = Color::WHITE,
-        .thickness = 200.0
+        .thickness = EDGELIGHT_THICKNESS
     };
     ACE_UPDATE_NODE_RENDER_CONTEXT(EdgeLightParam, param, columnNode);
 
     EdgeLightParam param1 {
         .edgeLightPosition = EdgeLightPosition::TOP,
-        .length = 300,
-        .intensity = 0.1,
+        .length = length,
+        .intensity = 0,
         .color = Color::WHITE,
-        .thickness = 200.0
+        .thickness = EDGELIGHT_THICKNESS
     };
 
     AnimationOption option;
-    option.SetDuration(500);
+    option.SetDuration(EDGELIGHT_MOVING_TIME);
     option.SetCurve(SHOW_SCALE_ANIMATION_CURVE);
 
     /**
@@ -3404,15 +3413,15 @@ void DialogPattern::PlayFlowLight()
 
     EdgeLightParam param2 {
         .edgeLightPosition = EdgeLightPosition::TOP,
-        .length = 300,
-        .intensity = 0.3,
+        .length = length,
+        .intensity = EDGELIGHT_INTENSITY,
         .color = Color::WHITE,
-        .thickness = 200.0
+        .thickness = EDGELIGHT_THICKNESS
     };
     
     AnimationOption option2;
-    option2.SetDuration(480);
-    option2.SetDelay(300);  // Set delay
+    option2.SetDuration(HIGHLIGHT_ANIMATION_TIME);
+    option2.SetDelay(HIGHLIGHT_ANIMATION_DELAY_TIME);  // Set delay
     option2.SetCurve(Curves::LINEAR);
 
     /**
@@ -3426,15 +3435,15 @@ void DialogPattern::PlayFlowLight()
 
     EdgeLightParam param3 {
         .edgeLightPosition = EdgeLightPosition::TOP,
-        .length = 300,
+        .length = length,
         .intensity = 0,
         .color = Color::WHITE,
         .thickness = 0.0
     };
     
     AnimationOption option3;
-    option3.SetDuration(280);
-    option3.SetDelay(500);  // Set delay
+    option3.SetDuration(LIGHT_DISAPPEARING_ANIMATION_TIME);
+    option3.SetDelay(LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME);  // Set delay
     option3.SetCurve(Curves::LINEAR);
 
     /**
@@ -3508,7 +3517,7 @@ void DialogPattern::PlayDistortion()
     };
     AnimationOption option;
     option.SetDuration(1000);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 247, 25));  // Spring curve
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27));  // Spring curve
     AnimationUtils::Animate(option, [renderContext, param1, childContexts]() {
         renderContext->UpdateDistortionParam(param1);
         for (const auto& childContext : childContexts) {
@@ -3528,7 +3537,7 @@ void DialogPattern::PlayDistortion()
         .rbCorner = { 1, 1 },   // Right-bottom corner stays in place
         .barrelDistortion = {  0, 0, 0, 0 },  // Add barrel distortion Left-Right-Top-Bottom
     };
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 110, 16));
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 235, 23));
     AnimationUtils::Animate(option, [renderContext, param2, childContexts]() {
         renderContext->UpdateDistortionParam(param2);
         for (const auto& childContext : childContexts) {
