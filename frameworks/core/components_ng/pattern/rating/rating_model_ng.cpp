@@ -22,6 +22,41 @@
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+ImageSourceInfo CreateSourceInfo(
+    const std::string& src, RefPtr<PixelMap>& pixmap, const std::string& bundleName, const std::string& moduleName)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (pixmap) {
+        return ImageSourceInfo(pixmap);
+    }
+#endif
+    return { src, bundleName, moduleName };
+}
+
+std::string GetResMediaPath(const RefPtr<ResourceObject>& resObj)
+{
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, "");
+    std::string src = resourceAdapter->GetMediaPath(resObj->GetId());
+    auto params = resObj->GetParams();
+    if (src.empty() && !params.empty() && params[0].value.has_value()) {
+        if (resObj->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
+            src = resourceAdapter->GetRawfile(params[0].value.value());
+        } else {
+            src = resourceAdapter->GetMediaPathByName(params[0].value.value());
+        }
+    }
+    if (resObj->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+        if (resObj->GetId() == -1 && !params.empty() && params[0].value.has_value()) {
+            src = resourceAdapter->GetStringByName(params[0].value.value());
+        } else if (resObj->GetId() != -1) {
+            src = resourceAdapter->GetString(resObj->GetId());
+        }
+    }
+    return src;
+}
+} // namespace
 void RatingModelNG::Create(double rating, bool indicator)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -94,31 +129,58 @@ void RatingModelNG::SetStepSize(double value)
     ACE_UPDATE_PAINT_PROPERTY(RatingRenderProperty, StepSize, value);
 }
 
-void RatingModelNG::SetForegroundSrc(const std::string& value, bool flag)
+void RatingModelNG::SetForegroundSrc(const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj)
 {
     if (flag) {
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(RatingLayoutProperty, ForegroundImageSourceInfo, PROPERTY_UPDATE_MEASURE);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, ImageSourceInfo(value));
+        return;
     }
+    if (!resObj) {
+        auto srcInfo = ImageSourceInfo(value);
+        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, srcInfo);
+        return;
+    }
+    auto src = GetResMediaPath(resObj);
+    RefPtr<PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, resObj->GetBundleName(), resObj->GetModuleName());
+    srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
+    ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, srcInfo);
 }
 
-void RatingModelNG::SetSecondarySrc(const std::string& value, bool flag)
+void RatingModelNG::SetSecondarySrc(const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj)
 {
     if (flag) {
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(RatingLayoutProperty, SecondaryImageSourceInfo, PROPERTY_UPDATE_MEASURE);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value));
+        return;
     }
+    if (!resObj) {
+        auto srcInfo = ImageSourceInfo(value);
+        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, srcInfo);
+        return;
+    }
+    auto src = GetResMediaPath(resObj);
+    RefPtr<PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, resObj->GetBundleName(), resObj->GetModuleName());
+    srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
+    ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, srcInfo);
 }
 
-void RatingModelNG::SetBackgroundSrc(const std::string& value, bool flag)
+void RatingModelNG::SetBackgroundSrc(const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj)
 {
     if (flag) {
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(RatingLayoutProperty, BackgroundImageSourceInfo, PROPERTY_UPDATE_MEASURE);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value));
+        return;
     }
+    if (!resObj) {
+        auto srcInfo = ImageSourceInfo(value);
+        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, srcInfo);
+        return;
+    }
+    auto src = GetResMediaPath(resObj);
+    RefPtr<PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, resObj->GetBundleName(), resObj->GetModuleName());
+    srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
+    ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, srcInfo);
 }
 
 void RatingModelNG::SetOnChange(RatingChangeEvent&& onChange)
@@ -168,37 +230,64 @@ void RatingModelNG::SetStepSize(FrameNode* frameNode, double value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, StepSize, value, frameNode);
 }
 
-void RatingModelNG::SetForegroundSrc(FrameNode* frameNode, const std::string& value, bool flag)
+void RatingModelNG::SetForegroundSrc(
+    FrameNode* frameNode, const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj)
 {
     if (flag) {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             RatingLayoutProperty, ForegroundImageSourceInfo, PROPERTY_UPDATE_MEASURE, frameNode);
-    } else {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            RatingLayoutProperty, ForegroundImageSourceInfo, ImageSourceInfo(value), frameNode);
+        return;
     }
+    if (!resObj) {
+        auto srcInfo = ImageSourceInfo(value);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, srcInfo, frameNode);
+        return;
+    }
+    auto src = GetResMediaPath(resObj);
+    RefPtr<PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, resObj->GetBundleName(), resObj->GetModuleName());
+    srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, srcInfo, frameNode);
 }
 
-void RatingModelNG::SetSecondarySrc(FrameNode* frameNode, const std::string& value, bool flag)
+void RatingModelNG::SetSecondarySrc(
+    FrameNode* frameNode, const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj)
 {
     if (flag) {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             RatingLayoutProperty, SecondaryImageSourceInfo, PROPERTY_UPDATE_MEASURE, frameNode);
-    } else {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value), frameNode);
+        return;
     }
+    if (!resObj) {
+        auto srcInfo = ImageSourceInfo(value);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, srcInfo, frameNode);
+        return;
+    }
+    auto src = GetResMediaPath(resObj);
+    RefPtr<PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, resObj->GetBundleName(), resObj->GetModuleName());
+    srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, srcInfo, frameNode);
 }
 
-void RatingModelNG::SetBackgroundSrc(FrameNode* frameNode, const std::string& value, bool flag)
+void RatingModelNG::SetBackgroundSrc(
+    FrameNode* frameNode, const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj)
 {
     if (flag) {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             RatingLayoutProperty, BackgroundImageSourceInfo, PROPERTY_UPDATE_MEASURE, frameNode);
-    } else {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value), frameNode);
+        return;
     }
+    if (!resObj) {
+        auto srcInfo = ImageSourceInfo(value);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, srcInfo, frameNode);
+        return;
+    }
+    auto src = GetResMediaPath(resObj);
+    RefPtr<PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, resObj->GetBundleName(), resObj->GetModuleName());
+    srcInfo.SetIsUriPureNumber(resObj->GetId() == -1);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, srcInfo, frameNode);
 }
 
 void RatingModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&& makeFunc)

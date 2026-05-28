@@ -41,9 +41,9 @@ public:
     virtual void SetIndicator(bool value) = 0;
     virtual void SetStars(int32_t value) = 0;
     virtual void SetStepSize(double value) = 0;
-    virtual void SetForegroundSrc(const std::string& value, bool flag) = 0;
-    virtual void SetSecondarySrc(const std::string& value, bool flag) = 0;
-    virtual void SetBackgroundSrc(const std::string& value, bool flag) = 0;
+    virtual void SetForegroundSrc(const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetSecondarySrc(const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetBackgroundSrc(const std::string& value, bool flag, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetOnChange(RatingChangeEvent&& onChange) = 0;
     virtual void SetOnChangeEvent(RatingChangeEvent&& onChangeEvent) = 0;
     virtual void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj,

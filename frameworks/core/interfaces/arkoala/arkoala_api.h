@@ -7486,8 +7486,8 @@ struct ArkUICalendarPickerDialogModifier {
 struct ArkUIRatingModifier {
     void (*setStars)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setRatingStepSize)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*setStarStyle)(
-        ArkUINodeHandle node, ArkUI_CharPtr backgroundUri, ArkUI_CharPtr foregroundUri, ArkUI_CharPtr secondaryUri);
+    void (*setStarStyle)(ArkUINodeHandle node, ArkUI_CharPtr backgroundUri, ArkUI_CharPtr foregroundUri,
+        ArkUI_CharPtr secondaryUri, const ArkUIRatingStyleStruct& resObj);
     void (*setOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetStars)(ArkUINodeHandle node);
     void (*resetRatingStepSize)(ArkUINodeHandle node);

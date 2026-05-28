@@ -2829,8 +2829,8 @@ struct CJUICalendarPickerDialogModifier {
 struct CJUIRatingModifier {
     void (*setStars)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setRatingStepSize)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*setStarStyle)(
-        ArkUINodeHandle node, ArkUI_CharPtr backgroundUri, ArkUI_CharPtr foregroundUri, ArkUI_CharPtr secondaryUri);
+    void (*setStarStyle)(ArkUINodeHandle node, ArkUI_CharPtr backgroundUri, ArkUI_CharPtr foregroundUri,
+        ArkUI_CharPtr secondaryUri, const ArkUIRatingStyleStruct& resObj);
     void (*resetStars)(ArkUINodeHandle node);
     void (*resetRatingStepSize)(ArkUINodeHandle node);
     void (*resetStarStyle)(ArkUINodeHandle node);
