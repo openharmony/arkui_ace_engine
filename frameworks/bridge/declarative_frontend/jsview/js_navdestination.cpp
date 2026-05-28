@@ -643,6 +643,47 @@ void JSNavDestination::SetWillDisAppear(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSNavDestination::SetOnSaveState(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+
+    auto saveStateCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onSaveState = [execCtx = info.GetExecutionContext(), func = std::move(saveStateCallback)]() -> std::string {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, "");
+        ACE_SCORING_EVENT("NavDestination.onSaveState");
+        auto result = func->ExecuteJS();
+        if (result.IsEmpty() || result->IsUndefined() || result->IsNull()) {
+            return "";
+        }
+        return result->ToString();
+    };
+    NavDestinationModel::GetInstance()->SetOnSaveState(std::move(onSaveState));
+    info.ReturnSelf();
+}
+
+void JSNavDestination::SetOnRestoreState(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+
+    auto restoreStateCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onRestoreState = [execCtx = info.GetExecutionContext(), func = std::move(restoreStateCallback)](
+                              const std::string& state) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.onRestoreState");
+        JSRef<JSVal> params[1] = { JSRef<JSVal>::Make() };
+        if (!state.empty()) {
+            params[0] = JSRef<JSObject>::New()->ToJsonObject(state.c_str());
+        }
+        func->ExecuteJS(1, params);
+    };
+    NavDestinationModel::GetInstance()->SetOnRestoreState(std::move(onRestoreState));
+    info.ReturnSelf();
+}
+
 void JSNavDestination::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
 {
     NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
@@ -839,6 +880,8 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillShow", &JSNavDestination::SetWillShow);
     JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
+    JSClass<JSNavDestination>::StaticMethod("onSaveState", &JSNavDestination::SetOnSaveState);
+    JSClass<JSNavDestination>::StaticMethod("onRestoreState", &JSNavDestination::SetOnRestoreState);
     JSClass<JSNavDestination>::StaticMethod("onActive", &JSNavDestination::SetOnActive);
     JSClass<JSNavDestination>::StaticMethod("onInactive", &JSNavDestination::SetOnInactive);
     JSClass<JSNavDestination>::StaticMethod("onResult", &JSNavDestination::SetResultCallback);

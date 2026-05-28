@@ -118,6 +118,8 @@ public:
         navigationMode_ = navigationMode;
     }
 
+    void SetNavigationConfiguration(const NavigationConfiguration& config);
+
     bool JudgeFoldStateChangeAndUpdateState();
 
     void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback = true);
@@ -170,6 +172,8 @@ public:
     {
         return navigationStack_->GetAllNavDestinationNodes();
     }
+
+    bool ProcessAutoCleanAndRestore(int32_t lastStandardIndex);
 
     void RemoveIfNeeded(const std::string& name, const RefPtr<UINode>& navDestinationNode)
     {
@@ -675,6 +679,20 @@ public:
 
     void FireChangeCallbackAfterLayout();
 
+    void IncreasePendingToCleanCount()
+    {
+        pendingToCleanCount_++;
+    }
+
+    void DecreasePendingToCleanCount()
+    {
+        if (pendingToCleanCount_ <= 0) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "pendingToCleanCount already 0, shouldn't decrease!");
+            return;
+        }
+        pendingToCleanCount_--;
+    }
+
     //-------for force split------- begin------
     bool CreateRelatedDestination(
         const std::string& name, RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& relatedDest);
@@ -815,6 +833,9 @@ private:
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
+    int32_t GetAutoCleanRestoreMinIndex(int32_t lastStandardIndex, int32_t stackSize) const;
+    bool NeedRestoreOrAutoClean(const NavPathList& navPathList, int32_t restoreMinIndex) const;
+    bool RestoreAutoCleanedDestination(NavPathList& navPathList, int32_t index, int32_t stackIndex = -1);
     void RefreshNavDestination();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBarOrHomeDestination);
     void NotifyNavDestinationSwitch(RefPtr<NavDestinationContext> from,
@@ -870,6 +891,7 @@ private:
         std::vector<WeakPtr<NavDestinationNodeBase>>& invisibleNodes,
         std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void OnAllTransitionAnimationFinish();
+    void HandleAllPendingToClean();
     void SetRequestedOrientationIfNeeded();
     void UpdatePageLevelConfigForSizeChanged();
     void UpdatePageLevelConfigForSizeChangedWhenNoAnimation();
@@ -1087,6 +1109,9 @@ private:
     bool windowSizeChangedDuringTransition_ = false;
     bool enableVisibilityLifecycleWithContentCover_ = true;
     bool enableLockOrientation_ = false;
+    NavigationConfiguration config_;
+    bool configInitialed_ = false;
+    int32_t pendingToCleanCount_ = 0;
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;

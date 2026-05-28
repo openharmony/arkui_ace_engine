@@ -301,6 +301,13 @@ public:
         return isActive_;
     }
 
+    void SetPendingToClean(bool pendingToClean);
+
+    bool GetPendingToClean() const
+    {
+        return pendingToClean_;
+    }
+
     std::string GetSerializedParam() const
     {
         return serializedParam_;
@@ -332,6 +339,8 @@ public:
     {
         return isStatic_;
     }
+
+    void CallSavedStateToJS(const std::string& savedState);
 
 private:
     struct HideBarOnSwipeContext {
@@ -381,6 +390,7 @@ private:
     RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
     bool isActive_ = false;
+    bool pendingToClean_ = false;
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;

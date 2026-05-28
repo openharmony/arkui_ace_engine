@@ -586,6 +586,9 @@ void NavDestinationPattern::OnDetachFromMainTree()
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->NotifyDestinationLifecycle(host, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
+    if (pendingToClean_) {
+        SetPendingToClean(false);
+    }
 }
 
 void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1124,5 +1127,37 @@ void NavDestinationPattern::BeforeCreateLayoutWrapper()
     auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireBeforeCreateLayoutWrapperCallBack();
+}
+
+void NavDestinationPattern::SetPendingToClean(bool pendingToClean)
+{
+    if (pendingToClean_ == pendingToClean) {
+        return;
+    }
+    pendingToClean_ = pendingToClean;
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    if (pendingToClean_) {
+        navigationPattern->IncreasePendingToCleanCount();
+    } else {
+        navigationPattern->DecreasePendingToCleanCount();
+        auto navigationStack = navigationPattern->GetNavigationStack();
+        if (navigationStack) {
+            navigationStack->MarkAutoCleanedFlag(GetNavDestinationId());
+        }
+    }
+}
+
+void NavDestinationPattern::CallSavedStateToJS(const std::string& savedState)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    CHECK_NULL_VOID(navigation);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto stack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_VOID(stack);
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    stack->SaveStateToJsCallback(hostNode->GetIndex(), GetName(), GetNavDestinationId(), savedState);
 }
 } // namespace OHOS::Ace::NG

@@ -213,6 +213,25 @@ public:
         }
     }
 
+    void SetOnSaveState(NavDestinationSaveStateCallback&& onSaveState)
+    {
+        onSaveState_ = std::move(onSaveState);
+    }
+
+    void SetOnRestoreState(NavDestinationRestoreStateCallback&& onRestoreState)
+    {
+        onRestoreState_ = std::move(onRestoreState);
+    }
+
+    void FireOnSaveState();
+
+    void FireOnRestoreState(const std::string& state)
+    {
+        if (onRestoreState_) {
+            onRestoreState_(state);
+        }
+    }
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -234,6 +253,8 @@ private:
     std::function<void(int32_t)> onShownEvent_;
     std::function<void(int32_t)> onHiddenEvent_;
     NavDestinationOnNewParamCallback onNewParamCallback_;
+    NavDestinationSaveStateCallback onSaveState_;
+    NavDestinationRestoreStateCallback onRestoreState_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
     std::function<void(const RefPtr<NavPathInfo>&)> onNewParamCallbackStatic_;
     std::unordered_map<int32_t, OnStateChangeEvent> onHiddenChange_;
