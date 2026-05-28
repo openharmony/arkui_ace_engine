@@ -12906,7 +12906,7 @@ int32_t SetFocusOnTouch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
 void ResetFocusOnTouch(ArkUI_NodeHandle node)
 {
-    CHECK_NULL_RETURN(node);
+    CHECK_NULL_VOID(node);
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusOnTouch(node->uiNodeHandle);
 }
