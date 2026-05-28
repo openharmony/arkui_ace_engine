@@ -58,10 +58,14 @@ ImageLoadingContext::~ImageLoadingContext()
             std::string taskKey = src_.GetTaskKey() + (GetOnProgressCallback() ? "1" : "0");
             if (ImageProvider::CancelTask(taskKey, WeakClaim(this))) {
                 DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(src_.GetSrc());
+                AceAsyncTraceEndCommercial(traceId_, traceTag_.c_str());
             }
         } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE && InstanceOf<StaticImageObject>(imageObj_)) {
             // cancel MakeCanvasImage task
             ImageProvider::CancelTask(canvasKey_, WeakClaim(this));
+            if (src_.GetSrcType() == SrcType::NETWORK && traceId_ >= 0) {
+                AceAsyncTraceEndCommercial(traceId_, traceTag_.c_str());
+            }
         }
     }
 }
