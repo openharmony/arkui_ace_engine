@@ -548,6 +548,7 @@ ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptorWithString(ArkUI
     auto spans = ParseSpanBaseVector(styles, maxLength);
     spanString->BindWithSpans(spans);
     descriptor->spanString = spanString;
+    descriptor->html = nullptr;
     return descriptor;
 }
 
@@ -557,6 +558,7 @@ ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptorWithImage(ArkUII
     ImageSpanOptions options = CreateImageSpanOptions(attachment);
     MutableSpanString* spanString = new MutableSpanString(options);
     descriptor->spanString = spanString;
+    descriptor->html = nullptr;
     return descriptor;
 }
 
@@ -569,13 +571,17 @@ ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptorWithCustomSpan(A
     MutableSpanString* spanString = new MutableSpanString(span);
     ArkUI_StyledString_Descriptor* descriptor = new ArkUI_StyledString_Descriptor();
     descriptor->spanString = spanString;
+    descriptor->html = nullptr;
     return descriptor;
 }
 
 ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptor()
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor create");
-    return new ArkUI_StyledString_Descriptor();
+    auto* descriptor = new ArkUI_StyledString_Descriptor();
+    descriptor->spanString = nullptr;
+    descriptor->html = nullptr;
+    return descriptor;
 }
 
 void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descriptor)
@@ -583,7 +589,7 @@ void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descripto
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor destroy");
     CHECK_NULL_VOID(descriptor);
     if (descriptor->html) {
-        delete descriptor->html;
+        delete[] descriptor->html;
         descriptor->html = nullptr;
     }
     if (descriptor->spanString) {
