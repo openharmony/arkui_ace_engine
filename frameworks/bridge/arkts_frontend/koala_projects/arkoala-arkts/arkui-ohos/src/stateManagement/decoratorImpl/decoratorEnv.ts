@@ -607,7 +607,9 @@ export class EnvUtils {
  
     public static isSimpleEnvKey(key: string): boolean {
         return key === 'system.window.focused' || key === 'system.window.highlighted' ||
-               key === 'system.window.density.system' || key === 'system.window.displayid';
+               key === 'system.window.density.system' || key === 'system.window.displayid' ||
+               key === 'system.window.avoidarea' || key === 'system.window.avoidarea.px' ||
+               key === 'system.window.size' || key === 'system.window.size.px';
     }
  
     public static getOrCreateWindowStaticEnv(uiContext: UIContext): WindowStaticEnv {
@@ -620,39 +622,28 @@ export class EnvUtils {
         return env;
     }
  
-    public static registerCallbackOnWindowStaticEnv(env: WindowStaticEnv, key: string , callback: (value: Any) => void): void {
+    public static registerCallbackOnWindowStaticEnv(env: WindowStaticEnv, key: string , callback: (value: Any) => void): (() => void) | undefined {
         switch (key) {
             case 'system.window.focused':
-                env.registerFocusEnv(callback as (value: boolean) => void);
-                break;
+                return env.registerFocusEnv(callback as (value: boolean) => void);
             case 'system.window.highlighted':
-                env.registerHighlightedEnv(callback as (value: boolean) => void);
-                break;
+                return env.registerHighlightedEnv(callback as (value: boolean) => void);
             case 'system.window.density.system':
-                env.registerSystemDensityEnv(callback as (value: double) => void);
-                break;
+                return env.registerSystemDensityEnv(callback as (value: double) => void);
             case 'system.window.displayid':
-                env.registerDisplayIdEnv(callback as (value: long) => void);
-                break;
+                return env.registerDisplayIdEnv(callback as (value: long) => void);
+            case 'system.window.avoidarea':
+                return env.registerWindowAvoidAreaVpEnv(callback as (value: window.UIEnvWindowAvoidAreaInfoVP) => void);
+            case 'system.window.avoidarea.px':
+                return env.registerWindowAvoidAreaPxEnv(callback as (value: window.UIEnvWindowAvoidAreaInfoPX) => void);
+            case 'system.window.size':
+                return env.registerWindowSizeVpEnv(callback as (value: window.SizeInVP) => void);
+            case 'system.window.size.px':
+                return env.registerWindowSizePxEnv(callback as (value: window.Size) => void);
             default:
-                break;
+                return undefined;
         }
     }
- 
-    public static unregisterCallbackFromWindowStaticEnv(env: WindowStaticEnv, key: string, callback: (value: Any) => void): void {
-        switch (key) {
-            case 'system.window.focused':
-                env.unregisterFocusEnv(callback as (value: boolean) => void); break;
-            case 'system.window.highlighted':
-                env.unregisterHighlightedEnv(callback as (value: boolean) => void); break;
-            case 'system.window.density.system':
-                env.unregisterSystemDensityEnv(callback as (value: double) => void); break;
-            case 'system.window.displayid':
-                env.unregisterDisplayIdEnv(callback as (value: long) => void); break;
-            default: break;
-        }
-    }
- 
 }
 
 export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IEnvDecoratedVariable<T>, IEnvVariable {
@@ -742,7 +733,10 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
             this.owningViewInternal.__setSimpleEnvDispatchFunc__Internal(this.envSystemEnvString!, dispatchFunc);
 
             const windowStaticEnv = EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
-            this.registerCallbackOnWindowStaticEnv(windowStaticEnv, this.envSystemEnvString!, dispatchFunc);
+            const unregisterFunc = EnvUtils.registerCallbackOnWindowStaticEnv(windowStaticEnv, this.envSystemEnvString!, dispatchFunc);
+            if (unregisterFunc !== undefined) {
+                this.owningViewInternal.__setSimpleEnvUnregisterFunc__Internal(this.envSystemEnvString!, unregisterFunc);
+            }
         }
 
         if (shouldAddToSet) {
@@ -764,18 +758,7 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
             return;
         }
 
-        const setEmpty = this.owningViewInternal.__removeSimpleEnvCallback__Internal(this.envSystemEnvString!, this.systemEnvKeyCallback!);
-
-        if (setEmpty) {
-            const dispatchFunc = this.owningViewInternal.__getAndClearSimpleEnvDispatchFunc__Internal(this.envSystemEnvString!);
-            if (dispatchFunc !== undefined) {
-                const effectiveInstanceId = this.latestInstanceId ?? UIContextUtil.getCurrentInstanceId();
-                const windowStaticEnv = EnvUtils.windowStaticEnvMap.get(effectiveInstanceId);
-                if (windowStaticEnv !== undefined) {
-                    EnvUtils.unregisterCallbackFromWindowStaticEnv(windowStaticEnv, this.envSystemEnvString!, dispatchFunc);
-                }
-            }
-        }
+        this.owningViewInternal.__removeSimpleEnvCallback__Internal(this.envSystemEnvString!, this.systemEnvKeyCallback!);
         this.systemEnvKeyCallback = undefined;
     }
 
@@ -810,24 +793,6 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         return this.finalResult!.get();
     }
 
-    private registerCallbackOnWindowStaticEnv(env: WindowStaticEnv, key: string, callback: (value: Any) => void): void {
-        switch (key) {
-            case 'system.window.focused':
-                env.registerFocusEnv(callback as (value: boolean) => void);
-                break;
-            case 'system.window.highlighted':
-                env.registerHighlightedEnv(callback as (value: boolean) => void);
-                break;
-            case 'system.window.density.system':
-                env.registerSystemDensityEnv(callback as (value: double) => void);
-                break;
-            case 'system.window.displayid':
-                env.registerDisplayIdEnv(callback as (value: long) => void);
-                break;
-            default:
-                break;
-        }
-    }
 
 
     private windowSizeLayoutBreakpointActivate(instanceId: int32): IEnvironmentValue<T> {

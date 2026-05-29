@@ -128,6 +128,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private envInstanceId: int32 | undefined;
     private simpleEnvCallbackSets_: Map<string, Set<(value: Any) => void>> = new Map<string, Set<(value: Any) => void>>();
     private simpleEnvDispatchFuncs_: Map<string, (value: Any) => void> = new Map<string, (value: Any) => void>();
+    private simpleEnvUnregisterFuncs_: Map<string, () => void> = new Map<string, () => void>();
 
     private __activeFunc__Internal?: ActiveAndInactiveCallbackType;
     private __inactiveFunc__Internal?: ActiveAndInactiveCallbackType;
@@ -383,10 +384,19 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     __getSimpleEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void> {
         return this.simpleEnvDispatchFuncs_;
     }
+
+    __setSimpleEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void {
+        this.simpleEnvUnregisterFuncs_.set(envKey, unregisterFunc);
+    }
+
+    __getSimpleEnvUnregisterFuncs__Internal(): Map<string, () => void> {
+        return this.simpleEnvUnregisterFuncs_;
+    }
  
     __clearAllSimpleEnvRegistrations__Internal(): void {
         this.simpleEnvCallbackSets_.clear();
         this.simpleEnvDispatchFuncs_.clear();
+        this.simpleEnvUnregisterFuncs_.clear();
     }    
 
     __getDelegate__Internal<T extends ExtendableComponent, T_Options>(): CustomDelegate<T, T_Options> | undefined {

@@ -33,7 +33,6 @@ import { UIContext } from '@ohos/arkui/UIContext';
 import { RouterImpl } from 'arkui/base/Router';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
-import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { transferTypeName } from '../stateManagement/storage/persistenceV2';
@@ -41,7 +40,6 @@ import { ArkCustomComponentRootPeer } from './staticComponents';
 import { ArkUIObjectFinalizationRegisterProxy } from '../base/ArkUIObjectFinalizationRegisterProxy';
 import { ActiveAndInactiveCallbackType, CustomComponentContext, IReusePool } from '../stateManagement/utils';
 import { IVariableOwner } from '../stateManagement/decorator';
-import { EnvUtils } from '../stateManagement/decoratorImpl/decoratorEnv';
 import { GlobalReusePool } from '../stateManagement/tools/globalReusePool';
 
 // GlobalReuse pool ownership type
@@ -310,12 +308,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             }
             envSet.clear();
         }
-        const dispatchFuncs = this.instance.__getSimpleEnvDispatchFuncs__Internal();
-        const instanceId = this.instance.getEnvInstance();
-        if (instanceId !== undefined && dispatchFuncs.size > 0) {
-            dispatchFuncs.forEach((dispatchFunc: (value: Any) => void, envKey: string) => {
-                const env = EnvUtils.getOrCreateWindowStaticEnv(UIContextUtil.getOrCreateCurrentUIContext());
-                EnvUtils.unregisterCallbackFromWindowStaticEnv(env, envKey, dispatchFunc);
+        const unregisterFuncs = this.instance.__getSimpleEnvUnregisterFuncs__Internal();
+        if (unregisterFuncs.size > 0) {
+            unregisterFuncs.forEach((unregisterFunc: () => void, _: string) => {
+                unregisterFunc();
             });
         }
         this.instance.__clearAllSimpleEnvRegistrations__Internal();
