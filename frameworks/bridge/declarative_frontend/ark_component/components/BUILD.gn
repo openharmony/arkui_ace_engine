@@ -50,7 +50,6 @@ arkui_components_modules = [
 
 arkui_modules = [
   "dynamiclayout",
-  "lazydynamiclayout",
   "flowitem",
   "sidebarcontainer",
   "checkbox",

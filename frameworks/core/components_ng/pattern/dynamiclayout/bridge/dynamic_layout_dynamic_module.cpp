@@ -24,11 +24,6 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_DynamicLayout()
     return new OHOS::Ace::DynamicLayoutDynamicModule();
 }
 
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_LazyDynamicLayout()
-{
-    return new OHOS::Ace::DynamicLayoutDynamicModule();
-}
-
 namespace OHOS::Ace {
 
 namespace NG {

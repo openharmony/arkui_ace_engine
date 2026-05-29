@@ -75,7 +75,6 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "FlowItem", "waterflow" },
         { "FolderStack", "folderstack" },
         {"DynamicLayout", "dynamiclayout"},
-        { "LazyDynamicLayout", "dynamiclayout "},
         { "Gauge", "gauge" },
         { "Hyperlink", "hyperlink" },
         { "Indexer", "indexer" },

@@ -22,8 +22,6 @@ class DynamicLayoutBridge {
 public:
     static void RegisterDynamicLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static ArkUINativeModuleValue CreateDynamicLayout(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue CreateLazyDynamicLayout(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetOnVisibleIndexesChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 #endif
