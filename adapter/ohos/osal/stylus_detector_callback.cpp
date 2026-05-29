@@ -224,7 +224,7 @@ int32_t StylusDetectorCallBack::ChoiceText(int32_t nodeId, void* data,
                 CHECK_NULL_VOID(textInputClient);
                 SelectionOptions option = { .menuPolicy = MenuPolicy::HIDE };
                 if (choiceTextOption.showMenu) {
-                    option = { .menuPolicy = MenuPolicy::SHOW };
+                    option = { .menuPolicy = MenuPolicy::SHOW, .forceShowHandle = true  };
                 }
                 textInputClient->SetSelection(std::get<INDEX_S>(ret), std::get<INDEX_E>(ret), option);
                 resultCode = 0;

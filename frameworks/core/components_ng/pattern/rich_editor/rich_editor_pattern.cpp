@@ -10533,7 +10533,8 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
         IF_TRUE(handlePolicy == HandlePolicy::HIDE, CloseSelectOverlay());
         CHECK_NULL_VOID(handlePolicy == HandlePolicy::DEFAULT);
     }
-    if (!IsShowHandle()) {
+    bool forceShowHandle = options.has_value() ? options.value().forceShowHandle : false;
+    if (!IsShowHandle() && !forceShowHandle) {
         CloseSelectOverlay();
     } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
         ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
