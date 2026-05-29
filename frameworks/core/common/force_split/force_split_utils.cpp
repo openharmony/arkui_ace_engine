@@ -580,43 +580,6 @@ bool ForceSplitUtils::ParseForceSplitParam(
     if (isRouterSplit) {
         return true;
     }
-    if (configJson->Contains(HOME_NAVIGATION_ID_KEY)) {
-        auto idJson = configJson->GetValue(HOME_NAVIGATION_ID_KEY);
-        if (!idJson->IsString()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not string!", HOME_NAVIGATION_ID_KEY);
-            return false;
-        }
-        auto idStr = idJson->GetString();
-        if (!idStr.empty()) {
-            config.navigationId = idStr;
-        }
-    }
-    if (configJson->Contains(HOME_NAVIGATION_DEPTH_KEY)) {
-        auto depthJson = configJson->GetValue(HOME_NAVIGATION_DEPTH_KEY);
-        if (!depthJson->IsNumber()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not number!", HOME_NAVIGATION_DEPTH_KEY);
-            return false;
-        }
-        config.navigationDepth = configJson->GetInt(HOME_NAVIGATION_DEPTH_KEY);
-    }
-    if (configJson->Contains(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY)) {
-        auto disablePlaceholderJson = configJson->GetValue(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
-        if (!disablePlaceholderJson->IsBool()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not bool!",
-                NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
-            return false;
-        }
-        config.navigationDisablePlaceholder = disablePlaceholderJson->GetBool();
-    }
-    if (configJson->Contains(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY)) {
-        auto disableDividerJson = configJson->GetValue(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY);
-        if (!disableDividerJson->IsBool()) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is not bool!",
-                NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY);
-            return false;
-        }
-        config.navigationDisableDivider = disableDividerJson->GetBool();
-    }
     return ParseNavigationOptions(configJson, config);
 }
 
