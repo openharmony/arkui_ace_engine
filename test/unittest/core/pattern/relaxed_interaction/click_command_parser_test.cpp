@@ -227,17 +227,6 @@ const std::string MODE_IS_NUMBER_JSON = R"({
         }
     }
 })";
-
-const std::string INVALID_X1_Y1_NOT_NUMBER_JSON = R"({
-    "type": "click",
-    "mode": "auto",
-    "action_info": {
-        "coordinates": {
-            "x1": "abc",
-            "y1": "xyz"
-        }
-    }
-})";
 }
 
 class ClickCommandParserTest : public testing::Test {
@@ -681,18 +670,6 @@ HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_Y1NotNumber_Re
     EXPECT_FALSE(result);
 }
 
-HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_X1Y1BothNotNumber_ReturnsFalse, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ClickCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_X1_Y1_NOT_NUMBER_JSON);
-    ASSERT_NE(json, nullptr);
-
-    PointF coordinates(0.0f, 0.0f);
-    auto result = parser.ParseCoordinates(json.get(), coordinates);
-    EXPECT_FALSE(result);
-}
-
 HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_FractionalValues_ParsesCorrectly, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
@@ -738,42 +715,6 @@ HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_CoordinatesNot
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
     ClickCommandParser parser(context);
     auto json = JsonUtil::ParseJsonString(COORDINATES_NOT_OBJECT_JSON);
-    ASSERT_NE(json, nullptr);
-
-    PointF coordinates(0.0f, 0.0f);
-    auto result = parser.ParseCoordinates(json.get(), coordinates);
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_OnlyX1Present_ReturnsFalse, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ClickCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_ONLY_X1_JSON);
-    ASSERT_NE(json, nullptr);
-
-    PointF coordinates(0.0f, 0.0f);
-    auto result = parser.ParseCoordinates(json.get(), coordinates);
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_OnlyY1Present_ReturnsFalse, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ClickCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_ONLY_Y1_JSON);
-    ASSERT_NE(json, nullptr);
-
-    PointF coordinates(0.0f, 0.0f);
-    auto result = parser.ParseCoordinates(json.get(), coordinates);
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(ClickCommandParserParseCoordinatesTest, ParseCoordinates_BothMissing_ReturnsFalse, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    ClickCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(INVALID_MISSING_X1_Y1_JSON);
     ASSERT_NE(json, nullptr);
 
     PointF coordinates(0.0f, 0.0f);

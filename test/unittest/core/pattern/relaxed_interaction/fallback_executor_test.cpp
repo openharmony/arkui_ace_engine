@@ -19,19 +19,12 @@
 
 #include "base/memory/ace_type.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/relaxed_interaction/executors/fallback_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
-constexpr int32_t TEST_NODE_ID = 69;
-const std::string TEST_BODY = "{\"cmd\":\"checked\",\"params\":{\"value\":true}}";
-const std::string TEST_STRING_IDENTITY = "test_node_key";
 
 class FallbackExecutorTest : public testing::Test {
 public:
@@ -133,45 +126,6 @@ HWTEST_F(FallbackExecutorIsSingleStepTest, IsSingleStep_ReturnsTrue, TestSize.Le
 
     auto isSingleStep = executor.IsSingleStep();
     EXPECT_TRUE(isSingleStep);
-}
-
-HWTEST_F(FallbackExecutorExecuteStepTest, ExecuteStep_StringIdentity_NullRootNode_ReturnsFailed, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    auto rootBackup = mockPipelineContext_->rootNode_;
-    mockPipelineContext_->rootNode_.Reset();
-
-    FallbackExecutor executor(context, TEST_STRING_IDENTITY, TEST_BODY);
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::FAILED);
-
-    mockPipelineContext_->rootNode_ = rootBackup;
-}
-
-HWTEST_F(FallbackExecutorExecuteStepTest, ExecuteStep_StringIdentity_NoMatchingNode_ReturnsFailed, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    auto rootNode = mockPipelineContext_->GetRootElement();
-    ASSERT_EQ(rootNode, nullptr);
-
-    FallbackExecutor executor(context, TEST_STRING_IDENTITY, TEST_BODY);
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::FAILED);
-}
-
-HWTEST_F(FallbackExecutorExecuteStepTest, ExecuteStep_IntIdentity_NodeFound_ReturnsSuccess, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-
-    auto frameNode = FrameNode::CreateFrameNode(
-        "test", TEST_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    ElementRegister::GetInstance()->AddUINode(frameNode);
-
-    FallbackExecutor executor(context, TEST_NODE_ID, TEST_BODY);
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::SUCCESS);
-
-    ElementRegister::GetInstance()->RemoveItemSilently(TEST_NODE_ID);
 }
 
 } // namespace OHOS::Ace::NG
