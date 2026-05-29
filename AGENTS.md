@@ -149,7 +149,7 @@ Detailed templates/rules: `docs/knowledge_base_README.md`.
 - If a user correction reveals a doc error, update relevant knowledge base docs.
 - Record root cause and prevention in the knowledge base when appropriate.
 
-## 5. Project Map (Condensed)
+## 5. Project Map
 
 - `adapter/`: platform adaptation (`ohos/`, `preview/`)
 - `advanced_ui_component/`, `advanced_ui_component_static/`: advanced/composite components for the dynamic and static paradigms (counterparts of `@ohos.arkui.advanced.*`).
@@ -178,3 +178,18 @@ Detailed templates/rules: `docs/knowledge_base_README.md`.
   - Build `linux_unittest_capi`
   - Run relevant `capi_*` test executables
   - Ensure host binaries are correct architecture (`file <test_binary>`)
+
+## 8. Hard Boundaries (Do not / Ask before)
+
+Do not (without explicit user confirmation):
+
+- Change public API signatures/semantics/error codes/struct layout under `interfaces/native/` or `interfaces/napi/` (including ABI-risk changes).
+- Manually edit generated files under `**/generated/`.
+- Add dependencies on other OpenHarmony system modules outside `adapter/` (including `BUILD.gn` `deps/public_deps/data_deps` dependency entries).
+- Run destructive or hard-to-recover commands (for example `rm -rf`, `git reset --hard`).
+
+Ask before:
+
+- Any API/ABI compatibility-impacting change or default behavior change.
+- Any new/updated/replaced dependency: `bundle.json` dependency changes; new `deps/public_deps/data_deps` in any `BUILD.gn`.
+- Regenerating static ArkTS generated files (must edit `frameworks/bridge/arkts_frontend/arkoala_generator/` first).
