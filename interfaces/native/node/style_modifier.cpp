@@ -1084,11 +1084,20 @@ int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             node->uiNodeHandle, item->string, bundle.c_str(), module.c_str(), repeat, nullptr);
     } else {
         auto drawableDescriptor = reinterpret_cast<ArkUI_DrawableDescriptor*>(item->object);
-        if (!drawableDescriptor->drawableDescriptor) {
+        if (!drawableDescriptor) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePixelMap(
-            node->uiNodeHandle, drawableDescriptor->drawableDescriptor.get(), repeat);
+        node->drawableDescriptor = drawableDescriptor;
+        if (!drawableDescriptor->drawableDescriptor && !drawableDescriptor->newDrawableDescriptor) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        if (drawableDescriptor->drawableDescriptor) {
+            fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePixelMap(
+                node->uiNodeHandle, drawableDescriptor->drawableDescriptor.get(), repeat);
+        } else if (drawableDescriptor->newDrawableDescriptor) {
+            fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageDrawableDescriptor(
+                node->uiNodeHandle, drawableDescriptor->newDrawableDescriptor, repeat);
+        }
     }
     return ERROR_CODE_NO_ERROR;
 }

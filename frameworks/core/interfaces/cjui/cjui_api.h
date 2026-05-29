@@ -459,6 +459,8 @@ struct CJUICommonModifier {
     ArkUIBlurStyleOptionType (*getForegroundBlurStyle)(ArkUINodeHandle node);
     void (*setBackgroundImagePixelMap)(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex);
     void (*setBackgroundImagePixelMapByPixelMapPtr)(ArkUINodeHandle node, void* pixelMapPtr, ArkUI_Int32 repeatIndex);
+    void (*setBackgroundImageDrawableDescriptor)(ArkUINodeHandle node, void* newDrawableDescriptor,
+        ArkUI_Int32 repeatIndex);
     void (*setLayoutRect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[4]);
     void (*getLayoutRect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[4]);
     void (*resetLayoutRect)(ArkUINodeHandle node);
