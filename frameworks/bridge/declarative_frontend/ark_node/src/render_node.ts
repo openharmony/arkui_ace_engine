@@ -144,6 +144,28 @@ class LengthMetrics {
         this.value_ = unit === undefined ? value : 0;
     }
     this.res_ = res === undefined ? undefined : res;
+    Object.defineProperty(this, 'value', {
+      enumerable: true,
+      configurable: true,
+      get: (): number => {
+        this.updateValue();
+        return this.value_;
+      },
+      set: (v: number): void => {
+        this.value_ = v;
+      }
+    });
+    Object.defineProperty(this, 'unit', {
+      enumerable: true,
+      configurable: true,
+      get: (): LengthUnit => {
+        this.updateValue();
+        return this.unit_;
+      },
+      set: (v: LengthUnit): void => {
+        this.unit_ = v;
+      }
+    });
   }
   static px(value: number) {
     return new LengthMetrics(value, LengthUnit.PX);
@@ -174,13 +196,6 @@ class LengthMetrics {
       this.value_ = length[0];
       this.unit_ = length[1];
     }
-  }
-  get value(): number {
-    this.updateValue();
-    return this.value_;
-  }
-  get unit(): LengthUnit {
-    return this.unit_;
   }
   get res(): Resource | undefined {
     return this.res_;
