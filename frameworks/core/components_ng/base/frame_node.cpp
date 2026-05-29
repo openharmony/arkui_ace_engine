@@ -640,6 +640,20 @@ public:
         }
     }
 
+    void RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes)
+    {
+        auto guard = GetGuard();
+        for (const auto& node : nodes) {
+            for (auto it = partFrameNodeChildren_.begin(); it != partFrameNodeChildren_.end();) {
+                if (it->second && it->second->GetHostNode() == node) {
+                    it = partFrameNodeChildren_.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+    }
+
 private:
     std::list<FrameChildNode> children_;
     std::list<FrameChildNode>::iterator cursor_ = children_.begin();
@@ -6613,6 +6627,11 @@ void FrameNode::SetActiveChildRange(
 void FrameNode::RecycleItemsByIndex(int32_t start, int32_t end)
 {
     frameProxy_->RecycleItemsByIndex(start, end);
+}
+
+void FrameNode::RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes)
+{
+    frameProxy_->RemoveFromPartFrameNodeChildren(nodes);
 }
 
 void FrameNode::RemoveChildInRenderTree(uint32_t index)

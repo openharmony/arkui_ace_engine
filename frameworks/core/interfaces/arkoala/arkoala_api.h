@@ -9319,6 +9319,11 @@ struct ArkUINDKRenderNodeModifier {
 
 struct ArkUIDynamicLayoutModifier {
     void (*createDynamicLayout)(void* params, ArkUI_Int32 type);
+    void (*createLazyDynamicLayout)(void* params, ArkUI_Int32 type);
+    void (*setOnVisibleIndexesChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnVisibleIndexesChange)(ArkUINodeHandle node);
+    void (*setAdjustedOffset)(ArkUINodeHandle node, ArkUI_Float32 adjustedOffset);
+    void (*setInActiveChildren)(ArkUINodeHandle node, const ArkUI_Int32* children, ArkUI_Uint32 size);
 };
 
 struct ArkUILazyWaterFlowLayoutModifier {

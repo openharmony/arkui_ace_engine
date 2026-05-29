@@ -24,6 +24,7 @@
 #include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_offset.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
@@ -34,7 +35,6 @@ namespace OHOS::Ace::NG {
 class PipelineContext;
 class ListPattern;
 class ListPositionMap;
-struct AdjustOffset;
 
 struct ListItemGroupLayoutInfo {
     bool atStart = false;

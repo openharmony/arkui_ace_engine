@@ -531,6 +531,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
 {
     static const std::unordered_set<std::string> loadModuleName = {
         {"DynamicLayout"},
+        {"LazyDynamicLayout"},
         { "ContainerReader" },
         {"Counter"},
         {"Gauge" },

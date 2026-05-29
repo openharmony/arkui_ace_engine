@@ -16,11 +16,15 @@ import(
  
 build_component_ng("dynamiclayout_pattern_ng") {
   sources = [
+    "active_range_updater.cpp",
     "algorithm_param_base.cpp",
     "dynamic_layout_algorithm.cpp",
     "dynamic_layout_model_ng.cpp",
     "dynamic_layout_node.cpp",
-    "dynamic_layout_pattern.cpp"
+    "dynamic_layout_pattern.cpp",
+    "lazy_dynamic_layout_algorithm.cpp",
+    "lazy_dynamic_layout_model_ng.cpp",
+    "lazy_dynamic_layout_pattern.cpp"
   ]
   ark_sources = [
     "bridge/arkts_native_dynamic_layout_bridge.cpp",
