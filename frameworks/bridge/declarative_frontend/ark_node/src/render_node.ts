@@ -499,7 +499,8 @@ class ColorMetrics {
     if (maxValue > 1.0) {
       headRoom = maxValue;
     }
-    colorMetrics.setColorWithHeadRoom(clampedRed / headRoom, clampedGreen / headRoom, clampedBlue / headRoom, headRoom);
+    colorMetrics.setColorWithHeadRoom(
+      clampedRed / headRoom, clampedGreen / headRoom, clampedBlue / headRoom, Math.pow(headRoom, 2.2));
     return colorMetrics;
   }
 }
