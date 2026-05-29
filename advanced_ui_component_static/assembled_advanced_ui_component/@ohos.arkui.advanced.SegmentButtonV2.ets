@@ -83,6 +83,7 @@ import { EnvironmentCallback } from '@kit.AbilityKit';
 import deviceInfo from '@ohos.deviceInfo';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
+import common from '@ohos.app.ability.common';
 
 export interface SegmentButtonV2ItemOptions {
   text?: ResourceStr;
@@ -146,6 +147,7 @@ const SMALLEST_MAX_FONT_SCALE: double = 1.0;
 const LARGEST_MAX_FONT_SCALE: double = 2.0;
 const SMALLEST_MIN_FONT_SCALE: double = 0.0;
 const LARGEST_MIN_FONT_SCALE: double = 1.0;
+const COLOR_RESOURCE_TYPE: int = 10001;
 
 const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
   buttonBackgroundColor: $r('sys.color.segment_button_v2_tab_button_background'),
@@ -1527,9 +1529,15 @@ struct SegmentButtonV2ItemContent {
 
   private getItemSymbolFillColor(): ResourceColor {
     if (this.selected) {
-      return this.itemSelectedSymbolFontColor?.color ?? this.theme.itemSelectedSymbolFontColor;
+      if (this.itemSelectedSymbolFontColor) {
+        return this.getColorMetricsResourceColor(this.itemSelectedSymbolFontColor as ColorMetrics);
+      }
+      return this.theme.itemSelectedSymbolFontColor;
     }
-    return this.itemSymbolFontColor?.color ?? this.theme.itemSymbolFontColor;
+    if (this.itemSymbolFontColor) {
+      return this.getColorMetricsResourceColor(this.itemSymbolFontColor as ColorMetrics);
+    }
+    return this.theme.itemSymbolFontColor;
   }
 
   private getSymbolFontSize(): Dimension {
@@ -1567,6 +1575,20 @@ struct SegmentButtonV2ItemContent {
     return SMALLEST_MIN_FONT_SCALE;
   }
 
+  private getColorMetricsResourceColor(colorMetrics: ColorMetrics): ResourceColor {
+    let cls = Class.from<ColorMetrics>();
+    let method = cls.getInstanceMethod('getResourceId');
+    let resourceId = method!.invoke(colorMetrics);
+    if (typeof resourceId === 'number' && resourceId !== -1) {
+      const context: common.Context = this.getUIContext().getHostContext() as common.Context;
+      return {
+        id: resourceId as int, type: COLOR_RESOURCE_TYPE,
+        bundleName: (context as common.UIAbilityContext)?.abilityInfo?.bundleName ?? '',
+        moduleName: (context as common.UIAbilityContext)?.abilityInfo?.moduleName ?? '',
+      } as Resource;
+    }
+    return colorMetrics.color;
+  }
   private getItemPadding(): LocalizedPadding | Length | Padding {
     const itemPadding: LocalizedPadding = {
       top: this.theme.itemPadding.top,
@@ -1614,12 +1636,12 @@ struct SegmentButtonV2ItemContent {
   private getItemFontColor(): ResourceColor {
     if (this.selected) {
       if (this.itemSelectedFontColor) {
-        return this.itemSelectedFontColor!.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedFontColor as ColorMetrics);
       }
       return this.theme.itemSelectedFontColor;
     }
     if (this.itemFontColor) {
-      return this.itemFontColor!.color;
+      return this.getColorMetricsResourceColor(this.itemFontColor as ColorMetrics);
     }
     return this.theme.itemFontColor;
   }
@@ -1668,12 +1690,12 @@ struct SegmentButtonV2ItemContent {
   private getItemIconFillColor(): ResourceColor {
     if (this.selected) {
       if (this.itemSelectedIconFillColor) {
-        return this.itemSelectedIconFillColor!.color;
+        return this.getColorMetricsResourceColor(this.itemSelectedIconFillColor as ColorMetrics);
       }
       return this.theme.itemSelectedIconFillColor;
     }
     if (this.itemIconFillColor) {
-      return this.itemIconFillColor!.color;
+      return this.getColorMetricsResourceColor(this.itemIconFillColor as ColorMetrics);
     }
     return this.theme.itemIconFillColor;
   }

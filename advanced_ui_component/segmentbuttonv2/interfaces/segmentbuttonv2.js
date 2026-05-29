@@ -3301,9 +3301,15 @@ class SegmentButtonV2ItemContent extends ViewV2 {
   }
   getItemSymbolFillColor() {
     if (this.selected) {
-      return this.itemSelectedSymbolFontColor?.color ?? this.theme.itemSelectedSymbolFontColor;
+      if (this.itemSelectedSymbolFontColor) {
+        return this.getColorMetricsResourceColor(this.itemSelectedSymbolFontColor);
+      }
+      return this.theme.itemSelectedSymbolFontColor;
     }
-    return this.itemSymbolFontColor?.color ?? this.theme.itemSymbolFontColor;
+    if (this.itemSymbolFontColor) {
+      return this.getColorMetricsResourceColor(this.itemSymbolFontColor);
+    }
+    return this.theme.itemSymbolFontColor;
   }
   getSymbolFontSize() {
     if (
@@ -3365,13 +3371,13 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     return this.hasHybrid ? this.theme.hybridItemMinHeight : this.theme.itemMinHeight;
   }
   getColorMetricsResourceColor(colorMetrics) {
-    const resourceId = colorMetrics.getResourceId();
-    if (resourceId !== undefined && resourceId !== -1) {
-      const abilityContext = this.getUIContext().getHostContext();
+    const resourceId = Reflect.get(colorMetrics, 'resourceId_');
+    if (typeof resourceId === 'number' && resourceId !== -1) {
+      const context = this.getUIContext().getHostContext();
       return {
         id: resourceId, type: COLOR_RESOURCE_TYPE,
-        bundleName: abilityContext?.abilityInfo?.bundleName ?? '',
-        moduleName: abilityContext?.abilityInfo?.moduleName ?? ''
+        bundleName: context?.abilityInfo?.bundleName ?? '',
+        moduleName: context?.abilityInfo?.moduleName ?? '',
       };
     }
     return colorMetrics.color;
