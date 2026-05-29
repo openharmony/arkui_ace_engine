@@ -17,6 +17,7 @@ import { StorageDefaultCreator } from './persistenceV2';
 import { IObservedAnyProp } from '../decorator';
 import { ObserveWrappedKeyedMeta } from '../base/observeWrappedBase';
 import { StateMgmtTool } from '#stateMgmtTool';
+import { InterfaceProxyHandler } from '../tools/arkts/observeInterfaceProxy';
 
 export type CollectionCoderErrorCallback = (message: string) => void;
 
@@ -97,6 +98,18 @@ function getClassName(val: Any): string | undefined {
 function getElementType(val: Any): string {
     if (val === null || val === undefined) {
         return '';
+    }
+    if (Array.isArray(val)) {
+        return 'Array';
+    }
+    if (val instanceof Set) {
+        return 'Set';
+    }
+    if (val instanceof Map && !(val instanceof Record)) {
+        return 'Map';
+    }
+    if (val instanceof Date) {
+        return 'Date';
     }
     if (typeof val === 'object') {
         const cn = getClassName(val);
@@ -265,6 +278,28 @@ function serializePlainObject(value: Any, refId: string, visited: Map<Object, st
     return result;
 }
 
+function collectProxyFieldDeps(proxy: Any, target: Any): void {
+    try {
+        const handler = StateMgmtTool.tryGetHandler(proxy as Object);
+        if (handler === undefined || handler === null) {
+            return;
+        }
+        if (!(handler instanceof InterfaceProxyHandler)) {
+            return;
+        }
+        const interfaceHandler = handler as InterfaceProxyHandler;
+        const clazz = Class.of(target as Object);
+        reflect.getInstanceFieldsRecursive(clazz).forEach((field: reflect.InstanceField) => {
+            try {
+                const getter = clazz.getInstanceMethod(GETTER_PREFIX + field.getName());
+                if (getter !== undefined && getter !== null) {
+                    interfaceHandler.get(target as Object, getter);
+                }
+            } catch (e) {}
+        });
+    } catch (e) {}
+}
+
 function serializeValue(value: Any, visited: Map<Object, string>,
     onError?: CollectionCoderErrorCallback): string {
     const primResult = serializePrimitive(value);
@@ -278,33 +313,42 @@ function serializeValue(value: Any, visited: Map<Object, string>,
         (value as IObservedAnyProp).addRefAnyProp();
     }
 
-    const boxedResult = serializeBoxed(value);
+    let realValue: Any = value;
+    try {
+        const target = StateMgmtTool.tryGetTarget(value as Object);
+        if (target !== undefined && target !== null) {
+            realValue = target as Any;
+            collectProxyFieldDeps(value, target);
+        }
+    } catch (e) {}
+
+    const boxedResult = serializeBoxed(realValue);
     if (boxedResult !== undefined) {
         return boxedResult;
     }
 
-    let refId = visited.get(value as Object);
+    let refId = visited.get(realValue as Object);
     if (refId !== undefined) {
         return '{"_t":"re","_r":"' + refId + '"}';
     }
 
     const size: int = visited.size;
     refId = size.toString(32).padStart(4, '0');
-    visited.set(value as Object, refId);
+    visited.set(realValue as Object, refId);
 
-    if (value instanceof Date) {
-        return '{"_t":"Da","_r":"' + refId + '","_v":"' + (value as Date).toISOString() + '"}';
+    if (realValue instanceof Date) {
+        return '{"_t":"Da","_r":"' + refId + '","_v":"' + (realValue as Date).toISOString() + '"}';
     }
-    if (value instanceof Array) {
-        return serializeArray(value, refId, visited, onError);
+    if (realValue instanceof Array) {
+        return serializeArray(realValue, refId, visited, onError);
     }
-    if (value instanceof Set) {
-        return serializeSet(value, refId, visited, onError);
+    if (realValue instanceof Set) {
+        return serializeSet(realValue, refId, visited, onError);
     }
-    if (value instanceof Map && !(value instanceof Record)) {
-        return serializeMap(value, refId, visited, onError);
+    if (realValue instanceof Map && !(realValue instanceof Record)) {
+        return serializeMap(realValue, refId, visited, onError);
     }
-    return serializePlainObject(value, refId, visited, onError);
+    return serializePlainObject(realValue, refId, visited, onError);
 }
 
 function readPrimitiveValue(type: string, element: jsonx.JsonElement): Any | undefined {
@@ -689,6 +733,16 @@ function checkUnregisteredSubCreator(srcFirst: Any, collectionLabel: string,
     return undefined;
 }
 
+function resolveActualClassName(instance: Object): string {
+    try {
+        const target = StateMgmtTool.tryGetTarget(instance);
+        if (target !== undefined && target !== null) {
+            return Class.of(target).getName();
+        }
+    } catch (e) {}
+    return Class.of(instance).getName();
+}
+
 function isCreatorMismatch(actualName: string, className: string,
     onError?: CollectionCoderErrorCallback): boolean {
     if (actualName === className) {
@@ -722,7 +776,7 @@ function cloneOrCopyValue(val: Any, classNameToCreator: Map<string, StorageDefau
         if (creator !== undefined) {
             const newInstance = creator();
             try {
-                const actualName = Class.of(newInstance as Object).getName();
+                const actualName = resolveActualClassName(newInstance as Object);
                 if (isCreatorMismatch(actualName, className, onError)) {
                     return SKIP_SENTINEL;
                 }
@@ -731,6 +785,24 @@ function cloneOrCopyValue(val: Any, classNameToCreator: Map<string, StorageDefau
             restoreObject(newInstance, val, classNameToCreator, visitedTargets, visitedSources, onError);
             return newInstance;
         }
+    }
+    if (val instanceof Array) {
+        const newArr: Array<Any> = [];
+        visitedSources.set(val as Object, newArr as Object);
+        restoreArray(newArr, val, classNameToCreator, visitedTargets, visitedSources, onError);
+        return newArr;
+    }
+    if (val instanceof Set) {
+        const newSet: Set<Any> = new Set<Any>();
+        visitedSources.set(val as Object, newSet as Object);
+        restoreSet(newSet, val, classNameToCreator, visitedTargets, visitedSources, onError);
+        return newSet;
+    }
+    if (val instanceof Map && !(val instanceof Record)) {
+        const newMap: Map<Any, Any> = new Map<Any, Any>();
+        visitedSources.set(val as Object, newMap as Object);
+        restoreMap(newMap, val, classNameToCreator, visitedTargets, visitedSources, onError);
+        return newMap;
     }
     visitedSources.set(val as Object, val as Object);
     return val;
@@ -883,7 +955,7 @@ function restoreNestedField(field: reflect.InstanceField, realTarget: Any,
         if (creator !== undefined) {
             const newInstance = creator();
             try {
-                const actualName = Class.of(newInstance as Object).getName();
+                const actualName = resolveActualClassName(newInstance as Object);
                 if (isCreatorMismatch(actualName, className, onError)) {
                     return;
                 }
@@ -996,8 +1068,18 @@ function restoreObject(target: Any, source: Any,
 export class V2CollectionCoder {
 
     public static stringify<T>(value: T, onError?: CollectionCoderErrorCallback): string {
+        let safeOnError: CollectionCoderErrorCallback | undefined = undefined;
+        if (onError) {
+            safeOnError = (msg: string): void => {
+                try {
+                    onError!(msg);
+                } catch (e) {
+                    console.error('PersistenceV2: Error callback threw: ' + e);
+                }
+            };
+        }
         const visited = new Map<Object, string>();
-        return '{"$":' + serializeValue(value, visited, onError) + '}';
+        return '{"$":' + serializeValue(value, visited, safeOnError) + '}';
     }
 
     public static parse(text: string): Any {

@@ -41,6 +41,17 @@ export function transferTypeName(typename: string): string {
     return typename.substring(typename.lastIndexOf('.') + 1);
 }
 
+const WRAPPER_TO_BASE_TYPE: Map<string, string> = new Map<string, string>([
+    ['WrappedArray', 'Array'],
+    ['ObservedArray', 'Array'],
+    ['WrappedMap', 'Map'],
+    ['ObservedMap', 'Map'],
+    ['WrappedSet', 'Set'],
+    ['ObservedSet', 'Set'],
+    ['WrappedDate', 'Date'],
+    ['ObservedDate', 'Date'],
+]);
+
 export interface SerializableObject extends jsonx.JsonElementSerializable, jsonx.JsonElementDeserializable {}
 
 /**
@@ -261,9 +272,16 @@ export class StorageHelper {
     }
 
     public static checkTypeByName(key: string, ttype: Class, typeName: string): void {
-        if (transferTypeName(ttype.getName()) !== typeName) {
-            throw new Error(`The type mismatches when use the key '${key}' in storage, '${transferTypeName(ttype.getName())}' vs. '${typeName}'`);
+        const currentName = transferTypeName(ttype.getName());
+        if (currentName === typeName) {
+            return;
         }
+        const baseName = WRAPPER_TO_BASE_TYPE.get(currentName);
+        if (baseName !== undefined && baseName === typeName) {
+            return;
+        }
+        throw new Error('The type mismatches when use the key \'' + key + '\' in storage, \'' +
+            currentName + '\' vs. \'' + typeName + '\'');
     }
 
     public static checkTypeByInstanceOf<T>(key: string, ttype: Class, obj: T): void {
@@ -496,6 +514,19 @@ export class PersistenceV2Impl {
             classNameToCreator = new Map<string, StorageDefaultCreator<object>>();
             connectOptions.defaultSubCreators!.forEach((creator: StorageDefaultCreator<object>, clazz: Class) => {
                 classNameToCreator!.set(clazz.getName(), creator);
+                if (clazz.isInterface()) {
+                    try {
+                        let instance = creator() as Object;
+                        const target = StateMgmtTool.tryGetTarget(instance);
+                        if (target !== undefined && target !== null) {
+                            instance = target;
+                        }
+                        const runtimeName = Class.of(instance).getName();
+                        if (runtimeName !== clazz.getName()) {
+                            classNameToCreator!.set(runtimeName, creator);
+                        }
+                    } catch (e) {}
+                }
             });
         }
 
@@ -741,23 +772,34 @@ export class PersistenceV2Impl {
         return new StoragePropertyV2<T>(key, uiUtils.autoProxyObject(value), autoSave);
     }
 
-    private static getTargetClassName<T extends object>(value: T): string {
-        try {
-            let maybeTarget = StateMgmtTool.tryGetTarget(value);
-            let target = maybeTarget ? maybeTarget as T : value;
-            if (target instanceof Map && !(target instanceof Record)) return 'Map';
-            if (target instanceof Set) return 'Set';
-            if (target instanceof Date) return 'Date';
-            if (Array.isArray(target)) return 'Array';
-            return transferTypeName(Class.ofAny(target)!.getName());
-        } catch (err) {
-            // not proxied
+    private static resolveCollectionTypeName<T extends object>(target: T): string | undefined {
+        if (target instanceof Map && !(target instanceof Record)) {
+            return 'Map';
         }
-        if (value instanceof Map && !(value instanceof Record)) return 'Map';
-        if (value instanceof Set) return 'Set';
-        if (value instanceof Date) return 'Date';
-        if (Array.isArray(value)) return 'Array';
-        return transferTypeName(Class.ofAny(value)!.getName());
+        if (target instanceof Set) {
+            return 'Set';
+        }
+        if (target instanceof Date) {
+            return 'Date';
+        }
+        if (Array.isArray(target)) {
+            return 'Array';
+        }
+        return undefined;
+    }
+
+    private static resolveObjectTypeName<T extends object>(target: T): string {
+        return transferTypeName(Class.ofAny(target)!.getName());
+    }
+
+    private static getTargetClassName<T extends object>(value: T): string {
+        let maybeTarget = StateMgmtTool.tryGetTarget(value);
+        let target = maybeTarget ? maybeTarget as T : value;
+        let collectionName = PersistenceV2Impl.resolveCollectionTypeName(target);
+        if (collectionName !== undefined) {
+            return collectionName;
+        }
+        return PersistenceV2Impl.resolveObjectTypeName(target);
     }
 
     private static fromJsonWithType<T extends object | SerializableObject>(
@@ -804,6 +846,28 @@ export class PersistenceV2Impl {
         return jsonx.JsonElement.createArray(topArray);
     }
 
+    private restoreParsedValue<T extends object>(
+        key: string, ttype: Class, currentValue: T,
+        jsonElement: jsonx.JsonElement,
+        classNameToCreator: Map<string, StorageDefaultCreator<object>> | undefined,
+        jsonString: string | undefined): T {
+        const typeNameOnDisk = jsonElement.asArray()[0].asString();
+        StorageHelper.checkTypeByName(key, ttype, typeNameOnDisk);
+        const payloadStr = JSON.stringifyJsonElement(jsonElement.asArray()[1]);
+        if (V2CollectionCoder.isNewFormat(payloadStr)) {
+            const parsed = V2CollectionCoder.parse(payloadStr);
+            V2CollectionCoder.restoreTo(currentValue, parsed, classNameToCreator, (msg: string) => {
+                if (this.errorCB_) {
+                    this.errorCB_!(key, Serialization, msg, jsonString);
+                }
+                console.error('PersistenceV2 [' + key + ']: ' + msg);
+            });
+        } else {
+            PersistenceV2Impl.parseUpdateWithType<T>(key, jsonElement, currentValue);
+        }
+        return currentValue;
+    }
+
     private readValueFromDisk<T extends object>(
         key: string,
         ttype: Class,
@@ -846,23 +910,8 @@ export class PersistenceV2Impl {
                         key, undefined, jsonElement, property!.get() as jsonx.JsonElementDeserializable);
                     newObservedValue = property!.get();
                 } else {
-                    const currentValue = property!.get()!;
-                    const typeNameOnDisk = jsonElement.asArray()[0].asString();
-                    StorageHelper.checkTypeByName(key, ttype, typeNameOnDisk);
-                    const payloadStr = JSON.stringifyJsonElement(jsonElement.asArray()[1]);
-
-                    if (V2CollectionCoder.isNewFormat(payloadStr)) {
-                        const parsed = V2CollectionCoder.parse(payloadStr);
-                        V2CollectionCoder.restoreTo(currentValue, parsed, classNameToCreator, (msg: string) => {
-                            if (this.errorCB_) {
-                                this.errorCB_!(key, Serialization, msg, jsonString);
-                            }
-                            console.error(`PersistenceV2 [${key}]: ${msg}`);
-                        });
-                    } else {
-                        PersistenceV2Impl.parseUpdateWithType<T>(key, jsonElement, currentValue);
-                    }
-                    newObservedValue = currentValue;
+                    newObservedValue = this.restoreParsedValue<T>(
+                        key, ttype, property!.get()!, jsonElement, classNameToCreator, jsonString);
                 }
             }
 
