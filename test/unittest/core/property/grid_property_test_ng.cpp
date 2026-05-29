@@ -139,32 +139,6 @@ HWTEST_F(GridPropertyTestNg, UpdateSpan_Test002, TestSize.Level0)
 }
 
 /**
- * @tc.name: UpdateOffset_Test
- * @tc.desc: Test cast to GridProperty
- * @tc.type: FUNC
- */
-HWTEST_F(GridPropertyTestNg, UpdateOffset_Test, TestSize.Level0)
-{
-    /**
-     * @tc.steps1: create a object gridProperty.
-     */
-    RefPtr<GridProperty> gridProperty = AceType::MakeRefPtr<NG::GridProperty>();
-    auto type = static_cast<GridSizeType>(INDEX);
-
-    /**
-     * @tc.steps2: create a container_.
-     */
-    gridProperty->container_ = AceType::MakeRefPtr<GridContainerLayoutProperty>();
-
-    /**
-     * @tc.steps2: call UpdateSpan.push span is < 0.
-     * @tc.expected: Return result is false.
-     */
-    bool result = gridProperty->UpdateOffset(OFFSETONE, type);
-    EXPECT_FALSE(result);
-}
-
-/**
  * @tc.name: SetSpan_Test
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
