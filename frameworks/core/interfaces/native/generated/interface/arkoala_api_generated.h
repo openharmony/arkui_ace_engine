@@ -2045,8 +2045,6 @@ typedef struct SearchValueCallback SearchValueCallback;
 typedef struct Opt_SearchValueCallback Opt_SearchValueCallback;
 typedef struct ShouldBuiltInRecognizerParallelWithCallback ShouldBuiltInRecognizerParallelWithCallback;
 typedef struct Opt_ShouldBuiltInRecognizerParallelWithCallback Opt_ShouldBuiltInRecognizerParallelWithCallback;
-typedef struct ShouldRecognizerParallelWithCallback ShouldRecognizerParallelWithCallback;
-typedef struct Opt_ShouldRecognizerParallelWithCallback Opt_ShouldRecognizerParallelWithCallback;
 typedef struct SizeChangeCallback SizeChangeCallback;
 typedef struct Opt_SizeChangeCallback Opt_SizeChangeCallback;
 typedef struct SliderModifierBuilder SliderModifierBuilder;
@@ -14329,16 +14327,6 @@ typedef struct Opt_ShouldBuiltInRecognizerParallelWithCallback {
     Ark_Tag tag;
     ShouldBuiltInRecognizerParallelWithCallback value;
 } Opt_ShouldBuiltInRecognizerParallelWithCallback;
-typedef struct ShouldRecognizerParallelWithCallback {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_GestureRecognizer current, const Array_GestureRecognizer others, const Callback_GestureRecognizer_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureRecognizer current, const Array_GestureRecognizer others, const Callback_GestureRecognizer_Void continuation);
-} ShouldRecognizerParallelWithCallback;
-typedef struct Opt_ShouldRecognizerParallelWithCallback {
-    Ark_Tag tag;
-    ShouldRecognizerParallelWithCallback value;
-} Opt_ShouldRecognizerParallelWithCallback;
 typedef struct SizeChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -24394,8 +24382,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                               const Opt_GestureRecognizerJudgeBeginCallback* value);
     void (*setShouldBuiltInRecognizerParallelWith)(Ark_NativePointer node,
                                                    const Opt_ShouldBuiltInRecognizerParallelWithCallback* value);
-    void (*setShouldRecognizerParallelWith)(Ark_NativePointer node,
-                                            const ShouldRecognizerParallelWithCallback* value);
     void (*setMonopolizeEvents)(Ark_NativePointer node,
                                 const Opt_Boolean* value);
     void (*setOnTouchIntercept)(Ark_NativePointer node,

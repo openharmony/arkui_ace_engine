@@ -56,7 +56,6 @@ using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
 using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
-using ShouldRecognizerParallelWithFunc = ShouldBuiltInRecognizerParallelWithFunc;
 using TouchTestDoneCallback = std::function<void(
     const std::shared_ptr<BaseGestureEvent>&, const std::list<WeakPtr<NGGestureRecognizer>>&)>;
 using OnGestureCollectInterceptFunc = std::function<GestureCollectIntervention(
@@ -218,9 +217,7 @@ public:
     TouchInterceptFunc GetOnTouchIntercept() const;
     void SetShouldBuildinRecognizerParallelWithFunc(ShouldBuiltInRecognizerParallelWithFunc&& parallelGestureToFunc);
     ShouldBuiltInRecognizerParallelWithFunc GetParallelInnerGestureToFunc() const;
-    void SetShouldRecognizerParallelWithFunc(ShouldRecognizerParallelWithFunc&& parallelGestureToFunc);
-    ShouldRecognizerParallelWithFunc GetShouldRecognizerParallelWithFunc() const;
-    void TriggerShouldParallelWith(
+    void TriggerShouldParallelInnerWith(
         const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
     void SetOnGestureCollectInterceptFunc(OnGestureCollectInterceptFunc&& func);
     OnGestureCollectInterceptFunc GetOnGestureCollectInterceptFunc() const;
@@ -589,7 +586,6 @@ private:
     TouchInterceptFunc touchInterceptFunc_;
 
     ShouldBuiltInRecognizerParallelWithFunc shouldBuildinRecognizerParallelWithFunc_;
-    ShouldRecognizerParallelWithFunc shouldRecognizerParallelWithFunc_;
     OnGestureCollectInterceptFunc onGestureCollectInterceptFunc_;
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
 

@@ -5419,13 +5419,6 @@ struct ArkUIParallelInnerGestureEvent {
     ArkUI_Int32 count = 0;
 };
 
-struct ArkUIParallelGestureEvent {
-    ArkUIGestureRecognizer* current = nullptr;
-    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
-    void* userData = nullptr;
-    ArkUI_Int32 count = 0;
-};
-
 struct ArkUIGestureModifier {
     ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, bool limitFingerCount, void* userData);
     ArkUIGesture* (*createTapGestureWithDistanceThreshold)(
@@ -5459,8 +5452,6 @@ struct ArkUIGestureModifier {
         ArkUINodeHandle node, void* userData, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo));
     ArkUI_Int32 (*setInnerGestureParallelTo)(ArkUINodeHandle node, void* userData,
         ArkUIGestureRecognizer* (*parallelInnerGesture)(ArkUIParallelInnerGestureEvent* event));
-    ArkUI_Int32 (*setGestureParallelTo)(ArkUINodeHandle node, void* userData,
-        ArkUIGestureRecognizer* (*parallelGesture)(ArkUIParallelGestureEvent* event));
     ArkUI_Int32 (*setGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer, bool enabled);
     ArkUI_Int32 (*setGestureRecognizerLimitFingerCount)(ArkUIGesture* gesture, bool limitFingerCount);
     ArkUI_Int32 (*setLongPressGestureAllowableMovement)(ArkUIGesture* gesture, double allowableMovement);

@@ -10277,66 +10277,6 @@ ArkUINativeModuleValue CommonBridge::ResetShouldBuiltInRecognizerParallelWith(Ar
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetShouldRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_EQUAL_RETURN(secondeArg->IsFunction(vm), false, panda::JSValueRef::Undefined(vm));
-    auto obj = secondeArg->ToObject(vm);
-    auto containerId = Container::CurrentId();
-    panda::Local<panda::FunctionRef> func = obj;
-    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
-    auto shouldRecognizerParallelWithFunc =
-        [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), node = AceType::WeakClaim(frameNode),
-            containerId](const RefPtr<NG::NGGestureRecognizer>& current,
-            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
-        auto function = func.Lock();
-        CHECK_EQUAL_RETURN(function.IsEmpty(), true, nullptr);
-        CHECK_EQUAL_RETURN(function->IsFunction(vm), false, nullptr);
-        PipelineContext::SetCallBackNode(node);
-        auto currentObj = CreateRecognizerObject(vm, current);
-        auto othersArr = panda::ArrayRef::New(vm);
-        uint32_t othersIdx = 0;
-        for (const auto& item : others) {
-            auto othersObj = CreateRecognizerObject(vm, item);
-            othersArr->SetValueAt(vm, othersArr, othersIdx++, othersObj);
-        }
-        panda::Local<panda::JSValueRef> params[2] = { currentObj, othersArr };
-        auto value = function->Call(vm, function.ToLocal(), params, 2);
-        if (!value->IsObject(vm)) {
-            return nullptr;
-        }
-        RefPtr<NG::NGGestureRecognizer> returnValue = nullptr;
-        auto valueObj = value->ToObject(vm);
-        valueObj->Freeze(vm);
-        auto jsObj = JSRef<JSObject>(JSObject(valueObj));
-        auto* gestureRecognizer = jsObj->Unwrap<JSGestureRecognizer>();
-        if (!gestureRecognizer) {
-            return nullptr;
-        }
-        returnValue = Referenced::Claim(gestureRecognizer)->GetRecognizer().Upgrade();
-        return returnValue;
-    };
-    NG::ViewAbstract::SetShouldRecognizerParallelWith(frameNode, std::move(shouldRecognizerParallelWithFunc));
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue CommonBridge::ResetShouldRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    ViewAbstract::SetShouldRecognizerParallelWith(frameNode, nullptr);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue CommonBridge::AddTapGesture(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -1160,12 +1160,6 @@ public:
         ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
     }
 
-    void SetShouldRecognizerParallelWith(
-        NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc) override
-    {
-        ViewAbstract::SetShouldRecognizerParallelWith(std::move(shouldRecognizerParallelWithFunc));
-    }
-
     void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override
     {

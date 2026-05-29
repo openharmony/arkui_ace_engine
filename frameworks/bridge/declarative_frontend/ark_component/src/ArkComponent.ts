@@ -2398,21 +2398,6 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
   }
 }
 
-declare type ShouldRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
-class ShouldRecognizerParallelWithModifier extends ModifierWithKey<ShouldRecognizerParallelWithCallback> {
-  constructor(value: ShouldRecognizerParallelWithCallback) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('shouldRecognizerParallelWith');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().common.resetShouldRecognizerParallelWith(node);
-    } else {
-      getUINativeModule().common.setShouldRecognizerParallelWith(node, this.value);
-    }
-  }
-}
-
 class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   constructor(value: MotionPathOptions) {
     super(value);
@@ -4245,7 +4230,6 @@ class ArkComponent {
   _needDiff: boolean;
   _keyboardShortcutList: Array<ArkKeyBoardShortCut>;
   private _onTouchInterceptEvent: TouchInterceptCallback;
-  private _shouldRecognizerParallelWith: ShouldRecognizerParallelWithCallback;
   private _onVisibleAreaChange: ArkOnVisibleAreaChange;
   private _onVisibleAreaApproximateChange: ArkOnVisibleAreaApproximateChange;
   private _onPreDragEvent: PreDragCallback;
@@ -4394,11 +4378,6 @@ class ArkComponent {
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
     this._shouldBuiltInRecognizerParallelWith = callback;
     modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
-    return this;
-  }
-  shouldRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
-    this._shouldRecognizerParallelWith = callback;
-    modifierWithKey(this._modifiersWithKeys, ShouldRecognizerParallelWithModifier.identity, ShouldRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback: (oldValue: SizeOptions, newValue: SizeOptions) => void): this {

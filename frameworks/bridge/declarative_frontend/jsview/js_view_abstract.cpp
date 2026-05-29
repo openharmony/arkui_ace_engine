@@ -10217,8 +10217,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod(
         "shouldBuiltInRecognizerParallelWith", &JSViewAbstract::JsShouldBuiltInRecognizerParallelWith);
     JSClass<JSViewAbstract>::StaticMethod(
-        "shouldRecognizerParallelWith", &JSViewAbstract::JsShouldRecognizerParallelWith);
-    JSClass<JSViewAbstract>::StaticMethod(
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchTestDone", &JSViewAbstract::JsOnTouchTestDone);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
@@ -11700,28 +11698,6 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
     };
     ViewAbstractModel::GetInstance()->SetShouldBuiltInRecognizerParallelWith(
         std::move(shouldBuiltInRecognizerParallelWithFunc));
-}
-
-void JSViewAbstract::JsShouldRecognizerParallelWith(const JSCallbackInfo& info)
-{
-    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
-        ViewAbstractModel::GetInstance()->SetShouldRecognizerParallelWith(nullptr);
-        return;
-    }
-
-    auto jsParallelGestureToFunc =
-        AceType::MakeRefPtr<JsShouldBuiltInRecognizerParallelWithFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto shouldRecognizerParallelWithFunc =
-        [execCtx = info.GetExecutionContext(), func = jsParallelGestureToFunc, node = frameNode](
-            const RefPtr<NG::NGGestureRecognizer>& current,
-            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
-        ACE_SCORING_EVENT("shouldRecognizerParallelWith");
-        PipelineContext::SetCallBackNode(node);
-        return func->Execute(current, others);
-    };
-    ViewAbstractModel::GetInstance()->SetShouldRecognizerParallelWith(std::move(shouldRecognizerParallelWithFunc));
 }
 
 void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
