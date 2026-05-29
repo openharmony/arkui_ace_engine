@@ -1654,7 +1654,9 @@ class JSSearch extends JSViewAbstract {
     getUINativeModule().search.setStrokeJoinStyle(true, value);
   }
   static shaderStyle(value) {
-    if (value.options) {
+    if (value === undefined || value === null) {
+      getUINativeModule().search.resetShaderStyle(true, null);
+    } else if (value.options) {
       getUINativeModule().search.setShaderStyle(true, value.options.center, value.options.radius, value.options.angle,
         value.options.direction, value.options.repeating, value.options.colors, value.options.color);
     } else {
