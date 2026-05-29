@@ -1661,10 +1661,11 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
             float chainOffset = GetChainOffset(pos->first);
             if (GreatOrEqual(pos->second.startPos + chainOffset, endMainPos_)) {
                 break;
-            } else if (!pos->second.isGroup) {
-                continue;
+            } else if (pos->second.isGroup) {
+                AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
+            } else if (lazyChildIndex_.count(pos->first) > 0) {
+                AdjustPostionForLazyChild(layoutWrapper, axis_, pos->first, forwardLayout);
             }
-            AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
         }
         return;
     }
@@ -1673,15 +1674,18 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
             float chainOffset = GetChainOffset(pos->first);
             if (LessOrEqual(pos->second.endPos + chainOffset, startMainPos_)) {
                 break;
-            } else if (!pos->second.isGroup) {
-                continue;
+            } else if (pos->second.isGroup) {
+                AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
+            } else if (lazyChildIndex_.count(pos->first) > 0) {
+                AdjustPostionForLazyChild(layoutWrapper, axis_, pos->first, forwardLayout);
             }
-            AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
         }
         return;
     }
     if (itemPosition_.begin()->second.isGroup) {
         AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), forwardLayout);
+    } else if (lazyChildIndex_.count(itemPosition_.begin()->first) > 0) {
+        AdjustPostionForLazyChild(layoutWrapper, axis_, GetStartIndex(), forwardLayout);
     }
 }
 
@@ -2270,6 +2274,7 @@ void ListLayoutAlgorithm::MeasureLazyChild(const RefPtr<LayoutWrapper>& wrapper,
     ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureLazyChild:%d, %f, forward:%d", index, referencePos, forward);
     wrapper->Measure(CreateLazyChildConstraint(referencePos, forward));
     ApplyLazyVGridAdjustOffset(wrapper, referencePos, forward);
+    lazyChildIndex_.emplace(index);
 }
 
 AdjustOffset ListLayoutAlgorithm::GetAdjustOffset(const RefPtr<LayoutWrapper>& item)
@@ -2402,6 +2407,28 @@ void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(itemGroup);
     itemGroup->CheckRecycle(wrapper, startMainPos_ - startFixOffset_, endMainPos_ + endFixOffset_,
         referencePos, forwardLayout);
+}
+
+void ListLayoutAlgorithm::AdjustPostionForLazyChild(LayoutWrapper* layoutWrapper, Axis axis, int32_t index,
+    bool forwardLayout)
+{
+    auto wrapper = GetListItem(layoutWrapper, index);
+    if (!wrapper) {
+        ReportGetChildError("AdjustPostionForLazyChild", index);
+        return;
+    }
+    auto refPos = forwardLayout ? itemPosition_[index].endPos : itemPosition_[index].startPos;
+    MeasureLazyChild(wrapper, index, refPos, !forwardLayout);
+    if (childrenSize_) {
+        return;
+    }
+    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
+    auto& pos = itemPosition_[index];
+    if (forwardLayout) {
+        pos.startPos = refPos - mainLen;
+    } else {
+        pos.endPos = refPos + mainLen;
+    }
 }
 
 void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index,

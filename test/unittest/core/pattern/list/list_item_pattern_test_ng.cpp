@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "list_test_ng.h"
 
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -33,7 +34,7 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class ListItemPatternTestNg : public TestNG {
+class ListItemPatternTestNg : public ListTestNg {
 public:
     RefPtr<FrameNode> CreateSwipeNode()
     {
@@ -45,6 +46,412 @@ public:
         return column;
     };
 };
+
+/**
+ * @tc.name: OnThemeScopeUpdate000
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API>=26 + CARD + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate000, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set theme color
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    // Set theme color to RED
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    auto originalColor = listItemTheme->itemDefaultColor_;
+    listItemTheme->itemDefaultColor_ = Color::RED;
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color is updated to theme color (RED)
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::RED); // Verify color equals theme color
+
+    // Restore
+    listItem->apiVersion_ = oriApiVersion;
+    listItemTheme->itemDefaultColor_ = originalColor;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API>=26 + CARD + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set theme color
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // Set theme color to RED
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    auto originalColor = listItemTheme->itemDefaultColor_;
+    listItemTheme->itemDefaultColor_ = Color::RED;
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color is updated to theme color (RED)
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::RED); // Verify color equals theme color
+
+    // Restore
+    listItem->apiVersion_ = oriApiVersion;
+    listItemTheme->itemDefaultColor_ = originalColor;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate002
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API>=26 + CARD + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set background color
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    auto layoutProperty = listItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to BLUE)
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+
+    listItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate003
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API>=26 + NONE + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with NONE style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set API version
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged due to NONE style
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = listItem->GetRenderContext()->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+
+    listItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate004
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API>=26 + NONE + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with NONE style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set background color
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GREEN);
+
+    auto layoutProperty = listItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to GREEN)
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GREEN);
+
+    listItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate005
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API<26 + CARD + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set background color
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GRAY);
+
+    auto layoutProperty = listItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to GRAY) due to API < 26
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GRAY);
+
+    listItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate006
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API<26 + CARD + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set background color
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLACK);
+
+    auto layoutProperty = listItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to BLACK)
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLACK);
+
+    listItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate007
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API<26 + NONE + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with NONE style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set background color
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    auto layoutProperty = listItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged due to API < 26
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+
+    listItem->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate008
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: API<26 + NONE + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with NONE style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and set background color
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GREEN);
+
+    auto layoutProperty = listItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GREEN);
+
+    listItem->apiVersion_ = oriApiVersion;
+}
 
 /**
  * @tc.name: OnDidPop001
@@ -430,7 +837,6 @@ HWTEST_F(ListItemPatternTestNg, HandleDragEnd003, TestSize.Level1)
  */
 HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction001, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     auto listItem = FrameNode::CreateFrameNode(
@@ -473,7 +879,6 @@ HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction001, TestSize.Level1)
     ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::END);
     pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
     EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_END);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -483,7 +888,6 @@ HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction001, TestSize.Level1)
  */
 HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction002, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     auto listItem = FrameNode::CreateFrameNode(
@@ -518,7 +922,6 @@ HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction002, TestSize.Level1)
     ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::START);
     pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
     EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_START);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -528,7 +931,6 @@ HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction002, TestSize.Level1)
  */
 HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction003, TestSize.Level1)
 {
-    MockPipelineContext::SetUp();
     RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     auto listItem = FrameNode::CreateFrameNode(
@@ -555,7 +957,6 @@ HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction003, TestSize.Level1)
     ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::START);
     pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
     EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_START);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -568,7 +969,6 @@ HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction004, TestSize.Level1)
     /**
      * @tc.steps: step1. Create List an ListItem.
      */
-    MockPipelineContext::SetUp();
     RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     auto listItem = FrameNode::CreateFrameNode(
@@ -612,7 +1012,6 @@ HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction004, TestSize.Level1)
     auto startNode = AceType::DynamicCast<FrameNode>(listItem->GetChildAtIndex(listItemPattern->startNodeIndex_));
     ASSERT_NE(startNode, nullptr);
     EXPECT_TRUE(startNode->IsLayoutComplete());
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -625,7 +1024,6 @@ HWTEST_F(ListItemPatternTestNg, CollapseSwipeAction001, TestSize.Level1)
     /**
      * @tc.desc: Create ListItem node.
      */
-    MockPipelineContext::SetUp();
     RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     auto listItem = FrameNode::CreateFrameNode(
@@ -658,6 +1056,320 @@ HWTEST_F(ListItemPatternTestNg, CollapseSwipeAction001, TestSize.Level1)
     EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_END);
     ListItemModelNG::CollapseSwipeAction(AceType::RawPtr(listItem));
     EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::ITEM_CHILD);
-    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate009
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: Verify FocusPaintParams is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and components
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto focusHub = listItem->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Set theme focus colors
+     */
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    auto originalBorderColor = listItemTheme->focusBorderColor_;
+    auto originalBorderWidth = listItemTheme->focusBorderWidth_;
+    listItemTheme->focusBorderColor_ = Color::RED;
+    listItemTheme->focusBorderWidth_ = Dimension(5.0, DimensionUnit::VP);
+
+    /**
+     * @tc.steps: step4. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: FocusPaintParams is set with theme colors
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+
+    EXPECT_TRUE(focusHub->HasPaintColor());
+    EXPECT_EQ(focusHub->GetPaintColor(), Color::RED);
+    EXPECT_TRUE(focusHub->HasPaintWidth());
+    EXPECT_EQ(focusHub->GetPaintWidth(), Dimension(5.0, DimensionUnit::VP));
+
+    // Restore
+    listItem->apiVersion_ = oriApiVersion;
+    listItemTheme->focusBorderColor_ = originalBorderColor;
+    listItemTheme->focusBorderWidth_ = originalBorderWidth;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate010
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: HasStateStyle(SELECTED)=true, BlendBgColor not called
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and components
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto eventHub = listItem->GetEventHub<ListItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. Set SELECTED state
+     */
+    eventHub->AddSupportedState(UI_STATE_SELECTED);
+    eventHub->MarkModifyDone();
+    eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+
+    /**
+     * @tc.steps: step4. Set theme color
+     */
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    auto originalDefaultColor = listItemTheme->itemDefaultColor_;
+    listItemTheme->itemDefaultColor_ = Color::BLUE;
+
+    /**
+     * @tc.steps: step5. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color equals theme default color, BlendBgColor not called
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+    EXPECT_TRUE(eventHub->HasStateStyle(UI_STATE_SELECTED));
+
+    // Restore
+    listItem->apiVersion_ = oriApiVersion;
+    listItemTheme->itemDefaultColor_ = originalDefaultColor;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate011
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: HasStateStyle(SELECTED)=false, BlendBgColor called
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and components
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto eventHub = listItem->GetEventHub<ListItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. Set isSelected_ = true (not SELECTED state support)
+     */
+    pattern->isSelected_ = true;
+
+    /**
+     * @tc.steps: step4. Set theme colors
+     */
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    auto originalDefaultColor = listItemTheme->itemDefaultColor_;
+    auto originalSelectedColor = listItemTheme->selectedColor_;
+    auto originalSelectedColorWithAlpha = listItemTheme->selectedColorWithAlpha_;
+    listItemTheme->itemDefaultColor_ = Color(0xFF0000FF); // BLUE
+    listItemTheme->selectedColor_ = Color(0x8000FF00); // GREEN (50% alpha)
+    listItemTheme->selectedColorWithAlpha_ = Color(0x8000FF00); // GREEN (50% alpha)
+
+    /**
+     * @tc.steps: step5. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: BlendBgColor is called, background color is blended
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_FALSE(eventHub->HasStateStyle(UI_STATE_SELECTED));
+
+    // Restore
+    listItem->apiVersion_ = oriApiVersion;
+    listItemTheme->itemDefaultColor_ = originalDefaultColor;
+    listItemTheme->selectedColor_ = originalSelectedColor;
+    listItemTheme->selectedColorWithAlpha_ = originalSelectedColorWithAlpha;
+    pattern->isSelected_ = false;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate012
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: User set bg + HasStateStyle=false, BlendBgColor called
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and components
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto eventHub = listItem->GetEventHub<ListItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto layoutProperty = listItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. User sets background color
+     */
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step4. Set isSelected_ = true
+     */
+    pattern->isSelected_ = true;
+
+    /**
+     * @tc.steps: step5. Set theme color
+     */
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    auto originalSelectedColor = listItemTheme->selectedColor_;
+    auto originalSelectedColorWithAlpha = listItemTheme->selectedColorWithAlpha_;
+    listItemTheme->selectedColor_ = Color(0x80FF0000); // RED (50% alpha)
+    listItemTheme->selectedColorWithAlpha_ = Color(0x80FF0000); // RED (50% alpha)
+
+    /**
+     * @tc.steps: step6. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: User set BLUE is preserved and blended with RED
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_FALSE(eventHub->HasStateStyle(UI_STATE_SELECTED));
+
+    // Restore
+    listItem->apiVersion_ = oriApiVersion;
+    listItemTheme->selectedColor_ = originalSelectedColor;
+    listItemTheme->selectedColorWithAlpha_ = originalSelectedColorWithAlpha;
+    pattern->isSelected_ = false;
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate013
+ * @tc.desc: Test ListItemPattern OnThemeScopeUpdate: User set bg + HasStateStyle=true, BlendBgColor not called
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnThemeScopeUpdate013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItem
+     */
+    CreateList();
+    CreateListItems(1, V2::ListItemStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItem node and components
+     */
+    auto listItem = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItem, nullptr);
+
+    auto pattern = listItem->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto eventHub = listItem->GetEventHub<ListItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto renderContext = listItem->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto layoutProperty = listItem->GetLayoutProperty<ListItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. User sets background color
+     */
+    renderContext->UpdateBackgroundColor(Color::GREEN);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step4. Set SELECTED state
+     */
+    eventHub->AddSupportedState(UI_STATE_SELECTED);
+    eventHub->MarkModifyDone();
+    eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+
+    /**
+     * @tc.steps: step5. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: User set GREEN is preserved, BlendBgColor not called
+     */
+    auto oriApiVersion = listItem->apiVersion_;
+    listItem->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GREEN);
+    EXPECT_TRUE(eventHub->HasStateStyle(UI_STATE_SELECTED));
+
+    // Restore
+    listItem->apiVersion_ = oriApiVersion;
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
 }
 } // namespace OHOS::Ace::NG
