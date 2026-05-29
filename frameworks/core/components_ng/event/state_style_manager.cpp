@@ -15,7 +15,6 @@
 
 #include "core/components_ng/event/state_style_manager.h"
 
-#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
@@ -79,25 +78,6 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
     };
     pressedFunc_ = MakeRefPtr<TouchEventImpl>(std::move(pressedCallback));
     return pressedFunc_;
-}
-
-const RefPtr<InputEvent>& StateStyleManager::GetHoverListener()
-{
-    if (hoverFunc_) {
-        return hoverFunc_;
-    }
-
-    auto hoverCallback = [weak = WeakClaim(this)](bool isHover, HoverInfo& info) {
-        auto stateStyleMgr = weak.Upgrade();
-        CHECK_NULL_VOID(stateStyleMgr);
-        if (isHover) {
-            stateStyleMgr->UpdateCurrentUIState(UI_STATE_HOVERED);
-        } else {
-            stateStyleMgr->ResetCurrentUIState(UI_STATE_HOVERED);
-        }
-    };
-    hoverFunc_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
-    return hoverFunc_;
 }
 
 void StateStyleManager::HandleTouchDown()

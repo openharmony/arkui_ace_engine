@@ -8403,7 +8403,6 @@ export interface StateStyles {
     focused?: CustomStyles;
     clicked?: CustomStyles;
     selected?: CustomStyles;
-    hovered?: CustomStyles;
 }
 export interface PopupMessageOptions {
     textColor?: ResourceColor;

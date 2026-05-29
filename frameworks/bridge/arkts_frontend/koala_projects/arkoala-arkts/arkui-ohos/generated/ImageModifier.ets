@@ -53,7 +53,6 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     applyFocusedAttribute(instance: ImageAttribute): void { }
     applyDisabledAttribute(instance: ImageAttribute): void { }
     applySelectedAttribute(instance: ImageAttribute): void { }
-    applyHoveredAttribute(instance: ImageAttribute): void { }
     // instructive change end
     public _alt_0_0value?: string | global_resource_Resource | PixelMap | ImageAlt | undefined
     public _matchTextDirection_0_0value?: boolean | undefined

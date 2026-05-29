@@ -43,7 +43,6 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     applyFocusedAttribute(instance: SwiperAttribute): void { }
     applyDisabledAttribute(instance: SwiperAttribute): void { }
     applySelectedAttribute(instance: SwiperAttribute): void { }
-    applyHoveredAttribute(instance: SwiperAttribute): void { }
     public _Swiper_index_0_0value?: int32 | Bindable<int32> | undefined
     public _Swiper_autoPlay_0_0value?: boolean | undefined
     public _Swiper_interval_0_0value?: int32 | undefined

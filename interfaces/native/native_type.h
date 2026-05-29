@@ -2909,8 +2909,6 @@ typedef enum {
      * <b>Checkbox</b>, <b>Radio</b>, <b>Toggle</b>, <b>List</b>, <b>Grid</b>, and <b>MenuItem</b>.
      */
     UI_STATE_SELECTED = 1 << 3,
-    /** Hovered state. */
-    UI_STATE_HOVERED = 1 << 4,
 } ArkUI_UIState;
 
 /**

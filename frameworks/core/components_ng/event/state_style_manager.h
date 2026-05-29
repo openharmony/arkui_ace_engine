@@ -30,7 +30,6 @@ namespace OHOS::Ace::NG {
 class FrameNode;
 class TouchEventImpl;
 class CustomNodeBase;
-class InputEvent;
 
 using UIState = uint64_t;
 inline constexpr UIState UI_STATE_NORMAL = 0;
@@ -39,7 +38,6 @@ inline constexpr UIState UI_STATE_FOCUSED = 1 << 1;
 inline constexpr UIState UI_STATE_DISABLED = 1 << 2;
 // used for radio, checkbox, switch.
 inline constexpr UIState UI_STATE_SELECTED = 1 << 3;
-inline constexpr UIState UI_STATE_HOVERED = 1 << 4;
 inline constexpr UIState UI_STATE_UNKNOWN = 1 << 9;
 
 inline constexpr uint64_t EXCLUDE_INNER_FLAG_NONE = 0;
@@ -144,7 +142,6 @@ public:
     }
 
     const RefPtr<TouchEventImpl>& GetPressedListener();
-    const RefPtr<InputEvent>& GetHoverListener();
     void HandleTouchDown();
     void HandleTouchUp();
 
@@ -237,7 +234,6 @@ private:
 
     WeakPtr<FrameNode> host_;
     RefPtr<TouchEventImpl> pressedFunc_;
-    RefPtr<InputEvent> hoverFunc_;
 
     UIState supportedStates_ = UI_STATE_NORMAL;
     UIState currentState_ = UI_STATE_NORMAL;
