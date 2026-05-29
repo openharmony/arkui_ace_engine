@@ -2901,4 +2901,122 @@ HWTEST_F(ClickRecognizerTestNg, CleanRecognizerStateTest001, TestSize.Level1)
     clickRecognizer.CleanRecognizerState();
     EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::PENDING);
 }
+
+/**
+ * @tc.name: ClickRecognizerInitGlobalValueTest001
+ * @tc.desc: Test ClickRecognizer function: InitGlobalValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerInitGlobalValueTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+
+    clickRecognizer->InitGlobalValue(SourceType::TOUCH);
+    clickRecognizer->InitGlobalValue(SourceType::MOUSE);
+    clickRecognizer->InitGlobalValue(SourceType::TOUCH_PAD);
+    clickRecognizer->InitGlobalValue(SourceType::NONE);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: ClickRecognizerGetOnAccessibilityEventFuncTest001
+ * @tc.desc: Test ClickRecognizer function: GetOnAccessibilityEventFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerGetOnAccessibilityEventFuncTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+    EXPECT_EQ(clickRecognizer->GetAttachedNode().Upgrade(), nullptr);
+
+    auto callback = clickRecognizer->GetOnAccessibilityEventFunc();
+    ASSERT_NE(callback, nullptr);
+    callback(AccessibilityEventType::CLICK);
+
+    auto frameNode = FrameNode::CreateFrameNode("accessibilityNode", 101, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    EXPECT_NE(clickRecognizer->GetAttachedNode().Upgrade(), nullptr);
+    callback(AccessibilityEventType::CLICK);
+
+    clickRecognizer = nullptr;
+    callback(AccessibilityEventType::CLICK);
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleReportsTapTypeTest001
+ * @tc.desc: Test ClickRecognizer function: HandleReports with TAP_GESTURE type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleReportsTapTypeTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("tapNode", 102, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.x = TEST_X;
+    touchEvent.y = TEST_Y;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    auto info = clickRecognizer->GetGestureEventInfo();
+    clickRecognizer->HandleReports(info, GestureCallbackType::ACTION);
+    EXPECT_EQ(clickRecognizer->GetRecognizerType(), GestureTypeName::TAP_GESTURE);
+}
+
+/**
+ * @tc.name: ClickRecognizerTriggerGestureJudgeCallbackTest004
+ * @tc.desc: Test ClickRecognizer function: TriggerGestureJudgeCallback with callback only
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTriggerGestureJudgeCallbackTest004, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    ASSERT_NE(clickRecognizer, nullptr);
+    ASSERT_NE(targetComponent, nullptr);
+
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;
+    };
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    clickRecognizer->targetComponent_ = targetComponent;
+
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    auto result = clickRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: ClickRecognizerDeadlineTimerTest001
+ * @tc.desc: Test ClickRecognizer function: DeadlineTimer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerDeadlineTimerTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+    CancelableCallback<void()> deadlineTimer;
+    clickRecognizer->DeadlineTimer(deadlineTimer, 1);
+    EXPECT_TRUE(static_cast<bool>(deadlineTimer));
+}
+
+/**
+ * @tc.name: ClickRecognizerPlayClickSoundEffectTest001
+ * @tc.desc: Test ClickRecognizer function: PlayClickSoundEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerPlayClickSoundEffectTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+    auto oldTimeCount = clickRecognizer->time_.time_since_epoch().count();
+    clickRecognizer->PlayClickSoundEffect(static_cast<int32_t>(TEST_X), static_cast<int32_t>(TEST_Y));
+    EXPECT_EQ(clickRecognizer->time_.time_since_epoch().count(), oldTimeCount);
+}
 } // namespace OHOS::Ace::NG

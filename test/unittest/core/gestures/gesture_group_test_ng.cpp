@@ -1102,4 +1102,217 @@ HWTEST_F(GestureGroupTestNg, GestureGroupTestNg007, TestSize.Level1)
     panGesture->Serialize(buff2);
     EXPECT_EQ(result, -1);
 }
+
+/**
+ * @tc.name: GestureGroupBranchCoverageTest001
+ * @tc.desc: Test GestureGroup CreateRecognizer handles recognizer creation and child filtering branches
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupBranchCoverageTest001, TestSize.Level1)
+{
+    GestureGroup gestureGroup(GestureMode::Sequence);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE);
+    auto invalidChildGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Begin);
+    gestureGroup.AddGesture(invalidChildGroup);
+    gestureGroup.AddGesture(panGesture);
+    gestureGroup.priority_ = GesturePriority::High;
+    gestureGroup.gestureMask_ = GestureMask::IgnoreInternal;
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE, GestureTypeName::PAN_GESTURE,
+        true);
+    gestureGroup.gestureInfo_ = gestureInfo;
+    bool cancelCalled = false;
+    gestureGroup.SetOnActionCancelId([&cancelCalled](const GestureEvent&) {
+        cancelCalled = true;
+        return;
+    });
+
+    auto groupRecognizer = AceType::DynamicCast<SequencedRecognizer>(gestureGroup.CreateRecognizer());
+    ASSERT_NE(groupRecognizer, nullptr);
+    EXPECT_EQ(groupRecognizer->GetGroupRecognizer().size(), 1u);
+    EXPECT_EQ(groupRecognizer->GetPriority(), GesturePriority::High);
+    EXPECT_EQ(groupRecognizer->GetPriorityMask(), GestureMask::IgnoreInternal);
+    EXPECT_EQ(groupRecognizer->gestureInfo_, gestureInfo);
+    EXPECT_FALSE(gestureInfo->GetDisposeTag());
+    EXPECT_FALSE(cancelCalled);
+}
+
+/**
+ * @tc.name: GestureGroupBranchCoverageTest002
+ * @tc.desc: Test GestureGroup MakeGesture covers supported and unsupported gesture types
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupBranchCoverageTest002, TestSize.Level1)
+{
+    GestureGroup gestureGroup(GestureMode::Parallel);
+
+    auto panGesture = gestureGroup.MakeGesture(GestureType::PAN);
+    EXPECT_NE(AceType::DynamicCast<PanGesture>(panGesture), nullptr);
+
+    auto groupGesture = gestureGroup.MakeGesture(GestureType::GROUP);
+    auto nestedGroup = AceType::DynamicCast<GestureGroup>(groupGesture);
+    ASSERT_NE(nestedGroup, nullptr);
+    EXPECT_EQ(nestedGroup->mode_, GestureMode::Parallel);
+
+    EXPECT_EQ(gestureGroup.MakeGesture(GestureType::LONG_PRESS), nullptr);
+}
+
+/**
+ * @tc.name: GestureGroupBranchCoverageTest003
+ * @tc.desc: Test GestureGroup SizeofMe and Serialize with child gestures
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupBranchCoverageTest003, TestSize.Level1)
+{
+    GestureGroup gestureGroup(GestureMode::Exclusive);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::RIGHT;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE);
+    auto nestedGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Parallel);
+    nestedGroup->AddGesture(AceType::MakeRefPtr<PanGesture>(SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE));
+    gestureGroup.AddGesture(panGesture);
+    gestureGroup.AddGesture(nestedGroup);
+
+    auto expectedSize = static_cast<int32_t>(sizeof(int32_t) + sizeof(GestureType) + sizeof(GestureMode) +
+        panGesture->SizeofMe() + nestedGroup->SizeofMe());
+    EXPECT_EQ(gestureGroup.SizeofMe(), expectedSize);
+
+    std::vector<char> buffer(gestureGroup.SizeofMe());
+    auto serializedSize = gestureGroup.Serialize(buffer.data());
+    EXPECT_EQ(serializedSize, expectedSize);
+    EXPECT_EQ(*reinterpret_cast<GestureType*>(buffer.data()), GestureType::GROUP);
+    EXPECT_EQ(*reinterpret_cast<int32_t*>(buffer.data() + sizeof(GestureType)), expectedSize);
+
+    GestureGroup deserializedGroup(GestureMode::Sequence);
+    auto deserializedSize = deserializedGroup.Deserialize(buffer.data());
+    EXPECT_EQ(deserializedSize, expectedSize);
+    EXPECT_EQ(deserializedGroup.mode_, GestureMode::Exclusive);
+    ASSERT_EQ(deserializedGroup.gestures_.size(), 2u);
+    EXPECT_NE(AceType::DynamicCast<PanGesture>(deserializedGroup.gestures_.front()), nullptr);
+    EXPECT_NE(AceType::DynamicCast<GestureGroup>(deserializedGroup.gestures_.back()), nullptr);
+}
+
+/**
+ * @tc.name: GestureGroupBranchCoverageTest004
+ * @tc.desc: Test GestureGroup Deserialize rejects malformed size and unsupported child type
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupBranchCoverageTest004, TestSize.Level1)
+{
+    GestureGroup gestureGroup(GestureMode::Sequence);
+    constexpr auto HEADER_SIZE = sizeof(GestureType) + sizeof(int32_t);
+
+    std::vector<char> tooLarge(HEADER_SIZE + sizeof(GestureMode));
+    *reinterpret_cast<GestureType*>(tooLarge.data()) = GestureType::GROUP;
+    *reinterpret_cast<int32_t*>(tooLarge.data() + sizeof(GestureType)) = MAX_BYTES_SIZE;
+    EXPECT_EQ(gestureGroup.Deserialize(tooLarge.data()), -1);
+
+    std::vector<char> noMode(HEADER_SIZE);
+    *reinterpret_cast<GestureType*>(noMode.data()) = GestureType::GROUP;
+    *reinterpret_cast<int32_t*>(noMode.data() + sizeof(GestureType)) =
+        static_cast<int32_t>(HEADER_SIZE + sizeof(GestureMode) - 1);
+    EXPECT_EQ(gestureGroup.Deserialize(noMode.data()), -1);
+
+    std::vector<char> unsupported(HEADER_SIZE + sizeof(GestureMode) + sizeof(GestureType));
+    *reinterpret_cast<GestureType*>(unsupported.data()) = GestureType::GROUP;
+    *reinterpret_cast<int32_t*>(unsupported.data() + sizeof(GestureType)) =
+        static_cast<int32_t>(unsupported.size());
+    *reinterpret_cast<GestureMode*>(unsupported.data() + HEADER_SIZE) = GestureMode::Parallel;
+    *reinterpret_cast<GestureType*>(unsupported.data() + HEADER_SIZE + sizeof(GestureMode)) =
+        GestureType::LONG_PRESS;
+    EXPECT_EQ(gestureGroup.Deserialize(unsupported.data()), -1);
+}
+
+/**
+ * @tc.name: GestureGroupBranchCoverageTest005
+ * @tc.desc: Test GestureGroup Deserialize rejects child payloads whose reported length exceeds total bytes
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupBranchCoverageTest005, TestSize.Level1)
+{
+    GestureGroup sourceGroup(GestureMode::Parallel);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE);
+    sourceGroup.AddGesture(panGesture);
+
+    std::vector<char> buffer(sourceGroup.SizeofMe());
+    sourceGroup.Serialize(buffer.data());
+    *reinterpret_cast<int32_t*>(buffer.data() + sizeof(GestureType)) =
+        static_cast<int32_t>(sizeof(GestureType) + sizeof(int32_t) + sizeof(GestureMode) + sizeof(GestureType));
+
+    GestureGroup targetGroup(GestureMode::Sequence);
+    EXPECT_EQ(targetGroup.Deserialize(buffer.data()), -1);
+}
+
+/**
+ * @tc.name: GestureGroupBranchCoverageTest006
+ * @tc.desc: Test RemoveChildrenByTag covers direct removal, nested removal, and no-match paths
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupBranchCoverageTest006, TestSize.Level1)
+{
+    auto directGesture = AceType::MakeRefPtr<TapGesture>();
+    directGesture->SetTag("direct");
+    auto untouchedGesture = AceType::MakeRefPtr<TapGesture>();
+    untouchedGesture->SetTag("untouched");
+    auto nestedMatchGesture = AceType::MakeRefPtr<TapGesture>();
+    nestedMatchGesture->SetTag("nested");
+    auto nestedKeepGesture = AceType::MakeRefPtr<TapGesture>();
+    nestedKeepGesture->SetTag("keep");
+    auto nestedGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive);
+    nestedGroup->AddGesture(nestedMatchGesture);
+    nestedGroup->AddGesture(nestedKeepGesture);
+
+    GestureGroup gestureGroup(GestureMode::Sequence);
+    gestureGroup.AddGesture(directGesture);
+    gestureGroup.AddGesture(untouchedGesture);
+    gestureGroup.AddGesture(nestedGroup);
+
+    bool needRecollect = false;
+    gestureGroup.RemoveChildrenByTag("direct", needRecollect);
+    EXPECT_TRUE(needRecollect);
+    ASSERT_EQ(gestureGroup.gestures_.size(), 2u);
+    EXPECT_EQ(gestureGroup.gestures_.front(), untouchedGesture);
+
+    needRecollect = false;
+    gestureGroup.RemoveChildrenByTag("nested", needRecollect);
+    EXPECT_TRUE(needRecollect);
+    ASSERT_EQ(nestedGroup->gestures_.size(), 1u);
+    EXPECT_EQ(nestedGroup->gestures_.front(), nestedKeepGesture);
+
+    needRecollect = false;
+    gestureGroup.RemoveChildrenByTag("missing", needRecollect);
+    EXPECT_FALSE(needRecollect);
+    EXPECT_EQ(gestureGroup.gestures_.size(), 2u);
+    EXPECT_EQ(nestedGroup->gestures_.size(), 1u);
+}
+
+/**
+ * @tc.name: GestureGroupBranchCoverageTest007
+ * @tc.desc: Test RemoveGesture covers direct removal, nested removal, and no-match paths
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupBranchCoverageTest007, TestSize.Level1)
+{
+    auto directGesture = AceType::MakeRefPtr<TapGesture>();
+    auto untouchedGesture = AceType::MakeRefPtr<TapGesture>();
+    auto nestedTargetGesture = AceType::MakeRefPtr<TapGesture>();
+    auto nestedKeepGesture = AceType::MakeRefPtr<TapGesture>();
+    auto missingGesture = AceType::MakeRefPtr<TapGesture>();
+    auto nestedGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive);
+    nestedGroup->AddGesture(nestedTargetGesture);
+    nestedGroup->AddGesture(nestedKeepGesture);
+
+    GestureGroup gestureGroup(GestureMode::Sequence);
+    gestureGroup.AddGesture(directGesture);
+    gestureGroup.AddGesture(untouchedGesture);
+    gestureGroup.AddGesture(nestedGroup);
+
+    gestureGroup.RemoveGesture(directGesture);
+    ASSERT_EQ(gestureGroup.gestures_.size(), 2u);
+    EXPECT_EQ(gestureGroup.gestures_.front(), untouchedGesture);
+
+    gestureGroup.RemoveGesture(nestedTargetGesture);
+    ASSERT_EQ(nestedGroup->gestures_.size(), 1u);
+    EXPECT_EQ(nestedGroup->gestures_.front(), nestedKeepGesture);
+
+    gestureGroup.RemoveGesture(missingGesture);
+    EXPECT_EQ(gestureGroup.gestures_.size(), 2u);
+    EXPECT_EQ(nestedGroup->gestures_.size(), 1u);
+}
 } // namespace OHOS::Ace::NG
