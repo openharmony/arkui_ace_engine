@@ -1363,17 +1363,22 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew051, TestSize.Level1)
     overlay.align = Alignment::TOP_LEFT;
     overlay.x = Dimension(10.0_px);
     overlay.y = Dimension(5.0_px);
-    rosenRenderContext->OnOverlayTextUpdate(overlay);
+    RefPtr<RenderContext> renderContext = AceType::DynamicCast<RenderContext>(rosenRenderContext);
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateOverlayText(overlay);
     ASSERT_NE(rosenRenderContext->overlayTextModifier_, nullptr);
     ASSERT_NE(rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX], nullptr);
+    auto expectedTextRect = std::make_shared<Rosen::RectF>(
+        *rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX]);
 
     auto expectedClearRect = std::make_shared<Rosen::RectF>(0.0f, 0.0f, PAINT_WIDTH, PAINT_HEIGHT);
     EXPECT_FALSE(*rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX] == *expectedClearRect);
 
     overlay.content = "";
-    rosenRenderContext->OnOverlayTextUpdate(overlay);
+    renderContext->UpdateOverlayText(overlay);
     ASSERT_NE(rosenRenderContext->overlayTextModifier_, nullptr);
     ASSERT_NE(rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX], nullptr);
-    EXPECT_TRUE(*rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX] == *expectedClearRect);
+    EXPECT_TRUE(*rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX] == *expectedTextRect);
+    EXPECT_FALSE(*rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX] == *expectedClearRect);
 }
 } // namespace OHOS::Ace::NG

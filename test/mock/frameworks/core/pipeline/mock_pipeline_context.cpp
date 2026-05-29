@@ -1396,6 +1396,7 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
 
 void PipelineContext::InitManagers()
 {
+    memoryMgr_ = MakeRefPtr<MemoryManager>();
     navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();

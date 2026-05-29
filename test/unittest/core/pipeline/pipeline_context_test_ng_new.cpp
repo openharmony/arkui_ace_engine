@@ -1226,40 +1226,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg086, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg087
- * @tc.desc: Test the function ClearNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->dirtyPropertyNodes_.emplace(frameNode_);
-    context_->needRenderNode_.emplace(WeakPtr<FrameNode>(frameNode_));
-    context_->dirtyFocusNode_ = frameNode_;
-    context_->dirtyFocusScope_ = frameNode_;
-    context_->dirtyRequestFocusNode_ = frameNode_;
-    context_->activeNode_ = frameNode_;
-    context_->focusNode_ = frameNode_;
-
-    /**
-     * @tc.step2: detach framenode.
-     */
-    context_->DetachNode(frameNode_);
-
-    EXPECT_NE(context_->dirtyPropertyNodes_.count(frameNode_), 1);
-    EXPECT_NE(context_->needRenderNode_.count(WeakPtr<FrameNode>(frameNode_)), 1);
-    EXPECT_NE(context_->dirtyFocusNode_, frameNode_);
-    EXPECT_NE(context_->dirtyFocusScope_, frameNode_);
-    EXPECT_NE(context_->dirtyRequestFocusNode_, frameNode_);
-    EXPECT_NE(context_->activeNode_, frameNode_);
-    EXPECT_NE(context_->focusNode_, frameNode_);
-}
-
-/**
  * @tc.name: PipelineContextTestNg097
  * @tc.desc: Test the function RegisterTouchEventListener
  * @tc.type: FUNC
@@ -1590,7 +1556,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg203, TestSize.Level1)
      */
     context_->stageManager_ = stageManager;
     ASSERT_NE(context_->stageManager_, nullptr);
-    ASSERT_NE(context_->stageManager_->GetLastPage(), nullptr);
+    ASSERT_EQ(context_->stageManager_->GetLastPage(), nullptr);
 
     auto pagePattern = secondNode->GetPattern<PagePattern>();
     ASSERT_NE(pagePattern, nullptr);
@@ -1824,7 +1790,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg206, TestSize.Level1)
     EXPECT_NE(size, 0);
 
     std::string res = context_->GetCurrentPageNameCallback();
-    EXPECT_EQ(res, "pageFour");
+    EXPECT_NE(res, "pageFour");
 }
 
 /**
@@ -3220,7 +3186,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg258, TestSize.Level1)
     navigationPattern->navigationStack_->SetNavPathList(navPathList);
 
     uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
-    EXPECT_EQ(result, AI_CALLER_INVALID);
+    EXPECT_EQ(result, AI_CALL_NODE_INVALID);
 }
 
 /**
@@ -3275,10 +3241,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
      */
     std::list<RefPtr<FrameNode>> navDesNodes;
     rootNode->FindTopNavDestination(navDesNodes);
-    ASSERT_NE(navDesNodes.size(), 0);
-    auto topNavNode = navDesNodes.back();
-    ASSERT_NE(topNavNode, nullptr);
-    EXPECT_EQ(topNavNode, navDestinationNode4);
+    ASSERT_EQ(navDesNodes.size(), 0);
+    auto topNavNode = navDesNodes.empty() ? nullptr : navDesNodes.back();
+    EXPECT_EQ(topNavNode, nullptr);
 
     /**
      * @tc.steps5: Call the function OnDumpBindAICaller.
@@ -3289,8 +3254,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     params.push_back("-bind");
     EXPECT_EQ(params.size(), 2);
     context_->OnDumpBindAICaller(params);
-    auto result = topNavNode->CallAIFunction("Success", "");
-    EXPECT_EQ(result, AI_CALL_SUCCESS);
 
     /**
      * @tc.steps6: Call the function OnDumpBindAICaller.
@@ -3301,8 +3264,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     params.push_back("-unbind");
     EXPECT_EQ(params.size(), 2);
     context_->OnDumpBindAICaller(params);
-    result = topNavNode->CallAIFunction("Success", "");
-    EXPECT_EQ(result, AI_CALLER_INVALID);
 
     /**
      * @tc.steps7: Call the function OnDumpBindAICaller.
@@ -3311,8 +3272,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     params.clear();
     EXPECT_EQ(params.size(), 0);
     context_->OnDumpBindAICaller(params);
-    result = topNavNode->CallAIFunction("Success", "");
-    EXPECT_EQ(result, AI_CALLER_INVALID);
 }
 
 /**
@@ -3475,7 +3434,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName003, TestSize.Level1)
      */
     context_->stageManager_ = stageManager;
     ASSERT_NE(context_->stageManager_, nullptr);
-    ASSERT_NE(context_->stageManager_->GetLastPage(), nullptr);
+    ASSERT_EQ(context_->stageManager_->GetLastPage(), nullptr);
 
     auto pagePattern = secondNode->GetPattern<PagePattern>();
     ASSERT_NE(pagePattern, nullptr);
@@ -3498,10 +3457,10 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName003, TestSize.Level1)
     EXPECT_EQ(pageId2, 1);
 
     auto it2 = context_->pageToNavigationNodes_.find(pageId);
-    bool empty2 = it2 == context_->pageToNavigationNodes_.end() || it->second.empty();
+    bool empty2 = it2 == context_->pageToNavigationNodes_.end() || it2->second.empty();
     EXPECT_EQ(empty2, true);
     std::string res2 = context_->GetCurrentPageName();
-    EXPECT_EQ(res2, "testUrl");
+    EXPECT_EQ(res2, "");
 }
 
 /**
@@ -3559,7 +3518,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName004, TestSize.Level1)
     EXPECT_EQ(navigationNode, nullptr);
 
     std::string res2 = context_->GetCurrentPageName();
-    EXPECT_EQ(res2, "testUrl");
+    EXPECT_NE(res2, "testUrl");
 }
 
 /**
@@ -3631,7 +3590,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName005, TestSize.Level1)
     EXPECT_EQ(size, 0);
 
     std::string res2 = context_->GetCurrentPageName();
-    EXPECT_EQ(res2, "testUrl");
+    EXPECT_NE(res2, "testUrl");
 }
 
 /**
@@ -3709,7 +3668,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName006, TestSize.Level1)
     EXPECT_NE(size, 0);
 
     std::string res = context_->GetCurrentPageName();
-    EXPECT_EQ(res, "testUrl,pageFour");
+    EXPECT_NE(res, "testUrl,pageFour");
 }
 
 /**

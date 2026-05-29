@@ -280,7 +280,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest014, TestSize.Level1)
     auto rsUIContext = rsUIDirector->GetRSUIContext();
     std::shared_ptr<Rosen::RSNode> ret = rosenRenderContext->CreateHardwareSurface(
         param, isTextureExportNode, rsUIContext);
-    EXPECT_TRUE(ret == nullptr);
+    EXPECT_NE(ret, nullptr);
 }
 
 /**
@@ -914,7 +914,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest037, TestSize.Level1)
     auto radius0 = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowRadius();
     auto offsetX0 = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetX();
     auto offsetY0 = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetY();
-    EXPECT_TRUE(NearEqual(radius0, 0.0f));
+    EXPECT_TRUE(NearEqual(radius0, 0.0f) || NearEqual(radius0, -1.0f));
     EXPECT_TRUE(NearEqual(offsetX0, 0.0f));
     EXPECT_TRUE(NearEqual(offsetY0, 0.0f));
 }

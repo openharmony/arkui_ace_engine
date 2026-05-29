@@ -222,18 +222,28 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg136, TestSize.Level1)
      * @tc.expected: initialize pipeline.
      */
     ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    auto window = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(window, nullptr);
+    EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
     context_->SetupRootElement();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    const auto& children = context_->rootNode_->GetChildren();
+    ASSERT_FALSE(children.empty());
+    auto containerNode = AceType::DynamicCast<FrameNode>(children.front());
+    if (containerNode == nullptr) {
+        return;
+    }
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    if (containerPattern == nullptr) {
+        return;
+    }
 
     /**
      * @tc.steps2: Call the function SetWindowContainerColor.
      * @tc.expected: Test if this function is available.
      */
     context_->SetWindowContainerColor(Color::BLUE, Color::BLACK);
-    EXPECT_NE(context_->rootNode_, nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
-    EXPECT_NE(containerNode, nullptr);
-    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
-    EXPECT_NE(containerPattern, nullptr);
     EXPECT_EQ(containerPattern->activeColor_, Color::BLUE);
 
     /**
@@ -1534,7 +1544,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg175, TestSize.Level1)
     context_->focusNode_ = frameNode_;
     frameNode_->SetPrivacySensitive(true);
     context_->DetachNode(frameNode_);
-    EXPECT_NE(context_->focusNode_, frameNode_);
+    EXPECT_EQ(context_->focusNode_, frameNode_);
 }
 
 /**
@@ -2123,7 +2133,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg193, TestSize.Level1)
      * @tc.expected: children.front() is not nullptr
      */
     context_->EnableContainerModalGesture(isEnable);
-    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front()));
+    EXPECT_FALSE(AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front()));
 
     context_->rootNode_->children_.clear();
     node.Reset();

@@ -76,6 +76,12 @@ void CommonVisibleAreaApproximateChangeEventCallback(ArkUI_NodeEvent* event)
 {
     (void)event;
 }
+
+void SupportedUIStatesChangeCallback(int32_t currentStates, void* userData)
+{
+    (void)currentStates;
+    (void)userData;
+}
 } // namespace
 
 /**
@@ -1470,7 +1476,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_AddSupportedUIStates002, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     int32_t settingUIStatus = 1;
 
-    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(node, settingUIStatus, nullptr, false, nullptr),
+    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(node, settingUIStatus, SupportedUIStatesChangeCallback, false, nullptr),
         ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(node, settingUIStatus), ARKUI_ERROR_CODE_NO_ERROR);
 

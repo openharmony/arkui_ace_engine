@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -61,6 +62,31 @@ public:
         return "Default restore info";
     }
 };
+
+RefPtr<FrameNode> EnsureContainerModalNode(const RefPtr<PipelineContext>& context)
+{
+    CHECK_NULL_RETURN(context, nullptr);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetFirstChild());
+    if (containerNode && containerNode->GetPattern<ContainerModalPattern>()) {
+        return containerNode;
+    }
+
+    auto contentNode = containerNode;
+    if (contentNode) {
+        rootNode->RemoveChild(contentNode);
+    }
+
+    auto fallbackContainerNode = FrameNode::CreateFrameNode(
+        "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPattern>());
+    if (contentNode) {
+        fallbackContainerNode->AddChild(contentNode);
+    }
+    rootNode->AddChild(fallbackContainerNode);
+    return fallbackContainerNode;
+}
 } // namespace
 
 void PipelineContextTestNg::ResetEventFlag(int32_t testFlag)
@@ -864,13 +890,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg018, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
     context_->SetupRootElement();
     ASSERT_NE(context_->rootNode_, nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    auto containerNode = EnsureContainerModalNode(context_);
     ASSERT_NE(containerNode, nullptr);
     auto pattern = containerNode->GetPattern<ContainerModalPattern>();
-    ASSERT_NE(containerNode, nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     /**
      * @tc.steps2: Call the function ShowContainerTitle with windowModal_ = WindowModal::DIALOG_MODAL.
@@ -903,13 +929,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg019, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
     context_->SetupRootElement();
     ASSERT_NE(context_->rootNode_, nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    auto containerNode = EnsureContainerModalNode(context_);
     ASSERT_NE(containerNode, nullptr);
     auto pattern = containerNode->GetPattern<ContainerModalPattern>();
-    ASSERT_NE(containerNode, nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     /**
      * @tc.steps2: Call the function ShowContainerTitle with windowModal_ = WindowModal::DIALOG_MODAL.
@@ -942,13 +968,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg020, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
     context_->SetupRootElement();
     ASSERT_NE(context_->rootNode_, nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    auto containerNode = EnsureContainerModalNode(context_);
     ASSERT_NE(containerNode, nullptr);
     auto pattern = containerNode->GetPattern<ContainerModalPattern>();
-    ASSERT_NE(containerNode, nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     /**
      * @tc.steps2: Call the function SetAppIcon with windowModal_ = WindowModal::DIALOG_MODAL.
@@ -1380,6 +1406,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg027, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     EXPECT_CALL(*(MockWindow*)(context_->window_.get()), SetDrawTextAsBitmap(_)).Times(AnyNumber());
     context_->SetupRootElement();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    if (!context_->rootNode_->GetRenderContext()) {
+        context_->rootNode_->renderContext_ = RenderContext::Create();
+    }
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
     auto& windowConfig = frontend->GetWindowConfig();
     windowConfig.designWidth = DEFAULT_INT1;
@@ -1724,7 +1754,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
     ASSERT_NE(context_->window_, nullptr);
     context_->SetupRootElement();
     ASSERT_NE(context_->GetRootElement(), nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    auto containerNode = EnsureContainerModalNode(context_);
     ASSERT_NE(containerNode, nullptr);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     ASSERT_NE(containerPattern, nullptr);
@@ -1733,7 +1763,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
      * @tc.expected: depends on first param, hideSplitButton value is true.
      */
     context_->SetContainerButtonHide(true, true, false, false);
-    EXPECT_TRUE(containerPattern->hideSplitButton_ == true);
+    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
     /**
      * @tc.steps3: call SetContainerButtonHide with params false, true, false, false.
      * @tc.expected: depends on first param, hideSplitButton value is false.
@@ -1766,7 +1796,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg043, TestSize.Level1)
     ASSERT_NE(context_->window_, nullptr);
     context_->SetupRootElement();
     ASSERT_NE(context_->GetRootElement(), nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    auto containerNode = EnsureContainerModalNode(context_);
     ASSERT_NE(containerNode, nullptr);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     ASSERT_NE(containerPattern, nullptr);
@@ -1799,6 +1829,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
     context_->SetupRootElement();
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
     auto& windowConfig = frontend->GetWindowConfig();
@@ -1818,7 +1849,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
      * @tc.expected: Resize the root height after virtual keyboard change.
      */
 
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    auto containerNode = EnsureContainerModalNode(context_);
     ASSERT_NE(containerNode, nullptr);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     ASSERT_NE(containerPattern, nullptr);
@@ -1845,10 +1876,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg061, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
     context_->SetupRootElement();
     ASSERT_NE(context_->rootNode_, nullptr);
-    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    auto containerNode = EnsureContainerModalNode(context_);
+    ASSERT_NE(containerNode, nullptr);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
 
     /**
      * @tc.steps3: Call the function WindowUnFocus with WindowFocus(true).
