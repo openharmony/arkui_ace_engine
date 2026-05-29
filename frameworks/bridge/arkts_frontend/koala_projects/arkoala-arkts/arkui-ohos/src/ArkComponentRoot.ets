@@ -27,6 +27,7 @@ import { LifeCycleEvent, CustomDelegate } from './component/customComponent';
 import { int32 } from '@koalaui/common';
 import { ExtendableComponent } from './component/extendableComponent';
 import { IEnvVariable } from './stateManagement/decoratorImpl/decoratorEnv';
+import { UIContextUtil } from './base/UIContextUtil';
 
 export function setNeedCreate(isNeedCreate: boolean): boolean {
     const temp = GlobalStateManager.instance._isNeedCreate
@@ -79,19 +80,36 @@ export function ArkComponentRoot(
                     return new Long(childPeerPtr);
                 }
             });
-            if (component instanceof CustomDelegate && (component as Any as CustomDelegate<ExtendableComponent, Object>).getInstance().checkEnvSetSize()) {
-                const envComponent: ExtendableComponent = (component as Any as CustomDelegate<ExtendableComponent, Object>).getInstance();
-                node.getEnvInstanceId((instanceId: int32): void => {
-                    if (envComponent.getEnvInstance() && envComponent.getEnvInstance() === instanceId) {
+            if (component instanceof CustomDelegate) {
+                const delegateComponent = component as Any as CustomDelegate<ExtendableComponent, Object>;
+                const switchComponent: ExtendableComponent = delegateComponent.getInstance();
+                const hasEnv = switchComponent.checkEnvSetSize();
+                node.getEnvInstanceId((newInstanceId: int32): void => {
+                    if (hasEnv) {
+                        if (switchComponent.getEnvInstance() && switchComponent.getEnvInstance() === newInstanceId) {
+                            return;
+                        }
+                        switchComponent.setEnvInstance(newInstanceId);
+                        const envSet: Set<IEnvVariable> = switchComponent.getEnvSet();
+                        for (const envItem of envSet) {
+                            envItem.unRegisterEnv(newInstanceId);
+                            envItem.registerEnv(newInstanceId);
+                        }
+                    }
+
+                    const oldContext = switchComponent.getUIContext();
+                    const oldInstanceId = oldContext.getInstanceId();
+                    if (oldInstanceId === newInstanceId) {
                         return;
                     }
-                    envComponent.setEnvInstance(instanceId);
-                    const envSet: Set<IEnvVariable> = envComponent.getEnvSet();
-                    for (const envItem of envSet) {
-                        envItem.unRegisterEnv(instanceId);
-                        envItem.registerEnv(instanceId);
+                    const newContext = UIContextUtil.getOrCreateUIContextById(newInstanceId);
+                    delegateComponent.__updateUIContext__Internal(newContext);
+                    const peer = switchComponent.__getPeerNode__Internal() as ArkCustomComponentRootPeer;
+                    if (peer) {
+                        peer.updateFreeRootUIContext(oldContext, newContext);
                     }
-                })
+                    switchComponent.__propagateInstanceSwitch__Internal(newInstanceId, newContext);
+                });
             }
             return node;
         },
