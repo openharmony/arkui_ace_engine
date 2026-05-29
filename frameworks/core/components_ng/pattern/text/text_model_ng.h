@@ -128,6 +128,7 @@ public:
     void ResetSelectedDragPreviewStyle() override;
     void SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy) override;
     void ResetIncrementalUpdatePolicy() override;
+    void BindJSTextController(std::function<void()>&& func) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);

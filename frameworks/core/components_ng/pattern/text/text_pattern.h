@@ -484,6 +484,9 @@ public:
     bool SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
     virtual void ClearParagraphCache() {};
 
+    void BindJSTextController(std::function<void()>&& bindFunc) {
+        jsTextControllerBinder_ = std::move(bindFunc);
+    }
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
     int32_t GetClickedSpanPosition();
@@ -869,6 +872,9 @@ private:
     //hash for span string
     std::unique_ptr<SpanGroupHashResult> spanGroupHashResult_;
     RefPtr<LRUMap<uint64_t, ParagraphCacheInfo>> paragraphCache_;
+
+    // used to keep same life cycle with TextPattern
+    std::function<void()> jsTextControllerBinder_;
 };
 } // namespace OHOS::Ace::NG
 

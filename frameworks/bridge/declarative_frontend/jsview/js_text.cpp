@@ -1016,6 +1016,12 @@ void JSText::Create(const JSCallbackInfo& info)
                 jsController->ClearStyledString();
             }
         }
+        // bind text controller
+        auto castObj = JSRef<JSObject>::Cast(controllerObj);
+        auto jSTextControllerBinder = [castObj]() {
+            return;
+        };
+        TextModel::GetInstance()->BindJSTextController(std::move(jSTextControllerBinder));
     }
 }
 
