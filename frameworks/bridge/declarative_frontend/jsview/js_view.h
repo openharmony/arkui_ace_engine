@@ -422,8 +422,6 @@ public:
 
     bool JSAllowReusableV2Descendant();
 
-    void JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInfo& info);
-
     void JSRegisterUpdateJSInstanceCallback(const JSCallbackInfo& info);
 
     void RegisterOnInstanceIdUpdateCallback(const JSRef<JSFunc>& onInstanceIdUpdateFunc);
@@ -431,6 +429,8 @@ public:
     void RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>& onCustomEnvUpdateFunc);
 
     void RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>& onSystemEnvUpdateFunc);
+
+    void RegisterUpdateForEnvCallback(const JSRef<JSFunc>& updateForEnvFunc);
 
     void JSFindCustomValueByKey(const JSCallbackInfo& info);
 

@@ -448,10 +448,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.allowReusableV2Descendant();
   }
 
-  public __registerUpdateInstanceForEnvFunc__Internal(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void {
-    return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
-  }
-
   public findCustomValueByKey(key: number): CustomEnvValue {
     stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
     return this.nativeViewPartialUpdate.findCustomValueByKey(key);
