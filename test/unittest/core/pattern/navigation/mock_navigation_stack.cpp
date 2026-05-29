@@ -352,6 +352,62 @@ int32_t MockNavigationStack::GetRecoveredDestinationMode(int32_t index)
     return mockPathArray_[index]->mode;
 }
 
+bool MockNavigationStack::IsAutoCleaned(int32_t index) const
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return false;
+    }
+
+    return mockPathArray_[index]->autoCleaned;
+}
+
+void MockNavigationStack::ClearAutoCleanedState(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return;
+    }
+
+    mockPathArray_[index]->autoCleaned = false;
+    mockPathArray_[index]->autoCleanedState.clear();
+}
+
+std::string MockNavigationStack::GetAutoCleanedState(int32_t index) const
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return "";
+    }
+
+    return mockPathArray_[index]->autoCleanedState;
+}
+
+void MockNavigationStack::SaveStateToJsCallback(
+    int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state)
+{
+    if (CheckIndexValid(index, mockPathArray_.size()) && mockPathArray_[index]->GetName() == name) {
+        mockPathArray_[index]->autoCleanedState = state;
+        return;
+    }
+
+    auto id = std::to_string(navDestinationId);
+    for (auto&& info : mockPathArray_) {
+        if (info->GetNavDestinationId() == id) {
+            info->autoCleanedState = state;
+            return;
+        }
+    }
+}
+
+void MockNavigationStack::MarkAutoCleanedFlag(uint64_t navDestinationId)
+{
+    auto id = std::to_string(navDestinationId);
+    for (auto&& info : mockPathArray_) {
+        if (info->GetNavDestinationId() == id) {
+            info->autoCleaned = true;
+            return;
+        }
+    }
+}
+
 void MockNavigationStack::CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo)
 {
     recoveryPushCalls_.push_back(navdestinationsInfo);

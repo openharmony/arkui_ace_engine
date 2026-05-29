@@ -754,6 +754,44 @@ void ResetNavDestinationOnWillShow(ArkUINodeHandle node)
     NavDestinationModelNG::SetOnWillShow(frameNode, nullptr);
 }
 
+void SetNavDestinationOnSaveState(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSaveState = reinterpret_cast<NG::NavDestinationSaveStateCallback*>(callback);
+        NavDestinationModelNG::SetOnSaveState(frameNode, std::move(*onSaveState));
+    } else {
+        NavDestinationModelNG::SetOnSaveState(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnSaveState(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnSaveState(frameNode, nullptr);
+}
+
+void SetNavDestinationOnRestoreState(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onRestoreState = reinterpret_cast<NG::NavDestinationRestoreStateCallback*>(callback);
+        NavDestinationModelNG::SetOnRestoreState(frameNode, std::move(*onRestoreState));
+    } else {
+        NavDestinationModelNG::SetOnRestoreState(frameNode, nullptr);
+    }
+}
+
+void ResetNavDestinationOnRestoreState(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnRestoreState(frameNode, nullptr);
+}
+
 void SetNavDestinationOnWillDisappear(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1035,6 +1073,10 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetNavDestinationOnWillAppear = ResetNavDestinationOnWillAppear,
         .setNavDestinationOnWillShow = SetNavDestinationOnWillShow,
         .resetNavDestinationOnWillShow = ResetNavDestinationOnWillShow,
+        .setNavDestinationOnSaveState = SetNavDestinationOnSaveState,
+        .resetNavDestinationOnSaveState = ResetNavDestinationOnSaveState,
+        .setNavDestinationOnRestoreState = SetNavDestinationOnRestoreState,
+        .resetNavDestinationOnRestoreState = ResetNavDestinationOnRestoreState,
         .setNavDestinationOnWillDisappear = SetNavDestinationOnWillDisappear,
         .resetNavDestinationOnWillDisappear = ResetNavDestinationOnWillDisappear,
         .setNavDestinationOnBackPressed = SetNavDestinationOnBackPressed,

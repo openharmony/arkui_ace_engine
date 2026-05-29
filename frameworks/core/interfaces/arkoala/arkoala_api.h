@@ -5774,6 +5774,10 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationOnWillAppear)(ArkUINodeHandle node);
     void (*setNavDestinationOnWillShow)(ArkUINodeHandle node, void* callback);
     void (*resetNavDestinationOnWillShow)(ArkUINodeHandle node);
+    void (*setNavDestinationOnSaveState)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnSaveState)(ArkUINodeHandle node);
+    void (*setNavDestinationOnRestoreState)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnRestoreState)(ArkUINodeHandle node);
     void (*setNavDestinationOnWillDisappear)(ArkUINodeHandle node, void* callback);
     void (*resetNavDestinationOnWillDisappear)(ArkUINodeHandle node);
     void (*setNavDestinationOnBackPressed)(ArkUINodeHandle node, void* callback);
@@ -7099,6 +7103,8 @@ struct ArkUINavigationModifier {
     void (*setDividerStartMargin)(ArkUINodeHandle node, ArkUI_CharPtr start, ArkUI_VoidPtr startRes);
     void (*setDividerEndMargin)(ArkUINodeHandle node, ArkUI_CharPtr end, ArkUI_VoidPtr endRes);
     void (*resetDividerStyle)(ArkUINodeHandle node);
+    void (*setNavigationConfiguration)(ArkUINodeHandle node, ArkUI_Int32 stackSizeLimit);
+    void (*resetNavigationConfiguration)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {

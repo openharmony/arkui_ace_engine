@@ -19,7 +19,9 @@
 #include <cstdint>
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components/theme/theme.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {

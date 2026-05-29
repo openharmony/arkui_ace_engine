@@ -137,6 +137,16 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillShowModifier.identity, NavDestinationOnWillShowModifier, callback);
     return this;
   }
+  onSaveState(callback: () => string): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnSaveStateModifier.identity,
+      NavDestinationOnSaveStateModifier, callback);
+    return this;
+  }
+  onRestoreState(callback: (state: ESObject) => void): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnRestoreStateModifier.identity,
+      NavDestinationOnRestoreStateModifier, callback);
+    return this;
+  }
   onWillDisappear(callback: () => void): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillDisappearModifier.identity, NavDestinationOnWillDisappearModifier, callback);
     return this;
@@ -592,6 +602,34 @@ class NavDestinationOnWillShowModifier extends ModifierWithKey<Callback<void>> {
       getUINativeModule().navDestination.resetOnWillShow(node);
     } else {
       getUINativeModule().navDestination.setOnWillShow(node, this.value);
+    }
+  }
+}
+
+class NavDestinationOnSaveStateModifier extends ModifierWithKey<() => string> {
+  constructor(value: () => string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onSaveState');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnSaveState(node);
+    } else {
+      getUINativeModule().navDestination.setOnSaveState(node, this.value);
+    }
+  }
+}
+
+class NavDestinationOnRestoreStateModifier extends ModifierWithKey<(state: ESObject) => void> {
+  constructor(value: (state: ESObject) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onRestoreState');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnRestoreState(node);
+    } else {
+      getUINativeModule().navDestination.setOnRestoreState(node, this.value);
     }
   }
 }

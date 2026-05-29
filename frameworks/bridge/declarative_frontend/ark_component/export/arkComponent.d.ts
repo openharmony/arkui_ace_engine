@@ -46,6 +46,9 @@ declare type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 declare interface AreaChangeOptions {
     expectedUpdateInterval?: int32;
 }
+declare interface NavigationConfiguration {
+    stackSizeLimit?: number;
+}
 declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _changed: boolean;
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -1150,6 +1153,8 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     hideTitleBar(value: boolean): this;
     onShown(callback: (reason: VisibilityChangeReason) => void): this;
     onHidden(callback: (reason: VisibilityChangeReason) => void): this;
+    onSaveState(callback: () => string): this;
+    onRestoreState(callback: (state: any) => void): this;
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
     recoverable(value: boolean | undefined): this;
@@ -1230,6 +1235,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     recoverable(value: boolean | undefined): NavigationAttribute;
     enableDragBar(value: boolean | undefined): NavigationAttribute;
     splitPlaceholder(placeholder: ComponentContent): NavigationAttribute;
+    configuration(config: NavigationConfiguration | undefined): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

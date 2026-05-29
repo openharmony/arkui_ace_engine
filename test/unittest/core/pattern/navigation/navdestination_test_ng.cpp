@@ -15,10 +15,10 @@
 
 #include "gtest/gtest.h"
 #include "mock_navigation_route.h"
-#include "core/accessibility/accessibility_manager.h"
 
 #define protected public
 #define private public
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/dialog/dialog_theme.h"

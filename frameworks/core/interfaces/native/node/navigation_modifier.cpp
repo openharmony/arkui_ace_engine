@@ -958,6 +958,23 @@ void ResetDividerStyle(ArkUINodeHandle node)
     NavigationModelNG::ResetDividerStyle(frameNode);
 }
 
+void SetNavigationConfiguration(ArkUINodeHandle node, ArkUI_Int32 stackSizeLimit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationConfiguration config;
+    config.stackSizeLimit = stackSizeLimit;
+    NavigationModelNG::SetNavigationConfiguration(frameNode, config);
+}
+
+void ResetNavigationConfiguration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationConfiguration config;
+    NavigationModelNG::SetNavigationConfiguration(frameNode, config);
+}
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -1037,6 +1054,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setDividerStartMargin = SetDividerStartMargin,
         .setDividerEndMargin = SetDividerEndMargin,
         .resetDividerStyle = ResetDividerStyle,
+        .setNavigationConfiguration = SetNavigationConfiguration,
+        .resetNavigationConfiguration = ResetNavigationConfiguration,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

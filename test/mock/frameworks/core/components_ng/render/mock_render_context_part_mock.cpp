@@ -67,10 +67,11 @@ void MockRenderContext::CancelTranslateXYAnimation()
 }
 OffsetF MockRenderContext::GetTranslateXYProperty()
 {
-    return {};
+    return translateXYValue_;
 }
 void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset)
 {
+    translateXYValue_ = offset;
 }
 #endif
 } // namespace OHOS::Ace::NG

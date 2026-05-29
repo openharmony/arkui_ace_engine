@@ -1357,7 +1357,7 @@ void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::functi
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
 
-void SetOnSaveState(FrameNode* frameNode, NG::NavDestinationSaveStateCallback&& onSaveState)
+void NavDestinationModelNG::SetOnSaveState(FrameNode* frameNode, NG::NavDestinationSaveStateCallback&& onSaveState)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
@@ -1374,7 +1374,8 @@ void NavDestinationModelNG::SetOnSaveState(NG::NavDestinationSaveStateCallback&&
     navDestinationEventHub->SetOnSaveState(std::move(onSaveState));
 }
 
-void SetOnRestoreState(FrameNode* frameNode, NG::NavDestinationRestoreStateCallback&& onRestoreState)
+void NavDestinationModelNG::SetOnRestoreState(
+    FrameNode* frameNode, NG::NavDestinationRestoreStateCallback&& onRestoreState)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());

@@ -1565,6 +1565,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillShow));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillShow"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnWillShow));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSaveState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnSaveState));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSaveState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnSaveState));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRestoreState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnRestoreState));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRestoreState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnRestoreState));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillDisappear"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillDisappear));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillDisappear"),
@@ -2431,6 +2439,10 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetDivider));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDividerStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetDivider));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setConfiguration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetNavigationConfiguration));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetConfiguration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetNavigationConfiguration));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 

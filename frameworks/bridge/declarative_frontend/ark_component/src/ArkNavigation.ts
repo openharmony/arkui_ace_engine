@@ -241,7 +241,29 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, NavigationSystemBarStyleModifier.identity, NavigationSystemBarStyleModifier, style);
     return this;
   }
+  configuration(config: Optional<NavigationConfiguration>): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationConfigurationModifier.identity,
+      NavigationConfigurationModifier, config);
+    return this;
+  }
 } 
+
+class NavigationConfigurationModifier extends ModifierWithKey<Optional<NavigationConfiguration>> {
+  constructor(value: Optional<NavigationConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('configuration');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().navigation.resetConfiguration(node);
+    } else {
+      getUINativeModule().navigation.setConfiguration(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
 class OnTitleModeChangeModifier extends ModifierWithKey<((titleMode: NavigationTitleMode) => void)> {
   constructor(value: (titleMode: NavigationTitleMode) => void) {
