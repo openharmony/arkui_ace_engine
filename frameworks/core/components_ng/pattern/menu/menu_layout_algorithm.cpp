@@ -632,6 +632,8 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (!canExpandCurrentWindow_ && isContainerModal_) {
             LimitContainerModalMenuRect(width_, height_, menuPattern);
+        } else {
+            AdjustWrapperRectForPCMode(host);
         }
     }
     CalculateSafeAreaIntersection(safeAreaInsets);
@@ -2616,6 +2618,17 @@ void MenuLayoutAlgorithm::LimitContainerModalMenuRect(
                             static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
     rectWidth -= containerOffsetX;
     rectHeight -= containerOffsetY;
+}
+
+void MenuLayoutAlgorithm::AdjustWrapperRectForPCMode(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    if (!SystemProperties::IsPCMode()) {
+        return;
+    }
+    auto parentOffset = host->GetPaintRectOffset(true, true);
+    width_ -= parentOffset.GetX();
+    height_ -= parentOffset.GetY();
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
