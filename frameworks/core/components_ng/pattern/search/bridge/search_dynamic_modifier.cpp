@@ -593,12 +593,7 @@ void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonO
     SearchModelNG::SetSearchButton(frameNode, value->value, isJsView);
     SearchModelNG::SetSearchButtonFontSize(
         frameNode, CalcDimension(value->sizeValue, static_cast<DimensionUnit>(value->sizeUnit)));
-    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        SearchModelNG::SetSearchButtonFontColor(frameNode, *colorPtr, isThemeColor);
-    } else {
-        SearchModelNG::SetSearchButtonFontColor(frameNode, *colorPtr,
-            isThemeColor && SystemProperties::ConfigChangePerform());
-    }
+    SearchModelNG::SetSearchButtonFontColor(frameNode, *colorPtr, isThemeColor);
     SearchModelNG::SetSearchButtonAutoDisable(frameNode, value->autoDisable);
     if (isJsView) {
         ParseSearchButtonRegisterResource(frameNode, value, *colorPtr, imageIconRes);

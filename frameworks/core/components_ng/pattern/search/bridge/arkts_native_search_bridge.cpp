@@ -1313,6 +1313,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
         value.fontColor = static_cast<int32_t>(fontColor.GetValue());
     } else {
         value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
+        fontColor = theme->GetSearchButtonTextColor();
         isTheme = true;
     }
 
