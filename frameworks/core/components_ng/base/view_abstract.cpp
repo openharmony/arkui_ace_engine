@@ -2629,14 +2629,6 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
-void ViewAbstract::SetShouldRecognizerParallelWith(
-    NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc)
-{
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetShouldRecognizerParallelWithFunc(std::move(shouldRecognizerParallelWithFunc));
-}
-
 void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
     GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag)
 {
@@ -10116,15 +10108,6 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
-}
-
-void ViewAbstract::SetShouldRecognizerParallelWith(
-    FrameNode* frameNode, NG::ShouldRecognizerParallelWithFunc&& shouldRecognizerParallelWithFunc)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetShouldRecognizerParallelWithFunc(std::move(shouldRecognizerParallelWithFunc));
 }
 
 void ViewAbstract::SetNextFocus(FrameNode* frameNode, FocusIntension key,
