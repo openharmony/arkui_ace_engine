@@ -266,6 +266,9 @@ public:
         multiSelectable_ = multiSelectable;
     }
     void UpdateBackPressCloseSwipeActionCallback();
+    bool NeedBackPressHandler() const override;
+    bool HandleBackPress() override;
+    bool CloseSwipeActionOnBackPressed();
     void SetBackPressCloseSwipeAction(bool closeSwipeAction)
     {
         closeSwipeActionByBackPress_ = closeSwipeAction;
@@ -275,7 +278,7 @@ public:
         return closeSwipeActionByBackPress_;
     }
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
-    WeakPtr<ListItemPattern> GetSwiperItem();
+    WeakPtr<ListItemPattern> GetSwiperItem() const;
     void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem);
     bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem);
     bool CanReplaceSwiperItem();
@@ -353,6 +356,7 @@ public:
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
     bool NeedJudgeWithHotZone() override;
+    bool NeedReserveEditModeCheckBoxSpaceForList();
     int32_t GetItemAtPosition(float offsetX, float offsetY) const override;
     bool IsInEditModeHotZone(const PointF& point) const override;
     void MarkSwipeItemSelected(int32_t index, bool isSelected) override;
@@ -366,6 +370,7 @@ public:
         std::vector<SwipeSelectStateKey>& keys) const override;
     void ApplyEditModeToVisibleItems() override;
     void RemoveEditModeFromItems() override;
+    void ApplyEditModeToCachedItems(bool enabled) override;
 
     void SetItemState(ItemState itemState, int32_t id)
     {
@@ -507,7 +512,6 @@ public:
 
 protected:
     void OnModifyDone() override;
-    void OnDetachFromMainTree() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     virtual bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
     virtual void AdjustScrollPosition(int32_t nextIndex, int32_t curIndex);
@@ -726,7 +730,6 @@ private:
     WeakPtr<ListItemPattern> swiperItem_;
     bool canReplaceSwiperItem_ = true;
     bool closeSwipeActionByBackPress_ = true;
-    bool hasBackPressHandlerRegistered_ = false;
 
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
