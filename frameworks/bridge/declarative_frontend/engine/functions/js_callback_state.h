@@ -40,10 +40,8 @@ class JsCallbackWithNode<FuncT, R(Args...)> {
 public:
     using Trampoline = R (*)(const RefPtr<FuncT>&, Args...);
 
-    JsCallbackWithNode(const JSExecutionContext& execCtx, RefPtr<FuncT> func, WeakPtr<NG::FrameNode> node,
-        Trampoline trampoline, R defaultResult = R())
-        : state_{execCtx, std::move(func), std::move(node)}, trampoline_(trampoline),
-            defaultResult_(std::move(defaultResult))
+    JsCallbackWithNode(JsCallbackState<FuncT> state, Trampoline trampoline, R defaultResult = R())
+        : state_(std::move(state)), trampoline_(trampoline), defaultResult_(std::move(defaultResult))
     {}
 
     R operator()(Args... args) const

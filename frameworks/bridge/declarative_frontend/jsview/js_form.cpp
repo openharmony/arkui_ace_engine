@@ -53,38 +53,30 @@ FormModel* FormModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 template<typename FuncT>
-class JsFormStringCallback {
-public:
-    JsFormStringCallback(const JSExecutionContext& execCtx, RefPtr<FuncT> func, const char* scoringEvent,
-        const char* key0 = nullptr, const char* key1 = nullptr, const char* key2 = nullptr)
-        : execCtx_(execCtx), func_(std::move(func)), scoringEvent_(scoringEvent), key0_(key0), key1_(key1),
-          key2_(key2)
-    {}
+struct JsFormStringCallback {
+    JSExecutionContext execCtx;
+    RefPtr<FuncT> func;
+    const char* scoringEvent = nullptr;
+    const char* key0 = nullptr;
+    const char* key1 = nullptr;
+    const char* key2 = nullptr;
 
     void operator()(const std::string& param) const
     {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
-        ACE_SCORING_EVENT(scoringEvent_);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT(scoringEvent);
         std::vector<std::string> keys;
-        if (key0_ != nullptr) {
-            keys.emplace_back(key0_);
+        if (key0 != nullptr) {
+            keys.emplace_back(key0);
         }
-        if (key1_ != nullptr) {
-            keys.emplace_back(key1_);
+        if (key1 != nullptr) {
+            keys.emplace_back(key1);
         }
-        if (key2_ != nullptr) {
-            keys.emplace_back(key2_);
+        if (key2 != nullptr) {
+            keys.emplace_back(key2);
         }
-        func_->Execute(keys, param);
+        func->Execute(keys, param);
     }
-
-private:
-    JSExecutionContext execCtx_;
-    RefPtr<FuncT> func_;
-    const char* scoringEvent_ = nullptr;
-    const char* key0_ = nullptr;
-    const char* key1_ = nullptr;
-    const char* key2_ = nullptr;
 };
 } // namespace
 
@@ -239,8 +231,9 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onAcquired = JsFormStringCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
-            "Form.onAcquired", "id", "idString", "isLocked");
+        auto onAcquired = JsFormStringCallback<JsFunction> {
+            info.GetExecutionContext(), std::move(jsFunc), "Form.onAcquired", "id", "idString", "isLocked"
+        };
         FormModel::GetInstance()->SetOnAcquired(std::move(onAcquired));
     }
 }
@@ -249,8 +242,9 @@ void JSForm::JsOnError(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onError = JsFormStringCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
-            "Form.onError", "errcode", "msg");
+        auto onError = JsFormStringCallback<JsFunction> {
+            info.GetExecutionContext(), std::move(jsFunc), "Form.onError", "errcode", "msg"
+        };
         FormModel::GetInstance()->SetOnError(std::move(onError));
     }
 }
@@ -259,8 +253,9 @@ void JSForm::JsOnUninstall(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onUninstall = JsFormStringCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
-            "Form.onUninstall", "id", "idString", "isLocked");
+        auto onUninstall = JsFormStringCallback<JsFunction> {
+            info.GetExecutionContext(), std::move(jsFunc), "Form.onUninstall", "id", "idString", "isLocked"
+        };
         FormModel::GetInstance()->SetOnUninstall(std::move(onUninstall));
     }
 }
@@ -269,8 +264,9 @@ void JSForm::JsOnRouter(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onRouter = JsFormStringCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
-            "Form.onRouter", "action");
+        auto onRouter = JsFormStringCallback<JsFunction> {
+            info.GetExecutionContext(), std::move(jsFunc), "Form.onRouter", "action"
+        };
         FormModel::GetInstance()->SetOnRouter(std::move(onRouter));
     }
 }
@@ -279,8 +275,9 @@ void JSForm::JsOnLoad(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onLoad = JsFormStringCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
-            "Form.onLoad");
+        auto onLoad = JsFormStringCallback<JsFunction> {
+            info.GetExecutionContext(), std::move(jsFunc), "Form.onLoad"
+        };
         FormModel::GetInstance()->SetOnLoad(std::move(onLoad));
     }
 }
@@ -289,8 +286,9 @@ void JSForm::JsOnUpdate(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onUpdate = JsFormStringCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
-            "Form.onUpdate", "id", "idString");
+        auto onUpdate = JsFormStringCallback<JsFunction> {
+            info.GetExecutionContext(), std::move(jsFunc), "Form.onUpdate", "id", "idString"
+        };
         FormModel::GetInstance()->SetOnUpdate(std::move(onUpdate));
     }
 }

@@ -8466,8 +8466,10 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onDragStart = DragStartCallback(info.GetExecutionContext(), std::move(jsOnDragStartFunc), frameNode,
-        &OnDragStartTrampoline);
+    JsCallbackState<JsDragFunction> callbackState {
+        info.GetExecutionContext(), std::move(jsOnDragStartFunc), frameNode
+    };
+    auto onDragStart = DragStartCallback(std::move(callbackState), &OnDragStartTrampoline);
     ViewAbstractModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
 }
 

@@ -251,7 +251,8 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
     };
 
     const auto& resetStagingPageCallback = [invokeOnJsEngine]() {
-        invokeOnJsEngine(&Framework::JsEngine::ResetStagingPage); };
+        invokeOnJsEngine(&Framework::JsEngine::ResetStagingPage);
+    };
 
     const auto& destroyPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t pageId) {
         auto jsEngine = weakEngine.Upgrade();
