@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

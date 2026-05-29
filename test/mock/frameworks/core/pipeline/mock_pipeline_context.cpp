@@ -1990,4 +1990,9 @@ ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhas
 ScopedEnvConsumer::~ScopedEnvConsumer()
 {
 }
+
+bool PipelineContext::GetIsRequestVsync()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

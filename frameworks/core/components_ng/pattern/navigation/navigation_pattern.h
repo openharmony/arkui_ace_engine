@@ -20,6 +20,7 @@
 #include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/navigation/custom_safe_area_expander.h"
 #include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
