@@ -18,6 +18,7 @@ import { RecordData } from '@ohos.base';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { CustomComponentLifecycle, CustomDelegate } from './customComponent';
 import { __CustomComponentLifecycle__Internal } from './customComponentLifecycle';
+import { ArkCustomComponentRootPeer } from './staticComponents';
 import { SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
 import {
     IProvideDecoratedVariable,
@@ -69,6 +70,7 @@ export interface IExtendableComponent {
     __getParentNode__Internal(): PeerNode | undefined;
     getInstance(): ExtendableComponent;
     getCanUpdateStateVars(): boolean;
+    __updateUIContext__Internal(newContext: UIContext): void;
 }
 
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
@@ -341,8 +343,34 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         return this.envInstanceId;
     }
 
-    setEnvInstance(newInstanceId: int32 | undefined) {
+    setEnvInstance(newInstanceId: int32 | undefined): void {
         this.envInstanceId = newInstanceId;
+    }
+
+    __updateFreeRootUIContext__Internal(oldContext: UIContext, newContext: UIContext): void {
+        const peer = this.__getPeerNode__Internal();
+        if (peer instanceof ArkCustomComponentRootPeer) {
+            peer.updateFreeRootUIContext(oldContext, newContext);
+        }
+    }
+
+    __propagateInstanceSwitch__Internal(newInstanceId: int32, newContext: UIContext): void {
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            if (child) {
+                const childOldContext = child.getUIContext();
+                const childDelegate = child.__getIExtendableDelegate__Internal();
+                if (childDelegate) {
+                    childDelegate.__updateUIContext__Internal(newContext);
+                }
+                child.__updateFreeRootUIContext__Internal(childOldContext, newContext);
+                child.__propagateInstanceSwitch__Internal(newInstanceId, newContext);
+            }
+        });
+    }
+
+    __getIExtendableDelegate__Internal(): IExtendableComponent | undefined {
+        return this.delegate_;
     }
 
     __addSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean {

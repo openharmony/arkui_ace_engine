@@ -650,6 +650,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return this.uiContext!;
     }
 
+    __updateUIContext__Internal(newContext: UIContext): void {
+        this.uiContext = newContext;
+    }
+
     getPeerNode(): PeerNode | undefined {
         return this.getPeer();
     }
