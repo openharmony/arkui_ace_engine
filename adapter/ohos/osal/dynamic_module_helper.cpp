@@ -77,6 +77,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"DynamicLayout", "dynamiclayout"},
         { "LazyDynamicLayout", "dynamiclayout "},
         { "Gauge", "gauge" },
+        { "Grid", "grid" },
+        { "GridItem", "grid" },
         { "Hyperlink", "hyperlink" },
         { "Indexer", "indexer" },
         { "Badge", "badge" },

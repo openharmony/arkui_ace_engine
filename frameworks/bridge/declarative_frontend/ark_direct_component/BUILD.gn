@@ -32,6 +32,24 @@ ohos_abc("arkimagespan") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkgrid") {
+  sources = [ "./src/arkgrid.ts" ]
+  output_name = "arkgrid"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkgriditem") {
+  sources = [ "./src/arkgriditem.ts" ]
+  output_name = "arkgriditem"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkdatapanel") {
   sources = [ "./src/arkdatapanel.ts" ]
   output_name = "arkdatapanel"

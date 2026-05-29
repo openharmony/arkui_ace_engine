@@ -610,6 +610,11 @@ public:
     template<typename T>
     static T GetPropertyValue(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue);
+    static Local<ObjectRef> CreateItemDragInfo(const EcmaVM* vm, const ItemDragInfo& info);
+    static bool SetJSWidth(const Local<JSValueRef>& jsValue);
+    static bool SetJSHeight(const Local<JSValueRef>& jsValue);
+    static void SetJsBindContextMenu(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
     static bool ParseAllBorderRadiuses(EcmaVM* vm, panda::Local<panda::ObjectRef> object,

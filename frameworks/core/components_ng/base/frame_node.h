@@ -2072,7 +2072,7 @@ extern template RefPtr<DialogAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
 extern template RefPtr<GaugeAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
-extern template RefPtr<GridAccessibilityProperty>
+extern template ACE_FORCE_EXPORT RefPtr<GridAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
 extern template RefPtr<GridItemAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;

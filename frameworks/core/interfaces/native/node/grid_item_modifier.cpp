@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,229 +12,60 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "core/interfaces/native/node/grid_item_modifier.h"
 
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
-#include "core/pipeline/base/element_register.h"
+#include "core/common/dynamic_module_helper.h"
 
-namespace OHOS::Ace::NG {
-
-constexpr int32_t DEFAULT_GRID_ITEM_VALUE = 0;
-const int32_t ERROR_INT_CODE = -1;
-
-void SetGridItemSelectable(ArkUINodeHandle node, ArkUI_Bool selectable)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetSelectable(frameNode, selectable);
-}
-
-void ResetGridItemSelectable(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetSelectable(frameNode, true);
-}
-
-ArkUI_Bool GetGridItemSelectable(ArkUINodeHandle node)
-{
-    CHECK_NULL_RETURN(node, true);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, true);
-    return GridItemModelNG::GetSelectable(frameNode);
-}
-
-void SetGridItemSelected(ArkUINodeHandle node, ArkUI_Bool selected)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetSelected(frameNode, selected);
-}
-
-void ResetGridItemSelected(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetSelected(frameNode, false);
-}
-
-ArkUI_Bool GetGridItemSelected(ArkUINodeHandle node)
-{
-    CHECK_NULL_RETURN(node, false);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    return GridItemModelNG::GetSelected(frameNode);
-}
-
-void SetGridItemRowStart(ArkUINodeHandle node, int32_t rowStart)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetRowStart(frameNode, rowStart);
-}
-
-void ResetGridItemRowStart(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetRowStart(frameNode, DEFAULT_GRID_ITEM_VALUE);
-}
-
-void SetGridItemRowEnd(ArkUINodeHandle node, int32_t rowEnd)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetRowEnd(frameNode, rowEnd);
-}
-
-void ResetGridItemRowEnd(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetRowEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
-}
-
-void SetGridItemColumnStart(ArkUINodeHandle node, int32_t columnStart)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetColumnStart(frameNode, columnStart);
-}
-
-void ResetGridItemColumnStart(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetColumnStart(frameNode, DEFAULT_GRID_ITEM_VALUE);
-}
-
-void SetGridItemColumnEnd(ArkUINodeHandle node, int32_t columnEnd)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetColumnEnd(frameNode, columnEnd);
-}
-
-void ResetGridItemColumnEnd(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetColumnEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
-}
-
-void SetGridItemOptions(ArkUINodeHandle node, ArkUI_Int32 style)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemStyle(frameNode, static_cast<GridItemStyle>(style));
-}
-
-void ResetGridItemOptions(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemStyle(frameNode, GridItemStyle::NONE);
-}
-
-ArkUI_Int32 GetGridItemOptions(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return static_cast<int32_t>(GridItemModelNG::GetGridItemStyle(frameNode));
-}
-
-void SetGridItemOnSelect(ArkUINodeHandle node, void* callback)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onSelectEvent = reinterpret_cast<std::function<void(bool)>*>(callback);
-        GridItemModelNG::SetOnSelect(frameNode, std::move(*onSelectEvent));
-    } else {
-        GridItemModelNG::SetOnSelect(frameNode, nullptr);
-    }
-}
-
-void ResetGridItemOnSelect(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetOnSelect(frameNode, nullptr);
-}
-
-namespace NodeModifier {
-void SetOnGridItemSelect(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](bool isSelected) {
-        ArkUINodeEvent event;
-        event.kind = COMPONENT_ASYNC_EVENT;
-        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_GRID_ITEM_SELECT;
-        event.componentAsyncEvent.data[0].i32 = isSelected;
-        SendArkUISyncEvent(&event);
-    };
-    GridItemModelNG::SetOnSelect(frameNode, std::move(onEvent));
-}
-
-void ResetOnGridItemSelect(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetOnSelect(frameNode, nullptr);
-}
-
+namespace OHOS::Ace::NG::NodeModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const ArkUIGridItemModifier* GetGridItemDynamicModifier();
+const CJUIGridItemModifier* GetCJUIGridItemDynamicModifier();
+const GridItemCustomModifier* GetGridItemCustomDynamicModifier();
+#endif
 const ArkUIGridItemModifier* GetGridItemModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIGridItemModifier modifier = {
-        .setGridItemSelectable = SetGridItemSelectable,
-        .resetGridItemSelectable = ResetGridItemSelectable,
-        .getGridItemSelectable  = GetGridItemSelectable,
-        .setGridItemSelected = SetGridItemSelected,
-        .resetGridItemSelected = ResetGridItemSelected,
-        .getGridItemSelected = GetGridItemSelected,
-        .setGridItemRowStart = SetGridItemRowStart,
-        .resetGridItemRowStart = ResetGridItemRowStart,
-        .setGridItemRowEnd = SetGridItemRowEnd,
-        .resetGridItemRowEnd = ResetGridItemRowEnd,
-        .setGridItemColumnStart = SetGridItemColumnStart,
-        .resetGridItemColumnStart = ResetGridItemColumnStart,
-        .setGridItemColumnEnd = SetGridItemColumnEnd,
-        .resetGridItemColumnEnd = ResetGridItemColumnEnd,
-        .setGridItemOptions = SetGridItemOptions,
-        .resetGridItemOptions = ResetGridItemOptions,
-        .getGridItemOptions = GetGridItemOptions,
-        .setGridItemOnSelect = SetGridItemOnSelect,
-        .resetGridItemOnSelect = ResetGridItemOnSelect,
-        .setOnGridItemSelect = SetOnGridItemSelect,
-        .resetOnGridItemSelect = ResetOnGridItemSelect,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const ArkUIGridItemModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GetGridItemDynamicModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridItem");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIGridItemModifier*>(module->GetDynamicModifier());
+#endif
+    }
+    return cachedModifier;
 }
 
 const CJUIGridItemModifier* GetCJUIGridItemModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIGridItemModifier modifier = {
-        .setGridItemSelectable = SetGridItemSelectable,
-        .resetGridItemSelectable = ResetGridItemSelectable,
-        .setGridItemSelected = SetGridItemSelected,
-        .resetGridItemSelected = ResetGridItemSelected,
-        .setGridItemRowStart = SetGridItemRowStart,
-        .resetGridItemRowStart = ResetGridItemRowStart,
-        .setGridItemRowEnd = SetGridItemRowEnd,
-        .resetGridItemRowEnd = ResetGridItemRowEnd,
-        .setGridItemColumnStart = SetGridItemColumnStart,
-        .resetGridItemColumnStart = ResetGridItemColumnStart,
-        .setGridItemColumnEnd = SetGridItemColumnEnd,
-        .resetGridItemColumnEnd = ResetGridItemColumnEnd,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const CJUIGridItemModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GetCJUIGridItemDynamicModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridItem");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIGridItemModifier*>(module->GetCjModifier());
+#endif
+    }
+    return cachedModifier;
 }
+
+const NG::GridItemCustomModifier* GetGridItemCustomModifier()
+{
+    static const NG::GridItemCustomModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GetGridItemCustomDynamicModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("GridItem");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier =
+            reinterpret_cast<const NG::GridItemCustomModifier*>(module->GetCustomModifier("GridItemCustom"));
+#endif
+    }
+    return cachedModifier;
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG::NodeModifier

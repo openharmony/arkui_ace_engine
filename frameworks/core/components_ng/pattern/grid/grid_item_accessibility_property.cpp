@@ -15,12 +15,16 @@
 
 #include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const char GRID_ETS_TAG[] = "Grid";
+}
 bool GridItemAccessibilityProperty::IsSelected() const
 {
     auto frameNode = host_.Upgrade();
@@ -41,7 +45,7 @@ AceCollectionItemInfo GridItemAccessibilityProperty::GetCollectionItemInfo() con
     CHECK_NULL_RETURN(gridItemLayoutProperty, aceCollectionItemInfo);
     auto uiNode = DynamicCast<UINode>(frameNode);
     CHECK_NULL_RETURN(uiNode, aceCollectionItemInfo);
-    while (uiNode->GetTag() != V2::GRID_ETS_TAG) {
+    while (uiNode->GetTag() != GRID_ETS_TAG) {
         uiNode = uiNode->GetParent();
         CHECK_NULL_RETURN(uiNode, aceCollectionItemInfo);
     }

@@ -616,10 +616,10 @@ namespace Converter {
     ACE_FORCE_EXPORT void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src);
 
     template<>
-    void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from);
+    ACE_FORCE_EXPORT void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from);
 
     template<>
-    void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from);
+    ACE_FORCE_EXPORT void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from);
 
     // Converter declarations should be here, because they can be used in other converters!
     // SORTED_SECTION: Converter's specializations. No multiline declarations, please!
@@ -825,7 +825,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT double Convert(const Ark_Float64& src);
     template<> float Convert(const Ark_Float32& src);
     template<> ACE_FORCE_EXPORT float Convert(const Ark_Float64& src);
-    template<> int Convert(const Ark_Float64& src);
+    template<> ACE_FORCE_EXPORT int Convert(const Ark_Float64& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
@@ -918,7 +918,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src);
     template<> void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
-    template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
     template<> void AssignCast(std::optional<EdgeLightPosition>& dst, const Ark_EdgeLightPosition& src);
     template<> void AssignCast(std::optional<EffectLayer>& dst, const Ark_EffectLayer& src);
     template<> void AssignCast(std::optional<UnionMode>& dst, const Ark_UnionMode& src);
@@ -930,9 +930,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src);
-    template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FocusDrawLevel>& dst, const Ark_FocusDrawLevel& src);
-    template<> void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FontFamilies>& dst, const Ark_Resource& value);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FontWeight>& dst, const Ark_Int32& src);
@@ -1002,7 +1002,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_NavigationTitleOptions& src);
     template<> void AssignCast(std::optional<NavigationTransition>& dst, const Ark_NavigationAnimatedTransition& src);
     template<> void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src);
-    template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<OHOS::Ace::CommonSubType>& dst, const Ark_EffectDirection& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FillStyle>& dst, const Ark_EffectFillStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);

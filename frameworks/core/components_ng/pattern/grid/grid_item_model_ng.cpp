@@ -25,13 +25,26 @@
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const char GRID_ITEM_ETS_TAG[] = "GridItem";
+}
 
 void GridItemModelNG::Create(GridItemStyle gridItemStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GRID_ITEM_ETS_TAG, nodeId);
-    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::GRID_ITEM_ETS_TAG, nodeId,
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", GRID_ITEM_ETS_TAG, nodeId);
+    auto frameNode = ScrollableItemPool::GetInstance().Allocate(GRID_ITEM_ETS_TAG, nodeId,
+        [itemStyle = gridItemStyle]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
+    stack->Push(frameNode);
+}
+
+void GridItemModelNG::CreateStatic(GridItemStyle gridItemStyle)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", GRID_ITEM_ETS_TAG, nodeId);
+    auto frameNode = ScrollableItemPool::GetInstance().Allocate(GRID_ITEM_ETS_TAG, nodeId,
         [itemStyle = gridItemStyle]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
     stack->Push(frameNode);
 }
@@ -51,7 +64,30 @@ void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool
         deepRenderFunc(nodeId);
         return ViewStackProcessor::GetInstance()->Finish();
     };
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, nodeId,
+    auto frameNode = FrameNode::GetOrCreateFrameNode(GRID_ITEM_ETS_TAG, nodeId,
+        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = gridItemStyle]() {
+            return AceType::MakeRefPtr<GridItemPattern>(shallowBuilder, itemStyle);
+        });
+    stack->Push(frameNode);
+}
+
+void GridItemModelNG::CreateStatic(
+    std::function<void(int32_t)>&& deepRenderFunc, bool isLazy, GridItemStyle gridItemStyle)
+{
+    if (!isLazy) {
+        CreateStatic(gridItemStyle);
+        return;
+    }
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
+        CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+        ScopedViewStackProcessor scopedViewStackProcessor;
+        deepRenderFunc(nodeId);
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
+    auto frameNode = FrameNode::GetOrCreateFrameNode(GRID_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = gridItemStyle]() {
             return AceType::MakeRefPtr<GridItemPattern>(shallowBuilder, itemStyle);
         });
@@ -62,7 +98,7 @@ RefPtr<FrameNode> GridItemModelNG::CreateFrameNode(int32_t nodeId)
 {
     // call CreateFrameNodeMultiThread by multi thread
     THREAD_SAFE_NODE_SCOPE_CHECK(CreateFrameNode, nodeId);
-    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::GRID_ITEM_ETS_TAG, nodeId,
+    auto frameNode = ScrollableItemPool::GetInstance().Allocate(GRID_ITEM_ETS_TAG, nodeId,
         [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
 
     return frameNode;
@@ -71,7 +107,7 @@ RefPtr<FrameNode> GridItemModelNG::CreateFrameNode(int32_t nodeId)
 RefPtr<FrameNode> GridItemModelNG::CreateGridItem(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
+        GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
     return frameNode;
 }
 
@@ -146,6 +182,14 @@ void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
 void GridItemModelNG::BindContextMenu()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->BindContextMenu();
+}
+
+void GridItemModelNG::BindContextMenu(FrameNode* frameNode)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);

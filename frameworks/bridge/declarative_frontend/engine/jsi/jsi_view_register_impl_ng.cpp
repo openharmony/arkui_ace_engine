@@ -59,10 +59,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
@@ -412,8 +410,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSIsolatedComponent::JSBind(globalObj);
 #endif
 #endif
-    JSGrid::JSBind(globalObj);
-    JSGridItem::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
     JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);

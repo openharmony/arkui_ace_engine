@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/marquee/marquee_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
@@ -49,6 +48,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 
@@ -486,16 +486,14 @@ bool ComponentTestComponentImpl::IsSelectedImpl(ErrInfo& errInfo) const
         return false;
     }
     const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    const auto* gridItemModifier = NG::NodeModifier::GetGridItemCustomModifier();
     if (AceType::InstanceOf<NG::ListItemPattern>(pattern)) {
         auto listItemPattern = AceType::DynamicCast<NG::ListItemPattern>(pattern);
         if (listItemPattern) {
             return listItemPattern->IsSelected();
         }
-    } else if (AceType::InstanceOf<NG::GridItemPattern>(pattern)) {
-        auto gridItemPattern = AceType::DynamicCast<NG::GridItemPattern>(pattern);
-        if (gridItemPattern) {
-            return gridItemPattern->IsSelected();
-        }
+    } else if (gridItemModifier && gridItemModifier->isGridItemPattern(pattern)) {
+        return gridItemModifier->isSelected(frameNode);
     } else if (AceType::InstanceOf<NG::TextBase>(pattern)) {
         auto textBase = AceType::DynamicCast<NG::TextBase>(pattern);
         if (textBase) {

@@ -104,6 +104,8 @@ special_components = [
   "arkimagespan",
   "arkgauge",
   "arkbadge",
+  "arkgrid",
+  "arkgriditem",
   "arkdatapanel",
   "arktextclock",
   "arkloadingprogress",

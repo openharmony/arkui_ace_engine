@@ -229,6 +229,14 @@ interface TextPickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface GridComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface GridItemComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 declare class TextForegroundColorModifier extends ModifierWithKey<object> {
     constructor(value: object);
 }

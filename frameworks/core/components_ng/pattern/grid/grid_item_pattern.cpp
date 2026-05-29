@@ -34,6 +34,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+const char GRID_ETS_TAG[] = "Grid";
 } // namespace
 
 GridItemPattern::GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
@@ -508,7 +509,7 @@ void GridItemPattern::HandleFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto uiNode = DynamicCast<UINode>(host);
-    while (uiNode->GetTag() != V2::GRID_ETS_TAG) {
+    while (uiNode->GetTag() != GRID_ETS_TAG) {
         uiNode = uiNode->GetParent();
         CHECK_NULL_VOID(uiNode);
     }

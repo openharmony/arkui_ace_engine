@@ -84,6 +84,11 @@ public:
 
     DisplayMode GetDisplayMode() const override;
 
+    static void CreateGrid(
+        const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollProxy);
+    static void PopStatic();
+    static RefPtr<ScrollControllerBase> CreatePositionControllerStatic();
+    static RefPtr<ScrollProxy> CreateScrollBarProxyStatic();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
@@ -94,6 +99,7 @@ public:
     static void SetRowsGap(FrameNode* frameNode, const Dimension& rowsGap);
     static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& scrollBarMode);
     static int32_t GetScrollBarMode(FrameNode* frameNode);
+    static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth);
     static float GetScrollBarWidth(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
@@ -182,6 +188,11 @@ public:
     static bool GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode);
     static void CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
+    static void SetSupportDragAnimation(FrameNode* frameNode, bool value);
+    static DisplayMode GetDisplayMode(FrameNode* frameNode);
+    static void SetIsRTL(FrameNode* frameNode, TextDirection direction);
+    static void SetGridHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetOnScrollToIndex(FrameNode* frameNode, ScrollToIndexFunc&& value);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

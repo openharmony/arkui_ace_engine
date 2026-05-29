@@ -16,48 +16,13 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_MODIFIER_H
 
+#include "core/components_ng/pattern/grid/bridge/grid/grid_utils_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIGridModifier* GetGridModifier();
 const CJUIGridModifier* GetCJUIGridModifier();
-void SetOnGridScrollIndex(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridScrollIndex(ArkUINodeHandle node);
-void SetOnGridScrollIndexCallBack(ArkUINodeHandle node, void* extraParam);
-void SetOnGridScrollBarUpdateCallBack(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridScrollBarUpdate(ArkUINodeHandle node);
-void SetOnGridItemDragStart(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridItemDragStart(ArkUINodeHandle node);
-void SetOnGridItemDragEnter(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridItemDragEnter(ArkUINodeHandle node);
-void SetOnGridItemDragMove(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridItemDragMove(ArkUINodeHandle node);
-void SetOnGridItemDragLeave(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridItemDragLeave(ArkUINodeHandle node);
-void SetOnGridItemDrop(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridItemDrop(ArkUINodeHandle node);
-void CreateWithResourceObjGridFriction(ArkUINodeHandle node, void* resObj);
-void CreateWithResourceObjGridScrollBarColor(ArkUINodeHandle node, void* resObj);
-void SetOnGridScrollStart(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridScrollStart(ArkUINodeHandle node);
-void SetOnGridScrollStop(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridScrollStop(ArkUINodeHandle node);
-void SetOnGridScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridScrollFrameBegin(ArkUINodeHandle node);
-void SetOnGridWillScroll(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridWillScroll(ArkUINodeHandle node);
-void SetOnGridDidScroll(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridDidScroll(ArkUINodeHandle node);
-void SetOnGridScrollBarUpdate(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridScrollBarUpdate(ArkUINodeHandle node);
-void SetGridOnItemDragEnter(ArkUINodeHandle node, void* extraParam);
-void SetGridOnItemDragLeave(ArkUINodeHandle node, void* extraParam);
-void SetGridOnItemDragMove(ArkUINodeHandle node, void* extraParam);
-void SetGridOnItemDragStart(ArkUINodeHandle node, void* extraParam);
-void SetGridOnItemDrop(ArkUINodeHandle node, void* extraParam);
-void SetOnGridEditModeChange(ArkUINodeHandle node, void* extraParam);
-void ResetOnGridEditModeChange(ArkUINodeHandle node);
-void SetOnGridEditModeChangeCallBack(ArkUINodeHandle node, void* extraParam);
+const NG::GridCustomModifier* GetGridCustomModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_MODIFIER_H

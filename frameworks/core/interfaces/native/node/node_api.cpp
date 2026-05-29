@@ -691,27 +691,6 @@ const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
 };
 
-const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
-    nullptr,
-    NodeModifier::SetOnGridScrollStart,
-    NodeModifier::SetOnGridScrollStop,
-    NodeModifier::SetOnGridScrollIndex,
-    NodeModifier::SetOnGridScrollFrameBegin,
-    NodeModifier::SetOnGridWillScroll,
-    NodeModifier::SetOnGridDidScroll,
-    NodeModifier::SetOnGridScrollBarUpdate,
-    NodeModifier::SetGridOnItemDragStart,
-    NodeModifier::SetGridOnItemDragEnter,
-    NodeModifier::SetGridOnItemDragMove,
-    NodeModifier::SetGridOnItemDragLeave,
-    NodeModifier::SetGridOnItemDrop,
-    NodeModifier::SetOnGridEditModeChange,
-};
-
-const ComponentAsyncEventHandler GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetOnGridItemSelect,
-};
-
 const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSearchSubmit,
     NodeModifier::SetOnSearchChange,
@@ -946,27 +925,6 @@ const ResetComponentAsyncEventHandler ARC_LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[]
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetListItemOnSelect,
-};
-
-const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
-    nullptr,
-    NodeModifier::ResetOnGridScrollStart,
-    NodeModifier::ResetOnGridScrollStop,
-    NodeModifier::ResetOnGridScrollIndex,
-    NodeModifier::ResetOnGridScrollFrameBegin,
-    NodeModifier::ResetOnGridWillScroll,
-    NodeModifier::ResetOnGridDidScroll,
-    NodeModifier::ResetOnGridScrollBarUpdate,
-    NodeModifier::ResetOnGridItemDragEnter,
-    NodeModifier::ResetOnGridItemDragLeave,
-    NodeModifier::ResetOnGridItemDragMove,
-    NodeModifier::ResetOnGridItemDragStart,
-    NodeModifier::ResetOnGridItemDrop,
-    NodeModifier::ResetOnGridEditModeChange,
-};
-
-const ResetComponentAsyncEventHandler GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::ResetOnGridItemSelect,
 };
 
 const ResetComponentAsyncEventHandler ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1208,21 +1166,18 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             break;
         }
         case ARKUI_GRID: {
-            // grid event type.
-            if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* gridModifier = NodeModifier::GetGridModifier();
+            if (gridModifier) {
+                eventHandle = reinterpret_cast<ComponentAsyncEventHandler>(gridModifier->getEventSetHandler(subKind));
             }
-            eventHandle = GRID_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_GRID_ITEM: {
-            // grid item event type.
-            if (subKind >= sizeof(GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* gridItemModifier = NodeModifier::GetGridItemModifier();
+            if (gridItemModifier) {
+                eventHandle =
+                    reinterpret_cast<ComponentAsyncEventHandler>(gridItemModifier->getEventSetHandler(subKind));
             }
-            eventHandle = GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_ALPHABET_INDEXER: {
@@ -1515,24 +1470,19 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             break;
         }
         case ARKUI_GRID: {
-            // grid event type.
-            if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
-                TAG_LOGE(
-                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* gridModifier = NodeModifier::GetGridModifier();
+            if (gridModifier) {
+                eventHandle =
+                    reinterpret_cast<ResetComponentAsyncEventHandler>(gridModifier->getEventResetHandler(subKind));
             }
-            eventHandle = GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_GRID_ITEM: {
-            // grid item event type.
-            if (subKind >=
-                sizeof(GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
-                TAG_LOGE(
-                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* gridItemModifier = NodeModifier::GetGridItemModifier();
+            if (gridItemModifier) {
+                eventHandle =
+                    reinterpret_cast<ResetComponentAsyncEventHandler>(gridItemModifier->getEventResetHandler(subKind));
             }
-            eventHandle = GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_ALPHABET_INDEXER: {

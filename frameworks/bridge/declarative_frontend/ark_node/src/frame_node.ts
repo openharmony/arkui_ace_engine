@@ -1458,12 +1458,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Grid', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Grid', (node: NodePtr, type: ModifierType): ArkGridComponent => {
-        return new ArkGridComponent(node, type);
+        getUINativeModule().loadNativeModule('Grid');
+        let module = globalThis.requireNapi('arkui.components.arkgrid');
+        return module.createComponent(node, type);
       })
     }],
     ['GridItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
-        return new ArkGridItemComponent(node, type);
+        getUINativeModule().loadNativeModule('GridItem');
+        let module = globalThis.requireNapi('arkui.components.arkgriditem');
+        return module.createComponent(node, type);
       })
     }],
     ['TextClock', (context: UIContext): FrameNode => {
@@ -1633,7 +1637,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkGridComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Grid');
+      let module = globalThis.requireNapi('arkui.components.arkgrid');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['GridItem', (node: FrameNode): ArkGridItemComponent => {
@@ -1643,7 +1649,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkGridItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('GridItem');
+      let module = globalThis.requireNapi('arkui.components.arkgriditem');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Text', (node: FrameNode): ArkTextComponent => {

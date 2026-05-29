@@ -99,7 +99,7 @@ private:
     std::string GetBarStateString() const;
 };
 
-class GridPaintProperty : public ScrollablePaintProperty {
+class ACE_FORCE_EXPORT GridPaintProperty : public ScrollablePaintProperty {
     DECLARE_ACE_TYPE(GridPaintProperty, ScrollablePaintProperty);
 public:
     RefPtr<PaintProperty> Clone() const override;
