@@ -2072,7 +2072,6 @@ void AssignUnionTo(std::optional<T>& dst,
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -5030,7 +5029,6 @@ ASSIGN_OPT(Opt_TranslateOptions)
 ASSIGN_OPT(Opt_Tuple_ColorMetrics_F64)
 ASSIGN_OPT(Opt_Tuple_ResourceColor_F64)
 ASSIGN_OPT(Opt_Tuple_ResourceColor_ResourceColor)
-ASSIGN_OPT(Opt_uiEffect_HdrDarkenBlender)
 ASSIGN_OPT(Opt_UIExtensionOptions)
 ASSIGN_OPT(Opt_uiObserver_NavigationInfo)
 ASSIGN_OPT(Opt_UIPickerComponentOptions)
