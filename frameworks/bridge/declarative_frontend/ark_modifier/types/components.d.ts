@@ -551,6 +551,10 @@ declare class ArkContainerPickerComponent extends ArkComponent implements UIPick
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
+declare class ArkContainerReaderComponent extends ArkComponent implements ContainerReaderAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+}
+
 declare class ArkContainerSpanComponent extends ArkComponent implements ContainerSpanAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }

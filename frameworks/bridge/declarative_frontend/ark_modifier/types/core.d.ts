@@ -156,6 +156,7 @@ interface ParticleAttribute extends CommonAttribute {}
 interface SymbolGlyphAttribute extends CommonAttribute {}
 interface SymbolSpanAttribute extends CommonAttribute {}
 interface Component3DAttribute extends CommonAttribute {}
+interface ContainerReaderAttribute extends CommonAttribute {}
 interface ContainerSpanAttribute extends CommonAttribute {}
 interface LazyVGridLayoutAttribute extends CommonAttribute {}
 interface LazyColumnLayoutAttribute extends CommonAttribute {}
@@ -184,6 +185,7 @@ type BorderImageOption = object;
 type BackgroundOptions = { color?: ResourceColor };
 type BackgroundEffectOptions = object;
 type BackgroundBrightnessOptions = object;
+type BreakpointOptions = object;
 type BrightnessOptions = object;
 type ForegroundBlurStyleOptions = object;
 type BackgroundBlurStyleOptions = object;

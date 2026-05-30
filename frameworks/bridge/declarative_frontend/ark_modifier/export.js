@@ -22,7 +22,7 @@ function processDistFile(fileName) {
         content += `
 export default {
   AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier,
-  CheckboxGroupModifier, CircleModifier, ColumnModifier, ColumnSplitModifier, CommonModifier,
+  CheckboxGroupModifier, CircleModifier, ColumnModifier, ColumnSplitModifier, CommonModifier, ContainerReaderModifier,
   CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier,
   GaugeModifier, GridModifier, GridItemModifier, GridColModifier, GridRowModifier, HyperlinkModifier,
   ImageModifier, ImageAnimatorModifier, ImageSpanModifier, LineModifier, ListModifier, ListItemModifier,

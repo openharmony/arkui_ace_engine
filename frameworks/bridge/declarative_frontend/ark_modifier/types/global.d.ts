@@ -81,6 +81,10 @@ interface CheckboxGroupComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ContainerReaderComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface ColumnSplitComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
