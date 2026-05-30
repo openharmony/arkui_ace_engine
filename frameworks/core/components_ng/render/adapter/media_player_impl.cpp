@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"
+#ifdef RS_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#endif
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -100,6 +103,16 @@ void MediaPlayerImpl::InitListener()
             }, "ArkUIVideoPlayerStatusChanged");
     };
 
+    auto onStop = [weak = WeakClaim(this), uiTaskExecutor] {
+        uiTaskExecutor.PostSyncTask([weak] {
+                auto player = weak.Upgrade();
+                CHECK_NULL_VOID(player);
+                if (player->stateChangeCallback_) {
+                    player->stateChangeCallback_(PlaybackStatus::STOPPED);
+                }
+            }, "ArkUIVideoPlayerStopped");
+    };
+
     auto onCurrentTimeChange = [weak = WeakClaim(this), uiTaskExecutor](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([weak, currentPos] {
                 auto player = weak.Upgrade();
@@ -135,9 +148,14 @@ void MediaPlayerImpl::InitListener()
     player_->AddCurrentPosListener(onCurrentTimeChange);
     player_->AddCompletionListener(onCompletion);
     player_->AddSeekDoneListener(onSeekDone);
+    player_->AddStopListener(onStop);
 }
 
-void MediaPlayerImpl::ResetMediaPlayer() {}
+void MediaPlayerImpl::ResetMediaPlayer()
+{
+    CHECK_NULL_VOID(player_);
+    player_->MarkResetPending();
+}
 
 bool MediaPlayerImpl::IsMediaPlayerValid()
 {
@@ -252,6 +270,13 @@ int32_t MediaPlayerImpl::SetSurface()
     return 0;
 }
 
+int32_t MediaPlayerImpl::SetRenderFirstFrame(bool display)
+{
+    CHECK_NULL_RETURN(player_, -1);
+    player_->SetRenderFirstFrame(display);
+    return 0;
+}
+
 int32_t MediaPlayerImpl::PrepareAsync()
 {
     return 0;
@@ -312,6 +337,11 @@ void MediaPlayerImpl::ProcessSurfaceCreate()
 void MediaPlayerImpl::ProcessSurfaceChange(int32_t width, int32_t height)
 {
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player ProcessSurfaceChange (%{public}d, %{public}d)", width, height);
+#if defined(RS_ENABLE_VK) && defined(ANDROID_PLATFORM)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+        SetSurface();
+    }
+#endif
     if (resolutionChangeCallback_) {
         resolutionChangeCallback_();
     }
