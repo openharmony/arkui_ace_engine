@@ -257,3 +257,21 @@ export function SecurityUIExtensionComponentImpl(
         content_?.()
     })
 }
+
+@memo
+export function SecurityUIExtensionComponent(
+    @memo @memo_skip
+    style: ((attributes: SecurityUIExtensionComponentAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void, 
+): void {
+    const receiver = remember<ArkSecurityUIExtensionComponentComponent>((): ArkSecurityUIExtensionComponentComponent => {
+        return new ArkSecurityUIExtensionComponentComponent()
+    })
+    NodeAttach<ArkSecurityUIExtensionComponentPeer>(():
+        ArkSecurityUIExtensionComponentPeer => ArkSecurityUIExtensionComponentPeer.create(receiver),
+                                               (_: ArkSecurityUIExtensionComponentPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}

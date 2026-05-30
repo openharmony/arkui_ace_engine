@@ -159,3 +159,16 @@ export function DynamicComponentImpl(
         style?.(receiver)
     })
 }
+
+@memo
+export function DynamicComponent(
+    @memo @memo_skip
+    style: ((attributes: DynamicComponentAttribute) => void) | undefined,
+): void {
+    const receiver = remember(() => {
+        return new ArkDynamicComponent()
+    })
+    NodeAttach<ArkDynamicComponentPeer>((): ArkDynamicComponentPeer => ArkDynamicComponentPeer.create(receiver, DcFlag), (_: ArkDynamicComponentPeer) => {
+        style?.(receiver)
+    })
+}
