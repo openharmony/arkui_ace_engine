@@ -5403,12 +5403,6 @@ let LazyForEachMemOptStrategy;
   LazyForEachMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION = 1;
 })(LazyForEachMemOptStrategy || (LazyForEachMemOptStrategy = {}));
 
-let GestureShortcut;
-(function (GestureShortcut) {
-  GestureShortcut[GestureShortcut.PRIMARY = 0] = 'PRIMARY';
-})(GestureShortcut || (GestureShortcut = {}));
-globalThis.GestureShortcut = GestureShortcut;
-
 let EdgeLightPosition;
 (function (EdgeLightPosition) {
   EdgeLightPosition[EdgeLightPosition.TOP_LEFT = 0] = 'TOP_LEFT';

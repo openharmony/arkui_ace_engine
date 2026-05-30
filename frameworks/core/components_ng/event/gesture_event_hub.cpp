@@ -752,21 +752,6 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
     focusHub->SetOnClickCallback(std::move(clickEvent));
 }
 
-void GestureEventHub::SetCommonClickEvent(GestureEventFunc&& clickEvent)
-{
-    commonClickEvent_ = std::move(clickEvent);
-}
-
-void GestureEventHub::ClearCommonClickEvent()
-{
-    commonClickEvent_ = nullptr;
-}
-
-GestureEventFunc GestureEventHub::GetCommonClickEvent() const
-{
-    return commonClickEvent_;
-}
-
 // helper function to ensure clickActuator is initialized
 void GestureEventHub::CheckClickActuator()
 {
@@ -790,14 +775,12 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double dista
     CheckClickActuator();
     if (parallelCombineClick) {
         userParallelClickEventActuator_->SetUserCallback(std::move(clickEvent));
-        SetCommonClickEvent(userParallelClickEventActuator_->GetClickEvent());
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
         auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(dimensionDistanceThreshold);
         clickEventActuator_->AddDistanceThreshold(dimensionDistanceThreshold);
     } else {
         clickEventActuator_->SetUserCallback(std::move(clickEvent));
-        SetCommonClickEvent(clickEventActuator_->GetClickEvent());
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
         auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(dimensionDistanceThreshold);
@@ -820,14 +803,12 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, Dimension di
     CheckClickActuator();
     if (parallelCombineClick) {
         userParallelClickEventActuator_->SetUserCallback(std::move(clickEvent));
-        SetCommonClickEvent(userParallelClickEventActuator_->GetClickEvent());
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
         auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(distanceThreshold);
         clickEventActuator_->AddDistanceThreshold(distanceThreshold);
     } else {
         clickEventActuator_->SetUserCallback(std::move(clickEvent));
-        SetCommonClickEvent(clickEventActuator_->GetClickEvent());
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
         auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(distanceThreshold);
@@ -856,11 +837,9 @@ void GestureEventHub::SetFrameNodeCommonOnClick(GestureEventFunc&& clickEvent)
     CheckClickActuator();
     if (parallelCombineClick) {
         userParallelClickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
-        SetCommonClickEvent(userParallelClickEventActuator_->GetClickEvent());
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
     } else {
         clickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
-        SetCommonClickEvent(clickEventActuator_->GetClickEvent());
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
     }
 }
@@ -952,7 +931,6 @@ void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
 
-    SetCommonClickEvent(clickEventActuator_->GetClickEvent());
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 
     auto uiNode = AceType::DynamicCast<UINode>(GetFrameNode());
@@ -975,7 +953,6 @@ void GestureEventHub::AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)
     CheckClickActuator();
     clickEventActuator_->AddClickAfterEvent(clickEvent);
 
-    SetCommonClickEvent(clickEventActuator_->GetClickEvent());
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
 
@@ -1249,7 +1226,6 @@ void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
     auto host = GetFrameNode();
     ACE_UINODE_TRACE(host);
     CHECK_NULL_VOID(gestureEventHub);
-    commonClickEvent_ = gestureEventHub->commonClickEvent_;
     auto originalTouchEventActuator = gestureEventHub->touchEventActuator_;
     if (originalTouchEventActuator) {
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();

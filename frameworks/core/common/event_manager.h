@@ -48,7 +48,6 @@ namespace NG {
 class FrameNode;
 class GestureDebugBoundaryManager;
 class SelectOverlayManager;
-class SmartGestureManager;
 class ResponseCtrl;
 class TouchDelegate : public virtual AceType {
     DECLARE_ACE_TYPE(TouchDelegate, AceType);
@@ -126,10 +125,6 @@ public:
     bool HasDifferentDirectionGesture();
 
     bool OnNonPointerEvent(const NonPointerEvent& event);
-    ACE_FORCE_EXPORT const RefPtr<NG::SmartGestureManager>& GetOrCreateSmartGestureManager();
-    const RefPtr<NG::SmartGestureManager>& GetSmartGestureManager() const;
-    void ClearSmartGestureSelected();
-    void ResetSmartGestureManager();
     ACE_NON_VIRTUAL bool DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch = true);
     bool DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch = true);
     void DispatchTouchCancelToRecognizer(
@@ -575,7 +570,6 @@ private:
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
     std::unordered_map<int32_t, RefPtr<NG::GestureReferee>> postEventRefereeWithStrategyNG_;
-    RefPtr<NG::SmartGestureManager> smartGestureManager_;
     RefPtr<NG::GestureDebugBoundaryManager> gestureDebugBoundaryManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
     RefPtr<InputEventMonitorManager> inputMonitorManager_;

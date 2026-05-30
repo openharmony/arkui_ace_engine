@@ -55,9 +55,6 @@
             "@ohos/arkui/UIContext": [
                 "../@ohos.arkui.UIContext.ts"
             ],
-            "@ohos/arkui/smartGestureController": [
-                "../@ohos.arkui.smartGestureController.ts"
-            ],
             "@ohos.arkui.UIContext": [
                 "../@ohos.arkui.UIContext.ts"
             ],
@@ -112,7 +109,6 @@
         "build/unmemoized/src/**/*.ts",
         "build/unmemoized/src/*.ts",
         "build/unmemoized/@ohos.arkui.UIContext.ts",
-        "build/unmemoized/@ohos.arkui.smartGestureController.ts",
         "build/unmemoized/@ohos.measure.ts",
         "build/unmemoized/@ohos.font.ts",
         "build/unmemoized/@ohos.animator.ts",

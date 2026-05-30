@@ -34,7 +34,6 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #endif
@@ -136,7 +135,6 @@
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/smart_gesture_property.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
@@ -6250,17 +6248,6 @@ void FrameNode::UpdateFocusState()
     }
 }
 
-void FrameNode::UpdateSmartGestureSelectedState()
-{
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    auto eventManager = context->GetEventManager();
-    CHECK_NULL_VOID(eventManager);
-    auto smartGestureManager = eventManager->GetSmartGestureManager();
-    CHECK_NULL_VOID(smartGestureManager);
-    smartGestureManager->UpdateSelectedNodePaintIfNeeded(AceType::Claim(this));
-}
-
 bool FrameNode::SelfOrParentExpansive()
 {
     return SelfExpansive() || ParentExpansive();
@@ -6463,9 +6450,6 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
     // update focus state
     UpdateFocusState();
-
-    // update smart gesture selected state
-    UpdateSmartGestureSelectedState();
 
     // rebuild child render node.
     if (!isLayoutNode_) {
@@ -7284,27 +7268,11 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
         eventHub_->OnAttachContext(context);
     }
     pattern_->OnAttachContext(context);
-    if (smartGestureProperty_) {
-        auto eventManager = context->GetEventManager();
-        CHECK_NULL_VOID(eventManager);
-        auto manager = eventManager->GetOrCreateSmartGestureManager();
-        if (manager) {
-            manager->SyncPrimaryActionNode(AceType::Claim(this));
-        }
-    }
 }
 
 void FrameNode::DetachContext(bool recursive)
 {
     CHECK_NULL_VOID(context_);
-    if (smartGestureProperty_) {
-        auto eventManager = context_->GetEventManager();
-        CHECK_NULL_VOID(eventManager);
-        auto manager = eventManager->GetOrCreateSmartGestureManager();
-        if (manager) {
-            manager->RemovePrimaryActionNode(GetId());
-        }
-    }
     pattern_->OnDetachContext(context_);
     if (eventHub_) {
         eventHub_->OnDetachContext(context_);
@@ -8676,19 +8644,6 @@ const DragPreviewOption& FrameNode::GetDragPreviewOption()
         return defaultInstance;
     }
     return dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
-}
-
-RefPtr<SmartGestureProperty> FrameNode::GetOrCreateSmartGestureProperty()
-{
-    if (!smartGestureProperty_) {
-        smartGestureProperty_ = MakeRefPtr<SmartGestureProperty>();
-    }
-    return smartGestureProperty_;
-}
-
-RefPtr<SmartGestureProperty> FrameNode::GetSmartGestureProperty() const
-{
-    return smartGestureProperty_;
 }
 
 void FrameNode::RegisterLpxAttribute(LpxAttribute attribute)

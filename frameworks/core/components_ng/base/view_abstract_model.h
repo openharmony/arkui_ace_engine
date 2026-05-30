@@ -432,8 +432,6 @@ public:
             responseRegionMap) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
     virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
-    virtual void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) {}
-    virtual void ResetSmartGestureShortcut() {}
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;

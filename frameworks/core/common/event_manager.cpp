@@ -25,7 +25,6 @@
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
-#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -33,7 +32,6 @@
 #include "core/event/crown_event.h"
 #include "core/event/coasting_axis_event_generator.h"
 #include "core/pipeline/base/render_node.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 constexpr int32_t DUMP_DOUBLE_NUMBER = 2;
@@ -2450,36 +2448,6 @@ EventManager::EventManager()
 }
 
 EventManager::~EventManager() = default;
-
-const RefPtr<NG::SmartGestureManager>& EventManager::GetOrCreateSmartGestureManager()
-{
-    if (!smartGestureManager_) {
-        auto container = Container::GetContainer(instanceId_);
-        CHECK_NULL_RETURN(container, smartGestureManager_);
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-        CHECK_NULL_RETURN(pipeline, smartGestureManager_);
-        smartGestureManager_ = AceType::MakeRefPtr<NG::SmartGestureManager>(WeakPtr<NG::PipelineContext>(pipeline));
-    }
-    return smartGestureManager_;
-}
-
-const RefPtr<NG::SmartGestureManager>& EventManager::GetSmartGestureManager() const
-{
-    return smartGestureManager_;
-}
-
-void EventManager::ClearSmartGestureSelected()
-{
-    auto smartGestureManager = GetSmartGestureManager();
-    if (smartGestureManager) {
-        smartGestureManager->ClearSelected();
-    }
-}
-
-void EventManager::ResetSmartGestureManager()
-{
-    smartGestureManager_.Reset();
-}
 
 void EventManager::AddRectCallback(std::function<void(std::vector<Rect>&)>&& getRectCallback,
     std::function<void()>&& touchCallback, std::function<void()>&& mouseCallback)

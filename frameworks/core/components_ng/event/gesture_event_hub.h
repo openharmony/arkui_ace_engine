@@ -194,9 +194,6 @@ public:
     void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
-    void SetCommonClickEvent(GestureEventFunc&& clickEvent);
-    void ClearCommonClickEvent();
-    GestureEventFunc GetCommonClickEvent() const;
     bool IsClickable() const;
     bool IsComponentClickable() const;
     bool IsUserClickable() const;
@@ -602,8 +599,6 @@ private:
     bool monopolizeEvents_ = false;
     float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
     bool isDragNewFwk_ = false;
-    // When the component has onClick or TapGesture, it will set a common click event.
-    GestureEventFunc commonClickEvent_;
 };
 
 #ifdef ENABLE_ROSEN_BACKEND
