@@ -415,6 +415,7 @@ const GENERATED_ArkUIUIWaterFlowEventAccessor* GetUIWaterFlowEventAccessor();
 const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor();
 const GENERATED_ArkUIVerifyPinHandlerAccessor* GetVerifyPinHandlerAccessor();
 const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor();
+const GENERATED_ArkUIVideoControllerAsyncAccessor* GetVideoControllerAsyncAccessor();
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor();
 const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor();
 const GENERATED_ArkUIWebKeyboardControllerAccessor* GetWebKeyboardControllerAccessor();
@@ -769,6 +770,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUrlStyleAccessor,
         GetVerifyPinHandlerAccessor,
         GetVideoControllerAccessor,
+        GetVideoControllerAsyncAccessor,
         GetWebContextMenuParamAccessor,
         GetWebContextMenuResultAccessor,
         GetWebKeyboardControllerAccessor,

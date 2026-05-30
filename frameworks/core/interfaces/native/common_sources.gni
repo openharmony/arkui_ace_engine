@@ -35,6 +35,8 @@ common_sources = [
   "implementation/text_field_modifier.cpp",
   "implementation/text_picker_dialog_extender.cpp",
   "implementation/video_controller_peer_impl.cpp",
+  "implementation/video_controller_async_peer_impl.cpp",
+  "implementation/video_controller_async_accessor.cpp",
   "implementation/ui_extension_proxy_peer.cpp",
   "implementation/web_modifier_callbacks.cpp",
   "implementation/x_component_controller_peer_impl.cpp",

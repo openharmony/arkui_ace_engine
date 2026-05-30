@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT VideoModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<Pattern> CreateVideoStaticPattern(const RefPtr<VideoControllerV2>& videoController);
     static void SetSrc(FrameNode* frameNode,
         const std::string& src, const std::string& bundleName, const std::string& moduleName);
     static void SetShowFirstFrame(FrameNode* frameNode, bool showFirstFrame);

@@ -431,6 +431,21 @@ void VideoStateMachinePattern::OnControllerDestroyed()
     }
 }
 
+void VideoStateMachinePattern::SetVideoControllerAsync(
+    const RefPtr<VideoControllerAsync>& videoControllerAsync)
+{
+    if (videoControllerAsync_ == videoControllerAsync) {
+        return;
+    }
+    if (videoControllerAsync_) {
+        videoControllerAsync_->ClearPattern();
+    }
+    videoControllerAsync_ = videoControllerAsync;
+    if (videoControllerAsync_) {
+        videoControllerAsync_->SetPattern(WeakClaim(this));
+    }
+}
+
 void VideoStateMachinePattern::ResetMediaPlayerOnBg(VideoControllerAsync::AsyncCommandCallback callback)
 {
     CHECK_NULL_VOID(mediaPlayer_);

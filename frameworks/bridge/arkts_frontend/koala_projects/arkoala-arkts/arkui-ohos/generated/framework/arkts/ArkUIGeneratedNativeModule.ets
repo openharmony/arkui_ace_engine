@@ -7192,6 +7192,20 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _VideoController_reset(ptr: KPointer): void
     @ani.unsafe.Direct
+    native static _VideoControllerAsync_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _VideoControllerAsync_getFinalizer(): KPointer
+    native static _VideoControllerAsync_start(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _VideoControllerAsync_pause(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _VideoControllerAsync_stop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _VideoControllerAsync_requestFullscreen(ptr: KPointer, value: boolean): void
+    @ani.unsafe.Direct
+    native static _VideoControllerAsync_exitFullscreen(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _VideoControllerAsync_setCurrentTime(ptr: KPointer, value: KDouble, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _VideoControllerAsync_reset(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _WebContextMenuParam_construct(): KPointer
     @ani.unsafe.Direct
     native static _WebContextMenuParam_getFinalizer(): KPointer
