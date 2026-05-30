@@ -427,8 +427,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig023, TestSize.Level1)
     EXPECT_TRUE(config.pagePairs.find("PageA") != config.pagePairs.end());
     EXPECT_TRUE(config.pagePairs["PageA"].empty());
     EXPECT_EQ(config.pagePairs.size(), 1);
-    EXPECT_EQ(config.transPages.size(), 1);
-    EXPECT_TRUE(config.transPages.find("TransitionPage") != config.transPages.end());
+    EXPECT_TRUE(config.transPages.empty());
 }
 
 /**
@@ -438,7 +437,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig023, TestSize.Level1)
  */
 HWTEST_F(ForceSplitUtilsTest, ParseForceSplitConfig024, TestSize.Level1)
 {
-    std::string configStr = "{ \"transPages\": {} }";
+    std::string configStr = "{ \"mode\": 0, \"transPages\": {} }";
     bool isRouterSplit = NAVIGATION_SPLIT;
     NG::ForceSplitConfig config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
