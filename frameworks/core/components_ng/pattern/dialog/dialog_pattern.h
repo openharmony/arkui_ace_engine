@@ -537,6 +537,7 @@ private:
     void OnWindowShow() override;
     void PlayFlowLight();
     void PlayDistortion();
+    void StartMaskColorAnimation();
     void ReportActionSheetOnInjectionEvent(bool result,
         std::string reason, int32_t sheetIndex = -1, int32_t buttonIndex = -1);
     int32_t OnInjectionEvent(const std::string& command) override;
@@ -564,6 +565,7 @@ private:
     std::optional<int32_t> hoverModeChangedCallbackId_;
     std::optional<bool> needDistortion_;
     std::optional<bool> needFlowLight_;
+    std::optional<bool> isDistortAnimationExecuting_;
     bool isFoldStatusChanged_ = false;
 
     // XTS inspector values
@@ -607,7 +609,6 @@ private:
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
     RectF parentWindowRect_;
-    bool isDialogShow_ = true;
     bool hasExtraNodeForDistortion_ = false;
     std::function<void()> onFinishEvent_ = nullptr;
 };

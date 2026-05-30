@@ -23,6 +23,7 @@ ace_unittest("dialog_test_ng") {
     "dialog_model_test_two_ng.cpp",
     "dialog_pattern_test_ng.cpp",
     "dialog_pattern_test_two_ng.cpp",
+    "dialog_pattern_test_three_ng.cpp",
     "dialog_test_ng.cpp",
     "dialog_test_two_ng.cpp",
   ]
