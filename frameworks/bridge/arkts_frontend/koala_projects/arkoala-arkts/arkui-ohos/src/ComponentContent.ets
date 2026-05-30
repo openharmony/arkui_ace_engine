@@ -103,6 +103,13 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
 
     dispose(): void {
         this.isDisposed_ = true;
+        const frameNodePtr = this.builderNode_?.getFrameNodeWithoutCheck()?.nodePtr_;
+        if (frameNodePtr) {
+            const weakRef: WeakRef<ComponentContent<T>> = new WeakRef<ComponentContent<T>>(this)
+            ArkUIAniModule._FireArkUIObjectLifecycleCallback(
+                weakRef as object,
+                'ComponentContent', 'ComponentContent', frameNodePtr!);
+        }
         this.detachFromParent();
         this.builderNode_?.dispose();
     }

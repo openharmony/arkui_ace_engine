@@ -1184,6 +1184,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::CheckThreadValid)
         },
         ani_native_function {
+            "_FireArkUIObjectLifecycleCallback",
+            "C{std.core.Object}C{std.core.String}C{std.core.String}l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::FireArkUIObjectLifecycleCallback)
+        },
+        ani_native_function {
             "_Common_SetCustomPropertyCallBack",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomPropertyCallBack)
