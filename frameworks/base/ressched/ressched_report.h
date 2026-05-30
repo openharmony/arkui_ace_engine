@@ -51,6 +51,14 @@ struct ResEventInfo {
     SourceTool sourceTool = SourceTool::UNKNOWN;
 };
 
+struct PageTransitionInfo {
+    std::string fromPage;
+    std::string toPage;
+    std::string mode;
+    std::string fromComponentName;
+    std::string toComponentName;
+};
+
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
     const std::unordered_map<std::string, std::string>& payload);
 
@@ -88,8 +96,7 @@ public:
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
-    void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode,
-        const std::string& fromComponentName = {}, const std::string& toComponentName = {});
+    void HandlePageTransition(const PageTransitionInfo& pageTransitionInfo, const uint32_t windowId);
     void HandleSwiperChange(std::unordered_map<std::string, std::string>& payload);
     static std::atomic<int32_t> createPageCount; // not consider multi-instances.
     static bool triggerExecuted; // not consider multi-instances.

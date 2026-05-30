@@ -667,7 +667,7 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     CHECK_NULL_VOID(destPageInfo);
     auto destFullPath = destPageInfo->GetFullPath();
 
-    ResSchedReport::GetInstance().HandlePageTransition(srcFullPath, destFullPath, "Router");
+    PageTransitionReport(srcFullPath, destFullPath);
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
@@ -801,5 +801,21 @@ std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
     auto info = pattern->GetPageInfo();
     CHECK_NULL_RETURN(info, "");
     return info->GetPagePath();
+}
+
+void StageManager::PageTransitionReport(const std::string& srcFullPath, const std::string& destFullPath)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = srcFullPath;
+    pageTransitionInfo.toPage = destFullPath;
+    pageTransitionInfo.mode = "Router";
+    pageTransitionInfo.fromComponentName = "";
+    pageTransitionInfo.toComponentName = "";
+    uint32_t windowId = 0;
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        windowId = context->GetWindowId();
+    }
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, windowId);
 }
 } // namespace OHOS::Ace::NG

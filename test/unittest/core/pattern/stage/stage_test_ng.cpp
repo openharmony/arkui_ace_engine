@@ -940,6 +940,38 @@ HWTEST_F(StageTestNg, StageManagerTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StageManagerTest012
+ * @tc.desc: Testing PageTransitionReport Function when context is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->PageTransitionReport("fromPage", "toPage", "fromCompoent", "toComponent");
+    /**
+     * @tc.steps: step3. execute PageTransitionReport Function when context is nullptr.
+     * @tc.expected: Expected report success.
+     */
+    stageManager->PageTransitionReport("fromPage", "toPage");
+    EXPECT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. restore context
+     */
+    MockPipelineContext::pipeline_ = pipeline_bak;
+}
+
+/**
  * @tc.name: PagePattern FirePageTransitionStart001
  * @tc.desc: Test the PagePattern Fire Page Transition Start
  * @tc.type: FUNC

@@ -81,99 +81,73 @@ HWTEST_F(TaihangOptimizerTest, SetEnableTest002, TestSize.Level1)
     EXPECT_FALSE(optimizer_->enable_);
 }
 
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest001, TestSize.Level1)
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest001, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = false;
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page2");
+    optimizer_->pageNameSet_.clear();
+    bool result = optimizer_->CheckSwiperPageValid("page1,page2");
     EXPECT_FALSE(result);
 }
 
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest002, TestSize.Level1)
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest002, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page2");
+    optimizer_->pageNameSet_.clear();
+    bool result = optimizer_->CheckSwiperPageValid("page1,page2");
     EXPECT_FALSE(result);
 }
 
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest003, TestSize.Level1)
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest003, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    optimizer_->bundleNameToPages_["com.example.app"] = {"page1"};
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1");
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest004, TestSize.Level1)
-{
-    optimizer_->isInited_ = true;
-    optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    optimizer_->bundleNameToPages_["com.other.app"] = {"page2"};
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page2");
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest005, TestSize.Level1)
-{
-    optimizer_->isInited_ = true;
-    optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    std::vector<std::string> pageList = {"page2", "page3"};
-    optimizer_->bundleNameToPages_["com.example.app"] = pageList;
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page2");
+    optimizer_->pageNameSet_ = {"page1"};
+    bool result = optimizer_->CheckSwiperPageValid("page1");
     EXPECT_TRUE(result);
 }
 
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest006, TestSize.Level1)
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest004, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    std::vector<std::string> pageList = {"page2", "page2"};
-    optimizer_->bundleNameToPages_["com.example.app"] = pageList;
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page4");
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest007, TestSize.Level1)
-{
-    optimizer_->isInited_ = true;
-    optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    optimizer_->bundleNameToPages_["com.example.app"] = {"page2"};
-    bool result = optimizer_->CheckSwiperPathValid("", "page1,page2");
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest008, TestSize.Level1)
-{
-    optimizer_->isInited_ = true;
-    optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    optimizer_->bundleNameToPages_["com.example.app"] = {"page2"};
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "");
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest009, TestSize.Level1)
-{
-    optimizer_->isInited_ = true;
-    optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    optimizer_->bundleNameToPages_["com.example.app"] = {"page2", "page3"};
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page3");
+    optimizer_->pageNameSet_ = {"page2"};
+    bool result = optimizer_->CheckSwiperPageValid("page1,page2");
     EXPECT_TRUE(result);
 }
 
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest010, TestSize.Level1)
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest005, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->pageNameSet_ = {"page2", "page3"};
+    bool result = optimizer_->CheckSwiperPageValid("page1,page2");
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest006, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->pageNameSet_ = {"page2", "page3"};
+    bool result = optimizer_->CheckSwiperPageValid("page1,page4");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest007, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->pageNameSet_ = {"page2"};
+    bool result = optimizer_->CheckSwiperPageValid("");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest008, TestSize.Level1)
 {
     optimizer_->isInited_ = false;
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page3");
+    bool result = optimizer_->CheckSwiperPageValid("page1,page3");
     EXPECT_FALSE(result);
 }
 
@@ -540,55 +514,21 @@ HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskWithPositiveIndex001, TestSi
     EXPECT_NE(swiperPattern->swiperController_, nullptr);
 }
 
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithMultiplePages001, TestSize.Level1)
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidWithChineseChars001, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    std::vector<std::string> pageList = {"page1", "page2", "page3", "page4"};
-    optimizer_->bundleNameToPages_["com.example.app"] = pageList;
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix,page3");
+    optimizer_->pageNameSet_ = {"页面1"};
+    bool result = optimizer_->CheckSwiperPageValid("prefix,页面1");
     EXPECT_TRUE(result);
 }
 
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithMultiplePages002, TestSize.Level1)
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidWithWhitespace001, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    std::vector<std::string> pageList = {"page1", "page2", "page3", "page4"};
-    optimizer_->bundleNameToPages_["com.example.app"] = pageList;
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix,page5");
-    EXPECT_FALSE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithSpecialChars001, TestSize.Level1)
-{
-    optimizer_->isInited_ = true;
-    optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    optimizer_->bundleNameToPages_["com.example.app"] = {"page_1"};
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix,page_1");
-    EXPECT_TRUE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithChineseChars001, TestSize.Level1)
-{
-    optimizer_->isInited_ = true;
-    optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    optimizer_->bundleNameToPages_["com.example.app"] = {"页面1"};
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix,页面1");
-    EXPECT_TRUE(result);
-}
-
-HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithWhitespace001, TestSize.Level1)
-{
-    optimizer_->isInited_ = true;
-    optimizer_->enable_ = true;
-    optimizer_->bundleNameToPages_.clear();
-    optimizer_->bundleNameToPages_["com.example.app"] = {"page1"};
-    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix, page1");
+    optimizer_->pageNameSet_ =  {"page1"};
+    bool result = optimizer_->CheckSwiperPageValid("prefix, page1");
     EXPECT_FALSE(result);
 }
 
@@ -623,5 +563,29 @@ HWTEST_F(TaihangOptimizerTest, EnableDisableSequence001, TestSize.Level1)
     EXPECT_FALSE(optimizer_->IsEnable());
     optimizer_->SetEnable(true);
     EXPECT_TRUE(optimizer_->IsEnable());
+}
+
+HWTEST_F(TaihangOptimizerTest, ParseReplyPages001, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> reply;
+    reply["pageNames"] = "[\"page1\", \"page2\"]";
+    optimizer_->ParseReplyPages(reply);
+    EXPECT_FALSE(optimizer_->pageNameSet_.empty());
+}
+
+HWTEST_F(TaihangOptimizerTest, ParseReplyPages002, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> reply;
+    reply["pageNames"] = "";
+    optimizer_->ParseReplyPages(reply);
+    EXPECT_TRUE(optimizer_->pageNameSet_.empty());
+}
+
+HWTEST_F(TaihangOptimizerTest, ParseReplyPages003, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> reply;
+    reply["pageNames"] = "[1,2]";
+    optimizer_->ParseReplyPages(reply);
+    EXPECT_TRUE(optimizer_->pageNameSet_.empty());
 }
 } // namespace OHOS::Ace

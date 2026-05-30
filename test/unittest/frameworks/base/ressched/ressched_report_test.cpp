@@ -204,4 +204,60 @@ HWTEST_F(ResSchedReportTest, ResSchedReportTest011, TestSize.Level1)
     bool result = ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: ResSchedReportTest012
+ * @tc.desc: test HandlePageTransition when frompage is and toPage is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest012, TestSize.Level1)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = "";
+    pageTransitionInfo.toPage = "";
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
+    EXPECT_TRUE(pageTransitionInfo.fromPage.empty());
+}
+
+/**
+ * @tc.name: ResSchedReportTest013
+ * @tc.desc: test HandlePageTransition when frompage is empty and topage is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest013, TestSize.Level1)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = "";
+    pageTransitionInfo.toPage = "topage";
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
+    EXPECT_FALSE(pageTransitionInfo.toPage.empty());
+}
+
+/**
+ * @tc.name: ResSchedReportTest014
+ * @tc.desc: test HandlePageTransition when frompage is not empty and toPage is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest014, TestSize.Level1)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = "frompage";
+    pageTransitionInfo.toPage = "";
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
+    EXPECT_FALSE(pageTransitionInfo.fromPage.empty());
+}
+
+/**
+ * @tc.name: ResSchedReportTest015
+ * @tc.desc: test HandlePageTransition when frompage is not empty and toPage is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest015, TestSize.Level1)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = "frompage";
+    pageTransitionInfo.toPage = "topage";
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
+    EXPECT_FALSE(pageTransitionInfo.fromPage.empty());
+}
 } // namespace OHOS::Ace

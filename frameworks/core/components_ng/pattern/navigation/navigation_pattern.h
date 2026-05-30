@@ -864,6 +864,9 @@ private:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RefreshFocusToDestination();
 
+    void PageTransitionReport(const std::string& fromNavDestinationName, const std::string& toNavDestinationName,
+        const std::string& fromComponentName, const std::string& toComponentName);
+
     void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
     void StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination,
