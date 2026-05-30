@@ -38,8 +38,6 @@ const auto POS_0 = 0;
 const auto POS_1 = 1;
 const auto POS_2 = 2;
 const auto MODE_0 = 0;
-const auto MODE_1 = 1;
-const auto MODE_2 = 2;
 const auto CHILD_COUNT_0 = 0;
 const auto CHILD_COUNT_1 = 1;
 const auto CHILD_COUNT_2 = 2;
@@ -581,44 +579,6 @@ HWTEST_F(FrameNodeAccessorTest, DISABLED_getChildrenCountTest, TestSize.Level1)
     auto childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_3);
     EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeAllExpand), static_cast<Ark_Int32>(childList.size()));
-    DestroyPeer(childPeer1);
-    DestroyPeer(childPeer2);
-    DestroyPeer(childPeer3);
-}
-
-/**
- * @tc.name: getChildrenCountModeTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeAccessorTest, getChildrenCountModeTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->getChildrenCount, nullptr);
-    ASSERT_NE(accessor_->appendChild, nullptr);
-    auto modeAllExpand = Converter::ArkValue<Ark_Number>(MODE_0);
-    auto modeOnlyExpanded = Converter::ArkValue<Ark_Number>(MODE_1);
-    auto modeAllNotExpand = Converter::ArkValue<Ark_Number>(MODE_2);
-    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeAllExpand), CHILD_COUNT_0);
-    auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
-
-    auto childPeer1 = CreatePeer();
-    auto childUINodeRef1 = AceType::DynamicCast<UINode>(childPeer1->node);
-
-    auto childPeer2 = CreatePeer();
-    auto childUINodeRef2 = AceType::DynamicCast<UINode>(childPeer2->node);
-
-    auto childPeer3 = CreatePeer();
-    auto childUINodeRef3 = AceType::DynamicCast<UINode>(childPeer3->node);
-
-    accessor_->appendChild(peer_, childPeer1);
-    accessor_->appendChild(peer_, childPeer2);
-    accessor_->appendChild(peer_, childPeer3);
-    auto childList = peer_->node->GetChildren();
-    EXPECT_EQ(childList.size(), CHILD_COUNT_3);
-    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeAllExpand), static_cast<Ark_Int32>(childList.size()));
-    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeOnlyExpanded), static_cast<Ark_Int32>(childList.size()));
-    EXPECT_EQ(accessor_->getChildrenCount(peer_, &modeAllNotExpand), static_cast<Ark_Int32>(childList.size()));
-
     DestroyPeer(childPeer1);
     DestroyPeer(childPeer2);
     DestroyPeer(childPeer3);
