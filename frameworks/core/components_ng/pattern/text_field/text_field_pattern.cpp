@@ -4343,11 +4343,24 @@ void TextFieldPattern::HandleDeleteOnCounterScene()
 void TextFieldPattern::HandleCountStyle()
 {
     bool noDeleteOperation = deleteBackwardOperations_.empty() && deleteForwardOperations_.empty();
-    if (!IsShowCount() || !noDeleteOperation) {
+    if (!noDeleteOperation) {
         return;
     }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (IsUnderlineMode()) {
+        if (showCountBorderStyle_) {
+            auto theme = GetTheme();
+            CHECK_NULL_VOID(theme);
+            underlineWidth_ = ERROR_UNDERLINE_WIDTH;
+            SetUnderlineColor(userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor()));
+        } else if (!IsShowError()) {
+            ApplyUnderlineTheme();
+        }
+    }
+    if (!IsShowCount()) {
+        return;
+    }
     auto inputValue = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
     auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
     if (inputValue == DEFAULT_MODE) {

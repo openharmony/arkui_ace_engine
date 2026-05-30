@@ -1515,4 +1515,20 @@ HWTEST_F(TextFieldPatternTesttwelve, IsPreviewTextInputting001, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: HandleCountStyleUnderlineWithoutShowCounter001
+ * @tc.desc: showCounter=false + showCountBorderStyle=true should still set error underline color
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesttwelve, HandleCountStyleUnderlineWithoutShowCounter001, TestSize.Level1)
+{
+    CreateTextField();
+    layoutProperty_->UpdateShowCounter(false);
+    layoutProperty_->UpdateMaxLength(10);
+    layoutProperty_->UpdateShowUnderline(true);
+    pattern_->showCountBorderStyle_ = true;
+    pattern_->HandleCountStyle();
+    EXPECT_EQ(pattern_->GetUnderlineColor(), pattern_->GetTheme()->GetErrorUnderlineColor());
+}
+
 } // namespace OHOS::Ace::NG
