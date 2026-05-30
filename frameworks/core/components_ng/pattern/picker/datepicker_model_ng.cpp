@@ -813,6 +813,9 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
         properties.hoverModeArea = pickerDialog.hoverModeArea.value();
     }
     properties.enableHoverMode = pickerDialog.enableHoverMode;
+    properties.systemMaterial = pickerDialog.systemMaterial;
+    properties.distortionMode = pickerDialog.distortionMode;
+    properties.edgeLightMode = pickerDialog.edgeLightMode;
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));

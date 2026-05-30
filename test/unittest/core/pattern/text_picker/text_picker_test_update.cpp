@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/common/properties/ui_material.h"
 #undef private
 #undef protected
 
@@ -791,5 +792,88 @@ HWTEST_F(TextPickerTestUpdate, SetValues001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetValues(frameNode, value);
     EXPECT_EQ(frameNode->GetPattern<TextPickerPattern>()->GetSelected(), 0);
+}
+
+/**
+ * @tc.name: TextPickerDialogMaterialProperties001
+ * @tc.desc: Test TextPickerDialog material properties: systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogMaterialProperties001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    
+    TextPickerDialog textPickerDialog;
+    
+    // Test default value (null)
+    EXPECT_EQ(textPickerDialog.systemMaterial, nullptr);
+    
+    // Test setting systemMaterial
+    auto systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+    textPickerDialog.systemMaterial = systemMaterial;
+    EXPECT_NE(textPickerDialog.systemMaterial, nullptr);
+    
+    // Test copying systemMaterial
+    auto copiedMaterial = textPickerDialog.systemMaterial->Copy();
+    EXPECT_NE(copiedMaterial, nullptr);
+}
+
+/**
+ * @tc.name: TextPickerDialogMaterialProperties002
+ * @tc.desc: Test TextPickerDialog material properties: distortionMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogMaterialProperties002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    
+    TextPickerDialog textPickerDialog;
+    
+    // Test default value (no value)
+    EXPECT_FALSE(textPickerDialog.distortionMode.has_value());
+    
+    // Test setting distortionMode to DISTORTION_AUTO
+    textPickerDialog.distortionMode = DistortionMode::DISTORTION_AUTO;
+    EXPECT_TRUE(textPickerDialog.distortionMode.has_value());
+    EXPECT_EQ(textPickerDialog.distortionMode.value(), DistortionMode::DISTORTION_AUTO);
+    
+    // Test setting distortionMode to DISTORTION_ENABLED
+    textPickerDialog.distortionMode = DistortionMode::DISTORTION_ENABLED;
+    EXPECT_EQ(textPickerDialog.distortionMode.value(), DistortionMode::DISTORTION_ENABLED);
+    
+    // Test setting distortionMode to DISTORTION_DISABLED
+    textPickerDialog.distortionMode = DistortionMode::DISTORTION_DISABLED;
+    EXPECT_EQ(textPickerDialog.distortionMode.value(), DistortionMode::DISTORTION_DISABLED);
+}
+
+/**
+ * @tc.name: TextPickerDialogMaterialProperties003
+ * @tc.desc: Test TextPickerDialog material properties: edgeLightMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogMaterialProperties003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    
+    TextPickerDialog textPickerDialog;
+    
+    // Test default value (no value)
+    EXPECT_FALSE(textPickerDialog.edgeLightMode.has_value());
+    
+    // Test setting edgeLightMode to EDGELIGHT_AUTO
+    textPickerDialog.edgeLightMode = EdgeLightMode::EDGELIGHT_AUTO;
+    EXPECT_TRUE(textPickerDialog.edgeLightMode.has_value());
+    EXPECT_EQ(textPickerDialog.edgeLightMode.value(), EdgeLightMode::EDGELIGHT_AUTO);
+    
+    // Test setting edgeLightMode to EDGELIGHT_ENABLED
+    textPickerDialog.edgeLightMode = EdgeLightMode::EDGELIGHT_ENABLED;
+    EXPECT_EQ(textPickerDialog.edgeLightMode.value(), EdgeLightMode::EDGELIGHT_ENABLED);
+    
+    // Test setting edgeLightMode to EDGELIGHT_DISABLED
+    textPickerDialog.edgeLightMode = EdgeLightMode::EDGELIGHT_DISABLED;
+    EXPECT_EQ(textPickerDialog.edgeLightMode.value(), EdgeLightMode::EDGELIGHT_DISABLED);
 }
 } // namespace OHOS::Ace::NG

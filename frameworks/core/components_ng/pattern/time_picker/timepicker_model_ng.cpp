@@ -571,6 +571,9 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     if (pickerDialog.hoverModeArea.has_value()) {
         properties.hoverModeArea = pickerDialog.hoverModeArea.value();
     }
+    properties.systemMaterial = pickerDialog.systemMaterial;
+    properties.distortionMode = pickerDialog.distortionMode;
+    properties.edgeLightMode = pickerDialog.edgeLightMode;
 
     std::map<std::string, PickerTime> timePickerProperty;
     timePickerProperty["start"] = pickerDialog.parseStartTime;
