@@ -300,7 +300,6 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
     if (!isWidth) {
         layoutProperty->MarkUserDefinedHeightConfigured();
     }
-    frameNode->UnRegisterLpxAttribute(isWidth ? LpxAttribute::LPX_WIDTH : LpxAttribute::LPX_HEIGHT);
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
@@ -411,7 +410,6 @@ void ViewAbstract::ResetMinSize(bool resetWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    frameNode->UnRegisterLpxAttribute(resetWidth ? LpxAttribute::LPX_MIN_WIDTH : LpxAttribute::LPX_MIN_HEIGHT);
     layoutProperty->ResetCalcMinSize(resetWidth);
 }
 
@@ -522,7 +520,6 @@ void ViewAbstract::ResetMaxSize(bool resetWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    frameNode->UnRegisterLpxAttribute(resetWidth ? LpxAttribute::LPX_MAX_WIDTH : LpxAttribute::LPX_MAX_HEIGHT);
     layoutProperty->ResetCalcMaxSize(resetWidth);
 }
 
@@ -1500,11 +1497,6 @@ void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const PaddingPropert
 void ViewAbstract::ResetSafeAreaPadding(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING_RIGHT);
     ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, frameNode);
 }
 
@@ -3583,12 +3575,6 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
     CheckIfParentNeedMarkDirty(frameNode);
     ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X);
     ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_RIGHT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_START);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_END);
     ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
@@ -3607,12 +3593,6 @@ void ViewAbstract::SetPosition(const Dimension& x, const Dimension& y,
     CheckIfParentNeedMarkDirty(frameNode);
     ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X);
     ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_RIGHT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_START);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_END);
     ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
@@ -3743,8 +3723,6 @@ void ViewAbstract::SetPositionEdges(const EdgesParam& value)
     }
     CheckIfParentNeedMarkDirty(frameNode);
     CheckPositionEdgesLPX(value);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_X);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_Y);
     ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
     ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
 }
@@ -6250,13 +6228,6 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
     } else {
         BorderWidthProperty borderWidth;
         borderWidth.SetBorderWidth(Dimension(0));
-        if (frameNode) {
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH);
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH_TOP);
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH_BOTTOM);
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH_LEFT);
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH_RIGHT);
-        }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
         pattern->OnBorderWidthReset();
@@ -7456,12 +7427,6 @@ void ViewAbstract::SetPosition(FrameNode* frameNode, OffsetT<Dimension>& value, 
     CheckIfParentNeedMarkDirty(frameNode);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X, frameNode);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y, frameNode);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_RIGHT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_START);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_END);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
@@ -7471,8 +7436,6 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
     CHECK_NULL_VOID(frameNode);
     CheckIfParentNeedMarkDirty(frameNode);
     CheckNodePositionEdgesLPX(frameNode, value);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_X);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_Y);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, value, frameNode);
     if (!SystemProperties::ConfigChangePerform()) {
@@ -7501,8 +7464,6 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
             }
         }
         CheckNodePositionEdgesLPX(frameNode, edges);
-        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_X);
-        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_Y);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, edges, frameNode);
     };
@@ -7514,14 +7475,6 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     CHECK_NULL_VOID(frameNode);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_RIGHT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_START);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_END);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_X);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_Y);
     auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parentNode);
     auto parentPattern = parentNode->GetPattern();
@@ -8799,7 +8752,6 @@ void ViewAbstract::ResetMaxSize(FrameNode* frameNode, bool resetWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    frameNode->UnRegisterLpxAttribute(resetWidth ? LpxAttribute::LPX_MAX_WIDTH : LpxAttribute::LPX_MAX_HEIGHT);
     layoutProperty->ResetCalcMaxSize(resetWidth);
 }
 
@@ -8808,7 +8760,6 @@ void ViewAbstract::ResetMinSize(FrameNode* frameNode, bool resetWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    frameNode->UnRegisterLpxAttribute(resetWidth ? LpxAttribute::LPX_MIN_WIDTH : LpxAttribute::LPX_MIN_HEIGHT);
     layoutProperty->ResetCalcMinSize(resetWidth);
 }
 

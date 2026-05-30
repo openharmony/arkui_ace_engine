@@ -407,7 +407,6 @@ void ShapeAbstractModelNG::SetStrokeWidth(FrameNode* frameNode, const RefPtr<Res
         CHECK_NULL_VOID(frameNode);
         CalcDimension value = 1.0_vp;
         if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, value)) {
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SHAPE_STROKE_WIDTH);
             ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, 1.0_vp, frameNode);
             return;
         }

@@ -438,4 +438,29 @@ HWTEST_F(RectPatternTestNg, SetRadius001, TestSize.Level1)
     EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: RectLpxAttribute001
+ * @tc.desc: Test SetRadiusWidth/SetRadiusHeight with LPX unit registers LPX_RECT_RADIUS attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RectPatternTestNg, RectLpxAttribute001, TestSize.Level1)
+{
+    RectModelNG rectModel;
+    rectModel.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    rectModel.SetRadiusWidth(lpxDim);
+    rectModel.SetRadiusHeight(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    rectModel.SetRadiusWidth(vpDim);
+    rectModel.SetRadiusHeight(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
 } // namespace OHOS::Ace::NG
