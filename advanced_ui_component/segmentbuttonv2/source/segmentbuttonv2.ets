@@ -27,7 +27,7 @@ import { SizeT } from '@ohos.arkui.node';
 import { i18n } from '@kit.LocalizationKit';
 import util from '@ohos.util';
 import uiMaterial from '@ohos.arkui.uiMaterial';
-import { EnvironmentCallback } from '@kit.AbilityKit';
+import { EnvironmentCallback, common } from '@kit.AbilityKit';
 import deviceInfo from '@ohos.deviceInfo';
 
 export interface SegmentButtonV2ItemOptions {
@@ -1685,9 +1685,15 @@ struct SegmentButtonV2ItemContent {
 
   getItemSymbolFillColor(): ResourceColor {
     if (this.selected) {
-      return this.itemSelectedSymbolFontColor?.color ?? this.theme.itemSelectedSymbolFontColor;
+      if (this.itemSelectedSymbolFontColor) {
+        return this.getColorMetricsResourceColor(this.itemSelectedSymbolFontColor);
+      }
+      return this.theme.itemSelectedSymbolFontColor;
     }
-    return this.itemSymbolFontColor?.color ?? this.theme.itemSymbolFontColor;
+    if (this.itemSymbolFontColor) {
+      return this.getColorMetricsResourceColor(this.itemSymbolFontColor);
+    }
+    return this.theme.itemSymbolFontColor;
   }
 
   private getSymbolFontSize(): Dimension {
@@ -1757,13 +1763,13 @@ struct SegmentButtonV2ItemContent {
   }
 
   private getColorMetricsResourceColor(colorMetrics: ColorMetrics): ResourceColor {
-    const resourceId = colorMetrics.getResourceId();
-    if (resourceId !== undefined && resourceId !== -1) {
-      const abilityContext = this.getUIContext().getHostContext();
+    const resourceId: number = Reflect.get(colorMetrics, 'resourceId_');
+    if (typeof resourceId === 'number' && resourceId !== -1) {
+      const context: common.Context = this.getUIContext().getHostContext() as common.Context;
       return {
         id: resourceId, type: COLOR_RESOURCE_TYPE,
-        bundleName: abilityContext?.abilityInfo?.bundleName ?? '',
-        moduleName: abilityContext?.abilityInfo?.moduleName ?? ''
+        bundleName: (context as common.UIAbilityContext)?.abilityInfo?.bundleName ?? '',
+        moduleName: (context as common.UIAbilityContext)?.abilityInfo?.moduleName ?? '',
       } as Resource;
     }
     return colorMetrics.color;
