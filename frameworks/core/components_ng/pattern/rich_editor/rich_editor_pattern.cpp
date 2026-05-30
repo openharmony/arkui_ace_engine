@@ -30,8 +30,8 @@
 #include <string>
 #include <utility>
 
-#include "base/log/event_report.h"
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
+#include "base/log/event_report.h"
 #include "base/geometry/offset.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -40,6 +40,7 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
+#include "base/view_data/ace_auto_fill_error.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
@@ -3551,7 +3552,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     }
     auto gradient = style.GetGradient();
     if (gradient.has_value()) {
-        spanNode->UpdateGradient(GradientConvert::ToNGGradient(gradient));
+        spanNode->UpdateGradient(gradient);
     } else {
         spanNode->ResetGradient();
     }
@@ -5561,7 +5562,7 @@ struct UpdateParagraphStyle RichEditorPattern::GetParagraphStyle(const RefPtr<Sp
     paraStyle.textDirection = spanItem->textLineStyle->GetTextDirection();
     auto gradient = spanItem->textLineStyle->GetGradient();
     if (gradient.has_value()) {
-        paraStyle.SetOptGradient(GradientConvert::ToGradient(gradient));
+        paraStyle.SetOptGradient(gradient);
     }
     paraStyle.colorShaderStyle = spanItem->textLineStyle->GetColorShaderStyle();
     return paraStyle;
@@ -7927,17 +7928,9 @@ void RichEditorPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
     auto action = keyEvent.action;
     bool isShiftPressed = hasKeyShift &&
         (action == KeyAction::DOWN || action == KeyAction::UP || action == KeyAction::CANCEL);
-    bool shiftOldFlag = shiftFlag_;
     if (isShiftPressed != shiftFlag_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateShiftFlag:%{public}d by action:%{public}d", isShiftPressed, action);
         shiftFlag_ = isShiftPressed;
-        if (shiftOldFlag && !shiftFlag_) {
-            auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
-            auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
-        }
     }
 }
 
@@ -8349,7 +8342,25 @@ RefPtr<GestureEventHub> RichEditorPattern::GetGestureEventHub() {
 
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 {
+    ReportShiftAndDirectionEvent(keyEvent);
     return TextInputClient::HandleKeyEvent(keyEvent);
+}
+
+void RichEditorPattern::ReportShiftAndDirectionEvent(const KeyEvent& keyEvent)
+{
+    bool isDirectionalKey = keyEvent.HasKey(KeyCode::KEY_DPAD_UP) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_DOWN) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_LEFT) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_RIGHT);
+    auto action = keyEvent.action;
+    bool isDirectionPressed = (!isDirectionalKey) &&
+            (action == KeyAction::UP || action == KeyAction::CANCEL);
+    CHECK_NULL_VOID(isDirectionPressed && shiftFlag_);
+ 	auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
+ 	auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
+ 	auto host = GetHost();
+ 	CHECK_NULL_VOID(host);
+    ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
 }
 
 void RichEditorPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
@@ -10522,7 +10533,8 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
         IF_TRUE(handlePolicy == HandlePolicy::HIDE, CloseSelectOverlay());
         CHECK_NULL_VOID(handlePolicy == HandlePolicy::DEFAULT);
     }
-    if (!IsShowHandle()) {
+    bool forceShowHandle = options.has_value() ? options.value().forceShowHandle : false;
+    if (!IsShowHandle() && !forceShowHandle) {
         CloseSelectOverlay();
     } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
         ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
@@ -12300,7 +12312,7 @@ void ParsespanParaStyle(std::optional<TextStyle>& spanTextStyle,
     paraStyle.paragraphSpacing = spanNode->GetParagraphSpacing();
     paraStyle.textVerticalAlign = spanNode->GetTextVerticalAlign();
     paraStyle.textDirection = spanNode->GetTextDirection();
-    paraStyle.SetOptGradient(GradientConvert::ToGradient(spanNode->GetGradient()));
+    paraStyle.SetOptGradient(spanNode->GetGradient());
     paraStyle.colorShaderStyle = spanNode->GetColorShaderStyle();
     spanParaStyle = paraStyle;
 }
@@ -12342,7 +12354,7 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
             paraStyle.textDirection = (*it)->textLineStyle->GetTextDirection();
           auto gradient = (*it)->textLineStyle->GetGradient();
             if (gradient.has_value()) {
-                paraStyle.SetOptGradient(GradientConvert::ToGradient(gradient));
+                paraStyle.SetOptGradient(gradient);
             }
             paraStyle.colorShaderStyle = (*it)->textLineStyle->GetColorShaderStyle();
             spanParaStyle = paraStyle;
@@ -12582,7 +12594,7 @@ void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
         static_cast<int32_t>(paraStyle->textVerticalAlign.value()));
     IF_TRUE(paraStyle->textDirection.has_value(), textStyleResult.textDirection =
         static_cast<int32_t>(paraStyle->textDirection.value()));
-    textStyleResult.SetOptGradient(paraStyle->GetGradient());
+    textStyleResult.SetOptGradient(GradientConvert::ToGradient(paraStyle->GetGradient()));
     textStyleResult.colorShaderStyle = paraStyle->colorShaderStyle;
     retInfo.SetTextStyle(textStyleResult);
 }

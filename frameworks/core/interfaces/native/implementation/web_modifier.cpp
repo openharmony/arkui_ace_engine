@@ -29,6 +29,10 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -236,6 +240,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = WebModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::WEB_ETS_TAG, id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

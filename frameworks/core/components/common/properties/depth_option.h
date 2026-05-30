@@ -26,6 +26,21 @@
 
 namespace OHOS::Ace {
 
+struct ACE_EXPORT CropOffset {
+    float x = 0.0f;
+    float y = 0.0f;
+
+    bool operator==(const CropOffset& other) const
+    {
+        return NearEqual(x, other.x) && NearEqual(y, other.y);
+    }
+
+    bool operator!=(const CropOffset& other) const
+    {
+        return !(*this == other);
+    }
+};
+
 struct ACE_EXPORT DepthVector3 {
     float x = 0.0f;
     float y = 0.0f;
@@ -98,12 +113,16 @@ struct ACE_EXPORT SpatialEffectParams {
     std::optional<DepthPosition> position;
     float occlusionWeight = 0.0f;
     float depth = 0.0f;
+    std::optional<CropOffset> cropOffset;
+    float cropScale = 1.0f;
 
     bool operator==(const SpatialEffectParams& other) const
     {
         return position == other.position
             && NearEqual(occlusionWeight, other.occlusionWeight)
-            && NearEqual(depth, other.depth);
+            && NearEqual(depth, other.depth)
+            && cropOffset == other.cropOffset
+            && NearEqual(cropScale, other.cropScale);
     }
 
     bool operator!=(const SpatialEffectParams& other) const
@@ -116,6 +135,8 @@ struct ACE_EXPORT SpatialEffectParams {
         position.reset();
         occlusionWeight = 0.0f;
         depth = 0.0f;
+        cropOffset.reset();
+        cropScale = 1.0f;
     }
 };
 
@@ -213,17 +234,37 @@ enum class ACE_EXPORT DepthSpaceType {
     GLOBAL = 1,
 };
 
+struct ACE_EXPORT CameraBufferCrop {
+    int32_t bufferWidth = 0;
+    int32_t bufferHeight = 0;
+    CropOffset cropOffset;
+    float cropScale = 1.0f;
+
+    bool operator==(const CameraBufferCrop& other) const
+    {
+        return bufferWidth == other.bufferWidth && bufferHeight == other.bufferHeight &&
+               cropOffset == other.cropOffset && NearEqual(cropScale, other.cropScale);
+    }
+
+    bool operator!=(const CameraBufferCrop& other) const
+    {
+        return !(*this == other);
+    }
+};
+
 struct ACE_EXPORT DepthCameraParams {
     DepthVector3 position;
     DepthVector4 quaternion;
     float yFov = 0.0f;
     float zNear = 0.1f;
     float zFar = 100.0f;
+    std::optional<CameraBufferCrop> cameraBufferCrop;
 
     bool operator==(const DepthCameraParams& other) const
     {
         return position == other.position && quaternion == other.quaternion &&
-               NearEqual(yFov, other.yFov) && NearEqual(zNear, other.zNear) && NearEqual(zFar, other.zFar);
+               NearEqual(yFov, other.yFov) && NearEqual(zNear, other.zNear) && NearEqual(zFar, other.zFar) &&
+               cameraBufferCrop == other.cameraBufferCrop;
     }
 
     bool operator!=(const DepthCameraParams& other) const

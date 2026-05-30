@@ -53,32 +53,36 @@ void SetRatingStepSize(ArkUINodeHandle node, ArkUI_Float32 value)
     RatingModelNG::SetStepSize(frameNode, value);
 }
 
-void SetStarStyle(ArkUINodeHandle node,
-    const char* backgroundUri, const char* foregroundUri, const char* secondaryUri)
+void SetStarStyle(ArkUINodeHandle node, const char* backgroundUri, const char* foregroundUri, const char* secondaryUri,
+    const ArkUIRatingStyleStruct& resObj)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     std::string backgroundUriStr = backgroundUri;
+    auto* backgroundObj = reinterpret_cast<ResourceObject*>(resObj.backgroundResObj);
+    auto backgroundResObjPtr = AceType::Claim(backgroundObj);
     if (backgroundUriStr.empty()) {
-        RatingModelNG::SetBackgroundSrc(frameNode, "", true);
+        RatingModelNG::SetBackgroundSrc(frameNode, "", true, backgroundResObjPtr);
     } else {
-        RatingModelNG::SetBackgroundSrc(frameNode, backgroundUriStr, false);
+        RatingModelNG::SetBackgroundSrc(frameNode, backgroundUriStr, false, backgroundResObjPtr);
     }
-
     std::string foregroundUriStr = foregroundUri;
+    auto* foregroundObj = reinterpret_cast<ResourceObject*>(resObj.foregroundResObj);
+    auto foregroundResObjPtr = AceType::Claim(foregroundObj);
     if (foregroundUriStr.empty()) {
-        RatingModelNG::SetForegroundSrc(frameNode, "", true);
+        RatingModelNG::SetForegroundSrc(frameNode, "", true, foregroundResObjPtr);
     } else {
-        RatingModelNG::SetForegroundSrc(frameNode, foregroundUriStr, false);
+        RatingModelNG::SetForegroundSrc(frameNode, foregroundUriStr, false, foregroundResObjPtr);
     }
-
     std::string secondaryUriStr = secondaryUri;
+    auto* secondaryObj = reinterpret_cast<ResourceObject*>(resObj.secondaryResObj);
+    auto secondaryResObjPtr = AceType::Claim(secondaryObj);
     if (!secondaryUriStr.empty()) {
-        RatingModelNG::SetSecondarySrc(frameNode, secondaryUriStr, false);
+        RatingModelNG::SetSecondarySrc(frameNode, secondaryUriStr, false, secondaryResObjPtr);
     } else if (!backgroundUriStr.empty()) {
-        RatingModelNG::SetSecondarySrc(frameNode, backgroundUriStr, false);
+        RatingModelNG::SetSecondarySrc(frameNode, backgroundUriStr, false, backgroundResObjPtr);
     } else {
-        RatingModelNG::SetSecondarySrc(frameNode, "", true);
+        RatingModelNG::SetSecondarySrc(frameNode, "", true, secondaryResObjPtr);
     }
 }
 
@@ -87,7 +91,7 @@ void SetStarStylePtr(ArkUINodeHandle node, const char* backgroundUri,
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SetStarStyle(node, backgroundUri, foregroundUri, secondaryUri);
+    SetStarStyle(node, backgroundUri, foregroundUri, secondaryUri, resObj);
     if (SystemProperties::ConfigChangePerform()) {
         FrameNode* frameNode = GetFrameNode(node);
         CHECK_NULL_VOID(frameNode);
@@ -206,37 +210,43 @@ void SetRatingStepSizeImpl(ArkUINodeHandle node, ArkUI_Float32 value)
     GetRatingModelImpl()->SetStepSize(value);
 }
 
-void SetStarStyleImpl(ArkUINodeHandle node,
-    const char* backgroundUri, const char* foregroundUri, const char* secondaryUri)
+void SetStarStyleImpl(ArkUINodeHandle node, const char* backgroundUri, const char* foregroundUri,
+    const char* secondaryUri, const ArkUIRatingStyleStruct& resObj)
 {
     std::string backgroundUriStr = backgroundUri;
+    auto* backgroundObj = reinterpret_cast<ResourceObject*>(resObj.backgroundResObj);
+    auto backgroundResObjPtr = AceType::Claim(backgroundObj);
     if (backgroundUriStr.empty()) {
-        GetRatingModelImpl()->SetBackgroundSrc("", true);
+        GetRatingModelImpl()->SetBackgroundSrc("", true, backgroundResObjPtr);
     } else {
-        GetRatingModelImpl()->SetBackgroundSrc(backgroundUriStr, false);
+        GetRatingModelImpl()->SetBackgroundSrc(backgroundUriStr, false, backgroundResObjPtr);
     }
 
     std::string foregroundUriStr = foregroundUri;
+    auto* foregroundObj = reinterpret_cast<ResourceObject*>(resObj.foregroundResObj);
+    auto foregroundResObjPtr = AceType::Claim(foregroundObj);
     if (foregroundUriStr.empty()) {
-        GetRatingModelImpl()->SetForegroundSrc("", true);
+        GetRatingModelImpl()->SetForegroundSrc("", true, foregroundResObjPtr);
     } else {
-        GetRatingModelImpl()->SetForegroundSrc(foregroundUriStr, false);
+        GetRatingModelImpl()->SetForegroundSrc(foregroundUriStr, false, foregroundResObjPtr);
     }
 
     std::string secondaryUriStr = secondaryUri;
+    auto* secondaryObj = reinterpret_cast<ResourceObject*>(resObj.secondaryResObj);
+    auto secondaryResObjPtr = AceType::Claim(secondaryObj);
     if (!secondaryUriStr.empty()) {
-        GetRatingModelImpl()->SetSecondarySrc(secondaryUriStr, false);
+        GetRatingModelImpl()->SetSecondarySrc(secondaryUriStr, false, secondaryResObjPtr);
     } else if (!backgroundUriStr.empty()) {
-        GetRatingModelImpl()->SetSecondarySrc(backgroundUriStr, false);
+        GetRatingModelImpl()->SetSecondarySrc(backgroundUriStr, false, backgroundResObjPtr);
     } else {
-        GetRatingModelImpl()->SetSecondarySrc("", true);
+        GetRatingModelImpl()->SetSecondarySrc("", true, secondaryResObjPtr);
     }
 }
 
 void SetStarStylePtrImpl(ArkUINodeHandle node, const char* backgroundUri,
     const char* foregroundUri, const char* secondaryUri, const ArkUIRatingStyleStruct& resObj)
 {
-    SetStarStyleImpl(node, backgroundUri, foregroundUri, secondaryUri);
+    SetStarStyleImpl(node, backgroundUri, foregroundUri, secondaryUri, resObj);
     if (SystemProperties::ConfigChangePerform()) {
         if (resObj.backgroundResObj) {
             auto* backgroundObj = reinterpret_cast<ResourceObject*>(resObj.backgroundResObj);
@@ -284,9 +294,9 @@ void ResetRatingStepSizeImpl(ArkUINodeHandle node)
 
 void ResetStarStyleImpl(ArkUINodeHandle node)
 {
-    GetRatingModelImpl()->SetBackgroundSrc("", true);
-    GetRatingModelImpl()->SetForegroundSrc("", true);
-    GetRatingModelImpl()->SetSecondarySrc("", true);
+    GetRatingModelImpl()->SetBackgroundSrc("", true, nullptr);
+    GetRatingModelImpl()->SetForegroundSrc("", true, nullptr);
+    GetRatingModelImpl()->SetSecondarySrc("", true, nullptr);
 }
 
 void SetRatingOptionsImpl(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator) {}

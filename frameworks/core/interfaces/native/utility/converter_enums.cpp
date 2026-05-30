@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/list/list_properties.h"
+#include "core/components_ng/property/union_effect_container_options.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "ui/base/macros.h"
 #include "ui/view/components/tabs/tabs_data.h"
@@ -2610,6 +2611,30 @@ void AssignCast(std::optional<DialogDisplayModeInSubWindow>& dst, const Ark_Dial
         case ARK_DIALOG_DISPLAY_MODE_SCREEN_BASED: dst = DialogDisplayModeInSubWindow::SCREEN_BASED; break;
         case ARK_DIALOG_DISPLAY_MODE_WINDOW_BASED: dst = DialogDisplayModeInSubWindow::WINDOW_BASED; break;
         default: LOGE("Unexpected enum value in Ark_DialogDisplayMode: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<EdgeLightPosition>& dst, const Ark_EdgeLightPosition& src)
+{
+    switch (src) {
+        case ARK_EDGE_LIGHT_POSITION_TOP_LEFT: dst = EdgeLightPosition::TOP_LEFT; break;
+        case ARK_EDGE_LIGHT_POSITION_TOP_RIGHT: dst = EdgeLightPosition::TOP_RIGHT; break;
+        case ARK_EDGE_LIGHT_POSITION_BOTTOM_LEFT: dst = EdgeLightPosition::BOTTOM_LEFT; break;
+        case ARK_EDGE_LIGHT_POSITION_BOTTOM_RIGHT: dst = EdgeLightPosition::BOTTOM_RIGHT; break;
+        case ARK_EDGE_LIGHT_POSITION_TOP: dst = EdgeLightPosition::TOP; break;
+        case ARK_EDGE_LIGHT_POSITION_BOTTOM: dst = EdgeLightPosition::BOTTOM; break;
+        case ARK_EDGE_LIGHT_POSITION_LEFT: dst = EdgeLightPosition::LEFT; break;
+        case ARK_EDGE_LIGHT_POSITION_RIGHT: dst = EdgeLightPosition::RIGHT; break;
+        default: LOGE("Unexpected enum value in Ark_EdgeLightPosition: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<UnionMode>& dst, const Ark_UnionMode& src)
+{
+    switch (src) {
+        case ARK_UNION_MODE_SMOOTH_UNION: dst = UnionMode::SMOOTH_UNION; break;
+        case ARK_UNION_MODE_GRAVITY_UNION: dst = UnionMode::GRAVITY_UNION; break;
+        default: LOGE("Unexpected enum value in Ark_UnionMode: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

@@ -158,6 +158,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/common/mock_statistic_event_reporter.cpp",
     "$ace_root/test/mock/frameworks/base/subwindow/mock_subwindow.cpp",
     "$ace_root/test/mock/frameworks/base/subwindow/mock_subwindow_manager.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_feature_manager.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_feature_param.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_frame_report.cpp",
     "$ace_root/test/mock/frameworks/base/mousestyle/mock_mouse_style.cpp",
@@ -181,7 +182,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_getter.cpp",
 
-    "pipeline_context_font_scale_env_test_ng.cpp",
     "pipeline_context_test_ng.cpp",
     "pipeline_context_test_ng_five.cpp",
     "pipeline_context_test_ng_four.cpp",

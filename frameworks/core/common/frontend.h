@@ -103,6 +103,13 @@ struct PageRouterOptions {
     bool isNamedRouterMode = false;
 };
 
+struct DynamicOptions {
+    std::string content;
+    std::string params;
+    std::string entryPoint;
+    std::string hapPath;
+};
+
 typedef struct RouterStateInfo {
     int32_t index = -1;
     std::string name;
@@ -166,8 +173,7 @@ public:
     {
         return UIContentErrorCode::NO_ERRORS;
     }
-    virtual UIContentErrorCode RunDynamicPage(
-        const std::string& content, const std::string& params, const std::string& entryPoint)
+    virtual UIContentErrorCode RunDynamicPage(const DynamicOptions& options)
     {
         return UIContentErrorCode::NO_ERRORS;
     }
@@ -478,6 +484,11 @@ public:
     // For arkts static
     virtual void NotifyArkoalaConfigurationChange(bool isNeedUpdate) {}
     virtual void InitXBarProxy() {}
+
+    virtual bool SetExternalClearCallback(std::function<void()>&& func)
+    {
+        return false;
+    }
 
     // Create ArkTS dynamic page in ArkTS static
     virtual void* CreateDynamicPage(int32_t pageId, const std::string& url, const std::string& params, bool recoverable)

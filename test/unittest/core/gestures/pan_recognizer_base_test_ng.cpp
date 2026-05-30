@@ -687,6 +687,32 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerOnFingerEscapedTest002, TestSize.
 }
 
 /**
+ * @tc.name: PanRecognizerOnFingerEscapedTest003
+ * @tc.desc: OnFingerEscaped does not removes all per-finger state for wrong id
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerOnFingerEscapedTest003, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    pan->touchPointsDistance_[ESCAPE_FINGER_ID_0] = Offset();
+    pan->fingersId_.insert(ESCAPE_FINGER_ID_0);
+    pan->activeFingers_.push_back(ESCAPE_FINGER_ID_0);
+    pan->currentFingers_ = 1;
+
+    pan->OnFingerEscaped(ESCAPE_FINGER_ID_1);
+
+    EXPECT_FALSE(pan->touchPoints_.find(ESCAPE_FINGER_ID_0) == pan->touchPoints_.end());
+    EXPECT_FALSE(pan->touchPointsDistance_.find(ESCAPE_FINGER_ID_0) == pan->touchPointsDistance_.end());
+    EXPECT_FALSE(pan->fingersId_.find(ESCAPE_FINGER_ID_0) == pan->fingersId_.end());
+    EXPECT_EQ(pan->currentFingers_, 1);
+}
+
+/**
  * @tc.name: PanRecognizerSetEscapeModeForPanTest001
  * @tc.desc: SetEscapeModeForPan marks escape + cleans up tracked fingers + resets aggregated state
  * @tc.type: FUNC

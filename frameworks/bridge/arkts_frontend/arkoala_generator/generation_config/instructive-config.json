@@ -8,6 +8,8 @@
             "SymbolGlyphModifier.ets",
             "component/common.ets",
             "component/contentSlot.ets",
+            "component/idlize.ets",
+            "component/image.ets",
             "component/lazyGridLayout.ets",
             "component/navigation.ets",
             "component/styledString.ets",
@@ -16,7 +18,6 @@
             "component/video.ets",
             "component/waterFlow.ets",
             "component/withTheme.ets",
-            "component/xcomponent.ets",
             "framework/index.ets",
             "#handwritten.ets"
         ]

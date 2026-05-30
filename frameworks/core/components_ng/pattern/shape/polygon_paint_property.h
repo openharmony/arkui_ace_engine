@@ -69,11 +69,14 @@ public:
         if (propPoints_.has_value()) {
             const auto size = static_cast<int32_t>(propPoints_.value().size());
             std::vector<std::array<float, 2>> point(size);
-            for (int i = 0; i < size; i++) {
-                point[i][0] = propPoints_.value()[i].first.ConvertToPx();
-                point[i][1] = propPoints_.value()[i].second.ConvertToPx();
+            auto pointsJsonArray = JsonUtil::CreateArray(true);
+            for (int i = 0; i < size; ++i) {
+                auto pointArray = JsonUtil::CreateArray(true);
+                pointArray->Put("0", propPoints_.value()[i].first.ConvertToPx());
+                pointArray->Put("1", propPoints_.value()[i].second.ConvertToPx());
+                pointsJsonArray->Put(std::to_string(i).c_str(), pointArray);
             }
-            json->PutExtAttr("points", point.data(), filter);
+            json->PutExtAttr("points", pointsJsonArray, filter);
         }
     }
 

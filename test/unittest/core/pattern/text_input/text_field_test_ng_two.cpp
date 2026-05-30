@@ -28,26 +28,26 @@ public:
 
 /**
  * @tc.name: testCaretPosition001
- * @tc.desc: test testInput caretPosition
+ * @tc.desc: test testInput caretPosition.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldTestNgTwo, testCaretPosition001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node
-     * @tc.expected: caretPosition is 10
+     * @tc.steps: Create Text filed node.
+     * @tc.expected: caretPosition is 10.
      */
     CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.step: step2. Set caretPosition
+     * @tc.step: step2. Set caretPosition.
      */
     pattern_->SetCaretPosition(10);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 10);
 
     /**
-     * @tc.step: step3. Set caretPosition
+     * @tc.step: step3. Set caretPosition.
      */
     pattern_->SetCaretPosition(5);
     TextEditingValue value;
@@ -71,28 +71,28 @@ HWTEST_F(TextFieldTestNgTwo, testCaretPosition001, TestSize.Level1)
 
 /**
  * @tc.name: testShowPasswordIcon001
- * @tc.desc: test testInput showPasswordIcon
+ * @tc.desc: test testInput showPasswordIcon.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldTestNgTwo, testShowPasswordIcon001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node
-     * @tc.expected: showPasswordIcon is false
+     * @tc.steps: Create Text filed node.
+     * @tc.expected: showPasswordIcon is false.
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetShowPasswordIcon(false);
     });
 
     /**
-     * @tc.step: step2. Set showPasswordIcon
+     * @tc.step: step2. Set showPasswordIcon.
      */
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->GetCaretUpdateType(), CaretUpdateType::NONE);
     EXPECT_EQ(layoutProperty_->GetShowPasswordIcon(), false);
 
      /**
-     * @tc.step: step3. Set showPasswordIcon
+     * @tc.step: step3. Set showPasswordIcon.
      */
     layoutProperty_->UpdateShowPasswordIcon(true);
     frameNode_->MarkModifyDone();

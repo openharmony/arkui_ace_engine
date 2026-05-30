@@ -27,12 +27,11 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_event_function.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/depth_component/depth_component_model.h"
 #include "core/image/image_source_info.h"
@@ -49,109 +48,6 @@ constexpr uint32_t NUM_4 = 4;
 constexpr uint32_t NUM_5 = 5;
 constexpr uint32_t NUM_8 = 8;
 constexpr uint32_t NUM_16 = 16;
-
-decltype(JSViewAbstract::ParseJsLengthMetricsVp)* ParseJsLengthMetrics = JSViewAbstract::ParseJsLengthMetricsVp;
-
-bool ParseDepthLocationProps(const JSRef<JSObject>& jsObj, CalcDimension& x, CalcDimension& y,
-    RefPtr<ResourceObject>& xresObj, RefPtr<ResourceObject>& yresObj)
-{
-    bool hasX = false;
-    bool hasY = false;
-    auto xVal = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X));
-    auto yVal = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
-    if (!xVal->IsUndefined()) {
-        hasX = JSViewAbstract::ParseJsDimension(xVal, x, DimensionUnit::VP, xresObj);
-    }
-    if (!yVal->IsUndefined()) {
-        hasY = JSViewAbstract::ParseJsDimension(yVal, y, DimensionUnit::VP, yresObj);
-    }
-    return hasX || hasY;
-}
-
-void ParseDepthLocationPropsEdgesResObj(EdgesParam& edges, const RefPtr<ResourceObject>& topResObj,
-    const RefPtr<ResourceObject>& leftResObj, const RefPtr<ResourceObject>& bottomResObj,
-    const RefPtr<ResourceObject>& rightResObj)
-{
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
-    edges.resMap_.clear();
-    NG::ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.top", edges, topResObj);
-    NG::ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.left", edges, leftResObj);
-    NG::ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.bottom", edges, bottomResObj);
-    NG::ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.right", edges, rightResObj);
-}
-
-bool ParseDepthLocationPropsEdges(const JSRef<JSObject>& edgesObj, EdgesParam& edges)
-{
-    bool useEdges = false;
-    CalcDimension top;
-    CalcDimension left;
-    CalcDimension bottom;
-    CalcDimension right;
-    RefPtr<ResourceObject> topResObj;
-    RefPtr<ResourceObject> leftResObj;
-    RefPtr<ResourceObject> bottomResObj;
-    RefPtr<ResourceObject> rightResObj;
-    JSRef<JSVal> topVal = edgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
-    JSRef<JSVal> leftVal = edgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT));
-    JSRef<JSVal> bottomVal = edgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
-    JSRef<JSVal> rightVal = edgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT));
-    if (JSViewAbstract::ParseJsDimensionNG(topVal, top, DimensionUnit::VP, topResObj)) {
-        edges.SetTop(top);
-        useEdges = true;
-    }
-    if (JSViewAbstract::ParseJsDimensionNG(leftVal, left, DimensionUnit::VP, leftResObj)) {
-        edges.SetLeft(left);
-        useEdges = true;
-    }
-    if (JSViewAbstract::ParseJsDimensionNG(bottomVal, bottom, DimensionUnit::VP, bottomResObj)) {
-        edges.SetBottom(bottom);
-        useEdges = true;
-    }
-    if (JSViewAbstract::ParseJsDimensionNG(rightVal, right, DimensionUnit::VP, rightResObj)) {
-        edges.SetRight(right);
-        useEdges = true;
-    }
-    ParseDepthLocationPropsEdgesResObj(edges, topResObj, leftResObj, bottomResObj, rightResObj);
-    return useEdges;
-}
-
-bool ParseDepthLocalizedEdges(const JSRef<JSObject>& localizedEdgesObj, EdgesParam& edges)
-{
-    bool useLocalizedEdges = false;
-    CalcDimension start;
-    CalcDimension end;
-    CalcDimension top;
-    CalcDimension bottom;
-
-    JSRef<JSVal> startVal = localizedEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::START));
-    if (startVal->IsObject()) {
-        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
-        ParseJsLengthMetrics(startObj, start);
-        edges.start = start;
-        useLocalizedEdges = true;
-    }
-    JSRef<JSVal> endVal = localizedEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
-    if (endVal->IsObject()) {
-        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
-        ParseJsLengthMetrics(endObj, end);
-        edges.end = end;
-        useLocalizedEdges = true;
-    }
-    JSRef<JSVal> topVal = localizedEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
-    if (topVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(topVal), top)) {
-        edges.SetTop(top);
-        useLocalizedEdges = true;
-    }
-    JSRef<JSVal> bottomVal = localizedEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
-    if (bottomVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(bottomVal), bottom)) {
-        edges.SetBottom(bottom);
-        useLocalizedEdges = true;
-    }
-    return useLocalizedEdges;
-}
-
 }
 
 void JSDepthComponent::Create(const JSCallbackInfo& info)
@@ -188,10 +84,37 @@ void JSDepthComponent::SetDepthMap(const JSCallbackInfo& info)
         return;
     }
 
+    // Parse optional callback
+    RefPtr<JsFunction> jsFunc;
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    }
+
+    auto setDepthMapWithCallback = [&info, &jsFunc](const ImageSourceInfo& imageSourceInfo) {
+        if (jsFunc) {
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            node = frameNode](int32_t code, const std::string& msg) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("DepthComponent.depthMap");
+                PipelineContext::SetCallBackNode(node);
+                JSRef<JSObject> errorObj = JSRef<JSObject>::New();
+                errorObj->SetProperty<int32_t>("code", code);
+                errorObj->SetProperty<std::string>("name", "BusinessError");
+                errorObj->SetProperty<std::string>("message", msg);
+                JSRef<JSVal> param = JSRef<JSVal>::Cast(errorObj);
+                func->ExecuteJS(1, &param);
+            };
+            NG::DepthComponentModel::SetDepthMap(imageSourceInfo, std::move(onError));
+        } else {
+            NG::DepthComponentModel::SetDepthMap(imageSourceInfo);
+        }
+    };
+
 #if defined(PIXEL_MAP_SUPPORTED)
     auto pixelMap = CreatePixelMapFromNapiValue(info[0]);
     if (pixelMap) {
-        NG::DepthComponentModel::SetDepthMap(ImageSourceInfo(pixelMap));
+        setDepthMapWithCallback(ImageSourceInfo(pixelMap));
         TAG_LOGI(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent depthMap set from PixelMap");
         info.ReturnSelf();
         return;
@@ -200,7 +123,7 @@ void JSDepthComponent::SetDepthMap(const JSCallbackInfo& info)
 
     auto backgroundSource = ParseBackgroundSource(info[0]);
     if (backgroundSource.IsImage()) {
-        NG::DepthComponentModel::SetDepthMap(backgroundSource.imageSourceInfo);
+        setDepthMapWithCallback(backgroundSource.imageSourceInfo);
         TAG_LOGI(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent depthMap set");
     }
     info.ReturnSelf();
@@ -240,6 +163,25 @@ void JSDepthComponent::SetCamera(const JSCallbackInfo& info)
     if (zFarValue->IsNumber()) {
         cameraParams.zFar = zFarValue->ToNumber<float>();
     }
+
+    auto cameraBufferCropValue = jsObject->GetProperty("cameraBufferCrop");
+    if (cameraBufferCropValue->IsObject()) {
+        cameraParams.cameraBufferCrop = ParseCameraBufferCrop(cameraBufferCropValue);
+    } else {
+        OHOS::Ace::CameraBufferCrop defaultCrop;
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        if (frameNode) {
+            auto geoNode = frameNode->GetGeometryNode();
+            if (geoNode) {
+                defaultCrop.bufferWidth = static_cast<int32_t>(geoNode->GetFrameSize().Width());
+                defaultCrop.bufferHeight = static_cast<int32_t>(geoNode->GetFrameSize().Height());
+            }
+        }
+        defaultCrop.cropOffset = {0.0f, 0.0f};
+        defaultCrop.cropScale = 1.0f;
+        cameraParams.cameraBufferCrop = defaultCrop;
+    }
+
     NG::DepthComponentModel::SetCamera(cameraParams);
     info.ReturnSelf();
 }
@@ -271,27 +213,56 @@ void JSDepthComponent::SetLight(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSDepthComponent::SetBackgroundOffset(const JSCallbackInfo& info)
+void JSDepthComponent::SetOnComplete(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent backgroundOffset parameter must be an object");
+    if (!info[0]->IsFunction()) {
         return;
     }
-
-    auto bgOffset = ParseBackgroundOffset(info[0]);
-    NG::DepthComponentModel::SetBackgroundOffset(bgOffset);
+    RefPtr<JsFunction> jsFunc =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                       node = frameNode](const NG::DepthComponentCompleteEvent& completeEvent) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("DepthComponent.onComplete");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObject> eventObj = JSRef<JSObject>::New();
+        eventObj->SetProperty<double>("componentWidth", completeEvent.componentWidth);
+        eventObj->SetProperty<double>("componentHeight", completeEvent.componentHeight);
+        JSRef<JSVal> param = JSRef<JSVal>::Cast(eventObj);
+        func->ExecuteJS(1, &param);
+    };
+    NG::DepthComponentModel::SetOnComplete(std::move(onComplete));
     info.ReturnSelf();
 }
 
-void JSDepthComponent::SetBackgroundScale(const JSCallbackInfo& info)
+void JSDepthComponent::SetOnError(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        TAG_LOGW(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent backgroundScale parameter is required");
+    if (!info[0]->IsFunction()) {
         return;
     }
-
-    auto bgScale = ParseBackgroundScale(info[0]);
-    NG::DepthComponentModel::SetBackgroundScale(bgScale);
+    RefPtr<JsFunction> jsFunc =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    node = frameNode](const NG::DepthComponentErrorEvent& errorEvent) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("DepthComponent.onError");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObject> eventObj = JSRef<JSObject>::New();
+        eventObj->SetProperty<double>("componentWidth", errorEvent.componentWidth);
+        eventObj->SetProperty<double>("componentHeight", errorEvent.componentHeight);
+        if (errorEvent.errorCode != 0 || !errorEvent.errorMessage.empty()) {
+            JSRef<JSObject> errorObj = JSRef<JSObject>::New();
+            errorObj->SetProperty<int32_t>("code", errorEvent.errorCode);
+            errorObj->SetProperty<std::string>("name", "BusinessError");
+            errorObj->SetProperty<std::string>("message", errorEvent.errorMessage);
+            eventObj->SetProperty<JSRef<JSObject>>("error", errorObj);
+        }
+        JSRef<JSVal> param = JSRef<JSVal>::Cast(eventObj);
+        func->ExecuteJS(1, &param);
+    };
+    NG::DepthComponentModel::SetOnError(std::move(onError));
     info.ReturnSelf();
 }
 
@@ -303,8 +274,8 @@ void JSDepthComponent::JSBind(BindingTarget globalObj)
     JSClass<JSDepthComponent>::StaticMethod("depthMap", &JSDepthComponent::SetDepthMap, opt);
     JSClass<JSDepthComponent>::StaticMethod("camera", &JSDepthComponent::SetCamera, opt);
     JSClass<JSDepthComponent>::StaticMethod("light", &JSDepthComponent::SetLight, opt);
-    JSClass<JSDepthComponent>::StaticMethod("backgroundOffset", &JSDepthComponent::SetBackgroundOffset, opt);
-    JSClass<JSDepthComponent>::StaticMethod("backgroundScale", &JSDepthComponent::SetBackgroundScale, opt);
+    JSClass<JSDepthComponent>::StaticMethod("onComplete", &JSDepthComponent::SetOnComplete, opt);
+    JSClass<JSDepthComponent>::StaticMethod("onError", &JSDepthComponent::SetOnError, opt);
     JSClass<JSDepthComponent>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSDepthComponent>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSDepthComponent>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -399,6 +370,51 @@ void JSDepthComponent::ParseAndSetDepthSpace(const JSRef<JSVal>& optionsValue)
     }
 }
 
+OHOS::Ace::CropOffset JSDepthComponent::ParseCropOffset(const JSRef<JSVal>& offsetValue)
+{
+    OHOS::Ace::CropOffset offset;
+    if (!offsetValue->IsObject()) {
+        return offset;
+    }
+    auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+    auto xValue = offsetObj->GetProperty("x");
+    if (xValue->IsNumber()) {
+        offset.x = xValue->ToNumber<float>();
+    }
+
+    auto yValue = offsetObj->GetProperty("y");
+    if (yValue->IsNumber()) {
+        offset.y = yValue->ToNumber<float>();
+    }
+    return offset;
+}
+
+OHOS::Ace::CameraBufferCrop JSDepthComponent::ParseCameraBufferCrop(const JSRef<JSVal>& cropValue)
+{
+    OHOS::Ace::CameraBufferCrop crop;
+    if (!cropValue->IsObject()) {
+        return crop;
+    }
+    auto cropObj = JSRef<JSObject>::Cast(cropValue);
+    auto bufferWidthValue = cropObj->GetProperty("bufferWidth");
+    if (bufferWidthValue->IsNumber()) {
+        crop.bufferWidth = bufferWidthValue->ToNumber<int32_t>();
+    }
+    auto bufferHeightValue = cropObj->GetProperty("bufferHeight");
+    if (bufferHeightValue->IsNumber()) {
+        crop.bufferHeight = bufferHeightValue->ToNumber<int32_t>();
+    }
+    auto cropOffsetValue = cropObj->GetProperty("cropOffset");
+    if (cropOffsetValue->IsObject()) {
+        crop.cropOffset = ParseCropOffset(cropOffsetValue);
+    }
+    auto cropScaleValue = cropObj->GetProperty("cropScale");
+    if (cropScaleValue->IsNumber()) {
+        crop.cropScale = cropScaleValue->ToNumber<float>();
+    }
+    return crop;
+}
+
 OHOS::Ace::DepthVector3 JSDepthComponent::ParseVector3(const JSRef<JSVal>& vectorValue)
 {
     auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
@@ -473,48 +489,6 @@ OHOS::Ace::DepthColorRGB JSDepthComponent::ParseLightColor(const JSRef<JSVal>& c
         }
     }
     return color;
-}
-
-DepthBackgroundOffset JSDepthComponent::ParseBackgroundOffset(const JSRef<JSVal>& offsetValue)
-{
-    DepthBackgroundOffset bgOffset;
-    if (!offsetValue->IsObject()) {
-        return bgOffset;
-    }
-
-    auto offsetObject = JSRef<JSObject>::Cast(offsetValue);
-    EdgesParam edges;
-    if (ParseDepthLocalizedEdges(offsetObject, edges)) {
-        bgOffset.offsetEdges = edges;
-        bgOffset.useLocalizedOffset = true;
-        return bgOffset;
-    }
-
-    if (ParseDepthLocationPropsEdges(offsetObject, edges)) {
-        bgOffset.offsetEdges = edges;
-        return bgOffset;
-    }
-
-    CalcDimension x;
-    CalcDimension y;
-    RefPtr<ResourceObject> xResObj;
-    RefPtr<ResourceObject> yResObj;
-    if (ParseDepthLocationProps(offsetObject, x, y, xResObj, yResObj)) {
-        bgOffset.offset = NG::OffsetT<Dimension>(x, y);
-    }
-    return bgOffset;
-}
-
-std::optional<NG::VectorF> JSDepthComponent::ParseBackgroundScale(const JSRef<JSVal>& scaleValue)
-{
-    double xVal = 1.0;
-    double yVal = 1.0;
-    if (scaleValue->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(scaleValue);
-        JSViewAbstract::ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X)), xVal);
-        JSViewAbstract::ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y)), yVal);
-    }
-    return NG::VectorF(static_cast<float>(xVal), static_cast<float>(yVal));
 }
 
 } // namespace OHOS::Ace::Framework

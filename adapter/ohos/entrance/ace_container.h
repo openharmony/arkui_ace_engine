@@ -552,8 +552,7 @@ public:
     static UIContentErrorCode RunPage(
         int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
-    static bool RunDynamicPage(
-        int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint);
+    static bool RunDynamicPage(int32_t instanceId, const DynamicOptions& options);
     static bool OnBackPressed(int32_t instanceId);
     static void OnShow(int32_t instanceId);
     static void OnHide(int32_t instanceId);
@@ -580,6 +579,7 @@ public:
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static OHOS::AbilityRuntime::Context* GetRuntimeContext(int32_t instanceId);
+    static float GetFontWeightScaleFromConfig(int32_t instanceId);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
     static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
         int32_t instanceId, const std::string& contentInfo, ContentInfoType type);

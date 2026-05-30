@@ -26,6 +26,7 @@ class GestureEvent;
 namespace OHOS::Ace::NG {
 
 using DialogEvent = std::function<void(const std::string&)>;
+using SelectedChangeEvent = DialogEvent;
 using DialogCancelEvent = std::function<void()>;
 using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 

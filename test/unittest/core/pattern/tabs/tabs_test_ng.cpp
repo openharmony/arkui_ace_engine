@@ -25,6 +25,7 @@
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components/focus_animation/focus_animation_theme.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 
@@ -53,6 +54,9 @@ RefPtr<Theme> GetTheme(ThemeType type)
         tabTheme->tabBarFocusedColor_ = Color::GRAY;
         tabTheme->activeIndicatorColor_ = Color::RED;
         return tabTheme;
+    } else if (type == FocusAnimationTheme::TypeId()) {
+        auto focusTheme = AceType::MakeRefPtr<FocusAnimationTheme>();
+        return focusTheme;
     } else {
         return AceType::MakeRefPtr<DialogTheme>();
     }
@@ -1073,5 +1077,406 @@ HWTEST_F(TabsTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     dividerRenderProperty->propDividerColor_ = Color::RED;
     tabsPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(dividerRenderProperty->propDividerColor_, Color::RED);
+}
+
+/**
+ * @tc.name: SetUseNewMaterial001
+ * @tc.desc: test SetUseNewMaterial and IsNewMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetUseNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+    tabBarPattern_->SetUseNewMaterial(true);
+    EXPECT_TRUE(tabBarPattern_->IsNewMaterial());
+    tabBarPattern_->SetUseNewMaterial(false);
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+}
+
+/**
+ * @tc.name: HandleTouchDownNewMaterial001
+ * @tc.desc: test HandleTouchDown with useNewMaterial_ true, PlayPressAnimation should not be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchDownNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    auto itemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(itemNode, nullptr);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto colorBefore = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+
+    tabBarPattern_->HandleTouchDown(0);
+    FlushUITasks();
+    auto colorAfter = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(colorBefore, colorAfter);
+}
+
+/**
+ * @tc.name: HandleTouchUpNewMaterial001
+ * @tc.desc: test HandleTouchUp with useNewMaterial_ true, PlayPressAnimation should not be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    auto itemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(itemNode, nullptr);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto colorBefore = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+
+    tabBarPattern_->HandleTouchUp(0);
+    FlushUITasks();
+    auto colorAfter = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(colorBefore, colorAfter);
+}
+
+/**
+ * @tc.name: HandleTouchUpAndClickTo001
+ * @tc.desc: test HandleTouchUpAndClickTo when useNewMaterial_ is false, HandleClick should not be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpAndClickTo001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(false);
+    int32_t clickIndex = -1;
+    auto event = [&clickIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            clickIndex = tabInfo->GetIndex();
+        }
+    };
+    pattern_->SetOnTabBarClickEvent(std::move(event));
+
+    TouchLocationInfo info(0);
+    info.SetTouchType(TouchType::UP);
+    info.SetLocalLocation(Offset(TABS_WIDTH / 4.0f, 0.0f));
+    tabBarPattern_->HandleTouchUpAndClickTo(info);
+    EXPECT_EQ(clickIndex, -1);
+}
+
+/**
+ * @tc.name: HandleTouchUpAndClickTo002
+ * @tc.desc: test HandleTouchUpAndClickTo when touch type is not UP, HandleClick should not be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpAndClickTo002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    int32_t clickIndex = -1;
+    auto event = [&clickIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            clickIndex = tabInfo->GetIndex();
+        }
+    };
+    pattern_->SetOnTabBarClickEvent(std::move(event));
+
+    TouchLocationInfo info(0);
+    info.SetTouchType(TouchType::DOWN);
+    info.SetLocalLocation(Offset(TABS_WIDTH / 4.0f, 0.0f));
+    tabBarPattern_->HandleTouchUpAndClickTo(info);
+    EXPECT_EQ(clickIndex, -1);
+}
+
+/**
+ * @tc.name: HandleTouchUpAndClickTo003
+ * @tc.desc: test HandleTouchUpAndClickTo with useNewMaterial_ true and TouchType::UP, should trigger HandleClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpAndClickTo003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    int32_t clickIndex = -1;
+    auto event = [&clickIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            clickIndex = tabInfo->GetIndex();
+        }
+    };
+    pattern_->SetOnTabBarClickEvent(std::move(event));
+
+    TouchLocationInfo info(0);
+    info.SetTouchType(TouchType::UP);
+    info.SetLocalLocation(Offset(TABS_WIDTH / 4.0f, 0.0f));
+    tabBarPattern_->HandleTouchUpAndClickTo(info);
+    EXPECT_NE(clickIndex, -1);
+}
+
+/**
+ * @tc.name: GetSelectChildIndex001
+ * @tc.desc: test GetSelectChildIndex with offset within first child
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetSelectChildIndex001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    FlushUITasks();
+
+    auto host = tabBarPattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto result = tabBarPattern_->GetSelectChildIndex(Offset(0.0f, 0.0f));
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetSelectChildIndex002
+ * @tc.desc: test GetSelectChildIndex with offset before first child
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetSelectChildIndex002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    FlushUITasks();
+
+    auto result = tabBarPattern_->GetSelectChildIndex(Offset(-100.0f, 0.0f));
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetSelectChildIndex003
+ * @tc.desc: test GetSelectChildIndex with offset after last child
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetSelectChildIndex003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    FlushUITasks();
+
+    auto result = tabBarPattern_->GetSelectChildIndex(Offset(10000.0f, 0.0f));
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetSelectChildIndex004
+ * @tc.desc: test GetSelectChildIndex with offset in the middle region
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetSelectChildIndex004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    FlushUITasks();
+
+    auto host = tabBarPattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto result = tabBarPattern_->GetSelectChildIndex(Offset(TABS_WIDTH / 2.0f, 0.0f));
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: ApplySystemMaterial001
+ * @tc.desc: test ApplySystemMaterial with no BarFloatingStyle set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, ApplySystemMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    layoutProperty_->ResetBarFloatingStyle();
+    pattern_->ApplySystemMaterial();
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+}
+
+/**
+ * @tc.name: ApplySystemMaterial002
+ * @tc.desc: test ApplySystemMaterial with BarFloatingStyle but no systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, ApplySystemMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    BarFloatingStyleParameters style;
+    layoutProperty_->UpdateBarFloatingStyle(style);
+    pattern_->ApplySystemMaterial();
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+}
+
+/**
+ * @tc.name: ResetSystemMaterial001
+ * @tc.desc: test ResetSystemMaterial sets useNewMaterial_ to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, ResetSystemMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+    EXPECT_TRUE(tabBarPattern_->IsNewMaterial());
+
+    pattern_->ResetSystemMaterial();
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+}
+
+/**
+ * @tc.name: TabBarItemFocusPatternNewMaterial001
+ * @tc.desc: test TabBarItemPattern GetFocusPattern with useNewMaterial_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarItemFocusPatternNewMaterial001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(true);
+
+    auto tabBarItemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(tabBarItemNode, nullptr);
+    auto tabBarItemPattern = tabBarItemNode->GetPattern<TabBarItemPattern>();
+    ASSERT_NE(tabBarItemPattern, nullptr);
+
+    auto focusPattern = tabBarItemPattern->GetFocusPattern();
+    EXPECT_EQ(focusPattern.GetFocusType(), FocusType::SCOPE);
+    const auto& paintParams = focusPattern.GetFocusPaintParams();
+    ASSERT_TRUE(paintParams != nullptr);
+    EXPECT_TRUE(paintParams->HasPaintColor());
+    EXPECT_TRUE(paintParams->HasPaintWidth());
+}
+
+/**
+ * @tc.name: TabBarItemFocusPatternNewMaterial002
+ * @tc.desc: test TabBarItemPattern GetFocusPattern with useNewMaterial_ false (default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarItemFocusPatternNewMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_FALSE(tabBarPattern_->IsNewMaterial());
+
+    auto tabBarItemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(tabBarItemNode, nullptr);
+    auto tabBarItemPattern = tabBarItemNode->GetPattern<TabBarItemPattern>();
+    ASSERT_NE(tabBarItemPattern, nullptr);
+
+    auto focusPattern = tabBarItemPattern->GetFocusPattern();
+    EXPECT_EQ(focusPattern.GetFocusType(), FocusType::SCOPE);
+    const auto& paintParams = focusPattern.GetFocusPaintParams();
+    ASSERT_TRUE(paintParams != nullptr);
+    EXPECT_TRUE(paintParams->HasPaintColor());
+    EXPECT_TRUE(paintParams->HasPaintWidth());
+}
+
+/**
+ * @tc.name: HandleTouchDownNewMaterial002
+ * @tc.desc: test HandleTouchDown with useNewMaterial_ false, PlayPressAnimation should be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchDownNewMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(false);
+    auto itemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(itemNode, nullptr);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    tabBarPattern_->HandleTouchDown(0);
+    FlushUITasks();
+    auto colorAfter = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(colorAfter, Color::GREEN);
+}
+
+/**
+ * @tc.name: HandleTouchUpNewMaterial002
+ * @tc.desc: test HandleTouchUp with useNewMaterial_ false, PlayPressAnimation should be called
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, HandleTouchUpNewMaterial002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    tabBarPattern_->SetUseNewMaterial(false);
+    auto itemNode = GetChildFrameNode(tabBarNode_, 0);
+    ASSERT_NE(itemNode, nullptr);
+    auto renderContext = itemNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    tabBarPattern_->HandleTouchUp(0);
+    FlushUITasks();
+    auto colorAfter = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    EXPECT_EQ(colorAfter, Color::TRANSPARENT);
 }
 } // namespace OHOS::Ace::NG

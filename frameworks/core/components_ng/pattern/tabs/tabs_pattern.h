@@ -34,6 +34,9 @@ enum class FloatingBarPosition {
     LEFT,
     RIGHT,
 };
+
+constexpr float FLOATING_BAR_SCALE = 1.0f;
+constexpr float FLOATING_BAR_SCALE_ENLARGED = 1.15f;
 }
 
 class TabsNode;
@@ -191,6 +194,11 @@ public:
     {
         return isFloatingBar_;
     }
+    bool LastFloatingBar() const
+    {
+        return lastFloatingBar_;
+    }
+    void SetFloatingScaleEnabled(bool isFloatingScaleEnabled);
 
 private:
     void OnAttachToFrameNode() override;
@@ -261,6 +269,7 @@ private:
     int32_t floatTabBarFollowHandAnimationCount_ = 0;
     std::list<std::shared_ptr<AnimationUtils::Animation>> floatTabBarFollowHandAnimations_;
     std::optional<float> floatingBarMargin_ = 0.0f;
+    float baseFloatingScale_ = FLOATING_BAR_SCALE;
 };
 
 } // namespace OHOS::Ace::NG

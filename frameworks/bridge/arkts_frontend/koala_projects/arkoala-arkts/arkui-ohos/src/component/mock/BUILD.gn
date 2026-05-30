@@ -28,3 +28,11 @@ generate_static_abc("graphics3d_scene_resources_stub") {
   dst_file = "$target_out_dir/graphics3d_SceneResources.abc"
   out_puts = [ "$target_out_dir/graphics3d_SceneResources.abc" ]
 }
+
+generate_static_abc("window_animation_manager_stub") {
+  ui_enable = "True"
+  base_url = "."
+  files = [ "./@ohos.animation.windowAnimationManager.ets" ]
+  dst_file = "$target_out_dir/ohos_animation_windowAnimationManager.abc"
+  out_puts = [ "$target_out_dir/ohos_animation_windowAnimationManager.abc" ]
+}

@@ -8616,7 +8616,7 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
     NewLinearGradient(jsObj, newGradient);
 }
 
-void JSViewAbstract::NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient)
+void JSViewAbstract::NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient, bool loadRes)
 {
     newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
     // angle
@@ -8636,7 +8636,7 @@ void JSViewAbstract::NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradien
     SetGradientDirection(newGradient, direction);
     auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
-    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)), NUM_0);
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)), NUM_0, loadRes);
 }
 
 void JSViewAbstract::SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction)
@@ -8687,11 +8687,11 @@ void JSViewAbstract::ParseJsTextShaderStyle(std::optional<NG::Gradient>& gradien
     }
     if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NG::Gradient gradient;
-        NewRadialGradient(shaderStyleObj, gradient);
+        NewRadialGradient(shaderStyleObj, gradient, true);
         gradientShaderStyle = gradient;
     } else if (shaderStyleObj->HasProperty("colors")) {
         NG::Gradient gradient;
-        NewLinearGradient(shaderStyleObj, gradient);
+        NewLinearGradient(shaderStyleObj, gradient, true);
         gradientShaderStyle = gradient;
     } else if (shaderStyleObj->HasProperty("color")) {
         Color textColor;
@@ -8820,7 +8820,7 @@ void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradien
     NewRadialGradient(jsObj, newGradient);
 }
 
-void JSViewAbstract::NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient)
+void JSViewAbstract::NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& newGradient, bool loadRes)
 {
     newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
     // center
@@ -8851,7 +8851,7 @@ void JSViewAbstract::NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradien
     auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
     newGradient.SetRepeat(repeating);
     // color stops
-    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)), NUM_2);
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)), NUM_2, loadRes);
 }
 
 void JSViewAbstract::ParseRadialGradientCenter(NG::Gradient& newGradient, JSRef<JSArray> centerArray)
@@ -9568,6 +9568,7 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
         auto infoPtr = new KeyEventInfo(info);
         auto eventObj = NG::FrameNodeBridge::CreateKeyEventInfoObj(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnKeyEvent_end type:%d", infoPtr->GetKeyType());
         auto ret = func->Call(vm, func.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
         return ret->IsBoolean() ? ret->ToBoolean(vm)->Value() : false;
@@ -11475,7 +11476,7 @@ void JSViewAbstract::NewParseGradientColor(NG::Gradient& gradient, RefPtr<Resour
 }
 
 void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops,
-    const int32_t mapIdx)
+    const int32_t mapIdx, bool loadRes)
 {
     if (!colorStops->IsArray()) {
         return;
@@ -11496,9 +11497,15 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         // color
         Color color;
         RefPtr<ResourceObject> resObj;
-        if (!ParseJsColor(subArray->GetValueAt(0), color, resObj)) {
+        auto colorObj = subArray->GetValueAt(0);
+        if (!ParseJsColor(colorObj, color, resObj)) {
             nullNum++;
             continue;
+        }
+        if (colorObj->IsObject() && loadRes) {
+            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
+            CompleteResourceObject(jsObj);
+            resObj = GetResourceObject(jsObj);
         }
         gradientColor.SetColor(color);
         gradientColor.SetHasValue(false);
@@ -11511,7 +11518,7 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         //  [0, 1] -> [0, 100.0];
         gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         gradient.AddColor(gradientColor);
-        if (SystemProperties::ConfigChangePerform() && resObj) {
+        if ((SystemProperties::ConfigChangePerform() || loadRes) && resObj) {
             int32_t indx = static_cast<int32_t>(i) - nullNum;
             if (mapIdx == NUM_1) {
                 NewParseSweepGradientColor(gradient, resObj, gradientColor, indx);
@@ -12104,17 +12111,14 @@ void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
     auto options = JSRef<JSObject>::Cast(info[0]);
     auto actionValue = options->GetProperty("action");
     auto enabledValue = options->GetProperty("enabled");
-    if (!actionValue->IsNumber() || !enabledValue->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
-        return;
+    int32_t action = SMART_GESTURE_SHORTCUT_PRIMARY;
+    if (actionValue->IsNumber()) {
+        action = actionValue->ToNumber<int32_t>();
     }
-
-    int32_t action = actionValue->ToNumber<int32_t>();
-    if (action != SMART_GESTURE_SHORTCUT_PRIMARY) {
-        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
-        return;
+    bool enabled = false;
+    if (enabledValue->IsBoolean()) {
+        enabled = enabledValue->ToBoolean();
     }
-    bool enabled = enabledValue->ToBoolean();
     bool selectable = enabled;
     auto selectableValue = options->GetProperty("selectable");
     if (selectableValue->IsBoolean()) {
@@ -13961,6 +13965,20 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_ParseResourceObject(void* value)
     CHECK_NULL_RETURN(resourceObject, nullptr);
     resourceObject->IncRefCount();
     return reinterpret_cast<void*>(AceType::RawPtr(resourceObject));
+}
+
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_ParseDimensionToPx(void* value)
+{
+    napi_value napiValue = reinterpret_cast<napi_value>(value);
+    if (!napiValue) {
+        return 0;
+    }
+    JSRef<JSVal> jsVal = JsConverter::ConvertNapiValueToJsVal(napiValue);
+    CalcDimension result;
+    if (!JSViewAbstract::ParseJsDimensionNG(jsVal, result, DimensionUnit::PX)) {
+        return 0;
+    }
+    return static_cast<int32_t>(result.ConvertToPx());
 }
 
 void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,

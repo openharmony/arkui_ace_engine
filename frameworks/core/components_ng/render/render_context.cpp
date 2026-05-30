@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/render_context.h"
 
+#include "base/utils/utils.h"
+#include "core/components_ng/property/particle_property.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/border_image.h"
@@ -372,5 +374,45 @@ void RenderContext::UpdateBorderImage(const RefPtr<BorderImage>& value)
     }
     groupProperty->UpdateBorderImage(value);
     OnBorderImageUpdate(value);
+}
+
+void RenderContext::UpdateParticleOptionArray(const std::list<ParticleOption>& value)
+{
+    if (propParticleOptionArray_.has_value()) {
+        if (NearEqual(propParticleOptionArray_.value(), value)) {
+            return;
+        }
+    }
+    propParticleOptionArray_ = value;
+    OnParticleOptionArrayUpdate(value);
+}
+
+const std::optional<std::list<ParticleOption>>& RenderContext::GetParticleOptionArray() const
+{
+    return propParticleOptionArray_;
+}
+bool RenderContext::HasParticleOptionArray() const
+{
+    return propParticleOptionArray_.has_value();
+}
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue() const
+{
+    return propParticleOptionArray_.value();
+}
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue(
+    const std::list<ParticleOption>& defaultValue) const
+{
+    if (!HasParticleOptionArray()) {
+        return defaultValue;
+    }
+    return propParticleOptionArray_.value();
+}
+std::optional<std::list<ParticleOption>> RenderContext::CloneParticleOptionArray() const
+{
+    return propParticleOptionArray_;
+}
+void RenderContext::ResetParticleOptionArray()
+{
+    return propParticleOptionArray_.reset();
 }
 } // namespace OHOS::Ace::NG

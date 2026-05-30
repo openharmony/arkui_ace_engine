@@ -244,6 +244,11 @@ public:
         return static_cast<NG::LazyForEachReleaseStrategy>(options_.releaseStrategy);
     }
 
+    NG::LazyForEachMemOptStrategy GetLazyForEachMemOptStrategy() const override
+    {
+        return static_cast<NG::LazyForEachMemOptStrategy>(options_.memOptStrategy);
+    }
+
     void ReleaseChildGroupById(const std::string& id) override
     {
         JSLazyForEachActuator::ReleaseChildGroupByComposedId(id);

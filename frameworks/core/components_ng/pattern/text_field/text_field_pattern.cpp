@@ -23,66 +23,41 @@
 
 #include <algorithm>
 #include <array>
-#include <atomic>
 #include <cctype>
-#include <cstdint>
-#include <optional>
-#include <regex>
-#include <string>
 #include <string_view>
-#include <utility>
 #include "base/geometry/dimension.h"
-#include "base/log/event_report.h"
-#include "base/utils/multi_thread.h"
-#include "base/utils/utf_helper.h"
-#include "core/common/ai/ai_write_adapter.h"
-#include "core/common/ime/constant.h"
-#include "core/common/statistic_event_reporter.h"
-#include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
-#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "bridge/common/utils/utils.h"
+#include "base/view_data/ace_auto_fill_error.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
-#include "core/common/font_manager.h"
 #include "core/common/ime/input_method_manager.h"
-#include "core/common/ime/text_input_client.h"
-#include "core/common/ime/text_input_connection.h"
 #include "core/common/ime/text_input_formatter.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/components_ng/base/observer_handler.h"
 #include "core/common/screen_lock/screen_lock_manager.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/ui_material.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_free_scroller.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/text/text_emoji_processor.h"
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
-#include "parameters.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -91,6 +66,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -1899,6 +1875,7 @@ void TextFieldPattern::InitFocusEvent()
     auto keyTask = [weak = WeakClaim(this)](const KeyEvent& keyEvent) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->ReportShiftAndDirectionEvent(keyEvent);
         return pattern->OnKeyEvent(keyEvent);
     };
     focusHub->SetOnKeyEventInternal(keyTask);
@@ -5698,6 +5675,24 @@ void TextFieldPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
     }
 }
 
+void TextFieldPattern::ReportShiftAndDirectionEvent(const KeyEvent& keyEvent)
+{
+    bool isDirectionalKey = keyEvent.HasKey(KeyCode::KEY_DPAD_UP) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_DOWN) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_LEFT) ||
+            keyEvent.HasKey(KeyCode::KEY_DPAD_RIGHT);
+    auto action = keyEvent.action;
+    bool isDirectionPressed = (!isDirectionalKey) &&
+            (action == KeyAction::UP || action == KeyAction::CANCEL);
+    if (isDirectionPressed && shiftFlag_) {
+        auto selectStart = selectController_->GetStartIndex();
+ 	    auto selectEnd = selectController_->GetEndIndex();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        ReportSelectionChangeEvent(host->GetId(), "selectionChange", selectStart, selectEnd);
+    }
+}
+
 void TextFieldPattern::UpdateCaretByClick(const Offset& localOffset)
 {
     if (shiftFlag_) {
@@ -8012,9 +8007,6 @@ void TextFieldPattern::AfterSelection()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     showSelect_ = IsSelected();
     UpdateCaretInfoToController();
-    auto startIndex = selectController_->GetStartIndex();
-    auto endIndex = selectController_->GetEndIndex();
-    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", startIndex, endIndex);
 }
 
 void TextFieldPattern::HandleSelectionUp()
@@ -8306,7 +8298,8 @@ void TextFieldPattern::SetSelectionFlag(
         NotifyOnEditChanged(true);
     }
     SetIsSingleHandle(!IsSelected());
-    if (!IsShowHandle()) {
+    bool forceShowHandle = options.has_value() ? options.value().forceShowHandle : false;
+    if (!IsShowHandle() && !forceShowHandle) {
         CloseSelectOverlay(true);
     } else {
         isShowMenu = IsShowMenu(options, isShowMenu);

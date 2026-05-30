@@ -20,6 +20,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "compatible/components/list/list_component.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/indexer/indexer_item_component.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/constants.h"

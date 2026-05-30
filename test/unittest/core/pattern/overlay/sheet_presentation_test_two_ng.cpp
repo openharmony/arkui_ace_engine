@@ -1475,8 +1475,8 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition004, TestSize.Level1)
     detent.sheetMode = SheetMode::MEDIUM;
     style.detents.emplace_back(detent);
     SheetHeight detent1;
-    detent1.height->unit_ = DimensionUnit::VP;
-    detent1.height->value_ = 100;
+    detent1.height->SetUnit(DimensionUnit::VP);
+    detent1.height->SetValue(100);
     style.detents.emplace_back(detent1);
     layoutProperty->UpdateSheetStyle(style);
     sheetPattern->IsNeedPlayTransition(style);
@@ -1565,8 +1565,8 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition007, TestSize.Level1)
     detent.sheetMode = SheetMode::MEDIUM;
     style.detents.emplace_back(detent);
     SheetHeight detent1;
-    detent1.height->unit_ = DimensionUnit::VP;
-    detent1.height->value_ = 100;
+    detent1.height->SetUnit(DimensionUnit::VP);
+    detent1.height->SetValue(100);
     style.detents.emplace_back(detent1);
     layoutProperty->UpdateSheetStyle(style);
     style.detentSelection = detent1;
@@ -1605,8 +1605,8 @@ HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition008, TestSize.Level1)
     SheetHeight height1;
     height1.sheetMode = SheetMode::AUTO;
     SheetHeight height2;
-    height2.height->unit_ = DimensionUnit::VP;
-    height2.height->value_ = 100;
+    height2.height->SetUnit(DimensionUnit::VP);
+    height2.height->SetValue(100);
     style.detents.emplace_back(height1);
     style.detents.emplace_back(height2);
     layoutProperty->UpdateSheetStyle(style);

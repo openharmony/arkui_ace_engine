@@ -89,7 +89,6 @@ void InteractiveEffect::TouchDownAnimation()
     FinishPreviousAnimation();
     if (!theme_) {
         LOGE("theme is invalid, stop build animation");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
     RefPtr<KeyframeAnimation<double>> alphaAnimation = AceType::MakeRefPtr<KeyframeAnimation<double>>();
@@ -102,7 +101,6 @@ void InteractiveEffect::TouchUpAnimation()
     FinishPreviousAnimation();
     if (!theme_) {
         LOGE("theme is invalid, stop build animation");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
     RefPtr<KeyframeAnimation<double>> alphaAnimation = AceType::MakeRefPtr<KeyframeAnimation<double>>();
@@ -114,7 +112,6 @@ void InteractiveEffect::CancelTouchAnimation()
 {
     if (!theme_) {
         LOGE("theme is invalid, stop build animation");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
     if (controller_ && !controller_->IsStopped()) {
@@ -182,7 +179,6 @@ void InteractiveEffect::BuildClickAnimation()
 {
     if (!theme_) {
         LOGE("theme is invalid, stop build animation");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
 

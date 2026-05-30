@@ -154,6 +154,48 @@ void ReadBooleanProperty(
     }
 }
 
+void SetGridLayoutAlgorithmParam(
+    ani_env* env, const ani_object& obj, ArkUINodeHandle node, const ArkUIAniDynamicLayoutModifier* modifier)
+{
+    ArkUIGridLayoutAlgorithm algorithm;
+    ani_ref columnsTemplateRef;
+    if (env->Object_GetPropertyByName_Ref(obj, "columnsTemplate", &columnsTemplateRef) == ANI_OK) {
+        if (!AniUtils::IsUndefined(env, columnsTemplateRef)) {
+            ani_object ctObj = static_cast<ani_object>(columnsTemplateRef);
+            ani_class stringClass;
+            if (env->FindClass("std.core.String", &stringClass) == ANI_OK) {
+                ani_boolean isString = ANI_FALSE;
+                env->Object_InstanceOf(ctObj, stringClass, &isString);
+                if (isString) {
+                    std::string strValue = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(ctObj));
+                    if (!strValue.empty()) {
+                        static thread_local std::string tlColumnsTemplate;
+                        tlColumnsTemplate = strValue;
+                        algorithm.columnsTemplate = tlColumnsTemplate.c_str();
+                    }
+                }
+            }
+            if (algorithm.columnsTemplate == nullptr) {
+                ani_ref fillTypeRef;
+                if (env->Object_GetPropertyByName_Ref(ctObj, "fillType", &fillTypeRef) == ANI_OK) {
+                    if (!AniUtils::IsUndefined(env, fillTypeRef)) {
+                        ani_int ordinal = 0;
+                        ani_object ftObj = static_cast<ani_object>(fillTypeRef);
+                        if (env->Object_CallMethodByName_Int(ftObj, "getOrdinal", nullptr, &ordinal) == ANI_OK) {
+                            algorithm.itemFillPolicy = static_cast<ArkUI_Int32>(ordinal);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ReadLengthMetricsProperty(env, obj, "rowsGap", algorithm.rowsGap);
+    ReadLengthMetricsProperty(env, obj, "columnsGap", algorithm.columnsGap);
+    if (modifier->setDynamicLayoutGridOptions) {
+        modifier->setDynamicLayoutGridOptions(node, algorithm);
+    }
+}
+
 void SetRowLayoutAlgorithmParam(
     ani_env* env, const ani_object& obj, ArkUINodeHandle node, const ArkUIAniDynamicLayoutModifier* modifier)
 {
@@ -258,6 +300,33 @@ void SetDynamicLayoutColumnLayoutAlgorithm(
     env->Object_InstanceOf(columnLayoutAlgorithm, dynamicLayoutColumnLayoutAlgorithm, &isExpectedType);
     if (isExpectedType) {
         SetColumnLayoutAlgorithmParam(env, columnLayoutAlgorithm, arkNode, dynamicLayoutModifier);
+    }
+}
+
+void SetDynamicLayoutGridLayoutAlgorithm(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object gridLayoutAlgorithm)
+{
+    const auto* modifier = GetNodeAniModifier();
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
+    if (!modifier || !arkNode) {
+        return;
+    }
+    const auto* dynamicLayoutModifier = modifier->getArkUIAniDynamicLayoutModifier();
+    if (!dynamicLayoutModifier) {
+        return;
+    }
+    if (AniUtils::IsUndefined(env, gridLayoutAlgorithm)) {
+        return;
+    }
+
+    ani_class dynamicLayoutGridLayoutAlgorithm;
+    if (env->FindClass("arkui.LayoutAlgorithm.GridLayoutAlgorithm", &dynamicLayoutGridLayoutAlgorithm) != ANI_OK) {
+        return;
+    }
+    ani_boolean isExpectedType = ANI_FALSE;
+    env->Object_InstanceOf(gridLayoutAlgorithm, dynamicLayoutGridLayoutAlgorithm, &isExpectedType);
+    if (isExpectedType) {
+        SetGridLayoutAlgorithmParam(env, gridLayoutAlgorithm, arkNode, dynamicLayoutModifier);
     }
 }
 

@@ -76,6 +76,13 @@ interface RichEditorAttribute extends CommonAttribute {}
 interface RowAttribute extends CommonAttribute {}
 interface RowSplitAttribute extends CommonAttribute {}
 interface SearchAttribute extends CommonAttribute {}
+interface SelectionContainerAttribute extends CommonAttribute {}
+interface SelectionContainerMenuOptions {
+  onAppear?: Callback<string>;
+  onDisappear?: Callback<void>;
+  onMenuShow?: Callback<string>;
+  onMenuHide?: Callback<string>;
+}
 interface SpanAttribute extends CommonAttribute {}
 interface SideBarContainerAttribute extends CommonAttribute {}
 interface StackAttribute extends CommonAttribute {}
@@ -293,6 +300,9 @@ type ImageInterpolation = 'none' | 'low' | 'medium' | 'high';
 type ImageSpanAlignment = 'baseline' | 'bottom' | 'center' | 'top';
 
 type CopyOptions = 'none' | 'inApp' | 'local' | 'distributed';
+type SelectionContainerTextJoinStyle = number;
+type TextSpanType = number;
+type TextResponseType = number;
 type TextInputType = 'text' | 'multiline' | 'number' | 'numberPassword' | 'email' | 'password' | 'phoneNumber' | 'userName' | 'newPassword';
 type TextInputAction = 'none' | 'default' | 'go' | 'search' | 'send' | 'next' | 'done' | 'previous';
 type TextAreaType = 'text' | 'multiline' | 'number' | 'numberPassword' | 'email' | 'password' | 'phoneNumber' | 'userName' | 'newPassword';

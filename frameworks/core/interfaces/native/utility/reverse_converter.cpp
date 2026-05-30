@@ -72,6 +72,7 @@ const std::string MINUTE = "minute";
 const std::string SECOND = "second";
 const int32_t STD_TM_START_YEAR = 1900;
 const int32_t SEC_TO_MILLISEC = 1000;
+const int32_t TYPE_STRING = 0;
 } // namespace
 } // namespace OHOS::Ace
 
@@ -865,7 +866,13 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
     const auto& linearGradient = src.GetLinearGradient();
     if (linearGradient->angle.has_value()) {
         const auto& angleValue = linearGradient->angle.value();
-        dst.angle = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(angleValue.ToString(), ctx);
+        if (static_cast<int32_t>(angleValue.Unit()) == TYPE_STRING) {
+            dst.angle = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(
+                std::to_string(angleValue.Value()), ctx);
+        } else {
+            dst.angle = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(
+                static_cast<Ark_Float64>(angleValue.Value()));
+        }
     } else {
         dst.angle = Converter::ArkUnion<Opt_Union_F64_String>(Ark_Empty());
     }

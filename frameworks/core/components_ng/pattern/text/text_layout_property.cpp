@@ -274,6 +274,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         GetOrphanCharOptimization().value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("compressLeadingPunctuation",
         GetCompressLeadingPunctuation().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("punctuationOverflow",
+        GetPunctuationOverflow().value_or(false) ? "true" : "false", filter);
     if (HasLineHeightMultiply()) {
         json->PutExtAttr("lineHeightMultiply", std::to_string(GetLineHeightMultiply().value()).c_str(), filter);
     }

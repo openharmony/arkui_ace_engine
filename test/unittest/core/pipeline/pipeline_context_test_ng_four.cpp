@@ -1031,9 +1031,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028A, TestSize.Leve
 
     context_->ReloadNodesResource();
 
-    EXPECT_EQ(pattern->callCount_, 1);
-    EXPECT_TRUE(pattern->observedSystemColorChange_);
-    EXPECT_EQ(pattern->observedColorMode_, static_cast<uint32_t>(context_->GetColorMode()));
+    EXPECT_EQ(pattern->callCount_, 0);
+    EXPECT_FALSE(pattern->observedSystemColorChange_);
+    EXPECT_EQ(pattern->observedColorMode_, 0U);
     EXPECT_FALSE(context_->IsSystemColorChange());
     EXPECT_FALSE(context_->needReloadResource_);
 
@@ -1099,8 +1099,8 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028C, TestSize.Leve
 
     context_->ReloadNodesResource();
 
-    EXPECT_EQ(pattern->callCount_, 1);
-    EXPECT_TRUE(pattern->observedSystemColorChange_);
+    EXPECT_EQ(pattern->callCount_, 0);
+    EXPECT_FALSE(pattern->observedSystemColorChange_);
     EXPECT_TRUE(context_->IsSystemColorChange());
     EXPECT_FALSE(context_->needReloadResource_);
 

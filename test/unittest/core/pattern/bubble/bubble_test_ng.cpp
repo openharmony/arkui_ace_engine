@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/pattern/overlay/level_mode.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
@@ -1427,5 +1428,81 @@ HWTEST_F(BubbleTestNg, BubblePatternTest022, TestSize.Level0)
     ASSERT_NE(updatedPopupParam, nullptr);
     EXPECT_EQ(updatedPopupParam->GetOnWillDismiss(), nullptr);
     EXPECT_EQ(updatedPopupParam->GetOnStateChange(), nullptr);
+}
+
+/**
+ * @tc.name: PopupParamLevelModeTest001
+ * @tc.desc: Test PopupParam SetLevelMode and GetLevelMode with OVERLAY mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, PopupParamLevelModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopupParam instance.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+
+    /**
+     * @tc.steps: step2. Test default LevelMode is OVERLAY.
+     * @tc.expected: Default LevelMode should be OVERLAY.
+     */
+    EXPECT_EQ(popupParam->GetLevelMode(), LevelMode::OVERLAY);
+
+    /**
+     * @tc.steps: step3. Set LevelMode to OVERLAY and verify.
+     * @tc.expected: LevelMode should be set to OVERLAY.
+     */
+    popupParam->SetLevelMode(LevelMode::OVERLAY);
+    EXPECT_EQ(popupParam->GetLevelMode(), LevelMode::OVERLAY);
+}
+
+/**
+ * @tc.name: PopupParamLevelModeTest002
+ * @tc.desc: Test PopupParam SetLevelMode and GetLevelMode with EMBEDDED mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, PopupParamLevelModeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopupParam instance.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+
+    /**
+     * @tc.steps: step2. Set LevelMode to EMBEDDED and verify.
+     * @tc.expected: LevelMode should be set to EMBEDDED.
+     */
+    popupParam->SetLevelMode(LevelMode::EMBEDDED);
+    EXPECT_EQ(popupParam->GetLevelMode(), LevelMode::EMBEDDED);
+}
+
+/**
+ * @tc.name: PopupParamLevelModeTest003
+ * @tc.desc: Test PopupParam LevelMode can be changed from OVERLAY to EMBEDDED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, PopupParamLevelModeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PopupParam instance.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+
+    /**
+     * @tc.steps: step2. Set LevelMode to OVERLAY first.
+     * @tc.expected: LevelMode should be OVERLAY.
+     */
+    popupParam->SetLevelMode(LevelMode::OVERLAY);
+    EXPECT_EQ(popupParam->GetLevelMode(), LevelMode::OVERLAY);
+
+    /**
+     * @tc.steps: step3. Change LevelMode to EMBEDDED.
+     * @tc.expected: LevelMode should be changed to EMBEDDED.
+     */
+    popupParam->SetLevelMode(LevelMode::EMBEDDED);
+    EXPECT_EQ(popupParam->GetLevelMode(), LevelMode::EMBEDDED);
 }
 } // namespace OHOS::Ace::NG

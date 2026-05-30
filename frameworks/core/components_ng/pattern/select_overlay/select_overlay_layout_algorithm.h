@@ -115,6 +115,14 @@ private:
     bool AdjustToInfo(LayoutWrapper *layoutWrapper, OffsetF &menuOffset, const RectF &menuRect, OffsetF &windowOffset,
         std::shared_ptr<SelectOverlayInfo> &info);
     uint32_t GetSafeAreaTop();
+    bool ShouldSkipMenuLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& menu);
+    void LayoutMenuExtensionPart(LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& menu, const OffsetF& menuOffset, SelectOverlayMode mode);
+    RefPtr<LayoutWrapper> LayoutMoreButton(LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& menu, const OffsetF& menuOffset, SelectOverlayMode mode);
+    OffsetF LayoutMenuAndGetOffset(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& menu);
+    void SyncSelectMenuPaintRectToExtensionMenu(
+        const RefPtr<LayoutWrapper>& menu, LayoutWrapper* layoutWrapper);
 
     std::shared_ptr<SelectOverlayInfo> info_;
 

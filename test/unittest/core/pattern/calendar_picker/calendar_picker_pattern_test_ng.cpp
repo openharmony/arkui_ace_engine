@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"

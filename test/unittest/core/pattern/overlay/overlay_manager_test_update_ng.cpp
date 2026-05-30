@@ -33,6 +33,7 @@
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"

@@ -5813,7 +5813,7 @@ HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutScroll001, TestSize.Level1)
 
 /**
  * @tc.name: ListWithLazyVGridLayoutPredictBuild001
- * @tc.desc: Test ProcessPredictBuildLazyVGrid is called
+ * @tc.desc: Test ProcessPredictBuildLazyChild is called
  * @tc.type: FUNC
  */
 HWTEST_F(ListLayoutTestNg, ListWithLazyVGridLayoutPredictBuild001, TestSize.Level1)

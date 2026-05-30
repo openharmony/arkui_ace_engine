@@ -18,11 +18,10 @@
 
 import { ArkThemeScopeManager } from "#arktheme"
 import { ArkUIAniUIExtensionOptions } from "arkui.ani"
-import { ComponentContent } from "arkui.ComponentContent"
 import { KLong } from "@koalaui/interop"
-import { KPointer, InteropNativeModule } from "@koalaui/interop"
+import { KPointer, InteropNativeModule, DeserializerBase, SerializerBase } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
+import { ComponentBase } from 'arkui/ComponentBase';
 import { PeerNode } from "./../PeerNode"
 import { CommonMethod, TerminationInfo, ArkCommonMethodComponent } from "./common"
 import { ErrorCallback, BusinessError } from "@ohos.base"
@@ -35,29 +34,12 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkUIExtensionComponentPeerBase } from "./uiExtensionComponent"
 import { ArkUIAniUiextensionModal, UiextensionType } from "arkui.ani"
 
-export enum EmbeddedDpiFollowStrategy {
-    FOLLOW_HOST_DPI = 0,
-    FOLLOW_UI_EXTENSION_ABILITY_DPI = 1
-}
-
-export enum EmbeddedWindowModeFollowStrategy {
-    FOLLOW_HOST_WINDOW_MODE = 0,
-    FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1
-}
-
-export interface EmbeddedOptions {
-    placeholder?: ComponentContent;
-    dpiFollowStrategy?: EmbeddedDpiFollowStrategy;
-    windowModeFollowStrategy?: EmbeddedWindowModeFollowStrategy;
-    areaChangePlaceholder?: Array<[string, ComponentContent]>;
-}
-
 export class ArkEmbeddedComponentPeer extends ArkUIExtensionComponentPeerBase {
     embeddedComponentAttributeSet?: EmbeddedComponentModifier;
     public setEmbeddedComponentOptionsAttribute(loader: Want, type?: EmbeddedType, options?: EmbeddedOptions): void {
     InteropNativeModule._NativeLog("[AceEmbeddedComponent] setEmbeddedComponentOptionsAttribute entry");
     if (options !== undefined) {
-        let innerOption : ArkUIAniUIExtensionOptions = new ArkUIAniUIExtensionOptions()
+        let innerOption : ArkUIAniUIExtensionOptions = new ArkUIAniUIExtensionOptions();
         if (options.dpiFollowStrategy !== undefined) {
             innerOption.dpiFollowStrategy = (options.dpiFollowStrategy as EmbeddedDpiFollowStrategy).valueOf();
         }
@@ -191,15 +173,11 @@ export function EmbeddedComponentImpl(
 export function EmbeddedComponent(
     @memo @memo_skip
     style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-    @memo @memo_skip
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkEmbeddedComponentComponent>((): ArkEmbeddedComponentComponent => {
         return new ArkEmbeddedComponentComponent()
     })
     NodeAttach<ArkEmbeddedComponentPeer>((): ArkEmbeddedComponentPeer => ArkEmbeddedComponentPeer.create(receiver), (_: ArkEmbeddedComponentPeer): void => {
         style?.(receiver)
-        content_?.()
     })
 }
-

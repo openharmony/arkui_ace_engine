@@ -40,6 +40,7 @@ constexpr int32_t BORDER_SIDE_BOTTOM_INDEX = 3;
 constexpr int32_t SIZE_OF_COLOR_ARRAY = 8;
 constexpr int32_t SIZE_OF_WIDTH_ARRAY = 12;
 constexpr TextDirection DEFAULT_SELECT_DIRECTION = TextDirection::AUTO;
+constexpr ArkUI_Float32 DEFAULT_SCALE = 1.0f;
 
 void SetSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
@@ -1170,6 +1171,9 @@ void SetMenuBgBlurStyleWithOption(ArkUINodeHandle node, MenuBgBlurStyleOptionArg
     BlurStyleOption styleOption;
     styleOption.colorMode = static_cast<OHOS::Ace::ThemeColorMode>(optionArgs->colorMode);
     styleOption.adaptiveColor = static_cast<OHOS::Ace::AdaptiveColor>(optionArgs->adaptiveColor);
+    if (optionArgs->scale < 0.0f || optionArgs->scale > 1.0f) {
+        optionArgs->scale = DEFAULT_SCALE;
+    }
     styleOption.scale = optionArgs->scale;
     if (optionArgs->blurValues != nullptr && optionArgs->blurValuesSize > 0) {
         styleOption.blurOption.grayscale.assign(

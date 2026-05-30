@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { IReusePool } from './utils'
 import { ObserveSingleton } from './base/observeSingleton';
 import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
@@ -21,9 +21,26 @@ import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IncrementalNode } from '@koalaui/runtime';
 import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
+import window from '@ohos.window';
 import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
 export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
-
+export { ReusePoolOwnership } from '../component/customComponent';
+/**
+ * Framework-internal extension of IReusePool. Carries the methods the
+ * framework needs to push/pop instances and inspect ownership; not exposed
+ * to applications.
+ */
+export interface IGlobalReusePoolVariable extends IReusePool {
+    readonly ownership: ReusePoolOwnership;
+    readonly acceptedClasses: Array<string>;
+    readonly owner: IVariableOwner;
+ 
+    pop(classKey: string, reuseId?: string): Object | undefined;
+    push(classKey: string, instance: Object, reuseId?: string): boolean;
+    peek(classKey: string, reuseId?: string): Object | undefined;
+    acceptsComponent(classKey: string): boolean;
+    isActive(): boolean;
+}
 export interface IDecoratorBaseRegistry {
     registerToOwningView(): void;
 }
@@ -39,6 +56,15 @@ export interface IVariableOwner {
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
+    __addSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean;
+    __removeSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean;
+    __setSimpleEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void;
+    __getAndClearSimpleEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined;
+    __getSimpleEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void>;
+    __setSimpleEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void;
+    __getSimpleEnvUnregisterFuncs__Internal(): Map<string, () => void>;
+    __clearAllSimpleEnvRegistrations__Internal(): void;
+    __getSimpleEnvCallbackSet__Internal(envKey: string): (Set<(value: Any) => void>) | undefined;
     __getCustomComponentContext__Internal(): CustomComponentContext;
     __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
     __getCanUpdateStateVars__Internal(): boolean;
@@ -52,7 +78,9 @@ export interface IDecoratedVariable {
 export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
     registerWatchToSource(me: IDecoratedV1Variable<T>): WatchIdType;
 }
-
+export interface IDecoratedV1ResettableVariable<T> {
+    resetOnReuse(newValue: T): void;
+}
 export interface IDecoratedV2Variable<T> extends IDecoratedVariable {
     resetOnReuse(newValue: T): void;
 }
@@ -72,7 +100,7 @@ export interface IDecoratedUpdatableVariable<T> {
     update(newValue: T): void;
 }
 
-export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T>, IDecoratedV1ResettableVariable<T> {}
 
 export interface ILocalDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable<T> {}
 
@@ -95,18 +123,24 @@ export interface IPropDecoratedVariable<T>
 export interface IPropRefDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
         IDecoratedUpdatableVariable<T>,
-        IDecoratedV1Variable<T> {}
+        IDecoratedV1Variable<T>,
+        IDecoratedV1ResettableVariable<T> {}
 
-export interface ILinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface ILinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(newSource: IDecoratedV1Variable<T>): void;
+}
 
-export interface IProvideDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IProvideDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T>, IDecoratedV1ResettableVariable<T> {}
 
-export interface IConsumeDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+export interface IConsumeDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
+    resetOnReuse(provideAliasName: string, watchFunc?: WatchFuncType, consumeOptions?: ConsumeOptions<T>): void;
+}
 
 export interface IObjectLinkDecoratedVariable<T>
     extends IDecoratedImmutableVariable<T>,
         IDecoratedUpdatableVariable<T>,
-        IDecoratedV1Variable<T> {}
+        IDecoratedV1Variable<T>,
+        IDecoratedV1ResettableVariable<T> {}
 
 export interface IStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
@@ -279,11 +313,12 @@ export interface IStateMgmtFactory {
     makeMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
     makeEnv<T>(
         owningView: IVariableOwner,
-        envValue: string,
+        envValue: string | SystemEnvKey<T>,
         varName: string,
         envOptions?: EnvOptions<T>
     ): IEnvDecoratedVariable<T>;
     makeSyncMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
+    makeGlobalReusePool(ownership: ReusePoolOwnership, acceptedClasses: Class[], owner: IVariableOwner): IGlobalReusePoolVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -331,3 +366,33 @@ export interface IMonitorValue<T> {
 export type MonitorValueCallback = () => Any;
 export type MonitorCallback = (m: IMonitor) => void;
 export type ComputeCallback<T> = () => T;
+ 
+export class SystemEnvKey<T> {
+    key: string = '';
+    constructor(key: string) {
+        this.key = key;
+    }
+}
+ 
+class WritableSystemEnvKey<T> extends SystemEnvKey<T> {
+    constructor(key: string) {
+        super(key)
+    }
+}
+ 	 
+class ReadonlySystemEnvKey<T> extends SystemEnvKey<T> {
+    constructor(key: string) {
+        super(key)
+    }
+}
+ 
+export class ReadonlyEnvKey {
+    static readonly WINDOW_IS_FOCUSED: ReadonlySystemEnvKey<boolean> = new ReadonlySystemEnvKey<boolean>('system.window.focused');
+    static readonly WINDOW_DISPLAY_ID: ReadonlySystemEnvKey<long> = new ReadonlySystemEnvKey<long>('system.window.displayid');
+    static readonly WINDOW_SYSTEM_DENSITY: ReadonlySystemEnvKey<double> = new ReadonlySystemEnvKey<double>('system.window.density.system');
+    static readonly WINDOW_IS_HIGHLIGHTED: ReadonlySystemEnvKey<boolean> = new ReadonlySystemEnvKey<boolean>('system.window.highlighted');
+    static readonly WINDOW_SIZE: ReadonlySystemEnvKey<window.SizeInVP> = new ReadonlySystemEnvKey<window.SizeInVP>('system.window.size');
+    static readonly WINDOW_SIZE_PX: ReadonlySystemEnvKey<window.Size> = new ReadonlySystemEnvKey<window.Size>('system.window.size.px');
+    static readonly WINDOW_AVOID_AREA: ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoVP> = new ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoVP>('system.window.avoidarea');
+    static readonly WINDOW_AVOID_AREA_PX: ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoPX> = new ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoPX>('system.window.avoidarea.px');
+}

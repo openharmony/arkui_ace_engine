@@ -3825,12 +3825,17 @@ void DatePickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
         default:
             break;
     }
-    if (oldFullscreen != isWindowFullscreen_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        for (auto& column : datePickerColumns_) {
-            auto columnNode = column.Upgrade();
-            CHECK_NULL_VOID(columnNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (auto& column : datePickerColumns_) {
+        auto columnNode = column.Upgrade();
+        CHECK_NULL_VOID(columnNode);
+        auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+        if (columnPattern) {
+            columnPattern->FlushCurrentOptions(false, false, false, false);
+            columnNode->MarkModifyDone();
+        }
+        if (oldFullscreen != isWindowFullscreen_) {
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }

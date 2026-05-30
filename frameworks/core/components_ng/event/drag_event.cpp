@@ -74,6 +74,7 @@ constexpr float DEFAULT_OPACITY = 0.95f;
 constexpr float MIN_OPACITY { 0.0f };
 constexpr float MAX_OPACITY { 1.0f };
 constexpr float MENU_DRAG_SCALE = 0.05f;
+constexpr Dimension DEFAULT_DRAG_DISTANCE = 10.0_vp;
 } // namespace
 
 DragEventActuator::DragEventActuator(
@@ -623,6 +624,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     if (appTheme) {
         dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
     }
+    if (touchRestrict.touchEvent.isStylusMouseMode) {
+        dragPanDistanceMouse = DEFAULT_DRAG_DISTANCE;
+    }
     panRecognizer_->SetMouseDistance(dragPanDistanceMouse.ConvertToPx());
     actionCancel_ = actionCancel;
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -1059,9 +1063,8 @@ void DragEventActuator::UpdateGatherAnimatePosition(
     CHECK_NULL_VOID(gatherNode);
     auto imageContext = gatherNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
-    auto offset = imageContext->GetPaintRectWithoutTransform();
     imageContext->UpdatePosition(OffsetT<Dimension>(
-        Dimension(GatherNodeOffset.GetX() + offset.GetX()), Dimension(GatherNodeOffset.GetY() + offset.GetY())));
+        Dimension(GatherNodeOffset.GetX()), Dimension(GatherNodeOffset.GetY())));
 }
 
 void DragEventActuator::UpdatePreviewPositionAndScale(

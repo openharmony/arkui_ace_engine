@@ -21,15 +21,16 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-void LazyColumnLayoutInfo::EstimateItemSize()
+float LazyColumnLayoutInfo::GetEstimateItemSize()
 {
     if (!posMap_.empty()) {
         float totalSize = posMap_.rbegin()->second.endPos + space_ - posMap_.begin()->second.startPos;
         int32_t totalCount = static_cast<int32_t>(posMap_.size());
         if (totalCount > 0) {
-            estimateItemSize_ = totalSize / totalCount - space_;
+            return totalSize / totalCount - space_;
         }
     }
+    return 0.0f;
 }
 
 float LazyColumnLayoutInfo::UpdatePosMapStart(int32_t updatedStart, int32_t updatedEnd)
@@ -50,7 +51,8 @@ float LazyColumnLayoutInfo::UpdatePosMapStart(int32_t updatedStart, int32_t upda
             prevPos += gap * (estimateItemSize_ + space_);
         }
     } else {
-        prevPos = updatedStart * (estimateItemSize_ + space_);
+        // h/f/s: the body baseline starts at headerMainSize_; the prefix sum is anchored there.
+        prevPos = headerMainSize_ + updatedStart * (estimateItemSize_ + space_);
     }
     if (NearEqual(startIter->second.startPos, prevPos)) {
         return 0;
@@ -141,9 +143,13 @@ float LazyColumnLayoutInfo::UpdatePosWithIter(
 
 void LazyColumnLayoutInfo::UpdatePosMap()
 {
-    float prevTotalMainSize_ = totalMainSize_;
+    // Exclude the constant footer so it does not leak into the inter-frame adjustOffset.
+    float prevTotalMainSize_ = totalMainSize_ - footerMainSize_;
     if (!Positive(estimateItemSize_)) {
-        EstimateItemSize();
+        auto estimateItemSize = GetEstimateItemSize();
+        if (Positive(estimateItemSize)) {
+            estimateItemSize_ = estimateItemSize;
+        }
     }
     if (updatedStart_ < INT_MAX) {
         if (cachedUpdatedStart_ < updatedStart_) {
@@ -179,7 +185,9 @@ void LazyColumnLayoutInfo::SetSpace(float space)
     if (!NearEqual(space, space_)) {
         space_ = space;
         int32_t prevIndex = -1;
-        float prevPos = 0.0f;
+        // h/f/s: body baseline is headerMainSize_; without this anchor the first item snaps back to 0 and overlaps
+        // the header whenever space changes at runtime.
+        float prevPos = headerMainSize_;
         for (auto it = posMap_.begin(); it != posMap_.end(); it++) {
             UpdatePosWithIter(it, prevIndex, prevPos);
         }
@@ -200,9 +208,11 @@ void LazyColumnLayoutInfo::SetTotalItemCount(int32_t count)
         updatedStart_ = INT_MAX;
         updatedEnd_ = -1;
         startIndex_ = -1;
+        endIndex_ = -1;
+        visibleStartIndex_ = -1;
+        visibleEndIndex_ = -1;
         cachedUpdatedStart_ = INT_MAX;
         cachedUpdatedEnd_ = -1;
-        endIndex_ = -1;
         totalMainSize_ = 0.0f;
     }
 }
@@ -232,6 +242,8 @@ void LazyColumnLayoutInfo::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("itemStartIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("itemEndIndex:" + std::to_string(endIndex_));
     DumpLog::GetInstance().AddDesc("itemTotalCount:" + std::to_string(totalItemCount_));
+    DumpLog::GetInstance().AddDesc("headerMainSize:" + std::to_string(headerMainSize_));
+    DumpLog::GetInstance().AddDesc("footerMainSize:" + std::to_string(footerMainSize_));
     DumpLog::GetInstance().AddDesc("space:" + std::to_string(space_));
     DumpLog::GetInstance().AddDesc("totalMainSize:" + std::to_string(totalMainSize_));
 }
@@ -241,6 +253,8 @@ void LazyColumnLayoutInfo::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("itemStartIndex", startIndex_);
     json->Put("itemEndIndex", endIndex_);
     json->Put("itemTotalCount", totalItemCount_);
+    json->Put("headerMainSize", headerMainSize_);
+    json->Put("footerMainSize", footerMainSize_);
     json->Put("space", space_);
     json->Put("totalMainSize", totalMainSize_);
 }

@@ -56,10 +56,8 @@ public:
     static bool IsHomePageNavDestination(const RefPtr<NavDestinationGroupNode>& node);
     static bool IsHomePageNavBar(const RefPtr<NavBarNode>& navBar);
     static RefPtr<FrameNode> CreatePlaceHolderNode();
-    static bool ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config);
-    static bool ParseAppForceSplitConfig(bool isRouter, const std::string& configJsonStr, ForceSplitConfig& config);
-    static void LogSystemForceSplitConfig(bool isRouter, const std::string& homePage, const ForceSplitConfig& config);
-    static void LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config);
+    static bool ParseForceSplitConfig(bool isRouter, const std::string& configJsonStr, ForceSplitConfig& config);
+    static void LogForceSplitConfig(bool isRouter, const ForceSplitConfig& config);
 private:
     static bool ParseCommonConfig(const std::unique_ptr<JsonValue>& configJson, ForceSplitConfig& config);
     static bool ParseBehaviorModeConfig(const std::unique_ptr<JsonValue>& configJson, ForceSplitConfig& config);

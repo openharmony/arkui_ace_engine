@@ -23,6 +23,12 @@ ace_unittest("video_test_ng") {
     "video_test_ng.cpp",
     "video_test_ng_add.cpp",
     "video_test_ng_extra_add.cpp",
+    "video_state_machine_pattern_test_common.cpp",
+    "video_state_machine_pattern_test.cpp",
+    "video_state_machine_pattern_test_two.cpp",
+    "video_state_machine_pattern_test_extra.cpp",
+    "video_state_manager_test.cpp",
+    "video_controller_async_test.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {

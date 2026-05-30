@@ -3201,12 +3201,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg321, TestSize.Level1)
     constexpr int32_t REPEAT_NODE_ID = 331;
     auto hostNode = FrameNode::CreateFrameNode("repeat2Host", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
     auto repeatNode = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
-        REPEAT_NODE_ID, 0, 0,
-        [](IndexType, bool) {
+        REPEAT_NODE_ID, 0, 0, 0,
+        [](IndexType, bool, bool) {
             return std::make_pair(static_cast<RIDType>(0), static_cast<uint32_t>(OnGetRid4IndexResult::NO_NODE));
         },
         [](IndexType, IndexType) {}, [](int32_t, int32_t, int32_t, int32_t, bool, bool) {}, [](IndexType, IndexType) {},
-        []() {}, []() {});
+        []() {}, []() {}, []() {});
     ASSERT_NE(hostNode, nullptr);
     ASSERT_NE(repeatNode, nullptr);
 

@@ -131,6 +131,41 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test UpdateCurrentOffset with near-zero residual delta at start edge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with EdgeEffect::NONE.
+     * @tc.expected: WaterFlow is at start edge and can scroll to end.
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::NONE, false);
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
+    CreateDone();
+    EXPECT_TRUE(pattern_->layoutInfo_->itemStart_);
+    EXPECT_FALSE(pattern_->layoutInfo_->offsetEnd_);
+
+    /**
+     * @tc.steps: step2. Update current offset with a positive near-zero residual delta from animation.
+     * @tc.expected: Residual delta is not treated as a real backward scroll at start edge.
+     */
+    constexpr float residualDelta = 4.77e-7f;
+    EXPECT_TRUE(NearZero(residualDelta));
+    EXPECT_FALSE(Positive(residualDelta));
+
+    /**
+     * @tc.steps: step3. Handle the residual delta at start edge.
+     * @tc.expected: WaterFlow reports the frame as handled and keeps its position unchanged.
+     */
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(residualDelta, SCROLL_FROM_ANIMATION));
+    EXPECT_TRUE(Position(0));
+}
+
+/**
  * @tc.name: PositionController001
  * @tc.desc: Test PositionController
  * @tc.type: FUNC

@@ -1900,4 +1900,34 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection004, 
     SystemProperties::debugEnabled_ = originalDebugEnabled;
 }
 
+/**
+ * @tc.name: PreloadItemsItemNotInMatrix001
+ * @tc.desc: Test PreloadItems returns false when gridMatrix_ is cleared before
+ *           predict task executes. After scroll, preload items are queued. Clearing
+ *           gridMatrix_ causes GetItemPos to return {-1, -1}, so pos.first < 0
+ *           triggers return false, skipping the item safely without crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsItemNotInMatrix001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    layoutProperty_->UpdateCachedCount(2);
+    CreateFixedItems(50);
+    CreateDone();
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 3);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0U);
+    EXPECT_FALSE(pattern_->preloadItemList_.empty());
+
+    pattern_->info_.gridMatrix_.clear();
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+}
+
 } // namespace OHOS::Ace::NG

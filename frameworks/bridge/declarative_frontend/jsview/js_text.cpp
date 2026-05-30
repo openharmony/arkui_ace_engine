@@ -442,12 +442,14 @@ void JSText::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     Color selectedColor;
     RefPtr<ResourceObject> resObj;
     UnRegisterResource("SelectedBackgroundColor");
+    bool flagByUser = true;
     if (!ParseJsColor(info[0], selectedColor, resObj)) {
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         selectedColor = theme->GetSelectedColor();
+        flagByUser = false;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<Color>("SelectedBackgroundColor", resObj, selectedColor);
@@ -458,6 +460,7 @@ void JSText::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         selectedColor = selectedColor.ChangeOpacity(JSThemeUtils::DEFAULT_OPACITY);
     }
     TextModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+    TextModel::GetInstance()->SetSelectedBackgroundColorFlagByUser(flagByUser);
 }
 
 void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
@@ -1013,6 +1016,12 @@ void JSText::Create(const JSCallbackInfo& info)
                 jsController->ClearStyledString();
             }
         }
+        // bind text controller
+        auto castObj = JSRef<JSObject>::Cast(controllerObj);
+        auto jSTextControllerBinder = [castObj]() {
+            return;
+        };
+        TextModel::GetInstance()->BindJSTextController(std::move(jSTextControllerBinder));
     }
 }
 
@@ -1022,12 +1031,15 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
         return;
     }
     auto copyOptions = CopyOptions::None;
+    bool flagByUser = false;
     auto tmpInfo = info[0];
     if (tmpInfo->IsNumber()) {
         auto emunNumber = tmpInfo->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
+        flagByUser = true;
     }
     TextModel::GetInstance()->SetCopyOption(copyOptions);
+    TextModel::GetInstance()->SetCopyOptionFlagByUser(flagByUser);
 }
 
 void JSText::SetOnWillCopy(const JSCallbackInfo& info)
@@ -1035,7 +1047,7 @@ void JSText::SetOnWillCopy(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+        JSRef<JSFunc>::Cast(args), CreateSimpleJsOnWillObj);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                         const std::u16string& value) -> bool {
@@ -1311,10 +1323,12 @@ void JSText::SetHalfLeading(const JSCallbackInfo& info)
 void JSText::SetEnableHapticFeedback(const JSCallbackInfo& info)
 {
     bool state = true;
+    bool flagByUser = false;
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         state = info[0]->ToBoolean();
+        flagByUser = true;
     }
-    TextModel::GetInstance()->SetEnableHapticFeedback(state);
+    TextModel::GetInstance()->SetEnableHapticFeedback(state, flagByUser);
 }
 
 void JSText::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
@@ -1326,6 +1340,15 @@ void JSText::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
     }
     
     TextModel::GetInstance()->SetCompressLeadingPunctuation(state);
+}
+
+void JSText::SetPunctuationOverflow(const JSCallbackInfo& info)
+{
+    bool state = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetPunctuationOverflow(state);
 }
 
 void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
@@ -1528,6 +1551,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
     JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
     JSClass<JSText>::StaticMethod("compressLeadingPunctuation", &JSText::SetCompressLeadingPunctuation);
+    JSClass<JSText>::StaticMethod("punctuationOverflow", &JSText::SetPunctuationOverflow);
     JSClass<JSText>::StaticMethod("includeFontPadding", &JSText::SetIncludeFontPadding);
     JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
     JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);

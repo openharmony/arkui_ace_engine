@@ -15,6 +15,7 @@
 
 #include "compatible/components/tab_bar/tab_bar_item_component.h"
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/padding/padding_component.h"
 #include "compatible/components/tab_bar/tab_bar_item_element.h"

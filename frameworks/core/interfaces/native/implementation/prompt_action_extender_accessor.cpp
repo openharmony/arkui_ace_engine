@@ -348,6 +348,27 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     auto maxHeightOpt = OptConvert<Dimension>(menuOptions.maxHeight);
     Validator::ValidateNonNegative(maxHeightOpt);
     menuParam.maxHeight = maxHeightOpt;
+    auto distortionMode = OptConvert<DistortionMode>(menuOptions.distortionMode);
+    menuParam.distortionMode = distortionMode.value_or(DistortionMode::DISTORTION_AUTO);
+    auto edgeLightMode = OptConvert<EdgeLightMode>(menuOptions.edgeLightMode);
+    menuParam.edgeLightMode = edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED);
+    auto gridStyleOpt = Converter::OptConvertPtr<Ark_MenuGridStyleOptions>(&menuOptions.gridStyle);
+    if (gridStyleOpt) {
+        NG::MenuGridStyleOptions gridStyle;
+        auto countOpt = OptConvert<int32_t>(gridStyleOpt->count);
+        if (countOpt) {
+            gridStyle.count = countOpt.value();
+        }
+        auto horizontalSizeOpt = OptConvert<int32_t>(gridStyleOpt->horizontalSize);
+        if (horizontalSizeOpt) {
+            gridStyle.horizontalSize = horizontalSizeOpt.value();
+        }
+        auto positionOpt = Converter::OptConvertPtr<Ark_MenuGridPosition>(&gridStyleOpt->position);
+        if (positionOpt) {
+            gridStyle.position = static_cast<NG::MenuGridPosition>(*positionOpt);
+        }
+        menuParam.gridStyle = gridStyle;
+    }
     auto colorModeOpt = GetOpt(menuOptions.colorMode);
     if (colorModeOpt.has_value()) {
         if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
@@ -639,6 +660,17 @@ void UpdatePopupColorMode(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>&
     }
 }
 
+void UpdatePopupLevelMode(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
+{
+    auto showInSubWindow = Converter::OptConvert<bool>(src.showInSubWindow).value_or(false);
+    if (!showInSubWindow) {
+        auto levelModeOpt = Converter::OptConvert<LevelMode>(src.levelMode);
+        if (levelModeOpt.has_value()) {
+            popupParam->SetLevelMode(levelModeOpt.value());
+        }
+    }
+}
+
 void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
 {
     UpdatePopupOffset(src, popupParam);
@@ -649,6 +681,7 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
     UpdatePopupBackgroundEffects(src, popupParam);
     UpdatePopupLifecycleCallbacks(src, popupParam);
     UpdatePopupColorMode(src, popupParam);
+    UpdatePopupLevelMode(src, popupParam);
 }
 
 void updatePopupCommonParam(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)

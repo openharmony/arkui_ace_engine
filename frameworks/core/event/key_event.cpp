@@ -216,4 +216,11 @@ void KeyEventInfo::ParseKeyEvent(KeyEvent& keyEvent)
     keyEvent.enableCapsLock = GetCapsLock();
 }
 
+size_t KeyEventInfo::GetApproximateSize() const
+{
+    constexpr size_t ESTIMATED_STRING_LENGTH = 32; // Estimated for keyText_ and keyMsg_
+    constexpr size_t dynamicSize = ESTIMATED_STRING_LENGTH * 2;
+    return sizeof(*this) + GetApproximateBaseEventSize() + dynamicSize;
+}
+
 } // namespace OHOS::Ace

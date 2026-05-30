@@ -17,12 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_SMART_GESTURE_PROPERTY_H
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 
+namespace OHOS::Ace {
+class JsonValue;
+}
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 enum class SmartGestureShortcutAction : uint8_t {
     PRIMARY = 0,
@@ -58,6 +63,7 @@ public:
     {
         return IsPrimaryActionEnabled() && smartGestureShortcutConfig_->selectable;
     }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
 private:
     std::optional<SmartGestureShortcutConfig> smartGestureShortcutConfig_;

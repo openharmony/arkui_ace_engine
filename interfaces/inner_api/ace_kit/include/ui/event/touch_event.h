@@ -121,6 +121,7 @@ struct TouchEvent final : public PointerEvent {
     int32_t yReverse = 0;
     int32_t eventHandleId = 0;
     bool isNewReferee = false;
+    bool isStylusMouseMode = false;
     TouchEvent()
     {
         eventType = UIInputEventType::TOUCH;
@@ -308,11 +309,7 @@ public:
     void SetTouchEventsEnd(bool isTouchEventsEnd);
     bool GetTouchEventsEnd() const;
     TouchEvent ConvertToTouchEvent() const;
-    size_t GetSize() const
-    {
-        static constexpr size_t TOUCH_EVENT_INFO_SIZE = 9880;
-        return TOUCH_EVENT_INFO_SIZE;
-    }
+    size_t GetApproximateSize() const;
 
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;

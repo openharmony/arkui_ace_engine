@@ -1418,6 +1418,7 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
 
 void PipelineContext::InitManagers()
 {
+    memoryMgr_ = MakeRefPtr<MemoryManager>();
     navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
@@ -1988,5 +1989,10 @@ ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhas
 
 ScopedEnvConsumer::~ScopedEnvConsumer()
 {
+}
+
+bool PipelineContext::GetIsRequestVsync()
+{
+    return false;
 }
 } // namespace OHOS::Ace::NG

@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/particle_enum.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 
 #include "converter_union.h"
@@ -64,6 +65,7 @@ namespace OHOS::Ace {
 class DrawableDescriptor;
 class SpanBase;
 class ResponseRegion;
+class UiMaterial;
 enum class AutoCapitalizationMode;
 enum class CanvasUnit;
 enum class CancelButtonStyle;
@@ -101,16 +103,13 @@ struct TextMetrics;
 struct UserUnderlineColor;
 struct RenderingContextOptions;
 struct UpdateParagraphStyle;
+struct LightEffectOptions;
 
 namespace NG {
 // SORTED_SECTION
 enum class BindSheetDismissReason;
 enum class ContentClipMode;
 enum class DataPanelType;
-enum DistributionType;
-enum ParticleEmitterShape;
-enum ParticleType;
-enum UpdaterType;
 enum class KeyboardFluidLightMode;
 enum class KeyboardGradientMode;
 enum class LaunchMode;
@@ -697,11 +696,11 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT FontFamilies Convert(const Ark_String& src);
     template<> FontInfo Convert(const Ark_font_FontInfo& src);
     template<> FontMetaData Convert(const Ark_arkui_component_units_Font& src);
-    template<> FontWeightInt Convert(const Ark_FontWeight& src);
-    template<> FontWeightInt Convert(const Ark_Int32& src);
-    template<> FontWeightInt Convert(const Ark_String& src);
-    template<> FontWeightInt Convert(const Ark_Resource& src);
-    template<> FontWeightInt Convert(const Ark_ResourceStr& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_FontWeight& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Int32& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_String& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Resource& src);
+    template<> ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_ResourceStr& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> ACE_FORCE_EXPORT Gradient Convert(const Ark_RadialGradientOptions& value);
@@ -918,7 +917,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> void AssignCast(std::optional<EdgeLightPosition>& dst, const Ark_EdgeLightPosition& src);
     template<> void AssignCast(std::optional<EffectLayer>& dst, const Ark_EffectLayer& src);
+    template<> void AssignCast(std::optional<UnionMode>& dst, const Ark_UnionMode& src);
     template<> void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src);
     template<> void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src);
     template<> void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src);
@@ -1131,6 +1132,8 @@ namespace Converter {
     void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_UnionEffectContainerOptions& src);
     template<> void AssignCast(std::optional<ScrollDirectionalLockType>& dst,
         const Ark_ScrollDirectionalLockType& src);
+    template<> void AssignCast(std::optional<ImmersiveOptions>& dst, const Ark_ImmersiveOptionsInner& src);
+    template<> void AssignCast(std::optional<LightEffectOptions>& dst, const Ark_LightEffectOptionsInner& src);
     // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     template<typename From>

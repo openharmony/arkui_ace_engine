@@ -16,6 +16,9 @@
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/ani/richtext_model_static.h"
 #endif
+#if defined(PREVIEW)
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -32,6 +35,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::RICH_TEXT_ETS_TAG, id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 #else
     return {};
 #endif // WEB_SUPPORTED
@@ -41,10 +49,10 @@ namespace RichTextInterfaceModifier {
 void SetRichTextOptionsImpl(Ark_NativePointer node,
                             const Ark_Union_String_Resource* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-#ifdef WEB_SUPPORTED
     auto convValue = Converter::OptConvert<std::string>(*value);
     RichTextModelStatic::SetRichTextOptions(frameNode, convValue.value_or(""));
 #endif
@@ -54,9 +62,9 @@ namespace RichTextAttributeModifier {
 void SetOnStartImpl(Ark_NativePointer node,
                     const Opt_synthetic_Callback_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-#ifdef WEB_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value
@@ -71,9 +79,9 @@ void SetOnStartImpl(Ark_NativePointer node,
 void SetOnCompleteImpl(Ark_NativePointer node,
                        const Opt_synthetic_Callback_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-#ifdef WEB_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         // Implement Reset value

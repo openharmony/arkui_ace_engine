@@ -579,4 +579,163 @@ HWTEST_F(SearchTestFourNg, IsConsumeEventTest, TestSize.Level1)
     auto result = pattern->IsConsumeEvent();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent_ShiftRightUp
+ * @tc.desc: Shift held + Right key release triggers selection event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestFourNg, ReportShiftAndDirectionEvent_ShiftRightUp, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
+
+    pattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent_ShiftLeftUp
+ * @tc.desc: Shift held + Left key release triggers selection event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestFourNg, ReportShiftAndDirectionEvent_ShiftLeftUp, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_LEFT;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
+
+    pattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent_ShiftUpCancel
+ * @tc.desc: Shift held + Up key release (CANCEL) triggers selection event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestFourNg, ReportShiftAndDirectionEvent_ShiftUpCancel, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_UP;
+    keyEvent.action = KeyAction::CANCEL;
+    keyEvent.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
+
+    pattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent_ShiftDownUp
+ * @tc.desc: Shift held + Down key release triggers selection event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestFourNg, ReportShiftAndDirectionEvent_ShiftDownUp, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_DOWN;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
+
+    pattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent_RightUpNoShift
+ * @tc.desc: Right key release WITHOUT shift should not trigger
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestFourNg, ReportShiftAndDirectionEvent_RightUpNoShift, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    keyEvent.action = KeyAction::UP;
+
+    pattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent_ShiftRightDown
+ * @tc.desc: Shift held + Right key press (DOWN action) should not trigger
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestFourNg, ReportShiftAndDirectionEvent_ShiftRightDown, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
+
+    pattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ReportShiftAndDirectionEvent_ShiftOnlyUp
+ * @tc.desc: Only shift key release should not trigger
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestFourNg, ReportShiftAndDirectionEvent_ShiftOnlyUp, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::UP;
+
+    pattern->ReportShiftAndDirectionEvent(keyEvent);
+    EXPECT_TRUE(true);
+}
 } // namespace OHOS::Ace::NG

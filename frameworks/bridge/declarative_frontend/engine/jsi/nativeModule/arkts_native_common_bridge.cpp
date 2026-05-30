@@ -5098,15 +5098,14 @@ ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInf
     auto actionVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "action"));
     auto enabledVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enabled"));
     auto selectableVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selectable"));
-    if (!actionVal->IsNumber() || !enabledVal->IsBoolean()) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return panda::JSValueRef::Undefined(vm);
+    config.action = SmartGestureShortcutAction::PRIMARY;
+    if (actionVal->IsNumber()) {
+        config.action = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
     }
-    if (actionVal->Int32Value(vm) != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
-        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
-        return panda::JSValueRef::Undefined(vm);
+    config.enabled = false;
+    if (enabledVal->IsBoolean()) {
+        config.enabled = enabledVal->BooleaValue(vm);
     }
-    config.enabled = enabledVal->BooleaValue(vm);
     config.selectable = config.enabled;
     if (!selectableVal->IsUndefined() && selectableVal->IsBoolean()) {
         config.selectable = selectableVal->BooleaValue(vm);
@@ -8484,12 +8483,12 @@ void CommonBridge::SetGestureDistanceMap(ArkUIRuntimeCallInfo* runtimeCallInfo, 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
+    PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
     Local<JSValueRef> gestureDistanceMap = runtimeCallInfo->GetCallArgRef(argNumber);
     if (!gestureDistanceMap.IsNull() && !gestureDistanceMap->IsUndefined() && gestureDistanceMap->IsMap(vm)) {
         Local<panda::MapRef> distanceMapRef(gestureDistanceMap);
         int32_t distanceMapSize = distanceMapRef->GetSize(vm);
-        PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE },
-            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
         for (int32_t i = 0; i < distanceMapSize; i++) {
             SourceTool sourceTool = static_cast<SourceTool>(distanceMapRef->GetKey(vm, i)->ToNumber(vm)->Value());
             double distance = static_cast<double>(distanceMapRef->GetValue(vm, i)->ToNumber(vm)->Value());
@@ -8498,6 +8497,12 @@ void CommonBridge::SetGestureDistanceMap(ArkUIRuntimeCallInfo* runtimeCallInfo, 
                 distanceMap[sourceTool] = Dimension(distance, DimensionUnit::VP);
             }
         }
+        auto gesturePtr = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
+        gesturePtr->SetDistanceMap(distanceMap);
+        return;
+    }
+    Local<JSValueRef> distanceArg = runtimeCallInfo->GetCallArgRef(argNumber - 2);
+    if (distanceArg.IsNull() || distanceArg->IsUndefined()) {
         auto gesturePtr = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
         gesturePtr->SetDistanceMap(distanceMap);
     }
@@ -8820,7 +8825,7 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
@@ -9697,7 +9702,7 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* inf
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, 0.0f));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
     return obj;
@@ -11332,7 +11337,7 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, (infoPtr->GetTargetDisplayId()))};
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO, nativeSize);
     return obj;
@@ -11458,7 +11463,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetSize();
+    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_AXIS_INFO, nativeSize);
     return obj;

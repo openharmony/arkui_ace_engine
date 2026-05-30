@@ -14,12 +14,10 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/raw_input_event_wrapper_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-struct RawInputEventWrapperPeer {
-    Ark_Union_MouseEvent_TouchEventProxy_KeyEvent event;
-};
 
 namespace RawInputEventWrapperAccessor {
 namespace {
@@ -36,12 +34,9 @@ void DestroyPeerImpl(Ark_RawInputEventWrapper peer)
     }
 }
 
-Ark_RawInputEventWrapper ConstructImpl(const Ark_Union_MouseEvent_TouchEventProxy_KeyEvent* event)
+Ark_RawInputEventWrapper ConstructImpl()
 {
-    CHECK_NULL_RETURN(event, nullptr);
-    auto* peer = new RawInputEventWrapperPeer();
-    peer->event = *event;
-    return reinterpret_cast<Ark_RawInputEventWrapper>(peer);
+    return nullptr;
 }
 
 Ark_NativePointer GetFinalizerImpl()
@@ -94,6 +89,14 @@ Opt_KeyEvent AsKeyEventImpl(Ark_RawInputEventWrapper peer)
     return Converter::ArkValue<Opt_KeyEvent>(peerImpl->event.value2);
 }
 } // namespace RawInputEventWrapperAccessor
+
+Ark_RawInputEventWrapper CreateRawInputEventWrapperPeer(const RawInputEventUnion* event)
+{
+    CHECK_NULL_RETURN(event, nullptr);
+    auto* peer = new RawInputEventWrapperPeer();
+    peer->event = *event;
+    return reinterpret_cast<Ark_RawInputEventWrapper>(peer);
+}
 
 const GENERATED_ArkUIRawInputEventWrapperAccessor* GetRawInputEventWrapperAccessor()
 {

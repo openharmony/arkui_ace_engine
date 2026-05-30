@@ -15,12 +15,10 @@
 
 
 import { ArkUIAniModule } from "arkui.ani";
-
-export interface XComponentControllerCallbackInternal {
-    onSurfaceCreated: ((surfaceId: string) => void);
-    onSurfaceChanged: ((surfaceId: string, surfaceRect: SurfaceRect) => void);
-    onSurfaceDestroyed: ((surfaceId: string) => void);
-}
+import { XComponentControllerNative, XComponentControllerWrapper } from "./idlize"
+import { hookXComponentStartImageAnalyzer } from "../hooks"
+import { ImageAnalyzerConfig } from "./imageCommon"
+import { DrawingCanvas } from "./units"
 
 export class SurfaceRectAniInternal implements SurfaceRect {
     offsetX?: number;
@@ -47,6 +45,43 @@ export interface XComponentOptionsInternal {
     onSurfaceDestroyed: ((surfaceId: string) => void);
 }
 
-export interface XComponentParametersInternal {
-    
+export class XComponentController {
+    public nativeObj: XComponentControllerNative;
+    constructor() {
+        this.nativeObj = new XComponentControllerNative();
+    }
+    getXComponentSurfaceId(): string {
+        return this.nativeObj.getXComponentSurfaceId()
+    }
+    setXComponentSurfaceRect(rect: SurfaceRect): void {
+        this.nativeObj.setXComponentSurfaceRect(rect)
+    }
+    getXComponentSurfaceRect(): SurfaceRect {
+        return this.nativeObj.getXComponentSurfaceRect()
+    }
+    setXComponentSurfaceRotation(rotationOptions: SurfaceRotationOptions): void {
+        this.nativeObj.setXComponentSurfaceRotation(rotationOptions)
+    }
+    getXComponentSurfaceRotation(): Required<SurfaceRotationOptions> {
+        return this.nativeObj.getXComponentSurfaceRotation() as Required<SurfaceRotationOptions>
+    }
+    startImageAnalyzer(config: ImageAnalyzerConfig): Promise<void> {
+        return hookXComponentStartImageAnalyzer(this, config)
+    }
+    stopImageAnalyzer(): void {
+        return this.nativeObj.stopImageAnalyzer()
+    }
+    lockCanvas(): DrawingCanvas | null {
+        return this.nativeObj.lockCanvas()
+    }
+    unlockCanvasAndPost(canvas: DrawingCanvas):void {
+        this.nativeObj.unlockCanvasAndPost(canvas)
+    }
+    setXComponentSurfaceConfig(config: SurfaceConfig):void {
+        this.nativeObj.setXComponentSurfaceConfig(config)
+    }
+
+    onSurfaceCreated(surfaceId: string): void {}
+    onSurfaceChanged(surfaceId: string, rect: SurfaceRect): void {}
+    onSurfaceDestroyed(surfaceId: string): void {}
 }

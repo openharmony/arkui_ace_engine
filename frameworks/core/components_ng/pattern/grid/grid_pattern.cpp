@@ -186,11 +186,15 @@ void GridPattern::OnModifyDone()
         UninitSwipeSelectEvent();
     }
 
-    if (IsDefaultMultiSelectStyleEnabled()) {
-        ApplyEditModeToVisibleItems();
-    } else {
-        RemoveEditModeFromItems();
+    if (IsEditModeChanged()) {
+        if (IsDefaultMultiSelectStyleEnabled()) {
+            ApplyEditModeToVisibleItems();
+        } else {
+            RemoveEditModeFromItems();
+        }
+        ResetEditModeChanged();
     }
+    UpdateBackPressCallback();
 
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();

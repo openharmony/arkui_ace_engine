@@ -36,6 +36,9 @@ const char STYLE_NAME[] = "style";
 const char MATERIAL_COLOR_NAME[] = "materialColor";
 const char COLOR_INVERT_NAME[] = "colorInvert";
 const char APPLY_SHADOW_NAME[] = "applyShadow";
+const char INTERACTIVE_NAME[] = "interactive";
+const char LIGHT_EFFECT_NAME[] = "lightEffect";
+const char LIGHT_EFFECT_COLOR_NAME[] = "color";
 struct JsEnumInt {
     std::string_view enumName;
     int32_t enumInt;
@@ -136,6 +139,28 @@ ImmersiveOptions UiMaterialNapi::ParseImmersiveOptions(napi_env env, napi_value 
         bool applyShadow = false;
         napi_get_value_bool(env, napiApplyShadowParam, &applyShadow);
         options.applyShadow = applyShadow;
+    }
+    napi_value napiInteractiveParam = GetNamedProperty(env, value, INTERACTIVE_NAME);
+    if (GetValueType(env, napiInteractiveParam) == napi_boolean) {
+        bool interactive = false;
+        napi_get_value_bool(env, napiInteractiveParam, &interactive);
+        options.interactive = interactive;
+    }
+    napi_value napiLightEffectParam = GetNamedProperty(env, value, LIGHT_EFFECT_NAME);
+    if (napiLightEffectParam != nullptr) {
+        napi_valuetype lightEffectType = GetValueType(env, napiLightEffectParam);
+        if (lightEffectType == napi_null) {
+            options.lightEffectOptions = std::nullopt;
+        } else if (lightEffectType == napi_object) {
+            options.lightEffectOptions = LightEffectOptions {};
+            napi_value napiColorParam = GetNamedProperty(env, napiLightEffectParam, LIGHT_EFFECT_COLOR_NAME);
+            Color lightColor;
+            RefPtr<ResourceObject> lightColorResObj;
+            if (ParseNapiColor(env, napiColorParam, lightColor, lightColorResObj)) {
+                options.lightEffectOptions->color = lightColor;
+                options.lightEffectOptions->colorResObj = lightColorResObj;
+            }
+        }
     }
     return options;
 }

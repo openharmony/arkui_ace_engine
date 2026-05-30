@@ -110,6 +110,21 @@ export class FreeRootNode extends PeerNode {
             return undefined;
         }
     }
+    updateUIContext(oldContext: UIContext, newContext: UIContext): void {
+        const oldManager = oldContext.getDetachedRootEntryManager();
+        const newManager = newContext.getDetachedRootEntryManager();
+        if (oldManager.detachedRoots_.has(this.ptr)) {
+            const entry = oldManager.detachedRoots_.get(this.ptr)!;
+            oldManager.detachedRoots_.delete(this.ptr);
+            newManager.detachedRoots_.set(this.ptr, entry);
+        }
+        if (oldManager.freezedRoots_.has(this.ptr)) {
+            const entry = oldManager.freezedRoots_.get(this.ptr)!;
+            oldManager.freezedRoots_.delete(this.ptr);
+            newManager.freezedRoots_.set(this.ptr, entry);
+        }
+        this.context = newContext;
+    }
 }
 
 function componentFreeRootFactory(component: object | undefined, context: UIContext): IncrementalNode {
@@ -121,7 +136,6 @@ function componentFreeRootFactory(component: object | undefined, context: UICont
 
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
-        const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
         const currentExtendableComponent = ExtendableComponent.current;
         const currentStateManager = GlobalStateManager.instance;
@@ -146,6 +160,7 @@ export class CallbackTransformer {
             };
             const latestStateManager = GlobalStateManager.instance;
             GlobalStateManager.SetLocalManager(currentStateManager);
+            const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(
                 () => componentFreeRootFactory(currentExtendableComponent, context), cb);
             GlobalStateManager.SetLocalManager(latestStateManager);

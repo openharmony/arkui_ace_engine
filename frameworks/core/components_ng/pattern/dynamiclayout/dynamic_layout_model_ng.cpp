@@ -90,7 +90,7 @@ void DynamicLayoutModelNG::UpdatePropertyFromAlgorithmParams(const RefPtr<FrameN
     const RefPtr<AlgorithmParamBase>& algorithmParams, NG::DynamicLayoutType type)
 {
     if (updateLayoutPropertyFuncMap_.find(type) != updateLayoutPropertyFuncMap_.end()) {
-        updateLayoutPropertyFuncMap_[type](frameNode, algorithmParams);
+        updateLayoutPropertyFuncMap_.at(type)(frameNode, algorithmParams);
     }
 }
 
@@ -100,7 +100,8 @@ void DynamicLayoutModelNG::UpdatePropertyFromDefaultParam(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(StackLayoutProperty, Alignment, Alignment::CENTER, frameNode);
 }
 
-std::unordered_map<DynamicLayoutType, UpdateLayoutPropertyFunc> DynamicLayoutModelNG::updateLayoutPropertyFuncMap_ = {
+const std::unordered_map<DynamicLayoutType, UpdateLayoutPropertyFunc>
+    DynamicLayoutModelNG::updateLayoutPropertyFuncMap_ = {
     { DynamicLayoutType::COLUMN_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromLinearParam },
     { DynamicLayoutType::ROW_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromLinearParam },
     { DynamicLayoutType::STACK_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromStackParam },

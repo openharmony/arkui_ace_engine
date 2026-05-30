@@ -29,6 +29,7 @@ enum class ImageType {
     PIXELMAP_DRAWABLE,
     LAYERED_DRAWABLE,
     ANIMATED_DRAWABLE,
+    PICTURE_DRAWABLE,
 };
 
 enum class ImageInnerErrorCode : uint32_t {

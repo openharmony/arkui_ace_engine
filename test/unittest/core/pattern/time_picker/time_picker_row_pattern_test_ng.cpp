@@ -30,6 +30,7 @@
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
@@ -59,6 +60,10 @@ const uint32_t DEFAULT_MONTH = 2;
 const uint32_t DEFAULT_DAY = 5;
 constexpr uint32_t AM_PM_HOUR_12 = 12;
 constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
+const int32_t TEST_TIME_PICKER_WINDOW_WIDTH = 720;
+const int32_t TEST_TIME_PICKER_WINDOW_HEIGHT = 1280;
+const int32_t TEST_TIME_PICKER_WINDOW_WIDTH_LANDSCAPE = 1280;
+const int32_t TEST_TIME_PICKER_WINDOW_HEIGHT_LANDSCAPE = 720;
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -1431,8 +1436,14 @@ HWTEST_F(TimePickerRowPatternTestNg, TimePickerDialogViewUpdateCancelButtonTextL
     ASSERT_NE(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textCancelLayoutProperty, nullptr);
+    auto buttonCancelNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonCancelNode, nullptr);
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonCancelLayoutProperty, nullptr);
     TimePickerDialogView::useButtonFocusArea_ = true;
-    TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme);
+    TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme,
+        buttonCancelLayoutProperty);
     EXPECT_EQ(textCancelLayoutProperty->GetTextColor(), pickerTheme->GetTitleStyle().GetTextColor());
 }
 
@@ -1450,8 +1461,135 @@ HWTEST_F(TimePickerRowPatternTestNg, TimePickerDialogViewUpdateConfirmButtonText
     ASSERT_NE(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
+    auto buttonConfirmNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonConfirmNode, nullptr);
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonConfirmLayoutProperty, nullptr);
     TimePickerDialogView::useButtonFocusArea_ = true;
-    TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme);
+    TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme,
+        buttonConfirmLayoutProperty);
     EXPECT_EQ(textLayoutProperty->GetTextColor(), pickerTheme->GetTitleStyle().GetTextColor());
 }
+
+/**
+ * @tc.name: TimePickerRowPatternOnWindowSizeChanged001
+ * @tc.desc: Test TimePickerRowPattern OnWindowSizeChanged when fullscreen state changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerRowPatternOnWindowSizeChanged001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->isWindowFullscreen_ = false;
+
+    timePickerRowPattern->OnWindowSizeChanged(TEST_TIME_PICKER_WINDOW_WIDTH_LANDSCAPE,
+        TEST_TIME_PICKER_WINDOW_HEIGHT_LANDSCAPE, WindowSizeChangeReason::SPLIT_TO_FULL);
+
+    EXPECT_TRUE(timePickerRowPattern->isWindowFullscreen_);
+}
+
+/**
+ * @tc.name: TimePickerRowPatternOnWindowSizeChanged002
+ * @tc.desc: Test TimePickerRowPattern OnWindowSizeChanged when fullscreen state remains the same
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerRowPatternOnWindowSizeChanged002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->isWindowFullscreen_ = false;
+
+    timePickerRowPattern->OnWindowSizeChanged(TEST_TIME_PICKER_WINDOW_WIDTH, TEST_TIME_PICKER_WINDOW_HEIGHT,
+        WindowSizeChangeReason::UNDEFINED);
+
+    EXPECT_FALSE(timePickerRowPattern->isWindowFullscreen_);
+}
+
+/**
+ * @tc.name: TimePickerRowPatternOnWindowSizeChanged003
+ * @tc.desc: Test TimePickerRowPattern OnWindowSizeChanged with fullscreen to floating transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerRowPatternOnWindowSizeChanged003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->isWindowFullscreen_ = true;
+
+    timePickerRowPattern->OnWindowSizeChanged(TEST_TIME_PICKER_WINDOW_WIDTH_LANDSCAPE,
+        TEST_TIME_PICKER_WINDOW_HEIGHT_LANDSCAPE, WindowSizeChangeReason::FULL_TO_FLOATING);
+
+    EXPECT_FALSE(timePickerRowPattern->isWindowFullscreen_);
+}
+
+/**
+ * @tc.name: TimePickerRowPatternOnWindowSizeChanged004
+ * @tc.desc: Test TimePickerRowPattern OnWindowSizeChanged with split to full transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerRowPatternOnWindowSizeChanged004, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->isWindowFullscreen_ = false;
+
+    timePickerRowPattern->OnWindowSizeChanged(TEST_TIME_PICKER_WINDOW_WIDTH_LANDSCAPE,
+        TEST_TIME_PICKER_WINDOW_HEIGHT_LANDSCAPE, WindowSizeChangeReason::SPLIT_TO_FULL);
+
+    EXPECT_TRUE(timePickerRowPattern->isWindowFullscreen_);
+}
+
+/**
+ * @tc.name: TimePickerRowPatternOnWindowSizeChanged005
+ * @tc.desc: Test TimePickerRowPattern OnWindowSizeChanged with floating to full transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTestNg, TimePickerRowPatternOnWindowSizeChanged005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->isWindowFullscreen_ = false;
+
+    timePickerRowPattern->OnWindowSizeChanged(TEST_TIME_PICKER_WINDOW_WIDTH_LANDSCAPE,
+        TEST_TIME_PICKER_WINDOW_HEIGHT_LANDSCAPE, WindowSizeChangeReason::FLOATING_TO_FULL);
+
+    EXPECT_TRUE(timePickerRowPattern->isWindowFullscreen_);
+}
+
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "frameworks/core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 
 namespace OHOS::Ace::Framework {
 void JSLazyVGridLayout::Create()
@@ -53,6 +54,41 @@ void JSLazyVGridLayout::JsColumnsTemplate(const std::string& value)
     NG::LazyVGridLayoutModel::SetColumnsTemplate(value);
 }
 
+void JSLazyVGridLayout::JsSticky(const JSCallbackInfo& info)
+{
+    auto stickyStyle = NG::StickyStyle::NONE;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        const int32_t raw = info[0]->ToNumber<int32_t>();
+        if (raw >= static_cast<int32_t>(NG::StickyStyle::NONE) &&
+            raw <= static_cast<int32_t>(NG::StickyStyle::BOTH)) {
+            stickyStyle = static_cast<NG::StickyStyle>(raw);
+        }
+    }
+    NG::LazyGridLayoutModel::SetSticky(stickyStyle);
+}
+
+void JSLazyVGridLayout::JsHeader(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        NG::LazyGridLayoutModel::RemoveHeader();
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto builder = [builderFunc]() { builderFunc->Execute(); };
+    NG::LazyGridLayoutModel::SetHeader(std::move(builder));
+}
+
+void JSLazyVGridLayout::JsFooter(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        NG::LazyGridLayoutModel::RemoveFooter();
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto builder = [builderFunc]() { builderFunc->Execute(); };
+    NG::LazyGridLayoutModel::SetFooter(std::move(builder));
+}
+
 void JSLazyVGridLayout::JsOnVisibleIndexesChange(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
@@ -78,6 +114,9 @@ void JSLazyVGridLayout::JSBind(BindingTarget globalObj)
     JSClass<JSLazyVGridLayout>::StaticMethod("rowsGap", &JSLazyVGridLayout::JsRowsGap, opt);
     JSClass<JSLazyVGridLayout>::StaticMethod("columnsGap", &JSLazyVGridLayout::JsColumnsGap, opt);
     JSClass<JSLazyVGridLayout>::StaticMethod("columnsTemplate", &JSLazyVGridLayout::JsColumnsTemplate, opt);
+    JSClass<JSLazyVGridLayout>::StaticMethod("sticky", &JSLazyVGridLayout::JsSticky, opt);
+    JSClass<JSLazyVGridLayout>::StaticMethod("header", &JSLazyVGridLayout::JsHeader, opt);
+    JSClass<JSLazyVGridLayout>::StaticMethod("footer", &JSLazyVGridLayout::JsFooter, opt);
     JSClass<JSLazyVGridLayout>::StaticMethod(
         "onVisibleIndexesChange", &JSLazyVGridLayout::JsOnVisibleIndexesChange, opt);
 

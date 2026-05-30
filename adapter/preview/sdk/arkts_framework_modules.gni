@@ -858,4 +858,8 @@ arkts_framework_modules = [
     label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/mock:graphics3d_scene_resources_stub"
     name = "graphics3d_SceneResources.abc"
   },
+  {
+    label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/mock:window_animation_manager_stub"
+    name = "ohos_animation_windowAnimationManager.abc"
+  },
 ]

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIMEPICKER_BRIDGE_TIME_PICKER_UTIL_H
 
 #include <map>
+#include <optional>
 #include <string>
 #include <functional>
 

@@ -88,7 +88,10 @@ public:
     static constexpr int32_t INTERACTIVE_ACTIVE = 48;
     static constexpr int32_t INTERACTIVE_SELECT = 49;
     static constexpr int32_t INTERACTIVE_CLICK = 50;
-    static constexpr int32_t TOTAL_NUMBER = 51;
+    static constexpr int32_t PRIMARY = 51;
+    static constexpr int32_t ON_PRIMARY = 52;
+    static constexpr int32_t CONTAINER = 53;
+    static constexpr int32_t TOTAL_NUMBER = 54;
 
     TokenColors() = default;
     virtual ~TokenColors() = default;
@@ -101,6 +104,9 @@ public:
     Color Warning() const;
     Color Alert() const;
     Color Confirm() const;
+    Color Primary() const;
+    Color OnPrimary() const;
+    Color Container() const;
 
     Color FontPrimary() const;
     Color FontSecondary() const;

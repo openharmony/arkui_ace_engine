@@ -1082,7 +1082,7 @@ void TextPickerModelNG::SetNormalTextStyle(
             ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, value.textColor.value(), frameNode);
     } else {
         ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetTextStyle,
             &TextPickerLayoutProperty::UpdateColor, normalStyle.GetTextColor());
@@ -1132,7 +1132,7 @@ void TextPickerModelNG::SetSelectedTextStyle(
             ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, value.textColor.value(), frameNode);
     } else {
         ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetSelectedTextStyle,
             &TextPickerLayoutProperty::UpdateSelectedColor, selectedStyle.GetTextColor());
@@ -1183,7 +1183,7 @@ void TextPickerModelNG::SetDisappearTextStyle(
             ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
     }
     if (value.textColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor, value.textColor.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor, value.textColor.value(), frameNode);
     } else {
         ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetDisappearTextStyle,
             &TextPickerLayoutProperty::UpdateDisappearColor, disappearStyle.GetTextColor());

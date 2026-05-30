@@ -290,6 +290,7 @@ MouseEvent MouseEvent::operator-(const Offset& offset) const
     mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
     mouseEvent.isInjected = isInjected;
     mouseEvent.isPrivacyMode = isPrivacyMode;
+    mouseEvent.isStylusMouseMode = isStylusMouseMode;
     mouseEvent.rawDeltaX = rawDeltaX;
     mouseEvent.rawDeltaY = rawDeltaY;
     mouseEvent.pressedButtonsArray = pressedButtonsArray;
@@ -357,6 +358,19 @@ MouseEvent MouseInfo::ConvertToMouseEventForStatic() const
     return mouseEvent;
 }
 
+size_t MouseInfo::GetApproximateSize() const
+{
+    constexpr size_t PRESSED_BUTTONS = 3;
+    constexpr size_t HISTORY_COUNT = 5;
+    constexpr size_t LIST_NODE = sizeof(void*) * 2;
+
+    constexpr size_t buttonsSize = PRESSED_BUTTONS * sizeof(MouseButton);
+    constexpr size_t historySize = HISTORY_COUNT * (sizeof(MouseHistoricalPoint) + LIST_NODE);
+
+    return sizeof(*this) + GetApproximateBaseEventSize() + buttonsSize + historySize +
+           InputManager::GetApproximatePointerEventSize();
+}
+
 void HoverEffectTarget::SetHoverNode(const WeakPtr<NG::FrameNode>& node)
 {
     hoverNode_ = node;
@@ -399,6 +413,11 @@ MouseEvent MouseEvent::CloneWith(float scale) const
     mouseEvent.pointerEvent = pointerEvent;
     mouseEvent.originalId = originalId;
     mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+    mouseEvent.touchEventId = touchEventId;
+    mouseEvent.eventHandleId = eventHandleId;
+    mouseEvent.isFalsifyCancel = isFalsifyCancel;
+    mouseEvent.isNewReferee = isNewReferee;
+    mouseEvent.eventType = eventType;
     mouseEvent.history.reserve(history.size());
     for (const auto& historyEvent : history) {
         auto clonedHistoryEvent = historyEvent.CloneWith(scale);
@@ -408,6 +427,7 @@ MouseEvent MouseEvent::CloneWith(float scale) const
     mouseEvent.isInjected = isInjected;
     mouseEvent.isPrivacyMode = isPrivacyMode;
     mouseEvent.mockFlushEvent = mockFlushEvent;
+    mouseEvent.isStylusMouseMode = isStylusMouseMode;
     mouseEvent.rawDeltaX = rawDeltaX;
     mouseEvent.rawDeltaY = rawDeltaY;
     mouseEvent.pressedButtonsArray = pressedButtonsArray;
@@ -477,6 +497,7 @@ TouchEvent MouseEvent::CreateTouchPoint() const
         .SetOriginalId(pointOriginalId)
         .SetIsInjected(isInjected);
     event.isPrivacyMode = isPrivacyMode;
+    event.isStylusMouseMode = isStylusMouseMode;
     event.pointers.emplace_back(std::move(point));
     event.pressedKeyCodes_ = pressedKeyCodes_;
     event.passThrough = passThrough;

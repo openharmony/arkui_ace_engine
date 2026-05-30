@@ -17,6 +17,7 @@
 #include <ani.h>
 
 #include "ets_ani_expo.h"
+#include "extractor.h"
 #include "interfaces/inner_api/ace/constants.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline/pipeline_context.h"
@@ -28,8 +29,6 @@ const std::string DC_ETS = "/ets/";
 const std::string ENTRY_PREFIX = "/src/main/ets/";
 const std::string ENTRY_SUFFIX = "/__EntryWrapper";
 const std::string USERVIEW_SUFFIX = "/ComExampleTrivialApplication";
-constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
-constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 struct AppInfo {
     const char* className;
@@ -160,6 +159,21 @@ void GetUrlByDcEntryPoint(
     }
     url = entryPoint.substr(prefix.size());
 }
+
+void GetModuleNameFromEntryPoint(const std::string& bundleName,
+    const std::string& entryPoint, std::string& url)
+{
+    std::string prefix = bundleName + "/";
+    size_t slashIndex = entryPoint.find('/', prefix.size());
+    if (slashIndex == std::string::npos) {
+        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT,
+            "Cannot find module name from entryPoint: %{public}s with bundleName: %{public}s",
+            entryPoint.c_str(), bundleName.c_str());
+        url = "";
+        return;
+    }
+    url = entryPoint.substr(prefix.size(), slashIndex - prefix.size());
+}
 } // namespace
 
 ArktsDynamicFrontend::ArktsDynamicFrontend(void* runtime): ArktsFrontend(runtime)
@@ -176,22 +190,10 @@ void ArktsDynamicFrontend::Destroy()
     ArktsFrontend::Destroy();
 }
 
-UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
-    const std::string& content, const std::string& params, const std::string& entryPoint)
+UIContentErrorCode ArktsDynamicFrontend::InnerRunDynamicPage(const DynamicOptions& options)
 {
-    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "RunDynamicPage start content: %{public}s, params: %{public}s,"
-        " entryPoint: %{public}s", content.c_str(), params.c_str(), entryPoint.c_str());
     auto* env = Ani::AniUtils::GetAniEnv(vm_);
     CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
-    if (pageRouterManager_ == nullptr) {
-        pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
-    }
-
-    std::vector<uint8_t> abcContent;
-    if (!Framework::GetAssetContentImpl(assetManager_, "ets/modules_static.abc", abcContent)) {
-        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "GetAssetContent fail: ets/modules_static.abc");
-        return UIContentErrorCode::INVALID_URL;
-    }
 
     ani_class appClass{};
     ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return UIContentErrorCode::INVALID_URL);
@@ -201,7 +203,9 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
         &create), return UIContentErrorCode::INVALID_URL);
 
     std::string appUrlStr;
-    GetUrlByDcEntryPoint(bundleName_, moduleName_, entryPoint, appUrlStr);
+    std::string moduleNameFromEntryPoint;
+    GetModuleNameFromEntryPoint(bundleName_, options.entryPoint, moduleNameFromEntryPoint);
+    GetUrlByDcEntryPoint(bundleName_, moduleNameFromEntryPoint, options.entryPoint, appUrlStr);
 
     ani_string aniUrl{};
     env->String_NewUTF8(appUrlStr.c_str(), appUrlStr.size(), &aniUrl);
@@ -210,15 +214,15 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
         " appUrl: %{public}s", bundleName_.c_str(), moduleName_.c_str(), appUrlStr.c_str());
 
     ani_string aniParams{};
-    env->String_NewUTF8(params.c_str(), params.size(), &aniParams);
+    env->String_NewUTF8(options.params.c_str(), options.params.size(), &aniParams);
 
-    std::string moduleAbcPath = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
+    std::string moduleAbcPath = AbilityBase::ExtractorUtil::GetLoadFilePath(options.hapPath);
     NG::EntryLoader entryLoader {env, moduleAbcPath};
 
-    std::string entryPath = moduleName_ + ENTRY_PREFIX + appUrlStr + ENTRY_SUFFIX;
+    std::string entryPath = moduleNameFromEntryPoint + ENTRY_PREFIX + appUrlStr + ENTRY_SUFFIX;
     ani_object entryPointObj = entryLoader.GetPageEntryObj(entryPath);
 
-    std::string legacyEntryPath = moduleName_ + ENTRY_PREFIX + appUrlStr + USERVIEW_SUFFIX;
+    std::string legacyEntryPath = moduleNameFromEntryPoint + ENTRY_PREFIX + appUrlStr + USERVIEW_SUFFIX;
     ani_object legacyEntryPointObj = entryLoader.GetPageEntryObj(legacyEntryPath);
 
     ani_string module{};
@@ -246,6 +250,29 @@ UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(
     ani_long result;
     ANI_CALL(env, Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result, ANI_FALSE),
         return UIContentErrorCode::INVALID_URL);
+
+    return UIContentErrorCode::NO_ERRORS;
+}
+
+UIContentErrorCode ArktsDynamicFrontend::RunDynamicPage(const DynamicOptions& options)
+{
+    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "RunDynamicPage start content: %{public}s, params: %{public}s,"
+        " entryPoint: %{public}s, hapPath: %{public}s", options.content.c_str(), options.params.c_str(),
+        options.entryPoint.c_str(), options.hapPath.c_str());
+    if (pageRouterManager_ == nullptr) {
+        pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
+    }
+
+    std::vector<uint8_t> abcContent;
+    if (!Framework::GetAssetContentImpl(assetManager_, "ets/modules_static.abc", abcContent)) {
+        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "GetAssetContent fail: ets/modules_static.abc");
+        return UIContentErrorCode::INVALID_URL;
+    }
+
+    auto errorCode = InnerRunDynamicPage(options);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        return errorCode;
+    }
 
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
     auto inId = pipeline_->GetInstanceId();

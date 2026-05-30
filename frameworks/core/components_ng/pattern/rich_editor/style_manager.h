@@ -308,7 +308,7 @@ public:
         }
         auto gradient = style.GetGradient();
         if (gradient.has_value()) {
-            spanNode->UpdateGradient(GradientConvert::ToNGGradient(gradient));
+            spanNode->UpdateGradient(gradient);
         } else {
             spanNode->ResetGradient();
         }
@@ -572,7 +572,7 @@ public:
         spanParagraphStyle.paragraphSpacing = typingParagraphStyle.paragraphSpacing;
         spanParagraphStyle.textVerticalAlign = typingParagraphStyle.textVerticalAlign;
         spanParagraphStyle.textDirection = typingParagraphStyle.textDirection;
-        spanParagraphStyle.SetOptGradient(GradientConvert::ToNGGradient(typingParagraphStyle.GetGradient()));
+        spanParagraphStyle.SetOptGradient(typingParagraphStyle.GetGradient());
         spanParagraphStyle.colorShaderStyle = typingParagraphStyle.colorShaderStyle;
         spans.push_back(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, length));
     }

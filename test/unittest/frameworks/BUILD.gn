@@ -21,5 +21,6 @@ group("frameworks_unittest") {
     "core/common:color_inverter_test",
     "core/common:container_scope_test",
     "core/common:premake_scope_test",
+    "core/drawable:drawable_descriptor_test",
   ]
 }

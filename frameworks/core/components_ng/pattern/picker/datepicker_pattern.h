@@ -39,9 +39,6 @@ class DialogTheme;
 }
 
 namespace OHOS::Ace::NG {
-using OHOS::Ace::PickerTheme;
-using OHOS::Ace::DialogTheme;
-
 class FrameNode;
 class InspectorFilter;
 constexpr int32_t COLUMNS_SIZE = 3;

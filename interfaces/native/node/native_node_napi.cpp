@@ -252,7 +252,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arkmenu", "arkui.components.arkmenuitem", "arkui.components.arkmenuitemgroup",
             "arkui.components.arkdatapanel", "arkui.components.arktextclock", "arkui.components.arkpatternlock",
             "arkui.components.arkcounter", "arkui.components.arkqrcode", "arkui.components.arkalphabetindexer",
-            "arkui.components.arkricheditor", "arkui.arktheme" };
+            "arkui.components.arkricheditor", "arkui.components.selectioncontainer", "arkui.arktheme" };
         for (const char* allowedModule : allowedModules) {
             if (std::strcmp(moduleName, allowedModule) == 0) {
                 return true;
@@ -302,18 +302,19 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
     napi_get_named_property(env, value, "typeName", &typeName);
     std::string typenameStr;
     GetStringFromNapiValue(env, typeName, typenameStr);
-    if (typenameStr == "AnimatedDrawableDescriptor" || typenameStr == "PixelMapDrawableDescriptor") {
-        OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
-        drawable->newDrawableDescriptor = objectNapi;
+    if (typenameStr == "LayeredDrawableDescriptor") {
+        auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
+        if (!descriptor) {
+            delete drawable;
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
         *drawableDescriptor = drawable;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
-    auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
-    if (!descriptor) {
-        delete drawable;
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
+
+    OHOS::Ace::NodeModel::IncreaseRefDrawable(objectNapi);
+    drawable->newDrawableDescriptor = objectNapi;
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

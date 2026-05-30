@@ -42,6 +42,8 @@ public:
     static void SetWillShow(const JSCallbackInfo& info);
     static void SetWillHide(const JSCallbackInfo& info);
     static void SetWillDisAppear(const JSCallbackInfo& info);
+    static void SetOnSaveState(const JSCallbackInfo& info);
+    static void SetOnRestoreState(const JSCallbackInfo& info);
     static void SetOnActive(const JSCallbackInfo& info);
     static void SetOnInactive(const JSCallbackInfo& info);
     static void SetResultCallback(const JSCallbackInfo& info);

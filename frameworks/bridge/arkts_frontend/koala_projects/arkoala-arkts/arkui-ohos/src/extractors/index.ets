@@ -14,7 +14,7 @@
  */
 
 import { int32 } from "@koalaui/common";
-import { KPointer, nullptr } from '@koalaui/interop';
+import { KPointer, nullptr, MaterializedBaseTag } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
 import { ColorMetricsExt, TouchEventProxy, TouchEventHandwritten } from '#generated'
@@ -109,12 +109,15 @@ import { CommonModifier } from '#generated'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInternal} from '@ohos.arkui.ArcSwiper'
 import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMeasureInfoProxy } from "#generated";
-import { CustomSpanWrapper } from "#generated";
+import { CustomSpanWrapper, ArkUIGeneratedNativeModule } from "#generated";
 import { default as text } from '@ohos.graphics.text'
 import { PanGestureOptions } from '../component/gesture'
 import { PanGestureOptionsProxy } from '../component/idlize'
 import { ShaderStyleProxy } from '../component/idlize'
 import { ShaderStyle, LinearGradientStyle, RadialGradientStyle, ColorShaderStyle } from '../component/textCommon'
+import { GestureControl, GestureRecognizer, TapRecognizerInternal, LongPressRecognizerInternal, PanRecognizerInternal, PinchRecognizerInternal, SwipeRecognizerInternal, RotationRecognizerInternal, TapGestureEventInternal, LongPressGestureEventInternal, PanGestureEventInternal, PinchGestureEventInternal, SwipeGestureEventInternal, RotationGestureEventInternal, BaseGestureEventInternal, EventTargetInfo, ScrollableTargetInfo } from '../component/gesture'
+import { XComponentController } from '../component/xcomponent'
+import { XComponentControllerWrapper } from '../component/idlize'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -694,6 +697,23 @@ export namespace extractors {
     return proxy as ArcSwiperContentTransitionProxy;
   }
 
+  export function transform_Ark_XComponentController_to_Ark_XComponentControllerWrapper(value:XComponentController):XComponentControllerWrapper {
+    return {
+        managed: value,
+        nativeObj: value.nativeObj,
+        onSurfaceCreated: value.onSurfaceCreated,
+        onSurfaceChanged: value.onSurfaceChanged,
+        onSurfaceDestroyed: value.onSurfaceDestroyed,
+    }
+  }
+
+  export function transform_Ark_XComponentControllerWrapper_to_Ark_XComponentController(value:XComponentControllerWrapper):XComponentController {
+      if (!(value.managed instanceof XComponentController)) {
+        throw new Error("Invalid managed object type in XComponentControllerWrapper");
+      }
+      return value.managed as XComponentController
+  }
+
   export function transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(colorMetrics: ColorMetrics): ColorMetricsExt {
     const colorMetricsExt = new ColorMetricsExt()
     colorMetricsExt.red = colorMetrics.red
@@ -897,5 +917,68 @@ export namespace extractors {
           return new RadialGradientStyle(proxy.radialGradientOptions!!);
       }
       return new ShaderStyle();
+  }
+  export function deserialize_arkui_component_gesture_GestureRecognizer(ptr: KPointer): GestureRecognizer {
+    if (ptr === 0) {
+      throw new Error('Pointer to GestureRecognizer is null');
+    }
+    const retval = ArkUIGeneratedNativeModule._GestureRecognizer_getType(ptr)
+    let recognizerType =  GestureControl.GestureType.fromValue(Double.toInt(retval))
+    switch(recognizerType) {
+      case GestureControl.GestureType.TAP_GESTURE:
+        return TapRecognizerInternal.fromPtr(ptr)
+      case GestureControl.GestureType.LONG_PRESS_GESTURE:
+        return LongPressRecognizerInternal.fromPtr(ptr)
+      case GestureControl.GestureType.PAN_GESTURE:
+        return PanRecognizerInternal.fromPtr(ptr)
+      case GestureControl.GestureType.PINCH_GESTURE:
+        return PinchRecognizerInternal.fromPtr(ptr)
+      case GestureControl.GestureType.SWIPE_GESTURE:
+        return SwipeRecognizerInternal.fromPtr(ptr)
+      case GestureControl.GestureType.ROTATION_GESTURE:
+        return RotationRecognizerInternal.fromPtr(ptr)
+      case GestureControl.GestureType.CLICK:
+      case GestureControl.GestureType.DRAG:
+      default:
+        return new GestureRecognizer(MaterializedBaseTag.NOP, ptr)
+    }
+  }
+
+  export function deserialize_arkui_component_gesture_BaseGestureEvent(ptr: KPointer): BaseGestureEventInternal {
+    if (ptr === 0) {
+      throw new Error('Pointer to BaseGestureEvent is null');
+    }
+    let type = Double.toInt(ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(ptr))
+    if (type === -1) {
+      return new BaseGestureEventInternal(MaterializedBaseTag.NOP, ptr)
+    }
+    let recognizerType = GestureControl.GestureType.fromValue(type)
+    switch(recognizerType) {
+      case GestureControl.GestureType.TAP_GESTURE:
+        return TapGestureEventInternal.fromPtr(ptr)
+      case GestureControl.GestureType.LONG_PRESS_GESTURE:
+        return LongPressGestureEventInternal.fromPtr(ptr)
+      case GestureControl.GestureType.PAN_GESTURE:
+        return PanGestureEventInternal.fromPtr(ptr)
+      case GestureControl.GestureType.PINCH_GESTURE:
+        return PinchGestureEventInternal.fromPtr(ptr)
+      case GestureControl.GestureType.SWIPE_GESTURE:
+        return SwipeGestureEventInternal.fromPtr(ptr)
+      case GestureControl.GestureType.ROTATION_GESTURE:
+        return RotationGestureEventInternal.fromPtr(ptr)
+      case GestureControl.GestureType.CLICK:
+      case GestureControl.GestureType.DRAG:
+      default:
+        return new BaseGestureEventInternal(MaterializedBaseTag.NOP, ptr)
+    }
+  }
+
+  export function deserialize_arkui_component_gesture_EventTargetInfo(ptr: KPointer): EventTargetInfo {
+    const isScorllableComponent = ArkUIGeneratedNativeModule._GestureOps_isScrollableComponent(ptr)
+    if (isScorllableComponent) {
+        const scrollableTargetInfoObj : ScrollableTargetInfo = new ScrollableTargetInfo(MaterializedBaseTag.NOP, ptr)
+        return scrollableTargetInfoObj
+    }
+    return new EventTargetInfo(MaterializedBaseTag.NOP, ptr)
   }
 }

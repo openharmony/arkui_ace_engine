@@ -2163,6 +2163,11 @@ void ParallelStageManager::RebuildRouterColumnNodesIfNeeded() const
         if (type == RouterPageType::PLACEHOLDER_PAGE || type == RouterPageType::RELATED_PAGE) {
             continue;
         }
+        // EXIT_POP pages may stay mounted until their own finish callback removes them,
+        // but logically they have already been popped and must not participate in stack calculation.
+        if (pattern->GetPageInTransition() && pattern->GetSplitTransitionType() == PageTransitionType::EXIT_POP) {
+            continue;
+        }
         stackPages.emplace_back(page);
         if (type == RouterPageType::HOME_PAGE) {
             homePage = page;
@@ -3060,6 +3065,7 @@ bool ParallelStageManager::StartSplitPopAnimation(
             weakPopEnter.Upgrade(), weakExiting.Upgrade(), weakMoving.Upgrade());
     }, option.GetOnFinishEvent(), nullptr, stageNode_->GetContextRefPtr());
     AddAnimation(animation, false);
+    InvalidateRouterColumnNodes();
     return true;
 }
 

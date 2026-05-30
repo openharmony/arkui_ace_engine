@@ -242,6 +242,13 @@ struct BlurStyleOption {
         jsonBlurStyleOption->Put("type", BLUR_TYPE[static_cast<int>(blurType)]);
         jsonBlurStyleOption->Put("inactiveColor", inactiveColor.ColorToString().c_str());
         jsonBlurStyleOption->Put("scale", scale);
+        auto grayscale = "[0,0]";
+        if (blurOption.grayscale.size() > 1) {
+            grayscale =
+                ("[" + std::to_string(blurOption.grayscale[0]) + "," + std::to_string(blurOption.grayscale[1]) + "]")
+                    .c_str();
+        }
+        jsonBlurStyleOption->Put("blurOption", grayscale);
         jsonBlurStyle->Put("options", jsonBlurStyleOption);
 
         json->PutExtAttr("backgroundBlurStyle", jsonBlurStyle, filter);

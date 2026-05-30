@@ -35,6 +35,90 @@ import { ItemFillPolicy as ItemFillPolicy } from './component/units';
 export interface LayoutAlgorithm {
 }
 
+export interface GridLayoutAlgorithmOptions {
+    columnsTemplate?: string | ItemFillPolicy;
+    rowsGap?: LengthMetrics;
+    columnsGap?: LengthMetrics;
+}
+
+export class GridLayoutAlgorithm implements LayoutAlgorithm, IObservedObject, ISubscribedWatches {
+  @JSONStringifyIgnore() @JSONParseIgnore() private subscribedWatches: ISubscribedWatches =
+    STATE_MGMT_FACTORY.makeSubscribedWatches();
+  public addWatchSubscriber(watchId: WatchIdType): void {
+    this.subscribedWatches.addWatchSubscriber(watchId);
+  }
+  
+  public removeWatchSubscriber(watchId: WatchIdType): boolean {
+    return this.subscribedWatches.removeWatchSubscriber(watchId);
+  }
+ 
+  public executeOnSubscribingWatches(propertyName: string): void {
+    this.subscribedWatches.executeOnSubscribingWatches(propertyName);
+  }
+ 
+  public setV1RenderId(renderId: RenderIdType): void {}
+ 
+  protected conditionalAddRef(meta: IMutableStateMeta): void {
+    meta.addRef();
+  }
+ 
+  @JSONRename({newName:'columnsTemplate'}) public backingColumnsTemplate?: (string | ItemFillPolicy | undefined);
+  @JSONStringifyIgnore() @JSONParseIgnore() private metaColumnsTemplate: IMutableStateMeta =
+    STATE_MGMT_FACTORY.makeMutableStateMeta(this, '__metaV2_columnsTemplate');
+  public get columnsTemplate(): (string | ItemFillPolicy | undefined) {
+    this.conditionalAddRef(this.metaColumnsTemplate);
+    return UIUtils.makeObserved((this.backingColumnsTemplate as (string | ItemFillPolicy | undefined)));
+  }
+ 
+  public set columnsTemplate(newValue: (string | ItemFillPolicy | undefined)) {
+    if (((this.backingColumnsTemplate) !== (newValue))) {
+      this.backingColumnsTemplate = newValue;
+      this.metaColumnsTemplate.fireChange();
+      this.executeOnSubscribingWatches('columnsTemplate');
+    }
+  }
+ 
+  @JSONRename({newName:'rowsGap'}) public backingRowsGap?: (LengthMetrics | undefined);
+  @JSONStringifyIgnore() @JSONParseIgnore() private metaRowsGap: IMutableStateMeta =
+    STATE_MGMT_FACTORY.makeMutableStateMeta(this, '__metaV2_rowsGap');
+  public get rowsGap(): (LengthMetrics | undefined) {
+    this.conditionalAddRef(this.metaRowsGap);
+    return UIUtils.makeObserved((this.backingRowsGap as (LengthMetrics | undefined)));
+  }
+ 
+  public set rowsGap(newValue: (LengthMetrics | undefined)) {
+    if (((this.backingRowsGap) !== (newValue))) {
+      this.backingRowsGap = newValue;
+      this.metaRowsGap.fireChange();
+      this.executeOnSubscribingWatches('rowsGap');
+    }
+  }
+ 
+  @JSONRename({newName:'columnsGap'}) public backingColumnsGap?: (LengthMetrics | undefined);
+  @JSONStringifyIgnore() @JSONParseIgnore() private metaColumnsGap: IMutableStateMeta =
+    STATE_MGMT_FACTORY.makeMutableStateMeta(this, '__metaV2_columnsGap');
+  public get columnsGap(): (LengthMetrics | undefined) {
+    this.conditionalAddRef(this.metaColumnsGap);
+    return UIUtils.makeObserved((this.backingColumnsGap as (LengthMetrics | undefined)));
+  }
+ 
+  public set columnsGap(newValue: (LengthMetrics | undefined)) {
+    if (((this.backingColumnsGap) !== (newValue))) {
+      this.backingColumnsGap = newValue;
+      this.metaColumnsGap.fireChange();
+      this.executeOnSubscribingWatches('columnsGap');
+    }
+  }
+ 
+  constructor(option?: GridLayoutAlgorithmOptions) {
+    if (option) {
+        this.backingColumnsTemplate = option.columnsTemplate !== undefined ? option.columnsTemplate : undefined
+        this.backingRowsGap = option.rowsGap !== undefined ? option.rowsGap : undefined
+        this.backingColumnsGap = option.columnsGap !== undefined ? option.columnsGap : undefined
+    }
+  }
+}
+
 export class CustomLayoutAlgorithm implements LayoutAlgorithm, IObservedObject, ISubscribedWatches {
   @JSONStringifyIgnore() @JSONParseIgnore() private subscribedWatches: ISubscribedWatches =
     STATE_MGMT_FACTORY.makeSubscribedWatches();

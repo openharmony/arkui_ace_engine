@@ -115,8 +115,8 @@ bool DispatchSmartGesture(const KeyEvent& event, int32_t instanceId, std::option
     // and should return the normal unhandled key-event result.
     if (!manager->HandleTrigger(trigger.value(), event)) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "smart gesture recognized but not handled, return unconsumed result. code=%{public}d trigger=%{public}d",
-            static_cast<int32_t>(event.code), static_cast<int32_t>(trigger.value()));
+            "smart gesture recognized but not handled, return unconsumed result. OperateIntention = %{public}d",
+            static_cast<int32_t>(trigger.value()));
         return false;
     }
     return true;
@@ -597,6 +597,8 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
     auto smartGestureManager = eventManager ? eventManager->GetOrCreateSmartGestureManager() : nullptr;
     auto trigger = ResolveSmartGestureTrigger(event, smartGestureManager);
     if (trigger.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "SmartGesture received OperateIntention %{public}d",
+            static_cast<uint8_t>(trigger.value()));
         return DispatchSmartGesture(event, GetInstanceId(), trigger);
     }
 #endif

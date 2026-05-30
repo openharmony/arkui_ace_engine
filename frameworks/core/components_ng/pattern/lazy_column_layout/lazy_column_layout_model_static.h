@@ -18,12 +18,15 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+
+class UINode;
 
 class ACE_EXPORT LazyColumnLayoutModelStatic {
 public:
@@ -33,6 +36,16 @@ public:
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetAlignItems(FrameNode* frameNode, std::optional<HorizontalAlign> align);
     static void SetOnVisibleIndexesChange(FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange);
+    // Set sticky style; nullopt resets to NONE. The integer must match the NG::StickyStyle enum.
+    static void SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle);
+    // Mount the header node directly.
+    static void SetHeader(FrameNode* frameNode, const RefPtr<UINode>& headerNode);
+    // Mount the footer node directly.
+    static void SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footerNode);
+    // Remove the header.
+    static void RemoveHeader(FrameNode* frameNode);
+    // Remove the footer.
+    static void RemoveFooter(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

@@ -178,6 +178,11 @@ public:
         return color;
     }
 
+    void SetPlaceholder(ColorPlaceholder holder)
+    {
+        placeholder_ = holder;
+    }
+
     ColorPlaceholder GetPlaceholder() const
     {
         return placeholder_;

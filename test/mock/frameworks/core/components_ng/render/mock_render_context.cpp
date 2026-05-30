@@ -16,6 +16,7 @@
 
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_proxy.h"
+#include "core/components_ng/property/particle_property.h"
 
 #include "base/utils/utils.h"
 #include "core/components/common/properties/ui_material.h"

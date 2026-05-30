@@ -1440,4 +1440,33 @@ HWTEST_F(GridIrregularLayoutTestTwo, ScrollToIndexWithDataRefresh, TestSize.Leve
     EXPECT_EQ(info.jumpIndex_, EMPTY_JUMP_INDEX);
     EXPECT_NE(info.gridMatrix_.size(), 0u);
 }
+
+/**
+ * @tc.name: PreloadItemsItemNotInMatrix001
+ * @tc.desc: Test GridIrregularLayoutAlgorithm PreloadItems returns false when
+ *           gridMatrix_ is cleared before predict task executes. After scroll,
+ *           preload items are queued via PreloadGridItems. Clearing gridMatrix_
+ *           causes GetItemPos to return {-1, -1}, so pos.first < 0 triggers
+ *           return false, skipping the item safely without crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTestTwo, PreloadItemsItemNotInMatrix001, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    model.SetLayoutOptions({});
+    CreateDone();
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 3);
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0U);
+    EXPECT_FALSE(pattern_->preloadItemList_.empty());
+
+    pattern_->info_.gridMatrix_.clear();
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
+}
+
 } // namespace OHOS::Ace::NG

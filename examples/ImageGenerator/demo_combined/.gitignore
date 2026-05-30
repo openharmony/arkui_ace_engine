@@ -1,0 +1,15 @@
+/node_modules
+/oh_modules
+/local.properties
+/.idea
+**/build
+/.hvigor
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+**/.test
+/.appanalyzer
+/AppScope/resources/base/media/foreground.svg
+/AppScope/resources/base/media/layered_image.json
+/background.svg

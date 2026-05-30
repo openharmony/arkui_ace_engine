@@ -22,13 +22,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentControllerExtenderAccessor {
 void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
-                            Ark_XComponentController peer,
+                            const Ark_XComponentControllerWrapper* wrapper,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    peer->TriggerStartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
+    CHECK_NULL_VOID(wrapper);
+    CHECK_NULL_VOID(wrapper->nativeObj);
+    wrapper->nativeObj->TriggerStartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
 #endif //XCOMPONENT_SUPPORTED
 }
 } // XComponentControllerExtenderAccessor

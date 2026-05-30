@@ -18,6 +18,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "unicode/uchar.h"
 

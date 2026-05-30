@@ -115,10 +115,10 @@ Shadow Shadow::CreateShadow(ShadowStyle style)
 
 double Shadow::GetBlurRadius() const
 {
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        return std::max(blurRadius_, 0.0);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return blurRadius_;
     }
-    return blurRadius_;
+    return std::max(blurRadius_, 0.0);
 }
 
 void Shadow::SetBlurRadius(double blurRadius)
@@ -128,7 +128,7 @@ void Shadow::SetBlurRadius(double blurRadius)
         isHardwareAcceleration_ = false;
         return;
     }
-    blurRadius_ = Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0.0: blurRadius;
+    blurRadius_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? blurRadius : 0.0;
 }
 
 bool Shadow::IsValid() const
@@ -136,9 +136,9 @@ bool Shadow::IsValid() const
     if (isHardwareAcceleration_) {
         return elevation_ > 0.0f && elevation_ < LIGHT_HEIGHT;
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return blurRadius_ >= 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
     }
-    return blurRadius_ >= 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
+    return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
 }
 } // namespace OHOS::Ace

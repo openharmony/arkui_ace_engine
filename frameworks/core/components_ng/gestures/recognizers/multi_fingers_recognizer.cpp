@@ -111,7 +111,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
                     ("{" + std::to_string(point.second.touchEventId) + ", " + std::to_string(point.second.id) + "}, ");
             }
             str += "]";
-            TAG_LOGW(AceLogTag::ACE_GESTURE,
+            TAG_LOGD(AceLogTag::ACE_GESTURE,
                 "lastPointEvent_ update failed. size:%{public}d touchPoints:%{public}s "
                 "extraInfo:%{public}s",
                 static_cast<int32_t>(point.second.pointers.size()), str.c_str(), GetExtraInfo().c_str());

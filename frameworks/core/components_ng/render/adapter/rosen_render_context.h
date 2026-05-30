@@ -58,9 +58,13 @@
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
-#include "core/components_ng/property/particle_property.h"
 
 namespace OHOS::Ace::NG {
+struct EmitterOption;
+struct VelocityProperty;
+struct AccelerationProperty;
+struct ParticleColorPropertyOption;
+struct ParticleFloatPropertyOption;
 class BackgroundModifier;
 class TransitionModifier;
 class BorderImageModifier;
@@ -272,6 +276,8 @@ public:
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
     void OnBackBlendApplyTypeUpdate(BlendApplyType applyType) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
+
+    void UpdateMaterialInteractionEffect(float scaleX, float scaleY, float offsetX, float offsetY) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
     void OnTransform3DMatrixUpdate(const Matrix4& matrix) override;
@@ -925,6 +931,8 @@ protected:
     std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
     std::shared_ptr<OverlayTextModifier> overlayTextModifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+
+    std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> materialInteractionEffectModifier_;
 
     std::shared_ptr<Rosen::ModifierNG::RSBoundsClipModifier> clipBoundModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSFrameClipModifier> customClipToFrameModifier_;

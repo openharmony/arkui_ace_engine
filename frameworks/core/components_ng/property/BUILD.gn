@@ -30,5 +30,6 @@ build_component_ng("property_ng") {
     "property.cpp",
     "safe_area_insets.cpp",
     "templates_parser.cpp",
+    "smart_gesture_property.cpp",
   ]
 }

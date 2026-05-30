@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+
 #include "core/common/event_manager.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
@@ -1501,5 +1503,167 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest027, TestSize.Level1)
     ViewAbstract::ResetFlexShrink();
     ASSERT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
     EXPECT_FALSE(FRAME_NODE_ROOT->GetRenderContext()->GetFrontBlurRadius().has_value());
+}
+/**
+ * @tc.name: BindPopupWithLevelModeTest001
+ * @tc.desc: Test BindPopup with LevelMode::EMBEDDED and GetEmbeddedOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BindPopupWithLevelModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and PopupParam with LevelMode::EMBEDDED.
+     */
+    const RefPtr<FrameNode> customNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(param, nullptr);
+
+    /**
+     * @tc.steps: step2. Set LevelMode to EMBEDDED and showInSubWindow to false.
+     * @tc.expected: LevelMode is set to EMBEDDED.
+     */
+    param->SetLevelMode(LevelMode::EMBEDDED);
+    param->SetShowInSubWindow(false);
+    EXPECT_EQ(param->GetLevelMode(), LevelMode::EMBEDDED);
+    EXPECT_EQ(param->IsShowInSubWindow(), false);
+
+    /**
+     * @tc.steps: step3. Get overlayManager and verify GetEmbeddedOverlay can be called.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto nodeId = targetNode->GetId();
+    PopupInfo info = overlayManager->GetPopupInfo(nodeId);
+    info.isCurrentOnShow = true;
+    info.popupId = 1;
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    info.popupNode = popupNode;
+    info.target = targetNode;
+    info.embeddedOveraly = overlayManager;
+    overlayManager->ShowPopup(targetNode->GetId(), info);
+
+    /**
+     * @tc.steps: step4. Call BindPopup with EMBEDDED level mode.
+     * @tc.expected: BindPopup succeeds with LevelMode::EMBEDDED.
+     */
+    ViewAbstract::BindPopup(param, targetNode, customNode);
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    EXPECT_NE(popupInfo.popupNode, nullptr);
+}
+
+/**
+ * @tc.name: BindPopupWithLevelModeTest002
+ * @tc.desc: Test BindPopup with LevelMode::OVERLAY (default value).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BindPopupWithLevelModeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and PopupParam with default LevelMode.
+     */
+    const RefPtr<FrameNode> customNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(param, nullptr);
+
+    /**
+     * @tc.steps: step2. Verify default LevelMode is OVERLAY.
+     * @tc.expected: Default LevelMode is OVERLAY.
+     */
+    EXPECT_EQ(param->GetLevelMode(), LevelMode::OVERLAY);
+
+    /**
+     * @tc.steps: step3. Get overlayManager.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto nodeId = targetNode->GetId();
+    PopupInfo info = overlayManager->GetPopupInfo(nodeId);
+    info.isCurrentOnShow = true;
+    info.popupId = 2;
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    info.popupNode = popupNode;
+    info.target = targetNode;
+    overlayManager->ShowPopup(targetNode->GetId(), info);
+
+    /**
+     * @tc.steps: step4. Call BindPopup with default LevelMode.
+     * @tc.expected: BindPopup succeeds with default LevelMode::OVERLAY.
+     */
+    ViewAbstract::BindPopup(param, targetNode, customNode);
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    EXPECT_NE(popupInfo.popupNode, nullptr);
+}
+
+/**
+ * @tc.name: BindPopupWithLevelModeTest003
+ * @tc.desc: Test BindPopup with LevelMode::EMBEDDED when showInSubWindow is true (should be ignored).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, BindPopupWithLevelModeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and PopupParam with LevelMode::EMBEDDED but showInSubWindow is true.
+     */
+    const RefPtr<FrameNode> customNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(param, nullptr);
+
+    /**
+     * @tc.steps: step2. Set LevelMode to EMBEDDED but showInSubWindow to true (LevelMode should be ignored).
+     * @tc.expected: LevelMode is set but showInSubWindow is true.
+     */
+    param->SetLevelMode(LevelMode::EMBEDDED);
+    param->SetShowInSubWindow(true);
+    EXPECT_EQ(param->GetLevelMode(), LevelMode::EMBEDDED);
+    EXPECT_EQ(param->IsShowInSubWindow(), true);
+
+    /**
+     * @tc.steps: step3. Get overlayManager.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto nodeId = targetNode->GetId();
+    PopupInfo info = overlayManager->GetPopupInfo(nodeId);
+    info.isCurrentOnShow = true;
+    info.popupId = 3;
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    info.popupNode = popupNode;
+    info.target = targetNode;
+    overlayManager->ShowPopup(targetNode->GetId(), info);
+
+    /**
+     * @tc.steps: step4. Call BindPopup with showInSubWindow true (LevelMode should be ignored).
+     * @tc.expected: BindPopup succeeds but embeddedOveraly is not set due to showInSubWindow being true.
+     */
+    ViewAbstract::BindPopup(param, targetNode, customNode);
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    EXPECT_NE(popupInfo.popupNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

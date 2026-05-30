@@ -28,4 +28,9 @@ std::shared_ptr<MMI::PointerEvent> InputManager::CreatePointerEvent(
     return nullptr;
 }
 
+size_t InputManager::GetApproximatePointerEventSize()
+{
+    return 0;
+}
+
 } // namespace OHOS::Ace

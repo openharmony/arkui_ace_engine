@@ -25,6 +25,12 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace {
+constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000;
+constexpr int32_t MEMORY_LEVEL_LOW = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
+}
+
 namespace OHOS::Ace::NG {
 
 RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
@@ -42,6 +48,11 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     node->RegisterBuilderListener();
+    if (node->GetMemOptStrategy() == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        node->RegisterWindowStateChangedCallback();
+        node->RegisterMemoryLevelChangedCallback();
+        node->PostMemOptTask();
+    }
     return node;
 }
 
@@ -57,6 +68,10 @@ void LazyForEachNode::OnDelete()
 
 LazyForEachNode::~LazyForEachNode()
 {
+    if (GetMemOptStrategy() == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        UnregisterWindowStateChangedCallback();
+        UnregisterMemoryLevelChangedCallback();
+    }
     CHECK_NULL_VOID(builder_);
     if (isRegisterListener_) {
         builder_->UnregisterDataChangeListener(this);
@@ -113,6 +128,9 @@ void LazyForEachNode::BuildAllChildren()
 
 void LazyForEachNode::PostIdleTask(uint32_t taskSource)
 {
+    if (taskSource != LazyForEachIdleTaskSource::RELEASE_NODE) {
+        needPreBuild_ = true;
+    }
     if (needPredict_) {
         return;
     }
@@ -129,15 +147,19 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
         auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
         if (node->builder_) {
             node->GetChildren();
-            auto preBuildResult = node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask);
+            auto preBuildResult = node->GetNeedPrebuild() ?
+                node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask) : true;
+            node->SetNeedPrebuild(false);
             if (!preBuildResult) {
                 node->PostIdleTask(LazyForEachIdleTaskSource::POST_IDLE_TASK);
             } else {
                 node->requestLongPredict_ = true;
                 node->itemConstraint_.reset();
             }
+
+            node->builder_->RemovingExpiringItem(deadline);
             if (!node->builder_->removingNodeList_.empty()) {
-                node->PostIdleTask(LazyForEachIdleTaskSource::POST_IDLE_TASK);
+                node->PostIdleTask(LazyForEachIdleTaskSource::RELEASE_NODE);
             }
             ACE_SCOPED_TRACE("LazyForEach predict finish: %s", node->builder_->DumpHashKey().c_str());
         }
@@ -500,13 +522,26 @@ void LazyForEachNode::DoSetActiveChildRange(
     }
     ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d], cacheStart[%d], cacheEnd[%d], showCache[%d]",
         start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
-    if (builder_->SetActiveChildRange(start, end)) {
+    bool needRender = builder_->SetActiveChildRange(start, end);
+    if (GetMemOptStrategy() == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        setActiveRangeTime_ = GetSysTimestamp();
+        needRender |= IsCachedCountReduced(cacheStart, cacheEnd);
+    }
+    if (needRender) {
         tempChildren_.clear();
         tempChildren_.swap(children_);
         MarkNeedSyncRenderTree();
         PostIdleTask(LazyForEachIdleTaskSource::SET_ACTIVE_RANGE);
     }
     builder_->ReorganizeOffscreenNode();
+}
+
+bool LazyForEachNode::IsCachedCountReduced(int32_t cacheStart, int32_t cacheEnd)
+{
+    bool reduced = cacheStart > oldCacheStart_ || cacheEnd < oldCacheEnd_;
+    oldCacheStart_ = cacheStart;
+    oldCacheEnd_ = cacheEnd;
+    return reduced;
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) const
@@ -768,6 +803,187 @@ void LazyForEachNode::EnablePreBuild(bool enable)
 {
     if (builder_) {
         builder_->EnablePreBuild(enable);
+    }
+}
+
+LazyForEachMemOptStrategy LazyForEachNode::GetMemOptStrategy()
+{
+    return builder_? builder_->GetLazyForEachMemOptStrategy() : LazyForEachMemOptStrategy::DEFAULT;
+}
+
+void LazyForEachNode::OnWindowShow()
+{
+    ScheduleRestoreCacheTask();
+    PostMemOptTask();
+}
+
+void LazyForEachNode::OnWindowHide()
+{
+    CleanCache(true);
+}
+
+void LazyForEachNode::OnNotifyMemoryLevel(int32_t level)
+{
+    if (level == MEMORY_LEVEL_LOW || level == MEMORY_LEVEL_CRITICAL) {
+        CleanCache(false);
+    }
+}
+
+void LazyForEachNode::RegisterWindowStateChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowStateChangedCallback(GetId());
+}
+
+void LazyForEachNode::UnregisterWindowStateChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveWindowStateChangedCallback(GetId());
+}
+
+void LazyForEachNode::RegisterMemoryLevelChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddNodesToNotifyMemoryLevel(GetId());
+}
+
+void LazyForEachNode::UnregisterMemoryLevelChangedCallback()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveNodesToNotifyMemoryLevel(GetId());
+}
+
+bool LazyForEachNode::CheckParentFrameNodeVisibility()
+{
+    auto parent = GetParentFrameNode();
+    CHECK_NULL_RETURN(parent, false);
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    return !(parent->IsDisappearOrNoVisibleArea(context->GetVsyncTime()));
+}
+
+void LazyForEachNode::ScheduleCleanCacheTask()
+{
+    pendingRestoreCache_ = false;
+    CHECK_EQUAL_VOID(pendingCleanCache_, true);
+    TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "LazyForEach.ScheduleCleanCacheTask id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("LazyForEach.ScheduleCleanCacheTask id[%d]", GetId());
+    pendingCleanCache_ = true;
+    cacheTaskPostTime_ = GetSysTimestamp();
+}
+
+void LazyForEachNode::ScheduleRestoreCacheTask()
+{
+    pendingCleanCache_ = false;
+    CHECK_EQUAL_VOID(pendingRestoreCache_, true);
+    TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "LazyForEach.ScheduleRestoreCacheTask id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("LazyForEach.ScheduleRestoreCacheTask id[%d]", GetId());
+    pendingRestoreCache_ = true;
+    cacheTaskPostTime_ = GetSysTimestamp();
+}
+
+void LazyForEachNode::TryExecuteScheduledCacheTask()
+{
+    CHECK_EQUAL_VOID(pendingCleanCache_ || pendingRestoreCache_, false);
+    auto timeStamp = GetSysTimestamp();
+    CHECK_EQUAL_VOID(timeStamp - cacheTaskPostTime_ < CACHE_TASK_DELAY_TIME, true);
+    if (pendingCleanCache_) {
+        CHECK_EQUAL_VOID(timeStamp - setActiveRangeTime_ < CACHE_TASK_DELAY_TIME, true);
+        CleanCache(false);
+    } else if (pendingRestoreCache_) {
+        if (!CheckParentFrameNodeVisibility()) {
+            pendingCleanCache_ = false;
+            pendingRestoreCache_ = false;
+            return;
+        }
+        RestoreCache();
+    }
+}
+
+void LazyForEachNode::CleanCache(bool syncClean)
+{
+    TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH,
+        "LazyForEach.CleanCache id[%{public}d] syncClean[%{public}d]", GetId(), syncClean);
+    ACE_SCOPED_TRACE("LazyForEach.CleanCache id[%d] syncClean[%d]", GetId(), syncClean);
+    if (builder_) {
+        builder_->CleanCache(syncClean);
+    }
+    pendingCleanCache_ = false;
+    pendingRestoreCache_ = false;
+    if (!syncClean) {
+        PostIdleTask(LazyForEachIdleTaskSource::MEMORY_OPTIMIZE);
+    }
+}
+
+void LazyForEachNode::RestoreCache()
+{
+    if (builder_) {
+        builder_->RestoreCache();
+    }
+    pendingCleanCache_ = false;
+    pendingRestoreCache_ = false;
+    PostIdleTask(LazyForEachIdleTaskSource::MEMORY_OPTIMIZE);
+}
+
+void LazyForEachNode::SetNeedPrebuild(bool needPrebuild)
+{
+    needPreBuild_ = needPrebuild;
+}
+
+bool LazyForEachNode::GetNeedPrebuild()
+{
+    return needPreBuild_;
+}
+
+void LazyForEachNode::SetParentVisibility(bool visibility)
+{
+    isParentVisible_ = visibility;
+}
+bool LazyForEachNode::GetParentVisibility()
+{
+    return isParentVisible_;
+}
+
+void LazyForEachNode::PostMemOptTask()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    const uint32_t delay = 1000; // 1 seconds in milliseconds
+    auto weakNode = AceType::WeakClaim(this);
+    taskExecutor->PostDelayedTask(
+        [weakNode]() {
+            auto node = weakNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pipeline = node->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            CHECK_EQUAL_VOID(pipeline->GetOnShow(), false);
+            auto visible = node->CheckParentFrameNodeVisibility();
+            if (visible != node->GetParentVisibility()) {
+                node->SetParentVisibility(visible);
+                visible ? node->ScheduleRestoreCacheTask() : node->ScheduleCleanCacheTask();
+            }
+            node->TryExecuteScheduledCacheTask();
+            node->PostMemOptTask();
+        },
+        TaskExecutor::TaskType::UI,
+        delay,
+        "LazyForEachMemOptTask");
+}
+
+void LazyForEachNode::DisableChildrenAndCachesRecycle()
+{
+    CHECK_NULL_VOID(builder_);
+    std::vector<UINode*> childList;
+    builder_->GetAllItems(childList);
+    for (const auto& uiNode : childList) {
+        ForEachBaseNode::DisableRecycle(Claim(uiNode));
     }
 }
 

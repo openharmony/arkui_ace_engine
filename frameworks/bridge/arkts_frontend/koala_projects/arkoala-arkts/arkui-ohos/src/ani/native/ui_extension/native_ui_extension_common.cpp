@@ -16,7 +16,12 @@
 #include "native_ui_extension_common.h"
 
 #include "ani_callback_info.h"
+#if defined(PREVIEW)
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#else
 #include "ani_common_want.h"
+#include "want.h"
+#endif
 #include "../utils/ani_utils.h"
 #include "base/log/log_wrapper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -25,7 +30,7 @@
 #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
 #endif //WINDOW_SCENE_SUPPORTED
-#include "want.h"
+#include <array>
 
 namespace OHOS::Ace::Ani {
 
@@ -52,7 +57,7 @@ ani_status NativeUiExtensionCommon::BindNativeUiExtensionProxy(ani_env *env)
             "BindNativeUiExtensionProxy FindClass failed, className: %{public}s", className);
         return ANI_ERROR;
     }
-
+#ifdef WINDOW_SCENE_SUPPORTED
     std::array methods = {
         ani_native_function{"_Send_Data", nullptr, reinterpret_cast<void *>(SendData)},
         ani_native_function{"_Send_Data_Sync", nullptr, reinterpret_cast<void *>(SendDataSync)},
@@ -64,7 +69,7 @@ ani_status NativeUiExtensionCommon::BindNativeUiExtensionProxy(ani_env *env)
             " className: %{public}s", className);
         return ANI_ERROR;
     };
-
+#endif
     return ANI_OK;
 }
 
@@ -74,6 +79,7 @@ ani_status NativeUiExtensionCommon::SendData(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object paramObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     auto uIExtensionProxyPeer =
         reinterpret_cast<NG::GeneratedModifier::UIExtensionProxyPeerBase *>(pointer);
     if (uIExtensionProxyPeer == nullptr) {
@@ -91,6 +97,7 @@ ani_status NativeUiExtensionCommon::SendData(
     }
 
     uIExtensionProxyPeer->SendData(requestParams);
+#endif
     return ANI_OK;
 }
 
@@ -100,6 +107,7 @@ ani_object NativeUiExtensionCommon::SendDataSync(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object paramObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     ani_object result_obj = {};
     auto uIExtensionProxyPeer =
         reinterpret_cast<NG::GeneratedModifier::UIExtensionProxyPeerBase *>(pointer);
@@ -127,6 +135,9 @@ ani_object NativeUiExtensionCommon::SendDataSync(
     }
 
     return static_cast<ani_object>(wantParamsObj);
+#else
+    return {};
+#endif
 }
 
 } // namespace OHOS::Ace::Ani

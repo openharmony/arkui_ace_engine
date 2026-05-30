@@ -27,12 +27,11 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
-#include "base/mousestyle/mouse_style.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
-#include "core/common/ace_application_info.h"
 #include "base/view_data/hint_to_type_wrap.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
@@ -43,7 +42,6 @@
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -2116,6 +2114,7 @@ private:
     void HandleMouseEvent(MouseInfo& info);
     bool HandleMouseEventByScrollBar(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
+    void ReportShiftAndDirectionEvent(const KeyEvent& keyEvent);
     void UpdateShiftFlag(const KeyEvent& keyEvent) override;
     void UpdateCaretByClick(const Offset& localOffset);
     void HandleRightMouseEvent(MouseInfo& info);

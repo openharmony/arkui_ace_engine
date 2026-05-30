@@ -19,6 +19,7 @@
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_v2/indexer/indexer_item_component.h"
 #include "core/components_v2/indexer/popup_list_component.h"
 #include "core/pipeline/base/component_group.h"

@@ -1307,7 +1307,7 @@ bool CalendarPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();

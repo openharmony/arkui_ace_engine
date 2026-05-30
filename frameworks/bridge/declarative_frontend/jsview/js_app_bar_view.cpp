@@ -67,10 +67,6 @@ void JSAppBar::OnMenuClick(const JSCallbackInfo& info)
     JSRef<JSArray> jsParamsArray = JSRef<JSArray>::Cast(jsParams);
     std::map<std::string, std::string> params;
     GetParamsFromJSArray(jsParamsArray, params);
-    if (params.empty()) {
-        TAG_LOGI(AceLogTag::ACE_APPBAR, "appbar GetStringValueFromJSObject paramsMap param is error");
-        return;
-    }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto appBar = container->GetAppBar();

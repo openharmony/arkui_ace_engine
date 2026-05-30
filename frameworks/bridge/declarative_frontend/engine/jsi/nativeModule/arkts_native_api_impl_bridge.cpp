@@ -78,6 +78,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_selection_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_shape_bridge.h"
@@ -530,6 +531,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
 {
     static const std::unordered_set<std::string> loadModuleName = {
         {"DynamicLayout"},
+        {"LazyDynamicLayout"},
         { "ContainerReader" },
         {"Counter"},
         {"Gauge" },
@@ -1034,6 +1036,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCompressLeadingPunctuation));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetCompressLeadingPunctuation));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPunctuationOverflow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetPunctuationOverflow));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPunctuationOverflow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetPunctuationOverflow));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncludeFontPadding"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetIncludeFontPadding));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncludeFontPadding"),
@@ -1438,6 +1444,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCompressLeadingPunctuation));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetCompressLeadingPunctuation));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPunctuationOverflow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetPunctuationOverflow));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPunctuationOverflow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetPunctuationOverflow));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncludeFontPadding"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetIncludeFontPadding));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncludeFontPadding"),
@@ -1672,6 +1682,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
     RegisterRefreshAttributes(object, vm);
+    RegisterSelectionContainerAttributes(object, vm);
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     RegisterPluginAttributes(object, vm);
 #endif
@@ -3162,6 +3173,55 @@ void ArkUINativeModule::RegisterRefreshAttributes(Local<panda::ObjectRef> object
     refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxPullDownDistance"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetMaxPullDownDistance));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "refresh"), refresh);
+}
+
+void ArkUINativeModule::RegisterSelectionContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto selectionContainer = panda::ObjectRef::New(vm);
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::Create));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetCopyOption));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetCopyOption));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetEnableHapticFeedback));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetEnableHapticFeedback));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextJoinStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetTextJoinStyle));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextJoinStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetTextJoinStyle));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetCaretColor));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetCaretColor));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetSelectedBackgroundColor));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm),
+        SelectionContainerBridge::ResetSelectedBackgroundColor));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetOnWillCopy));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetOnWillCopy));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetOnCopy));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCopy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetOnCopy));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTextSelectionChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetOnTextSelectionChange));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTextSelectionChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetOnTextSelectionChange));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::SetSelectionMenuOptions));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetSelectionMenuOptions));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "bindSelectionMenu"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::BindSelectionMenu));
+    selectionContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBindSelectionMenu"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectionContainerBridge::ResetBindSelectionMenu));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "selectionContainer"), selectionContainer);
 }
 
 #if defined(FORM_SUPPORTED) || defined(PREVIEW)
@@ -4873,6 +4933,22 @@ void ArkUINativeModule::RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::SetColumnsTemplate));
     lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsTemplate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::ResetColumnsTemplate));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetSticky));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetSticky));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetHeader));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetHeader));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetFooter));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetFooter));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnVisibleIndexesChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetOnVisibleIndexesChange));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnVisibleIndexesChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetOnVisibleIndexesChange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "lazyVGridLayout"), lazyVGridLayout);
 }
 
@@ -6278,6 +6354,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetCompressLeadingPunctuation));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetCompressLeadingPunctuation));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPunctuationOverflow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetPunctuationOverflow));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPunctuationOverflow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetPunctuationOverflow));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFont"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFont));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),

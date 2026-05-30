@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,52 +12,291 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-var __decorate = (this && this.__decorate) || function (s44, t44, u44, v44) {
-    var w44 = arguments.length,
-        x44 = w44 < 3 ? t44 : v44 === null ? v44 = Object.getOwnPropertyDescriptor(t44, u44) : v44, y44;
+var __decorate = (this && this.__decorate) || function (v9, w9, x9, y9) {
+    var z9 = arguments.length, a10 = z9 < 3 ? w9 : y9 === null ? y9 = Object.getOwnPropertyDescriptor(w9, x9) : y9, b10;
     if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function')
-        x44 = Reflect.decorate(s44, t44, u44, v44); else
-        for (var z44 = s44.length - 1; z44 >= 0; z44--)
-            if (y44 = s44[z44])
-                x44 = (w44 < 3 ? y44(x44) : w44 > 3 ? y44(t44, u44, x44) : y44(t44, u44)) || x44;
-    return w44 > 3 && x44 && Object.defineProperty(t44, u44, x44), x44;
+        a10 = Reflect.decorate(v9, w9, x9, y9); else
+        for (var c10 = v9.length - 1; c10 >= 0; c10--)
+            if (b10 = v9[c10])
+                a10 = (z9 < 3 ? b10(a10) : z9 > 3 ? b10(w9, x9, a10) : b10(w9, x9)) || a10;
+    return z9 > 3 && a10 && Object.defineProperty(w9, x9, a10), a10;
 };
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
-
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const emitter = requireNapi('events.emitter');
 
 export var IconTypeV2;
-(function (r44) {
-    r44[r44['BADGE'] = 1] = 'BADGE';
-    r44[r44['NORMAL_ICON'] = 2] = 'NORMAL_ICON';
-    r44[r44['SYSTEM_ICON'] = 3] = 'SYSTEM_ICON';
-    r44[r44['HEAD_SCULPTURE'] = 4] = 'HEAD_SCULPTURE';
-    r44[r44['APP_ICON'] = 5] = 'APP_ICON';
-    r44[r44['PREVIEW'] = 6] = 'PREVIEW';
-    r44[r44['LONGITUDINAL'] = 7] = 'LONGITUDINAL';
-    r44[r44['VERTICAL'] = 8] = 'VERTICAL';
+(function (u9) {
+    u9[u9['BADGE'] = 1] = 'BADGE';
+    u9[u9['NORMAL_ICON'] = 2] = 'NORMAL_ICON';
+    u9[u9['SYSTEM_ICON'] = 3] = 'SYSTEM_ICON';
+    u9[u9['HEAD_SCULPTURE'] = 4] = 'HEAD_SCULPTURE';
+    u9[u9['APP_ICON'] = 5] = 'APP_ICON';
+    u9[u9['PREVIEW'] = 6] = 'PREVIEW';
+    u9[u9['LONGITUDINAL'] = 7] = 'LONGITUDINAL';
+    u9[u9['VERTICAL'] = 8] = 'VERTICAL';
 })(IconTypeV2 || (IconTypeV2 = {}));
 var FontSizeScaleLevel;
-(function (q44) {
-    q44[q44['LEVEL1'] = 1.75] = 'LEVEL1';
-    q44[q44['LEVEL2'] = 2] = 'LEVEL2';
-    q44[q44['LEVEL3'] = 3.2] = 'LEVEL3';
+(function (t9) {
+    t9[t9['LEVEL1'] = 1.75] = 'LEVEL1';
+    t9[t9['LEVEL2'] = 2] = 'LEVEL2';
+    t9[t9['LEVEL3'] = 3.2] = 'LEVEL3';
 })(FontSizeScaleLevel || (FontSizeScaleLevel = {}));
 var ItemHeight;
-(function (p44) {
-    p44[p44['FIRST_HEIGHT'] = 48] = 'FIRST_HEIGHT';
-    p44[p44['SECOND_HEIGHT'] = 56] = 'SECOND_HEIGHT';
-    p44[p44['THIRD_HEIGHT'] = 64] = 'THIRD_HEIGHT';
-    p44[p44['FOURTH_HEIGHT'] = 72] = 'FOURTH_HEIGHT';
-    p44[p44['FIFTH_HEIGHT'] = 96] = 'FIFTH_HEIGHT';
+(function (s9) {
+    s9[s9['FIRST_HEIGHT'] = 48] = 'FIRST_HEIGHT';
+    s9[s9['SECOND_HEIGHT'] = 56] = 'SECOND_HEIGHT';
+    s9[s9['THIRD_HEIGHT'] = 64] = 'THIRD_HEIGHT';
+    s9[s9['FOURTH_HEIGHT'] = 72] = 'FOURTH_HEIGHT';
+    s9[s9['FIFTH_HEIGHT'] = 96] = 'FIFTH_HEIGHT';
 })(ItemHeight || (ItemHeight = {}));
+let OperateIconV2 = class OperateIconV2 {
+    constructor(r9) {
+        this.value = '';
+        if (r9) {
+            if (r9.value !== undefined) {
+                this.value = r9.value;
+            }
+            if (r9.symbolStyle !== undefined) {
+                this.symbolStyle = r9.symbolStyle;
+            }
+            if (r9.action !== undefined) {
+                this.action = r9.action;
+            }
+            if (r9.accessibilityText !== undefined) {
+                this.accessibilityText = r9.accessibilityText;
+            }
+            if (r9.accessibilityDescription !== undefined) {
+                this.accessibilityDescription = r9.accessibilityDescription;
+            }
+            if (r9.accessibilityLevel !== undefined) {
+                this.accessibilityLevel = r9.accessibilityLevel;
+            }
+        }
+    }
+};
+__decorate([
+    Trace
+], OperateIconV2.prototype, 'value', void 0);
+__decorate([
+    Trace
+], OperateIconV2.prototype, 'symbolStyle', void 0);
+__decorate([
+    Trace
+], OperateIconV2.prototype, 'action', void 0);
+__decorate([
+    Trace
+], OperateIconV2.prototype, 'accessibilityText', void 0);
+__decorate([
+    Trace
+], OperateIconV2.prototype, 'accessibilityDescription', void 0);
+__decorate([
+    Trace
+], OperateIconV2.prototype, 'accessibilityLevel', void 0);
+OperateIconV2 = __decorate([
+    ObservedV2
+], OperateIconV2);
+
+export { OperateIconV2 };
+let OperateCheckV2 = class OperateCheckV2 {
+    constructor(q9) {
+        if (q9) {
+            if (q9.isCheck !== undefined) {
+                this.isCheck = q9.isCheck;
+            }
+            if (q9.onChange !== undefined) {
+                this.onChange = q9.onChange;
+            }
+            if (q9.accessibilityText !== undefined) {
+                this.accessibilityText = q9.accessibilityText;
+            }
+            if (q9.accessibilityDescription !== undefined) {
+                this.accessibilityDescription = q9.accessibilityDescription;
+            }
+            if (q9.accessibilityLevel !== undefined) {
+                this.accessibilityLevel = q9.accessibilityLevel;
+            }
+        }
+    }
+};
+__decorate([
+    Trace
+], OperateCheckV2.prototype, 'isCheck', void 0);
+__decorate([
+    Trace
+], OperateCheckV2.prototype, 'onChange', void 0);
+__decorate([
+    Trace
+], OperateCheckV2.prototype, 'accessibilityText', void 0);
+__decorate([
+    Trace
+], OperateCheckV2.prototype, 'accessibilityDescription', void 0);
+__decorate([
+    Trace
+], OperateCheckV2.prototype, 'accessibilityLevel', void 0);
+OperateCheckV2 = __decorate([
+    ObservedV2
+], OperateCheckV2);
+
+export { OperateCheckV2 };
+let OperateButtonV2 = class OperateButtonV2 {
+    constructor(p9) {
+        if (p9) {
+            if (p9.text !== undefined) {
+                this.text = p9.text;
+            }
+            if (p9.accessibilityText !== undefined) {
+                this.accessibilityText = p9.accessibilityText;
+            }
+            if (p9.accessibilityDescription !== undefined) {
+                this.accessibilityDescription = p9.accessibilityDescription;
+            }
+            if (p9.accessibilityLevel !== undefined) {
+                this.accessibilityLevel = p9.accessibilityLevel;
+            }
+        }
+    }
+};
+__decorate([
+    Trace
+], OperateButtonV2.prototype, 'text', void 0);
+__decorate([
+    Trace
+], OperateButtonV2.prototype, 'accessibilityText', void 0);
+__decorate([
+    Trace
+], OperateButtonV2.prototype, 'accessibilityDescription', void 0);
+__decorate([
+    Trace
+], OperateButtonV2.prototype, 'accessibilityLevel', void 0);
+OperateButtonV2 = __decorate([
+    ObservedV2
+], OperateButtonV2);
+
+export { OperateButtonV2 };
+let ContentItemV2 = class ContentItemV2 {
+    constructor(o9) {
+        if (o9) {
+            if (o9.iconStyle !== undefined) {
+                this.iconStyle = o9.iconStyle;
+            }
+            if (o9.icon !== undefined) {
+                this.icon = o9.icon;
+            }
+            if (o9.symbolStyle !== undefined) {
+                this.symbolStyle = o9.symbolStyle;
+            }
+            if (o9.primaryText !== undefined) {
+                this.primaryText = o9.primaryText;
+            }
+            if (o9.secondaryText !== undefined) {
+                this.secondaryText = o9.secondaryText;
+            }
+            if (o9.description !== undefined) {
+                this.description = o9.description;
+            }
+        }
+    }
+};
+__decorate([
+    Trace
+], ContentItemV2.prototype, 'iconStyle', void 0);
+__decorate([
+    Trace
+], ContentItemV2.prototype, 'icon', void 0);
+__decorate([
+    Trace
+], ContentItemV2.prototype, 'symbolStyle', void 0);
+__decorate([
+    Trace
+], ContentItemV2.prototype, 'primaryText', void 0);
+__decorate([
+    Trace
+], ContentItemV2.prototype, 'secondaryText', void 0);
+__decorate([
+    Trace
+], ContentItemV2.prototype, 'description', void 0);
+ContentItemV2 = __decorate([
+    ObservedV2
+], ContentItemV2);
+
+export { ContentItemV2 };
+let OperateItemV2 = class OperateItemV2 {
+    constructor(n9) {
+        if (n9) {
+            if (n9.icon !== undefined) {
+                this.icon = n9.icon;
+            }
+            if (n9.subIcon !== undefined) {
+                this.subIcon = n9.subIcon;
+            }
+            if (n9.button !== undefined) {
+                this.button = n9.button;
+            }
+            if (n9.toggle !== undefined) {
+                this.toggle = n9.toggle;
+            }
+            if (n9.checkbox !== undefined) {
+                this.checkbox = n9.checkbox;
+            }
+            if (n9.radio !== undefined) {
+                this.radio = n9.radio;
+            }
+            if (n9.image !== undefined) {
+                this.image = n9.image;
+            }
+            if (n9.symbolStyle !== undefined) {
+                this.symbolStyle = n9.symbolStyle;
+            }
+            if (n9.text !== undefined) {
+                this.text = n9.text;
+            }
+            if (n9.arrow !== undefined) {
+                this.arrow = n9.arrow;
+            }
+        }
+    }
+};
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'icon', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'subIcon', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'button', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'toggle', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'checkbox', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'radio', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'image', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'symbolStyle', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'text', void 0);
+__decorate([
+    Trace
+], OperateItemV2.prototype, 'arrow', void 0);
+OperateItemV2 = __decorate([
+    ObservedV2
+], OperateItemV2);
+
+export { OperateItemV2 };
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
 const TEXT_COLUMN_SPACE = 4;
@@ -200,19 +439,19 @@ const APPICON_ITEMLENGTH = LengthMetrics.resource({
 }).value;
 
 class Util {
-    static isSymbolResource(n44) {
-        if (!Util.isResourceType(n44)) {
+    static isSymbolResource(l9) {
+        if (!Util.isResourceType(l9)) {
             return false;
         }
-        let o44 = n44;
-        return o44.type === RESOURCE_TYPE_SYMBOL;
+        let m9 = l9;
+        return m9.type === RESOURCE_TYPE_SYMBOL;
     }
 
-    static isResourceType(m44) {
-        if (!m44) {
+    static isResourceType(k9) {
+        if (!k9) {
             return false;
         }
-        if (typeof m44 === 'string' || typeof m44 === 'undefined') {
+        if (typeof k9 === 'string' || typeof k9 === 'undefined') {
             return false;
         }
         return true;
@@ -220,16 +459,16 @@ class Util {
 }
 
 class ContentItemStruct extends ViewV2 {
-    constructor(g44, h44, i44, j44 = -1, k44, l44) {
-        super(g44, j44, l44);
-        this.initParam('iconStyle', (h44 && 'iconStyle' in h44) ? h44.iconStyle : null);
-        this.initParam('icon', (h44 && 'icon' in h44) ? h44.icon : null);
-        this.initParam('symbolStyle', (h44 && 'symbolStyle' in h44) ? h44.symbolStyle : null);
-        this.initParam('primaryText', (h44 && 'primaryText' in h44) ? h44.primaryText : null);
-        this.initParam('secondaryText', (h44 && 'secondaryText' in h44) ? h44.secondaryText : null);
-        this.initParam('description', (h44 && 'description' in h44) ? h44.description : null);
+    constructor(e9, f9, g9, h9 = -1, i9, j9) {
+        super(e9, h9, j9);
+        this.initParam('iconStyle', (f9 && 'iconStyle' in f9) ? f9.iconStyle : null);
+        this.initParam('icon', (f9 && 'icon' in f9) ? f9.icon : null);
+        this.initParam('symbolStyle', (f9 && 'symbolStyle' in f9) ? f9.symbolStyle : null);
+        this.initParam('primaryText', (f9 && 'primaryText' in f9) ? f9.primaryText : null);
+        this.initParam('secondaryText', (f9 && 'secondaryText' in f9) ? f9.secondaryText : null);
+        this.initParam('description', (f9 && 'description' in f9) ? f9.description : null);
         this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
-        this.initParam('leftWidth', (h44 && 'leftWidth' in h44) ? h44.leftWidth : LEFT_PART_WIDTH);
+        this.initParam('leftWidth', (f9 && 'leftWidth' in f9) ? f9.leftWidth : LEFT_PART_WIDTH);
         this.primaryTextColor = {
             'id': -1,
             'type': 10001,
@@ -251,10 +490,10 @@ class ContentItemStruct extends ViewV2 {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.initParam('fontSizeScale', (h44 && 'fontSizeScale' in h44) ? h44.fontSizeScale : 1);
-        this.initParam('parentDirection', (h44 && 'parentDirection' in h44) ? h44.parentDirection : FlexDirection.Row);
-        this.initParam('itemDirection', (h44 && 'itemDirection' in h44) ? h44.itemDirection : FlexDirection.Row);
-        this.initParam('isFocus', (h44 && 'isFocus' in h44) ? h44.isFocus : false);
+        this.initParam('fontSizeScale', (f9 && 'fontSizeScale' in f9) ? f9.fontSizeScale : 1);
+        this.initParam('parentDirection', (f9 && 'parentDirection' in f9) ? f9.parentDirection : FlexDirection.Row);
+        this.initParam('itemDirection', (f9 && 'itemDirection' in f9) ? f9.itemDirection : FlexDirection.Row);
+        this.initParam('isFocus', (f9 && 'isFocus' in f9) ? f9.isFocus : false);
         this.primaryTextSize = {
             'id': -1,
             'type': 10002,
@@ -269,7 +508,7 @@ class ContentItemStruct extends ViewV2 {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.initParam('itemHeight', (h44 && 'itemHeight' in h44) ? h44.itemHeight : null);
+        this.initParam('itemHeight', (f9 && 'itemHeight' in f9) ? f9.itemHeight : null);
         this.iconColor = null;
         this.secondaryTextColors = {
             'id': -1,
@@ -299,15 +538,15 @@ class ContentItemStruct extends ViewV2 {
         this.finalizeConstruction();
     }
 
-    resetStateVarsOnReuse(f44) {
-        this.resetParam('iconStyle', (f44 && 'iconStyle' in f44) ? f44.iconStyle : null);
-        this.resetParam('icon', (f44 && 'icon' in f44) ? f44.icon : null);
-        this.resetParam('symbolStyle', (f44 && 'symbolStyle' in f44) ? f44.symbolStyle : null);
-        this.resetParam('primaryText', (f44 && 'primaryText' in f44) ? f44.primaryText : null);
-        this.resetParam('secondaryText', (f44 && 'secondaryText' in f44) ? f44.secondaryText : null);
-        this.resetParam('description', (f44 && 'description' in f44) ? f44.description : null);
+    resetStateVarsOnReuse(d9) {
+        this.resetParam('iconStyle', (d9 && 'iconStyle' in d9) ? d9.iconStyle : null);
+        this.resetParam('icon', (d9 && 'icon' in d9) ? d9.icon : null);
+        this.resetParam('symbolStyle', (d9 && 'symbolStyle' in d9) ? d9.symbolStyle : null);
+        this.resetParam('primaryText', (d9 && 'primaryText' in d9) ? d9.primaryText : null);
+        this.resetParam('secondaryText', (d9 && 'secondaryText' in d9) ? d9.secondaryText : null);
+        this.resetParam('description', (d9 && 'description' in d9) ? d9.description : null);
         this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
-        this.resetParam('leftWidth', (f44 && 'leftWidth' in f44) ? f44.leftWidth : LEFT_PART_WIDTH);
+        this.resetParam('leftWidth', (d9 && 'leftWidth' in d9) ? d9.leftWidth : LEFT_PART_WIDTH);
         this.primaryTextColor = {
             'id': -1,
             'type': 10001,
@@ -329,10 +568,10 @@ class ContentItemStruct extends ViewV2 {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.resetParam('fontSizeScale', (f44 && 'fontSizeScale' in f44) ? f44.fontSizeScale : 1);
-        this.resetParam('parentDirection', (f44 && 'parentDirection' in f44) ? f44.parentDirection : FlexDirection.Row);
-        this.resetParam('itemDirection', (f44 && 'itemDirection' in f44) ? f44.itemDirection : FlexDirection.Row);
-        this.resetParam('isFocus', (f44 && 'isFocus' in f44) ? f44.isFocus : false);
+        this.resetParam('fontSizeScale', (d9 && 'fontSizeScale' in d9) ? d9.fontSizeScale : 1);
+        this.resetParam('parentDirection', (d9 && 'parentDirection' in d9) ? d9.parentDirection : FlexDirection.Row);
+        this.resetParam('itemDirection', (d9 && 'itemDirection' in d9) ? d9.itemDirection : FlexDirection.Row);
+        this.resetParam('isFocus', (d9 && 'isFocus' in d9) ? d9.isFocus : false);
         this.primaryTextSize = {
             'id': -1,
             'type': 10002,
@@ -347,7 +586,7 @@ class ContentItemStruct extends ViewV2 {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         };
-        this.resetParam('itemHeight', (f44 && 'itemHeight' in f44) ? f44.itemHeight : null);
+        this.resetParam('itemHeight', (d9 && 'itemHeight' in d9) ? d9.itemHeight : null);
         this.iconColor = null;
         this.secondaryTextColors = {
             'id': -1,
@@ -414,16 +653,16 @@ class ContentItemStruct extends ViewV2 {
 
     onWrapChange() {
         this.isWrapText = this.isWrapFirstText || this.isWrapSecondText || this.isWrapThirdText;
-        let e44 = {
+        let c9 = {
             data: { isWrapText: this.isWrapText }
         };
-        emitter.emit({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, e44);
+        emitter.emit({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, c9);
     }
 
-    onWillApplyTheme(d44) {
-        this.primaryTextColor = d44.colors.fontPrimary;
-        this.secondaryTextColor = d44.colors.fontSecondary;
-        this.descriptionColor = d44.colors.fontTertiary;
+    onWillApplyTheme(b9) {
+        this.primaryTextColor = b9.colors.fontPrimary;
+        this.secondaryTextColor = b9.colors.fontSecondary;
+        this.descriptionColor = b9.colors.fontTertiary;
     }
 
     getContentItemIconFillColor() {
@@ -455,27 +694,27 @@ class ContentItemStruct extends ViewV2 {
         }
     }
 
-    judgeIsWrap(z43, a44, b44) {
-        let c44 = this.getSingleRowTextHeight(z43, a44);
-        return b44 > c44;
+    judgeIsWrap(x8, y8, z8) {
+        let a9 = this.getSingleRowTextHeight(x8, y8);
+        return z8 > a9;
     }
 
-    getSingleRowTextHeight(u43, v43) {
-        if (u43 && v43) {
-            let w43 = measure.measureTextSize({
-                textContent: u43,
-                fontSize: v43,
+    getSingleRowTextHeight(s8, t8) {
+        if (s8 && t8) {
+            let u8 = measure.measureTextSize({
+                textContent: s8,
+                fontSize: t8,
                 maxLines: TEXT_MAX_LINE
             });
-            if (w43 && w43.height) {
-                let x43 = 0;
-                if (typeof w43.height === 'number') {
-                    x43 = w43.height;
-                } else if (typeof w43.height === 'string') {
-                    x43 = parseFloat(w43.height);
+            if (u8 && u8.height) {
+                let v8 = 0;
+                if (typeof u8.height === 'number') {
+                    v8 = u8.height;
+                } else if (typeof u8.height === 'string') {
+                    v8 = parseFloat(u8.height);
                 }
-                let y43 = px2vp(x43);
-                return y43;
+                let w8 = px2vp(v8);
+                return w8;
             }
         }
         return 0;
@@ -485,16 +724,16 @@ class ContentItemStruct extends ViewV2 {
         this.onPropChange();
     }
 
-    createIcon(d43 = null) {
-        this.observeComponentCreation2((e43, f43) => {
+    createIcon(b8 = null) {
+        this.observeComponentCreation2((c8, d8) => {
             If.create();
             if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((g43, h43) => {
+                    this.observeComponentCreation2((e8, f8) => {
                         If.create();
                         if (this.symbolStyle != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((s43, t43) => {
+                                this.observeComponentCreation2((q8, r8) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([this.getContentItemIconFillColor()]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.symbolStyle);
@@ -515,11 +754,11 @@ class ContentItemStruct extends ViewV2 {
                             });
                         } else if (this.icon != null) {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((i43, j43) => {
+                                this.observeComponentCreation2((g8, h8) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.icon)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((q43, r43) => {
+                                            this.observeComponentCreation2((o8, p8) => {
                                                 SymbolGlyph.create(this.icon);
                                                 SymbolGlyph.fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`);
                                                 SymbolGlyph.fontColor([this.getContentItemIconFillColor()]);
@@ -537,11 +776,11 @@ class ContentItemStruct extends ViewV2 {
                                         });
                                     } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((k43, l43) => {
+                                            this.observeComponentCreation2((i8, j8) => {
                                                 If.create();
                                                 if (this.iconStyle <= IconTypeV2.PREVIEW) {
                                                     this.ifElseBranchUpdateFunction(0, () => {
-                                                        this.observeComponentCreation2((o43, p43) => {
+                                                        this.observeComponentCreation2((m8, n8) => {
                                                             Image.create(this.icon);
                                                             Image.objectFit(ImageFit.Contain);
                                                             Image.width(ICON_SIZE_MAP.get(this.iconStyle));
@@ -561,7 +800,7 @@ class ContentItemStruct extends ViewV2 {
                                                     });
                                                 } else {
                                                     this.ifElseBranchUpdateFunction(1, () => {
-                                                        this.observeComponentCreation2((m43, n43) => {
+                                                        this.observeComponentCreation2((k8, l8) => {
                                                             Image.create(this.icon);
                                                             Image.objectFit(ImageFit.Contain);
                                                             Image.constraintSize({
@@ -606,8 +845,8 @@ class ContentItemStruct extends ViewV2 {
         If.pop();
     }
 
-    createText(h42 = null) {
-        this.observeComponentCreation2((b43, c43) => {
+    createText(f7 = null) {
+        this.observeComponentCreation2((z7, a8) => {
             Column.create({ space: TEXT_COLUMN_SPACE });
             Column.flexShrink(1);
             Column.margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
@@ -616,7 +855,7 @@ class ContentItemStruct extends ViewV2 {
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((w42, x42) => {
+        this.observeComponentCreation2((u7, v7) => {
             Text.create(this.primaryText);
             Text.fontSize(this.primaryTextSize);
             Text.fontColor(this.primaryTextColors);
@@ -627,19 +866,19 @@ class ContentItemStruct extends ViewV2 {
             Text.fontWeight(FontWeight.Medium);
             Text.focusable(true);
             Text.draggable(false);
-            Text.onSizeChange((y42, z42) => {
-                if (!IS_SUPPORT_SUBCOMPONENT_EVENT && z42.height) {
-                    let a43 = typeof z42.height === 'number' ? z42.height : 0;
-                    this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize, a43);
+            Text.onSizeChange((w7, x7) => {
+                if (!IS_SUPPORT_SUBCOMPONENT_EVENT && x7.height) {
+                    let y7 = typeof x7.height === 'number' ? x7.height : 0;
+                    this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize, y7);
                 }
             });
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((p42, q42) => {
+        this.observeComponentCreation2((n7, o7) => {
             If.create();
             if (this.secondaryText != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((r42, s42) => {
+                    this.observeComponentCreation2((p7, q7) => {
                         Text.create(this.secondaryText);
                         Text.fontSize(this.secondaryThirdTextSize);
                         Text.fontColor(this.secondaryTextColors);
@@ -648,11 +887,11 @@ class ContentItemStruct extends ViewV2 {
                                 TextOverflow.Ellipsis
                         });
                         Text.draggable(false);
-                        Text.onSizeChange((t42, u42) => {
-                            if (!IS_SUPPORT_SUBCOMPONENT_EVENT && u42.height) {
-                                let v42 = typeof u42.height === 'number' ? u42.height : 0;
+                        Text.onSizeChange((r7, s7) => {
+                            if (!IS_SUPPORT_SUBCOMPONENT_EVENT && s7.height) {
+                                let t7 = typeof s7.height === 'number' ? s7.height : 0;
                                 this.isWrapSecondText =
-                                    this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize, v42);
+                                    this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize, t7);
                             }
                         });
                     }, Text);
@@ -664,11 +903,11 @@ class ContentItemStruct extends ViewV2 {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((i42, j42) => {
+        this.observeComponentCreation2((g7, h7) => {
             If.create();
             if (this.description != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((k42, l42) => {
+                    this.observeComponentCreation2((i7, j7) => {
                         Text.create(this.description);
                         Text.fontSize(this.secondaryThirdTextSize);
                         Text.fontColor(this.descriptionColors);
@@ -677,11 +916,11 @@ class ContentItemStruct extends ViewV2 {
                                 TextOverflow.Ellipsis
                         });
                         Text.draggable(false);
-                        Text.onSizeChange((m42, n42) => {
-                            if (!IS_SUPPORT_SUBCOMPONENT_EVENT && n42.height) {
-                                let o42 = typeof n42.height === 'number' ? n42.height : 0;
+                        Text.onSizeChange((k7, l7) => {
+                            if (!IS_SUPPORT_SUBCOMPONENT_EVENT && l7.height) {
+                                let m7 = typeof l7.height === 'number' ? l7.height : 0;
                                 this.isWrapThirdText =
-                                    this.judgeIsWrap(this.description, this.secondaryThirdTextSize, o42);
+                                    this.judgeIsWrap(this.description, this.secondaryThirdTextSize, m7);
                             }
                         });
                     }, Text);
@@ -718,7 +957,7 @@ class ContentItemStruct extends ViewV2 {
     }
 
     initialRender() {
-        this.observeComponentCreation2((f42, g42) => {
+        this.observeComponentCreation2((d7, e7) => {
             Flex.create({
                 space: { main: this.getItemSpace() },
                 direction: this.itemDirection,
@@ -739,45 +978,45 @@ class ContentItemStruct extends ViewV2 {
         Flex.pop();
     }
 
-    updateStateVars(e42) {
-        if (e42 === undefined) {
+    updateStateVars(c7) {
+        if (c7 === undefined) {
             return;
         }
-        if ('iconStyle' in e42) {
-            this.updateParam('iconStyle', e42.iconStyle);
+        if ('iconStyle' in c7) {
+            this.updateParam('iconStyle', c7.iconStyle);
         }
-        if ('icon' in e42) {
-            this.updateParam('icon', e42.icon);
+        if ('icon' in c7) {
+            this.updateParam('icon', c7.icon);
         }
-        if ('symbolStyle' in e42) {
-            this.updateParam('symbolStyle', e42.symbolStyle);
+        if ('symbolStyle' in c7) {
+            this.updateParam('symbolStyle', c7.symbolStyle);
         }
-        if ('primaryText' in e42) {
-            this.updateParam('primaryText', e42.primaryText);
+        if ('primaryText' in c7) {
+            this.updateParam('primaryText', c7.primaryText);
         }
-        if ('secondaryText' in e42) {
-            this.updateParam('secondaryText', e42.secondaryText);
+        if ('secondaryText' in c7) {
+            this.updateParam('secondaryText', c7.secondaryText);
         }
-        if ('description' in e42) {
-            this.updateParam('description', e42.description);
+        if ('description' in c7) {
+            this.updateParam('description', c7.description);
         }
-        if ('leftWidth' in e42) {
-            this.updateParam('leftWidth', e42.leftWidth);
+        if ('leftWidth' in c7) {
+            this.updateParam('leftWidth', c7.leftWidth);
         }
-        if ('fontSizeScale' in e42) {
-            this.updateParam('fontSizeScale', e42.fontSizeScale);
+        if ('fontSizeScale' in c7) {
+            this.updateParam('fontSizeScale', c7.fontSizeScale);
         }
-        if ('parentDirection' in e42) {
-            this.updateParam('parentDirection', e42.parentDirection);
+        if ('parentDirection' in c7) {
+            this.updateParam('parentDirection', c7.parentDirection);
         }
-        if ('itemDirection' in e42) {
-            this.updateParam('itemDirection', e42.itemDirection);
+        if ('itemDirection' in c7) {
+            this.updateParam('itemDirection', c7.itemDirection);
         }
-        if ('isFocus' in e42) {
-            this.updateParam('isFocus', e42.isFocus);
+        if ('isFocus' in c7) {
+            this.updateParam('isFocus', c7.isFocus);
         }
-        if ('itemHeight' in e42) {
-            this.updateParam('itemHeight', e42.itemHeight);
+        if ('itemHeight' in c7) {
+            this.updateParam('itemHeight', c7.itemHeight);
         }
     }
 
@@ -880,28 +1119,28 @@ class OperateItemStructController {
         };
         this.changeCheckboxState = () => {
         };
-        this.changeSwitchState = () => {
+        this.changeToggleState = () => {
         };
     }
 }
 
 class OperateItemStruct extends ViewV2 {
-    constructor(y41, z41, a42, b42 = -1, c42, d42) {
-        super(y41, b42, d42);
-        this.initParam('arrow', (z41 && 'arrow' in z41) ? z41.arrow : null);
-        this.initParam('icon', (z41 && 'icon' in z41) ? z41.icon : null);
-        this.initParam('subIcon', (z41 && 'subIcon' in z41) ? z41.subIcon : null);
-        this.initParam('button', (z41 && 'button' in z41) ? z41.button : null);
-        this.initParam('switch', (z41 && 'switch' in z41) ? z41.switch : null);
-        this.initParam('checkBox', (z41 && 'checkBox' in z41) ? z41.checkBox : null);
-        this.initParam('radio', (z41 && 'radio' in z41) ? z41.radio : null);
-        this.initParam('image', (z41 && 'image' in z41) ? z41.image : null);
-        this.initParam('symbolStyle', (z41 && 'symbolStyle' in z41) ? z41.symbolStyle : null);
-        this.initParam('text', (z41 && 'text' in z41) ? z41.text : null);
-        this.switchState = false;
+    constructor(w6, x6, y6, z6 = -1, a7, b7) {
+        super(w6, z6, b7);
+        this.initParam('arrow', (x6 && 'arrow' in x6) ? x6.arrow : null);
+        this.initParam('icon', (x6 && 'icon' in x6) ? x6.icon : null);
+        this.initParam('subIcon', (x6 && 'subIcon' in x6) ? x6.subIcon : null);
+        this.initParam('button', (x6 && 'button' in x6) ? x6.button : null);
+        this.initParam('toggle', (x6 && 'toggle' in x6) ? x6.toggle : null);
+        this.initParam('checkBox', (x6 && 'checkBox' in x6) ? x6.checkBox : null);
+        this.initParam('radio', (x6 && 'radio' in x6) ? x6.radio : null);
+        this.initParam('image', (x6 && 'image' in x6) ? x6.image : null);
+        this.initParam('symbolStyle', (x6 && 'symbolStyle' in x6) ? x6.symbolStyle : null);
+        this.initParam('text', (x6 && 'text' in x6) ? x6.text : null);
+        this.toggleState = false;
         this.radioState = false;
         this.checkBoxState = false;
-        this.initParam('rightWidth', (z41 && 'rightWidth' in z41) ? z41.rightWidth : RIGHT_PART_WIDTH);
+        this.initParam('rightWidth', (x6 && 'rightWidth' in x6) ? x6.rightWidth : RIGHT_PART_WIDTH);
         this.secondaryTextColor = {
             'id': -1,
             'type': 10001,
@@ -911,15 +1150,15 @@ class OperateItemStruct extends ViewV2 {
         };
         this.hoveringColor = '#0d000000';
         this.activedColor = '#1a0a59f7';
-        this.initParam('parentCanFocus', (z41 && 'parentCanFocus' in z41) ? z41.parentCanFocus : false);
-        this.initParam('parentCanTouch', (z41 && 'parentCanTouch' in z41) ? z41.parentCanTouch : true);
-        this.initParam('parentIsHover', (z41 && 'parentIsHover' in z41) ? z41.parentIsHover : false);
-        this.initParam('parentCanHover', (z41 && 'parentCanHover' in z41) ? z41.parentCanHover : true);
-        this.initParam('parentIsActive', (z41 && 'parentIsActive' in z41) ? z41.parentIsActive : false);
-        this.initParam('parentFrontColor', (z41 && 'parentFrontColor' in z41) ? z41.parentFrontColor : NORMAL_BG_COLOR);
-        this.initParam('parentDirection', (z41 && 'parentDirection' in z41) ? z41.parentDirection : FlexDirection.Row);
+        this.initParam('parentCanFocus', (x6 && 'parentCanFocus' in x6) ? x6.parentCanFocus : false);
+        this.initParam('parentCanTouch', (x6 && 'parentCanTouch' in x6) ? x6.parentCanTouch : true);
+        this.initParam('parentIsHover', (x6 && 'parentIsHover' in x6) ? x6.parentIsHover : false);
+        this.initParam('parentCanHover', (x6 && 'parentCanHover' in x6) ? x6.parentCanHover : true);
+        this.initParam('parentIsActive', (x6 && 'parentIsActive' in x6) ? x6.parentIsActive : false);
+        this.initParam('parentFrontColor', (x6 && 'parentFrontColor' in x6) ? x6.parentFrontColor : NORMAL_BG_COLOR);
+        this.initParam('parentDirection', (x6 && 'parentDirection' in x6) ? x6.parentDirection : FlexDirection.Row);
         this.rowSpace = DEFAULT_ROW_SPACE;
-        this.initParam('isFocus', (z41 && 'isFocus' in z41) ? z41.isFocus : false);
+        this.initParam('isFocus', (x6 && 'isFocus' in x6) ? x6.isFocus : false);
         this.secondaryTextSize = {
             'id': -1,
             'type': 10002,
@@ -948,27 +1187,27 @@ class OperateItemStruct extends ViewV2 {
         this.changeCheckboxState = () => {
             this.checkBoxState = !this.checkBoxState;
         };
-        this.changeSwitchState = () => {
-            this.switchState = !this.switchState;
+        this.changeToggleState = () => {
+            this.toggleState = !this.toggleState;
         };
         this.finalizeConstruction();
     }
 
-    resetStateVarsOnReuse(x41) {
-        this.resetParam('arrow', (x41 && 'arrow' in x41) ? x41.arrow : null);
-        this.resetParam('icon', (x41 && 'icon' in x41) ? x41.icon : null);
-        this.resetParam('subIcon', (x41 && 'subIcon' in x41) ? x41.subIcon : null);
-        this.resetParam('button', (x41 && 'button' in x41) ? x41.button : null);
-        this.resetParam('switch', (x41 && 'switch' in x41) ? x41.switch : null);
-        this.resetParam('checkBox', (x41 && 'checkBox' in x41) ? x41.checkBox : null);
-        this.resetParam('radio', (x41 && 'radio' in x41) ? x41.radio : null);
-        this.resetParam('image', (x41 && 'image' in x41) ? x41.image : null);
-        this.resetParam('symbolStyle', (x41 && 'symbolStyle' in x41) ? x41.symbolStyle : null);
-        this.resetParam('text', (x41 && 'text' in x41) ? x41.text : null);
-        this.switchState = false;
+    resetStateVarsOnReuse(v6) {
+        this.resetParam('arrow', (v6 && 'arrow' in v6) ? v6.arrow : null);
+        this.resetParam('icon', (v6 && 'icon' in v6) ? v6.icon : null);
+        this.resetParam('subIcon', (v6 && 'subIcon' in v6) ? v6.subIcon : null);
+        this.resetParam('button', (v6 && 'button' in v6) ? v6.button : null);
+        this.resetParam('toggle', (v6 && 'toggle' in v6) ? v6.toggle : null);
+        this.resetParam('checkBox', (v6 && 'checkBox' in v6) ? v6.checkBox : null);
+        this.resetParam('radio', (v6 && 'radio' in v6) ? v6.radio : null);
+        this.resetParam('image', (v6 && 'image' in v6) ? v6.image : null);
+        this.resetParam('symbolStyle', (v6 && 'symbolStyle' in v6) ? v6.symbolStyle : null);
+        this.resetParam('text', (v6 && 'text' in v6) ? v6.text : null);
+        this.toggleState = false;
         this.radioState = false;
         this.checkBoxState = false;
-        this.resetParam('rightWidth', (x41 && 'rightWidth' in x41) ? x41.rightWidth : RIGHT_PART_WIDTH);
+        this.resetParam('rightWidth', (v6 && 'rightWidth' in v6) ? v6.rightWidth : RIGHT_PART_WIDTH);
         this.secondaryTextColor = {
             'id': -1,
             'type': 10001,
@@ -978,16 +1217,15 @@ class OperateItemStruct extends ViewV2 {
         };
         this.hoveringColor = '#0d000000';
         this.activedColor = '#1a0a59f7';
-        this.resetParam('parentCanFocus', (x41 && 'parentCanFocus' in x41) ? x41.parentCanFocus : false);
-        this.resetParam('parentCanTouch', (x41 && 'parentCanTouch' in x41) ? x41.parentCanTouch : true);
-        this.resetParam('parentIsHover', (x41 && 'parentIsHover' in x41) ? x41.parentIsHover : false);
-        this.resetParam('parentCanHover', (x41 && 'parentCanHover' in x41) ? x41.parentCanHover : true);
-        this.resetParam('parentIsActive', (x41 && 'parentIsActive' in x41) ? x41.parentIsActive : false);
-        this.resetParam('parentFrontColor',
-            (x41 && 'parentFrontColor' in x41) ? x41.parentFrontColor : NORMAL_BG_COLOR);
-        this.resetParam('parentDirection', (x41 && 'parentDirection' in x41) ? x41.parentDirection : FlexDirection.Row);
+        this.resetParam('parentCanFocus', (v6 && 'parentCanFocus' in v6) ? v6.parentCanFocus : false);
+        this.resetParam('parentCanTouch', (v6 && 'parentCanTouch' in v6) ? v6.parentCanTouch : true);
+        this.resetParam('parentIsHover', (v6 && 'parentIsHover' in v6) ? v6.parentIsHover : false);
+        this.resetParam('parentCanHover', (v6 && 'parentCanHover' in v6) ? v6.parentCanHover : true);
+        this.resetParam('parentIsActive', (v6 && 'parentIsActive' in v6) ? v6.parentIsActive : false);
+        this.resetParam('parentFrontColor', (v6 && 'parentFrontColor' in v6) ? v6.parentFrontColor : NORMAL_BG_COLOR);
+        this.resetParam('parentDirection', (v6 && 'parentDirection' in v6) ? v6.parentDirection : FlexDirection.Row);
         this.rowSpace = DEFAULT_ROW_SPACE;
-        this.resetParam('isFocus', (x41 && 'isFocus' in x41) ? x41.isFocus : false);
+        this.resetParam('isFocus', (v6 && 'isFocus' in v6) ? v6.isFocus : false);
         this.secondaryTextSize = {
             'id': -1,
             'type': 10002,
@@ -1013,8 +1251,8 @@ class OperateItemStruct extends ViewV2 {
     }
 
     onPropChange() {
-        if (this.switch != null) {
-            this.switchState = this.switch.isCheck;
+        if (this.toggle != null) {
+            this.toggleState = this.toggle.isCheck;
         }
         if (this.radio != null) {
             this.radioState = this.radio.isCheck;
@@ -1057,10 +1295,10 @@ class OperateItemStruct extends ViewV2 {
         };
     }
 
-    onWillApplyTheme(w41) {
-        this.secondaryTextColor = w41.colors.fontSecondary;
-        this.hoveringColor = w41.colors.interactiveHover;
-        this.activedColor = w41.colors.interactiveActive;
+    onWillApplyTheme(u6) {
+        this.secondaryTextColor = u6.colors.fontSecondary;
+        this.hoveringColor = u6.colors.interactiveHover;
+        this.activedColor = u6.colors.interactiveActive;
     }
 
     aboutToAppear() {
@@ -1069,12 +1307,12 @@ class OperateItemStruct extends ViewV2 {
         if (this.controller) {
             this.controller.changeRadioState = this.changeRadioState;
             this.controller.changeCheckboxState = this.changeCheckboxState;
-            this.controller.changeSwitchState = this.changeSwitchState;
+            this.controller.changeToggleState = this.changeToggleState;
         }
     }
 
-    createButton(o41 = null) {
-        this.observeComponentCreation2((t41, u41) => {
+    createButton(m6 = null) {
+        this.observeComponentCreation2((r6, s6) => {
             Button.createWithChild();
             Button.padding({ top: 0, bottom: 0 });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
@@ -1109,13 +1347,13 @@ class OperateItemStruct extends ViewV2 {
             Button.onFocus(() => {
                 this.notifyParentCanFocusChange(false);
             });
-            Button.onHover((v41) => {
+            Button.onHover((t6) => {
                 this.notifyParentCanHoverChange(false);
-                if (v41 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (t6 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.notifyParentFrontColorChange(this.parentIsActive ? this.activedColor :
                         Color.Transparent.toString());
                 }
-                if (!v41) {
+                if (!t6) {
                     this.notifyParentCanHoverChange(true);
                     if (this.parentIsHover) {
                         this.notifyParentFrontColorChange(this.parentIsHover ? this.hoveringColor :
@@ -1127,14 +1365,14 @@ class OperateItemStruct extends ViewV2 {
             Button.accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''));
             Button.accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((r41, s41) => {
+        this.observeComponentCreation2((p6, q6) => {
             Row.create();
             Row.padding({
                 left: TEXT_SAFE_MARGIN,
                 right: TEXT_SAFE_MARGIN
             });
         }, Row);
-        this.observeComponentCreation2((p41, q41) => {
+        this.observeComponentCreation2((n6, o6) => {
             Text.create(this.button?.text);
             Text.focusable(true);
         }, Text);
@@ -1143,8 +1381,8 @@ class OperateItemStruct extends ViewV2 {
         Button.pop();
     }
 
-    createIcon(z40, a41 = null) {
-        this.observeComponentCreation2((l41, m41) => {
+    createIcon(x5, y5 = null) {
+        this.observeComponentCreation2((j6, k6) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
             Button.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
@@ -1161,13 +1399,13 @@ class OperateItemStruct extends ViewV2 {
             Button.onFocus(() => {
                 this.notifyParentCanFocusChange(false);
             });
-            Button.onHover((n41) => {
+            Button.onHover((l6) => {
                 this.notifyParentCanHoverChange(false);
-                if (n41 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (l6 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.notifyParentFrontColorChange(this.parentIsActive ? this.activedColor :
                         Color.Transparent.toString());
                 }
-                if (!n41) {
+                if (!l6) {
                     this.notifyParentCanHoverChange(true);
                     if (this.parentIsHover) {
                         this.notifyParentFrontColorChange(this.parentIsHover ? this.hoveringColor :
@@ -1175,20 +1413,20 @@ class OperateItemStruct extends ViewV2 {
                     }
                 }
             });
-            Button.onClick(z40.icon?.action);
-            Button.accessibilityLevel(getAccessibilityLevelOnAction(z40.icon?.accessibilityLevel, z40.icon?.action));
-            Button.accessibilityText(getAccessibilityText(z40.icon?.accessibilityText ?? ''));
-            Button.accessibilityDescription(getAccessibilityText(z40.icon?.accessibilityDescription ?? ''));
+            Button.onClick(x5.icon?.action);
+            Button.accessibilityLevel(getAccessibilityLevelOnAction(x5.icon?.accessibilityLevel, x5.icon?.action));
+            Button.accessibilityText(getAccessibilityText(x5.icon?.accessibilityText ?? ''));
+            Button.accessibilityDescription(getAccessibilityText(x5.icon?.accessibilityDescription ?? ''));
             Button.flexShrink(0);
         }, Button);
-        this.observeComponentCreation2((b41, c41) => {
+        this.observeComponentCreation2((z5, a6) => {
             If.create();
-            if (z40.icon?.symbolStyle) {
+            if (x5.icon?.symbolStyle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((j41, k41) => {
+                    this.observeComponentCreation2((h6, i6) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontColor([this.iconColor]);
-                        SymbolGlyph.attributeModifier.bind(this)(z40.icon?.symbolStyle);
+                        SymbolGlyph.attributeModifier.bind(this)(x5.icon?.symbolStyle);
                         SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
@@ -1198,12 +1436,12 @@ class OperateItemStruct extends ViewV2 {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((d41, e41) => {
+                    this.observeComponentCreation2((b6, c6) => {
                         If.create();
-                        if (Util.isSymbolResource(z40.icon?.value)) {
+                        if (Util.isSymbolResource(x5.icon?.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((h41, i41) => {
-                                    SymbolGlyph.create(z40.icon?.value);
+                                this.observeComponentCreation2((f6, g6) => {
+                                    SymbolGlyph.create(x5.icon?.value);
                                     SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                                     SymbolGlyph.fontColor([this.iconColor]);
                                     SymbolGlyph.focusable(true);
@@ -1212,8 +1450,8 @@ class OperateItemStruct extends ViewV2 {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((f41, g41) => {
-                                    Image.create(z40.icon?.value);
+                                this.observeComponentCreation2((d6, e6) => {
+                                    Image.create(x5.icon?.value);
                                     Image.height(OPERATEITEM_ICONLIKE_SIZE);
                                     Image.width(OPERATEITEM_ICONLIKE_SIZE);
                                     Image.focusable(true);
@@ -1231,12 +1469,12 @@ class OperateItemStruct extends ViewV2 {
         Button.pop();
     }
 
-    createImage(s40 = null) {
-        this.observeComponentCreation2((t40, u40) => {
+    createImage(q5 = null) {
+        this.observeComponentCreation2((r5, s5) => {
             If.create();
             if (Util.isSymbolResource(this.image)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((x40, y40) => {
+                    this.observeComponentCreation2((v5, w5) => {
                         SymbolGlyph.create(this.image);
                         SymbolGlyph.fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`);
                         SymbolGlyph.draggable(false);
@@ -1245,7 +1483,7 @@ class OperateItemStruct extends ViewV2 {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((v40, w40) => {
+                    this.observeComponentCreation2((t5, u5) => {
                         Image.create(this.image);
                         Image.height(OPERATEITEM_IMAGE_SIZE);
                         Image.width(OPERATEITEM_IMAGE_SIZE);
@@ -1258,8 +1496,8 @@ class OperateItemStruct extends ViewV2 {
         If.pop();
     }
 
-    createSymbol(p40 = null) {
-        this.observeComponentCreation2((q40, r40) => {
+    createSymbol(n5 = null) {
+        this.observeComponentCreation2((o5, p5) => {
             SymbolGlyph.create();
             SymbolGlyph.attributeModifier.bind(this)(this.symbolStyle);
             SymbolGlyph.fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`);
@@ -1270,8 +1508,8 @@ class OperateItemStruct extends ViewV2 {
         }, SymbolGlyph);
     }
 
-    createText(m40 = null) {
-        this.observeComponentCreation2((n40, o40) => {
+    createText(k5 = null) {
+        this.observeComponentCreation2((l5, m5) => {
             Text.create(this.text);
             Text.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Text.fontSize(this.secondaryTextSize);
@@ -1298,8 +1536,8 @@ class OperateItemStruct extends ViewV2 {
         Text.pop();
     }
 
-    createArrow(y39 = null) {
-        this.observeComponentCreation2((j40, k40) => {
+    createArrow(w4 = null) {
+        this.observeComponentCreation2((h5, i5) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
@@ -1313,11 +1551,11 @@ class OperateItemStruct extends ViewV2 {
             });
             Button.stateEffect(this.arrow?.action !== undefined);
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((l40) => {
+            Button.onHover((j5) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                if (l40 && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (j5 && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.notifyParentCanHoverChange(false);
                     this.notifyParentFrontColorChange(this.parentIsActive ? this.activedColor :
                         Color.Transparent.toString());
@@ -1335,11 +1573,11 @@ class OperateItemStruct extends ViewV2 {
             Button.accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''));
             Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((z39, a40) => {
+        this.observeComponentCreation2((x4, y4) => {
             If.create();
             if (this.arrow?.symbolStyle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((h40, i40) => {
+                    this.observeComponentCreation2((f5, g5) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
                             'id': -1,
@@ -1358,11 +1596,11 @@ class OperateItemStruct extends ViewV2 {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((b40, c40) => {
+                    this.observeComponentCreation2((z4, a5) => {
                         If.create();
                         if (Util.isSymbolResource(this.arrow?.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((f40, g40) => {
+                                this.observeComponentCreation2((d5, e5) => {
                                     SymbolGlyph.create(this.arrow?.value);
                                     SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                                     SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
@@ -1378,7 +1616,7 @@ class OperateItemStruct extends ViewV2 {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((d40, e40) => {
+                                this.observeComponentCreation2((b5, c5) => {
                                     Image.create(this.arrow?.value);
                                     Image.height(OPERATEITEM_ICONLIKE_SIZE);
                                     Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -1404,8 +1642,8 @@ class OperateItemStruct extends ViewV2 {
         Button.pop();
     }
 
-    createRadio(t39 = null) {
-        this.observeComponentCreation2((u39, v39) => {
+    createRadio(r4 = null) {
+        this.observeComponentCreation2((s4, t4) => {
             Radio.create({ value: '', group: '' });
             Radio.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Radio.checked(this.radioState);
@@ -1414,12 +1652,12 @@ class OperateItemStruct extends ViewV2 {
             });
             Radio.backgroundColor(Color.Transparent);
             Radio.borderRadius(OPERATE_ITEM_RADIUS);
-            Radio.onChange((x39) => {
+            Radio.onChange((v4) => {
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.radioState = x39;
+                    this.radioState = v4;
                 }
                 if (this.radio?.onChange) {
-                    this.radio?.onChange(x39);
+                    this.radio?.onChange(v4);
                 }
             });
             Radio.height(OPERATEITEM_ICONLIKE_SIZE);
@@ -1430,13 +1668,13 @@ class OperateItemStruct extends ViewV2 {
             });
             Radio.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
             Radio.flexShrink(0);
-            Radio.onHover((w39) => {
+            Radio.onHover((u4) => {
                 this.notifyParentCanHoverChange(false);
-                if (w39 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (u4 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.notifyParentFrontColorChange(this.parentIsActive ? this.activedColor :
                         Color.Transparent.toString());
                 }
-                if (!w39) {
+                if (!u4) {
                     this.notifyParentCanHoverChange(true);
                     if (this.parentIsHover) {
                         this.notifyParentFrontColorChange(this.parentIsHover ? this.hoveringColor :
@@ -1451,20 +1689,20 @@ class OperateItemStruct extends ViewV2 {
         }, Radio);
     }
 
-    createCheckBox(o39 = null) {
-        this.observeComponentCreation2((p39, q39) => {
+    createCheckBox(m4 = null) {
+        this.observeComponentCreation2((n4, o4) => {
             Checkbox.create();
             Checkbox.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS);
             Checkbox.unselectedColor(DEFUALT_RADIO_CHECKBOX_BORDER_COLOR);
             Checkbox.backgroundColor(Color.Transparent);
             Checkbox.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Checkbox.select(this.checkBoxState);
-            Checkbox.onChange((s39) => {
+            Checkbox.onChange((q4) => {
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.checkBoxState = s39;
+                    this.checkBoxState = q4;
                 }
                 if (this.checkBox?.onChange) {
-                    this.checkBox?.onChange(s39);
+                    this.checkBox?.onChange(q4);
                 }
             });
             Checkbox.height(OPERATEITEM_ICONLIKE_SIZE);
@@ -1475,13 +1713,13 @@ class OperateItemStruct extends ViewV2 {
             });
             Checkbox.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
             Checkbox.flexShrink(0);
-            Checkbox.onHover((r39) => {
+            Checkbox.onHover((p4) => {
                 this.notifyParentCanHoverChange(false);
-                if (r39 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (p4 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.notifyParentFrontColorChange(this.parentIsActive ? this.activedColor :
                         Color.Transparent.toString());
                 }
-                if (!r39) {
+                if (!p4) {
                     this.notifyParentCanHoverChange(true);
                     if (this.parentIsHover) {
                         this.notifyParentFrontColorChange(this.parentIsHover ? this.hoveringColor :
@@ -1497,8 +1735,8 @@ class OperateItemStruct extends ViewV2 {
         Checkbox.pop();
     }
 
-    createSwitch(h39 = null) {
-        this.observeComponentCreation2((l39, m39) => {
+    createToggle(f4 = null) {
+        this.observeComponentCreation2((j4, k4) => {
             Row.create();
             Row.margin({ end: LengthMetrics.vp(SWITCH_PADDING) });
             Row.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
@@ -1507,13 +1745,13 @@ class OperateItemStruct extends ViewV2 {
             Row.onFocus(() => {
                 this.notifyParentCanFocusChange(false);
             });
-            Row.onHover((n39) => {
+            Row.onHover((l4) => {
                 this.notifyParentCanHoverChange(false);
-                if (n39 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (l4 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.notifyParentFrontColorChange(this.parentIsActive ? this.activedColor :
                         Color.Transparent.toString());
                 }
-                if (!n39) {
+                if (!l4) {
                     this.notifyParentCanHoverChange(true);
                     if (this.parentIsHover) {
                         this.notifyParentFrontColorChange(this.parentIsHover ? this.hoveringColor :
@@ -1522,31 +1760,31 @@ class OperateItemStruct extends ViewV2 {
                 }
             });
         }, Row);
-        this.observeComponentCreation2((i39, j39) => {
-            Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
+        this.observeComponentCreation2((g4, h4) => {
+            Toggle.create({ type: ToggleType.Switch, isOn: this.toggleState });
             Toggle.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS);
             Toggle.backgroundColor(Color.Transparent);
-            Toggle.onChange((k39) => {
-                this.switchState = k39;
-                if (this.switch?.onChange) {
-                    this.switch?.onChange(k39);
+            Toggle.onChange((i4) => {
+                this.toggleState = i4;
+                if (this.toggle?.onChange) {
+                    this.toggle?.onChange(i4);
                 }
             });
             Toggle.onClick(() => {
-                this.switchState = !this.switchState;
+                this.toggleState = !this.toggleState;
             });
             Toggle.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
-            Toggle.accessibilityLevel(getAccessibilityLevelOnChange(this.switch?.accessibilityLevel,
-                this.switch?.onChange));
-            Toggle.accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''));
-            Toggle.accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''));
+            Toggle.accessibilityLevel(getAccessibilityLevelOnChange(this.toggle?.accessibilityLevel,
+                this.toggle?.onChange));
+            Toggle.accessibilityText(getAccessibilityText(this.toggle?.accessibilityText ?? ''));
+            Toggle.accessibilityDescription(getAccessibilityText(this.toggle?.accessibilityDescription ?? ''));
         }, Toggle);
         Toggle.pop();
         Row.pop();
     }
 
-    createTextArrow(z37 = null) {
-        this.observeComponentCreation2((e39, f39) => {
+    createTextArrow(x2 = null) {
+        this.observeComponentCreation2((c4, d4) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
             Button.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ?
@@ -1574,11 +1812,11 @@ class OperateItemStruct extends ViewV2 {
             });
             Button.stateEffect(this.arrow?.action !== undefined);
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((g39) => {
+            Button.onHover((e4) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                if (g39 && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (e4 && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.notifyParentCanHoverChange(false);
                     this.notifyParentFrontColorChange(this.parentIsActive ? this.activedColor :
                         Color.Transparent.toString());
@@ -1596,18 +1834,18 @@ class OperateItemStruct extends ViewV2 {
             Button.accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`);
             Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((a38, b38) => {
+        this.observeComponentCreation2((y2, z2) => {
             If.create();
             if (this.parentDirection === FlexDirection.Column) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c39, d39) => {
+                    this.observeComponentCreation2((a4, b4) => {
                         Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
                         Flex.padding({
                             start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
                             end: LengthMetrics.vp(LISTITEM_PADDING)
                         });
                     }, Flex);
-                    this.observeComponentCreation2((a39, b39) => {
+                    this.observeComponentCreation2((y3, z3) => {
                         Text.create(this.text);
                         Text.fontSize({
                             'id': -1,
@@ -1624,11 +1862,11 @@ class OperateItemStruct extends ViewV2 {
                         });
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((q38, r38) => {
+                    this.observeComponentCreation2((o3, p3) => {
                         If.create();
                         if (this.arrow?.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((y38, z38) => {
+                                this.observeComponentCreation2((w3, x3) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{
                                         'id': -1,
@@ -1647,11 +1885,11 @@ class OperateItemStruct extends ViewV2 {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((s38, t38) => {
+                                this.observeComponentCreation2((q3, r3) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.arrow?.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((w38, x38) => {
+                                            this.observeComponentCreation2((u3, v3) => {
                                                 SymbolGlyph.create(this.arrow?.value);
                                                 SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                                                 SymbolGlyph.fontColor([{
@@ -1667,7 +1905,7 @@ class OperateItemStruct extends ViewV2 {
                                         });
                                     } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((u38, v38) => {
+                                            this.observeComponentCreation2((s3, t3) => {
                                                 Image.create(this.arrow?.value);
                                                 Image.height(OPERATEITEM_ICONLIKE_SIZE);
                                                 Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -1694,14 +1932,14 @@ class OperateItemStruct extends ViewV2 {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((o38, p38) => {
+                    this.observeComponentCreation2((m3, n3) => {
                         Row.create({ space: SPECICAL_ROW_SPACE });
                         Row.padding({
                             start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
                             end: LengthMetrics.vp(LISTITEM_PADDING)
                         });
                     }, Row);
-                    this.observeComponentCreation2((m38, n38) => {
+                    this.observeComponentCreation2((k3, l3) => {
                         Text.create(this.text);
                         Text.fontSize(this.secondaryTextSize);
                         Text.fontColor(this.secondaryTextColors);
@@ -1729,11 +1967,11 @@ class OperateItemStruct extends ViewV2 {
                         Text.margin({ right: OPERATEITEM_ARROW_MARGIN_WIDTH });
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((c38, d38) => {
+                    this.observeComponentCreation2((a3, b3) => {
                         If.create();
                         if (this.arrow?.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((k38, l38) => {
+                                this.observeComponentCreation2((i3, j3) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
                                         'id': -1,
@@ -1752,11 +1990,11 @@ class OperateItemStruct extends ViewV2 {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((e38, f38) => {
+                                this.observeComponentCreation2((c3, d3) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.arrow?.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((i38, j38) => {
+                                            this.observeComponentCreation2((g3, h3) => {
                                                 SymbolGlyph.create(this.arrow?.value);
                                                 SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                                                 SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
@@ -1772,7 +2010,7 @@ class OperateItemStruct extends ViewV2 {
                                         });
                                     } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((g38, h38) => {
+                                            this.observeComponentCreation2((e3, f3) => {
                                                 Image.create(this.arrow?.value);
                                                 Image.height(OPERATEITEM_ICONLIKE_SIZE);
                                                 Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -1804,34 +2042,34 @@ class OperateItemStruct extends ViewV2 {
     }
 
     getFlexOptions() {
-        let y37 = { alignItems: ItemAlign.Center };
+        let w2 = { alignItems: ItemAlign.Center };
         if (this.parentDirection === FlexDirection.Column) {
-            y37.justifyContent = FlexAlign.SpaceBetween;
+            w2.justifyContent = FlexAlign.SpaceBetween;
         } else {
-            y37.space = { main: LengthMetrics.vp(this.rowSpace) };
-            y37.justifyContent = FlexAlign.End;
+            w2.space = { main: LengthMetrics.vp(this.rowSpace) };
+            w2.justifyContent = FlexAlign.End;
         }
-        return y37;
+        return w2;
     }
 
-    notifyParentCanFocusChange(x37) {
-        emitter.emit({ eventId: EVENT_PARENT_CAN_FOCUS_CHANGE }, { data: { canFocus: x37 } });
+    notifyParentCanFocusChange(v2) {
+        emitter.emit({ eventId: EVENT_PARENT_CAN_FOCUS_CHANGE }, { data: { canFocus: v2 } });
     }
 
-    notifyParentCanHoverChange(w37) {
-        emitter.emit({ eventId: EVENT_PARENT_CAN_HOVER_CHANGE }, { data: { canHover: w37 } });
+    notifyParentCanHoverChange(u2) {
+        emitter.emit({ eventId: EVENT_PARENT_CAN_HOVER_CHANGE }, { data: { canHover: u2 } });
     }
 
-    notifyParentFrontColorChange(v37) {
-        emitter.emit({ eventId: EVENT_PARENT_FRONT_COLOR_CHANGE }, { data: { frontColor: v37 } });
+    notifyParentFrontColorChange(t2) {
+        emitter.emit({ eventId: EVENT_PARENT_FRONT_COLOR_CHANGE }, { data: { frontColor: t2 } });
     }
 
     initialRender() {
-        this.observeComponentCreation2((t37, u37) => {
+        this.observeComponentCreation2((r2, s2) => {
             Flex.create(this.getFlexOptions());
             Flex.width(this.parentDirection === FlexDirection.Column ? undefined : this.rightWidth);
         }, Flex);
-        this.observeComponentCreation2((p37, q37) => {
+        this.observeComponentCreation2((n2, o2) => {
             If.create();
             if (this.button != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
@@ -1871,15 +2109,15 @@ class OperateItemStruct extends ViewV2 {
                 this.ifElseBranchUpdateFunction(8, () => {
                     this.createCheckBox.bind(this)();
                 });
-            } else if (this.switch != null) {
+            } else if (this.toggle != null) {
                 this.ifElseBranchUpdateFunction(9, () => {
-                    this.createSwitch.bind(this)();
+                    this.createToggle.bind(this)();
                 });
             } else if (this.icon != null) {
                 this.ifElseBranchUpdateFunction(10, () => {
                     this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon',
                         { icon: () => (this['__icon'] ? this['__icon'] : this['icon']) }));
-                    this.observeComponentCreation2((r37, s37) => {
+                    this.observeComponentCreation2((p2, q2) => {
                         If.create();
                         if (this.subIcon != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
@@ -1902,66 +2140,66 @@ class OperateItemStruct extends ViewV2 {
         Flex.pop();
     }
 
-    updateStateVars(o37) {
-        if (o37 === undefined) {
+    updateStateVars(m2) {
+        if (m2 === undefined) {
             return;
         }
-        if ('arrow' in o37) {
-            this.updateParam('arrow', o37.arrow);
+        if ('arrow' in m2) {
+            this.updateParam('arrow', m2.arrow);
         }
-        if ('icon' in o37) {
-            this.updateParam('icon', o37.icon);
+        if ('icon' in m2) {
+            this.updateParam('icon', m2.icon);
         }
-        if ('subIcon' in o37) {
-            this.updateParam('subIcon', o37.subIcon);
+        if ('subIcon' in m2) {
+            this.updateParam('subIcon', m2.subIcon);
         }
-        if ('button' in o37) {
-            this.updateParam('button', o37.button);
+        if ('button' in m2) {
+            this.updateParam('button', m2.button);
         }
-        if ('switch' in o37) {
-            this.updateParam('switch', o37.switch);
+        if ('toggle' in m2) {
+            this.updateParam('toggle', m2.toggle);
         }
-        if ('checkBox' in o37) {
-            this.updateParam('checkBox', o37.checkBox);
+        if ('checkBox' in m2) {
+            this.updateParam('checkBox', m2.checkBox);
         }
-        if ('radio' in o37) {
-            this.updateParam('radio', o37.radio);
+        if ('radio' in m2) {
+            this.updateParam('radio', m2.radio);
         }
-        if ('image' in o37) {
-            this.updateParam('image', o37.image);
+        if ('image' in m2) {
+            this.updateParam('image', m2.image);
         }
-        if ('symbolStyle' in o37) {
-            this.updateParam('symbolStyle', o37.symbolStyle);
+        if ('symbolStyle' in m2) {
+            this.updateParam('symbolStyle', m2.symbolStyle);
         }
-        if ('text' in o37) {
-            this.updateParam('text', o37.text);
+        if ('text' in m2) {
+            this.updateParam('text', m2.text);
         }
-        if ('rightWidth' in o37) {
-            this.updateParam('rightWidth', o37.rightWidth);
+        if ('rightWidth' in m2) {
+            this.updateParam('rightWidth', m2.rightWidth);
         }
-        if ('parentCanFocus' in o37) {
-            this.updateParam('parentCanFocus', o37.parentCanFocus);
+        if ('parentCanFocus' in m2) {
+            this.updateParam('parentCanFocus', m2.parentCanFocus);
         }
-        if ('parentCanTouch' in o37) {
-            this.updateParam('parentCanTouch', o37.parentCanTouch);
+        if ('parentCanTouch' in m2) {
+            this.updateParam('parentCanTouch', m2.parentCanTouch);
         }
-        if ('parentIsHover' in o37) {
-            this.updateParam('parentIsHover', o37.parentIsHover);
+        if ('parentIsHover' in m2) {
+            this.updateParam('parentIsHover', m2.parentIsHover);
         }
-        if ('parentCanHover' in o37) {
-            this.updateParam('parentCanHover', o37.parentCanHover);
+        if ('parentCanHover' in m2) {
+            this.updateParam('parentCanHover', m2.parentCanHover);
         }
-        if ('parentIsActive' in o37) {
-            this.updateParam('parentIsActive', o37.parentIsActive);
+        if ('parentIsActive' in m2) {
+            this.updateParam('parentIsActive', m2.parentIsActive);
         }
-        if ('parentFrontColor' in o37) {
-            this.updateParam('parentFrontColor', o37.parentFrontColor);
+        if ('parentFrontColor' in m2) {
+            this.updateParam('parentFrontColor', m2.parentFrontColor);
         }
-        if ('parentDirection' in o37) {
-            this.updateParam('parentDirection', o37.parentDirection);
+        if ('parentDirection' in m2) {
+            this.updateParam('parentDirection', m2.parentDirection);
         }
-        if ('isFocus' in o37) {
-            this.updateParam('isFocus', o37.isFocus);
+        if ('isFocus' in m2) {
+            this.updateParam('isFocus', m2.isFocus);
         }
     }
 
@@ -1984,7 +2222,7 @@ __decorate([
 ], OperateItemStruct.prototype, 'button', void 0);
 __decorate([
     Param
-], OperateItemStruct.prototype, 'switch', void 0);
+], OperateItemStruct.prototype, 'toggle', void 0);
 __decorate([
     Param
 ], OperateItemStruct.prototype, 'checkBox', void 0);
@@ -2002,7 +2240,7 @@ __decorate([
 ], OperateItemStruct.prototype, 'text', void 0);
 __decorate([
     Local
-], OperateItemStruct.prototype, 'switchState', void 0);
+], OperateItemStruct.prototype, 'toggleState', void 0);
 __decorate([
     Local
 ], OperateItemStruct.prototype, 'radioState', void 0);
@@ -2058,54 +2296,54 @@ __decorate([
     Local
 ], OperateItemStruct.prototype, 'iconColor', void 0);
 __decorate([
-    Monitor('arrow', 'icon', 'subIcon', 'button', 'switch', 'checkBox', 'radio', 'image', 'symbolStyle', 'text')
+    Monitor('arrow', 'icon', 'subIcon', 'button', 'toggle', 'checkBox', 'radio', 'image', 'symbolStyle', 'text')
 ], OperateItemStruct.prototype, 'onPropChange', null);
 __decorate([
     Monitor('isFocus')
 ], OperateItemStruct.prototype, 'onFocusChange', null);
 
-function getAccessibilityText(j37) {
+function getAccessibilityText(h2) {
     try {
-        let n37 = '';
-        if (typeof j37 === 'string') {
-            n37 = j37;
+        let l2 = '';
+        if (typeof h2 === 'string') {
+            l2 = h2;
         } else {
-            n37 = getContext().resourceManager.getStringSync(j37);
+            l2 = getContext().resourceManager.getStringSync(h2);
         }
-        return n37;
-    } catch (k37) {
-        let l37 = k37.code;
-        let m37 = k37.message;
-        hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${l37}, message: ${m37}`);
+        return l2;
+    } catch (i2) {
+        let j2 = i2.code;
+        let k2 = i2.message;
+        hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${j2}, message: ${k2}`);
         return '';
     }
 }
 
-function getAccessibilityLevelOnChange(h37, i37) {
-    if (h37) {
-        return h37;
+function getAccessibilityLevelOnChange(f2, g2) {
+    if (f2) {
+        return f2;
     }
-    if (i37) {
+    if (g2) {
         return ACCESSIBILITY_LEVEL_YES;
     }
     return ACCESSIBILITY_LEVEL_NO;
 }
 
-function getAccessibilityLevelOnAction(f37, g37) {
-    if (f37) {
-        return f37;
+function getAccessibilityLevelOnAction(d2, e2) {
+    if (d2) {
+        return d2;
     }
-    if (g37) {
+    if (e2) {
         return ACCESSIBILITY_LEVEL_YES;
     }
     return ACCESSIBILITY_LEVEL_NO;
 }
 
 export class ComposeListItemV2 extends ViewV2 {
-    constructor(u36, v36, w36, x36 = -1, y36, z36) {
-        super(u36, x36, z36);
-        this.initParam('contentItemV2', (v36 && 'contentItemV2' in v36) ? v36.contentItemV2 : null);
-        this.initParam('operateItemV2', (v36 && 'operateItemV2' in v36) ? v36.operateItemV2 : null);
+    constructor(s1, t1, u1, v1 = -1, w1, x1) {
+        super(s1, v1, x1);
+        this.initParam('contentItemV2', (t1 && 'contentItemV2' in t1) ? t1.contentItemV2 : null);
+        this.initParam('operateItemV2', (t1 && 'operateItemV2' in t1) ? t1.operateItemV2 : null);
         this.frontColor = NORMAL_BG_COLOR;
         this.borderSize = 0;
         this.canFocus = false;
@@ -2138,28 +2376,28 @@ export class ComposeListItemV2 extends ViewV2 {
         this.listScale = { x: 1, y: 1 };
         this.operateItemStructRef = new OperateItemStructController();
         this.envCallback = {
-            onConfigurationUpdated: (b37) => {
-                if (b37 === undefined || !this.isFollowingSystemFontScale) {
+            onConfigurationUpdated: (z1) => {
+                if (z1 === undefined || !this.isFollowingSystemFontScale) {
                     this.fontSizeScale = 1;
                     return;
                 }
                 try {
-                    this.fontSizeScale = Math.min(this.maxFontScale, b37.fontSizeScale ?? 1);
-                } catch (c37) {
-                    let d37 = c37.code;
-                    let e37 = c37.message;
-                    hilog.error(0x3900, 'Ace', `ComposeListItemV2 environmentCallback error: ${d37}, ${e37}`);
+                    this.fontSizeScale = Math.min(this.maxFontScale, z1.fontSizeScale ?? 1);
+                } catch (a2) {
+                    let b2 = a2.code;
+                    let c2 = a2.message;
+                    hilog.error(0x3900, 'Ace', `ComposeListItemV2 environmentCallback error: ${b2}, ${c2}`);
                 }
             },
-            onMemoryLevel: (a37) => {
+            onMemoryLevel: (y1) => {
             }
         };
         this.finalizeConstruction();
     }
 
-    resetStateVarsOnReuse(t36) {
-        this.resetParam('contentItemV2', (t36 && 'contentItemV2' in t36) ? t36.contentItemV2 : null);
-        this.resetParam('operateItemV2', (t36 && 'operateItemV2' in t36) ? t36.operateItemV2 : null);
+    resetStateVarsOnReuse(r1) {
+        this.resetParam('contentItemV2', (r1 && 'contentItemV2' in r1) ? r1.contentItemV2 : null);
+        this.resetParam('operateItemV2', (r1 && 'operateItemV2' in r1) ? r1.operateItemV2 : null);
         this.frontColor = NORMAL_BG_COLOR;
         this.borderSize = 0;
         this.canFocus = false;
@@ -2206,8 +2444,8 @@ export class ComposeListItemV2 extends ViewV2 {
             if (this.contentItemV2?.icon === undefined) {
                 this.itemHeight = ItemHeight.FIRST_HEIGHT;
             } else {
-                let s36 = this.contentItemV2.iconStyle ?? IconTypeV2.BADGE;
-                this.itemHeight = s36 <= IconTypeV2.HEAD_SCULPTURE ?
+                let q1 = this.contentItemV2.iconStyle ?? IconTypeV2.BADGE;
+                this.itemHeight = q1 <= IconTypeV2.HEAD_SCULPTURE ?
                     ItemHeight.SECOND_HEIGHT :
                     (LengthMetrics.resource({
                         'id': -1,
@@ -2218,20 +2456,20 @@ export class ComposeListItemV2 extends ViewV2 {
                     }).value);
             }
         } else if (this.contentItemV2.description === undefined) {
-            let r36 = this.contentItemV2.iconStyle ?? IconTypeV2.BADGE;
+            let p1 = this.contentItemV2.iconStyle ?? IconTypeV2.BADGE;
             if (this.contentItemV2.icon === undefined ||
-                (this.contentItemV2.icon !== undefined && r36 <= IconTypeV2.SYSTEM_ICON)) {
+                (this.contentItemV2.icon !== undefined && p1 <= IconTypeV2.SYSTEM_ICON)) {
                 this.itemHeight = ItemHeight.THIRD_HEIGHT;
             } else {
-                this.itemHeight = r36 === IconTypeV2.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
+                this.itemHeight = p1 === IconTypeV2.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
             }
         } else {
             this.itemHeight = ItemHeight.FIFTH_HEIGHT;
         }
-        let p36 = this.contentItemV2?.iconStyle ?? IconTypeV2.BADGE;
-        let q36 = ICON_SIZE_MAP.get(p36);
-        if (q36 !== undefined && q36 >= this.itemHeight) {
-            this.itemHeight = q36 + SAFE_LIST_PADDING;
+        let n1 = this.contentItemV2?.iconStyle ?? IconTypeV2.BADGE;
+        let o1 = ICON_SIZE_MAP.get(n1);
+        if (o1 !== undefined && o1 >= this.itemHeight) {
+            this.itemHeight = o1 + SAFE_LIST_PADDING;
         }
         if (this.operateItemV2?.arrow && this.operateItemV2?.text && this.operateItemV2?.arrow?.action) {
             this.accessibilityTextBuilder = `
@@ -2312,11 +2550,11 @@ export class ComposeListItemV2 extends ViewV2 {
         }
     }
 
-    onWillApplyTheme(o36) {
-        this.hoveringColor = o36.colors.interactiveHover;
-        this.touchDownColor = o36.colors.interactivePressed;
-        this.activedColor = o36.colors.interactiveActive;
-        this.focusOutlineColor = o36.colors.interactiveFocus;
+    onWillApplyTheme(m1) {
+        this.hoveringColor = m1.colors.interactiveHover;
+        this.touchDownColor = m1.colors.interactivePressed;
+        this.activedColor = m1.colors.interactiveActive;
+        this.focusOutlineColor = m1.colors.interactiveFocus;
     }
 
     aboutToAppear() {
@@ -2324,32 +2562,32 @@ export class ComposeListItemV2 extends ViewV2 {
         this.onPropChange();
         try {
             this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
-        } catch (l36) {
-            let m36 = l36.code;
-            let n36 = l36.message;
-            hilog.error(0x3900, 'Ace', `ComposeListItemV2 Faild to get environment param error: ${m36}, ${n36}`);
+        } catch (j1) {
+            let k1 = j1.code;
+            let l1 = j1.message;
+            hilog.error(0x3900, 'Ace', `ComposeListItemV2 Faild to get environment param error: ${k1}, ${l1}`);
         }
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
             this.onFontSizeScaleChange();
         }
-        emitter.on({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, (k36) => {
-            if (k36.data && k36.data.isWrapText !== undefined) {
-                this.isWrapText = k36.data.isWrapText;
+        emitter.on({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, (i1) => {
+            if (i1.data && i1.data.isWrapText !== undefined) {
+                this.isWrapText = i1.data.isWrapText;
             }
         });
-        emitter.on({ eventId: EVENT_PARENT_CAN_FOCUS_CHANGE }, (j36) => {
-            if (j36.data && j36.data.canFocus !== undefined) {
-                this.canFocus = j36.data.canFocus;
+        emitter.on({ eventId: EVENT_PARENT_CAN_FOCUS_CHANGE }, (h1) => {
+            if (h1.data && h1.data.canFocus !== undefined) {
+                this.canFocus = h1.data.canFocus;
             }
         });
-        emitter.on({ eventId: EVENT_PARENT_CAN_HOVER_CHANGE }, (i36) => {
-            if (i36.data && i36.data.canHover !== undefined) {
-                this.canHover = i36.data.canHover;
+        emitter.on({ eventId: EVENT_PARENT_CAN_HOVER_CHANGE }, (g1) => {
+            if (g1.data && g1.data.canHover !== undefined) {
+                this.canHover = g1.data.canHover;
             }
         });
-        emitter.on({ eventId: EVENT_PARENT_FRONT_COLOR_CHANGE }, (h36) => {
-            if (h36.data && h36.data.frontColor !== undefined) {
-                this.frontColor = h36.data.frontColor;
+        emitter.on({ eventId: EVENT_PARENT_FRONT_COLOR_CHANGE }, (f1) => {
+            if (f1.data && f1.data.frontColor !== undefined) {
+                this.frontColor = f1.data.frontColor;
             }
         });
     }
@@ -2372,7 +2610,7 @@ export class ComposeListItemV2 extends ViewV2 {
         if (this.operateItemV2?.text || this.operateItemV2?.button) {
             return RIGHT_PART_WIDTH;
         }
-        if (this.operateItemV2?.switch) {
+        if (this.operateItemV2?.toggle) {
             return RIGHT_ONLY_SWITCH_WIDTH;
         } else if (this.operateItemV2?.checkbox) {
             return RIGHT_ONLY_CHECKBOX_WIDTH;
@@ -2434,10 +2672,10 @@ export class ComposeListItemV2 extends ViewV2 {
         if (this.containerDirection === FlexDirection.Row) {
             return LengthMetrics.vp(0);
         }
-        let f36 = this.contentItemV2?.iconStyle ?? IconTypeV2.BADGE;
-        let g36 = ICON_SIZE_MAP.get(f36);
-        if (this.contentItemV2?.icon && g36 !== undefined && g36 <= HEADSCULPTURE_SIZE) {
-            return LengthMetrics.vp(g36 + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+        let d1 = this.contentItemV2?.iconStyle ?? IconTypeV2.BADGE;
+        let e1 = ICON_SIZE_MAP.get(d1);
+        if (this.contentItemV2?.icon && e1 !== undefined && e1 <= HEADSCULPTURE_SIZE) {
+            return LengthMetrics.vp(e1 + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
         }
         return LengthMetrics.vp(LISTITEM_PADDING - this.textArrowLeftSafeOffset);
     }
@@ -2486,14 +2724,14 @@ export class ComposeListItemV2 extends ViewV2 {
 
     getPadding() {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-            let c36 = LengthMetrics.resource(ITEM_PADDING).value;
-            let d36 = c36 > LISTITEM_PADDING;
-            let e36 = d36 ? c36 - LISTITEM_PADDING : 0;
+            let a1 = LengthMetrics.resource(ITEM_PADDING).value;
+            let b1 = a1 > LISTITEM_PADDING;
+            let c1 = b1 ? a1 - LISTITEM_PADDING : 0;
             return {
-                top: this.isWrapText ? c36 : 0,
-                bottom: this.isWrapText ? c36 : 0,
-                left: e36,
-                right: e36
+                top: this.isWrapText ? a1 : 0,
+                bottom: this.isWrapText ? a1 : 0,
+                left: c1,
+                right: c1
             };
         } else {
             return undefined;
@@ -2501,7 +2739,7 @@ export class ComposeListItemV2 extends ViewV2 {
     }
 
     initialRender() {
-        this.observeComponentCreation2((a36, b36) => {
+        this.observeComponentCreation2((y, z) => {
             Stack.create();
             Stack.width('100%');
             Stack.accessibilityGroup(true);
@@ -2539,8 +2777,8 @@ export class ComposeListItemV2 extends ViewV2 {
                 if (this.operateItemV2?.checkbox) {
                     this.operateItemStructRef.changeCheckboxState();
                 }
-                if (this.operateItemV2?.switch) {
-                    this.operateItemStructRef.changeSwitchState();
+                if (this.operateItemV2?.toggle) {
+                    this.operateItemStructRef.changeToggleState();
                 }
             });
             Stack.scale(this.listScale);
@@ -2554,7 +2792,7 @@ export class ComposeListItemV2 extends ViewV2 {
                 right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
             });
         }, Stack);
-        this.observeComponentCreation2((x35, y35) => {
+        this.observeComponentCreation2((v, w) => {
             Flex.create(this.getFlexOptions());
             Flex.height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined);
             Flex.constraintSize({
@@ -2575,19 +2813,19 @@ export class ComposeListItemV2 extends ViewV2 {
             Flex.onBlur(() => {
                 this.canFocus = false;
             });
-            Flex.onHover((z35) => {
+            Flex.onHover((x) => {
                 if (this.isFocus && !IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.isHover = false;
                     return;
                 }
-                this.isHover = z35;
+                this.isHover = x;
                 if (this.canHover) {
-                    this.frontColor = z35 ? this.hoveringColor :
+                    this.frontColor = x ? this.hoveringColor :
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.frontColor = z35 ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
-                    z35 ? this.zoomIn() : this.zoomOut();
+                    this.frontColor = x ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
+                    x ? this.zoomIn() : this.zoomOut();
                 }
             });
             ViewStackProcessor.visualState('focused');
@@ -2632,26 +2870,26 @@ export class ComposeListItemV2 extends ViewV2 {
             ViewStackProcessor.visualState();
             Flex.padding(this.containerPadding);
         }, Flex);
-        this.observeComponentCreation2((r35, s35) => {
+        this.observeComponentCreation2((p, q) => {
             If.create();
             if (this.contentItemV2 === null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((t35, u35) => {
-                            if (u35) {
-                                let v35 = new ContentItemStruct(this, {}, undefined, t35, () => {
+                        this.observeComponentCreation2((r, s) => {
+                            if (s) {
+                                let t = new ContentItemStruct(this, {}, undefined, r, () => {
                                 }, {
-                                    page: 'library/src/main/ets/components/0508/composelistitemv2/source/composelistitemv2.ets',
-                                    line: 1454,
+                                    page: 'library/src/main/ets/components/composelistitemv2.ets',
+                                    line: 1615,
                                     col: 11
                                 });
-                                ViewV2.create(v35);
-                                let w35 = () => {
+                                ViewV2.create(t);
+                                let u = () => {
                                     return {};
                                 };
-                                v35.paramsGenerator_ = w35;
+                                t.paramsGenerator_ = u;
                             } else {
-                                this.updateStateVarsOfChildByElmtId(t35, {});
+                                this.updateStateVarsOfChildByElmtId(r, {});
                             }
                         }, { name: 'ContentItemStruct' });
                     }
@@ -2662,14 +2900,14 @@ export class ComposeListItemV2 extends ViewV2 {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((l35, m35) => {
+        this.observeComponentCreation2((j, k) => {
             If.create();
             if (this.contentItemV2 !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((n35, o35) => {
-                            if (o35) {
-                                let p35 = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((l, m) => {
+                            if (m) {
+                                let n = new ContentItemStruct(this, {
                                     icon: this.contentItemV2?.icon,
                                     symbolStyle: this.contentItemV2?.symbolStyle,
                                     iconStyle: this.contentItemV2?.iconStyle,
@@ -2681,14 +2919,14 @@ export class ComposeListItemV2 extends ViewV2 {
                                     itemDirection: this.contentItemDirection,
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight
-                                }, undefined, n35, () => {
+                                }, undefined, l, () => {
                                 }, {
-                                    page: 'library/src/main/ets/components/0508/composelistitemv2/source/composelistitemv2.ets',
-                                    line: 1457,
+                                    page: 'library/src/main/ets/components/composelistitemv2.ets',
+                                    line: 1618,
                                     col: 11
                                 });
-                                ViewV2.create(p35);
-                                let q35 = () => {
+                                ViewV2.create(n);
+                                let o = () => {
                                     return {
                                         icon: this.contentItemV2?.icon,
                                         symbolStyle: this.contentItemV2?.symbolStyle,
@@ -2703,9 +2941,9 @@ export class ComposeListItemV2 extends ViewV2 {
                                         itemHeight: this.itemHeight
                                     };
                                 };
-                                p35.paramsGenerator_ = q35;
+                                n.paramsGenerator_ = o;
                             } else {
-                                this.updateStateVarsOfChildByElmtId(n35, {
+                                this.updateStateVarsOfChildByElmtId(l, {
                                     icon: this.contentItemV2?.icon,
                                     symbolStyle: this.contentItemV2?.symbolStyle,
                                     iconStyle: this.contentItemV2?.iconStyle,
@@ -2728,11 +2966,11 @@ export class ComposeListItemV2 extends ViewV2 {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((d35, e35) => {
+        this.observeComponentCreation2((b, c) => {
             If.create();
             if (this.operateItemV2 !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((j35, k35) => {
+                    this.observeComponentCreation2((h, i) => {
                         __Common__.create();
                         __Common__.flexShrink(0);
                         __Common__.onFocus(() => {
@@ -2744,13 +2982,13 @@ export class ComposeListItemV2 extends ViewV2 {
                         __Common__.padding({ start: this.getOperateOffset() });
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((f35, g35) => {
-                            if (g35) {
-                                let h35 = new OperateItemStruct(this, {
+                        this.observeComponentCreation2((d, e) => {
+                            if (e) {
+                                let f = new OperateItemStruct(this, {
                                     icon: this.operateItemV2?.icon,
                                     subIcon: this.operateItemV2?.subIcon,
                                     button: this.operateItemV2?.button,
-                                    switch: this.operateItemV2?.switch,
+                                    toggle: this.operateItemV2?.toggle,
                                     checkBox: this.operateItemV2?.checkbox,
                                     radio: this.operateItemV2?.radio,
                                     image: this.operateItemV2?.image,
@@ -2766,19 +3004,19 @@ export class ComposeListItemV2 extends ViewV2 {
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.containerDirection,
                                     isFocus: this.isFocus
-                                }, undefined, f35, () => {
+                                }, undefined, d, () => {
                                 }, {
-                                    page: 'library/src/main/ets/components/0508/composelistitemv2/source/composelistitemv2.ets',
-                                    line: 1472,
+                                    page: 'library/src/main/ets/components/composelistitemv2.ets',
+                                    line: 1633,
                                     col: 11
                                 });
-                                ViewV2.create(h35);
-                                let i35 = () => {
+                                ViewV2.create(f);
+                                let g = () => {
                                     return {
                                         icon: this.operateItemV2?.icon,
                                         subIcon: this.operateItemV2?.subIcon,
                                         button: this.operateItemV2?.button,
-                                        switch: this.operateItemV2?.switch,
+                                        toggle: this.operateItemV2?.toggle,
                                         checkBox: this.operateItemV2?.checkbox,
                                         radio: this.operateItemV2?.radio,
                                         image: this.operateItemV2?.image,
@@ -2796,13 +3034,13 @@ export class ComposeListItemV2 extends ViewV2 {
                                         isFocus: this.isFocus
                                     };
                                 };
-                                h35.paramsGenerator_ = i35;
+                                f.paramsGenerator_ = g;
                             } else {
-                                this.updateStateVarsOfChildByElmtId(f35, {
+                                this.updateStateVarsOfChildByElmtId(d, {
                                     icon: this.operateItemV2?.icon,
                                     subIcon: this.operateItemV2?.subIcon,
                                     button: this.operateItemV2?.button,
-                                    switch: this.operateItemV2?.switch,
+                                    toggle: this.operateItemV2?.toggle,
                                     checkBox: this.operateItemV2?.checkbox,
                                     radio: this.operateItemV2?.radio,
                                     image: this.operateItemV2?.image,
@@ -2848,15 +3086,15 @@ export class ComposeListItemV2 extends ViewV2 {
         };
     }
 
-    updateStateVars(c35) {
-        if (c35 === undefined) {
+    updateStateVars(a) {
+        if (a === undefined) {
             return;
         }
-        if ('contentItemV2' in c35) {
-            this.updateParam('contentItemV2', c35.contentItemV2);
+        if ('contentItemV2' in a) {
+            this.updateParam('contentItemV2', a.contentItemV2);
         }
-        if ('operateItemV2' in c35) {
-            this.updateParam('operateItemV2', c35.operateItemV2);
+        if ('operateItemV2' in a) {
+            this.updateParam('operateItemV2', a.operateItemV2);
         }
     }
 
@@ -2944,5 +3182,6 @@ __decorate([
 ], ComposeListItemV2.prototype, 'onFontSizeScaleChange', null);
 
 export default {
-    IconTypeV2, ComposeListItemV2
+    IconTypeV2, ComposeListItemV2, ContentItemV2,
+    OperateButtonV2, OperateCheckV2, OperateItemV2, OperateIconV2
 };

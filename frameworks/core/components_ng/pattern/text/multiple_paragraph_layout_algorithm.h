@@ -68,6 +68,7 @@ protected:
         CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
         return spanGroup.front();
     }
+    bool IsSpanStringCacheEnabled(const RefPtr<TextLayoutProperty>& textLayoutProperty) const;
     ACE_FORCE_EXPORT void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
     ACE_FORCE_EXPORT bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
@@ -138,6 +139,7 @@ protected:
     float shadowOffset_ = 0.0f;
     bool spanStringHasMaxLines_ = false;
     bool isSpanStringMode_ = false;
+    bool isSpanStringCacheEnabled_ = false;
     bool isMarquee_ = false;
     bool needReCreateParagraph_ = true;
     bool useParagraphCache_ = false;

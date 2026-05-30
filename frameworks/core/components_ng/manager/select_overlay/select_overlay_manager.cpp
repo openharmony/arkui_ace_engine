@@ -463,6 +463,14 @@ const RefPtr<SelectContentOverlayManager>& SelectOverlayManager::GetSelectConten
     return selectContentManager_;
 }
 
+const RefPtr<SelectionContainerManager>& SelectOverlayManager::GetSelectionContainerManager()
+{
+    if (!selectionContainerManager_) {
+        selectionContainerManager_ = AceType::MakeRefPtr<SelectionContainerManager>();
+    }
+    return selectionContainerManager_;
+}
+
 void SelectOverlayManager::OnFontChanged()
 {
     auto contentOverlayManager = GetSelectContentOverlayManager();

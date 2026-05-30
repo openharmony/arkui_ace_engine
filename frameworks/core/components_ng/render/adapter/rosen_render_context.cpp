@@ -16,6 +16,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
+#include "core/components_ng/property/particle_property.h"
 
 #include <memory>
 
@@ -1684,14 +1685,17 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
     if (params.position.has_value()) {
         const auto& position = params.position.value();
         Rosen::SpatialEffectPara::CornerPositions corners;
-        corners[Rosen::SpatialEffectPara::LEFT_TOP_INDEX] =
-            Rosen::Vector3f { position.leftTop.x, position.leftTop.y, position.leftTop.z };
-        corners[Rosen::SpatialEffectPara::RIGHT_TOP_INDEX] =
-            Rosen::Vector3f { position.rightTop.x, position.rightTop.y, position.rightTop.z };
-        corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] =
-            Rosen::Vector3f { position.leftBottom.x, position.leftBottom.y, position.leftBottom.z };
-        corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] =
-            Rosen::Vector3f { position.rightBottom.x, position.rightBottom.y, position.rightBottom.z };
+        bool hasCrop = params.cropOffset.has_value() && params.cropScale > 0.0f;
+        float scale = hasCrop ? (1.0f / params.cropScale) : 1.0f;
+        float offX = hasCrop ? params.cropOffset->x : 0.0f;
+        float offY = hasCrop ? params.cropOffset->y : 0.0f;
+        auto transformCorner = [scale, offX, offY](const DepthVector3& v) -> Rosen::Vector3f {
+            return { scale * (v.x - offX), scale * (v.y - offY), v.z };
+        };
+        corners[Rosen::SpatialEffectPara::LEFT_TOP_INDEX] = transformCorner(position.leftTop);
+        corners[Rosen::SpatialEffectPara::RIGHT_TOP_INDEX] = transformCorner(position.rightTop);
+        corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] = transformCorner(position.leftBottom);
+        corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] = transformCorner(position.rightBottom);
         variantPara->position = corners;
     } else {
         variantPara->position = params.depth;
@@ -2609,6 +2613,22 @@ void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
         SetPivot(xPivot, yPivot, zPivot);
         NotifyHostTransformUpdated();
     }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateMaterialInteractionEffect(float scaleX, float scaleY, float offsetX, float offsetY)
+{
+    FREE_RS_CONTEXT_CHECK(UpdateMaterialInteractionEffect, scaleX, scaleY, offsetX, offsetY);
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector2f xyTranslateValue { offsetX, offsetY };
+    Rosen::Vector2f xyScaleValue { scaleX, scaleY };
+
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
+        Rosen::Vector2f>(materialInteractionEffectModifier_, xyTranslateValue);
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+        Rosen::Vector2f>(materialInteractionEffectModifier_, xyScaleValue);
+
+    NotifyHostTransformUpdated();
     RequestNextFrame();
 }
 
@@ -5409,9 +5429,10 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
         rsNode_->SetShadowElevation(shadow.IsValid() ? shadow.GetElevation() : 0.0);
     } else {
         auto radius = shadow.GetBlurRadius();
-        rsNode_->SetShadowRadius(
-            (!shadow.IsValid() || (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
-            && NearZero(radius))) ? -1.0 : DrawingDecorationPainter::ConvertRadiusToSigma(radius));
+        auto isNeedNotConvert = !shadow.IsValid() ||
+            (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) && NearZero(radius));
+        rsNode_->SetShadowRadius(isNeedNotConvert ?
+            -1.0 : DrawingDecorationPainter::ConvertRadiusToSigma(radius));
     }
     RequestNextFrame();
 }
@@ -7605,7 +7626,7 @@ void RosenRenderContext::SetShadowRadius(float radius)
     FREE_RS_CONTEXT_CHECK(SetShadowRadius, radius);
     CHECK_NULL_VOID(rsNode_);
     if (LessOrEqual(radius, 0.0f) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         rsNode_->SetShadowRadius(-1.0f);
         return;
     }
@@ -8947,6 +8968,8 @@ void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
     constexpr float MAXBLOOMINTENSITY_MAX = 19.3f;
     constexpr float INNERBORDERBLOOMWIDTH_RATIO = 0.8f;
     constexpr float OUTERBORDERBLOOMWIDTH_RATIO = 0.2f;
+    constexpr float MENU_INNERBORDERBLOOMWIDTH_RATIO = 0.1f;
+    constexpr float MENU_OUTERBORDERBLOOMWIDTH_RATIO = 0.0f;
     constexpr float COLOR_RATIO = 255.0f;
 
     auto edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
@@ -8968,10 +8991,18 @@ void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectMaxBorderWidthTag>(MAXBORDERWIDTH_DEFAULT);
     // Thickness affects InnerBorderBloomWidth & OuterBorderBloomWidth.
     // InnerBorderBloomWidth has a coefficient of 0.8, OuterBorderBloomWidth has a coefficient of 0.2.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isMenuNode = host->GetTag() == V2::MENU_ETS_TAG;
+    if (host->GetParentFrameNode()) {
+        auto tag = host->GetParentFrameNode()->GetTag();
+        isMenuNode = isMenuNode || tag == V2::DIALOG_ETS_TAG || tag == V2::ALERT_DIALOG_ETS_TAG ||
+                     tag == V2::ACTION_SHEET_DIALOG_ETS_TAG;
+    }
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectInnerBorderBloomWidthTag>(
-        edgeLightThicknessValue * INNERBORDERBLOOMWIDTH_RATIO);
+        edgeLightThicknessValue * (isMenuNode ? MENU_INNERBORDERBLOOMWIDTH_RATIO : INNERBORDERBLOOMWIDTH_RATIO));
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectOuterBorderBloomWidthTag>(
-        edgeLightThicknessValue * OUTERBORDERBLOOMWIDTH_RATIO);
+        edgeLightThicknessValue * (isMenuNode ? MENU_OUTERBORDERBLOOMWIDTH_RATIO : OUTERBORDERBLOOMWIDTH_RATIO));
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectColorTag>(
         Rosen::Vector3f(edgeLightParam->color.GetRed() / COLOR_RATIO, edgeLightParam->color.GetGreen() / COLOR_RATIO,
             edgeLightParam->color.GetBlue() / COLOR_RATIO));

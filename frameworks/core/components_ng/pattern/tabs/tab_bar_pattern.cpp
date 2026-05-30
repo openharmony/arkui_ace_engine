@@ -66,6 +66,7 @@ constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
 constexpr int8_t HALF_OF_WIDTH = 2;
+constexpr int8_t HALF_OF_HEIGHT = 2;
 constexpr float MAX_FLING_VELOCITY = 4200.0f;
 
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
@@ -2071,7 +2072,7 @@ void TabBarPattern::HandleTouchUp(int32_t index)
     if (addSwiperEventCallback) {
         addSwiperEventCallback();
     }
-    if (useNewMaterial_) {
+    if (useNewMaterial_ && !hoverIndex_.has_value()) {
         return;
     }
     auto host = GetHost();
@@ -2123,6 +2124,7 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
         layoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         color = indicatorStyles_[index].color;
     }
+    CheckFloatingStyle(index);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = color]() {
         auto tabBar = weak.Upgrade();
         CHECK_NULL_VOID(tabBar);
@@ -2132,8 +2134,14 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
         CHECK_NULL_VOID(columnNode);
         auto renderContext = columnNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        if (selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
-            tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+        CHECK_NULL_VOID(tabsPattern);
+        bool needSetRadius = selectedIndex < static_cast<int32_t>(tabBar->tabBarStyles_.size()) &&
+                             tabBar->tabBarStyles_[selectedIndex] != TabBarStyle::SUBTABBATSTYLE &&
+                             !tabsPattern->IsFloatingBar();
+        if (needSetRadius) {
             BorderRadiusProperty borderRadiusProperty;
             auto tabTheme = host->GetTheme<TabTheme>(true);
             CHECK_NULL_VOID(tabTheme);
@@ -3954,5 +3962,35 @@ void TabBarPattern::HandleTouchUpAndClickTo(const TouchLocationInfo& info)
     }
     auto index = GetSelectChildIndex(info.GetLocalLocation());
     HandleClick(SourceType::NONE, index);
+}
+
+void TabBarPattern::CheckFloatingStyle(int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+    CHECK_NULL_VOID(itemNode);
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (!tabsPattern->IsFloatingBar()) {
+        if (tabsPattern->LastFloatingBar()) {
+            BorderRadiusProperty borderRadius;
+            renderContext->UpdateBorderRadius(borderRadius);
+        }
+        return;
+    }
+
+    auto geometryNode = itemNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto height = geometryNode->GetFrameSize().Height();
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(height / HALF_OF_HEIGHT));
+    renderContext->UpdateBorderRadius(borderRadius);
 }
 } // namespace OHOS::Ace::NG

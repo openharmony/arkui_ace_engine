@@ -40,6 +40,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/visual_effect/component_material_interaction.h"
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
@@ -299,7 +300,6 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
     if (!isWidth) {
         layoutProperty->MarkUserDefinedHeightConfigured();
     }
-    frameNode->UnRegisterLpxAttribute(isWidth ? LpxAttribute::LPX_WIDTH : LpxAttribute::LPX_HEIGHT);
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
@@ -410,7 +410,6 @@ void ViewAbstract::ResetMinSize(bool resetWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    frameNode->UnRegisterLpxAttribute(resetWidth ? LpxAttribute::LPX_MIN_WIDTH : LpxAttribute::LPX_MIN_HEIGHT);
     layoutProperty->ResetCalcMinSize(resetWidth);
 }
 
@@ -521,7 +520,6 @@ void ViewAbstract::ResetMaxSize(bool resetWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    frameNode->UnRegisterLpxAttribute(resetWidth ? LpxAttribute::LPX_MAX_WIDTH : LpxAttribute::LPX_MAX_HEIGHT);
     layoutProperty->ResetCalcMaxSize(resetWidth);
 }
 
@@ -1499,11 +1497,6 @@ void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const PaddingPropert
 void ViewAbstract::ResetSafeAreaPadding(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SAFE_AREA_PADDING_RIGHT);
     ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, frameNode);
 }
 
@@ -3582,12 +3575,6 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
     CheckIfParentNeedMarkDirty(frameNode);
     ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X);
     ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_RIGHT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_START);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_END);
     ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
@@ -3606,12 +3593,6 @@ void ViewAbstract::SetPosition(const Dimension& x, const Dimension& y,
     CheckIfParentNeedMarkDirty(frameNode);
     ACE_CHECK_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X);
     ACE_CHECK_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_RIGHT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_START);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_END);
     ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
@@ -3742,8 +3723,6 @@ void ViewAbstract::SetPositionEdges(const EdgesParam& value)
     }
     CheckIfParentNeedMarkDirty(frameNode);
     CheckPositionEdgesLPX(value);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_X);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_Y);
     ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
     ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
 }
@@ -4301,6 +4280,12 @@ void ViewAbstract::BindPopup(
         }
     }
     param->SetShowInSubWindow(showInSubWindow);
+    if (!param->IsShowInSubWindow() && param->GetLevelMode() == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = DialogManager::GetEmbeddedOverlay(targetId, AceType::Claim(context));
+        if (embeddedOverlay) {
+            popupInfo.embeddedOveraly = embeddedOverlay;
+        }
+    }
     if (popupInfo.popupNode && popupInfo.isTips) {
         // subwindow need to handle
         overlayManager->ErasePopup(targetId);
@@ -6187,6 +6172,7 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("viewAbstract.uiMaterial");
+    UnRegisterMaterialInteractionEvent(frameNode);
     if (preMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
         auto preConfig = renderContext->GetImmersiveMaterialConfig();
         if (!preConfig.has_value()) {
@@ -6242,13 +6228,6 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
     } else {
         BorderWidthProperty borderWidth;
         borderWidth.SetBorderWidth(Dimension(0));
-        if (frameNode) {
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH);
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH_TOP);
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH_BOTTOM);
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH_LEFT);
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_BORDER_WIDTH_RIGHT);
-        }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
         pattern->OnBorderWidthReset();
@@ -6275,19 +6254,17 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        auto pipeline = frameNode->GetContextWithCheck();
-        CHECK_NULL_VOID(pipeline);
         if (materialType == MaterialType::IMMERSIVE) {
             pattern->ProcessDefaultImmersiveOptions(immersiveOptionsPtr);
             SetImmersiveOptions(frameNode, immersiveOptionsPtr);
             return;
         }
-        auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+        auto materialTheme = frameNode->GetTheme<UiMaterialTheme>(true);
         if (!materialTheme) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
             return;
         }
-        auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
+        auto params = materialTheme->GetUiMaterialParam(materialType, frameNode);
         if (!params) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
             return;
@@ -6317,6 +6294,22 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
     // This function cannot save uiMaterial to renderContext.
 }
 
+void ViewAbstract::RegisterMaterialInteractionEvent(
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
+{
+    CHECK_NULL_VOID(frameNode);
+    ControlInteractionBase::RegisterMaterialInteractionEvent(frameNode, optionsPtr);
+}
+
+void ViewAbstract::UnRegisterMaterialInteractionEvent(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ControlInteractionBase::UninitLightEffect(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemoveMaterialInteractionEvent();
+}
+
 void ViewAbstract::SetImmersiveOptions(
     const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
 {
@@ -6324,6 +6317,11 @@ void ViewAbstract::SetImmersiveOptions(
     CHECK_NULL_VOID(renderContext);
     if (!optionsPtr) {
         return;
+    }
+    if (optionsPtr->interactive || optionsPtr->lightEffectOptions) {
+        RegisterMaterialInteractionEvent(frameNode, optionsPtr);
+    } else {
+        UnRegisterMaterialInteractionEvent(AceType::RawPtr(frameNode));
     }
     auto materialConfig = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
     if (!materialConfig) {
@@ -7429,12 +7427,6 @@ void ViewAbstract::SetPosition(FrameNode* frameNode, OffsetT<Dimension>& value, 
     CheckIfParentNeedMarkDirty(frameNode);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetX(), LpxAttribute::LPX_POSITION_X, frameNode);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(value.GetY(), LpxAttribute::LPX_POSITION_Y, frameNode);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_RIGHT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_START);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_END);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
@@ -7444,8 +7436,6 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
     CHECK_NULL_VOID(frameNode);
     CheckIfParentNeedMarkDirty(frameNode);
     CheckNodePositionEdgesLPX(frameNode, value);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_X);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_Y);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, value, frameNode);
     if (!SystemProperties::ConfigChangePerform()) {
@@ -7474,8 +7464,6 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
             }
         }
         CheckNodePositionEdgesLPX(frameNode, edges);
-        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_X);
-        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_Y);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, edges, frameNode);
     };
@@ -7487,14 +7475,6 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     CHECK_NULL_VOID(frameNode);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_TOP);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_BOTTOM);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_LEFT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_RIGHT);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_START);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_EDGES_END);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_X);
-    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_POSITION_Y);
     auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parentNode);
     auto parentPattern = parentNode->GetPattern();
@@ -7894,6 +7874,29 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
 void ViewAbstract::SetUseUnion(FrameNode* frameNode, bool useUnion)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnionEffect, useUnion, frameNode);
+}
+
+void ViewAbstract::SetMaterialShadow(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    Shadow shadow = MaterialUtils::GetImmersiveShadow(pipeline->GetDipScale());
+    renderContext->UpdateBackShadow(shadow);
+}
+
+void ViewAbstract::ResetMaterialShadow(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    ResetImmersiveShadowToDefault(pattern, renderContext);
 }
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
@@ -8749,7 +8752,6 @@ void ViewAbstract::ResetMaxSize(FrameNode* frameNode, bool resetWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    frameNode->UnRegisterLpxAttribute(resetWidth ? LpxAttribute::LPX_MAX_WIDTH : LpxAttribute::LPX_MAX_HEIGHT);
     layoutProperty->ResetCalcMaxSize(resetWidth);
 }
 
@@ -8758,7 +8760,6 @@ void ViewAbstract::ResetMinSize(FrameNode* frameNode, bool resetWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    frameNode->UnRegisterLpxAttribute(resetWidth ? LpxAttribute::LPX_MIN_WIDTH : LpxAttribute::LPX_MIN_HEIGHT);
     layoutProperty->ResetCalcMinSize(resetWidth);
 }
 

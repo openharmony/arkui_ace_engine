@@ -32,12 +32,9 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/drawable/drawable_descriptor.h"
 
 namespace {
-constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
-constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
-constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
-constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
 } // namespace
 
 namespace OHOS::Ace {

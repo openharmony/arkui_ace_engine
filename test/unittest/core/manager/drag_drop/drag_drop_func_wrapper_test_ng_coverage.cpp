@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 #define private public
 
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/base/window/mock_drag_window.h"
@@ -34,6 +35,8 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/common/visual_effect/transparency_utils.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -50,12 +53,37 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/pipeline/base/element_register.h"
 #include "ui/base/geometry/ng/offset_t.h"
 #include "core/components/select/select_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+#if !defined(OHOS_PLATFORM)
+namespace OHOS::Ace {
+int32_t TransparencyUtils::GetTransparencyLevel(int32_t materialLevel)
+{
+    if (materialLevel == static_cast<int32_t>(UiMaterialLevel::GENTLE)) {
+        return static_cast<int32_t>(UiMaterialTransparency::GENTLE_NORMAL);
+    }
+    if (materialLevel == static_cast<int32_t>(UiMaterialLevel::EXQUISITE)) {
+        return static_cast<int32_t>(UiMaterialTransparency::NORMAL);
+    }
+    return static_cast<int32_t>(UiMaterialTransparency::NONE);
+}
+
+std::optional<int32_t> TransparencyUtils::RegisterTransparencyListener(
+    const WeakPtr<NG::FrameNode>& node, TransparencyCallback&& callback)
+{
+    return std::nullopt;
+}
+
+void TransparencyUtils::UnRegisterTransparencyListener(int32_t callbackId) {}
+} // namespace OHOS::Ace
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 RefPtr<DragWindow> MOCK_DRAG_WINDOW;
@@ -68,6 +96,47 @@ constexpr float OFFSET_WIDTH = 100.0f;
 constexpr float OFFSET_HEIGHT = 50.0f;
 constexpr float TINY_RADIUS = 1.0;
 constexpr float MEDIUM_RADIUS = 12.0;
+constexpr int32_t TEST_THEME_SCOPE_ID = 100;
+constexpr int32_t TEST_TOKEN_THEME_ID = 1;
+
+class UiMaterialLevelGuard final {
+public:
+    explicit UiMaterialLevelGuard(UiMaterialLevel level) : backupLevel_(g_uiMaterialLevel)
+    {
+        g_uiMaterialLevel = level;
+    }
+
+    ~UiMaterialLevelGuard()
+    {
+        g_uiMaterialLevel = backupLevel_;
+    }
+
+private:
+    UiMaterialLevel backupLevel_;
+};
+
+class MockPipelineResetGuard final {
+public:
+    MockPipelineResetGuard()
+    {
+        MockPipelineContext::TearDown();
+    }
+
+    ~MockPipelineResetGuard()
+    {
+        MockPipelineContext::SetUp();
+        MockContainer::SetUp();
+    }
+};
+
+RefPtr<UiMaterial> CreateImmersiveMaterial()
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ImmersiveOptions options;
+    options.style = UiMaterialStyle::REGULAR;
+    material->SetImmersiveOptions(options);
+    return material;
+}
 } // namespace
 
 // test case
@@ -974,8 +1043,12 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDragEndPendingDone, TestSize.L
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
 
     DragDropGlobalController::GetInstance().requestId_ = requestId;
+    bool callbackCalled = false;
+    DragDropGlobalController::GetInstance().stopDragCallback_ =
+        [&callbackCalled](const DragRet&, const DragBehavior&, const bool&) { callbackCalled = true; };
     ret = DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
     EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(callbackCalled);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
 }
@@ -2033,5 +2106,132 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDisableDropAnimation, TestSize
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(DragDropGlobalController::GetInstance().disableDropAnimation_, true);
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+}
+
+/**
+ * @tc.name: ParseDragPreviewMaterialInfo001
+ * @tc.desc: Test ParseDragPreviewMaterialInfo with null and exact UiMaterial.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, ParseDragPreviewMaterialInfo001, TestSize.Level1)
+{
+    DragPreviewOption option;
+    auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    EXPECT_EQ(materialInfo.materialFilter, nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::ParseUiMaterial(option), -1);
+
+    constexpr float dipScale = 1.5f;
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, dipScale, ColorMode::DARK);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    EXPECT_EQ(materialInfo.materialFilter, nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::CreateMaterialFilter(option, dipScale, ColorMode::DARK), nullptr);
+
+    option.options.material = AceType::MakeRefPtr<UiMaterial>();
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    EXPECT_EQ(materialInfo.materialFilter, nullptr);
+
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, dipScale, ColorMode::DARK);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    EXPECT_EQ(materialInfo.materialFilter, nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::CreateMaterialFilter(option, dipScale, ColorMode::DARK), nullptr);
+
+    DragPreviewOption emptyOption;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(emptyOption, frameNode);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    EXPECT_EQ(materialInfo.materialFilter, nullptr);
+
+    RefPtr<FrameNode> nullFrameNode;
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(emptyOption, nullFrameNode);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    EXPECT_EQ(materialInfo.materialFilter, nullptr);
+
+    RefPtr<PipelineBase> pipeline = MockPipelineContext::GetCurrent();
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(emptyOption, pipeline);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    EXPECT_EQ(materialInfo.materialFilter, nullptr);
+}
+
+/**
+ * @tc.name: ParseDragPreviewMaterialInfo002
+ * @tc.desc: Test immersive material parsing through PipelineBase overloads.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, ParseDragPreviewMaterialInfo002, TestSize.Level1)
+{
+    UiMaterialLevelGuard guard(UiMaterialLevel::EXQUISITE);
+    DragPreviewOption option;
+    option.options.material = CreateImmersiveMaterial();
+    ASSERT_NE(option.options.material, nullptr);
+
+    constexpr float dipScale = 1.5f;
+    auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, dipScale, ColorMode::DARK);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    DragDropFuncWrapper::CreateMaterialFilter(option, dipScale, ColorMode::DARK);
+
+    RefPtr<PipelineBase> pipeline = MockPipelineContext::GetCurrent();
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, pipeline);
+    EXPECT_EQ(materialInfo.materialId, -1);
+
+    RefPtr<PipelineBase> nullPipeline;
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, nullPipeline);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    EXPECT_EQ(materialInfo.materialFilter, nullptr);
+}
+
+/**
+ * @tc.name: ParseDragPreviewMaterialInfo003
+ * @tc.desc: Test immersive material parsing through FrameNode overloads.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, ParseDragPreviewMaterialInfo003, TestSize.Level1)
+{
+    UiMaterialLevelGuard guard(UiMaterialLevel::EXQUISITE);
+    DragPreviewOption option;
+    option.options.material = CreateImmersiveMaterial();
+    ASSERT_NE(option.options.material, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, frameNode);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    DragDropFuncWrapper::CreateMaterialFilter(option, frameNode);
+
+    auto theme = AceType::MakeRefPtr<TokenTheme>(TEST_TOKEN_THEME_ID);
+    theme->SetColorMode(ColorMode::DARK);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    TokenThemeStorage::GetInstance()->StoreThemeScope(TEST_THEME_SCOPE_ID, TEST_TOKEN_THEME_ID);
+    frameNode->SetThemeScopeId(TEST_THEME_SCOPE_ID);
+    materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, frameNode);
+    EXPECT_EQ(materialInfo.materialId, -1);
+    TokenThemeStorage::GetInstance()->RemoveThemeScope(TEST_THEME_SCOPE_ID, true);
+}
+
+/**
+ * @tc.name: ParseDragPreviewMaterialInfo004
+ * @tc.desc: Test FrameNode overload when no PipelineContext is available.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, ParseDragPreviewMaterialInfo004, TestSize.Level1)
+{
+    DragPreviewOption option;
+    option.options.material = CreateImmersiveMaterial();
+    ASSERT_NE(option.options.material, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    {
+        MockPipelineResetGuard pipelineResetGuard;
+        auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(option, frameNode);
+        EXPECT_EQ(materialInfo.materialId, -1);
+        EXPECT_EQ(materialInfo.materialFilter, nullptr);
+    }
 }
 } // namespace OHOS::Ace::NG

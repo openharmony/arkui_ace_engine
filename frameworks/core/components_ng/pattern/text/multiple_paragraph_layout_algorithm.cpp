@@ -111,6 +111,13 @@ std::string MultipleParagraphLayoutAlgorithm::SpansToString()
     return ss.str();
 }
 
+bool MultipleParagraphLayoutAlgorithm::IsSpanStringCacheEnabled(
+    const RefPtr<TextLayoutProperty>& textLayoutProperty) const
+{
+    auto policy = textLayoutProperty->GetIncrementalUpdatePolicyValue(IncrementalUpdatePolicy::NONE);
+    return policy != IncrementalUpdatePolicy::NONE && isSpanStringMode_;
+}
+
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {
@@ -135,8 +142,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
-    auto policy = textLayoutProperty->GetIncrementalUpdatePolicyValue(IncrementalUpdatePolicy::NONE);
-    if (policy != IncrementalUpdatePolicy::NONE) {
+    isSpanStringCacheEnabled_ = IsSpanStringCacheEnabled(textLayoutProperty);
+    if (isSpanStringCacheEnabled_) {
         UpdateTextStyleFromProperty(textLayoutProperty, textTheme, textStyle, pattern);
     } else {
         CreateTextStyleUsingTheme(textLayoutProperty, textTheme,
@@ -231,32 +238,33 @@ void MultipleParagraphLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayo
         }
         return;
     }
-    if (!spans_.empty()) {
-        size_t itemIndex = -1;
-        for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
-            ++itemIndex;
-            auto paragraph = pIter->paragraph;
-            if (!paragraph) {
-                continue;
+    size_t itemIndex = -1;
+    for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
+        ++itemIndex;
+        auto paragraph = pIter->paragraph;
+        CHECK_NULL_CONTINUE(paragraph);
+        CHECK_NULL_VOID(itemIndex < spans_.size());
+        auto spans = spans_[itemIndex];
+        TextStyle textStyle;
+        if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
+            spans.front()->GetTextStyle()->GetGradient().has_value()) {
+            textStyle = spans.front()->GetTextStyle().value();
+            auto& textLineStyle = spans.front()->textLineStyle;
+            auto gradient = textLineStyle->GetGradient();
+            if (gradient.has_value()) {
+                textStyle.SetGradient(GradientConvert::ToGradient(gradient.value()));
+            } else if (textLineStyle->GetColorShaderStyle().has_value()) {
+                textStyle.SetColorShaderStyle(textLineStyle->GetColorShaderStyle());
             }
-            if (itemIndex >= spans_.size()) {
-                return;
-            }
-            auto spans = spans_[itemIndex];
-            TextStyle textStyle;
-            if (!spans.empty() && spans.front() && spans.front()->GetTextStyle() &&
-                spans.front()->GetTextStyle()->GetGradient().has_value()) {
-                textStyle = spans.front()->GetTextStyle().value();
-            } else {
-                textStyle = textStyle_;
-            }
-            CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
-            if (pIter->firstSpanTextStyleUid > 0) {
-                textStyle.SetTextStyleUid(pIter->firstSpanTextStyleUid);
-            }
-            textStyle.SetForeGroundBrushBitMap();
-            paragraph->ReLayoutForeground(textStyle);
+        } else {
+            textStyle = textStyle_;
         }
+        CHECK_NULL_CONTINUE(textStyle.GetGradient().has_value());
+        if (pIter->firstSpanTextStyleUid > 0) {
+            textStyle.SetTextStyleUid(pIter->firstSpanTextStyleUid);
+        }
+        textStyle.SetForeGroundBrushBitMap();
+        paragraph->ReLayoutForeground(textStyle);
     }
 }
 
@@ -626,7 +634,20 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
             }
         }
         contentOffset = alignPosition + paddingOffset;
+        // SetOffset does not include alignOffsetY, which is applied separately during painting
+        // by TextContentModifier::SetTextContentAlingOffsetY
         content->SetOffset(contentOffset);
+        // Add alignOffsetY to the return value so that child nodes (e.g. image spans) are positioned
+        // consistently with the actual paragraph paint position
+        if (textLayoutProperty && textLayoutProperty->HasTextContentAlign() && paragraphManager_) {
+            auto contentHeight = size.Height() + std::fabs(baselineOffset_);
+            if (contentHeight < paragraphManager_->GetHeight()) {
+                auto textContentAlign = textLayoutProperty->GetTextContentAlign().value();
+                auto alignOffsetY = static_cast<int32_t>(textContentAlign) *
+                    (contentHeight - paragraphManager_->GetHeight()) / 2.0f;
+                contentOffset.SetY(contentOffset.GetY() + alignOffsetY);
+            }
+        }
     }
     return contentOffset;
 }
@@ -654,8 +675,11 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
     // generally not allowed to be modified
     CHECK_NULL_RETURN(paragraphManager_, false);
     auto paragraphs = paragraphManager_->GetParagraphs();
+    float textWidth = isSpanStringCacheEnabled_
+        ? paragraphManager_->GetLongestLineWithIndent()
+        : paragraphManager_->GetTextWidthIncludeIndent();
     float paragraphNewWidth =
-        std::min(std::min(paragraphManager_->GetTextWidthIncludeIndent(), paragraphManager_->GetMaxWidth()),
+        std::min(std::min(textWidth, paragraphManager_->GetMaxWidth()),
             GetMaxMeasureSize(contentConstraint).Width());
     paragraphNewWidth =
         std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
@@ -664,8 +688,12 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
             auto paragraph = pIter->paragraph;
             CHECK_NULL_RETURN(paragraph, false);
             if (SystemProperties::GetTextTraceEnabled()) {
-                ACE_TEXT_SCOPED_TRACE("ParagraphReLayout[NewWidth:%f][MaxWidth:%f][IndentWidth:%f][Constraint:%s]",
-                    paragraphNewWidth, paragraph->GetMaxWidth(), paragraphManager_->GetTextWidthIncludeIndent(),
+                ACE_TEXT_SCOPED_TRACE(
+                    "ParagraphReLayout[NewWidth:%f][MaxWidth:%f][IndentWidth:%f]"
+                    "[LongestLineWithIndent:%f][Constraint:%s]",
+                    paragraphNewWidth, paragraph->GetMaxWidth(),
+                    paragraphManager_->GetTextWidthIncludeIndent(),
+                    paragraphManager_->GetLongestLineWithIndent(),
                     contentConstraint.ToString().c_str());
             }
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {

@@ -39,6 +39,7 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetTextCaretColor(const Color& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    void SetSelectedBackgroundColorFlagByUser(bool flag) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override;
@@ -90,6 +91,7 @@ public:
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetCopyOptionFlagByUser(bool flag) override;
     void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
@@ -109,7 +111,7 @@ public:
         const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     void SetHalfLeading(bool halfLeading) override;
-    void SetEnableHapticFeedback(bool state) override;
+    void SetEnableHapticFeedback(bool state, bool flagByUser) override;
     void SetEnableAutoSpacing(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
     void SetFallbackLineSpacing(bool enabled) override;
@@ -117,6 +119,7 @@ public:
     void SetOptimizeTrailingSpace(bool trim) override;
     void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
+    void SetPunctuationOverflow(bool enabled) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetColorShaderStyle(const Color& value) override;
     void ResetGradientShaderStyle() override;
@@ -125,6 +128,7 @@ public:
     void ResetSelectedDragPreviewStyle() override;
     void SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy) override;
     void ResetIncrementalUpdatePolicy() override;
+    void BindJSTextController(std::function<void()>&& func) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -163,6 +167,7 @@ public:
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
+    static void SetCopyOptionFlagByUser(FrameNode* frameNode, bool flag);
     static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
@@ -193,6 +198,7 @@ public:
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
     static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetSelectedBackgroundColorFlagByUser(FrameNode* frameNode, bool flag);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam);
@@ -257,7 +263,7 @@ public:
         FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
-    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state, bool flagByUser);
     static size_t GetLineCount(FrameNode* frameNode);
     static std::vector<ParagraphManager::TextBox> GetRectsForRange(FrameNode* frameNode, int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
@@ -281,6 +287,8 @@ public:
     static bool GetOrphanCharOptimization(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
+    static void SetPunctuationOverflow(FrameNode* frameNode, bool enabled);
+    static bool GetPunctuationOverflow(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
     static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
     static Color GetColorShaderStyle(FrameNode* frameNode);

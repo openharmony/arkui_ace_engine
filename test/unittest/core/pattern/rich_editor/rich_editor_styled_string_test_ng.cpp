@@ -1424,9 +1424,15 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward002, TestSize.Le
  */
 HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get rich editor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. create styledString
+     */
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
     richEditorPattern->previewLongPress_ = true;
     auto focusHub = richEditorPattern->GetFocusHub();

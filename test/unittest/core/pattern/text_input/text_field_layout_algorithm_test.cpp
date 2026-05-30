@@ -20,7 +20,6 @@
 #include "text_input_base.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 

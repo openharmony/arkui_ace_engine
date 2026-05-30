@@ -27,5 +27,6 @@ namespace OHOS::Ace {
 void* ParseResourceObject(void* object);
 std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager();
 const ArkUIDrawableDescriptor* GetArkUIDrawableModifier();
+int32_t ParseDimensionToPx(void* value);
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERAPI_DRAWABLE_BRIDGE_H

@@ -1151,6 +1151,14 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
     }
 }
 
+const WeakPtr<UINode>& OverlayManager::GetEmbeddedNode(const PopupInfo& popupInfo) const
+{
+    if (popupInfo.embeddedOveraly) {
+        return popupInfo.embeddedOveraly->GetRootNode();
+    }
+    return rootNodeWeak_;
+}
+
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
@@ -1160,7 +1168,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
             popupInfo.target.Upgrade()->GetTag().c_str());
         return;
     }
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
     if (frameNode && !frameNode->IsLayoutComplete()) {
@@ -1485,7 +1493,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
     auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
@@ -1603,7 +1611,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
     auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     auto container = Container::Current();
     if (container && container->IsSceneBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
@@ -1721,7 +1729,7 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
     if (!autoCancel && !isForceClear) {
         return nullptr;
     }
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
     CHECK_NULL_RETURN(rootNode, nullptr);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
@@ -1888,7 +1896,8 @@ void OverlayManager::ErasePopup(int32_t targetId)
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
     auto it = popupMap_.find(targetId);
     if (it != popupMap_.end()) {
-        auto rootNode = rootNodeWeak_.Upgrade();
+        auto popupInfo = GetPopupInfo(targetId);
+        auto rootNode = GetEmbeddedNode(popupInfo).Upgrade();
         CHECK_NULL_VOID(rootNode);
         auto popupNode = it->second.popupNode;
         CHECK_NULL_VOID(popupNode);
@@ -4912,15 +4921,20 @@ void OverlayManager::UpdateSheetRender(
     if (sheetStyle.borderColor.has_value()) {
         sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
     }
-    if (sheetStyle.shadow.has_value()) {
-        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-    } else if (sheetTheme->IsOuterBorderEnable()) {
-        auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
-        auto shadow = sheetNodePattern->GetShadowFromTheme(style);
-        sheetRenderContext->UpdateBackShadow(shadow);
-    } else if (!isPartialUpdate) {
-        auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
-        sheetRenderContext->UpdateBackShadow(shadow);
+    if (!(sheetStyle.systemMaterial && sheetStyle.systemMaterial->IsForceShadow())) {
+        if (sheetStyle.shadow.has_value()) {
+            sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, sheetStyle.shadow.value(), sheetPageNode);
+        } else if (sheetTheme->IsOuterBorderEnable()) {
+            auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
+            auto shadow = sheetNodePattern->GetShadowFromTheme(style);
+            sheetRenderContext->UpdateBackShadow(shadow);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, sheetPageNode);
+        } else if (!isPartialUpdate) {
+            auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
+            sheetRenderContext->UpdateBackShadow(shadow);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, sheetPageNode);
+        }
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 
@@ -5465,8 +5479,15 @@ void OverlayManager::SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode,
             sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
         }
     } else if (sheetStyle.backgroundColor.has_value() || !isPartialUpdate) {
-        sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value_or(
-            sheetTheme->GetSheetBackgoundColor()));
+        // - has systemMaterial and not SMOOTH -> do not set backgroundColor
+        // - has systemMaterial and SMOOTH -> use default backgroundColor
+        // - no systemMaterial -> follow the normal backgroundColor setting logic
+        if (!sheetStyle.systemMaterial) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(
+                sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
+        } else if (sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+        }
     }
 }
 

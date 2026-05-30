@@ -512,5 +512,19 @@ HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentL
 void UINode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
 }
+
+int32_t UINode::GetSelectionContainerId() const
+{
+    return {};
+}
+
+void UINode::SetSelectionContainerId(int32_t selectionContainerId)
+{
+}
+
+void UINode::UpdateSelectionContainerId(int32_t selectionContainerId)
+{
+}
+
 #pragma clang diagnostic pop
 } // namespace OHOS::Ace::NG

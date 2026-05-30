@@ -68,6 +68,7 @@
         "src/scroll_modifier.ts",
         "src/search_modifier.ts",
         "src/select_modifier.ts",
+        "src/selection_container_modifier.ts",
         "src/shape_modifier.ts",
         "src/sidebar_modifier.ts",
         "src/slider_modifier.ts",

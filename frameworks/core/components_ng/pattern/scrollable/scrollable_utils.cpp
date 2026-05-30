@@ -26,9 +26,9 @@ Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
 
 std::optional<float> GetAccessibilityCenterLimitMoveOffset(
     const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& curFrameNode, const MoveOffsetParam& param,
-    float rawMoveOffset)
+    float moveOffset)
 {
-    auto scrollMoveOffset = GetScrollAccessibilityCenterLimitMoveOffset(parentFrameNode, rawMoveOffset);
+    auto scrollMoveOffset = GetScrollAccessibilityCenterLimitMoveOffset(parentFrameNode, moveOffset);
     if (scrollMoveOffset.has_value()) {
         return scrollMoveOffset;
     }

@@ -167,6 +167,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->CanUndo(), false);
     EXPECT_EQ(pattern->CanRedo(), false);
+    /**
+     * @tc.steps: step2. HandleOnUndoAction
+     */
     pattern->HandleOnUndoAction();
     TextEditingValueNG record {
         .text = pattern->contentController_->GetTextUtf16Value(),
@@ -179,6 +182,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
         value.text = u"123";
         pattern->redoOperationRecords_.push_back(value);
     }
+    /**
+     * @tc.steps: step3. HandleOnUndoAction
+     */
     pattern->HandleOnUndoAction();
 }
 

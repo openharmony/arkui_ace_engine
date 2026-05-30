@@ -56,6 +56,7 @@ struct ImageDecoderOptions {
     bool isHdrDecoderNeed = false;
     PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN;
     ImageDfxConfig imageDfxConfig;
+    WeakPtr<class ImageLoadingContext> ctxWp;
 };
 
 struct UriDownLoadConfig {
@@ -64,6 +65,7 @@ struct UriDownLoadConfig {
     std::string taskKey;
     bool sync = false;
     bool hasProgressCallback = false;
+    WeakPtr<class ImageLoadingContext> ctxWp;
 };
 
 struct ImageLoadResultInfo {
@@ -172,6 +174,7 @@ private:
         std::set<WeakPtr<ImageLoadingContext>> ctxs_;
     };
 
+    static std::atomic<int32_t> traceTaskId_;
     static std::timed_mutex taskMtx_;
     static std::unordered_map<std::string, Task> tasks_;
 };

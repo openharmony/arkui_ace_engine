@@ -99,10 +99,10 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
             delta *= friction;
         }
     } else {
-        if (layoutInfo_->itemStart_ && delta > 0) {
+        if (layoutInfo_->itemStart_ && Positive(delta)) {
             return false;
         }
-        if (layoutInfo_->offsetEnd_ && delta < 0) {
+        if (layoutInfo_->offsetEnd_ && Negative(delta)) {
             return false;
         }
         if (layoutInfo_->Mode() == LayoutMode::TOP_DOWN && GreatNotEqual(delta, 0.0f)) {

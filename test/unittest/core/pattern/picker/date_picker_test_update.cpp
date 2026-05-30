@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components/button/button_theme.h"
 #undef private

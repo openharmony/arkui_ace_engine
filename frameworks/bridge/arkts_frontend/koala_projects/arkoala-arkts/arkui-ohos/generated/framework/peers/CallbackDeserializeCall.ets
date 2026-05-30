@@ -18,7 +18,7 @@
 
 import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, InputEventInterceptResult_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureCollectInterceptCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, InputEventListener, RawInputEventWrapper_serializer, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, InputEventInterceptResult, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, RawInputEventWrapper, PopupStateChangeParam } from './../../component/common'
 import { resourceFinalizerRegister, registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer } from '@koalaui/interop'
-import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, CustomSpanMeasureInfoProxy, CustomSpanMeasureInfoProxy_serializer, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, NavExtender_PushDestinationInner, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
+import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, CustomSpanMeasureInfoProxy, CustomSpanMeasureInfoProxy_serializer, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, NavExtender_PushDestinationInner, OnSurfaceChangedCb, OnSurfaceCreatedCb, OnSurfaceDestroyedCb, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
 import { extractors, TouchEvent } from '#handwritten'
 import { SwiperAnimationEvent_serializer, SwiperContentTransitionProxy_serializer, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult_serializer, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperContentTransitionProxy, SwiperContentWillScrollResult } from './../../component/swiper'
 import { ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
@@ -43,7 +43,6 @@ import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_seri
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnDidZoomCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, OnScrollFrameBeginHandlerResult, OffsetResult } from './../../component/scroll'
 import { DrawingRenderingContext_serializer, DrawingRenderingContext } from './../../component/canvas'
 import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, OnTabsAnimationEndCallback, TabsAnimationEvent_serializer, OnTabsAnimationStartCallback, OnTabsContentDidScrollCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback, TabContentAnimatedTransition, TabContentTransitionProxy, TabsAnimationEvent } from './../../component/tabs'
-import { SurfaceRect_serializer, SurfaceRect } from './../../component/xcomponent'
 import { TextPickerResult_serializer, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback, TextPickerResult } from './../../component/textPicker'
 import { TimePickerResult_serializer, OnTimePickerChangeCallback, TimePickerResult } from './../../component/timePicker'
 import { UIExtensionProxy_serializer, UIExtensionProxy } from './../../component/uiExtensionComponent'
@@ -63,6 +62,7 @@ import { OnFoldStatusChangeCallback, OnFoldStatusChangeInfo_serializer, OnHoverS
 import { OnListScrollIndexCallback, OnScrollVisibleContentChangeCallback, VisibleListContentInfo_serializer, ScrollState, VisibleListContentInfo } from './../../component/list'
 import { OnRadioChangeCallback, RadioConfiguration_serializer, RadioConfiguration } from './../../component/radio'
 import { OnRatingChangeCallback, RatingConfiguration_serializer, RatingConfiguration } from './../../component/rating'
+import { SurfaceRect_serializer, SurfaceRect } from './../../component/xcomponent'
 import { OnUIPickerComponentCallback } from './../../component/uiPickerComponent'
 import { OnWaterFlowScrollIndexCallback } from './../../component/waterFlow'
 import { PasteButtonCallback, PasteButtonOnClickResult } from './../../component/pasteButton'
@@ -1869,13 +1869,6 @@ export function deserializeAndCallCallback_String_PasteEvent_Void(thisDeserializ
     let event: PasteEvent = (PasteEvent_serializer.read(thisDeserializer) as PasteEvent)
     call(value, event)
 }
-export function deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer: DeserializerBase): void {
-    const resourceId: int32 = thisDeserializer.readInt32()
-    const call = (ResourceHolder.instance().get(resourceId) as ((surfaceId: string,rect: SurfaceRect) => void))
-    let surfaceId: string = (thisDeserializer.readString() as string)
-    let rect: SurfaceRect = SurfaceRect_serializer.read(thisDeserializer)
-    call(surfaceId, rect)
-}
 export function deserializeAndCallCallback_String_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<string, void>)
@@ -3275,6 +3268,25 @@ export function deserializeAndCallOnSubmitCallback(thisDeserializer: Deserialize
     let event: SubmitEvent = (SubmitEvent_serializer.read(thisDeserializer) as SubmitEvent)
     call(enterKey, event)
 }
+export function deserializeAndCallOnSurfaceChangedCb(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as OnSurfaceChangedCb)
+    let surfaceId: string = (thisDeserializer.readString() as string)
+    let rect: SurfaceRect = SurfaceRect_serializer.read(thisDeserializer)
+    call(surfaceId, rect)
+}
+export function deserializeAndCallOnSurfaceCreatedCb(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as OnSurfaceCreatedCb)
+    let surfaceId: string = (thisDeserializer.readString() as string)
+    call(surfaceId)
+}
+export function deserializeAndCallOnSurfaceDestroyedCb(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as OnSurfaceDestroyedCb)
+    let surfaceId: string = (thisDeserializer.readString() as string)
+    call(surfaceId)
+}
 export function deserializeAndCallOnSwiperAnimationEndCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as OnSwiperAnimationEndCallback)
@@ -4490,7 +4502,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_STRING: return deserializeAndCallCallback_String(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STRING_BOOLEAN: return deserializeAndCallCallback_String_Boolean(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STRING_PASTEEVENT_VOID: return deserializeAndCallCallback_String_PasteEvent_Void(thisDeserializer);
-        case CallbackKind.KIND_CALLBACK_STRING_SURFACERECT_VOID: return deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STRING_VOID: return deserializeAndCallCallback_String_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_STYLEDSTRINGCHANGEVALUE_BOOLEAN: return deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_SWIPEACTIONSTATE_VOID: return deserializeAndCallCallback_SwipeActionState_Void(thisDeserializer);
@@ -4601,6 +4612,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_ONSELECTCALLBACK: return deserializeAndCallOnSelectCallback(thisDeserializer);
         case CallbackKind.KIND_ONSSLERROREVENTCALLBACK: return deserializeAndCallOnSslErrorEventCallback(thisDeserializer);
         case CallbackKind.KIND_ONSUBMITCALLBACK: return deserializeAndCallOnSubmitCallback(thisDeserializer);
+        case CallbackKind.KIND_ONSURFACECHANGEDCB: return deserializeAndCallOnSurfaceChangedCb(thisDeserializer);
+        case CallbackKind.KIND_ONSURFACECREATEDCB: return deserializeAndCallOnSurfaceCreatedCb(thisDeserializer);
+        case CallbackKind.KIND_ONSURFACEDESTROYEDCB: return deserializeAndCallOnSurfaceDestroyedCb(thisDeserializer);
         case CallbackKind.KIND_ONSWIPERANIMATIONENDCALLBACK: return deserializeAndCallOnSwiperAnimationEndCallback(thisDeserializer);
         case CallbackKind.KIND_ONSWIPERANIMATIONSTARTCALLBACK: return deserializeAndCallOnSwiperAnimationStartCallback(thisDeserializer);
         case CallbackKind.KIND_ONSWIPERGESTURESWIPECALLBACK: return deserializeAndCallOnSwiperGestureSwipeCallback(thisDeserializer);

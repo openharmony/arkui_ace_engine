@@ -83,23 +83,33 @@ DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& ges
     SetIsNewFwk(true);
 }
 
-void DragDropEventActuator::InitPanAction()
+void DragDropEventActuator::InitPanMouseDistance(bool isStylusMouseMode)
+{
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(
+        DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
+    panRecognizer_->SetIsForDrag(true);
+    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragPanDistanceMouse = DRAG_PAN_DISTANCE_MOUSE;
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    if (appTheme) {
+        dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
+    }
+    if (isStylusMouseMode) {
+        dragPanDistanceMouse = DEFAULT_DRAG_DISTANCE;
+    }
+    panRecognizer_->SetMouseDistance(dragPanDistanceMouse.ConvertToPx());
+}
+
+void DragDropEventActuator::InitPanAction(bool isStylusMouseMode)
 {
     auto frameNode = GetFrameNode();
     ACE_UINODE_TRACE(frameNode);
     if (panRecognizer_ == nullptr) {
-        panRecognizer_ = MakeRefPtr<PanRecognizer>(
-            DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
-        panRecognizer_->SetIsForDrag(true);
-        panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
+        InitPanMouseDistance(isStylusMouseMode);
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
-        auto dragPanDistanceMouse = DRAG_PAN_DISTANCE_MOUSE;
-        auto appTheme = pipeline->GetTheme<AppTheme>();
-        if (appTheme) {
-            dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
-        }
-        panRecognizer_->SetMouseDistance(dragPanDistanceMouse.ConvertToPx());
     }
     panRecognizer_->SetOnActionStart(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
@@ -215,7 +225,7 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     auto touchEvent = touchRestrict.touchEvent;
     RecordTouchDownPoint(touchEvent);
     dragDropInitiatingHandler_->NotifyHitTesting(touchEvent);
-    InitPanAction();
+    InitPanAction(touchEvent.isStylusMouseMode);
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     if (touchRestrict.sourceType == SourceType::MOUSE) {

@@ -52,7 +52,7 @@ public:
     void Close(int32_t id, bool animation, CloseReason reason);
     bool CloseCurrent(bool animation, CloseReason reason);
     void CloseWithOverlayId(int32_t overlayId, CloseReason reason, bool animation);
-    void ShowOptionMenu();
+    void ShowOptionMenu(bool useNewAnimation = false);
     void HideOptionMenu(bool noAnimation = false, bool showSubMenu = false);
     void ToggleOptionMenu();
     void DisableMenu();

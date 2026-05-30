@@ -19,9 +19,10 @@
 #include <functional>
 #include <string>
 
+#include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
+
 namespace OHOS::Ace::NG {
 
-using SelectedChangeEvent = std::function<void(const std::string&)>;
 using RequestDataEvent = std::function<void(const std::string&)>;
 
 } // namespace OHOS::Ace::NG

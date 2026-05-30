@@ -29,14 +29,15 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT RepeatVirtualScroll2ModelNG : public RepeatVirtualScroll2Model {
 public:
-    void Create(uint32_t arrLen, uint32_t totalCount,
-        const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& onGetRid4Index,
+    void Create(uint32_t arrLen, uint32_t totalCount, int32_t memOptStrategy,
+        const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& onGetRid4Index,
         const std::function<void(int32_t, int32_t)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge,
-        const std::function<void()>& onUpdateDirty) override;
+        const std::function<void()>& onPurgeAll, const std::function<void()>& onUpdateDirty) override;
 
     void RemoveNode(uint32_t rid) override;
+    void RemoveNodes(const std::vector<uint32_t>& rids, const std::vector<int32_t>& indexes) override;
     void SetInvalid(int32_t repeatElmtId, uint32_t rid) override;
 
     void RequestContainerReLayout(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount,

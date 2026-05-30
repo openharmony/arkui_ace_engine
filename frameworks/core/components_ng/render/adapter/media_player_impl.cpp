@@ -248,6 +248,11 @@ int32_t MediaPlayerImpl::SetPlaybackSpeed(float speed)
     return 0;
 }
 
+int32_t MediaPlayerImpl::SetPlaybackRate(float speed, int32_t& errorCode, std::string& errorMsg)
+{
+    return SetPlaybackSpeed(speed);
+}
+
 int32_t MediaPlayerImpl::SetSurface()
 {
     CHECK_NULL_RETURN(player_, -1);

@@ -15,6 +15,7 @@
 
 #include "core/components/hyperlink/render_hyperlink.h"
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components/image/image_component.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/multi_composed_component.h"

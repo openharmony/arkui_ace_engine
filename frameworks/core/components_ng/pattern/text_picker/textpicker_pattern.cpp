@@ -76,6 +76,17 @@ void TextPickerPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+}
+
+void TextPickerPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RemoveWindowSizeChangeCallback(node->GetId());
 }
 
 void TextPickerPattern::SetLayoutDirection(TextDirection textDirection)
@@ -2281,6 +2292,20 @@ void TextPickerPattern::BeforeCreateLayoutWrapper()
     if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
         layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(DEFAULT_SIZE_ZERO), CalcLength(DEFAULT_SIZE_ZERO)));
+    }
+}
+
+void TextPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    auto frameNodes = GetColumnNodes();
+    for (auto& it : frameNodes) {
+        auto columnNode = it.second;
+        CHECK_NULL_VOID(columnNode);
+        auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+        if (columnPattern) {
+            columnPattern->FlushCurrentOptions(false, false, false, false);
+        }
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 

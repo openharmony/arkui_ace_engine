@@ -101,6 +101,8 @@ public:
     static ArkUINativeModuleValue ResetOptimizeTrailingSpace(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCompressLeadingPunctuation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetPunctuationOverflow(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetPunctuationOverflow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTextController(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelection(ArkUIRuntimeCallInfo* runtimeCallInfo);

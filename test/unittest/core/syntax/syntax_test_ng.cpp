@@ -219,7 +219,7 @@ RefPtr<RepeatVirtualScroll2Node> SyntaxTestNg::CreateRepeatVirtual2()
         {5, 6}
     };
     std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index =
-        [&](IndexType index, bool inAnimation) -> std::pair<RIDType, uint32_t> {
+        [&](IndexType index, bool inAnimation, bool restoreCache) -> std::pair<RIDType, uint32_t> {
             auto it = l1Rid4Index_.find(0);
             if (it != l1Rid4Index_.end()) {
                 return {index, 2};
@@ -239,11 +239,14 @@ RefPtr<RepeatVirtualScroll2Node> SyntaxTestNg::CreateRepeatVirtual2()
     std::function<void()> onPurge = []() -> void {
         return;
     };
+    std::function<void()> onPurgeAll = []() -> void {
+        return;
+    };
     std::function<void()> onUpdateDirty = []() -> void {
         return;
     };
-    model.Create(0, 0, onGetRid4Index, onRecycleItems, onActiveRange,
-        onMoveFromTo, onPurge, onUpdateDirty);
+    model.Create(0, 0, 0, onGetRid4Index, onRecycleItems, onActiveRange,
+        onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     auto repeatNode = GetMainFrameNode();
     return AceType::DynamicCast<RepeatVirtualScroll2Node>(repeatNode);
 }

@@ -743,10 +743,82 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_setFocusBox(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setFallbackLineSpacingAttribute(enabled: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (enabled !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enabledTmpValue = enabled!
+            thisSerializer.writeBoolean(enabledTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_setFallbackLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityNextFocusIdAttribute(nextId: string | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (nextId !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const nextIdTmpValue = nextId!
+            thisSerializer.writeString(nextIdTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_setAccessibilityNextFocusId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityDefaultFocusAttribute(focus: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (focus !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const focusTmpValue = focus!
+            thisSerializer.writeBoolean(focusTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_setAccessibilityDefaultFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityRoleAttribute(role: SecurityComponentRoleType | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (role !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const roleTmpValue = (role as SecurityComponentRoleType)
+            thisSerializer.writeInt32(roleTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_setAccessibilityRole(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityDescriptionAttribute(description: string | global_resource_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (description !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const descriptionTmpValue = description!
+            if (descriptionTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const descriptionTmpValueForIdx0 = descriptionTmpValue as string
+                thisSerializer.writeString(descriptionTmpValueForIdx0)
+            } else if (descriptionTmpValue instanceof global_resource_Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const descriptionTmpValueForIdx1 = descriptionTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, descriptionTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_setAccessibilityDescription(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SecurityComponentLayoutDirection {
     HORIZONTAL = 0,
     VERTICAL = 1
+}
+export enum SecurityComponentRoleType {
+    ROLE_NONE = 0,
+    BUTTON = 1
 }
 export interface SecurityComponentMethod {
     iconSize(value: Dimension | undefined): this {
@@ -853,6 +925,21 @@ export interface SecurityComponentMethod {
     }
     focusBox(style: FocusBoxStyle | undefined): this {
         throw new Error('Unimplemented method focusBox')
+    }
+    fallbackLineSpacing(enabled: boolean | undefined): this {
+        throw new Error('Unimplemented method fallbackLineSpacing')
+    }
+    accessibilityNextFocusId(nextId: string | undefined): this {
+        throw new Error('Unimplemented method accessibilityNextFocusId')
+    }
+    accessibilityDefaultFocus(focus: boolean | undefined): this {
+        throw new Error('Unimplemented method accessibilityDefaultFocus')
+    }
+    accessibilityRole(role: SecurityComponentRoleType | undefined): this {
+        throw new Error('Unimplemented method accessibilityRole')
+    }
+    accessibilityDescription(description: string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method accessibilityDescription')
     }
     attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -1036,6 +1123,31 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
     public focusBox(style: FocusBoxStyle | undefined): this {
         const style_casted = style as (FocusBoxStyle | undefined)
         this.getPeer()?.setFocusBoxAttribute(style_casted)
+        return this
+    }
+    public fallbackLineSpacing(enabled: boolean | undefined): this {
+        const enabled_casted = enabled as (boolean | undefined)
+        this.getPeer()?.setFallbackLineSpacingAttribute(enabled_casted)
+        return this
+    }
+    public accessibilityNextFocusId(nextId: string | undefined): this {
+        const nextId_casted = nextId as (string | undefined)
+        this.getPeer()?.setAccessibilityNextFocusIdAttribute(nextId_casted)
+        return this
+    }
+    public accessibilityDefaultFocus(focus: boolean | undefined): this {
+        const focus_casted = focus as (boolean | undefined)
+        this.getPeer()?.setAccessibilityDefaultFocusAttribute(focus_casted)
+        return this
+    }
+    public accessibilityRole(role: SecurityComponentRoleType | undefined): this {
+        const role_casted = role as (SecurityComponentRoleType | undefined)
+        this.getPeer()?.setAccessibilityRoleAttribute(role_casted)
+        return this
+    }
+    public accessibilityDescription(description: string | global_resource_Resource | undefined): this {
+        const description_casted = description as (string | global_resource_Resource | undefined)
+        this.getPeer()?.setAccessibilityDescriptionAttribute(description_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {

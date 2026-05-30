@@ -78,6 +78,15 @@ void SetPointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value)
     }
 #endif
 }
+void SetUnionModeImpl(Ark_NativePointer node, const Opt_UnionMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unionMode = Converter::OptConvertPtr<UnionMode>(value);
+    if (unionMode) {
+        UnionEffectContainerModelStatic::SetUnionMode(frameNode, unionMode.value());
+    }
+}
 } // UnionEffectContainerAttributeModifier
 const GENERATED_ArkUIUnionEffectContainerModifier* GetUnionEffectContainerModifier()
 {
@@ -85,6 +94,7 @@ const GENERATED_ArkUIUnionEffectContainerModifier* GetUnionEffectContainerModifi
         UnionEffectContainerModifier::ConstructImpl,
         UnionEffectContainerInterfaceModifier::SetUnionEffectContainerOptionsImpl,
         UnionEffectContainerAttributeModifier::SetPointLightImpl,
+        UnionEffectContainerAttributeModifier::SetUnionModeImpl,
     };
     return &ArkUIUnionEffectContainerModifierImpl;
 }

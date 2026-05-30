@@ -145,6 +145,9 @@ void SheetPresentationPattern::OnModifyDone()
         } else if (!MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial)) {
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
+        } else if (MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial) &&
+                   SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
     }
     InitPanEvent();
@@ -580,12 +583,7 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.systemMaterial) {
-        auto sheetRenderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(sheetRenderContext);
-        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
-        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial))) {
-            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
-        }
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
     }
 }
 
@@ -598,13 +596,7 @@ void SheetPresentationPattern::ClearSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (!sheetStyle.systemMaterial) {
-        auto sheetRenderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(sheetRenderContext);
-        sheetRenderContext->SetSystemMaterial(nullptr);
-        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), nullptr)) {
-            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), nullptr);
-        }
-        RemoveResObj("sheet.uiMaterial"); // check
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), nullptr);
     }
 }
 
@@ -720,13 +712,15 @@ void SheetPresentationPattern::SetShadowStyle(bool isFocused)
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.shadow.has_value() || sheetStyle.systemMaterial) {
-        return;
-    }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (sheetStyle.shadow.has_value() ||
+        (renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+        // Check if the sheetStyle has shadow or if the system material is set and apply material's shadow
+        return;
+    }
     auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
@@ -1757,7 +1751,11 @@ void SheetPresentationPattern::UpdateSheetBackgroundColor()
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.backgroundColor.has_value()) {
+    // - has systemMaterial and not SMOOTH -> return
+    // - has systemMaterial and SMOOTH -> update default backgroundColor
+    // - no systemMaterial and sheetStyle.backgroundColor has value -> return
+    if ((sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) ||
+        (!sheetStyle.systemMaterial && sheetStyle.backgroundColor.has_value())) {
         return;
     }
     auto pipeline = host->GetContext();
@@ -4411,8 +4409,8 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
     // Parse the background olor using the resource object.
     Color backgroundColor;
     bool result = ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     if (!result) {
-        auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         backgroundColor = (sheetTheme != nullptr) ? sheetTheme->GetSheetBackgoundColor() : backgroundColor;
     }
 
@@ -4426,7 +4424,12 @@ void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resOb
 
     // Update sheet mask background color.
     auto renderContext = sheetNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(backgroundColor);
+    if (!currSheetStyle.systemMaterial) {
+        renderContext->UpdateBackgroundColor(backgroundColor);
+    } else if (currSheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH &&
+               sheetTheme) {
+        renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+    }
     sheetNode->MarkModifyDone();
 }
 

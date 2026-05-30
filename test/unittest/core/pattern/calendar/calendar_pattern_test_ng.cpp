@@ -35,6 +35,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
+#include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"

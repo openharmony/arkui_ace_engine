@@ -2892,6 +2892,27 @@ void ResetTextInputCompressLeadingPunctuation(ArkUINodeHandle node)
     TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, false);
 }
 
+void SetTextInputPunctuationOverflow(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetPunctuationOverflow(frameNode, value);
+}
+
+ArkUI_Int32 GetTextInputPunctuationOverflow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetPunctuationOverflow(frameNode));
+}
+
+void ResetTextInputPunctuationOverflow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetPunctuationOverflow(frameNode, false);
+}
+
 void SetIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool includeFontPadding)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3393,8 +3414,11 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .getTextInputOrphanCharOptimization = GetTextInputOrphanCharOptimization,
         .resetTextInputOrphanCharOptimization = ResetTextInputOrphanCharOptimization,
         .setTextInputCompressLeadingPunctuation = SetTextInputCompressLeadingPunctuation,
-        .getTextInputCompressLeadingPunctuation = GetTextInputCompressLeadingPunctuation,
         .resetTextInputCompressLeadingPunctuation = ResetTextInputCompressLeadingPunctuation,
+        .getTextInputCompressLeadingPunctuation = GetTextInputCompressLeadingPunctuation,
+        .setTextInputPunctuationOverflow = SetTextInputPunctuationOverflow,
+        .resetTextInputPunctuationOverflow = ResetTextInputPunctuationOverflow,
+        .getTextInputPunctuationOverflow = GetTextInputPunctuationOverflow,
         .setTextInputDirection = SetTextInputDirection,
         .getTextInputDirection = GetTextInputDirection,
         .resetTextInputDirection = ResetTextInputDirection,

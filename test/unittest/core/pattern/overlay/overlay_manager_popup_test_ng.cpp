@@ -2203,4 +2203,84 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupLifecycleCallbackTest004, TestSize.Leve
     // If we reach here, the test passes (no crash)
     EXPECT_TRUE(true);
 }
+
+/**
+ * @tc.name: GetEmbeddedNodeTest001
+ * @tc.desc: Test OverlayManager::GetEmbeddedNode when embeddedOverlay is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, GetEmbeddedNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create root node and embedded overlay.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto embeddedRootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 2, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(embeddedRootNode, nullptr);
+    auto embeddedOverlayManager = AceType::MakeRefPtr<OverlayManager>(embeddedRootNode);
+    ASSERT_NE(embeddedOverlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create popupInfo with embeddedOverlay set.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.embeddedOveraly = embeddedOverlayManager;
+
+    /**
+     * @tc.steps: step3. Call GetEmbeddedNode and verify it returns embedded root node.
+     * @tc.expected: GetEmbeddedNode returns the embedded root node when embeddedOverlay is set.
+     */
+    auto embeddedNode = overlayManager->GetEmbeddedNode(popupInfo);
+    EXPECT_EQ(embeddedNode.Upgrade(), embeddedRootNode);
+}
+
+/**
+ * @tc.name: GetEmbeddedNodeTest002
+ * @tc.desc: Test OverlayManager::GetEmbeddedNode when embeddedOverlay is not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, GetEmbeddedNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create popupInfo without embeddedOverlay set.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+
+    /**
+     * @tc.steps: step3. Call GetEmbeddedNode and verify it returns root node.
+     * @tc.expected: GetEmbeddedNode returns the default root node when embeddedOverlay is not set.
+     */
+    auto embeddedNode = overlayManager->GetEmbeddedNode(popupInfo);
+    EXPECT_EQ(embeddedNode.Upgrade(), rootNode);
+}
 } // namespace OHOS::Ace::NG

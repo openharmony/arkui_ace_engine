@@ -78,20 +78,27 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        if (!propTopLeftRadius_.has_value() || !propTopRightRadius_.has_value() || !propBottomLeftRadius_.has_value() ||
-            !propBottomRightRadius_.has_value()) {
-            return;
+
+        std::array<std::optional<Radius>, 4> corners { propTopLeftRadius_, propTopRightRadius_, propBottomRightRadius_,
+            propBottomLeftRadius_ };
+        std::vector<std::vector<double>> radiusArray;
+        radiusArray.reserve(4);
+        for (const auto& opt : corners) {
+            radiusArray.push_back(opt.has_value() ? std::vector<double> { opt.value().GetX().ConvertToPx(),
+                                                        opt.value().GetY().ConvertToPx() }
+                                                  : std::vector<double> { 0, 0 });
         }
-        std::vector<std::vector<double>> radiusArray(4);
-        radiusArray[0] = { propTopLeftRadius_.value().GetX().ConvertToPx(),
-            propTopLeftRadius_.value().GetY().ConvertToPx() };
-        radiusArray[1] = { propTopRightRadius_.value().GetX().ConvertToPx(),
-            propTopRightRadius_.value().GetY().ConvertToPx() };
-        radiusArray[2] = { propBottomRightRadius_.value().GetX().ConvertToPx(),
-            propBottomRightRadius_.value().GetY().ConvertToPx() };
-        radiusArray[3] = { propBottomLeftRadius_.value().GetX().ConvertToPx(),
-            propBottomLeftRadius_.value().GetY().ConvertToPx() };
-        json->PutExtAttr("radius", radiusArray.data(), filter);
+
+        auto radiusJsonArray = JsonUtil::CreateArray(true);
+        for (size_t i = 0; i < radiusArray.size(); ++i) {
+            auto cornerArray = JsonUtil::CreateArray(true);
+            for (size_t j = 0; j < radiusArray[i].size(); ++j) {
+                cornerArray->Put(std::to_string(j).c_str(), radiusArray[i][j]);
+            }
+            radiusJsonArray->Put(std::to_string(i).c_str(), cornerArray);
+        }
+        json->PutExtAttr("radius", radiusJsonArray, filter);
+
         if (radiusArray[0][0] == radiusArray[1][0] &&
             radiusArray[0][0] == radiusArray[2][0] &&
             radiusArray[0][0] == radiusArray[3][0]) {

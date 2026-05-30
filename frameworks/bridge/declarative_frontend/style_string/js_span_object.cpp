@@ -35,6 +35,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/image/image_component.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
@@ -2399,6 +2400,10 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
         return;
     }
     auto shaderStyleObj = obj->GetProperty("shaderStyle");
+    if (!shaderStyleObj->IsObject()) {
+        paragraphStyle.ResetGradient();
+        return;
+    }
     std::optional<NG::Gradient> gradientShaderStyle;
     std::optional<Color> colorShaderStyle;
     RefPtr<ResourceObject> resObj;
@@ -2406,12 +2411,15 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
     JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
     paragraphStyle.colorShaderStyle = colorShaderStyle;
     if (gradientShaderStyle.has_value()) {
-        paragraphStyle.SetGradient(gradientShaderStyle.value());
+        paragraphStyle.SetOptGradient(gradientShaderStyle);
     } else {
         paragraphStyle.ResetGradient();
     }
     if (resObj && colorShaderStyle.has_value()) {
         JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(jsObject->GetProperty("color"));
+        if (!colorObj->IsObject()) {
+            return;
+        }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
         JSViewAbstract::CompleteResourceObject(jsObj);
         resObj = JSViewAbstract::GetResourceObject(jsObj);

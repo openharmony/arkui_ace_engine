@@ -110,10 +110,16 @@ ohos_shared_library("ace_ndk") {
   ]
   external_deps = [ "bounds_checking_function:libsec_shared" ]
   deps = []
+  defines = []
   cflags_cc = [ "-Wno-missing-braces" ]
 
+  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+  }
+
   if (target_os == "ohos") {
-    defines = [
+    defines += [
       "OHOS_PLATFORM",
       "USE_HILOG",
     ]

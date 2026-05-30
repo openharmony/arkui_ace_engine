@@ -832,6 +832,8 @@ public:
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetUseUnion(FrameNode* frameNode, bool useUnion);
+    static void SetMaterialShadow(FrameNode* frameNode);
+    static void ResetMaterialShadow(FrameNode* frameNode);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
@@ -1238,6 +1240,9 @@ private:
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
     static void ResetBorderAndBackgroundEffect(
         FrameNode* frameNode, const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
+    static void RegisterMaterialInteractionEvent(
+        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
+    static void UnRegisterMaterialInteractionEvent(FrameNode* frameNode);
     static void SetImmersiveOptions(
         const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr);
     static void SetImmersiveConfigs(

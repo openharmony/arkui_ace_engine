@@ -93,3 +93,22 @@ foreach(item, ace_platforms) {
     }
   }
 }
+
+ohos_shared_library("datepickercomponent") {
+  sources = [ "datepickercomponent.cpp" ]
+
+  if (use_mingw_win || use_mac || use_linux) {
+    deps = [ ":gen_obj_src_datepickercomponent_abc_preview" ]
+  } else {
+    deps = [ ":datepickercomponent_abc" ]
+  }
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
+
+  relative_install_dir = "module/arkui/advanced"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

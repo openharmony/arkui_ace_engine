@@ -2215,4 +2215,20 @@ void ViewAbstractModelStatic::SetInspectorLabelSta(UINode* node, const std::stri
     CHECK_NULL_VOID(node);
     node->SetInspectorLabel(inspectorLabel);
 }
+void ViewAbstractModelStatic::SetEdgeLightParam(FrameNode* frameNode, const std::optional<EdgeLightParam>& param)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (param.has_value()) {
+        renderContext->UpdateEdgeLightParam(param.value());
+    } else {
+        renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
+    }
+}
+void ViewAbstractModelStatic::SetCenterGravityOptions(FrameNode* frameNode, const CenterGravityOptions& centerGravityOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(CenterGravityOptions, centerGravityOptions, frameNode);
+}
 } // namespace OHOS::Ace::NG

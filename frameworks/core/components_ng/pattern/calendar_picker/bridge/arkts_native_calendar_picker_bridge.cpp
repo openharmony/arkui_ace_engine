@@ -779,7 +779,6 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     if (IsJsView(firstArg, vm)) {
         SetCalendarPickerJSBorder(vm, secondArg);
         return panda::JSValueRef::Undefined(vm);
@@ -798,6 +797,8 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     }
 
     if (leftArg->IsUndefined() && rightArg->IsUndefined() && topArg->IsUndefined() && bottomArg->IsUndefined()) {
+        auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
         RefPtr<CalendarTheme> calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
         CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
         GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerBorder(

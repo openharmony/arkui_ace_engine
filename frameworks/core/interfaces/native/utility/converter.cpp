@@ -64,6 +64,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1370,7 +1371,7 @@ Font Convert(const Ark_arkui_component_units_Font& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_FontWeight& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_FontWeight& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1381,7 +1382,7 @@ FontWeightInt Convert(const Ark_FontWeight& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_Int32& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Int32& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1393,7 +1394,7 @@ FontWeightInt Convert(const Ark_Int32& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_String& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_String& src)
 {
     FontWeightInt dst = {};
     dst.fixed = OptConvert<FontWeight>(src);
@@ -1416,7 +1417,7 @@ FontWeightInt Convert(const Ark_String& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_Resource& src)
 {
     FontWeightInt dst = {};
     ResourceConverter resourceConverter(src);
@@ -1437,7 +1438,7 @@ FontWeightInt Convert(const Ark_Resource& src)
 }
 
 template<>
-FontWeightInt Convert(const Ark_ResourceStr& src)
+ACE_FORCE_EXPORT FontWeightInt Convert(const Ark_ResourceStr& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0:
@@ -4030,6 +4031,23 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
         options.effectOption = effectOption;
     }
+    if (src.scrollEffectOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::ScrollEffectOptions scrollEffectOpt;
+        const auto& srcEffect = src.scrollEffectOptions.value;
+        if (srcEffect.scrollEffectType.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.scrollEffectType =
+                static_cast<NG::ScrollEffectType>(srcEffect.scrollEffectType.value);
+        }
+        if (srcEffect.blurEffectiveStartOffset.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.blurEffectiveStartOffset =
+                Converter::Convert<CalcDimension>(srcEffect.blurEffectiveStartOffset.value);
+        }
+        if (srcEffect.blurEffectiveEndOffset.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.blurEffectiveEndOffset =
+                Converter::Convert<CalcDimension>(srcEffect.blurEffectiveEndOffset.value);
+        }
+        options.scrollEffectOptions = scrollEffectOpt;
+    }
     return options;
 }
 
@@ -4358,5 +4376,47 @@ void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_Union
     dst = UnionEffectContainerOptions{};
     auto spacing = Converter::OptConvert<float>(src.spacing);
     dst->spacing = spacing.value_or(0.0f);
+}
+
+template<>
+void AssignCast(std::optional<ImmersiveOptions>& dst, const Ark_ImmersiveOptionsInner& src)
+{
+    auto immersiveOptions = ImmersiveOptions();
+    auto style = Converter::OptConvert<int32_t>(src.style);
+    if (style.has_value()) {
+        immersiveOptions.style = static_cast<UiMaterialStyle>(style.value());
+    }
+    auto materialColor = Converter::OptConvert<Color>(src.materialColor);
+    if (materialColor.has_value()) {
+        immersiveOptions.materialColor = materialColor.value();
+    }
+    auto colorInvert = Converter::OptConvert<bool>(src.colorInvert);
+    if (colorInvert.has_value()) {
+        immersiveOptions.colorInvert = colorInvert.value();
+    }
+    auto applyShadow = Converter::OptConvert<bool>(src.applyShadow);
+    if (applyShadow.has_value()) {
+        immersiveOptions.applyShadow = applyShadow.value();
+    }
+    auto interactive = Converter::OptConvert<bool>(src.interactive);
+    if (interactive.has_value()) {
+        immersiveOptions.interactive = interactive;
+    }
+    auto lightEffectOptions = Converter::OptConvert<LightEffectOptions>(src.lightEffect);
+    if (lightEffectOptions.has_value()) {
+        immersiveOptions.lightEffectOptions = lightEffectOptions;
+    }
+
+    dst = immersiveOptions;
+}
+template<>
+void AssignCast(std::optional<LightEffectOptions>& dst, const Ark_LightEffectOptionsInner& src)
+{
+    auto lightEffectColor = Converter::OptConvert<Color>(src.color);
+    LightEffectOptions lightEffectOptions;
+    if (lightEffectColor.has_value()) {
+        lightEffectOptions.color = lightEffectColor.value();
+    }
+    dst = lightEffectOptions;
 }
 } // namespace OHOS::Ace::NG::Converter

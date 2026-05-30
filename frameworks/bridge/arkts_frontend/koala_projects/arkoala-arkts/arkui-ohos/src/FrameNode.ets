@@ -164,6 +164,11 @@ export class ArkFrameNodePeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
+ 	releasePeerPtr(): void {
+        if (this.peer) {
+ 	        this.peer!.ptr = nullptr;
+        }
+ 	}
 }
 
 export enum ExpandMode {
@@ -540,6 +545,7 @@ export class FrameNode implements MaterializedBase {
             ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr!);
             this.peer?.close();
         }
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this.nodePtr_ = undefined;
         this.renderNode_?.dispose();
         this.isDisposed_ = true;
@@ -1076,6 +1082,19 @@ class ImmutableFrameNode extends FrameNode {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
+    get commonAttribute(): CommonMethod {
+ 	    ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr);
+ 	    if (this._commonAttribute === undefined) {
+ 	        let baseNode = new ArkBaseNode();
+
+ 	        const retval = FrameNodeExtender.getFrameNodePtr(this)
+ 	        let peer = new ArkFrameNodePeer(retval, this._nodeId!.toInt(), "FrameNode", 0);
+ 	        peer.releasePeerPtr();
+ 	        baseNode.setPeer(peer);
+ 	        this._commonAttribute = baseNode as CommonAttribute;
+ 	    }
+ 	    return this._commonAttribute!;
+ 	}
 }
 
 export class ProxyFrameNode extends ImmutableFrameNode {
@@ -1422,8 +1441,8 @@ export class FrameNodeUtils {
             let frameNode = isWeak
                 ? new BuilderRootWeakFrameNode<T>(uiContext, 'BuilderRootWeakFrameNode', ptr)
                 : new BuilderRootFrameNode<T>(uiContext, 'BuilderRootFrameNode', ptr);
-            frameNode._nodeId = nodeId;
-            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
+            (frameNode! as FrameNode)._nodeId = nodeId;
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, (frameNode! as FrameNode));
             return frameNode;
         }
         return null;

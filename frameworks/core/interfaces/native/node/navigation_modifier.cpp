@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NAV_BAR_POSITION_RANGE_MODIFIER = 1;
@@ -331,11 +332,12 @@ void ResetNavIgnoreLayoutSafeArea(ArkUINodeHandle node)
     NavigationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
-void UpdateNavigationTitlebarOptions(FrameNode* frameNode, ArkUINavigationTitlebarOptions options)
+void UpdateNavigationTitlebarOptions(
+    FrameNode* frameNode, ArkUINavigationTitlebarOptions options, RefPtr<UiMaterial> material)
 {
     CHECK_NULL_VOID(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    auto&& updateFunc = [wekNode = AceType::WeakClaim(frameNode), options](
+    auto&& updateFunc = [wekNode = AceType::WeakClaim(frameNode), options, material](
                             const RefPtr<ResourceObject>& resObj) mutable {
         options.ReloadResources();
         NG::NavigationTitlebarOptions finalOptions;
@@ -366,6 +368,7 @@ void UpdateNavigationTitlebarOptions(FrameNode* frameNode, ArkUINavigationTitleb
         if (options.enableCustomTitlePaddingCheck.isSet) {
             finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
         }
+        finalOptions.material = material;
         auto localFinalOptions = finalOptions;
         auto frameNode = wekNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -425,9 +428,15 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
     if (options.enableCustomTitlePaddingCheck.isSet) {
         finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
     }
+    RefPtr<UiMaterial> material = nullptr;
+    if (options.material) {
+        auto* castMaterial = reinterpret_cast<UiMaterial*>(options.material);
+        material = castMaterial->Copy();
+    }
+    finalOptions.material = material;
     NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
     if (SystemProperties::ConfigChangePerform()) {
-        UpdateNavigationTitlebarOptions(frameNode, options);
+        UpdateNavigationTitlebarOptions(frameNode, options, material);
     }
 }
 
@@ -653,6 +662,10 @@ void SetTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opt
     }
     if (opts.enableCustomTitlePaddingCheck.isSet) {
         finalOptions.enableCustomTitlePaddingCheck = opts.enableCustomTitlePaddingCheck.value;
+    }
+    if (opts.material) {
+        auto* castMaterial = reinterpret_cast<UiMaterial*>(opts.material);
+        finalOptions.material = castMaterial->Copy();
     }
     NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }

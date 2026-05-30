@@ -592,6 +592,7 @@ frameworks/bridge/declarative_frontend/ark_component/components/arklazywaterflow
 frameworks/bridge/declarative_frontend/ark_component/components/arklazycolumnlayout.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
+frameworks/bridge/declarative_frontend/ark_component/components/arklazydynamiclayout.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component_new/src/arkgauge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkcounter.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkdatapanel.ts @huawei_g_five
@@ -710,6 +711,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkXComponent.ts @ArkUI
 frameworks/bridge/declarative_frontend/ark_component/src/import.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_layoutalgorithm/ @arkuilayout1
+frameworks/bridge/declarative_frontend/ark_lazylayoutalgorithm/ @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/alphabet_indexer_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/blank_modifier.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/button_modifier.ts @arkuipopupwindow_all
@@ -1165,6 +1167,8 @@ frameworks/bridge/declarative_frontend/jsview/js_data_panel.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_data_panel.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_datepicker.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_datepicker.h @arkui001
+frameworks/bridge/declarative_frontend/jsview/js_depth_component.cpp @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/jsview/js_depth_component.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_divider.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_divider.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_dump_log.cpp @arkui_framework_xnode
@@ -2045,6 +2049,7 @@ frameworks/core/components/common/properties/color.h @arkuicodepulse
 frameworks/core/components/common/properties/common_decoration.h @ArkUI_Event
 frameworks/core/components/common/properties/decoration.cpp @ArkUI_Event
 frameworks/core/components/common/properties/decoration.h @ArkUI_Event
+frameworks/core/components/common/properties/depth_option.h @arkuipopupwindow_all
 frameworks/core/components/common/properties/edge.cpp @arkuilayout1
 frameworks/core/components/common/properties/edge.h @arkuilayout1
 frameworks/core/components/common/properties/input_option.h @ArkUI_Event
@@ -2508,6 +2513,7 @@ frameworks/core/components_ng/pattern/custom/ @arkuilayout1
 frameworks/core/components_ng/pattern/custom_frame_node/ @arkui_framework_xnode
 frameworks/core/components_ng/pattern/custom_node_ext/
 frameworks/core/components_ng/pattern/data_panel/ @huawei_g_five
+frameworks/core/components_ng/pattern/depth_component/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/divider/ @arkuilayout1
 frameworks/core/components_ng/pattern/effect_component/ @arkuicodepulse
@@ -3322,6 +3328,7 @@ frameworks/core/interfaces/native/implementation/accessibility_hover_event_acces
 frameworks/core/interfaces/native/implementation/drag_event_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/implementation/image_modifier_peer.h @arkui001
 frameworks/core/interfaces/native/implementation/raw_input_event_wrapper_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/raw_input_event_wrapper_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.h @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp @ArkUI_Event
@@ -3597,6 +3604,7 @@ test/mock/core/common/mock_data_detector_mgr.cpp @huawei_g_five
 test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
 test/mock/frameworks/core/common/mock_container_scope.cpp @arkui_framework_xnode
 test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp @arkui_framework_xnode
+test/mock/frameworks/core/components_v2/inspector/mock_inspector_constants.cpp @arkui_framework_xnode
 test/mock/interfaces/native/mock_native_error_message_wrapper.cpp @arkui_framework_xnode
 test/mock/ohos_mock/ @arkui_framework_xnode
 
@@ -3815,6 +3823,7 @@ test/unittest/interfaces/ace_ui_input_event/ @ArkUI_Event
 test/unittest/interfaces/ace_gesture/ @ArkUI_Event
 test/unittest/interfaces/form_render/ @form_framework
 test/unittest/interfaces/native_styled_string_test.cpp @arkui_rich_editor
+test/unittest/interfaces/scrollable_option_test.cpp @arkuiscroll
 test/unittest/frameworks/core/common/ace_engine_test.cpp @arkui_framework_xnode
 test/unittest/frameworks/core/common/container_scope_test.cpp @arkui_framework_xnode
 test/unittest/frameworks/core/common/BUILD.gn @arkui_framework_xnode

@@ -452,8 +452,11 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto contentRect = geometryNode->GetContentRect();
-    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s][paragraphs:%zu]", host->GetId(),
-        paintOffset_.GetX(), paintOffset_.GetY(), contentRect.ToString().c_str(), pManager->GetParagraphs().size());
+    const auto& paragraphs = pManager->GetParagraphs();
+    auto lastParagraphLength = paragraphs.back().paragraph ? paragraphs.back().paragraph->GetParagraphLength() : 0;
+    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s][paragraphs:%zu][lastParagraphLength:%zu]",
+        host->GetId(), paintOffset_.GetX(), paintOffset_.GetY(), contentRect.ToString().c_str(), paragraphs.size(),
+        lastParagraphLength);
 
     SetHybridRenderTypeIfNeeded(drawingContext, textPattern, pManager, host);
     PropertyChangeFlag flag = 0;
@@ -863,7 +866,7 @@ void TextContentModifier::ModifySymbolColorInTextStyle(TextStyle& textStyle)
 {
     if (symbolColors_.has_value() && animatableSymbolColor_) {
         lastSymbolColors_= animatableSymbolColor_->Get();
-        textStyle.SetSymbolColorList(Convert2VectorColor(animatableSymbolColor_->Get()));
+        textStyle.SetSymbolColorList(Convert2VectorColor(lastSymbolColors_));
     }
 }
 
@@ -1061,20 +1064,21 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
         return;
     }
     symbolColors_ = Convert2VectorLinearColor(symbolColors.value());
-    if (symbolColors_.has_value() && animatableSymbolColor_ &&
-        (ColorsDifferExceptHolder(symbolColors_.value(), animatableSymbolColor_->Get()) ||
-            ColorsDifferExceptHolder(lastSymbolColors_, animatableSymbolColor_->Get()))) {
-        flag |= PROPERTY_UPDATE_MEASURE_SELF;
-        if (SystemProperties::GetTextTraceEnabled()) {
-            ACE_TEXT_SCOPED_TRACE(
-                "TextContentModifier::UpdateSymbolColorMeasureFlag[symbolColors:%s][lastSymbolColors:%s]["
-                "animatableSymbolColor_:%s]",
-                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(symbolColors_.value())).c_str(),
-                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(lastSymbolColors_)).c_str(),
-                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(animatableSymbolColor_->Get()))
-                    .c_str());
+    if (symbolColors_.has_value() && animatableSymbolColor_) {
+        auto currentColors = animatableSymbolColor_->Get();
+        if (ColorsDifferExceptHolder(symbolColors_.value(), currentColors) ||
+            ColorsDifferExceptHolder(lastSymbolColors_, currentColors)) {
+            flag |= PROPERTY_UPDATE_MEASURE_SELF;
+            if (SystemProperties::GetTextTraceEnabled()) {
+                ACE_TEXT_SCOPED_TRACE(
+                    "TextContentModifier::UpdateSymbolColorMeasureFlag[symbolColors:%s][lastSymbolColors:%s]["
+                    "animatableSymbolColor_:%s]",
+                    StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(symbolColors_.value())).c_str(),
+                    StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(lastSymbolColors_)).c_str(),
+                    StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(currentColors)).c_str());
+            }
+            lastSymbolColors_ = currentColors;
         }
-        lastSymbolColors_ = animatableSymbolColor_->Get();
     }
 }
 

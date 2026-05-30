@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_EVENT_TYPES_H
 
 #include <functional>
-#include <string>
+
+#include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
 
 namespace OHOS::Ace::NG {
 
-using SelectedChangeEvent = std::function<void(const std::string&)>;
 using LayoutChangeEvent = std::function<void()>;
 
 } // namespace OHOS::Ace::NG

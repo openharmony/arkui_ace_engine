@@ -17,6 +17,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -572,9 +573,13 @@ void AddColorModeChangeCallback(RefPtr<FrameNode> dialog, const DialogProperties
     if (dialogProps.customStyle) {
         return;
     }
-
-    UpdateAndAddShadowCallback(dialog, dialogProps);
-
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    auto dialogProperties = dialogPattern->GetDialogProperties();
+    if (!DialogManager::ShouldApplySystemMaterialShadow(dialogProperties.systemMaterial)) {
+        UpdateAndAddShadowCallback(dialog, dialogProps);
+    }
+    CHECK_NULL_VOID(!dialogProperties.systemMaterial);
     UpdateAndAddBackgroundColorCallback(dialog, dialogProps);
 
     UpdateAndAddBorderColorCallback(dialog, dialogProps);

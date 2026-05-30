@@ -705,4 +705,7 @@ const char LAZY_COLUMN_LAYOUT_ETS_TAG[] = "LazyColumnLayout";
 
 // LazyVWaterFlowLayout
 const char LAZY_V_WATERFLOW_LAYOUT_ETS_TAG[] = "LazyVWaterFlowLayout";
+
+// selection container
+const char SELECTION_CONTAINER_ETS_TAG[] = "SelectionContainer";
 } // namespace OHOS::Ace::V2

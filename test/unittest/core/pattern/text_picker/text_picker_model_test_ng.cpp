@@ -32,6 +32,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #undef private
 #undef protected

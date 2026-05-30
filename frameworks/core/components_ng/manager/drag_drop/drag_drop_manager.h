@@ -792,6 +792,7 @@ private:
         const RefPtr<OverlayManager>& overlayManager, const RefPtr<NodeAnimatablePropertyFloat>& property, Point point);
     void StartDragTransitionAnimation(const Offset& newOffset, AnimationOption option,
         const RefPtr<OverlayManager>& overlayManager, const RefPtr<NodeAnimatablePropertyFloat>& property, Point point);
+    void DisableArkuiAnimation(int32_t containerId, const RefPtr<RenderContext>& renderContext);
     void NotifyDragSpringLoadingMove(const RefPtr<FrameNode>& dragFrameNode, const std::string& extraInfo);
     void NotifyDragSpringLoadingIntercept(std::string_view extraParams);
     void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,

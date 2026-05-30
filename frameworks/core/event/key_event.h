@@ -312,11 +312,7 @@ public:
 
     void ParseKeyEvent(KeyEvent& keyEvent);
 
-    size_t GetSize() const
-    {
-        static constexpr size_t KEY_EVENT_INFO_SIZE = 480;
-        return KEY_EVENT_INFO_SIZE;
-    }
+    size_t GetApproximateSize() const;
 
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;

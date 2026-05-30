@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components/common/layout/constants.h"
 
@@ -36,6 +37,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propSpace_ = CloneSpace();
         value->propHorizontalAlign_ = CloneHorizontalAlign();
+        value->propStickyStyle_ = CloneStickyStyle();
         return value;
     }
 
@@ -44,6 +46,7 @@ public:
         LayoutProperty::Reset();
         ResetSpace();
         ResetHorizontalAlign();
+        ResetStickyStyle();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -56,14 +59,26 @@ public:
         json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("alignItems",
             propHorizontalAlign_.value_or(HorizontalAlign::CENTER) == HorizontalAlign::START ? "HorizontalAlign.Start"
-            : propHorizontalAlign_.value_or(HorizontalAlign::CENTER) == HorizontalAlign::CENTER
+            : (propHorizontalAlign_.value_or(HorizontalAlign::CENTER) == HorizontalAlign::CENTER
                 ? "HorizontalAlign.Center"
-                : "HorizontalAlign.End",
+                : "HorizontalAlign.End"),
             filter);
+        auto sticky = propStickyStyle_.value_or(StickyStyle::NONE);
+        if (sticky == StickyStyle::HEADER) {
+            json->PutExtAttr("sticky", "StickyStyle.Header", filter);
+        } else if (sticky == StickyStyle::FOOTER) {
+            json->PutExtAttr("sticky", "StickyStyle.Footer", filter);
+        } else if (sticky == StickyStyle::BOTH) {
+            json->PutExtAttr("sticky", "StickyStyle.Header | StickyStyle.Footer", filter);
+        } else {
+            json->PutExtAttr("sticky", "StickyStyle.None", filter);
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HorizontalAlign, HorizontalAlign, PROPERTY_UPDATE_MEASURE);
+    // Sticky behavior for header / footer: NONE / HEADER / FOOTER / BOTH.
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, StickyStyle, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_COLUMN_LAYOUT_LAZY_COLUMN_LAYOUT_PROPERTY_H

@@ -191,7 +191,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         thisSerializer.release()
     }
 }
-export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
+export class ArkUIExtensionComponentPeer extends ArkUIExtensionComponentPeerBase {
     uIExtensionComponentAttributeSet?: UIExtensionComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -203,19 +203,6 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setUIExtensionComponentOptionsAttribute(want: Want, options?: UIExtensionOptions): void {
-        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (options !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue = options!
-            UIExtensionOptions_serializer.write(thisSerializer, optionsTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentInterface_setUIExtensionComponentOptions(this.peer.ptr, extractors.toWantPtr(want), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setOnRemoteReadyAttribute(value: ohos_base_Callback<UIExtensionProxy> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -226,54 +213,6 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnRemoteReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnReceiveAttribute(value: ReceiveCallback | undefined): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnErrorAttribute(value: ErrorCallback<BusinessError<void>> | undefined): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnTerminatedAttribute(value: ohos_base_Callback<TerminationInfo> | undefined): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnTerminated(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnDrawReadyAttribute(value: VoidCallback | undefined): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnDrawReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

@@ -2417,10 +2417,15 @@ void TimePickerRowPattern::OnWindowSizeChanged(int32_t width, int32_t height, Wi
         default:
             break;
     }
-    if (oldFullscreen != isWindowFullscreen_) {
-        for (auto& column : timePickerColumns_) {
-            auto columnNode = column.Upgrade();
-            CHECK_NULL_VOID(columnNode);
+    for (auto& column : timePickerColumns_) {
+        auto columnNode = column.Upgrade();
+        CHECK_NULL_VOID(columnNode);
+        auto columnPattern = columnNode->GetPattern<TimePickerColumnPattern>();
+        if (columnPattern) {
+            columnPattern->FlushCurrentOptions(false, false, false, false);
+            columnNode->MarkModifyDone();
+        }
+        if (oldFullscreen != isWindowFullscreen_) {
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }

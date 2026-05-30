@@ -780,7 +780,7 @@
       "api_paths": {
         "all": "OpenHarmony/interface/sdk-js/api/arkui/"
       },
-      "last_updated": "2026-02-04"
+      "last_updated": "2026-05-12"
     },
     {
       "name": "Component API",
@@ -1136,6 +1136,583 @@
         "modifier": "OpenHarmony/interface/sdk-js/api/arkui/RichEditorModifier.d.ts"
       },
       "last_updated": "2026-04-18"
+    },
+    {
+      "name": "ArkUI Native API",
+      "name_cn": "ArkUI Native API",
+      "category": "sdk",
+      "type": "sdk",
+      "keywords": [
+        "Native API",
+        "NAPI",
+        "C API",
+        "ArkUI",
+        "FFI"
+      ],
+      "aliases": [
+        "napi",
+        "NativeAPI",
+        "ArkUI NAPI"
+      ],
+      "file_path": "api/napi_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Card Frontend",
+      "name_cn": "卡片前端",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "Card Frontend",
+        "卡片",
+        "Form",
+        "轻量前端",
+        "渲染"
+      ],
+      "aliases": [
+        "CardFrontend",
+        "卡片前端",
+        "卡片渲染"
+      ],
+      "file_path": "architecture/Card_Frontend_Knowledge_Base_CN.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "CJ Frontend",
+      "name_cn": "仓颉前端",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "CJ Frontend",
+        "仓颉",
+        "Cangjie",
+        "桥接层",
+        "FFI"
+      ],
+      "aliases": [
+        "CJFrontend",
+        "仓颉前端",
+        "Cangjie Frontend"
+      ],
+      "file_path": "cj_frontend/CJ_Frontend_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "IDLize",
+      "name_cn": "IDLize 生成链路",
+      "category": "sdk",
+      "type": "feature",
+      "keywords": [
+        "IDLize",
+        "代码生成",
+        "桥接生成",
+        "arkoala",
+        "接口映射"
+      ],
+      "aliases": [
+        "IDLize工具",
+        "idlize",
+        "接口生成"
+      ],
+      "file_path": "common/idlize/idlize_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Resource System",
+      "name_cn": "资源系统",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "资源系统",
+        "resource",
+        "主题资源",
+        "解析",
+        "加载"
+      ],
+      "aliases": [
+        "Resource",
+        "资源机制",
+        "ArkUI资源"
+      ],
+      "file_path": "common/resource/Resource_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Animation",
+      "name_cn": "动画模块",
+      "category": "advanced",
+      "type": "feature",
+      "keywords": [
+        "动画",
+        "animation",
+        "过渡",
+        "插值",
+        "帧调度"
+      ],
+      "aliases": [
+        "Animation模块",
+        "动画系统",
+        "动效"
+      ],
+      "file_path": "pattern/animation/Animation_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "ArcScrollBar",
+      "name_cn": "弧形滚动条",
+      "category": "advanced",
+      "type": "component",
+      "keywords": [
+        "ArcScrollBar",
+        "弧形滚动条",
+        "滚动条",
+        "圆弧",
+        "ScrollBar"
+      ],
+      "aliases": [
+        "Arc ScrollBar",
+        "弧形Scrollbar",
+        "弧形滚动条组件"
+      ],
+      "file_path": "pattern/arcScrollBar/ArcScrollBar_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Hyperlink",
+      "name_cn": "超链接组件",
+      "category": "basic",
+      "type": "component",
+      "keywords": [
+        "Hyperlink",
+        "超链接",
+        "link",
+        "点击跳转",
+        "文本链接"
+      ],
+      "aliases": [
+        "Hyperlink组件",
+        "链接组件",
+        "超链接"
+      ],
+      "file_path": "pattern/hyperlink/Hyperlink_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "List",
+      "name_cn": "列表组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "List",
+        "列表",
+        "滚动列表",
+        "ListItem",
+        "分组列表"
+      ],
+      "aliases": [
+        "List组件",
+        "列表容器",
+        "长列表"
+      ],
+      "file_path": "pattern/list/List_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "LoadingProgress",
+      "name_cn": "加载进度组件",
+      "category": "data_display",
+      "type": "component",
+      "keywords": [
+        "LoadingProgress",
+        "加载进度",
+        "loading",
+        "转圈",
+        "进度反馈"
+      ],
+      "aliases": [
+        "LoadingProgress组件",
+        "加载组件",
+        "加载进度"
+      ],
+      "file_path": "pattern/loading_progress/LoadingProgress_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "PatternLock",
+      "name_cn": "图案锁组件",
+      "category": "selector",
+      "type": "component",
+      "keywords": [
+        "PatternLock",
+        "图案锁",
+        "手势密码",
+        "解锁",
+        "安全输入"
+      ],
+      "aliases": [
+        "PatternLock组件",
+        "图案密码",
+        "手势锁"
+      ],
+      "file_path": "pattern/patternlock/PatternLock_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Pipeline",
+      "name_cn": "渲染管线模块",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "Pipeline",
+        "渲染管线",
+        "pipeline_ng",
+        "任务调度",
+        "UI线程"
+      ],
+      "aliases": [
+        "Pipeline模块",
+        "渲染管线",
+        "管线系统"
+      ],
+      "file_path": "pattern/pipeline/Pipeline_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Progress",
+      "name_cn": "进度条组件",
+      "category": "data_display",
+      "type": "component",
+      "keywords": [
+        "Progress",
+        "进度条",
+        "progress bar",
+        "进度显示",
+        "加载进度"
+      ],
+      "aliases": [
+        "Progress组件",
+        "进度组件",
+        "进度条"
+      ],
+      "file_path": "pattern/progress/Progress_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "QRCode",
+      "name_cn": "二维码组件",
+      "category": "data_display",
+      "type": "component",
+      "keywords": [
+        "QRCode",
+        "二维码",
+        "qrcode",
+        "编码",
+        "扫码"
+      ],
+      "aliases": [
+        "QRCode组件",
+        "二维码",
+        "扫码码"
+      ],
+      "file_path": "pattern/qrcode/QRCode_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "ScrollBar",
+      "name_cn": "滚动条组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "ScrollBar",
+        "滚动条",
+        "scroll bar",
+        "滑块",
+        "滚动指示"
+      ],
+      "aliases": [
+        "ScrollBar组件",
+        "滚动条",
+        "Scrollbar"
+      ],
+      "file_path": "pattern/scrollBar/ScrollBar_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "TextArea",
+      "name_cn": "多行文本输入组件",
+      "category": "rich_text",
+      "type": "component",
+      "keywords": [
+        "TextArea",
+        "多行输入",
+        "文本域",
+        "输入框",
+        "编辑"
+      ],
+      "aliases": [
+        "TextArea组件",
+        "文本域",
+        "多行文本"
+      ],
+      "file_path": "pattern/text_area/TextArea_Knowledge_Base_CN.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "TextDrag",
+      "name_cn": "文本拖拽",
+      "category": "rich_text",
+      "type": "feature",
+      "keywords": [
+        "TextDrag",
+        "文本拖拽",
+        "拖拽选择",
+        "文本操作",
+        "DragDrop"
+      ],
+      "aliases": [
+        "文本拖拽",
+        "Text Drag",
+        "TextDrag功能"
+      ],
+      "file_path": "pattern/text_drag/TextDrag_Knowledge_Base_CN.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "TextField",
+      "name_cn": "文本输入框组件",
+      "category": "basic",
+      "type": "component",
+      "keywords": [
+        "TextField",
+        "输入框",
+        "文本输入",
+        "单行输入",
+        "编辑"
+      ],
+      "aliases": [
+        "TextField组件",
+        "文本框",
+        "输入框"
+      ],
+      "file_path": "pattern/text_field/TextField_Knowledge_Base_CN.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "TextInput",
+      "name_cn": "文本输入组件",
+      "category": "basic",
+      "type": "component",
+      "keywords": [
+        "TextInput",
+        "文本输入",
+        "输入组件",
+        "编辑控件",
+        "键盘输入"
+      ],
+      "aliases": [
+        "TextInput组件",
+        "文本输入框",
+        "输入控件"
+      ],
+      "file_path": "pattern/text_input/TextInput_Knowledge_Base_CN.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "IDL",
+      "name_cn": "接口定义语言",
+      "category": "sdk",
+      "type": "sdk",
+      "keywords": [
+        "IDL",
+        "接口定义",
+        "语言绑定",
+        "接口生成",
+        "SDK接口"
+      ],
+      "aliases": [
+        "IDL语言",
+        "Interface Definition Language",
+        "IDL知识库"
+      ],
+      "file_path": "sdk/IDL_Knowledge_Base_CN.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "SVG",
+      "name_cn": "SVG组件",
+      "category": "shape",
+      "type": "component",
+      "keywords": [
+        "SVG",
+        "矢量图",
+        "图形绘制",
+        "路径",
+        "图标"
+      ],
+      "aliases": [
+        "SVG组件",
+        "矢量图组件",
+        "Scalable Vector Graphics"
+      ],
+      "file_path": "svg/SVG_Knowledge_Base_CN.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "ForEach",
+      "name_cn": "ForEach语法组件",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "ForEach",
+        "循环渲染",
+        "语法组件",
+        "列表构建",
+        "迭代"
+      ],
+      "aliases": [
+        "ForEach语法",
+        "循环组件",
+        "ForEach节点"
+      ],
+      "file_path": "syntax/ForEach_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "LazyForEach",
+      "name_cn": "LazyForEach语法组件",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "LazyForEach",
+        "懒加载循环",
+        "语法组件",
+        "按需构建",
+        "列表优化"
+      ],
+      "aliases": [
+        "LazyForEach语法",
+        "懒循环组件",
+        "LazyForEach节点"
+      ],
+      "file_path": "syntax/LazyForEach_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "RepeatVirtualScroll",
+      "name_cn": "RepeatVirtualScroll语法组件",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "RepeatVirtualScroll",
+        "虚拟滚动",
+        "语法组件",
+        "复用渲染",
+        "性能优化"
+      ],
+      "aliases": [
+        "RepeatVirtualScroll语法",
+        "虚拟滚动语法",
+        "RepeatVirtualScroll节点"
+      ],
+      "file_path": "syntax/RepeatVirtualScroll_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Repeat",
+      "name_cn": "Repeat语法组件",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "Repeat",
+        "循环语法",
+        "语法组件",
+        "重复渲染",
+        "渲染优化"
+      ],
+      "aliases": [
+        "Repeat语法",
+        "重复组件",
+        "Repeat节点"
+      ],
+      "file_path": "syntax/Repeat_Knowledge_Base.md",
+      "last_updated": "2026-05-23"
+    },
+    {
+      "name": "Accessibility",
+      "name_cn": "无障碍",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "accessibility",
+        "无障碍",
+        "屏幕阅读器",
+        "TalkBack",
+        "AccessibilityProvider",
+        "AccessibilityProperty",
+        "JsAccessibilityManager",
+        "AccessibilityManagerNG",
+        "AccessibilityFocusStrategy",
+        "ArkUI_AccessibilityElementInfo",
+        "hover",
+        "focus move"
+      ],
+      "aliases": [
+        "无障碍框架",
+        "Accessibility 桥接",
+        "辅助功能",
+        "读屏"
+      ],
+      "file_path": "accessibility/Accessibility_Knowledge_Base_CN.md",
+      "source_paths": {
+        "provider": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_provider.h",
+        "session_adapter": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_session_adapter.h",
+        "manager_ng": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_manager_ng.h",
+        "ng_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/accessibility_property.h",
+        "js_manager": "OpenHarmony/foundation/arkui/ace_engine/adapter/ohos/osal/js_accessibility_manager.h",
+        "focus_strategy": "OpenHarmony/foundation/arkui/ace_engine/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
+      },
+      "api_paths": {
+        "ndk": "OpenHarmony/foundation/arkui/ace_engine/interfaces/native/native_interface_accessibility.h"
+      },
+      "last_updated": "2026-05-25"
+    },
+    {
+      "name": "ArkUI_API_Paradigm",
+      "name_cn": "ArkUI API 范式",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "API 范式",
+        "类web",
+        "lite",
+        "full",
+        "动态ArkTS",
+        "静态ArkTS",
+        "ArkTS Dynamic",
+        "ArkTS Static",
+        "FeatureAbility",
+        "import",
+        "static.d.ets",
+        "d.ts",
+        "Modifier",
+        "调用面"
+      ],
+      "aliases": [
+        "API 口径",
+        "API 入口",
+        "Paradigm",
+        "调用方式"
+      ],
+      "file_path": "api/ArkUI_API_Paradigm_Knowledge_Base_CN.md",
+      "source_paths": {
+        "arkts_static_components": "OpenHarmony/interface/sdk-js/api/arkui/component",
+        "featureability_full": "OpenHarmony/interface/sdk-js/api/common/full/featureability.d.ts",
+        "featureability_lite": "OpenHarmony/interface/sdk-js/api/common/lite/featureability.d.ts"
+      },
+      "api_paths": {
+        "arkui_root": "OpenHarmony/interface/sdk-js/api/arkui"
+      },
+      "last_updated": "2026-05-25"
     }
   ],
   "categories": {

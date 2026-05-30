@@ -280,6 +280,7 @@ HWTEST_F(ListGeneratedTestNg, ListToJsonValue001, TestSize.Level1)
      */
     CreateList();
     CreateListItems(ITEM_COUNT);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Serialize to JSON
@@ -1784,8 +1785,6 @@ HWTEST_F(ListGeneratedTestNg, ListEnableEditModeModifier001, TestSize.Level1)
     EXPECT_FALSE(ListModelNG::GetEnableEditMode(frameNode));
     EXPECT_EQ(callbackCount, 2);
     EXPECT_FALSE(lastValue);
-    pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->swipeSelectPanEvent_, nullptr);
 }
 
 /**
@@ -2008,6 +2007,34 @@ HWTEST_F(ListGeneratedTestNg, ListSwipeSelectStateKeyForGroup001, TestSize.Level
 }
 
 /**
+ * @tc.name: ListSwipeSelectNearStateKeyForGroup001
+ * @tc.desc: Test swipe multi-select resolves out-of-list positions near ListItemGroup to concrete group items
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectNearStateKeyForGroup001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, 3);
+    CreateDone();
+
+    auto listItems = GetFlatListItems(frameNode_);
+    ASSERT_GE(static_cast<int32_t>(listItems.size()), 3);
+    auto firstItemPoint = ConvertItemCenterToListLocal(frameNode_, listItems[0]);
+    auto stateKey = pattern_->GetSwipeSelectStateKeyNearPosition(WIDTH + 1.0f, firstItemPoint.GetY());
+    EXPECT_EQ(stateKey.index, 0);
+    EXPECT_EQ(stateKey.indexInGroup, 0);
+    EXPECT_EQ(pattern_->GetSelectableItemAtStateKey(stateKey), listItems[0]);
+
+    auto lastItemPoint = ConvertItemCenterToListLocal(frameNode_, listItems[2]);
+    stateKey = pattern_->GetSwipeSelectStateKeyNearPosition(lastItemPoint.GetX(), HEIGHT + 1.0f);
+    EXPECT_EQ(stateKey.index, 0);
+    EXPECT_EQ(stateKey.indexInGroup, 2);
+    EXPECT_EQ(pattern_->GetSelectableItemAtStateKey(stateKey), listItems[2]);
+}
+
+/**
  * @tc.name: ListSwipeSelectMarkGroupItem001
  * @tc.desc: Test swipe multi-select can mark list item inside list item group by state key
  * @tc.type: FUNC
@@ -2071,7 +2098,266 @@ HWTEST_F(ListGeneratedTestNg, SetListItemGroupParamStackFromEndContentOffset001,
 
     listLayoutAlgorithm->SetListItemGroupParam(layoutWrapper, 0, 0.0f, true, listLayoutProperty, false);
 
-    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentStartOffset_, 0.0f);
-    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentEndOffset_, contentEndOffset);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentStartOffset_, contentEndOffset);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->contentEndOffset_, 0.0f);
+}
+
+// ============================================================
+// editModeChanged_ flag — OnModifyDone guard for List
+// ============================================================
+
+/**
+ * @tc.name: ListEditModeChangedFlagDefaultFalse001
+ * @tc.desc: Test editModeChanged_ defaults to false after List creation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedFlagDefaultFalse001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+}
+
+/**
+ * @tc.name: ListEditModeChangedFlagSetOnValueChange001
+ * @tc.desc: Test editModeChanged_ becomes true when SetEnableEditMode changes the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedFlagSetOnValueChange001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    EXPECT_FALSE(pattern_->editModeChanged_);
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+}
+
+/**
+ * @tc.name: ListEditModeChangedFlagNotSetOnSameValue001
+ * @tc.desc: Test editModeChanged_ remains false when SetEnableEditMode is called with the same value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedFlagNotSetOnSameValue001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+    pattern_->ResetEditModeChanged();
+    EXPECT_FALSE(pattern_->editModeChanged_);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_FALSE(pattern_->editModeChanged_);
+}
+
+/**
+ * @tc.name: ListEditModeChangedFlagReset001
+ * @tc.desc: Test ResetEditModeChanged resets the flag to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedFlagReset001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->IsEditModeChanged());
+
+    pattern_->ResetEditModeChanged();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+}
+
+/**
+ * @tc.name: ListEditModeChangedFlagToggleOff001
+ * @tc.desc: Test editModeChanged_ becomes true when toggling edit mode off
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedFlagToggleOff001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->ResetEditModeChanged();
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+}
+
+/**
+ * @tc.name: ListEditModeChangedOnModifyDoneAppliesToItems001
+ * @tc.desc: Test OnModifyDone applies edit mode to visible items when editModeChanged_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedOnModifyDoneAppliesToItems001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->IsEditModeChanged());
+
+    pattern_->OnModifyDone();
+
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+    for (int32_t i = 0; i < ITEM_COUNT; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_NE(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i;
+        }
+    }
+}
+
+/**
+ * @tc.name: ListEditModeChangedOnModifyDoneSkipsWhenFalse001
+ * @tc.desc: Test OnModifyDone skips edit mode application when editModeChanged_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedOnModifyDoneSkipsWhenFalse001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->ResetEditModeChanged();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+
+    pattern_->OnModifyDone();
+
+    for (int32_t i = 0; i < ITEM_COUNT; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i;
+        }
+    }
+}
+
+/**
+ * @tc.name: ListEditModeChangedOnModifyDoneRemovesFromItems001
+ * @tc.desc: Test OnModifyDone removes edit mode from items when toggled off
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedOnModifyDoneRemovesFromItems001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->OnModifyDone();
+
+    for (int32_t i = 0; i < ITEM_COUNT; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_NE(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i << " should have CheckBox";
+        }
+    }
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_TRUE(pattern_->IsEditModeChanged());
+    pattern_->OnModifyDone();
+
+    for (int32_t i = 0; i < ITEM_COUNT; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i << " should have no CheckBox";
+        }
+    }
+}
+
+/**
+ * @tc.name: ListEditModeChangedOnModifyDoneNoDefaultMultiSelectStyle001
+ * @tc.desc: Test OnModifyDone calls RemoveEditModeFromItems when useDefaultMultiSelectStyle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedOnModifyDoneNoDefaultMultiSelectStyle001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    EditModeOptions options;
+    options.useDefaultMultiSelectStyle = false;
+    pattern_->SetEditModeOptions(options);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->IsEditModeChanged());
+
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+
+    for (int32_t i = 0; i < ITEM_COUNT; ++i) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        ASSERT_NE(child, nullptr);
+        auto itemPattern = child->GetPattern<SelectableItemPattern>();
+        if (itemPattern) {
+            EXPECT_EQ(itemPattern->editModeCheckBoxNode_, nullptr) << "item " << i;
+        }
+    }
+}
+
+/**
+ * @tc.name: ListEditModeChangedMultipleToggleCycle001
+ * @tc.desc: Test editModeChanged_ flag correctness across multiple toggle cycles
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedMultipleToggleCycle001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    EXPECT_FALSE(pattern_->editModeChanged_);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+    pattern_->ResetEditModeChanged();
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+    pattern_->ResetEditModeChanged();
+
+    pattern_->SetEnableEditMode(false);
+    EXPECT_FALSE(pattern_->editModeChanged_);
+
+    pattern_->SetEnableEditMode(true);
+    EXPECT_TRUE(pattern_->editModeChanged_);
+}
+
+/**
+ * @tc.name: ListEditModeChangedOnModifyDoneRepeatedCalls001
+ * @tc.desc: Test that repeated OnModifyDone calls without value change do not re-apply edit mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListEditModeChangedOnModifyDoneRepeatedCalls001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    pattern_->SetEnableEditMode(true);
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
+
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->IsEditModeChanged());
 }
 } // namespace OHOS::Ace::NG

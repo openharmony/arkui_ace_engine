@@ -1082,7 +1082,7 @@ void JSTabs::SetBarFloatingStyle(const JSCallbackInfo& info)
     auto systemMaterialObj = object->GetProperty("systemMaterial");
     if (systemMaterialObj->IsObject()) {
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
-        parameters.systemMaterial = material->Copy();
+        parameters.systemMaterial = material ? material->Copy() : nullptr;
     }
 
     if (SystemProperties::ConfigChangePerform()) {

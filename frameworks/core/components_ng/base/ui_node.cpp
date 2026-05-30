@@ -772,6 +772,10 @@ void UINode::DoAddChild(
     if (child->IsAllowUseParentTheme() && child->GetThemeScopeId() != themeScopeId) {
         child->UpdateThemeScopeId(themeScopeId);
     }
+    auto selectionContainerId = GetSelectionContainerId();
+    if (child->GetSelectionContainerId() != selectionContainerId) {
+        child->UpdateSelectionContainerId(selectionContainerId);
+    }
     child->SetDepth(depth_ + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
@@ -2879,5 +2883,37 @@ std::string UINode::GetPath()
         result << "/" << *it;
     }
     return result.str();
+}
+
+int32_t UINode::GetSelectionContainerId() const
+{
+    return selectionContainerId_;
+}
+
+void UINode::SetSelectionContainerId(int32_t selectionContainerId)
+{
+    selectionContainerId_ = selectionContainerId;
+    auto children = GetChildren();
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        child->UpdateSelectionContainerId(selectionContainerId);
+    }
+}
+
+void UINode::UpdateSelectionContainerId(int32_t selectionContainerId)
+{
+    if (GetTag() == V2::SELECTION_CONTAINER_ETS_TAG || GetSelectionContainerId() == selectionContainerId) {
+        return;
+    }
+    selectionContainerId_ = selectionContainerId;
+    auto children = GetChildren();
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        child->UpdateSelectionContainerId(selectionContainerId);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -160,7 +160,14 @@ interface __RepeatConfig<T> {
     onMoveHandler?: OnMoveHandler;
     itemDragEventHandler?: ItemDragEventHandler;
     reusable?: boolean;
+    memOptStrategy?: RepeatMemOptStrategy;
 };
+
+// Memory optimization strategy for virtual scroll
+enum RepeatMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+}
 
 // should be empty string, don't change it
 const RepeatEachFuncTtype: string = '';
@@ -210,7 +217,8 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     public virtualScroll(options? : {
-        totalCount?: number, onTotalCount?: () => number, onLazyLoading?: (index: number) => void, reusable?: boolean
+        totalCount?: number, onTotalCount?: () => number, onLazyLoading?: (index: number) => void, reusable?: boolean,
+        memoryOptimizationStrategy?: RepeatMemOptStrategy
     }): RepeatAPI<T> {
         // use array length by default
         this.config.totalCount = this.config.arr?.length;
@@ -242,6 +250,8 @@ class __Repeat<T> implements RepeatAPI<T> {
         if (options?.onLazyLoading) {
             this.config.onLazyLoading = options.onLazyLoading;
         }
+
+        this.parseMemoryOptimizationStrategy(options);
 
         this.isVirtualScroll = true;
         return this;
@@ -311,5 +321,22 @@ class __Repeat<T> implements RepeatAPI<T> {
                 cachedCountSpecified: false
             };
             return value;
+    }
+
+    private parseMemoryOptimizationStrategy(options? : {
+        totalCount?: number, onTotalCount?: () => number, onLazyLoading?: (index: number) => void, reusable?: boolean,
+        memoryOptimizationStrategy?: RepeatMemOptStrategy
+    }): void {
+        if (options?.memoryOptimizationStrategy !== undefined && options?.memoryOptimizationStrategy !== null) {
+            if (options.memoryOptimizationStrategy !== RepeatMemOptStrategy.DEFAULT &&
+                options.memoryOptimizationStrategy !== RepeatMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION) {
+                stateMgmtConsole.warn(
+                    `Repeat.virtualScroll: Invalid memoryOptimizationStrategy value ` +
+                    `${options.memoryOptimizationStrategy}. This will lead to undefined behavior.`);
+                this.config.memOptStrategy = RepeatMemOptStrategy.DEFAULT;
+            } else {
+                this.config.memOptStrategy = options.memoryOptimizationStrategy;
+            }
+        }
     }
 }; // __Repeat<T>

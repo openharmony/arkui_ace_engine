@@ -28,6 +28,8 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/common/resource/resource_object.h"
 
