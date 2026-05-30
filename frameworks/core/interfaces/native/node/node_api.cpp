@@ -677,6 +677,16 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListEditModeChange,
 };
 
+const ComponentAsyncEventHandler ARC_LIST_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnArcListScrollIndex,
+    NodeModifier::SetOnArcListScrollStart,
+    NodeModifier::SetOnArcListScrollStop,
+    NodeModifier::SetOnArcListWillScroll,
+    NodeModifier::SetOnArcListDidScroll,
+    NodeModifier::SetOnArcListReachStart,
+    NodeModifier::SetOnArcListReachEnd,
+};
+
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
 };
@@ -924,6 +934,16 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnListEditModeChange,
 };
 
+const ResetComponentAsyncEventHandler ARC_LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnArcListScrollIndex,
+    NodeModifier::ResetOnArcListScrollStart,
+    NodeModifier::ResetOnArcListScrollStop,
+    NodeModifier::ResetOnArcListWillScroll,
+    NodeModifier::ResetOnArcListDidScroll,
+    NodeModifier::ResetOnArcListReachStart,
+    NodeModifier::ResetOnArcListReachEnd,
+};
+
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetListItemOnSelect,
 };
@@ -1160,6 +1180,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = listNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_ARC_LIST: {
+            if (subKind >= sizeof(ARC_LIST_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ARC_LIST_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_LIST_ITEM: {
@@ -1455,6 +1483,16 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
                 return;
             }
             eventHandle = LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_ARC_LIST: {
+            if (subKind >=
+                sizeof(ARC_LIST_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ARC_LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_LIST_ITEM: {

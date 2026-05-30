@@ -49,6 +49,7 @@
 #endif
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
@@ -205,6 +206,14 @@ void* createListNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createArcListNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ListModelNG::CreateFrameNode(nodeId, true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createSwiperNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SwiperModelNG::CreateFrameNode(nodeId);
@@ -271,6 +280,22 @@ void* createFlexNode(ArkUI_Int32 nodeId)
 void* createListItemNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ListItemModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createArcListItemNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ListItemModelNG::CreateFrameNode(nodeId, true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createArcScrollBarNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ScrollBarModelNG::CreateArcScrollBar(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -777,6 +802,9 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     nullptr,
     createContainerPickerNode,
     createRichEditorNode,
+    createArcListNode,
+    createArcListItemNode,
+    createArcScrollBarNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

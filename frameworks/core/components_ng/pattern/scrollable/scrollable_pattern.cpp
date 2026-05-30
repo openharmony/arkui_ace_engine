@@ -1980,6 +1980,15 @@ void ScrollablePattern::SetMaxFlingVelocity(double max)
     scrollable->SetMaxFlingVelocity(max);
 }
 
+double ScrollablePattern::GetMaxFlingVelocity() const
+{
+    double density = PipelineBase::GetCurrentDensity();
+    CHECK_NULL_RETURN(scrollableEvent_, maxFlingVelocity_ * density);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_RETURN(scrollable, maxFlingVelocity_ * density);
+    return scrollable->GetMaxFlingVelocity();
+}
+
 void ScrollablePattern::GetParentNavigation()
 {
     if (navBarPattern_) {

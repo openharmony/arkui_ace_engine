@@ -1421,6 +1421,9 @@ enum ArkUINodeType {
     ARKUI_PICKER,
     ARKUI_RICH_EDITOR,
     ARKUI_LAZY_COLUMN_LAYOUT,
+    ARKUI_ARC_LIST,
+    ARKUI_ARC_LIST_ITEM,
+    ARKUI_ARC_SCROLL_BAR,
 };
 
 enum ArkUIEventCategory {
@@ -1676,6 +1679,14 @@ enum ArkUIEventSubKind {
     ON_RICH_EDITOR_ON_DID_CHANGE,
 
     ON_LAZY_COLUMN_LAYOUT_SCROLL_INDEX = ARKUI_MAX_EVENT_NUM * ARKUI_LAZY_COLUMN_LAYOUT,
+
+    ON_ARC_LIST_SCROLL_INDEX = ARKUI_MAX_EVENT_NUM * ARKUI_ARC_LIST,
+    ON_ARC_LIST_SCROLL_START,
+    ON_ARC_LIST_SCROLL_STOP,
+    ON_ARC_LIST_WILL_SCROLL,
+    ON_ARC_LIST_DID_SCROLL,
+    ON_ARC_LIST_REACH_START,
+    ON_ARC_LIST_REACH_END,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -4408,6 +4419,7 @@ struct ArkUIListModifier {
     ArkUI_Float32 (*getListScrollBarWidth)(ArkUINodeHandle node);
     void (*setListScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_VoidPtr resObjRawPtr);
     void (*resetListScrollBarWidth)(ArkUINodeHandle node);
+    void (*resetArcListScrollBarWidth)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getListScrollBarColor)(ArkUINodeHandle node);
     void (*setListScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetListScrollBarColor)(ArkUINodeHandle node);
@@ -4519,6 +4531,13 @@ struct ArkUIListModifier {
     void (*setBackPressCloseSwipeAction)(ArkUINodeHandle node, ArkUI_Bool closeSwipeAction);
     void (*resetBackPressCloseSwipeAction)(ArkUINodeHandle node);
     ArkUI_Bool (*getBackPressCloseSwipeAction)(ArkUINodeHandle node);
+    void (*setDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 sensitivity);
+    ArkUI_Int32 (*getDigitalCrownSensitivity)(ArkUINodeHandle node);
+    void (*resetDigitalCrownSensitivity)(ArkUINodeHandle node);
+    void (*setArcListHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
+    ArkUINodeHandle (*getArcListHeader)(ArkUINodeHandle node);
+    void (*resetArcListHeader)(ArkUINodeHandle node);
+    ArkUI_Bool (*getChainAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -5232,14 +5251,20 @@ struct ArkUIListItemModifier {
     void (*resetListItemStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*expand)(ArkUINodeHandle node, ArkUI_Int32 direction);
     ArkUI_Int32 (*collapse)(ArkUINodeHandle node);
+    void (*setAutoScale)(ArkUINodeHandle node, ArkUI_Bool autoScale);
+    ArkUI_Bool (*getAutoScale)(ArkUINodeHandle node);
+    void (*resetAutoScale)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollBarModifier {
     void (*setScrollBarDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetScrollBarDirection)(ArkUINodeHandle node);
     void (*setScrollBarState)(ArkUINodeHandle node, ArkUI_Int32 state);
+    ArkUI_Int32 (*getScrollBarState)(ArkUINodeHandle node);
     void (*resetScrollBarState)(ArkUINodeHandle node);
     void (*setScrollBarScroller)(ArkUINodeHandle node, ArkUINodeHandle controller);
+    ArkUINodeHandle (*getScrollBarScroller)(ArkUINodeHandle node);
+    void (*resetScrollBarScroller)(ArkUINodeHandle node);
     void (*setScrollBarEnableNestedScroll)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetScrollBarEnableNestedScroll)(ArkUINodeHandle node);
     void (*setScrollBarScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 value);
