@@ -296,6 +296,8 @@ private:
      */
     void StartDecoding(const SizeF& dstSize);
     bool GetAutoResizeDefaultBeforeDecode() const;
+    bool GetAutoResizeForCtx(
+        bool autoResize, bool autoResizeExplicitlySet, const RefPtr<ImageLoadingContext>& ctx) const;
     bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnCompleteInDataReady();
