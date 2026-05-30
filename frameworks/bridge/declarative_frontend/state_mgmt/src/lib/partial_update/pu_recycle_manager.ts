@@ -35,6 +35,7 @@ class RecycleManager {
   // Callback to request progressive release (set by parent ViewPU)
   private requestProgressiveReleaseCallback_: () => void = undefined;
   private defaultCacheCount: number;
+  private reuseIdForOptimize: Set<string> = new Set<string>();
 
   constructor() {
     this.cachedRecycleNodes_ = new Map<string, Array<ViewPU>>();
@@ -64,6 +65,7 @@ class RecycleManager {
     }
     this.cachedRecycleNodes_.get(name)?.push(node);
     if (node.__getReusableMemOptStrategy__Internal() === 1) {
+      this.reuseIdForOptimize.add(name);
       const cachedNodes = this.cachedRecycleNodes_.get(name);
       if (cachedNodes && cachedNodes.length > this.defaultCacheCount) {
         const currentSize = cachedNodes.length;
@@ -162,15 +164,41 @@ class RecycleManager {
     this.pendingProgressiveReleaseNodes_ = new Array<ViewPU>();
   }
 
+  public purgeAllCleanableRecycleNode(): void {
+    this.pendingCacheCleanTimers_.forEach((timerId) => {
+      clearTimeout(timerId);
+    });
+    this.pendingCacheCleanTimers_.clear();
+    this.maxCacheSizes_.clear();
+
+    this.cachedRecycleNodes_.forEach((nodes, reuseId) => {
+      if (!this.reuseIdForOptimize.has(reuseId)) {
+        return;
+      }
+      nodes.forEach((node) => {
+        node.resetRecycleCustomNode();
+      });
+    });
+    this.reuseIdForOptimize.forEach((reuseId) => {
+      this.cachedRecycleNodes_.delete(reuseId);
+    });
+    this.reuseIdForOptimize.clear();
+
+    this.pendingProgressiveReleaseNodes_.forEach((node) => {
+        node.resetRecycleCustomNode();
+    });
+    this.pendingProgressiveReleaseNodes_ = new Array<ViewPU>();
+  }
+
   /**
-   * @function preparePurgeAllCachedRecycleNodeProgressive
+   * @function preparePurgeAllCleanableRecycleNodeProgressive
    * @description
-   * Prepares to release all cached nodes by moving them to the pending progressive release list.
+   * Prepares to release all cleanable nodes by moving them to the pending progressive release list.
    * The actual release will be done later by releaseCachedNodesProgressive.
    *
    * @returns {number} - The number of nodes prepared for release.
    */
-  public preparePurgeAllCachedRecycleNodeProgressive(): number {
+  public preparePurgeAllCleanableRecycleNodeProgressive(): number {
     this.pendingCacheCleanTimers_.forEach((timerId) => {
       clearTimeout(timerId);
     });
@@ -178,13 +206,19 @@ class RecycleManager {
     this.maxCacheSizes_.clear();
 
     let count = 0;
-    this.cachedRecycleNodes_.forEach((nodes, _) => {
+    this.cachedRecycleNodes_.forEach((nodes, reuseId) => {
+      if (!this.reuseIdForOptimize.has(reuseId)) {
+        return;
+      }
       nodes.forEach((node) => {
         this.pendingProgressiveReleaseNodes_.push(node);
         count++;
       });
     });
-    this.cachedRecycleNodes_.clear();
+    this.reuseIdForOptimize.forEach((reuseId) => {
+      this.cachedRecycleNodes_.delete(reuseId);
+    });
+    this.reuseIdForOptimize.clear();
     return count;
   }
 

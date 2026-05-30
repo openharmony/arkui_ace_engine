@@ -1587,4 +1587,35 @@ HWTEST_F(LazyForEachSyntaxTestNg, SetEnableSyncLoadTest001, TestSize.Level1)
     EXPECT_EQ(lazyForEachBuilder->enableSyncLoad_, false);
 }
 
+/**
+ * @tc.name: ReduceCacheCountTest001
+ * @tc.desc: Test ReduceCacheCount with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ReduceCacheCountTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->startShowCached_ = 0;
+    lazyForEachBuilder->endShowCached_ = 0;
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 2);
+
+    lazyForEachBuilder->startShowCached_ = 0;
+    lazyForEachBuilder->endShowCached_ = 1;
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 3);
+
+    lazyForEachBuilder->startShowCached_ = 1;
+    lazyForEachBuilder->endShowCached_ = 0;
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 3);
+
+    lazyForEachBuilder->startShowCached_ = 1;
+    lazyForEachBuilder->endShowCached_ = 1;
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
+    EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(3), 3);
+}
+
 } // namespace OHOS::Ace::NG

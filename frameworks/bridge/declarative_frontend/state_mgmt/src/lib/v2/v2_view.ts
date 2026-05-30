@@ -295,13 +295,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
         // Sync mode: no time limit, batch release, collect nodes
         if (!isProgressive) {
-            this.recyclePoolV2_.purgeAllCachedRecycleElmtIds();
+            this.recyclePoolV2_.purgeAllCleanableRecycleElmtIds();
             return true;
         }
 
         // Collect nodes need to release progressively
         if (shouldCollect) {
-            this.recyclePoolV2_.preparePurgeAllCachedRecycleElmtIdsProgressive();
+            this.recyclePoolV2_.preparePurgeAllCleanableRecycleElmtIdsProgressive();
         }
 
         // Progressive mode: with time limit, collect nodes only once
