@@ -269,6 +269,8 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     } else {
         textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColorNoBg());
     }
+
+    textLayoutProperty->UpdatePunctuationOverflow(true);
 }
 
 void SecurityComponentModelNG::SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
