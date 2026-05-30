@@ -24,13 +24,15 @@ import { UIUtils } from '../../utils';
 import { uiUtils } from '../../base/uiUtilsImpl';
 import { FactoryInternal } from '../../base/iFactoryInternal';
 
-export class InterfaceProxyHandler implements reflect.InvocationHandler, IObservedObject, ISubscribedWatches {
+export class InterfaceProxyHandler implements reflect.InvocationHandler, IObservedObject, ISubscribedWatches, JsonSerializable {
     private __meta: IMutableStateMeta | undefined;
     private __keyedMeta: IMutableKeyedStateMeta | undefined;
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     private allowDeep_: boolean;
     private _target: Object;
     private isAPI_: boolean;
+    private readonly skipSymbol: string = '__observeInterfaceProxy_skipsymbol_Internal';
+    private static readonly TO_JSON_METHOD: string = 'toJSON';
     constructor(target: Object, allowDeep: boolean, isAPI: boolean) {
         this._target = target;
         this.allowDeep_ = allowDeep;
@@ -55,6 +57,52 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     public setV1RenderId(renderId: RenderIdType): void {}
     public shouldAddRef(): boolean {
         return OBSERVE.renderingComponent > 0;
+    }
+    public override toJSON(): string {
+        return JSON.stringify(this.toJSONObject());
+    }
+    public toJSONObject(): Record<string, Object> {
+        const result: Record<string, Object> = {};
+        const targetType = Class.of(this._target);
+        const visited = new Set<string>();
+        const getterPrefix = '%%get-';
+        const getterPrefixLength = getterPrefix.length;
+        for (let cls: Class | undefined = targetType; cls !== undefined; cls = cls!.getSuper()) {
+            const methods = cls!.getInstanceMethods();
+            for (const method of methods) {
+                const methodName = method.getName();
+                if (!methodName.startsWith(getterPrefix)) {
+                    continue;
+                }
+                const varName = methodName.substring(getterPrefixLength);
+                if (visited.has(varName)) {
+                    continue;
+                }
+                visited.add(varName);
+                const observedValue = this.getValue(varName);
+                if (observedValue !== this.skipSymbol) {
+                    result[varName] = observedValue;
+                }
+            }
+        }
+        return result;
+    }
+    public getValue(varName: string): Object {
+        const getterPrefix = '%%get-';
+        const targetType = Class.of(this._target);
+        const getter = targetType.getInstanceMethod(getterPrefix + varName);
+        if (!getter) {
+            return this.skipSymbol as Object;
+        }
+        const value = getter.invoke(this._target, []);
+        if (typeof value !== 'function' && this.shouldAddRef()) {
+            if (this.isAPI_) {
+                this.__keyedMeta!.addRef(varName);
+            } else {
+                this.__meta!.addRef();
+            }
+        }
+        return uiUtils.makeObservedEntrance(value, this.allowDeep_, this.isAPI_) as Object;
     }
     get(target: Object, method: reflect.InstanceMethod): Any {
         const value = method.invoke(this._target);
@@ -101,11 +149,12 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
             console.log(e);
         }
     }
-
     invoke(target: Object, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
+        if (method.getName() === InterfaceProxyHandler.TO_JSON_METHOD) {
+            return this.toJSON();
+        }
         return method.invoke(this._target, args);
     }
-
     get target(): Object {
         return this._target;
     }
