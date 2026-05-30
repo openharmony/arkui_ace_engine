@@ -15,6 +15,17 @@
 
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
+#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
+
+#include <algorithm>
+
+#include "base/log/log.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/picker/picker_change_event.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include <functional>
 #include <stdint.h>
 #include <string>
@@ -84,6 +95,34 @@ std::unordered_map<uint32_t, std::string> DatePickerPattern::lunarMonths_; // lu
 std::unordered_map<uint32_t, std::string> DatePickerPattern::lunarDays_;   // lunar day from 1 to 30, count is 30
 std::vector<std::string> DatePickerPattern::tagOrder_;    // order of year month day
 std::vector<std::string> DatePickerPattern::localizedMonths_;
+
+RefPtr<FrameNode> DatePickerPattern::GetColumn(const int32_t& tag) const
+{
+    auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(), [&tag](const auto& c) {
+        auto column = c.Upgrade();
+        return column && column->GetId() == tag;
+    });
+    return (iter == datePickerColumns_.end()) ? nullptr : (*iter).Upgrade();
+}
+
+uint32_t DatePickerPattern::GetOptionCount(RefPtr<FrameNode>& frameNode)
+{
+    return options_[frameNode].size();
+}
+
+PickerDateF DatePickerPattern::GetOptionValue(RefPtr<FrameNode>& frameNode, uint32_t index)
+{
+    if (index >= GetOptionCount(frameNode)) {
+        LOGE("index out of range.");
+        return {};
+    }
+    return options_[frameNode][index];
+}
+
+const std::vector<PickerDateF>& DatePickerPattern::GetAllOptions(RefPtr<FrameNode>& frameNode)
+{
+    return options_[frameNode];
+}
 
 void DatePickerPattern::OnAttachToFrameNode()
 {
@@ -2995,6 +3034,18 @@ const std::string DatePickerPattern::GetText()
     std::string result = std::to_string(pickerDate.GetYear()) + "-" + std::to_string(pickerDate.GetMonth()) + "-" +
                      std::to_string(pickerDate.GetDay());
     return result;
+}
+
+FocusPattern DatePickerPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+    auto focusColor = pickerTheme->GetFocusColor();
+    FocusPaintParam focusPaintParams;
+    focusPaintParams.SetPaintColor(focusColor);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
 }
 
 const std::string DatePickerPattern::GetFormatString(PickerDateF date)

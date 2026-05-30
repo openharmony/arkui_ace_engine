@@ -19,9 +19,13 @@
 #include <mutex>
 
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/picker/picker_date.h"
+#include "core/components_ng/pattern/picker/picker_time.h"
+namespace OHOS::Ace {
+class PickerTheme;
+}
+
+#include "core/components_ng/pattern/picker/picker_setting_data.h"
 
 namespace OHOS::Ace {
 using DateChangeEvent = std::function<void(const BaseEventInfo* info)>;

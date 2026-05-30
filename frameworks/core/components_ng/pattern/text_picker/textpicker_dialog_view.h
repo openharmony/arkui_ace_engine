@@ -17,13 +17,27 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TEXT_PICKER_DIALOG_VIEW_H
 
 #include "base/utils/macros.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
-#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
+
+namespace OHOS::Ace {
+struct KeyEvent;
+class ButtonTheme;
+class DialogTheme;
+class PickerTheme;
+}
 
 namespace OHOS::Ace::NG {
+
+class TextPickerPattern;
+class FrameNode;
+class UINode;
+class FocusHub;
+class PipelineContext;
+class ButtonLayoutProperty;
+class RenderContext;
 
 class ACE_EXPORT TextPickerDialogView {
 public:

@@ -19,10 +19,11 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 
 namespace OHOS::Ace::NG {

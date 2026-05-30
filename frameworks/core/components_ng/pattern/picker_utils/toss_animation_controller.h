@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_TOSS_ANIMATION_CONTROLLER_H
 
 #include "core/animation/curve.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+namespace OHOS::Ace {
+class PickerTheme;
+}
+
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/ace_type.h"
 

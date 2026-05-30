@@ -15,6 +15,8 @@
 
 #include "frameworks/compatible/components/picker/dom_picker_dialog.h"
 
+#include "core/components_ng/pattern/picker/picker_theme.h"
+
 namespace OHOS::Ace::Framework {
 
 DOMPickerDialog::DOMPickerDialog(NodeId nodeId, const std::string& nodeName) : DOMPickerBase(nodeId, nodeName, true) {}

@@ -23,7 +23,10 @@
 #include "compatible/components/picker/picker_time_component.h"
 #include "compatible/components/picker/picker_value_component.h"
 
-#include "core/components_ng/pattern/picker/picker_theme.h"
+namespace OHOS::Ace {
+class PickerTheme;
+}
+
 #include "core/components/text/text_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/common/dom/dom_node.h"

@@ -15,6 +15,10 @@
 
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {

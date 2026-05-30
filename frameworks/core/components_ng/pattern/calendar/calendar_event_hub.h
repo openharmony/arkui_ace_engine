@@ -16,19 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_CALENDAR_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_CALENDAR_EVENT_HUB_H
 
-#include <string>
-
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/calendar/calendar_event_types.h"
+#include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
 
 namespace OHOS::Ace::NG {
-
-using DialogEvent = std::function<void(const std::string&)>;
-using DialogCancelEvent = std::function<void()>;
-using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
-using SelectedChangeEvent = std::function<void(const std::string&)>;
-using RequestDataEvent = std::function<void(const std::string&)>;
 
 class CalendarEventHub : public EventHub {
     DECLARE_ACE_TYPE(CalendarEventHub, EventHub);

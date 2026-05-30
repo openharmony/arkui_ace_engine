@@ -21,8 +21,7 @@
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/i18n/localization.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/picker/picker_date_f.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
@@ -32,10 +31,13 @@
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 
 namespace OHOS::Ace {
+class PickerTheme;
 class TextLayoutProperty;
 }
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
 
 class DatePickerColumnPattern : public PickerColumnPattern {
     DECLARE_ACE_TYPE(DatePickerColumnPattern, PickerColumnPattern);

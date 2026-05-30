@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 
+#include "core/components/calendar/calendar_theme.h"
+#include "core/components_ng/pattern/calendar/calendar_event_hub.h"
+
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
@@ -31,6 +34,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+RefPtr<EventHub> CalendarMonthPattern::CreateEventHub()
+{
+    return MakeRefPtr<CalendarEventHub>();
+}
+
 namespace {
 constexpr int32_t CALENDAR_WEEK_DAYS = 7;
 constexpr int32_t DAILY_FOUR_ROWSPACE = 4;

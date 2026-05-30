@@ -15,8 +15,13 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
+
 #include "base/i18n/localization.h"
+#include "core/components/calendar/calendar_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"

@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 
 namespace OHOS::Ace::Framework {
 class JSDatePickerTheme {

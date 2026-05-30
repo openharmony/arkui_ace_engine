@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "compatible/components/picker/picker_option_component.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 
 namespace OHOS::Ace {
 namespace {

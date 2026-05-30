@@ -16,18 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATE_PICKER_DATE_TIME_ANIMATION_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATE_PICKER_DATE_TIME_ANIMATION_CONTROLLER_H
 
-#include "core/animation/animator.h"
-#include "core/components/display/render_display.h"
-#include "core/components/triangle/render_triangle.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/pipeline/pipeline_context.h"
+#include <memory>
+
+#include "base/memory/ace_type.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+
 class DateTimeAnimationController : public virtual AceType {
     DECLARE_ACE_TYPE(DateTimeAnimationController, AceType);
 
 public:
-    ~DateTimeAnimationController() = default;
+    ~DateTimeAnimationController() override;
 
     void SetButtonIcon(const RefPtr<FrameNode>& value)
     {
@@ -106,6 +107,6 @@ private:
     bool isOutAnimationPlaying_ = false;
     bool isDatePickerButtonHade_ = false;
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATE_PICKER_DATE_TIME_ANIMATION_CONTROLLER_H

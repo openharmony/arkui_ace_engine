@@ -16,7 +16,6 @@
 #define CAPI_STUBS_MOCK_DATE_PICKER_DIALOG_H
 
 #include "core/components_ng/pattern/picker/picker_model.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace::NG {
 class MockDatePickerDialog {

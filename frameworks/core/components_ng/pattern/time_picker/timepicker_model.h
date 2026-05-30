@@ -20,10 +20,10 @@
 #include "ui/base/macros.h"
 
 #include "base/i18n/time_format.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/picker/picker_change_event.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 
 namespace OHOS::Ace {
 using ChangeEvent = std::function<void(const BaseEventInfo* info)>;

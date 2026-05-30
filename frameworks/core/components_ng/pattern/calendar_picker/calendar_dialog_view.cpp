@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 
+#include "core/components/calendar/calendar_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include <utility>
 
 #include "base/i18n/localization.h"
@@ -25,6 +27,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
+
 #include <algorithm>
 
 #include "base/i18n/localization.h"
@@ -30,6 +32,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+RefPtr<EventHub> CalendarPickerPattern::CreateEventHub()
+{
+    return MakeRefPtr<CalendarPickerEventHub>();
+}
+
 namespace {
 constexpr int32_t YEAR_INDEX = 0;
 constexpr int32_t FIRST_SLASH = 1;

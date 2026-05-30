@@ -20,14 +20,15 @@
 #include <mutex>
 
 #include "base/utils/macros.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "base/geometry/dimension_offset.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_types.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 namespace NG {
 struct CalendarSettingData;
+struct PickerTextStyle;
 enum class CalendarEdgeAlign;
 }
 

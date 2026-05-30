@@ -17,6 +17,9 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/picker_change_event.h"
+#include "core/components_ng/pattern/picker/picker_types.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/resource/resource_parse_utils.h"
 

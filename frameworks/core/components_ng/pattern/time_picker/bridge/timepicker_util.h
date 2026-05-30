@@ -23,7 +23,7 @@
 
 #include "ui/base/referenced.h"
 
-#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_time.h"
 
 struct Ark_TimePickerDialogOptions;
 namespace OHOS::Ace {

@@ -18,27 +18,9 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
-
-namespace OHOS::Ace {
-class GestureEvent;
-}
+#include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
 
 namespace OHOS::Ace::NG {
-
-using TextChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;
-using TextValueChangeEvent = std::function<void(const std::vector<std::string>&)>;
-using TextSelectedChangeEvent = std::function<void(const std::vector<double>&)>;
-using DialogTextEvent = std::function<void(const std::string&)>;
-using DialogCancelEvent = std::function<void()>;
-using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
-
-struct TextPickerInteractiveEvent {
-    DialogCancelEvent cancelEvent;
-    DialogTextEvent acceptEvent;
-    DialogTextEvent changeEvent;
-    DialogTextEvent scrollStopEvent;
-    DialogTextEvent enterSelectedAreaEvent;
-};
 
 class TextPickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextPickerEventHub, EventHub);

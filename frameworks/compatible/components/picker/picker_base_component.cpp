@@ -15,6 +15,7 @@
 
 #include "compatible/components/picker/picker_base_component.h"
 
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "compatible/components/picker/picker_base_element.h"
 #include "compatible/components/picker/render_picker_base.h"
 
@@ -22,6 +23,11 @@
 #include "core/components/triangle/triangle_component.h"
 
 namespace OHOS::Ace {
+
+void PickerBaseComponent::SetTheme(const RefPtr<PickerTheme>& value)
+{
+    theme_ = value;
+}
 
 const char PickerBaseComponent::PICKER_YEAR_COLUMN[] = "year";
 const char PickerBaseComponent::PICKER_MONTH_COLUMN[] = "month";

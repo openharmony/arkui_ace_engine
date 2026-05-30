@@ -24,8 +24,6 @@
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_utils.h"
-#include "frameworks/core/components_ng/pattern/picker/picker_type_define.h"
-
 namespace OHOS::Ace::Framework {
 
 void JSContainerPicker::Create(const JSCallbackInfo& info)

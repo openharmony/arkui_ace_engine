@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_model_static.h"
 
+#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 namespace OHOS::Ace::NG {

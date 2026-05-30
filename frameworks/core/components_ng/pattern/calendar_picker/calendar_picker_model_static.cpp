@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_static.h"
 
+#include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 

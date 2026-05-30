@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"

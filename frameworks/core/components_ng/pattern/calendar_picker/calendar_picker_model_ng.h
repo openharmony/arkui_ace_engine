@@ -16,11 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H
 
-#include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
+
+namespace OHOS::Ace {
+class CalendarTheme;
+}
 
 namespace OHOS::Ace::NG {
+class CalendarPickerPattern;
+
 class ACE_EXPORT CalendarPickerModelNG : public CalendarPickerModel {
 public:
     void Create(const CalendarSettingData& settingData) override;

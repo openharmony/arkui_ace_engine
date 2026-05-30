@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/pipeline_ng/pipeline_context.h"

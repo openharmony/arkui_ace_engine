@@ -18,11 +18,19 @@
 #include <securec.h>
 
 #include "base/i18n/localization.h"
+#include "core/components/button/button_theme.h"
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "base/utils/utils.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/event/key_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -31,6 +39,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {

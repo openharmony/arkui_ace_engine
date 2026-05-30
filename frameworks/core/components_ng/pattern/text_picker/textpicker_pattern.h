@@ -18,22 +18,26 @@
 
 #include <optional>
 
-#include "core/components/theme/app_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/text_picker/textpicker_row_accessibility_property.h"
-#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
-#include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 #include "core/common/resource/resource_object.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
+
+namespace OHOS::Ace {
+class DialogTheme;
+class PickerTheme;
+}
+
 namespace OHOS::Ace::NG {
+using OHOS::Ace::PickerTheme;
+class TextPickerColumnPattern;
+class TextPickerEventHub;
 class InspectorFilter;
 using EventCallback = std::function<void(bool)>;
 using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, uint32_t, bool)>;
@@ -64,10 +68,7 @@ public:
         host->MarkModifyDone();
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<TextPickerEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -203,19 +204,7 @@ public:
         return backgroundColor_;
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
-        auto focusColor = pickerTheme->GetFocusColor();
-
-        FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(focusColor);
-
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 

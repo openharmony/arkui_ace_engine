@@ -17,8 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TEXT_PICKER_MODEL_STATIC_H
 
 #include "base/geometry/dimension.h"
+#include <shared_mutex>
+
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 

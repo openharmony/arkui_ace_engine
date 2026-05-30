@@ -14,6 +14,10 @@
  */
 
 #include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_date.h"
+#include "core/components_ng/pattern/picker/picker_date_time.h"
+#include "core/components_ng/pattern/picker/picker_string_formatter.h"
+#include "core/components_ng/pattern/picker/picker_time.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"

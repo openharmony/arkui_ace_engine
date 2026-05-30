@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 
