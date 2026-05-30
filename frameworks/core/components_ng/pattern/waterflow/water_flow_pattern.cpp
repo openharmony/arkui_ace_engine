@@ -740,11 +740,25 @@ void WaterFlowPattern::OnScrollEndCallback()
     MarkDirtyNodeSelf();
 }
 
+// SLIDING_WINDOW backToTop may settle at the estimated endpoint without reaching the top; re-align via index jump.
+void WaterFlowPattern::CheckBackToTopFallback()
+{
+    if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
+        return;
+    }
+    // backToTop stopped (not aborted) but estimated totalOffset_ settled short of the top; re-align by index jump.
+    // SCROLL_FROM_STATUSBAR is the durable signal since IsBackToTopRunning() may be cleared before OnAnimateStop.
+    if (!GetScrollAbort() && (IsBackToTopRunning() || GetScrollSource() == SCROLL_FROM_STATUSBAR) && !IsAtTop()) {
+        ScrollToIndex(0, false, ScrollAlign::START);
+    }
+}
+
 void WaterFlowPattern::OnAnimateStop()
 {
     if (!GetIsDragging() || GetScrollAbort()) {
         scrollStop_ = true;
     }
+    CheckBackToTopFallback();
     CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }

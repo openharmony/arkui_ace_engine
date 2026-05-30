@@ -253,6 +253,8 @@ private:
     double GetTopEdgeEffectPos() const;
     SizeF GetContentSize() const;
     void MarkDirtyNodeSelf();
+    // align to the very top via precise index jump when a backToTop animation settles short of the top
+    void CheckBackToTopFallback();
     void OnScrollEndCallback() override;
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
