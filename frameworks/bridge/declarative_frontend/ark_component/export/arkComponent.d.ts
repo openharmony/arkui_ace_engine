@@ -1153,6 +1153,7 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
     recoverable(value: boolean | undefined): this;
+    fullScreenOverlay(value: boolean | undefined): this;
     bindToScrollable(scrollers: Array<Scroller>): this;
     bindToNestedScrollable(scrollInfos: Array<NestedScrollInfo>): this;
     backButtonIcon(value: any, text?: ResourceStr): this;

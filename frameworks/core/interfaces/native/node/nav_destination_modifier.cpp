@@ -659,6 +659,24 @@ void ResetEnableNavigationIndicator(ArkUINodeHandle node)
     NavDestinationModelNG::SetEnableNavigationIndicator(frameNode, navigationIndicator);
 }
 
+void SetFullScreenOverlay(ArkUINodeHandle node, ArkUIOptionalBool fullScreenOverlay)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<bool> overlay;
+    if (fullScreenOverlay.isSet) {
+        overlay = fullScreenOverlay.value;
+    }
+    NavDestinationModelNG::SetFullScreenOverlay(frameNode, overlay);
+}
+
+void ResetFullScreenOverlay(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetFullScreenOverlay(frameNode, std::nullopt);
+}
+
 void SetNavDestinationOnShown(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1004,6 +1022,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .setMenuItemSymbol = SetMenuItemSymbol,
         .setRecoverable = SetNavDestinationRecoverable,
         .resetRecoverable = ResetNavDestinationRecoverable,
+        .setFullScreenOverlay = SetFullScreenOverlay,
+        .resetFullScreenOverlay = ResetFullScreenOverlay,
         .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
         .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
         .setNavDestinationCustomTitle = SetNavDestinationCustomTitle,

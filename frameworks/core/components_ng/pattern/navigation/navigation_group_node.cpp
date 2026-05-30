@@ -769,7 +769,8 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
 
     auto mode = navigationPattern->GetNavigationMode();
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    if (isLastChild && !navigationPattern->IsForceSplitSuccess() && (mode == NavigationMode::SPLIT ||
+    bool isForceSplit = navigationPattern->IsForceSplitSuccess();
+    if (isLastChild && !isForceSplit && ((mode == NavigationMode::SPLIT && !navDestination->IsFullScreenOverlay()) ||
                            (mode == NavigationMode::STACK && layoutProperty->GetHideNavBar().value_or(false)))) {
         return false;
     }
