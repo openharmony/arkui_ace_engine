@@ -28,6 +28,7 @@
 #include "base/error/error_code.h"
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/response_region.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/multi_thread.h"
@@ -6310,6 +6311,23 @@ void ViewAbstract::UnRegisterMaterialInteractionEvent(FrameNode* frameNode)
     gestureHub->RemoveMaterialInteractionEvent();
 }
 
+void ViewAbstract::HistogramImmersiveOptions(const ImmersiveMaterialConfig& config)
+{
+    int32_t state = 0;
+    [[maybe_unused]] static constexpr int32_t HISTOGRAM_MAX_COUNT_IMMERSIVE_MATERIAL = 8;
+    if (config.HasLightEffect()) {
+        state |= 0b01;
+    }
+    if (config.interactive) {
+        state |= 0b10;
+    }
+    if (config.colorInvert) {
+        state |= 0b100;
+    }
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(
+        "uiMaterial.ImmersiveMaterial.enum", state, HISTOGRAM_MAX_COUNT_IMMERSIVE_MATERIAL);
+}
+
 void ViewAbstract::SetImmersiveOptions(
     const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
 {
@@ -6327,6 +6345,7 @@ void ViewAbstract::SetImmersiveOptions(
     if (!materialConfig) {
         return;
     }
+    HistogramImmersiveOptions(*materialConfig);
     if (materialConfig->key.level != UiMaterialLevel::SMOOTH) {
         RegisterTransparencyListener(frameNode);
         SetImmersiveConfigs(frameNode, materialConfig);

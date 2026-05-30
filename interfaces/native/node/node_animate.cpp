@@ -17,8 +17,10 @@
 
 #include "animate_impl.h"
 #include "node/node_model.h"
+#include "ui/animation/animation_constants.h"
 
 #include "base/error/error_code.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "interfaces/native/native_error_message_macros.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
@@ -139,6 +141,9 @@ void OH_ArkUI_AnimateOption_SetIterations(ArkUI_AnimateOption* option, int32_t v
     if (value < -1) {
         return;
     }
+    if (value == OHOS::Ace::ANIMATION_REPEAT_INFINITE) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("OH_ArkUI_AnimateOption_SetIterations", 1);
+    }
     option->iterations = value;
 }
 
@@ -219,6 +224,9 @@ int32_t OH_ArkUI_KeyframeAnimateOption_SetIterations(ArkUI_KeyframeAnimateOption
     if (value < -1) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is less than -1");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (value == OHOS::Ace::ANIMATION_REPEAT_INFINITE) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("OH_ArkUI_KeyframeAnimateOption_SetIterations", 1);
     }
     option->iterations = value;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
@@ -355,6 +363,9 @@ int32_t OH_ArkUI_AnimatorOption_SetDuration(ArkUI_AnimatorOption* option, int32_
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is negative");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (value == 0 && option->iterations == OHOS::Ace::ANIMATION_REPEAT_INFINITE) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("OH_ArkUI_AnimatorOption_SetDuration", 1);
+    }
     option->duration = value;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -371,6 +382,9 @@ int32_t OH_ArkUI_AnimatorOption_SetIterations(ArkUI_AnimatorOption* option, int3
     CHECK_NULL_RETURN_WITH_MESSAGE(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "option is null");
     if (value < -1) {
         value = 1;
+    }
+    if (value == OHOS::Ace::ANIMATION_REPEAT_INFINITE && option->duration == 0) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("OH_ArkUI_AnimatorOption_SetDuration", 1);
     }
     option->iterations = value;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;

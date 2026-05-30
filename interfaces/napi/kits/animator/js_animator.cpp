@@ -16,6 +16,7 @@
 #include "animator_option.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/log_wrapper.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "core/animation/animation.h"
@@ -357,6 +358,9 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
         return nullptr;
     }
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "jsAnimator reset, id:%{public}d", animator->GetId());
+    if (option->iterations == ANIMATION_REPEAT_INFINITE && option->duration == 0) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("@ohos.animator.reset", 1);
+    }
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();
@@ -860,6 +864,9 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
 {
     auto option = std::make_shared<AnimatorOption>();
     ParseAnimatorOption(env, info, option);
+    if (option->iterations == ANIMATION_REPEAT_INFINITE && option->duration == 0) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("@ohos.animator.create", 1);
+    }
     auto animator = CREATE_ANIMATOR("ohos.animator");
     animator->AttachSchedulerOnContainer();
     AnimatorResult* animatorResult = new AnimatorResult(animator, option);

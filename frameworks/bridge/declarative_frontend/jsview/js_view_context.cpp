@@ -116,6 +116,7 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
     auto animationInterfaceName = GetAnimationInterfaceName(interface);
     CHECK_NULL_VOID(animationInterfaceName);
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
+        HistogramInfiniteAnimationEvent(interface);
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
                 "keyframe inf iteration. dur:%{public}d", option.GetDuration());

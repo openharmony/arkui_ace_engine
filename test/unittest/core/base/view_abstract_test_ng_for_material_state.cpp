@@ -884,4 +884,114 @@ HWTEST_F(ViewAbstractTestNg, MaterialTypeEnum001, TestSize.Level1)
     EXPECT_EQ(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT), 1);
 }
 
+/**
+ * @tc.name: HistogramImmersiveOptions_NoFlags
+ * @tc.desc: Test HistogramImmersiveOptions with all flags false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_NoFlags, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ImmersiveMaterialConfig with all flags false.
+     * @tc.steps: step2. Call HistogramImmersiveOptions.
+     * @tc.expected: step2. No crash, state=0.
+     */
+    ImmersiveMaterialConfig config;
+    config.interactive = false;
+    config.colorInvert = false;
+    config.lightEffectOptions = std::nullopt;
+    ViewAbstract::HistogramImmersiveOptions(config);
+    EXPECT_FALSE(config.HasLightEffect());
+    EXPECT_FALSE(config.interactive);
+    EXPECT_FALSE(config.colorInvert);
+}
+
+/**
+ * @tc.name: HistogramImmersiveOptions_LightEffectOnly
+ * @tc.desc: Test HistogramImmersiveOptions with only HasLightEffect true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_LightEffectOnly, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ImmersiveMaterialConfig with lightEffectOptions set.
+     * @tc.steps: step2. Call HistogramImmersiveOptions.
+     * @tc.expected: step2. No crash, HasLightEffect returns true.
+     */
+    ImmersiveMaterialConfig config;
+    config.interactive = false;
+    config.colorInvert = false;
+    config.lightEffectOptions = LightEffectOptions();
+    ViewAbstract::HistogramImmersiveOptions(config);
+    EXPECT_TRUE(config.HasLightEffect());
+    EXPECT_FALSE(config.interactive);
+    EXPECT_FALSE(config.colorInvert);
+}
+
+/**
+ * @tc.name: HistogramImmersiveOptions_InteractiveOnly
+ * @tc.desc: Test HistogramImmersiveOptions with only interactive true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_InteractiveOnly, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ImmersiveMaterialConfig with interactive=true.
+     * @tc.steps: step2. Call HistogramImmersiveOptions.
+     * @tc.expected: step2. No crash, interactive is true.
+     */
+    ImmersiveMaterialConfig config;
+    config.interactive = true;
+    config.colorInvert = false;
+    config.lightEffectOptions = std::nullopt;
+    ViewAbstract::HistogramImmersiveOptions(config);
+    EXPECT_TRUE(config.interactive);
+    EXPECT_FALSE(config.HasLightEffect());
+    EXPECT_FALSE(config.colorInvert);
+}
+
+/**
+ * @tc.name: HistogramImmersiveOptions_ColorInvertOnly
+ * @tc.desc: Test HistogramImmersiveOptions with only colorInvert true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_ColorInvertOnly, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ImmersiveMaterialConfig with colorInvert=true.
+     * @tc.steps: step2. Call HistogramImmersiveOptions.
+     * @tc.expected: step2. No crash, colorInvert is true.
+     */
+    ImmersiveMaterialConfig config;
+    config.interactive = false;
+    config.colorInvert = true;
+    config.lightEffectOptions = std::nullopt;
+    ViewAbstract::HistogramImmersiveOptions(config);
+    EXPECT_TRUE(config.colorInvert);
+    EXPECT_FALSE(config.HasLightEffect());
+    EXPECT_FALSE(config.interactive);
+}
+
+/**
+ * @tc.name: HistogramImmersiveOptions_AllFlags
+ * @tc.desc: Test HistogramImmersiveOptions with all flags true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, HistogramImmersiveOptions_AllFlags, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ImmersiveMaterialConfig with all flags true.
+     * @tc.steps: step2. Call HistogramImmersiveOptions.
+     * @tc.expected: step2. No crash, all flags are true.
+     */
+    ImmersiveMaterialConfig config;
+    config.interactive = true;
+    config.colorInvert = true;
+    config.lightEffectOptions = LightEffectOptions();
+    ViewAbstract::HistogramImmersiveOptions(config);
+    EXPECT_TRUE(config.HasLightEffect());
+    EXPECT_TRUE(config.interactive);
+    EXPECT_TRUE(config.colorInvert);
+}
+
 } // namespace OHOS::Ace::NG

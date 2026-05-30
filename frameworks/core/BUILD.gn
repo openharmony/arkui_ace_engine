@@ -692,6 +692,11 @@ template("ace_core_source_set") {
       external_deps += [ "ffrt:libffrt" ]
     }
 
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+      defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+    }
+
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     deps += [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
@@ -1228,6 +1233,11 @@ template("ace_core_ng_source_set") {
     if (defined(config.use_platform_font) && config.use_platform_font) {
       defines += [ "USE_PLATFORM_FONT" ]
       sources += [ "common/font/font_platform_proxy.cpp" ]
+    }
+
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+      defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
 
     cflags_cc = []
