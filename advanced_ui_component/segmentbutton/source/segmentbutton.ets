@@ -355,6 +355,8 @@ export class SegmentButtonOptions {
   public localizedButtonPadding?: LocalizedPadding
   public showText: boolean = false
   public showIcon: boolean = false
+  public hasFontSize: boolean = false;
+  public hasSelectedFontSize: boolean = false;
   public iconTextRadius?: number
   public iconTextBackgroundRadius?: number
   public backgroundBlurStyle: BlurStyle
@@ -381,8 +383,10 @@ export class SegmentButtonOptions {
   constructor(options: TabSegmentButtonOptions | CapsuleSegmentButtonOptions) {
     this.fontColor = options.fontColor ?? segmentButtonTheme.FONT_COLOR
     this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR
-    this.fontSize = options.fontSize ?? -1;
-    this.selectedFontSize = options.selectedFontSize ?? -1;
+    this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE;
+    this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE;
+    this.hasFontSize = options.fontSize !== undefined ? true : false;
+    this.hasSelectedFontSize = options.selectedFontSize !== undefined ? true : false;
     this.fontWeight = options.fontWeight ?? initFontWeight(FontWeight.Regular)
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium
     this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR
@@ -2096,11 +2100,11 @@ export struct SegmentButton {
 
   updateButtonFont(): void {
     this.buttonItemsSelected.forEach((selected, index) => {
-      const selectedFontSize = this.options.selectedFontSize !== -1 ? this.options.selectedFontSize: 
+      const selectedFontSize = this.options.hasSelectedFontSize ? this.options.selectedFontSize: 
         (this.useAdaptiveLineHeight ? 
           segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : 
           segmentButtonTheme.SELECTED_FONT_SIZE);
-      const normalFontSize = this.options.fontSize !== -1 ? this.options.fontSize: 
+      const normalFontSize = this.options.hasFontSize ? this.options.fontSize:  
         (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
       this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
