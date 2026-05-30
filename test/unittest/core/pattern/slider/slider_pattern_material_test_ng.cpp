@@ -2007,4 +2007,65 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderLayoutAlgorithm_Measure_SelectedTrac
     SliderLayoutAlgorithm sliderLayoutAlgorithm;
     sliderLayoutAlgorithm.Measure(AceType::RawPtr(layoutWrapper));
 }
+
+/**
+ * @tc.name: SliderPattern_UpdateMaterialNodePosition_AllNodesNull_001
+ * @tc.desc: Test UpdateMaterialNodePosition with all material nodes null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_UpdateMaterialNodePosition_AllNodesNull_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->blockSize_ = BLOCK_SIZE_TEST;
+    pattern->dragFrameNode_ = nullptr;
+    pattern->blurCoverNode_ = nullptr;
+    pattern->dragPointNode_ = nullptr;
+    
+    pattern->UpdateMaterialNodePosition(100.0f, 50.0f, 15.0f);
+    
+    EXPECT_EQ(pattern->dragFrameNode_, nullptr);
+    EXPECT_EQ(pattern->blurCoverNode_, nullptr);
+    EXPECT_EQ(pattern->dragPointNode_, nullptr);
+}
+
+/**
+ * @tc.name: SliderPattern_UpdateMaterialNodePosition_AllNodesExist_001
+ * @tc.desc: Test UpdateMaterialNodePosition with all material nodes existing
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_UpdateMaterialNodePosition_AllNodesExist_001, TestSize.Level1)
+{
+    auto frameNode = CreateSliderNodeWithMaterial();
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->blockSize_ = BLOCK_SIZE_TEST;
+    
+    pattern->CreateDragFrameNode();
+    pattern->CreateDragPointNode();
+    pattern->CreateBlurCoverNode();
+    
+    ASSERT_NE(pattern->dragFrameNode_, nullptr);
+    ASSERT_NE(pattern->blurCoverNode_, nullptr);
+    ASSERT_NE(pattern->dragPointNode_, nullptr);
+    
+    pattern->UpdateMaterialNodePosition(100.0f, 50.0f, 15.0f);
+    
+    auto frameRC = pattern->dragFrameNode_->GetRenderContext();
+    ASSERT_NE(frameRC, nullptr);
+    EXPECT_TRUE(frameRC->GetPosition().has_value());
+    
+    auto blurRC = pattern->blurCoverNode_->GetRenderContext();
+    ASSERT_NE(blurRC, nullptr);
+    EXPECT_TRUE(blurRC->GetPosition().has_value());
+    
+    auto pointRC = pattern->dragPointNode_->GetRenderContext();
+    ASSERT_NE(pointRC, nullptr);
+    EXPECT_TRUE(pointRC->GetPosition().has_value());
+}
 } // namespace OHOS::Ace::NG

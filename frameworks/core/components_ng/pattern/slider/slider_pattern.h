@@ -428,6 +428,8 @@ private:
     void UpdateSelectedTrackFrameNode();
     void UpdateParticleFrameNode();
     void UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius);
+    void UpdateMaterialFrameNode(
+        const RefPtr<FrameNode>& frameNode, float newSize, float posX, float posY, float borderRadiusValue);
     void RegisterMaterialNodePositionCallback();
     void ShowMaterialNode();
     void HideMaterialNode();
