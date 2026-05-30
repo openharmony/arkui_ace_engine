@@ -279,6 +279,7 @@ public:
     virtual void ResetSelectedDragPreviewStyle() {};
     virtual void SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy) {};
     virtual void ResetIncrementalUpdatePolicy() {};
+    virtual void BindJSTextController(std::function<void()>&& func) {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

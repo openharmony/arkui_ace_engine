@@ -2136,6 +2136,13 @@ void TextModelNG::ResetSelectedDragPreviewStyle()
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SelectedDragPreviewStyle, PROPERTY_UPDATE_MEASURE);
 }
 
+void TextModelNG::BindJSTextController(std::function<void()>&& bindFunc)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->BindJSTextController(std::move(bindFunc));
+}
+
 Color TextModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
 {
     Color value;
