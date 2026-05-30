@@ -26,9 +26,14 @@
 #include "core/components/common/layout/constants.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 
+namespace OHOS::Ace {
+class PixelMap;
+}
+
 namespace OHOS::Ace::NG {
 
 using OHOS::Ace::ForceSplitMode;
+using CreateSnapshotCallback = std::function<RefPtr<OHOS::Ace::PixelMap>(RefPtr<FrameNode>)>;
 
 class ForceSplitManager : public virtual AceType {
     DECLARE_ACE_TYPE(ForceSplitManager, AceType);
@@ -150,6 +155,45 @@ public:
     {
         return splitRatio_;
     }
+    void SetCurrentModeSplitRatio(float ratio)
+    {
+        if (mode_ == ForceSplitMode::WIDE_SPLIT) {
+            wideSplitRatio_ = ratio;
+        } else if (mode_ == ForceSplitMode::SQUARE_SPLIT) {
+            squareSplitRatio_ = ratio;
+        }
+    }
+    void SetSplitRatioDirectly(float ratio);
+    void SetWideSplitIsDraggable(bool isDraggable)
+    {
+        wideSplitIsDraggable_ = isDraggable;
+    }
+    void SetSquareSplitIsDraggable(bool isDraggable)
+    {
+        squareSplitIsDraggable_ = isDraggable;
+    }
+    bool IsSplitDraggable() const;
+    void SetIsForceSplitDragging(bool isDragging)
+    {
+        isForceSplitDragging_ = isDragging;
+    }
+    bool IsForceSplitDragging() const
+    {
+        return isForceSplitDragging_;
+    }
+    void SetTemporarySplitRatio(float ratio)
+    {
+        temporarySplitRatio_ = ratio;
+    }
+    std::optional<float> GetTemporarySplitRatio() const
+    {
+        return temporarySplitRatio_;
+    }
+    void ClearTemporarySplitRatio()
+    {
+        temporarySplitRatio_ = std::nullopt;
+    }
+    float FindNearestSnapRatio(float currentRatio) const;
     void UpdateForceSplitRatio();
     void AddForceSplitRatioListener(int32_t nodeId, std::function<void(float)>&& listener);
     void RemoveForceSplitRatioListener(int32_t nodeId);
@@ -175,6 +219,13 @@ public:
     bool CanPushPageToPrimary() const;
     bool IsTransitionShouldMovePageToPrimary(const std::string& from, const std::string& to) const;
 
+    void SetCreateSnapshotCallback(CreateSnapshotCallback&& callback)
+    {
+        createSnapshotCallback_ = std::move(callback);
+    }
+    RefPtr<FrameNode> CreateDragMaskNode();
+    void UpdateDragMaskNodeContent(const RefPtr<FrameNode>& maskNode, RefPtr<FrameNode> contentNode);
+
 private:
     bool IsTopFullScreenPage();
     bool IsWindowConditionMatched();
@@ -184,6 +235,7 @@ private:
     void FlushArkUIHook();
     float CalcCurrentSplitRatio();
     void OnForceSplitRatioUpdate(float ratio);
+    RefPtr<OHOS::Ace::PixelMap> CreateSnapshot(RefPtr<FrameNode> node);
 
     WeakPtr<PipelineContext> pipeline_;
     bool hasSetForceSplitConfig_ = false;
@@ -196,6 +248,10 @@ private:
     std::string relatedPageName_;
     std::optional<float> wideSplitRatio_;
     std::optional<float> squareSplitRatio_;
+    bool wideSplitIsDraggable_ = false;
+    bool squareSplitIsDraggable_ = false;
+    bool isForceSplitDragging_ = false;
+    std::optional<float> temporarySplitRatio_;
     float splitRatio_;
     ForceSplitMode mode_;
     ForceSplitBehaviorMode behaviorMode_ = ForceSplitBehaviorMode::NAVIGATION;
@@ -214,6 +270,7 @@ private:
     std::optional<Color> splitDividerColorLight_;
     std::optional<Color> splitDividerColorDark_;
     std::optional<ForceSplitMode> delayedMode_;
+    CreateSnapshotCallback createSnapshotCallback_;
 };
 } // namespace OHOS::Ace::NG
 

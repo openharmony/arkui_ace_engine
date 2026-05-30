@@ -3396,4 +3396,75 @@ void NavigationGroupNode::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(keyNode);
 }
+
+RefPtr<FrameNode> NavigationGroupNode::GetMaskContentNode(bool isLeft)
+{
+    if (!isLeft) {
+        auto navContent = AceType::DynamicCast<FrameNode>(GetContentNode());
+        CHECK_NULL_RETURN(navContent, nullptr);
+        if (!navContent->GetChildren().empty()) {
+            return navContent;
+        }
+        if (relatedPageDestinationNode_) {
+            return AceType::DynamicCast<FrameNode>(relatedPageDestinationNode_);
+        }
+        return AceType::DynamicCast<FrameNode>(forceSplitPlaceHolderNode_);
+    }
+    do {
+        auto primaryContent = AceType::DynamicCast<FrameNode>(primaryContentNode_);
+        CHECK_NULL_BREAK(primaryContent);
+        if (primaryContent->GetChildren().empty()) {
+            break;
+        }
+        return primaryContent;
+    } while (false);
+    return AceType::DynamicCast<FrameNode>(GetNavBarOrHomeDestinationNode());
+}
+
+void NavigationGroupNode::UpdateMaskNodeContent(bool isLeft)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    auto maskNode = AceType::DynamicCast<FrameNode>(GetOrCreateMaskNode(isLeft));
+    CHECK_NULL_VOID(maskNode);
+    auto contentNode = AceType::DynamicCast<FrameNode>(GetMaskContentNode(isLeft));
+    CHECK_NULL_VOID(contentNode);
+    forceSplitMgr->UpdateDragMaskNodeContent(maskNode, contentNode);
+}
+
+RefPtr<FrameNode> NavigationGroupNode::GetOrCreateMaskNode(bool isLeft)
+{
+    if (isLeft) {
+        if (leftMaskNode_) {
+            return leftMaskNode_;
+        }
+    } else {
+        if (rightMaskNode_) {
+            return rightMaskNode_;
+        }
+    }
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, nullptr);
+    auto maskNode = forceSplitMgr->CreateDragMaskNode();
+    CHECK_NULL_RETURN(maskNode, nullptr);
+    if (isLeft) {
+        leftMaskNode_ = maskNode;
+    } else {
+        rightMaskNode_ = maskNode;
+    }
+    return maskNode;
+}
+
+void NavigationGroupNode::UpdateMaskNodeVisibility(bool isLeft, VisibleType type)
+{
+    auto node = GetOrCreateMaskNode(isLeft);
+    CHECK_NULL_VOID(node);
+    auto property = node->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(type);
+}
 } // namespace OHOS::Ace::NG

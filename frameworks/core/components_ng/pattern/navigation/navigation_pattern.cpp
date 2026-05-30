@@ -28,7 +28,9 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/force_split/force_split_constants.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
@@ -48,6 +50,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "base/log/ace_checker.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
@@ -80,6 +83,8 @@ constexpr int32_t FULL_CIRCLE_ANGLE = 360;
 namespace {
 constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
+static const auto DIVIDER_DRAG_ANIMATION_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
+const std::string FORCE_SPLIT_SNAP_PROPERTY_NAME = "force_split_snap_property";
 
 int32_t ConvertDisplayOrientationToRotationAngle(DisplayOrientation ori)
 {
@@ -563,6 +568,20 @@ void NavigationPattern::ClearDragBarEvent()
 void NavigationPattern::BuildDragBar()
 {
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (forceSplitMgr->IsSplitDraggable() && IsForceSplitSuccess()) {
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        if (!GetDragBarNode()) {
+            CreateDragBarNode(hostNode);
+        }
+        CreateForceSplitMaskNodes();
+        InitForceSplitDragEvent();
         return;
     }
     if (enableDragBar_) {
@@ -3442,6 +3461,165 @@ void NavigationPattern::HandleDragEnd()
     }
     isInDividerDrag_ = false;
     SetMouseStyle(MouseFormat::DEFAULT);
+}
+
+void NavigationPattern::HandleForceSplitDragStart()
+{
+    if (!IsForceSplitSuccess()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Force split drag start failed: force split is not active");
+        return;
+    }
+
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsSplitDraggable()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Force split drag start failed: drag is disabled for current mode");
+        return;
+    }
+    StopForceSplitSnapAnimation();
+    forceSplitMgr->SetIsForceSplitDragging(true);
+    ShowForceSplitMask();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag started");
+}
+
+void NavigationPattern::HandleForceSplitDragUpdate(float xOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitDragging()) {
+        return;
+    }
+
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    float frameWidth = geometryNode->GetFrameSize().Width();
+    if (NearEqual(frameWidth, 0.0f)) {
+        return;
+    }
+    float startRatio = forceSplitMgr->GetSplitRatio();
+    float newRatio = startRatio - xOffset / frameWidth;
+    newRatio = std::clamp(newRatio, MIN_SPLIT_DRAG_RATIO, MAX_SPLIT_DRAG_RATIO);
+    forceSplitMgr->SetTemporarySplitRatio(newRatio);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void NavigationPattern::HandleForceSplitDragEnd()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitDragging()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Force split drag end: not in drag state");
+        return;
+    }
+
+    float tempRatio = forceSplitMgr->GetTemporarySplitRatio().has_value() ?
+        forceSplitMgr->GetTemporarySplitRatio().value() : forceSplitMgr->GetSplitRatio();
+    float finalRatio = forceSplitMgr->FindNearestSnapRatio(tempRatio);
+    if (NearEqual(tempRatio, finalRatio)) {
+        forceSplitMgr->ClearTemporarySplitRatio();
+        RemoveForceSplitMask();
+        forceSplitMgr->SetSplitRatioDirectly(finalRatio);
+        forceSplitMgr->SetCurrentModeSplitRatio(finalRatio);
+        forceSplitMgr->SetIsForceSplitDragging(false);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "Force split drag end: snap directly to %{public}f (already at snap point)", finalRatio);
+        return;
+    }
+
+    PlayForceSplitSnapAnimation(tempRatio, finalRatio);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag end: start snap animation from %{public}f to %{public}f",
+        tempRatio, finalRatio);
+}
+
+void NavigationPattern::ShowForceSplitMask()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    hostNode->UpdateMaskNodeVisibility(true, VisibleType::VISIBLE);
+    hostNode->UpdateMaskNodeContent(true);
+    hostNode->UpdateMaskNodeVisibility(false, VisibleType::VISIBLE);
+    hostNode->UpdateMaskNodeContent(false);
+    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void NavigationPattern::RemoveForceSplitMask()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    hostNode->UpdateMaskNodeVisibility(true, VisibleType::GONE);
+    hostNode->UpdateMaskNodeVisibility(false, VisibleType::GONE);
+}
+
+void NavigationPattern::CreateForceSplitMaskNodes()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto leftMaskNode = hostNode->GetOrCreateMaskNode(true);
+    if (leftMaskNode) {
+        hostNode->UpdateMaskNodeVisibility(true, VisibleType::GONE);
+        leftMaskNode->MountToParent(hostNode);
+    }
+    auto rightMaskNode = hostNode->GetOrCreateMaskNode(false);
+    if (rightMaskNode) {
+        hostNode->UpdateMaskNodeVisibility(false, VisibleType::GONE);
+        rightMaskNode->MountToParent(hostNode);
+    }
+}
+
+void NavigationPattern::InitForceSplitDragEvent()
+{
+    if (forceSplitDragEvent_) {
+        return;
+    }
+
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(GetDragBarNode());
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragGestureHub = dragBarNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dragGestureHub);
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag start triggered");
+        pattern->HandleForceSplitDragStart();
+    };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag update triggered");
+        pattern->HandleForceSplitDragUpdate(static_cast<float>(info.GetOffsetX()));
+    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag end triggered");
+        pattern->HandleForceSplitDragEnd();
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag cancel triggered");
+        pattern->HandleForceSplitDragEnd();
+    };
+
+    forceSplitDragEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask),
+        std::move(actionEndTask), std::move(actionCancelTask));
+
+    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
+    dragGestureHub->AddPanEvent(forceSplitDragEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
+    InitTouchEvent(dragGestureHub);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split drag event initialized on dragBar node");
 }
 
 void NavigationPattern::InitDividerPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -8080,6 +8258,91 @@ std::string NavigationPattern::GetNavDestinationJsViewName(RefPtr<UINode> uiNode
     }
     TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get navDestination component name failed. no navDestination node");
     return "";
+}
+
+void NavigationPattern::CreateForceSplitSnapProperty()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->CreateAnimatablePropertyFloat(
+        FORCE_SPLIT_SNAP_PROPERTY_NAME, 0.0f,
+        [weakHost = WeakPtr(host)](float value) {
+            auto hostNode = weakHost.Upgrade();
+            CHECK_NULL_VOID(hostNode);
+            auto context = hostNode->GetContext();
+            CHECK_NULL_VOID(context);
+            auto forceSplitMgr = context->GetForceSplitManager();
+            CHECK_NULL_VOID(forceSplitMgr);
+            if (!forceSplitMgr->IsForceSplitDragging()) {
+                return;
+            }
+            forceSplitMgr->SetTemporarySplitRatio(value);
+            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        });
+}
+
+void NavigationPattern::PlayForceSplitSnapAnimation(float fromRatio, float toRatio)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CreateForceSplitSnapProperty();
+    AnimationUtils::ExecuteWithoutAnimation(
+        [weakHost = WeakPtr(host), fromRatio]() {
+            auto host = weakHost.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->UpdateAnimatablePropertyFloat(FORCE_SPLIT_SNAP_PROPERTY_NAME, fromRatio);
+        }, host->GetContextRefPtr());
+
+    AnimationOption option;
+    option.SetCurve(DIVIDER_DRAG_ANIMATION_CURVE);
+    forceSplitSnapAnimation_ = AnimationUtils::StartAnimation(option,
+        [weakHost = WeakPtr(host), toRatio]() {
+            auto host = weakHost.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->UpdateAnimatablePropertyFloat(FORCE_SPLIT_SNAP_PROPERTY_NAME, toRatio);
+        },
+        [weakPattern = WeakClaim(this), toRatio]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnForceSplitSnapAnimationFinish(toRatio);
+        }, nullptr, host->GetContextRefPtr());
+}
+
+void NavigationPattern::OnForceSplitSnapAnimationFinish(float finalRatio)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+
+    forceSplitMgr->ClearTemporarySplitRatio();
+    RemoveForceSplitMask();
+    forceSplitMgr->SetSplitRatioDirectly(finalRatio);
+    forceSplitMgr->SetCurrentModeSplitRatio(finalRatio);
+    forceSplitMgr->SetIsForceSplitDragging(false);
+    forceSplitSnapAnimation_.reset();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Force split snap animation finish: ratio %{public}f", finalRatio);
+}
+
+void NavigationPattern::StopForceSplitSnapAnimation()
+{
+    if (forceSplitSnapAnimation_) {
+        AnimationUtils::StopAnimation(forceSplitSnapAnimation_);
+        forceSplitSnapAnimation_.reset();
+
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto forceSplitMgr = context->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
+        float tempRatio = forceSplitMgr->GetTemporarySplitRatio().has_value() ?
+            forceSplitMgr->GetTemporarySplitRatio().value() : forceSplitMgr->GetSplitRatio();
+        float snapRatio = forceSplitMgr->FindNearestSnapRatio(tempRatio);
+        forceSplitMgr->ClearTemporarySplitRatio();
+        RemoveForceSplitMask();
+        forceSplitMgr->SetSplitRatioDirectly(snapRatio);
+        forceSplitMgr->SetCurrentModeSplitRatio(snapRatio);
+        forceSplitMgr->SetIsForceSplitDragging(false);
+    }
 }
 
 void NavigationPattern::SetNavigationConfiguration(const NavigationConfiguration& config)

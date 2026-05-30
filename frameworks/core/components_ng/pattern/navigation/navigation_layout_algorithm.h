@@ -99,6 +99,11 @@ private:
 
     void SizeCalculationForForceSplit(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+    void MeasureForceSplitMaskNodes(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
+    void LayoutForceSplitMaskNodes(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, float navBarOrPrimarNodeWidth,
+        float dividerWidth);
 
     bool ifNeedInit_ = true;
 

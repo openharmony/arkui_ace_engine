@@ -5915,6 +5915,8 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& s
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
     forceSplitMgr->SetWideSplitRatio(config.wideSplitRatio);
     forceSplitMgr->SetSquareSplitRatio(config.squareSplitRatio);
+    forceSplitMgr->SetWideSplitIsDraggable(config.wideSplitIsDraggable);
+    forceSplitMgr->SetSquareSplitIsDraggable(config.squareSplitIsDraggable);
     forceSplitMgr->SetSplitDividerColor(config.splitDividerColorLight,
         config.splitDividerColorDark);
     forceSplitMgr->SetBehaviorMode(config.behaviorMode);
