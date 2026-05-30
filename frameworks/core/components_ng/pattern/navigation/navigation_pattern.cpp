@@ -6718,7 +6718,7 @@ void NavigationPattern::AdjustNodeForStackDisplayReconfigure()
         bool hideNavBar = navProperty->GetHideNavBarValue(false);
         navBarProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
     }
-    navContentProperty->UpdateVisibility(secondaryNodes_.empty() ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
 
     primaryProperty->UpdateVisibility(VisibleType::INVISIBLE);
     UpdatePlaceholderOrRelatedPageVisible(false);
