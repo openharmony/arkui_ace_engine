@@ -243,7 +243,8 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescBaseTest006, TestSize.Level1)
 HWTEST_F(DrawableDescriptorTest, DrawableDescBaseTest007, TestSize.Level1)
 {
     DrawableDescriptor desc;
-    desc.LoadAsync(nullptr);
+    EXPECT_NO_FATAL_FAILURE(desc.LoadAsync(nullptr));
+    EXPECT_EQ(desc.GetPixelMap(), nullptr);
 }
 
 /**
@@ -254,8 +255,9 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescBaseTest007, TestSize.Level1)
 HWTEST_F(DrawableDescriptorTest, DrawableDescBaseTest008, TestSize.Level1)
 {
     DrawableDescriptor desc;
-    desc.RegisterUpdateCallback(1, nullptr);
-    desc.UnRegisterUpdateCallback(1);
+    EXPECT_NO_FATAL_FAILURE(desc.RegisterUpdateCallback(1, nullptr));
+    EXPECT_NO_FATAL_FAILURE(desc.UnRegisterUpdateCallback(1));
+    EXPECT_EQ(desc.GetPixelMap(), nullptr);
 }
 
 /**
@@ -266,7 +268,8 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescBaseTest008, TestSize.Level1)
 HWTEST_F(DrawableDescriptorTest, DrawableDescBaseTest009, TestSize.Level1)
 {
     DrawableDescriptor desc;
-    desc.Invalidate();
+    EXPECT_NO_FATAL_FAILURE(desc.Invalidate());
+    EXPECT_EQ(desc.GetPixelMap(), nullptr);
 }
 
 /*============================================================================
@@ -881,14 +884,13 @@ HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest019, TestSize.Level1)
 
 /**
  * @tc.name: AnimatedDrawableDescTest020
- * @tc.desc: SetIterations when iterations_ < -1 resets to 1
+ * @tc.desc: SetIterations with iterations < -1 resets to 1
  * @tc.type: FUNC
  */
 HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest020, TestSize.Level1)
 {
     AnimatedDrawableDescriptor desc;
-    desc.iterations_ = -2;
-    desc.SetIterations(5);
+    desc.SetIterations(-2);
     EXPECT_EQ(desc.GetIterations(), 1);
 }
 
@@ -936,7 +938,8 @@ HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest023, TestSize.Level1)
 HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest024, TestSize.Level1)
 {
     AnimatedDrawableDescriptor desc;
-    desc.UnRegisterUpdateCallback(999);
+    EXPECT_NO_FATAL_FAILURE(desc.UnRegisterUpdateCallback(999));
+    EXPECT_TRUE(desc.animators_.empty());
 }
 
 /**
@@ -1017,6 +1020,282 @@ HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest029, TestSize.Level1)
     desc.isSetDurations_ = true;
     desc.totalDuration_ = 888;
     EXPECT_EQ(desc.GetTotalDuration(), 888);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest030
+ * @tc.desc: SetIterations with -1 (infinite) sets -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest030, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    desc.SetIterations(-1);
+    EXPECT_EQ(desc.GetIterations(), -1);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest031
+ * @tc.desc: SetIterations with 0 sets 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest031, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    desc.SetIterations(0);
+    EXPECT_EQ(desc.GetIterations(), 0);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest032
+ * @tc.desc: ToFillMode returns BACKWARDS for FIRST_FRAME stop mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest032, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    desc.SetStopMode(AnimatedDrawableDescriptor::AnimationStopMode::FIRST_FRAME);
+    EXPECT_EQ(desc.ToFillMode(), FillMode::BACKWARDS);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest033
+ * @tc.desc: ToFillMode returns FORWARDS for LAST_FRAME stop mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest033, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    desc.SetStopMode(AnimatedDrawableDescriptor::AnimationStopMode::LAST_FRAME);
+    EXPECT_EQ(desc.ToFillMode(), FillMode::FORWARDS);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest034
+ * @tc.desc: GetControlledAnimator(int32_t) with single animator returns it regardless of id
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest034, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    desc.animators_[1] = animator;
+    EXPECT_EQ(desc.GetControlledAnimator(999), animator);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest035
+ * @tc.desc: GetControlledAnimator(int32_t) with multiple animators finds by id
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest035, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    auto animator1 = AceType::MakeRefPtr<ControlledAnimator>();
+    auto animator2 = AceType::MakeRefPtr<ControlledAnimator>();
+    desc.animators_[1] = animator1;
+    desc.animators_[2] = animator2;
+    EXPECT_EQ(desc.GetControlledAnimator(1), animator1);
+    EXPECT_EQ(desc.GetControlledAnimator(2), animator2);
+    EXPECT_EQ(desc.GetControlledAnimator(3), nullptr);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest036
+ * @tc.desc: GetFrameByIndex with pixelMapList returns correct frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest036, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    auto pm1 = AceType::MakeRefPtr<MockPixelMap>();
+    auto pm2 = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pm1, GetWidth()).WillRepeatedly(Return(100));
+    EXPECT_CALL(*pm1, GetHeight()).WillRepeatedly(Return(100));
+    EXPECT_CALL(*pm2, GetWidth()).WillRepeatedly(Return(100));
+    EXPECT_CALL(*pm2, GetHeight()).WillRepeatedly(Return(100));
+    desc.pixelMapList_ = { pm1, pm2 };
+    EXPECT_EQ(desc.GetFrameByIndex(0, 1), pm1);
+    EXPECT_EQ(desc.GetFrameByIndex(1, 1), pm2);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest037
+ * @tc.desc: FlushUpdateCallbacksByNodeId with negative index → no callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest037, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    desc.frameCount_ = 3;
+    bool called = false;
+    desc.updateCallbacks_[1] = [&called](const RefPtr<PixelMap>&) { called = true; };
+    desc.FlushUpdateCallbacksByNodeId(-1, 1);
+    EXPECT_FALSE(called);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest038
+ * @tc.desc: FlushUpdateCallbacksByNodeId with out-of-range index → no callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest038, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    desc.frameCount_ = 3;
+    bool called = false;
+    desc.updateCallbacks_[1] = [&called](const RefPtr<PixelMap>&) { called = true; };
+    desc.FlushUpdateCallbacksByNodeId(3, 1);
+    EXPECT_FALSE(called);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest039
+ * @tc.desc: FlushUpdateCallbacksByNodeId with unknown nodeId → no callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest039, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    desc.frameCount_ = 3;
+    auto pm = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pm, GetWidth()).WillRepeatedly(Return(100));
+    EXPECT_CALL(*pm, GetHeight()).WillRepeatedly(Return(100));
+    desc.pixelMapList_ = { pm };
+    bool called = false;
+    desc.updateCallbacks_[1] = [&called](const RefPtr<PixelMap>&) { called = true; };
+    desc.FlushUpdateCallbacksByNodeId(0, 999);
+    EXPECT_FALSE(called);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest040
+ * @tc.desc: FlushUpdateCallbacksByNodeId with valid params invokes callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest040, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    auto pm = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pm, GetWidth()).WillRepeatedly(Return(100));
+    EXPECT_CALL(*pm, GetHeight()).WillRepeatedly(Return(100));
+    desc.pixelMapList_ = { pm };
+    desc.frameCount_ = 1;
+    RefPtr<PixelMap> received;
+    desc.updateCallbacks_[1] = [&received](const RefPtr<PixelMap>& p) { received = p; };
+    desc.FlushUpdateCallbacksByNodeId(0, 1);
+    EXPECT_EQ(received, pm);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest041
+ * @tc.desc: ControllAnimation with no animator for nodeId → early return, no crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest041, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    EXPECT_NO_FATAL_FAILURE(desc.ControllAnimation(1, true));
+    EXPECT_NO_FATAL_FAILURE(desc.ControllAnimation(1, false));
+    EXPECT_TRUE(desc.animators_.empty());
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest042
+ * @tc.desc: ControllAnimation with play=true and autoPlay_=false → FlushUpdateCallbacksByNodeId(0)
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest042, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    desc.animators_[1] = animator;
+    desc.autoPlay_ = false;
+    auto pm = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pm, GetWidth()).WillRepeatedly(Return(100));
+    EXPECT_CALL(*pm, GetHeight()).WillRepeatedly(Return(100));
+    desc.pixelMapList_ = { pm };
+    desc.frameCount_ = 1;
+    RefPtr<PixelMap> received;
+    desc.updateCallbacks_[1] = [&received](const RefPtr<PixelMap>& p) { received = p; };
+    desc.ControllAnimation(1, true);
+    EXPECT_EQ(received, pm);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest043
+ * @tc.desc: ControllAnimation with play=false and animator not RUNNING → no pause
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest043, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    desc.animators_[1] = animator;
+    desc.autoPlay_ = true;
+    // Default ControlStatus is IDLE, so Pause should not be called
+    auto statusBefore = animator->GetControlStatus();
+    EXPECT_NO_FATAL_FAILURE(desc.ControllAnimation(1, false));
+    EXPECT_EQ(animator->GetControlStatus(), statusBefore);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest044
+ * @tc.desc: GetDurations with frameCount_==0 and totalDuration_>=0 returns empty vector
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest044, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    desc.totalDuration_ = 100;
+    desc.frameCount_ = 0;
+    auto result = desc.GetDurations();
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest045
+ * @tc.desc: GetPixelMap returns first frame from pixelMapList
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest045, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    auto pm1 = AceType::MakeRefPtr<MockPixelMap>();
+    auto pm2 = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pm1, GetWidth()).WillRepeatedly(Return(50));
+    EXPECT_CALL(*pm1, GetHeight()).WillRepeatedly(Return(60));
+    EXPECT_CALL(*pm2, GetWidth()).WillRepeatedly(Return(70));
+    EXPECT_CALL(*pm2, GetHeight()).WillRepeatedly(Return(80));
+    desc.pixelMapList_ = { pm1, pm2 };
+    EXPECT_EQ(desc.GetPixelMap(), pm1);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest046
+ * @tc.desc: GetPixelMap with empty pixelMapList and no rawData returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest046, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    EXPECT_EQ(desc.GetPixelMap(), nullptr);
+}
+
+/**
+ * @tc.name: AnimatedDrawableDescTest047
+ * @tc.desc: GetOriginalWidth/Height with pixelMapList returns first frame dimensions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, AnimatedDrawableDescTest047, TestSize.Level1)
+{
+    AnimatedDrawableDescriptor desc;
+    auto pm = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pm, GetWidth()).WillRepeatedly(Return(200));
+    EXPECT_CALL(*pm, GetHeight()).WillRepeatedly(Return(300));
+    desc.pixelMapList_ = { pm };
+    EXPECT_EQ(desc.GetOriginalWidth(), 200);
+    EXPECT_EQ(desc.GetOriginalHeight(), 300);
 }
 
 /*============================================================================

@@ -214,7 +214,7 @@ void AnimatedDrawableDescriptor::SetTotalDuration(const int32_t totalDuration)
 
 void AnimatedDrawableDescriptor::SetIterations(const int32_t iterations)
 {
-    if (iterations_ < -1) {
+    if (iterations < -1) {
         iterations_ = 1;
         return;
     }
