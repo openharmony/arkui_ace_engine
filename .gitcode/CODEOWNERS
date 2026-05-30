@@ -2528,6 +2528,14 @@ frameworks/core/components_ng/pattern/grid_container/ @arkuilayout1
 frameworks/core/components_ng/pattern/grid/ @arkuiscroll
 frameworks/core/components_ng/pattern/grid_row/ @arkuilayout1
 frameworks/core/components_ng/pattern/dynamiclayout/ @arkuilayout1
+frameworks/core/components_ng/pattern/dynamiclayout/active_range_updater.cpp @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/active_range_updater.h @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_algorithm.cpp @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_algorithm.h @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng.cpp @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng.h @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_pattern.cpp @arkuiscroll
+frameworks/core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_pattern.h @arkuiscroll
 frameworks/core/components_ng/pattern/hyperlink/ @huawei_g_five
 frameworks/core/components_ng/pattern/image_animator/ @arkui001
 frameworks/core/components_ng/pattern/image/ @arkui001
@@ -3685,6 +3693,7 @@ test/unittest/core/pattern/data_panel/ @huawei_g_five
 test/unittest/core/pattern/dialog/ @arkuipopupwindow_all
 test/unittest/core/pattern/divider/ @arkuilayout1
 test/unittest/core/pattern/dynamiclayout/ @arkuilayout1
+test/unittest/core/pattern/lazydynamiclayout/ @arkuiscroll
 test/unittest/core/pattern/flex/ @arkuilayout1
 test/unittest/core/pattern/folder_stack/ @arkuilayout1
 test/unittest/core/pattern/form/ @form_framework

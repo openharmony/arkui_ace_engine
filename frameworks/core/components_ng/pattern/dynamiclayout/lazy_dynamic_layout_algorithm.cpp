@@ -29,6 +29,7 @@ void LazyDynamicLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto hasCustomMeasured = false;
     if (customParams_) {
+        axis_ = customParams_->GetAxis();
         customParams_->SetAdjustedOffset(0);
         auto geometry = layoutWrapper->GetGeometryNode();
         float prevMainSize = geometry ? geometry->GetPaddingSize().MainSize(axis_) : 0.0f;

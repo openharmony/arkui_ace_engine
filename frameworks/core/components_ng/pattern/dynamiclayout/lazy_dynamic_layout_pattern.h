@@ -67,7 +67,6 @@ private:
     void FireOnVisibleIndexesChange(const std::vector<int32_t>& indexes);
 
     RefPtr<LazyCustomLayoutAlgorithmParam> customParams_;
-    AdjustOffset adjustOffset_;
     std::vector<int32_t> prevVisibleIndexes_;
     Axis axis_ = Axis::VERTICAL;
     ACE_DISALLOW_COPY_AND_MOVE(LazyDynamicLayoutPattern);
