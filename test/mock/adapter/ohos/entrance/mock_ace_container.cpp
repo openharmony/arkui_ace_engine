@@ -102,4 +102,7 @@ void AceContainer::SetIsFormRender(bool isFormRender) {}
 void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
 
 void AceContainer::TerminateUIExtensionInner(int32_t code) {}
+
+void AceContainer::GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+    EventPositionInfo& originalPos) {}
 } // namespace OHOS::Ace::Platform

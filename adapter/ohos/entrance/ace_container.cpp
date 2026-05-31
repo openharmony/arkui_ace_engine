@@ -5288,4 +5288,14 @@ void AceContainer::TerminateUIExtensionInner(int32_t code)
     CHECK_NULL_VOID(uiExtensionContext);
     uiExtensionContext->TerminateSelfInner(code);
 }
+
+void AceContainer::GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+    EventPositionInfo& originalPos)
+{
+    Rosen::EventPositionInfo winEventPositionInfo {eventPositionInfo.displayX, eventPositionInfo.displayY};
+    Rosen::EventPositionInfo winOriginalPos {eventPositionInfo.displayX, eventPositionInfo.displayY};
+    uiWindow_->GetEventOriginalPosition(winEventPositionInfo, winOriginalPos);
+    originalPos.displayX = winOriginalPos.displayX;
+    originalPos.displayY = winOriginalPos.displayY;
+}
 } // namespace OHOS::Ace::Platform

@@ -169,6 +169,8 @@ public:
 
     void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override {}
     void TerminateUIExtensionInner(int32_t code) override {}
+    void GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+        EventPositionInfo& originalPos) override {}
 
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));

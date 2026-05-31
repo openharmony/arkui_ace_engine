@@ -827,6 +827,8 @@ public:
 
     virtual void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) {}
     virtual void TerminateUIExtensionInner(int32_t code) {}
+    virtual void GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+        EventPositionInfo& originalPos) {}
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);

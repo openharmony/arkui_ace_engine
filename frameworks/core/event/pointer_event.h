@@ -57,6 +57,18 @@ enum class PointerAction : int32_t {
     PULL_CANCEL = 37,
 };
 
+struct EventPositionInfo {
+    static constexpr int32_t INVALID_INT32 = std::numeric_limits<int32_t>::min();
+    static constexpr double INVALID_DOUBLE = std::numeric_limits<double>::lowest();
+
+    int32_t displayX = INVALID_INT32;
+    int32_t displayY = INVALID_INT32;
+    double displayXPos = INVALID_DOUBLE;
+    double displayYPos = INVALID_DOUBLE;
+    double globalX = INVALID_DOUBLE;
+    double globalY = INVALID_DOUBLE;
+};
+
 struct DragPointerEvent final : public PointerEvent {
     int32_t pointerEventId = 0;
     int32_t pointerId = 0;

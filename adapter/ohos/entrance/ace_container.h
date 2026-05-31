@@ -965,6 +965,8 @@ public:
     }
     void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override;
     void TerminateUIExtensionInner(int32_t code) override;
+    void GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+        EventPositionInfo& originalPos) override;
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

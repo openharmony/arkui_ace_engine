@@ -316,4 +316,7 @@ void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& 
 
 void AceContainer::TerminateUIExtensionInner(int32_t code) {}
 
+void AceContainer::GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
+    EventPositionInfo& originalPos) {}
+
 } // namespace OHOS::Ace::NG
