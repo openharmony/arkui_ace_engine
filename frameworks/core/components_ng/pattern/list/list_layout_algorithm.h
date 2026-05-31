@@ -569,6 +569,7 @@ protected:
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
     void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
+    void AdjustPostionForLazyChild(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
     LayoutConstraintF CreateLazyChildConstraint(float referencePos, bool forward) const;
     void MeasureLazyChild(
         const RefPtr<LayoutWrapper>& wrapper, int32_t index, float& referencePos, bool forward);
@@ -610,6 +611,7 @@ protected:
     RefPtr<ListLayoutProperty> listLayoutProperty_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
     bool defaultMultiSelectStyleEnabled_ = true;
+    std::unordered_set<int32_t> lazyChildIndex_;
 
     virtual void MeasureList(LayoutWrapper* layoutWrapper);
     LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);
