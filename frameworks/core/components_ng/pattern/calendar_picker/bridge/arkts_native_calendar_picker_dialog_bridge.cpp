@@ -780,6 +780,32 @@ DialogProperties CalendarPickerDialogBridge::BuildDialogProperties(EcmaVM* vm,
     SetDialogHoverModeProperties(vm, paramObj, properties);
     ParseCalendarPickerDialogBlurStyleOption(vm, paramObj, properties);
     ParseCalendarPickerDialogEffectOption(vm, paramObj, properties);
+    
+    auto systemMaterialValue = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "systemMaterial"));
+    if (systemMaterialValue->IsObject(vm)) {
+        auto* systemUiMaterial =
+            reinterpret_cast<UiMaterial*>(ArkTSUtils::UnwrapNapiValue(vm, systemMaterialValue->ToObject(vm)));
+        properties.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
+    }
+    
+    auto distortionModeValue = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "distortionMode"));
+    if (distortionModeValue->IsNumber()) {
+        auto distortionMode = distortionModeValue->ToNumber(vm)->Int32Value(vm);
+        if (distortionMode >= static_cast<int32_t>(DistortionMode::DISTORTION_AUTO) &&
+            distortionMode <= static_cast<int32_t>(DistortionMode::DISTORTION_DISABLED)) {
+            properties.distortionMode = static_cast<DistortionMode>(distortionMode);
+        }
+    }
+    
+    auto edgeLightModeValue = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "edgeLightMode"));
+    if (edgeLightModeValue->IsNumber()) {
+        auto edgeLightMode = edgeLightModeValue->ToNumber(vm)->Int32Value(vm);
+        if (edgeLightMode >= static_cast<int32_t>(EdgeLightMode::EDGELIGHT_AUTO) &&
+            edgeLightMode <= static_cast<int32_t>(EdgeLightMode::EDGELIGHT_DISABLED)) {
+            properties.edgeLightMode = static_cast<EdgeLightMode>(edgeLightMode);
+        }
+    }
+    
     return properties;
 }
 

@@ -889,6 +889,7 @@
       "OHOS::Ace::NG::ArkTSUtils::parseTextShadowRadiusWithResObj(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, std::__h::optional<OHOS::Ace::NG::NodeInfo> const&)";
       "OHOS::Ace::NG::ArkTSUtils::parseShadowType(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
       "OHOS::Ace::NG::ArkTSUtils::SetSymbolOptionApply(panda::ecmascript::EcmaVM*, std::__h::function<void (OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>&, panda::Local<panda::JSValueRef>)";
+      "OHOS::Ace::NG::ArkTSUtils::UnwrapNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(OHOS::Ace::NG::RectT<float>&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::CalcHandleLevelMode(OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::RectT<float> const&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::CalculateClippedRect(OHOS::Ace::NG::RectT<float>&)";

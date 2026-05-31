@@ -176,6 +176,36 @@ TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
+const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,
+    DistortionMode::DISTORTION_ENABLED, DistortionMode::DISTORTION_DISABLED };
+const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
+    EdgeLightMode::EDGELIGHT_ENABLED, EdgeLightMode::EDGELIGHT_DISABLED };
+
+void ParsePickerDialogMaterial(PickerDialogInfo& pickerDialog, const JSRef<JSObject>& paramObject)
+{
+    auto systemMaterialValue = paramObject->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        pickerDialog.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
+    }
+    
+    auto distortionModeValue = paramObject->GetProperty("distortionMode");
+    if (distortionModeValue->IsNumber()) {
+        auto distortionModeVal = distortionModeValue->ToNumber<int32_t>();
+        if (distortionModeVal >= 0 && distortionModeVal < static_cast<int32_t>(DIALOG_DISTORTION_MODE.size())) {
+            pickerDialog.distortionMode = DIALOG_DISTORTION_MODE[distortionModeVal];
+        }
+    }
+    
+    auto edgeLightModeValue = paramObject->GetProperty("edgeLightMode");
+    if (edgeLightModeValue->IsNumber()) {
+        auto edgeLightModeVal = edgeLightModeValue->ToNumber<int32_t>();
+        if (edgeLightModeVal >= 0 && edgeLightModeVal < static_cast<int32_t>(DIALOG_EDGELIGHT_MODE.size())) {
+            pickerDialog.edgeLightMode = DIALOG_EDGELIGHT_MODE[edgeLightModeVal];
+        }
+    }
+}
+
 JSRef<JSVal> DatePickerChangeEventToJSValue(const NG::DatePickerChangeEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -1243,6 +1273,7 @@ void JSDatePickerDialog::UpdatePickerDialogInfo(const JSRef<JSObject>& paramObje
     ParseDatePickerHoverMode(pickerDialog, paramObject);
     ParseDatePickerBlurStyleOption(pickerDialog, paramObject);
     ParseDatePickerEffectOption(pickerDialog, paramObject);
+    ParsePickerDialogMaterial(pickerDialog, paramObject);
 }
 
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)

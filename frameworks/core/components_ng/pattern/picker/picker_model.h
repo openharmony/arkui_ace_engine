@@ -49,6 +49,9 @@ struct PickerDialogInfo {
     std::optional<EffectOption> effectOption;
     std::optional<Shadow> shadow;
     std::optional<HoverModeAreaType> hoverModeArea;
+    RefPtr<UiMaterial> systemMaterial;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
 };
 struct PickerDialogEvent {
     std::function<void()> onDidAppear;
