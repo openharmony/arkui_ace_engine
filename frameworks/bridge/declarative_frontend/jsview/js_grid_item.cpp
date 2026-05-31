@@ -203,6 +203,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
 
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSGridItem>::StaticMethod("create", &JSGridItem::Create, opt);
+    JSClass<JSGridItem>::StaticMethod("pop", &JSContainerBase::Pop, opt);
     JSClass<JSGridItem>::StaticMethod("columnStart", &JSGridItem::SetColumnStart, opt);
     JSClass<JSGridItem>::StaticMethod("columnEnd", &JSGridItem::SetColumnEnd, opt);
     JSClass<JSGridItem>::StaticMethod("rowStart", &JSGridItem::SetRowStart, opt);
