@@ -24,6 +24,8 @@
 
 namespace OHOS::Ace {
 class PipelineContext;
+class ThemeConstants;
+class UiMaterial;
 }
 
 namespace OHOS::Ace::NG {
@@ -122,6 +124,16 @@ private:
     static void UpdateMenuPaintProperty(
         const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& isContextMenu);
     static void UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode);
+    static bool ShouldHandleLowEndImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial);
+    static bool HandleLowEndImmersiveMaterialForMenu(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<UiMaterial>& systemMaterial, const RefPtr<RenderContext>& renderContext);
+    static void SetLowEndImmersiveBackgroundForMenu(
+        const RefPtr<RenderContext>& renderContext, const RefPtr<ThemeConstants>& themeConstants);
+    static void SetLowEndImmersiveShadowForMenu(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<UiMaterial>& systemMaterial, const RefPtr<RenderContext>& renderContext,
+        const RefPtr<PipelineContext>& pipelineContext);
+    static bool ApplySystemMaterialForMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<UiMaterial>& systemMaterial,
+        const RefPtr<RenderContext>& renderContext);
     static void UpdateMenuBorderEffect(
         const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
