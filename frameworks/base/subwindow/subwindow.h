@@ -100,12 +100,19 @@ public:
     virtual void ClearMenuNG(int32_t targetId = -1, bool inWindow = true, bool showAnimation = false) = 0;
     virtual void ClearPopupNG() = 0;
     virtual void ClearPopupNG(bool isForceClear) {}
+    virtual RefPtr<NG::FrameNode> ShowDialogNG(
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps,
-        std::function<void()>&& buildFunc, std::function<void(int32_t)> callback = nullptr) = 0;
+        std::function<void()>&& buildFunc, std::function<void(int32_t, int32_t)> callback)
+    {
+        return nullptr;
+    }
     virtual RefPtr<NG::FrameNode> ShowDialogNGWithNode(
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
     virtual void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) = 0;
+    virtual void OpenCustomDialogNG(const DialogProperties& dialogProps,
+        std::function<void(int32_t errorCode, int32_t dialogId)>&& callback) {}
     virtual void CloseCustomDialogNG(int32_t dialogId) = 0;
     virtual void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) = 0;
     virtual void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,

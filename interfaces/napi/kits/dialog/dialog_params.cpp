@@ -203,15 +203,78 @@ void GetDialogAlignment(napi_env env, napi_value options, DialogProperties& dial
     }
 }
 
+napi_value JSRemoveDialog(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv = nullptr;
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+    int32_t instanceId = Container::CurrentIdSafely();
+    if (data) {
+        int32_t* instanceIdPtr = reinterpret_cast<int32_t*>(data);
+        instanceId = *instanceIdPtr;
+    }
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (delegate) {
+        delegate->RemoveCustomDialog(instanceId);
+    }
+    return nullptr;
+}
+
 void GetDialogOnWillDismiss(napi_env env, napi_value options, DialogProperties& dialogProps)
 {
     napi_ref dismissRef = nullptr;
     if (Napi::GetFunctionProperty(env, options, "onWillDismiss", dismissRef)) {
         dialogProps.onWillDismiss = [env, dismissRef](const int32_t& info, const int32_t& instanceId) {
-            napi_value fn = nullptr;
-            napi_get_reference_value(env, dismissRef, &fn);
-            napi_value result = nullptr;
-            napi_call_function(env, nullptr, fn, 0, nullptr, &result);
+            if (!dismissRef) {
+                return;
+            }
+            napi_handle_scope scope = nullptr;
+            auto ret = napi_open_handle_scope(env, &scope);
+            if ((ret != napi_ok) || (scope == nullptr)) {
+                TAG_LOGE(AceLogTag::ACE_DIALOG,
+                    "onWillDismiss of the dialog failed to open the scope of the handle.");
+                return;
+            }
+            napi_value onWillDismissFunc = nullptr;
+            napi_value reasonValue = nullptr;
+            napi_value funcValue = nullptr;
+            napi_value paramObj = nullptr;
+            napi_create_object(env, &paramObj);
+
+            int32_t* id = new int32_t(instanceId);
+            auto createStatus = napi_create_function(env, "dismiss", strlen("dismiss"), JSRemoveDialog, id, &funcValue);
+            if (createStatus != napi_ok || !funcValue) {
+                TAG_LOGE(AceLogTag::ACE_DIALOG,
+                    "onWillDismiss of the dialog failed to create dismiss function, status: %{public}d",
+                    static_cast<int>(createStatus));
+                delete id;
+                napi_close_handle_scope(env, scope);
+                return;
+            }
+            napi_set_named_property(env, paramObj, "dismiss", funcValue);
+            napi_status status = napi_add_finalizer(
+                env, funcValue, id,
+                [](napi_env env, void* data, void* hint) {
+                    int32_t* id = reinterpret_cast<int32_t*>(data);
+                    CHECK_NULL_VOID(id);
+                    delete id;
+                },
+                nullptr, nullptr);
+            if (status != napi_ok) {
+                delete id;
+                TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to add the finalizer method for instanceId.");
+                napi_close_handle_scope(env, scope);
+                return;
+            }
+            napi_create_int32(env, info, &reasonValue);
+            napi_set_named_property(env, paramObj, "reason", reasonValue);
+            napi_get_reference_value(env, dismissRef, &onWillDismissFunc);
+            if (onWillDismissFunc) {
+                napi_call_function(env, nullptr, onWillDismissFunc, 1, &paramObj, nullptr);
+            }
+            napi_close_handle_scope(env, scope);
         };
     }
 }
@@ -708,26 +771,26 @@ std::function<void(int32_t, int32_t)> CreatePresentFinishCallback(
     };
 }
 
-std::function<void(int32_t)> CreatePresentCustomFinishCallback(
+std::function<void(int32_t errorCode, int32_t dialogId)> CreatePresentCustomFinishCallback(
     std::shared_ptr<DialogAsyncContext> context)
 {
-    return [context](int32_t result) mutable {
+    return [context](int32_t errorCode, int32_t dialogId) mutable {
         auto container = AceEngine::Get().GetContainer(context->instanceId);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [context, result]() {
+            [context, errorCode, dialogId]() {
                 if (context == nullptr) {
                     return;
                 }
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(context->env, &scope);
                 if (context->deferred) {
-                    if (result >= ERROR_CODE_DIALOG_CONTENT_ERROR) {
-                        RejectPromise(context->env, context->deferred, "Dialog open failed.", result);
+                    if (errorCode == ERROR_CODE_NO_ERROR) {
+                        ResolvePromiseWithId(context->env, context->deferred, dialogId);
                     } else {
-                        ResolvePromiseWithId(context->env, context->deferred, result);
+                        RejectPromise(context->env, context->deferred, "Dialog open failed.", errorCode);
                     }
                     context->deferred = nullptr;
                 }
@@ -809,18 +872,45 @@ void GetCustomBuilder(napi_env env, napi_value content, DialogProperties& dialog
     napi_ref builderRef = nullptr;
     napi_create_reference(env, content, 1, &builderRef);
     dialogProps.customBuilder = [env, builderRef]() {
-        napi_value builder = nullptr;
-        napi_get_reference_value(env, builderRef, &builder);
-        napi_call_function(env, nullptr, builder, 0, nullptr, nullptr);
+        if (!builderRef) {
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        auto status = napi_open_handle_scope(env, &scope);
+        if ((status != napi_ok) || (scope == nullptr)) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG,
+                "customBuilder of the dialog failed to open the scope of the handle.");
+            napi_delete_reference(env, builderRef);
+            return;
+        }
+        napi_value builderFunc = nullptr;
+        napi_get_reference_value(env, builderRef, &builderFunc);
+        if (builderFunc) {
+            napi_call_function(env, nullptr, builderFunc, 0, nullptr, nullptr);
+        }
+        napi_delete_reference(env, builderRef);
+        napi_close_handle_scope(env, scope);
     };
     dialogProps.customBuilderWithId = [env, builderRef](const int32_t dialogId) {
+        if (!builderRef) {
+            return;
+        }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        napi_value builder = nullptr;
-        napi_get_reference_value(env, builderRef, &builder);
-        napi_value idValue = nullptr;
-        napi_create_int32(env, dialogId, &idValue);
-        napi_call_function(env, nullptr, builder, 1, &idValue, nullptr);
+        auto status = napi_open_handle_scope(env, &scope);
+        if ((status != napi_ok) || (scope == nullptr)) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG,
+                "customBuilderWithId of the dialog failed to open the scope of the handle.");
+            napi_delete_reference(env, builderRef);
+            return;
+        }
+        napi_value builderFunc = nullptr;
+        napi_get_reference_value(env, builderRef, &builderFunc);
+        if (builderFunc) {
+            napi_value dialogIdArg = nullptr;
+            napi_create_int32(env, dialogId, &dialogIdArg);
+            napi_call_function(env, nullptr, builderFunc, 1, &dialogIdArg, nullptr);
+        }
+        napi_delete_reference(env, builderRef);
         napi_close_handle_scope(env, scope);
     };
 }

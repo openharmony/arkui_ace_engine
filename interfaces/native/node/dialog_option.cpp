@@ -221,6 +221,30 @@ int32_t OH_ArkUI_CustomDialog_OpenDialog(ArkUI_CustomDialogOptions* options, voi
     return impl->getDialogAPI()->openCustomDialog(options->handle, callback);
 }
 
+void OH_ArkUI_CustomDialog_OpenDialogWithCallback(
+    ArkUI_CustomDialogOptions* options, void* userData, ArkUI_OpenDialogCallback callback)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !options) {
+        if (callback) {
+            callback(ARKUI_ERROR_CODE_PARAM_INVALID, -1, userData);
+        } else {
+            return;
+        }
+    }
+
+    auto dialogAPI = impl->getDialogAPI();
+    if (!dialogAPI) {
+        callback(ARKUI_ERROR_CODE_PARAM_INVALID, -1, userData);
+        return;
+    }
+
+    auto errorCode = dialogAPI->openCustomDialogWithErrorCallback(options->handle, userData, callback);
+    if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR && callback) {
+        callback(errorCode, -1, userData);
+    }
+}
+
 int32_t OH_ArkUI_CustomDialog_UpdateDialog(ArkUI_CustomDialogOptions* options, void (*callback)(int32_t dialogId))
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();

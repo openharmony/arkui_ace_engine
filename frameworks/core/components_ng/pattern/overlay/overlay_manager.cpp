@@ -483,19 +483,19 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const Di
     MountToParentWithService(root, node, levelOrder);
     if (!node->GetParent()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node mount failed, parent is null.");
-        if (dialogProps.isDialogNapiCall && mountCallback) {
+        if (mountCallback) {
             mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
             return;
         }
     }
     if (!node->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node is not on main tree after mount.");
-        if (dialogProps.isDialogNapiCall && mountCallback) {
+        if (mountCallback) {
             mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
             return;
         }
     }
-    if (dialogProps.isDialogNapiCall && mountCallback) {
+    if (mountCallback) {
         mountCallback(ERROR_CODE_NO_ERROR);
     }
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -683,19 +683,19 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
     MountToParentWithService(root, node, levelOrder);
     if (!node->GetParent()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node mount failed in SetDialogTransitionEffect, parent is null.");
-        if (dialogProps.isDialogNapiCall && mountCallback) {
+        if (mountCallback) {
             mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
             return;
         }
     }
     if (!node->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node is not on main tree after mount.");
-        if (dialogProps.isDialogNapiCall && mountCallback) {
+        if (mountCallback) {
             mountCallback(ERROR_CODE_DIALOG_CANNOT_OPEN);
             return;
         }
     }
-    if (dialogProps.isDialogNapiCall && mountCallback) {
+    if (mountCallback) {
         mountCallback(ERROR_CODE_NO_ERROR);
     }
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2184,8 +2184,8 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
     return ShowDialog(Maskarg, nullptr, false);
 }
 
-RefPtr<FrameNode> OverlayManager::ShowDialog(const DialogProperties& dialogProps,
-    std::function<void()>&& buildFunc, bool isRightToLeft, std::function<void(int32_t)> callback)
+RefPtr<FrameNode> OverlayManager::ShowDialog(
+    const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     RefPtr<UINode> customNode;
@@ -2208,16 +2208,11 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(const DialogProperties& dialogProps
     ACE_UINODE_TRACE(dialog);
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
     BeforeShowDialog(dialog);
-
-    auto mountCallback =
-        dialogProps.isDialogNapiCall ? std::move(callback) : std::function<void(int32_t)>();
-    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
-        dialogProps.maskTransitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    if (dialogProps.transitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps);
     } else {
-        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+        OpenDialogAnimation(dialog, dialogProps);
     }
-
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
@@ -2233,8 +2228,8 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(const DialogProperties& dialogProps
     return dialog;
 }
 
-RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(const DialogProperties& dialogProps,
-    const RefPtr<UINode>& customNode, bool isRightToLeft, std::function<void(int32_t)> callback)
+RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
+    const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
@@ -2242,16 +2237,11 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(const DialogProperties& dia
     ACE_UINODE_TRACE(dialog);
     BeforeShowDialog(dialog);
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
-
-    auto mountCallback =
-        dialogProps.isDialogNapiCall ? std::move(callback) : std::function<void(int32_t)>();
-    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
-        dialogProps.maskTransitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    if (dialogProps.transitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps);
     } else {
-        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+        OpenDialogAnimation(dialog, dialogProps);
     }
-
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
@@ -2282,6 +2272,89 @@ RefPtr<FrameNode> OverlayManager::GetDialogNodeWithExistContent(const RefPtr<UIN
         iter++;
     }
     return nullptr;
+}
+
+RefPtr<FrameNode> OverlayManager::ShowDialog(const DialogProperties& dialogProps,
+    std::function<void()>&& buildFunc, bool isRightToLeft, std::function<void(int32_t, int32_t)> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    RefPtr<UINode> customNode;
+    if (buildFunc) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "fail to build customNode");
+            return nullptr;
+        }
+    }
+
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    if (!dialog) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "fail to create dialog node");
+        return nullptr;
+    }
+    ACE_UINODE_TRACE(dialog);
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+    BeforeShowDialog(dialog);
+
+    int32_t dialogId = dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    SetContainerButtonEnable(false);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+    return dialog;
+}
+
+
+RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(const DialogProperties& dialogProps,
+    const RefPtr<UINode>& customNode, bool isRightToLeft, std::function<void(int32_t, int32_t)> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    CHECK_NULL_RETURN(dialog, nullptr);
+    ACE_UINODE_TRACE(dialog);
+    BeforeShowDialog(dialog);
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+
+    int32_t dialogId = dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    SetContainerButtonEnable(false);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+    return dialog;
 }
 
 void OverlayManager::RegisterDialogLifeCycleCallback(
@@ -2410,16 +2483,13 @@ void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
         dialogProps.dialogCallback(dialog);
     }
 
-    int32_t successCode = showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId();
-    if (!dialogProps.isDialogNapiCall) {
-        callback(successCode);
-    }
-    auto mountCallback = dialogProps.isDialogNapiCall ? std::move(callback) : std::function<void(int32_t)>();
+    callback(showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId());
+
     if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
         dialogProps.maskTransitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+        SetDialogTransitionEffect(dialog, dialogProps);
     } else {
-        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+        OpenDialogAnimation(dialog, dialogProps);
     }
 
     dialogCount_++;
@@ -2475,6 +2545,97 @@ RefPtr<FrameNode> OverlayManager::OpenCustomDialog(
         if (GetDialogNodeWithExistContent(contentNode)) {
             TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of custom dialog already existed.");
             callback(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+            return nullptr;
+        }
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
+        customNode = RebuildCustomBuilder(contentNode);
+        showComponentContent = true;
+    }
+    auto dialog = DialogView::CreateDialogNode(nodeId, dialogProps, customNode);
+    ACE_UINODE_TRACE(dialog);
+    OpenCustomDialogInner(dialogProps, std::move(callback), dialog, showComponentContent);
+    return dialog;
+}
+
+void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
+    std::function<void(int32_t errorCode, int32_t dialogId)>&& callback, const RefPtr<FrameNode> dialog,
+    bool showComponentContent)
+{
+    if (!dialog) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to create dialog node.");
+        callback(showComponentContent ? ERROR_CODE_DIALOG_CONTENT_ERROR : ERROR_CODE_INTERNAL_ERROR, -1);
+        return;
+    }
+
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+    BeforeShowDialog(dialog);
+    if (dialogProps.dialogCallback) {
+        dialogProps.dialogCallback(dialog);
+    }
+
+    int32_t dialogId = showComponentContent ? 0 : dialog->GetId();
+    auto mountCallback = std::function<void(int32_t)>(
+        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+    if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
+        dialogProps.maskTransitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog, dialogProps, std::move(mountCallback));
+    } else {
+        OpenDialogAnimation(dialog, dialogProps, true, std::move(mountCallback));
+    }
+
+    dialogCount_++;
+    CustomDialogRecordEvent(dialogProps);
+}
+
+RefPtr<FrameNode> OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps,
+    std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
+{
+    RefPtr<UINode> customNode;
+    bool showComponentContent = false;
+    if (!callback) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of OpenCustomDialog are incomplete because of no callback.");
+        return nullptr;
+    }
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    if (dialogProps.customBuilderWithId) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder with id.");
+        NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
+        dialogProps.customBuilderWithId(nodeId);
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else if (dialogProps.customBuilder) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder.");
+        NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
+        dialogProps.customBuilder();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else if (dialogProps.customCNode.Upgrade()) {
+        auto contentNode = dialogProps.customCNode.Upgrade();
+        customNode = RebuildCustomBuilder(contentNode);
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom cnode.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+    } else {
+        auto contentNode = dialogProps.contentNode.Upgrade();
+        if (!contentNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of custom dialog is null");
+            callback(ERROR_CODE_DIALOG_CONTENT_ERROR, -1);
+            return nullptr;
+        }
+        if (GetDialogNodeWithExistContent(contentNode)) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of custom dialog already existed.");
+            callback(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, -1);
             return nullptr;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "OpenCustomDialog ComponentContent id: %{public}d", contentNode->GetId());

@@ -220,11 +220,15 @@ public:
     RefPtr<FrameNode> GetDialog(int32_t dialogId);
     RefPtr<FrameNode> SetDialogMask(const DialogProperties& dialogProps);
     // customNode only used by customDialog, pass in nullptr if not customDialog
+    RefPtr<FrameNode> ShowDialog(
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft = false);
     RefPtr<FrameNode> ShowDialog(const DialogProperties& dialogProps, std::function<void()>&& buildFunc,
-        bool isRightToLeft = false, std::function<void(int32_t)> callback = nullptr);
+        bool isRightToLeft, std::function<void(int32_t, int32_t)> callback);
+    RefPtr<FrameNode> ShowDialogWithNode(
+        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode, bool isRightToLeft = false);
     RefPtr<FrameNode> ShowDialogWithNode(const DialogProperties& dialogProps,
-        const RefPtr<NG::UINode>& customNode, bool isRightToLeft = false,
-        std::function<void(int32_t)> callback = nullptr);
+        const RefPtr<NG::UINode>& customNode, bool isRightToLeft,
+        std::function<void(int32_t, int32_t)> callback);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -252,6 +256,8 @@ public:
     void DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode);
 
     RefPtr<FrameNode> OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
+    RefPtr<FrameNode> OpenCustomDialog(const DialogProperties& dialogProps,
+        std::function<void(int32_t errorCode, int32_t dialogId)>&& callback);
     void CloseCustomDialog(const int32_t dialogId);
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
     void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
@@ -915,6 +921,9 @@ private:
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
     void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
+        const RefPtr<FrameNode> dialog, bool showComponentContent);
+    void OpenCustomDialogInner(const DialogProperties& dialogProps,
+        std::function<void(int32_t errorCode, int32_t dialogId)>&& callback,
         const RefPtr<FrameNode> dialog, bool showComponentContent);
     RefPtr<FrameNode> UpdateCustomDialogInner(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
         const std::function<void(int32_t)>& callback);

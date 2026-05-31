@@ -385,14 +385,16 @@ HWTEST_F(SubwindowManagerTest, ShowDialogNGCallbackOnError001, TestSize.Level1)
     ASSERT_NE(manager, nullptr);
 
     DialogProperties dialogProps;
-    int32_t callbackResult = 0;
-    auto callback = [&callbackResult](int32_t errorCode) {
-        callbackResult = errorCode;
+    int32_t callbackErrorCode = 0;
+    int32_t callbackDialogId = 0;
+    auto callback = [&callbackErrorCode, &callbackDialogId](int32_t errorCode, int32_t dialogId) {
+        callbackErrorCode = errorCode;
+        callbackDialogId = dialogId;
     };
 
     auto dialogNode = manager->ShowDialogNG(dialogProps, nullptr, std::move(callback));
     EXPECT_EQ(dialogNode, nullptr);
-    EXPECT_EQ(callbackResult, ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED);
+    EXPECT_EQ(callbackErrorCode, ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED);
 }
 
 /**
@@ -406,12 +408,13 @@ HWTEST_F(SubwindowManagerTest, OpenCustomDialogNGCallbackOnError001, TestSize.Le
     ASSERT_NE(manager, nullptr);
 
     DialogProperties dialogProps;
-    int32_t callbackResult = 0;
-    auto callback = [&callbackResult](int32_t errorCode) {
-        callbackResult = errorCode;
+    int32_t callbackErrorCode = 0;
+    int32_t callbackDialogId = 0;
+    auto callback = [&callbackErrorCode, &callbackDialogId](int32_t errorCode, int32_t dialogId) {
+        callbackErrorCode = errorCode;
+        callbackDialogId = dialogId;
     };
-
     manager->OpenCustomDialogNG(dialogProps, std::move(callback));
-    EXPECT_EQ(callbackResult, ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED);
+    EXPECT_EQ(callbackErrorCode, ERROR_CODE_DIALOG_SUBWINDOW_CREATE_FAILED);
 }
 }

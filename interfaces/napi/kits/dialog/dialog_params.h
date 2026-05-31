@@ -39,7 +39,7 @@ void RejectPromise(napi_env env, napi_deferred deferred, const std::string& mess
 std::function<void(int32_t, int32_t)> CreatePresentFinishCallback(
     std::shared_ptr<DialogAsyncContext> context);
 
-std::function<void(int32_t)> CreatePresentCustomFinishCallback(
+std::function<void(int32_t, int32_t)> CreatePresentCustomFinishCallback(
     std::shared_ptr<DialogAsyncContext> context);
 
 std::function<void(int32_t)> CreateUpdateFinishCallback(

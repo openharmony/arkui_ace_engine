@@ -137,13 +137,17 @@ public:
         int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1, bool isForceClear = false);
     void ClearAllMenuPopup(int32_t instanceId);
+    ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps,
-        std::function<void()>&& buildFunc, std::function<void(int32_t)> callback = nullptr);
+        std::function<void()>&& buildFunc, std::function<void(int32_t, int32_t)> callback);
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
         const RefPtr<NG::UINode>& customNode);
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     ACE_FORCE_EXPORT void OpenCustomDialogNG(
         const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void OpenCustomDialogNG(const DialogProperties& dialogProps,
+        std::function<void(int32_t errorCode, int32_t dialogId)>&& callback);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(int32_t dialogId);
     ACE_FORCE_EXPORT void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void UpdateCustomDialogNG(
