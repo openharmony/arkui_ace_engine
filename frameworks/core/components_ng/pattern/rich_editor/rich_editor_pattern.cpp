@@ -5638,7 +5638,11 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
                 relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
                 HandleOnDelete(true);
             } else {
-                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
+                if (value->compose.GetStart() == 0 && value->text.empty()) {
+                    DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
+                } else {
+                    DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
+                }
                 value->compose.Update(-1);
             }
         } else {
