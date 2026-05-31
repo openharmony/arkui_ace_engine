@@ -172,6 +172,12 @@ HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest010, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest001, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetNavigationId(nullptr, nullptr, 0, nullptr);
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetNavigationId"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -183,6 +189,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest001, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest002, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetNavDestinationName(nullptr, nullptr, 0, nullptr);
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetNavDestinationName"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -194,6 +206,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest002, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest003, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetNavStackLength(nullptr, nullptr);
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetNavStackLength"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -205,6 +223,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest003, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest004, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetNavDestinationNameByIndex(nullptr, 0, nullptr, 0, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetNavDestinationNameByIndex"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -216,6 +240,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest004, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest005, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetNavDestinationId(nullptr, nullptr, 0, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetNavDestinationId"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -227,6 +257,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest005, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest006, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetNavDestinationState(nullptr, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetNavDestinationState"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -238,6 +274,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest006, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest007, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetNavDestinationIndex(nullptr, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetNavDestinationIndex"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -260,6 +302,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest008, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest009, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetRouterPageIndex(nullptr, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetRouterPageIndex"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -271,6 +319,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest009, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest010, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetRouterPageName(nullptr, nullptr, 0, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetRouterPageName"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -282,6 +336,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest010, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest011, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetRouterPagePath(nullptr, nullptr, 0, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetRouterPagePath"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -293,6 +353,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest011, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest012, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetRouterPageState(nullptr, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetRouterPageState"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -304,6 +370,12 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest012, TestSize.Level1)
 HWTEST_F(NativeNodeNapiTest, NavigationAPITest013, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetRouterPageId(nullptr, nullptr, 0, nullptr);
+    const char *errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(ret)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_GetRouterPageId"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: Node is null"), std::string::npos);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
