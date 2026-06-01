@@ -273,6 +273,7 @@ advanced_ui_component_static/arcslider/ @arkuipopupwindow_all
 advanced_ui_component_static/popup/ @arkuipopupwindow_all
 advanced_ui_component_static/formmenu/ @form_framework
 advanced_ui_component/imageGeneratorDialog/source/image_generator_dialog_project/image_generator_dialog/src/main/ets/common/utils/ @ArkUI_ability_group
+advanced_ui_component/datepickercomponent/ @arkui001
 
 [Advanced UI Components Static]
 advanced_ui_component_static/assembled_advanced_ui_component/ @arkuiadvancedcomponent
@@ -282,6 +283,7 @@ advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advance
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.CounterV2.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.SegmentButton.ets @arkuitoolchain
 advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.SegmentButtonV2.ets @arkuitoolchain
+advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.DatePickerComponent.ets @arkui001
 
 [Extend UI Components]
 component_ext/arc_swiper/
