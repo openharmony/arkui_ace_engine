@@ -101,9 +101,11 @@ Use the KB as the first-stop context before any deep code analysis, and follow t
 
 ### 3.1 Lookup First
 
+**MANDATORY: Before any code search or analysis on components, architecture, APIs, or patterns, you MUST run a KB query first. Do NOT skip this step and jump straight to source code.**
+
 - Prefer `docs/kb_search.py` for KB lookup:
   - `python3 docs/kb_search.py <keyword>`
-  - `python3 docs/kb_search.py <keyword> --field name`
+- Use KB query results to precisely locate files for follow-up code inspection.
 - Use `rg` in `docs/` as a fallback when script results are insufficient.
 - Entry points: `docs/knowledge_base_README.md`, `docs/knowledge_base_INDEX.json`, `docs/pattern/*`, `docs/architecture/`, `docs/best_practices/`.
 

@@ -1,7 +1,7 @@
 # ArkUI Flex 组件完整知识库
 
-> **版本**: 1.0
-> **更新时间**: 2026-02-05
+> **版本**: 1.1
+> **更新时间**: 2026-05-31
 > **基于**: OpenHarmony ace_engine (master 分支)
 
 ---
@@ -15,8 +15,9 @@
 5. [属性系统](#5-属性系统)
 6. [FlexItem 属性](#6-flexitem-属性)
 7. [Wrap 布局](#7-wrap-布局)
-8. [最佳实践](#8-最佳实践)
-9. [问题排查](#9-问题排查)
+8. [API 清单](#8-api-清单)
+9. [最佳实践](#9-最佳实践)
+10. [问题排查](#10-问题排查)
 
 ---
 
@@ -26,14 +27,17 @@
 
 Flex 组件是 OpenHarmony 中最核心的布局容器，实现了标准的 Flex 布局规范，采用 3 层架构：
 
-```
-ArkTS 前端 (Row/Column/Wrap)
-    ↓
-桥接层 (FlexModelNG) - 属性解析和节点创建
-    ↓
-模式层 (FlexLayoutPattern) - 业务逻辑和算法选择
-    ↓
-算法层 (FlexLayoutAlgorithm/WrapLayoutAlgorithm) - 布局算法实现
+```mermaid
+graph TD
+    Frontend["ArkTS 前端<br/>(Row / Column / Flex / Wrap)"]
+    Bridge["桥接层<br/>FlexModelNG — 属性解析和节点创建"]
+    Pattern["模式层<br/>FlexLayoutPattern — 业务逻辑和算法选择"]
+    FlexAlgo["FlexLayoutAlgorithm<br/>单行/单列布局"]
+    WrapAlgo["WrapLayoutAlgorithm<br/>多行换行布局"]
+
+    Frontend --> Bridge --> Pattern
+    Pattern -->|"isWrap_=false"| FlexAlgo
+    Pattern -->|"isWrap_=true"| WrapAlgo
 ```
 
 **设计原则**：
@@ -67,22 +71,22 @@ ArkTS 前端 (Row/Column/Wrap)
 - 此时组件作为 **Row 组件 / Column 组件**，被称为**线性容器**
 
 **组件关系图**：
-```
-Flex (弹性容器)
-├── 可配置方向 (Row/RowReverse/Column/ColumnReverse)
-└── 完整 Flex 属性支持
 
-Linear (线性容器) - Flex 的子类
-├── 受 isVertical 参数控制
-│   ├── isVertical=false → Row (横向)
-│   └── isVertical=true → Column (纵向)
-├── 提供 reverse 参数
-└── 默认避免二次布局
+```mermaid
+graph TD
+    Flex["Flex (弹性容器)<br/>可配置方向 Row/Column/Reverse<br/>完整 Flex 属性支持"]
+    Linear["Linear (线性容器)<br/>Flex 的子类<br/>默认避免二次布局"]
+    Row["Row<br/>isVertical=false"]
+    Column["Column<br/>isVertical=true"]
+    Wrap["Wrap (换行模式)<br/>FlexOptions.wrap=Wrap/WrapReverse<br/>并非独立组件"]
 
-Wrap (换行容器)
-├── Horizontal / Vertical 方向
-└── 支持多行布局
+    Flex --> Linear
+    Linear --> Row
+    Linear --> Column
+    Flex -.->|"wrap≠NoWrap"| Wrap
 ```
+
+> **注意**：Wrap 并非独立组件，而是 Flex 的换行模式（`FlexOptions.wrap: FlexWrap.Wrap`）。SDK 中没有单独的 `wrap.d.ts` 或 `WrapModifier`，Wrap 的所有属性通过 `FlexOptions` 配置。
 
 **设计理念**：
 - **Flex**：提供完整的弹性布局能力，适用于需要复杂空间分配的场景
@@ -91,15 +95,44 @@ Wrap (换行容器)
 
 ### 1.3 代码规模
 
-- **Pattern 文件**: 1 个 (`flex_layout_pattern.h`)
-- **Algorithm 文件**: 2 个 (`flex_layout_algorithm.h/cpp`, `wrap_layout_algorithm.h/cpp`)
-- **Property 文件**: 2 个 (`flex_layout_property.h`, `flex_layout_styles.h`)
-- **Model 文件**: 3 个 (`flex_model_ng.h/cpp`, `flex_model_ng_static.h/cpp`)
-- **总代码量**: 约 3000+ 行 C++ 代码
+- **Pattern 文件**: 1 个 (`flex_layout_pattern.h`，256 行)
+- **Algorithm 文件**: 4 个 (`flex_layout_algorithm.h/cpp` 201+1815 行, `wrap_layout_algorithm.h/cpp` 156+930 行)
+- **Property 文件**: 2 个 (`flex_layout_property.h` 92 行, `flex_layout_styles.h` 40 行)
+- **Model 文件**: 4 个 (`flex_model.h`, `flex_model_ng.h/cpp`, `flex_model_ng_static.h/cpp`)
+- **总代码量**: 约 4095 行 C++ 代码
 
 ---
 
 ## 2. 核心类详解
+
+### 核心类继承关系
+
+```mermaid
+graph BT
+    Pattern["Pattern (基类)"]
+    FlexLayoutPattern["FlexLayoutPattern"]
+    FlexLayoutAlgorithm["FlexLayoutAlgorithm"]
+    WrapLayoutAlgorithm["WrapLayoutAlgorithm"]
+    BoxLayoutAlgorithm["BoxLayoutAlgorithm"]
+    FlexLayoutProperty["FlexLayoutProperty"]
+    LayoutProperty["LayoutProperty"]
+    FlexModelNG["FlexModelNG"]
+    FlexModel["FlexModel (抽象)"]
+
+    FlexLayoutPattern --> Pattern
+    FlexLayoutAlgorithm --> BoxLayoutAlgorithm
+    WrapLayoutAlgorithm --> BoxLayoutAlgorithm
+    FlexLayoutProperty --> LayoutProperty
+    FlexModelNG --> FlexModel
+
+    FlexLayoutPattern --- FlexLayoutProperty
+    FlexLayoutPattern --- FlexLayoutAlgorithm
+    FlexLayoutPattern --- WrapLayoutAlgorithm
+
+    style FlexLayoutPattern fill:#e1f5fe
+    style FlexLayoutAlgorithm fill:#e8f5e9
+    style WrapLayoutAlgorithm fill:#fff3e0
+```
 
 ### 2.1 FlexLayoutPattern
 
@@ -1166,6 +1199,39 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
    }
    ```
 
+### 4.9 ContainerReader 集成（v1.1 新增）
+
+自 2026-04 起，Flex 布局算法新增对 `ContainerReader` 节点的支持。ContainerReader 是一种特殊子节点（tag: `V2::CONTAINER_READER_ETS_TAG`），在三种测量模式中被单独收集和处理：
+
+- **权重模式**: `MeasureContainerReaderNodesInWeight()` — 在常规子元素测量完成后，将剩余主轴空间作为约束测量 ContainerReader 节点
+- **优先级模式**: `MeasureContainerReaderNodesInPriority()` — 同上逻辑
+- **Grow/Shrink 模式**: `MeasureContainerReaderNodesInGrowShrink()` — 同上逻辑
+
+源码位置: `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp`
+
+### 4.10 单轴 matchParent 重构（API 26+，v1.1 新增）
+
+API 26 起，Flex 对 `matchParent` 子元素的处理发生了重大变化。新增 `MeasureMatchParentChildren()` 流程，将子元素按 matchParent 方向分为四类分别处理：
+
+| 分类 | 说明 | 对应成员变量 |
+|------|------|-------------|
+| Expand | 非 matchParent 的普通子元素 | — |
+| Cross-only | 仅交叉轴 matchParent | `childrenMatchParentAlongCrossAxisOnly_` |
+| Main-only | 仅主轴 matchParent | `childrenMatchParentAlongMainAxisOnly_` |
+| Bidirection | 双轴 matchParent | `childrenMatchParentAlongBidirection_` |
+
+新增方法:
+- `GetMatchParentFlagAlongMainAndCrossAxis()` — 判断子元素在主轴和交叉轴的 matchParent 标志
+- `HandleExpandAndNonCrossMatchChildren()` — 分类和初步测量
+- `MeasureCrossAxisMatchChildrenAndCorrect()` — 测量交叉轴 matchParent 子元素并修正主轴
+- `MeasureMainAxisMatchChildren()` — 用修正后的交叉轴尺寸重新测量主轴 matchParent 子元素
+
+此变更通过 `ShouldHandleMatchParentAlongSingleAxis()` 门控，仅在 API >= 26 且宿主为 Column/Flex/Row 时生效。
+
+### 4.11 LPX 适配（v1.1 新增）
+
+`FlexModelNG::SetMainSpace()` 和 `SetCrossSpace()` 新增 `ACE_CHECK_LPX_ATTRIBUTE` / `ACE_CHECK_NODE_LPX_ATTRIBUTE` 检查，用于逻辑像素单位（LPX）的适配验证。
+
 ---
 
 ## 5. 属性系统
@@ -1461,9 +1527,155 @@ Wrap({ space: 10 }) {
 
 ---
 
-## 8. 最佳实践
+## 8. API 清单
 
-### 8.1 基本使用
+### 8.1 API 声明路径
+
+#### Flex
+
+| 范式 | 声明文件 | 是否涉及 |
+|------|---------|---------|
+| Dynamic API | `OpenHarmony/interface/sdk-js/api/@internal/component/ets/flex.d.ts` | ✅ |
+| Static API | `OpenHarmony/interface/sdk-js/api/arkui/component/flex.static.d.ets` | ✅ |
+| Modifier API (Dynamic) | — | ❌（FlexModifier.d.ts 不存在） |
+| Modifier API (Static) | `OpenHarmony/interface/sdk-js/api/arkui/FlexModifier.static.d.ets` | ✅ |
+| CAPI / NDK | `OpenHarmony/foundation/arkui/ace_engine/interfaces/native/native_node.h` | ✅ |
+
+#### Row
+
+| 范式 | 声明文件 | 是否涉及 |
+|------|---------|---------|
+| Dynamic API | `OpenHarmony/interface/sdk-js/api/@internal/component/ets/row.d.ts` | ✅ |
+| Static API | `OpenHarmony/interface/sdk-js/api/arkui/component/row.static.d.ets` | ✅ |
+| Modifier API (Dynamic) | `OpenHarmony/interface/sdk-js/api/arkui/RowModifier.d.ts` | ✅ |
+| Modifier API (Static) | `OpenHarmony/interface/sdk-js/api/arkui/RowModifier.static.d.ets` | ✅ |
+| CAPI / NDK | `OpenHarmony/foundation/arkui/ace_engine/interfaces/native/native_node.h` | ✅ |
+
+#### Column
+
+| 范式 | 声明文件 | 是否涉及 |
+|------|---------|---------|
+| Dynamic API | `OpenHarmony/interface/sdk-js/api/@internal/component/ets/column.d.ts` | ✅ |
+| Static API | `OpenHarmony/interface/sdk-js/api/arkui/component/column.static.d.ets` | ✅ |
+| Modifier API (Dynamic) | `OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.d.ts` | ✅ |
+| Modifier API (Static) | `OpenHarmony/interface/sdk-js/api/arkui/ColumnModifier.static.d.ets` | ✅ |
+| CAPI / NDK | `OpenHarmony/foundation/arkui/ace_engine/interfaces/native/native_node.h` | ✅ |
+
+#### Wrap
+
+Wrap 不是独立组件，没有单独的 API 声明文件。通过 `FlexOptions.wrap` 控制。
+
+### 8.2 构造参数
+
+#### FlexOptions
+
+| 参数 | 类型 | 必填 | Dynamic @since | Static @since | 说明 |
+|------|------|:----:|:---------:|:---------:|------|
+| `direction` | `FlexDirection` | ❌ | 7 | 23 static | 主轴方向，默认 Row |
+| `wrap` | `FlexWrap` | ❌ | 7 | 23 static | 换行模式，默认 NoWrap |
+| `justifyContent` | `FlexAlign` | ❌ | 7 | 23 static | 主轴对齐，默认 Start |
+| `alignItems` | `ItemAlign` | ❌ | 7 | 23 static | 交叉轴对齐，默认 Start |
+| `alignContent` | `FlexAlign` | ❌ | 7 | 23 static | 多行交叉轴对齐，默认 Start |
+| `space` | `FlexSpaceOptions` | ❌ | 12 | 23 static | 主轴/交叉轴间距 |
+
+#### RowOptions / ColumnOptions
+
+| 参数 | 类型 | 必填 | Dynamic @since | Static @since | 说明 |
+|------|------|:----:|:---------:|:---------:|------|
+| `space` | `string \| number` | ❌ | 7 | 23 static | 子组件间距 |
+
+> RowOptionsV2/ColumnOptionsV2（@since 18 dynamic）支持 `SpaceType`（`string | number | Resource`）。
+
+### 8.3 属性接口清单
+
+#### Flex 属性
+
+Flex 组件的属性主要通过构造参数 `FlexOptions` 设置，`FlexAttribute` 本身几乎没有额外属性方法：
+
+| 属性接口 | 参数类型 | Dynamic | Static | Modifier (D) | Modifier (S) | CAPI | 说明 |
+|---------|---------|:-------:|:------:|:--------:|:--------:|:----:|------|
+| `pointLight` | `PointLightStyle` | ✅ @11 | ✅ @23 | ❌ | ✅ | ❌ | @systemapi |
+| `setFlexOptions` | `FlexOptions` | ❌ | ✅ @26 | ❌ | ✅ | — | staticonly |
+
+#### Row 属性
+
+| 属性接口 | 参数类型 | Dynamic | Static | Modifier (D) | Modifier (S) | CAPI | 说明 |
+|---------|---------|:-------:|:------:|:--------:|:--------:|:----:|------|
+| `alignItems` | `VerticalAlign` | ✅ @7 | ✅ @23 | ✅ | ✅ | ✅ `NODE_ROW_ALIGN_ITEMS` | 交叉轴对齐 |
+| `justifyContent` | `FlexAlign` | ✅ @8 | ✅ @23 | ✅ | ✅ | ✅ `NODE_ROW_JUSTIFY_CONTENT` | 主轴对齐 |
+| `reverse` | `Optional<boolean>` | ✅ @12 | ✅ @23 | ✅ | ✅ | ✅ `NODE_LINEAR_LAYOUT_REVERSE` @23 | 反向排列 |
+| `pointLight` | `PointLightStyle` | ✅ @11 | ✅ @23 | ✅ | ✅ | ❌ | @systemapi |
+| `setRowOptions` | `RowOptions` | ❌ | ✅ @26 | ❌ | ✅ | — | staticonly |
+
+#### Column 属性
+
+| 属性接口 | 参数类型 | Dynamic | Static | Modifier (D) | Modifier (S) | CAPI | 说明 |
+|---------|---------|:-------:|:------:|:--------:|:--------:|:----:|------|
+| `alignItems` | `HorizontalAlign` | ✅ @7 | ✅ @23 | ✅ | ✅ | ✅ `NODE_COLUMN_ALIGN_ITEMS` | 交叉轴对齐 |
+| `justifyContent` | `FlexAlign` | ✅ @8 | ✅ @23 | ✅ | ✅ | ✅ `NODE_COLUMN_JUSTIFY_CONTENT` | 主轴对齐 |
+| `reverse` | `Optional<boolean>` | ✅ @12 | ✅ @23 | ✅ | ✅ | ✅ `NODE_LINEAR_LAYOUT_REVERSE` @23 | 反向排列 |
+| `pointLight` | `PointLightStyle` | ✅ @11 | ✅ @23 | ✅ | ✅ | ❌ | @systemapi |
+| `setColumnOptions` | `ColumnOptions` | ❌ | ✅ @26 | ❌ | ✅ | — | staticonly |
+
+#### FlexItem 属性（子组件通用）
+
+| 属性接口 | CAPI 枚举 | 说明 |
+|---------|----------|------|
+| `flexGrow` | `NODE_FLEX_GROW` | 放大比例，`value[0].f32` |
+| `flexShrink` | `NODE_FLEX_SHRINK` | 缩小比例，`value[0].f32` |
+| `flexBasis` | `NODE_FLEX_BASIS` | 基础尺寸，`value[0].f32` |
+
+### 8.4 CAPI 枚举
+
+#### 节点类型
+
+| 枚举 | 说明 |
+|------|------|
+| `ARKUI_NODE_COLUMN` | Column 节点 |
+| `ARKUI_NODE_ROW` | Row 节点 |
+| `ARKUI_NODE_FLEX` | Flex 节点 |
+
+> 无 `ARKUI_NODE_WRAP`——Wrap 通过 `NODE_FLEX_OPTION` 的 wrap 字段控制。
+
+#### Flex 属性枚举
+
+| 枚举 | 值格式 | 说明 |
+|------|--------|------|
+| `NODE_FLEX_OPTION` | `[0].i32`=direction, `[1].i32`=wrap, `[2].i32`=justifyContent, `[3].i32`=alignItems, `[4].i32`=alignContent | 复合属性 |
+| `NODE_FLEX_SPACE` | `[0].f32`=主轴间距(vp), `[1].f32`=交叉轴间距(vp) | @since 23 |
+
+#### Row/Column 属性枚举
+
+| 枚举 | 适用 | 值格式 | 说明 |
+|------|------|--------|------|
+| `NODE_ROW_ALIGN_ITEMS` | Row | `[0].i32` ArkUI_VerticalAlignment | 默认 CENTER |
+| `NODE_ROW_JUSTIFY_CONTENT` | Row | `[0].i32` ArkUI_FlexAlignment | 默认 START |
+| `NODE_COLUMN_ALIGN_ITEMS` | Column | `[0].i32` ArkUI_HorizontalAlignment | 默认 CENTER |
+| `NODE_COLUMN_JUSTIFY_CONTENT` | Column | `[0].i32` ArkUI_FlexAlignment | 默认 START |
+| `NODE_LINEAR_LAYOUT_SPACE` | Row/Column | `[0].f32` (vp) | @since 23，共享 |
+| `NODE_LINEAR_LAYOUT_REVERSE` | Row/Column | `[0].i32` | @since 23，共享 |
+
+### 8.5 跨范式差异
+
+| 差异点 | Dynamic | Static | 说明 |
+|--------|---------|--------|------|
+| 数值类型 | `number` | `double` | Static 使用 double |
+| 可选类型 | `Optional<T>` | `T \| undefined` | 表达方式不同 |
+| Modifier 文件 | ❌ Flex 无 Dynamic Modifier | ✅ 有 FlexModifier.static.d.ets | Row/Column 两端都有 |
+| `set*Options` | ❌ | ✅ @since 26 staticonly | 运行时更新构造参数 |
+| `Extendable*` | ❌ | ✅ @since 26 staticonly | 扩展组件工厂类 |
+
+### 8.6 关联的 `@ohos.arkui.*` 模块 API
+
+| 模块 | 路径 | 说明 |
+|------|------|------|
+| N/A | — | 不涉及 |
+
+---
+
+## 9. 最佳实践
+
+### 9.1 基本使用
 
 **Row 布局**：
 ```typescript
@@ -1493,7 +1705,7 @@ Column() {
   .padding(20)
 ```
 
-### 8.2 对齐方式组合
+### 9.2 对齐方式组合
 
 **居中对齐**：
 ```typescript
@@ -1517,7 +1729,7 @@ Row() {
   .alignItems(FlexAlign.Center)
 ```
 
-### 8.3 空间分配
+### 9.3 空间分配
 
 **固定比例**：
 ```typescript
@@ -1542,7 +1754,7 @@ Row() {
   .width(300)
 ```
 
-### 8.4 layoutWeight 权重分配
+### 9.4 layoutWeight 权重分配
 
 **按比例分配空间**：
 ```typescript
@@ -1570,7 +1782,7 @@ Row() {
   .width('100%')
 ```
 
-### 8.5 Wrap 标签云
+### 9.5 Wrap 标签云
 
 ```typescript
 Wrap({ space: { main: 10, cross: 10 } }) {
@@ -1586,7 +1798,7 @@ Wrap({ space: { main: 10, cross: 10 } }) {
   .alignContent(WrapAlignment.Start)
 ```
 
-### 8.6 性能优化
+### 9.6 性能优化
 
 **理解二次布局的性能影响**：
 
@@ -1762,9 +1974,9 @@ frameNode.DumpInfo()
 
 ---
 
-## 9. 问题排查
+## 10. 问题排查
 
-### 9.1 常见问题
+### 10.1 常见问题
 
 | 症状 | 可能原因 | 解决方案 |
 |------|---------|----------|
@@ -1778,7 +1990,7 @@ frameNode.DumpInfo()
 | 二次测量未触发 | flex属性未设置 | 确保设置了 flexGrow、flexShrink 或 layoutWeight |
 | 基线对齐失败 | 子元素不支持基线 | 使用其他对齐方式（如 Center） |
 
-### 9.2 调试工具
+### 10.2 调试工具
 
 **DumpInfo 输出**：
 ```cpp
@@ -1803,7 +2015,7 @@ DumpLog::GetInstance().AddDesc(
 - 验证 flex-grow/flex-shrink 值
 - 验证 layoutWeight 值和约束尺寸
 
-### 9.3 性能分析
+### 10.3 性能分析
 
 **Measure-Layout 配对检查**：
 ```typescript
@@ -1827,7 +2039,7 @@ console.log('Measure-Layout Paired:',
 
 ---
 
-## 10. 相关目录
+## 11. 相关目录
 
 ```
 frameworks/core/components_ng/pattern/flex/
@@ -1847,7 +2059,7 @@ frameworks/core/components_ng/pattern/flex/
 
 ---
 
-## 11. API 文档路径
+## 12. API 文档路径
 
 ```
 OpenHarmony/interface/sdk-js/api/arkui/component/column.static.d.ets
@@ -1860,7 +2072,7 @@ OpenHarmony/interface/sdk-js/api/arkui/WrapModifier.d.ts
 
 ---
 
-## 12. 关键要点总结
+## 13. 关键要点总结
 
 1. **弹性布局**: Flex 是 OpenHarmony 最核心的布局容器，支持灵活的主轴和交叉轴空间分配
 2. **双向对齐**: justifyContent 控制主轴对齐，alignItems 控制交叉轴对齐
@@ -1897,5 +2109,6 @@ OpenHarmony/interface/sdk-js/api/arkui/WrapModifier.d.ts
 | 版本 | 日期 | 变更内容 | 作者 |
 |------|------|----------|------|
 | v1.0 | 2026-02-05 | 初始版本 | Claude |
+| v1.1 | 2026-05-31 | 新增 API 清单章节（跨范式对照表、CAPI 枚举、构造参数）；图表迁移至 Mermaid；新增 ContainerReader 集成、单轴 matchParent API26+ 重构、LPX 适配文档；Wrap 非独立组件说明；更新代码规模统计 | Claude |
 
 ---

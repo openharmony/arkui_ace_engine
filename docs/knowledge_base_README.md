@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-05-23
+> 更新时间：2026-06-01
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -128,3 +128,4 @@ python3 docs/kb_search.py --list-all
 
 - 2026-05-23：补齐未索引知识库条目（+25），索引覆盖 `*_Knowledge_Base*` 文档达到 100%。
 - 2026-05-23：按当前仓库实际重刷本文件，更新统计、目录快照和维护命令。
+- 2026-06-01：修正 Text 知识库索引中的属性文件路径（`text_property.cpp` -> `text_layout_property.cpp`），并同步修正文档示例中的错误常量与目录结构描述。

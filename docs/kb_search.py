@@ -30,7 +30,6 @@
 
 import json
 import sys
-import os
 import argparse
 from pathlib import Path
 
@@ -50,6 +49,8 @@ def match_entry(entry: dict, keyword: str, field: str = None) -> bool:
     """判断条目是否匹配关键字。"""
     keyword_lower = keyword.lower()
 
+    src = entry.get("source_paths", {})
+    api = entry.get("api_paths", {})
     search_fields = {
         "name": [entry.get("name", "")],
         "name_cn": [entry.get("name_cn", "")],
@@ -57,6 +58,8 @@ def match_entry(entry: dict, keyword: str, field: str = None) -> bool:
         "aliases": entry.get("aliases", []),
         "category": [entry.get("category", "")],
         "type": [entry.get("type", "")],
+        "source_paths": list(src.keys()) + list(src.values()),
+        "api_paths": list(api.keys()) + list(api.values()),
     }
 
     if field:
@@ -79,12 +82,12 @@ def format_entry(entry: dict, index: int) -> str:
 
     src = entry.get("source_paths", {})
     if src:
-        src_items = [f"{k}: {os.path.basename(v)}" for k, v in src.items()]
+        src_items = [f"{k}: {v}" for k, v in src.items()]
         lines.append(f"  源码: {', '.join(src_items)}")
 
     api = entry.get("api_paths", {})
     if api:
-        api_items = [f"{k}: {os.path.basename(v)}" for k, v in api.items()]
+        api_items = [f"{k}: {v}" for k, v in api.items()]
         lines.append(f"  API: {', '.join(api_items)}")
 
     kw = entry.get("keywords", [])
@@ -101,7 +104,7 @@ def format_entry(entry: dict, index: int) -> str:
 def main():
     parser = argparse.ArgumentParser(description="知识库索引检索工具")
     parser.add_argument("keyword", nargs="?", help="搜索关键字")
-    parser.add_argument("--field", help="限定搜索字段 (name/name_cn/keywords/aliases/category/type)")
+    parser.add_argument("--field", help="限定搜索字段 (name/name_cn/keywords/aliases/category/type/source_paths/api_paths)")
     parser.add_argument("--category", help="按分类过滤（如 component, layout）")
     parser.add_argument("--list-categories", action="store_true", help="列出所有分类")
     parser.add_argument("--list-all", action="store_true", help="列出所有知识库名称")
