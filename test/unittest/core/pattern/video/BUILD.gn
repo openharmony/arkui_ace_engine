@@ -19,6 +19,7 @@ ace_unittest("video_test_ng") {
 
   sources = [
     "$ace_root/test/mock/adapter/ohos/osal/mock_background_task_helper.cpp",
+    "video_controller_async_test.cpp",
     "video_property_test_ng.cpp",
     "video_test_ng.cpp",
     "video_test_ng_add.cpp",
@@ -28,7 +29,7 @@ ace_unittest("video_test_ng") {
     "video_state_machine_pattern_test_two.cpp",
     "video_state_machine_pattern_test_extra.cpp",
     "video_state_manager_test.cpp",
-    "video_controller_async_test.cpp",
+    "video_resource_test_ng.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
