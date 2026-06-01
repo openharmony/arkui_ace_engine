@@ -107,22 +107,28 @@ Use the KB as the first-stop context before any deep code analysis, and follow t
   - `python3 docs/kb_search.py <keyword>`
 - Use KB query results to precisely locate files for follow-up code inspection.
 - Use `rg` in `docs/` as a fallback when script results are insufficient.
-- Entry points: `docs/knowledge_base_README.md`, `docs/knowledge_base_INDEX.json`, `docs/pattern/*`, `docs/architecture/`, `docs/best_practices/`.
+- Entry points: `docs/knowledge_base_README.md`, `docs/knowledge_base_INDEX.json`, and KB directories under `docs/` (for example: `pattern/`, `common/`, `layout/`, `api/`, `sdk/`, `architecture/`).
+
+#### 3.1.1 Task Routing Rules (KB-first)
+
+- Keep this section rule-based, not an exhaustive scenario catalog.
+- Run `python3 docs/kb_search.py <keyword>` with 1-2 core keywords and read the top matching 1-3 KB docs first.
+- If KB hits are weak or ambiguous, refine query (`--field`, second keyword) and fallback to `rg -n "<keyword>" docs`.
+- After KB routing, verify only in real source code and tests (typically `frameworks/`, `interfaces/`, `test/`) before concluding.
 
 ### 3.2 Authoring Standard (Minimal)
 
-- Naming/location: use `XXX_Knowledge_Base.md` or `XXX_Knowledge_Base_CN.md`; place under `docs/pattern/<component>/`, `docs/sdk/`, or `docs/architecture/`.
+- Naming/location: use `XXX_Knowledge_Base.md` or `XXX_Knowledge_Base_CN.md`; place under `docs/pattern/<component>/`, `docs/sdk/`, `docs/architecture/`, `docs/common/`, `docs/layout/`, `docs/api/`, `docs/accessibility/` (choose by topic).
 - Index metadata (`docs/knowledge_base_INDEX.json`) must include: `name`, `name_cn`, `category`, `type`, `file_path`, `last_updated`, `keywords` (5-15), `aliases` (2-5); recommend `source_paths` and `api_paths`.
-- Allowed categories: `basic`, `container`, `selector`, `shape`, `media`, `data_display`, `rich_text`, `advanced`, `sdk`.
+- Allowed categories: `basic`, `container`, `selector`, `shape`, `media`, `data_display`, `rich_text`, `advanced`, `sdk`, `system`.
 - Required sections in each KB doc: 概述, 目录结构, 核心类继承关系, Pattern层详解, Model层详解, 完整API清单, 关键实现细节, 使用示例, 调试指南, 常见问题.
-- Path rules: source/API paths use `OpenHarmony/` prefix; KB cross-links use repo-relative paths; do not use local absolute paths like `/home/...`.
-- Before submit: verify referenced files/line numbers, validate `knowledge_base_INDEX.json`, and update both `docs/knowledge_base_INDEX.json` and `docs/knowledge_base_README.md`.
 
 Quick checks:
 
 ```bash
 find docs -name "*_Knowledge_Base*.md" -type f | wc -l
 python3 -m json.tool docs/knowledge_base_INDEX.json > /dev/null && echo "Valid JSON"
+python3 docs/kb_search.py --list-categories
 ```
 
 Detailed templates/rules: `docs/knowledge_base_README.md`.
