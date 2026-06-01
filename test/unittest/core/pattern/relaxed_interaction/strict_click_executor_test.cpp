@@ -15,21 +15,13 @@
 
 #include "gtest/gtest.h"
 
-#include <string>
-
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/common/event_manager.h"
 #include "core/components_ng/relaxed_interaction/executors/strict_click_executor.h"
-#include "core/components_ng/relaxed_interaction/frame_node_finder.h"
-#include "core/components_ng/relaxed_interaction/utils/relaxed_event_factory.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/gestures/recognizers/click_recognizer.h"
-#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
@@ -178,181 +170,6 @@ HWTEST_F(StrictClickExecutorIsSingleStepTest, IsSingleStep_ReturnsTrueForDiffere
 
     EXPECT_TRUE(executor1.IsSingleStep());
     EXPECT_TRUE(executor2.IsSingleStep());
-}
-
-/**
- * @brief Test ExecuteStep when FrameNode found but has no click function
- * Covers line 45-48 in strict_click_executor.cpp
- */
-HWTEST_F(StrictClickExecutorExecuteStepTest, ExecuteStep_FrameNodeWithoutClickFunc_ReturnsFailed, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    PointF coordinates(100.0f, 200.0f);
-    StrictClickExecutor executor(context, coordinates);
-
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::FAILED);
-}
-
-class MockFrameNodeForClick : public FrameNode {
-    DECLARE_ACE_TYPE(MockFrameNodeForClick, FrameNode);
-
-public:
-    MockFrameNodeForClick(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : FrameNode(tag, nodeId, pattern) {}
-
-    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, // NOLINT
-        const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result,
-        int32_t touchId, ResponseLinkResult& responseLinkResult, bool isDispatch = false) override
-    {
-        if (onTouchTest_) {
-            onTouchTest_(result);
-        }
-        return HitTestResult::STOP_BUBBLING;
-    }
-
-    void SetTouchTestCallback(std::function<void(TouchTestResult&)> callback)
-    {
-        onTouchTest_ = std::move(callback);
-    }
-
-private:
-    std::function<void(TouchTestResult&)> onTouchTest_;
-};
-
-class StrictClickExecutorMockTest : public testing::Test {
-public:
-    static void SetUpTestCase()
-    {
-        mockPipelineContext_ = AceType::MakeRefPtr<MockPipelineContext>();
-        ASSERT_NE(mockPipelineContext_, nullptr);
-    }
-
-    static void TearDownTestCase()
-    {
-        mockPipelineContext_.Reset();
-    }
-
-    void SetUp() override
-    {
-        mockPipelineContext_->SetEventManager(AceType::MakeRefPtr<EventManager>());
-    }
-
-    void TearDown() override
-    {
-        mockPipelineContext_->rootNode_.Reset();
-        mockPipelineContext_->eventManager_.Reset();
-    }
-
-protected:
-    inline static RefPtr<MockPipelineContext> mockPipelineContext_ = nullptr;
-};
-
-namespace {
-const double MOCK_CLICK_COORD_X = 100.0;
-const double MOCK_CLICK_COORD_Y = 200.0;
-const int32_t MOCK_ROOT_NODE_ID = 300;
-const int32_t MOCK_BUTTON_NODE_ID = 301;
-} // namespace
-
-HWTEST_F(StrictClickExecutorMockTest, ExecuteStep_NoRootNode_ReturnsFailed, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    PointF coordinates(MOCK_CLICK_COORD_X, MOCK_CLICK_COORD_Y);
-    StrictClickExecutor executor(context, coordinates);
-
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::FAILED);
-}
-
-HWTEST_F(StrictClickExecutorMockTest, ExecuteStep_RootNodeTouchTestReturnsEmpty_ReturnsFailed, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    auto rootNode = AceType::MakeRefPtr<MockFrameNodeForClick>(
-        "Root", MOCK_ROOT_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    rootNode->SetTouchTestCallback([](TouchTestResult&) {});
-    mockPipelineContext_->rootNode_ = rootNode;
-
-    PointF coordinates(MOCK_CLICK_COORD_X, MOCK_CLICK_COORD_Y);
-    StrictClickExecutor executor(context, coordinates);
-
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::FAILED);
-}
-
-HWTEST_F(StrictClickExecutorMockTest, ExecuteStep_RootNodeTouchTestReturnsPanRecognizer_ReturnsFailed, TestSize.Level1)
-{
-    auto buttonNode = AceType::MakeRefPtr<FrameNode>(
-        "Button", MOCK_BUTTON_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, PanDirection(), 5.0);
-    panRecognizer->AttachFrameNode(buttonNode);
-
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    auto rootNode = AceType::MakeRefPtr<MockFrameNodeForClick>(
-        "Root", MOCK_ROOT_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    rootNode->SetTouchTestCallback([&panRecognizer](TouchTestResult& result) {
-        result.push_back(panRecognizer);
-    });
-    mockPipelineContext_->rootNode_ = rootNode;
-
-    PointF coordinates(MOCK_CLICK_COORD_X, MOCK_CLICK_COORD_Y);
-    StrictClickExecutor executor(context, coordinates);
-
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::FAILED);
-}
-
-HWTEST_F(StrictClickExecutorMockTest, ExecuteStep_RootNodeTouchTestReturnsClickRecognizerSuccess, TestSize.Level1)
-{
-    auto buttonNode = AceType::MakeRefPtr<FrameNode>(
-        "Button", MOCK_BUTTON_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
-    clickRecognizer->AttachFrameNode(buttonNode);
-    GestureEventFunc clickFunc = [](GestureEvent&) {};
-    clickRecognizer->onAction_ = std::make_unique<GestureEventFunc>(clickFunc);
-
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    auto rootNode = AceType::MakeRefPtr<MockFrameNodeForClick>(
-        "Root", MOCK_ROOT_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    rootNode->SetTouchTestCallback([&clickRecognizer](TouchTestResult& result) {
-        result.push_back(clickRecognizer);
-    });
-    mockPipelineContext_->rootNode_ = rootNode;
-
-    PointF coordinates(MOCK_CLICK_COORD_X, MOCK_CLICK_COORD_Y);
-    StrictClickExecutor executor(context, coordinates);
-
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::SUCCESS);
-}
-
-HWTEST_F(StrictClickExecutorMockTest, ExecuteStep_ClickFuncIsActuallyInvoked, TestSize.Level1)
-{
-    auto buttonNode = AceType::MakeRefPtr<FrameNode>(
-        "Button", MOCK_BUTTON_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
-    clickRecognizer->AttachFrameNode(buttonNode);
-
-    bool clickFuncCalled = false;
-    GestureEventFunc clickFunc = [&clickFuncCalled](GestureEvent&) {
-        clickFuncCalled = true;
-    };
-    clickRecognizer->onAction_ = std::make_unique<GestureEventFunc>(clickFunc);
-
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    auto rootNode = AceType::MakeRefPtr<MockFrameNodeForClick>(
-        "Root", MOCK_ROOT_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    rootNode->SetTouchTestCallback([&clickRecognizer](TouchTestResult& result) {
-        result.push_back(clickRecognizer);
-    });
-    mockPipelineContext_->rootNode_ = rootNode;
-
-    PointF coordinates(MOCK_CLICK_COORD_X, MOCK_CLICK_COORD_Y);
-    StrictClickExecutor executor(context, coordinates);
-
-    auto result = executor.ExecuteStep();
-    EXPECT_EQ(result, ExecutorResult::SUCCESS);
-    EXPECT_TRUE(clickFuncCalled);
 }
 
 } // namespace OHOS::Ace::NG

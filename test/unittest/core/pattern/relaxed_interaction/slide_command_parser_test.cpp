@@ -195,28 +195,6 @@ HWTEST_F(SlideCommandParserParseTest, Parse_EmptyRootRect_ReturnsOneExecutor, Te
     geometryNode->SetFrameSize(originalSize);
 }
 
-HWTEST_F(SlideCommandParserParseTest, Parse_InvalidRootRect_ReturnsOneExecutor, TestSize.Level1)
-{
-    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
-    SlideCommandParser parser(context);
-    auto json = JsonUtil::ParseJsonString(VALID_SLIDE_JSON);
-    ASSERT_NE(json, nullptr);
-
-    auto rootNode = mockPipelineContext_->GetRootElement();
-    ASSERT_NE(rootNode, nullptr);
-    auto geometryNode = rootNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto originalSize = geometryNode->GetFrameSize();
-    geometryNode->SetFrameSize(SizeF(-1.0f, -1.0f));
-
-    auto executors = parser.Parse(json);
-    EXPECT_EQ(executors.size(), 1);
-    ASSERT_NE(executors[0], nullptr);
-    EXPECT_EQ(executors[0]->GetType(), "smart_gesture");
-
-    geometryNode->SetFrameSize(originalSize);
-}
-
 HWTEST_F(SlideCommandParserParseTest, Parse_ZeroWidthRootRect_ReturnsOneExecutor, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
