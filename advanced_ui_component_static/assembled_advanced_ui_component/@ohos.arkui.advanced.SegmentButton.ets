@@ -1903,6 +1903,7 @@ export struct SegmentButton {
           }
         }
       }
+      return true;
     })
     .accessibilityLevel('no')
     .priorityGesture(
