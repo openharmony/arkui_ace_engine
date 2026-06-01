@@ -320,10 +320,12 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/text_native_impl.cpp",
     "$ace_root/interfaces/native/node/span_style_native_impl.cpp",
     "$ace_root/interfaces/native/native_styled_string_descriptor.cpp",
+    "$ace_root/interfaces/native/node/swiper_option.cpp",
     "native_node_napi_test.cpp",
     "native_node_test.cpp",
     "native_node_two_part_test.cpp",
-    "native_styled_string_test.cpp"
+    "native_styled_string_test.cpp",
+    "capi_swiper_test_ng.cpp"
   ]
 
   configs = [
