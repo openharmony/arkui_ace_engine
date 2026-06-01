@@ -442,6 +442,10 @@ protected:
     OffsetF globalPosition_;
     void NativeXComponentOffset(double x, double y);
     std::string GetLeakType();
+#ifdef ENABLE_ROSEN_BACKEND
+    static void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDisplayMode foldDisplayMode,
+    const std::string& xcomponentId);
+#endif
 
 private:
     void OnAreaChangedInner() override;

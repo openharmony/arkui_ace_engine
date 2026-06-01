@@ -33,6 +33,7 @@
 #include "base/memory/ace_type.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/feature_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
@@ -93,6 +94,7 @@ constexpr char FULL[] = "1";
 constexpr char MAIN[] = "2";
 constexpr char SUB[] = "3";
 constexpr char COORDINATION[] = "4";
+constexpr char ANGLE_KEY[] = "logic_device";
 #endif
 
 #if defined(RENDER_EXTRACT_SUPPORTED) && defined(IOS_PLATFORM)
@@ -443,18 +445,31 @@ Rosen::ScreenRotation RotationIntToScreenRotation(int32_t rotation)
  
 std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& angleConfigJson)
 {
-    if (angleConfigJson == "") {
+    std::string tempAngleConfigJson = angleConfigJson;
+    if (SystemProperties::IsSensorCorrectionEnabled()) {
+        LOGI("Sensor Correction is Enabled");
+        std::string featureManagerAngleConfig;
+        auto featureResult = FeatureManager::GetInstance().GetFeatureParam(ANGLE_KEY, featureManagerAngleConfig);
+        if (featureResult == FeatureManager::SUCCESS) {
+            tempAngleConfigJson = featureManagerAngleConfig;
+            LOGI("featureManagerAngleConfig is %{public}s", tempAngleConfigJson.c_str());
+        }
+    } else {
+        LOGI("Sensor Correction is not Enabled");
+        // can return when the feature manager is enable.
+    }
+    if (tempAngleConfigJson.empty()) {
         LOGE("UIContent set compensation angle empty");
         return nullptr;
     }
-    auto jsonConfig = JsonUtil::ParseJsonString(angleConfigJson);
+    auto jsonConfig = JsonUtil::ParseJsonString(tempAngleConfigJson);
     if (jsonConfig == nullptr) {
-        LOGE("UIContent set compensasion angle %{public}s is invalid", angleConfigJson.c_str());
+        LOGE("UIContent set compensasion angle %{public}s is invalid", tempAngleConfigJson.c_str());
         return nullptr;
     }
     auto angleConfig = jsonConfig->GetObject(X_COMPONENT_COMPENSATION_ANGLE);
     if (angleConfig == nullptr) {
-        LOGE("UIContent can not get angle info from %{public}s", angleConfigJson.c_str());
+        LOGE("UIContent can not get angle info from %{public}s", tempAngleConfigJson.c_str());
         return nullptr;
     }
     auto result = angleConfig->ToString();
@@ -462,8 +477,8 @@ std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& ang
     return JsonUtil::ParseJsonString(result);
 }
  
-void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDisplayMode foldDisplayMode,
-    const std::string& xcomponentId)
+void XComponentPattern::SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext,
+    FoldDisplayMode foldDisplayMode, const std::string& xcomponentId)
 {
 #ifndef CROSS_PLATFORM
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
