@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(JsEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MediaPlayGestureAccess, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FullScreenVideoOverlay, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FileAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OnLineImageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DomStorageAccessEnabled, bool);

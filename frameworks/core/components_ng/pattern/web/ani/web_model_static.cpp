@@ -223,6 +223,14 @@ void WebModelStatic::SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeed
     webPatternStatic->UpdateMediaPlayGestureAccess(isNeedGestureAccess);
 }
 
+void WebModelStatic::SetEnableFullscreenVideoOverlay(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateFullScreenVideoOverlay(enable);
+}
+
 void WebModelStatic::SetOverlayScrollbarEnabled(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -945,6 +953,18 @@ void WebModelStatic::SetDefaultFileSelectorShow(
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->SetDefaultFileSelectorShowCallback(std::move(uiCallback));
+}
+
+void WebModelStatic::SetOnFullScreenVideoOverlayEnter(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) {
+        func(info.get());
+    };
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetOnFullScreenVideoOverlayEnterCallback(std::move(uiCallback));
 }
 
 void WebModelStatic::SetOnDetectedBlankScreen(

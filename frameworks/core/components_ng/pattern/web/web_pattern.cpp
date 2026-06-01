@@ -3961,6 +3961,13 @@ void WebPattern::OnMediaPlayGestureAccessUpdate(bool value)
     }
 }
 
+void WebPattern::OnFullScreenVideoOverlayUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateFullScreenVideoOverlayEnable(value);
+    }
+}
+
 void WebPattern::OnFileAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -4749,6 +4756,7 @@ void WebPattern::OnModifyDone()
 
         std::tuple<bool, bool> config = GetNativeVideoPlayerConfigValue({false, false});
         delegate_->UpdateNativeVideoPlayerConfig(std::get<0>(config), std::get<1>(config));
+        delegate_->UpdateFullScreenVideoOverlayEnable(GetFullScreenVideoOverlayValue(false));
 
         if (GetEnableFollowSystemFontWeight()) {
             delegate_->UpdateEnableFollowSystemFontWeight(GetEnableFollowSystemFontWeight().value());

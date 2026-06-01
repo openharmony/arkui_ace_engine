@@ -19,11 +19,47 @@
 #include <string_view>
 #include <vector>
 #include <unordered_set>
+#include <map>
 
 namespace OHOS::Ace {
 class WebUtil {
 public:
     static bool HasJSONDuplicateKeys(std::string_view json);
+    template<typename T>
+    static bool GetParamValue(const std::map<std::string, std::string>& param, const std::string& key, T& value)
+    {
+        auto it = param.find(key);
+        if (it == param.end() || it->second.empty()) {
+            return false;
+        }
+
+        const std::string& str = it->second;
+        char* endptr = nullptr;
+
+        if constexpr (std::is_same_v<T, int32_t>) {
+            long result = std::strtol(str.c_str(), &endptr, 10);
+            if (endptr == str || *endptr != '\0') {
+                return false;
+            }
+            value = static_cast<int32_t>(result);
+            return true;
+        } else if constexpr (std::is_same_v<T, double>) {
+            double result = std::strtod(str.c_str(), &endptr);
+            if (endptr == str || *endptr != '\0') {
+                return false;
+            }
+            value = result;
+            return true;
+        } else if constexpr (std::is_same_v<T, bool>) {
+            value = (it->second == "true" || it->second == "1");
+            return true;
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            value = it->second;
+            return true;
+        }
+
+        return false;
+    }
 
 private:
     WebUtil() = delete;

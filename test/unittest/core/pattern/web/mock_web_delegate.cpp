@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/pattern/web/web_util.h"
 #include "arkweb_utils.h"
 
 namespace OHOS::Ace {
@@ -1526,6 +1527,11 @@ void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
 void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
+void WebDelegate::UpdateFullScreenVideoOverlayEnable(bool) {}
+void WebDelegate::OnFullScreenVideoOverlayEnter(const char*) {}
+void WebDelegate::OnVideoStatusChanged(const int action, const std::map<std::string, std::string>& param) {}
+void WebDelegate::SetVideoSurface(std::string) {}
+void WebDelegate::RequestMediaControl(int32_t, std::string) {}
 
 std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> WebDelegate::GetNWebCommandActionManager()
 {
@@ -1533,4 +1539,8 @@ std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> WebDelegate::GetNWebComman
 }
 
 void WebDelegate::UpdateTouchEventFeatureDetectionEnabled() {}
+
+void FullScreenVideoOverlayHandlerOhos::SetVideoSurface(std::string surfaceId) {}
+
+void FullScreenVideoOverlayHandlerOhos::RequestMediaControl(int32_t action, std::string param) {}
 } // namespace OHOS::Ace

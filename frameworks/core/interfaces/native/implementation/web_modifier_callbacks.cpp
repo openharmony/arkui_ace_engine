@@ -28,6 +28,7 @@
 #endif // PREVIEW
 
 #include "core/components_ng/pattern/web/web_model_ng.h"
+#include "core/components/web/web_full_screen_video_overlay_handler.h"
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
@@ -55,6 +56,7 @@
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "base/web/webview/interfaces/kits/nativecommon/full_screen_video_overlay_handler_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier {
 
@@ -427,6 +429,79 @@ void DefaultOnShowFileSelector(const std::function<void(void*, void*, std::funct
         }
     };
     callback(paramPeer, resultPeer, std::move(releaseFunc));
+}
+
+NWeb::FullScreenVideoOverlayHandlerVTable CreateFullScreenVideoOverlayHandlerVTable()
+{
+    NWeb::FullScreenVideoOverlayHandlerVTable vtable;
+    vtable.destroy = [](void* ptr) {
+        delete static_cast<Ace::RefPtr<Ace::FullScreenVideoOverlayHandler>*>(ptr);
+    };
+    vtable.setVideoSurface = [](void* ptr, const char* surfaceId, size_t len) {
+        auto& h = *static_cast<Ace::RefPtr<Ace::FullScreenVideoOverlayHandler>*>(ptr);
+        if (h) {
+            h->SetVideoSurface(std::string(surfaceId, len));
+        }
+    };
+    vtable.requestMediaControl = [](void* ptr, int32_t action, const char* param, size_t len) {
+        auto& h = *static_cast<Ace::RefPtr<Ace::FullScreenVideoOverlayHandler>*>(ptr);
+        if (h) {
+            h->RequestMediaControl(action, std::string(param, len));
+        }
+    };
+    vtable.addListener = [](void* ptr, const NWeb::FullScreenVideoListenerCallbacks* cbs) {
+        auto& h = *static_cast<Ace::RefPtr<Ace::FullScreenVideoOverlayHandler>*>(ptr);
+        if (!h) {
+            return;
+        }
+        auto listener = std::make_shared<Ace::VideoPlayerListener>();
+        listener->OnStatusChanged = std::move(cbs->OnStatusChanged);
+        listener->OnMutedChanged = std::move(cbs->OnMutedChanged);
+        listener->OnPlaybackRateChanged = std::move(cbs->OnPlaybackRateChanged);
+        listener->OnDurationChanged = std::move(cbs->OnDurationChanged);
+        listener->OnTimeUpdate = std::move(cbs->OnTimeUpdate);
+        listener->OnBufferedEndTimeChanged = std::move(cbs->OnBufferedEndTimeChanged);
+        listener->OnEnded = std::move(cbs->OnEnded);
+        listener->OnVideoSizeChanged = std::move(cbs->OnVideoSizeChanged);
+        h->AddListener(std::move(listener));
+    };
+    return vtable;
+}
+
+void DefaultOnFullScreenVideoOverlayEnter(
+    const std::function<void(void*, void*, std::function<void(void*)>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    CHECK_NULL_VOID(callback);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+
+    auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenVideoOverlayEnterEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+
+    auto handler = eventInfo->GetHandler();
+    auto vtable = CreateFullScreenVideoOverlayHandlerVTable();
+
+    auto* handlerPtr = new Ace::RefPtr<Ace::FullScreenVideoOverlayHandler>(handler);
+    auto* wrapper = new NWeb::FullScreenVideoOverlayHandlerWrapper(handlerPtr, vtable);
+    auto* handlerPeer = reinterpret_cast<void*>(wrapper);
+    auto* mediaInfoPeer = new std::string(eventInfo->GetMediaInfo());
+
+    auto releaseFunc = [&handlerPeer, &mediaInfoPeer](
+        void* peer) mutable {
+        if (handlerPeer == peer) {
+            auto* w = static_cast<NWeb::FullScreenVideoOverlayHandlerWrapper*>(peer);
+            delete w;
+            handlerPeer = nullptr;
+        } else if (mediaInfoPeer == peer) {
+            delete static_cast<std::string*>(mediaInfoPeer);
+            mediaInfoPeer = nullptr;
+        }
+    };
+
+    callback(handlerPeer, mediaInfoPeer, std::move(releaseFunc));
 }
 
 void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& arkCallback,

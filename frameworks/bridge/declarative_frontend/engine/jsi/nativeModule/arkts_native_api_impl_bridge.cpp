@@ -4859,6 +4859,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetKeyboardAppearance));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyboardAppearance"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetKeyboardAppearance));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableFullscreenVideoOverlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableFullscreenVideoOverlay));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableFullscreenVideoOverlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableFullscreenVideoOverlay));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

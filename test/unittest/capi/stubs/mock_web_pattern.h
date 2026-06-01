@@ -57,6 +57,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DatabaseAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FullScreenVideoOverlay, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MultiWindowAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
@@ -216,6 +217,7 @@ private:
     void OnDatabaseAccessEnabledUpdate(bool) {}
     void OnMetaViewportUpdate(bool) {}
     void OnMediaPlayGestureAccessUpdate(bool) {}
+    void OnFullScreenVideoOverlayUpdate(bool) {}
     void OnMultiWindowAccessEnabledUpdate(bool) {}
     void OnOverlayScrollbarEnabledUpdate(bool) {}
     void OnBlockNetworkUpdate(bool) {}

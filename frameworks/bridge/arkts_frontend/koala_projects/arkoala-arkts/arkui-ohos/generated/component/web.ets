@@ -3325,6 +3325,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnInputmethodAttached(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableFullscreenVideoOverlayAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableFullscreenVideoOverlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -4410,6 +4422,9 @@ export interface WebAttribute extends CommonMethod {
     onInputmethodAttached(value: OnInputmethodAttachedCallback | undefined): this {
         throw new Error('Unimplemented method onInputmethodAttached')
     }
+    enableFullscreenVideoOverlay(value: boolean | undefined): this {
+        throw new Error('Unimplemented method enableFullscreenVideoOverlay')
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error('Unimplemented method registerNativeEmbedRule')
     }
@@ -5274,6 +5289,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     public onInputmethodAttached(value: OnInputmethodAttachedCallback | undefined): this {
         const value_casted = value as (OnInputmethodAttachedCallback | undefined)
         this.getPeer()?.setOnInputmethodAttachedAttribute(value_casted)
+        return this
+    }
+    public enableFullscreenVideoOverlay(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableFullscreenVideoOverlayAttribute(value_casted)
         return this
     }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {

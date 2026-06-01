@@ -523,6 +523,28 @@ private:
     CompletionHandler completionHandler_;
 };
 
+class FullScreenVideoOverlayHandlerOhos : public FullScreenVideoOverlayHandler {
+    DECLARE_ACE_TYPE(FullScreenVideoOverlayHandlerOhos, FullScreenVideoOverlayHandler);
+
+public:
+    explicit FullScreenVideoOverlayHandlerOhos(
+        const WeakPtr<WebDelegate>& delegate, const WeakPtr<NG::FrameNode> webNode)
+        : delegate_(delegate), webNode_(webNode)
+    {}
+
+    void SetVideoSurface(std::string surfaceId) override;
+    void RequestMediaControl(int32_t action, std::string param) override;
+    void AddListener(std::shared_ptr<VideoPlayerListener> listener) override;
+    WeakPtr<NG::FrameNode> GetWebNode() override
+    {
+        return webNode_;
+    }
+
+private:
+    WeakPtr<WebDelegate> delegate_;
+    WeakPtr<NG::FrameNode> webNode_;
+};
+
 class DataResubmittedOhos : public DataResubmitted {
     DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted);
 
@@ -1223,6 +1245,7 @@ public:
     void UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port);
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
+    void UpdateFullScreenVideoOverlayEnable(bool isNeedOverlay);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
     void UpdateAllowWindowOpenMethod(bool isAllowWindowOpenMethod);
     void UpdateWebCursiveFont(const std::string& cursiveFontFamily);
@@ -1360,6 +1383,15 @@ public:
     void OnReceivedTitle(const std::string& title, bool isRealTitle = false);
     void ExitFullScreen();
     void OnFullScreenExit();
+    void OnFullScreenVideoOverlayEnter(const char* mediaInfo);
+    void OnVideoStatusChanged(const int action, const std::map<std::string, std::string> &param);
+    void HandleVideoSizeChanged(const std::map<std::string, std::string>& param);
+    void SetVideoSurface(std::string surfaceId);
+    void RequestMediaControl(int32_t action, std::string param);
+    void AddListener(std::shared_ptr<VideoPlayerListener> listener)
+    {
+        videoPlayerListener_ = std::move(listener);
+    }
     void OnGeolocationPermissionsHidePrompt();
     void OnGeolocationPermissionsShowPrompt(
         const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback);
@@ -2017,6 +2049,8 @@ private:
     std::string lastSelectionText_ = "";
     // update when arkui reports to the application side.
     std::string lastPostSelectionText_ = "";
+
+    std::shared_ptr<VideoPlayerListener> videoPlayerListener_;
 #endif
 };
 
