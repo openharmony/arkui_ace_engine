@@ -736,8 +736,6 @@ ArkUI_ErrorCode OH_ArkUI_AddSupportedUIStates(ArkUI_NodeHandle node, int32_t uiS
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID,
         "OH_ArkUI_AddSupportedUIStates", "Node parameter is null");
-    CHECK_NULL_RETURN_WITH_MESSAGE(statesChangeHandler, ARKUI_ERROR_CODE_PARAM_INVALID,
-        "OH_ArkUI_AddSupportedUIStates", "StatesChangeHandler parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->addSupportedUIStates(node->uiNodeHandle, uiStates,
         reinterpret_cast<void*>(statesChangeHandler), excludeInner, userData);
