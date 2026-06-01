@@ -908,6 +908,7 @@ HWTEST_F(FocusHubTestNg, FocusToHeadOrTailChild001, TestSize.Level1)
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
+    
     focusHub->SetAllowedLoop(false);
     focusHub->SetCurrentFocus(true);
     auto res = focusHub->FocusToHeadOrTailChild(true);
@@ -935,6 +936,7 @@ HWTEST_F(FocusHubTestNg, FocusToHeadOrTailChild002, TestSize.Level1)
     eventHub->AttachHost(frameNode);
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
+
     auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
         AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
@@ -945,6 +947,7 @@ HWTEST_F(FocusHubTestNg, FocusToHeadOrTailChild002, TestSize.Level1)
     frameNode->children_.push_back(frameNode1);
     ASSERT_TRUE(focusHub->IsFocusableNode());
     ASSERT_TRUE(focusHub->IsFocusableScope());
+
     focusHub->tabStop_ = true;
     focusHub->focusDepend_ = FocusDependence::AUTO;
     EXPECT_TRUE(focusHub->FocusToHeadOrTailChild(true));
@@ -1035,14 +1038,17 @@ HWTEST_F(FocusHubTestNg, GetUnfocusableParentFocusNode001, TestSize.Level1)
     eventHub->AttachHost(frameNode);
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
+
     auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
         AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
+
     auto focusHub1 = frameNode1->GetFocusHub();
     focusHub->focusStyleType_ = FocusStyleType::CUSTOM_REGION;
     focusHub->focusType_ = FocusType::SCOPE;
     frameNode1->parent_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     frameNode->children_.push_back(frameNode1);
+
     auto res = focusHub->GetUnfocusableParentFocusNode();
     WeakPtr<FocusHub> FocusHub2 = nullptr;
     EXPECT_EQ(res, FocusHub2);
