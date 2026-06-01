@@ -50,25 +50,8 @@ thread_local panda::Global<panda::FunctionRef> JsiClass<C>::classFunction_;
 template<typename C>
 void JsiClass<C>::Declare(const char* name)
 {
-    className_ = name;
-    for (auto& [name, val] : staticFunctions_) {
-        val.FreeGlobalHandleAddr();
-    }
-    staticFunctions_.clear();
-    for (auto& [name, val] : customFunctions_) {
-        val.FreeGlobalHandleAddr();
-    }
-    customFunctions_.clear();
-    for (auto& [name, val] : customGetFunctions_) {
-        val.FreeGlobalHandleAddr();
-    }
-    customGetFunctions_.clear();
-    for (auto& [name, val] : customSetFunctions_) {
-        val.FreeGlobalHandleAddr();
-    }
-    customSetFunctions_.clear();
-    classFunction_.FreeGlobalHandleAddr();
-    classFunction_.Empty();
+    JsiClassBase::DeclareImpl(name, className_, staticFunctions_, customFunctions_, customGetFunctions_,
+        customSetFunctions_, classFunction_);
 }
 
 template<typename C>
@@ -98,9 +81,7 @@ void JsiClass<C>::CustomMethod(
 template<typename C>
 void JsiClass<C>::CustomMethod(const char* name, FunctionCallback callback)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    customFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback)));
+    JsiClassBase::AddCustomMethodImpl(name, callback, customFunctions_);
 }
 
 template<typename C>
@@ -172,19 +153,14 @@ template<typename C>
 void JsiClass<C>::StaticMethod(
     const char* name, StaticFunctionBinding<void, const JSCallbackInfo&>* staticFunctionBinding)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    staticFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(
-                  vm, panda::FunctionRef::New(vm, JSStaticMethodCallback, nullptr, (void*)staticFunctionBinding)));
+    JsiClassBase::AddStaticMethodJSImpl(
+        name, staticFunctionBinding, staticFunctions_, JSStaticMethodCallback);
 }
 
 template<typename C>
 void JsiClass<C>::CustomStaticMethod(const char* name, FunctionCallback callback)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    staticFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback)));
+    JsiClassBase::AddCustomStaticMethodImpl(name, callback, staticFunctions_);
 }
 
 template<typename C>
@@ -201,33 +177,8 @@ template<typename C>
 void JsiClass<C>::Bind(BindingTarget t, FunctionCallback ctor)
 {
     constructor_ = ctor;
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    LocalScope scope(vm);
-    classFunction_ = panda::Global<panda::FunctionRef>(
-        vm, panda::FunctionRef::NewClassFunction(vm, ConstructorInterceptor, nullptr, nullptr));
-    classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
-    auto prototype = Local<ObjectRef>(classFunction_->GetFunctionPrototype(vm));
-    prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
-        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
-    for (const auto& [name, val] : staticFunctions_) {
-        classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
-    }
-    for (const auto& [name, val] : customFunctions_) {
-        prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
-    }
-
-    for (const auto& [nameGet, valGet] : customGetFunctions_) {
-        for (const auto& [nameSet, valSet] : customSetFunctions_) {
-            if (nameGet == nameSet) {
-                prototype->SetAccessorProperty(
-                    vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()), valGet.ToLocal(), valSet.ToLocal());
-            }
-        }
-    }
-
-    t->Set(vm, panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName()),
-        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
+    JsiClassBase::BindImpl(t, ThisJSClass::JSName(), className_, ConstructorInterceptor, staticFunctions_,
+        customFunctions_, customGetFunctions_, customSetFunctions_, classFunction_);
 }
 
 template<typename C>

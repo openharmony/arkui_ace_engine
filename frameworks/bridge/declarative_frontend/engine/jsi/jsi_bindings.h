@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_BINDINGS_H
 
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_class_base.h"
 
 namespace __detail__ {
 
