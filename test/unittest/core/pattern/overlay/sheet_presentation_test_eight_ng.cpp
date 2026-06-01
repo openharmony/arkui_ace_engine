@@ -943,4 +943,1298 @@ HWTEST_F(SheetPresentationTestEightNg, UpdateSheetBackgroundColor002, TestSize.L
 
     SheetPresentationTestEightNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate001
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate when isOnDisappearing_ is false, no translation should be set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate001, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->isOnDisappearing_ = false;
+    sheetPattern->pageHeight_ = 800.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate002
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_BOTTOM type and isOnDisappearing_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate002, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1000.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate003
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_BOTTOMLANDSPACE type and isOnDisappearing_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate003, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOMLANDSPACE);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOMLANDSPACE;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1200.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1200.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate004
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CENTER type and isOnDisappearing_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate004, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1500.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1500.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate005
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER type, modalTransition DEFAULT
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate005, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 600.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 600.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate006
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER type, modalTransition NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate006, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::NONE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 600.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate007
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER type, modalTransition ALPHA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate007, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::ALPHA;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 600.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate008
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_POPUP type and isOnDisappearing_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate008, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_POPUP);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_POPUP;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate009
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_SIDE type and isOnDisappearing_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate009, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_SIDE);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_SIDE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate010
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_BOTTOM_OFFSET type and isOnDisappearing_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate010, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM_OFFSET);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM_OFFSET;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_OFFSET;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate011
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER type, no modalTransition set (default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate011, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 500.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 500.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate012
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_MINIMIZE type and isOnDisappearing_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate012, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_MINIMIZE);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_MINIMIZE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_MINIMIZE;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate013
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_BOTTOM type, pageHeight_ is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate013, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 0.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate014
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CENTER type, pageHeight_ is large value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate014, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 2000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 2000.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate015
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER, geometryNode height is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate015, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 0.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate016
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER, geometryNode height is large
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate016, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 1800.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1800.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate017
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_BOTTOMLANDSPACE, pageHeight_ is negative (edge case)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate017, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOMLANDSPACE);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOMLANDSPACE;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = -100.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), -100.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate018
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate transition from false to true state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate018, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->pageHeight_ = 800.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->isOnDisappearing_ = false;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 800.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate019
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_BOTTOM_FREE_WINDOW type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate019, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM_FREE_WINDOW);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate020
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate multiple calls with different sheetType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate020, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 900.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 900.0f);
+
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 900.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate021
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with x and z translation values should be zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate021, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1000.0f);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate022
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER, x and z should be zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate022, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 750.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 750.0f);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate023
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with sheetStyle having other properties set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate023, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    sheetStyle.backgroundColor = Color::BLUE;
+    sheetStyle.maskColor = Color::BLACK;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1100.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1100.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate024
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER and sheetStyle with backgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate024, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    sheetStyle.backgroundColor = Color::RED;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(600.0f, 400.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 400.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate025
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate after changing pageHeight_ multiple times
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate025, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->pageHeight_ = 500.0f;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 500.0f);
+
+    sheetPattern->pageHeight_ = 1500.0f;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1500.0f);
+
+    sheetPattern->pageHeight_ = 800.0f;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 800.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate026
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with geometryNode having different width
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate026, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(200.0f, 300.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 300.0f);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate027
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with isOnDisappearing_ toggling
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate027, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1000.0f);
+
+    sheetPattern->isOnDisappearing_ = false;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1000.0f);
+
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1200.0f;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1200.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate028
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with all bottom-style sheet types in sequence
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate028, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    std::vector<SheetType> bottomTypes = {
+        SheetType::SHEET_BOTTOM,
+        SheetType::SHEET_BOTTOMLANDSPACE,
+        SheetType::SHEET_CENTER
+    };
+
+    for (const auto& sheetType : bottomTypes) {
+        auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+        ASSERT_NE(layoutProperty, nullptr);
+        SheetStyle sheetStyle;
+        sheetStyle.sheetType = sheetType;
+        layoutProperty->propSheetStyle_ = sheetStyle;
+        sheetPattern->sheetType_ = sheetType;
+
+        sheetPattern->ReachToBottomWhenCloseAndRotate();
+        ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+        EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1000.0f);
+        EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
+        EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
+    }
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate029
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER multiple modalTransition values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate029, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 600.0f));
+
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    SheetStyle sheetStyleDefault;
+    sheetStyleDefault.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyleDefault.modalTransition = ModalTransition::DEFAULT;
+    layoutProperty->propSheetStyle_ = sheetStyleDefault;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 600.0f);
+
+    SheetStyle sheetStyleNone;
+    sheetStyleNone.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyleNone.modalTransition = ModalTransition::NONE;
+    layoutProperty->propSheetStyle_ = sheetStyleNone;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 600.0f);
+
+    SheetStyle sheetStyleAlpha;
+    sheetStyleAlpha.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyleAlpha.modalTransition = ModalTransition::ALPHA;
+    layoutProperty->propSheetStyle_ = sheetStyleAlpha;
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 600.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate030
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_BOTTOMLANDSPACE special pageHeight values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate030, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOMLANDSPACE);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOMLANDSPACE;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    std::vector<float> pageHeights = { 0.0f, 100.0f, 500.0f, 1000.0f, 2000.0f, -50.0f };
+
+    for (const auto& pageHeight : pageHeights) {
+        sheetPattern->pageHeight_ = pageHeight;
+        sheetPattern->ReachToBottomWhenCloseAndRotate();
+        ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+        EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), pageHeight);
+    }
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate031
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate boundary condition - very small pageHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate031, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_BOTTOM);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate032
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate boundary condition - very large pageHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate032, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CENTER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 10000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 10000.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate033
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER boundary - very small height
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate033, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 1.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 1.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate034
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with SHEET_CONTENT_COVER boundary - very large height
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate034, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_CONTENT_COVER);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->isOnDisappearing_ = true;
+
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(800.0f, 10000.0f));
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    sheetPattern->ReachToBottomWhenCloseAndRotate();
+
+    ASSERT_NE(renderContext->GetTransformTranslate(), std::nullopt);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 10000.0f);
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ReachToBottomWhenCloseAndRotate035
+ * @tc.desc: Test ReachToBottomWhenCloseAndRotate with all non-bottom types that should not translate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestEightNg, ReachToBottomWhenCloseAndRotate035, TestSize.Level1)
+{
+    SheetPresentationTestEightNg::SetUpTestCase();
+
+    auto sheetNode = CreateSheetNode(SheetType::SHEET_POPUP);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    sheetPattern->isOnDisappearing_ = true;
+    sheetPattern->pageHeight_ = 1000.0f;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    std::vector<SheetType> nonTranslateTypes = {
+        SheetType::SHEET_POPUP,
+        SheetType::SHEET_SIDE,
+        SheetType::SHEET_BOTTOM_OFFSET,
+        SheetType::SHEET_MINIMIZE,
+        SheetType::SHEET_BOTTOM_FREE_WINDOW
+    };
+
+    for (const auto& sheetType : nonTranslateTypes) {
+        auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+        ASSERT_NE(layoutProperty, nullptr);
+        SheetStyle sheetStyle;
+        sheetStyle.sheetType = sheetType;
+        layoutProperty->propSheetStyle_ = sheetStyle;
+        sheetPattern->sheetType_ = sheetType;
+
+        sheetPattern->ReachToBottomWhenCloseAndRotate();
+        EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+    }
+
+    SheetPresentationTestEightNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG
