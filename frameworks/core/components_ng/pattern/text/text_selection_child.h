@@ -30,8 +30,8 @@ public:
 
     std::u16string GetSelectionText() override;
     RefPtr<FrameNode> GetHostNode() const override;
-    std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
-    std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
+    std::optional<RectF> GetFirstHandleRect() override;
+    std::optional<RectF> GetSecondHandleRect() override;
     RectF GetSelectionArea(const RefPtr<FrameNode>& targetNode, SelectRectsType pos) override;
     SelectionIndexRange GetSelectionIndexes() const override;
     SelectionIndexRange GetSelectionIndexesByPoints(const OffsetF& firstPoint, const OffsetF& secondPoint) override;
@@ -39,7 +39,7 @@ public:
     void SelectTextByIndex(int32_t startIndex, int32_t endIndex) override;
     void SelectAll() override;
     void UpdateSelectionHandleInfo() override;
-    bool BetweenSelectedPosition(const Offset& globalOffset) const override;
+    bool BetweenSelectedPosition(const Offset& globalOffset) override;
     bool IsSelectAll() const override;
     bool HasSelectableText() const override;
     bool CanSelect() const override;
@@ -55,12 +55,20 @@ public:
     void ReportSelectionText() override;
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex) override;
     void OnContainerPropertyUpdate(uint32_t flags) override;
+    void UpdateChildHandleGlobalOffset() override;
+    OffsetF GetChildHandleGlobalOffset() const override;
 
 private:
     Offset GetMovingHandleReferenceOffset(const OffsetF& point) const;
     bool GetRenderClipValue() const;
+    bool CheckChildHasTransformAttr() const;
+    bool HasOrUpdateRenderTransform();
+    void UpdateTransformFlag();
+    OffsetF GetChildPaintOffsetWithoutTransform() const;
 
     WeakPtr<TextPattern> pattern_;
+    OffsetF handleGlobalOffset_;
+    bool childHasTransform_ = false;
 };
 } // namespace OHOS::Ace::NG
 

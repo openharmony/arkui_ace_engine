@@ -16,14 +16,19 @@
 #include "core/components_ng/pattern/selection_container/selection_container_pattern.h"
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
+#include "base/geometry/ng/point_t.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/event/key_event.h"
+#include "core/gestures/drag_constants.h"
+#include "core/gestures/drag_event.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -75,30 +80,6 @@ CollectedCopyData CollectAllowedCopyChildren(const std::vector<WeakPtr<Selection
 }
 } // namespace
 
-class SelectionOverlayTextHost : public TextBase {
-    DECLARE_ACE_TYPE(SelectionOverlayTextHost, TextBase);
-
-public:
-    explicit SelectionOverlayTextHost(const WeakPtr<SelectionContainerPattern>& pattern) : pattern_(pattern) {}
-    ~SelectionOverlayTextHost() override = default;
-
-    bool BetweenSelectedPosition(const Offset& globalOffset) override
-    {
-        auto pattern = pattern_.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->BetweenSelectedPosition(globalOffset);
-    }
-
-    RefPtr<FrameNode> GetClientHost() const override
-    {
-        auto pattern = pattern_.Upgrade();
-        CHECK_NULL_RETURN(pattern, nullptr);
-        return pattern->GetHost();
-    }
-
-private:
-    WeakPtr<SelectionContainerPattern> pattern_;
-};
 
 std::u16string SelectionContainerPattern::GetSelectionText()
 {
@@ -131,13 +112,9 @@ RefPtr<FrameNode> SelectionContainerPattern::GetHostNode() const
 
 RefPtr<SelectionSelectOverlay> SelectionContainerPattern::GetOrCreateSelectionSelectOverlay()
 {
-    if (!selectionOverlayTextHost_) {
-        selectionOverlayTextHost_ = AceType::MakeRefPtr<SelectionOverlayTextHost>(WeakClaim(this));
-    }
     if (!selectionSelectOverlay_) {
-        CHECK_NULL_RETURN(selectionOverlayTextHost_, nullptr);
         selectionSelectOverlay_ = AceType::MakeRefPtr<SelectionSelectOverlay>(
-            WeakPtr<TextBase>(selectionOverlayTextHost_), WeakClaim(this));
+            WeakPtr<TextBase>(Claim(this)), WeakClaim(this));
     }
     return selectionSelectOverlay_;
 }
@@ -189,6 +166,158 @@ bool SelectionContainerPattern::IsUsingMouse()
     return sourceType_ == SourceType::MOUSE;
 }
 
+void SelectionContainerPattern::OnSelectionMovingChildChange(const RefPtr<SelectionContainerChild>& child)
+{
+    UpdateScrollableParentByChild(child);
+}
+
+void SelectionContainerPattern::ResetScrollableParentOnScrollStop(bool isStopAutoScroll)
+{
+    if (!isStopAutoScroll) {
+        return;
+    }
+    auto scrollablePattern = scrollableParent_.Upgrade();
+    if (isTriggerParentToScroll_ && scrollablePattern) {
+        auto notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+        scrollablePattern->HandleOnDragStatusCallback(DragEventType::DROP, notifyDragEvent);
+    }
+    scrollableParent_.Reset();
+    scrollableParentIsInsideContainer_ = false;
+    isTriggerParentToScroll_ = false;
+}
+
+void SelectionContainerPattern::UpdateScrollableParentByChild(const RefPtr<SelectionContainerChild>& child)
+{
+    CHECK_NULL_VOID(child);
+    auto result = child->FindNearestScrollable();
+    scrollableParent_ = result.scrollable;
+    scrollableParentIsInsideContainer_ = result.isInsideContainer;
+}
+
+bool SelectionContainerPattern::IsPointInScrollableViewport(
+    const RefPtr<ScrollablePattern>& scrollablePattern, const OffsetF& globalPoint)
+{
+    CHECK_NULL_RETURN(scrollablePattern, false);
+    auto scrollableHost = scrollablePattern->GetHost();
+    CHECK_NULL_RETURN(scrollableHost, false);
+    auto scrollableFrameRect = scrollableHost->GetPaintRectWithTransform();
+    return scrollableFrameRect.IsInRegion(PointF(globalPoint.GetX(), globalPoint.GetY()));
+}
+
+bool SelectionContainerPattern::CheckScrollableParentSize(const RefPtr<ScrollablePattern>& scrollablePattern)
+{
+    CHECK_NULL_RETURN(scrollablePattern, false);
+    auto scrollAxis = scrollablePattern->GetAxis();
+    auto scrollableHost = scrollablePattern->GetHost();
+    CHECK_NULL_RETURN(scrollableHost, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto scrollableFrameRect = scrollableHost->GetPaintRectWithTransform();
+    auto hostRect = host->GetPaintRectWithTransform();
+    auto hostSize = scrollAxis == Axis::HORIZONTAL ? hostRect.Width() : hostRect.Height();
+    auto scrollableParentSize = scrollAxis == Axis::HORIZONTAL ? scrollableFrameRect.Width() :
+        scrollableFrameRect.Height();
+    return GreatNotEqual(hostSize, scrollableParentSize);
+}
+
+bool SelectionContainerPattern::IsTriggerParentToScroll()
+{
+    return isTriggerParentToScroll_;
+}
+
+bool SelectionContainerPattern::HasScrollableParent()
+{
+    return scrollableParent_.Upgrade() != nullptr;
+}
+
+void SelectionContainerPattern::TriggerScrollableParentToScroll(const OffsetF& globalPoint, bool isStopAutoScroll)
+{
+    auto scrollablePattern = scrollableParent_.Upgrade();
+    auto scrollableParentIsInsideContainer = scrollableParentIsInsideContainer_;
+    if (!isStopAutoScroll && (!scrollablePattern || !IsPointInScrollableViewport(scrollablePattern, globalPoint))) {
+        UpdateScrollableParentByChild(GetSelectionMovingChild());
+        scrollablePattern = scrollableParent_.Upgrade();
+        scrollableParentIsInsideContainer = scrollableParentIsInsideContainer_;
+    }
+    if (!scrollablePattern) {
+        ResetScrollableParentOnScrollStop(isStopAutoScroll);
+        return;
+    }
+    auto scrollAxis = scrollablePattern->GetAxis();
+    if (!scrollablePattern->IsScrollable() || (scrollAxis != Axis::VERTICAL && scrollAxis != Axis::HORIZONTAL)) {
+        ResetScrollableParentOnScrollStop(isStopAutoScroll);
+        return;
+    }
+    if (!scrollableParentIsInsideContainer && !CheckScrollableParentSize(scrollablePattern)) {
+        ResetScrollableParentOnScrollStop(isStopAutoScroll);
+        return;
+    }
+    auto notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+    notifyDragEvent->SetX(globalPoint.GetX());
+    notifyDragEvent->SetY(globalPoint.GetY());
+    scrollablePattern->HandleOnDragStatusCallback(
+        isStopAutoScroll ? DragEventType::DROP : DragEventType::MOVE, notifyDragEvent);
+    isTriggerParentToScroll_ = !isStopAutoScroll;
+    ResetScrollableParentOnScrollStop(isStopAutoScroll);
+}
+
+void SelectionContainerPattern::EnableMouseLeftSelectionTracking(const OffsetF& globalPoint)
+{
+    if (!HasScrollableParent()) {
+        return;
+    }
+    lastMouseLeftGlobalPoint_ = globalPoint;
+    RegisterMouseLeftSelectionNodeChangeListener();
+}
+
+void SelectionContainerPattern::StopMouseLeftSelectionTracking()
+{
+    lastMouseLeftGlobalPoint_.reset();
+    UnregisterMouseLeftSelectionNodeChangeListener();
+}
+
+void SelectionContainerPattern::RegisterMouseLeftSelectionNodeChangeListener()
+{
+    if (mouseLeftSelectionNodeChangeListenerRegistered_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RegisterNodeChangeListener();
+    mouseLeftSelectionNodeChangeListenerRegistered_ = true;
+}
+
+void SelectionContainerPattern::UnregisterMouseLeftSelectionNodeChangeListener()
+{
+    if (!mouseLeftSelectionNodeChangeListenerRegistered_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->UnregisterNodeChangeListener();
+    mouseLeftSelectionNodeChangeListenerRegistered_ = false;
+}
+
+void SelectionContainerPattern::RefreshMouseLeftSelectionOnFrameNodeChanged()
+{
+    CHECK_NULL_VOID(mouseLeftSelectionNodeChangeListenerRegistered_);
+    CHECK_NULL_VOID(lastMouseLeftGlobalPoint_.has_value());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    NG::PointF localPoint(lastMouseLeftGlobalPoint_->GetX(), lastMouseLeftGlobalPoint_->GetY());
+    NG::NGGestureRecognizer::Transform(localPoint, WeakClaim(Referenced::RawPtr(host)), true);
+    HandleSelectionUpdate(OffsetF(localPoint.GetX(), localPoint.GetY()));
+}
+
+void SelectionContainerPattern::UpdateMovingChildForHandle(bool isFirstHandle)
+{
+    auto movingChild = isFirstHandle ? GetSelectionStartChild() : GetSelectionEndChild();
+    if (!movingChild) {
+        movingChild = GetSelectionMovingChild();
+    }
+    UpdateSelectionMovingChild(movingChild);
+}
+
 void SelectionContainerPattern::UpdateHandleColor()
 {
     auto overlay = GetOrCreateSelectionSelectOverlay();
@@ -214,8 +343,13 @@ void SelectionContainerPattern::FireOnCopy(const std::u16string& text)
     eventHub->FireOnCopy(text);
 }
 
-void SelectionContainerPattern::OnSelectionRangeChanged(const std::vector<std::u16string>& selectedTexts)
+void SelectionContainerPattern::OnSelectionRangeChanged(const std::vector<std::u16string>& selectedTexts,
+    const std::vector<ChildSelectionInfo>& selectionState)
 {
+    if (selectionState == lastSelectionState_) {
+        return;
+    }
+    lastSelectionState_ = selectionState;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<SelectionContainerEventHub>();
@@ -563,6 +697,7 @@ void SelectionContainerPattern::HandleOnSelectAll()
     RefPtr<SelectionContainerChild> firstSelectedChild;
     RefPtr<SelectionContainerChild> lastSelectedChild;
     std::vector<std::u16string> selectedTexts;
+    std::vector<ChildSelectionInfo> selectionState;
     for (const auto& weakChild : childList) {
         auto child = weakChild.Upgrade();
         CHECK_NULL_CONTINUE(child);
@@ -576,13 +711,18 @@ void SelectionContainerPattern::HandleOnSelectAll()
             continue;
         }
         selectedTexts.push_back(std::move(childSelectionText));
+        auto childHostNode = child->GetHostNode();
+        if (childHostNode) {
+            auto indexes = child->GetSelectionIndexes();
+            selectionState.push_back({ childHostNode->GetId(), indexes.startIndex, indexes.endIndex });
+        }
 
         if (!firstSelectedChild) {
             firstSelectedChild = child;
         }
         lastSelectedChild = child;
     }
-    OnSelectionRangeChanged(selectedTexts);
+    OnSelectionRangeChanged(selectedTexts, selectionState);
     selectionStartChild_ = firstSelectedChild;
     selectionEndChild_ = lastSelectedChild;
     if (firstSelectedChild) {
@@ -756,6 +896,60 @@ void SelectionContainerPattern::CopySelectionMenuParams(SelectOverlayInfo& selec
         CHECK_NULL_VOID(pattern);
         pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_HIDE, menuParams);
     };
+}
+
+FrameNodeChangeInfoFlag SelectionContainerPattern::CollectDescendantChangeFlags()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FRAME_NODE_CHANGE_INFO_NONE);
+    auto hostId = host->GetId();
+    for (const auto& weakChild : GetChildList()) {
+        auto child = weakChild.Upgrade();
+        CHECK_NULL_CONTINUE(child);
+        auto childHost = child->GetHostNode();
+        CHECK_NULL_CONTINUE(childHost);
+        auto flag = CollectFlagsFromChildToHost(childHost, hostId);
+        if (flag != FRAME_NODE_CHANGE_INFO_NONE) {
+            return flag;
+        }
+    }
+    return FRAME_NODE_CHANGE_INFO_NONE;
+}
+
+FrameNodeChangeInfoFlag SelectionContainerPattern::CollectFlagsFromChildToHost(
+    const RefPtr<FrameNode>& childHost, int32_t containerId)
+{
+    auto flag = childHost->GetChangeInfoFlag();
+    auto current = childHost->GetAncestorNodeOfFrame(true);
+    while (current) {
+        if (current->GetId() == containerId) {
+            break;
+        }
+        flag |= current->GetChangeInfoFlag();
+        if (flag == FRAME_NODE_CHANGE_ALL) {
+            return flag;
+        }
+        current = current->GetAncestorNodeOfFrame(true);
+    }
+    return flag;
+}
+
+OffsetF SelectionContainerPattern::GetContainerPaintOffsetWithTransform() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    return host->GetPaintRectOffsetNG(false, true) - rootOffset;
+}
+
+void SelectionContainerPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    if (selectionSelectOverlay_ && selectionSelectOverlay_->SelectOverlayIsOn()) {
+        selectionSelectOverlay_->OnAncestorNodeChanged(flag);
+    }
+    RefreshMouseLeftSelectionOnFrameNodeChanged();
 }
 
 } // namespace OHOS::Ace::NG

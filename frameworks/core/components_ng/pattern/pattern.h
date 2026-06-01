@@ -678,6 +678,11 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
+    virtual FrameNodeChangeInfoFlag CollectDescendantChangeFlags()
+    {
+        return FRAME_NODE_CHANGE_INFO_NONE;
+    }
+
     virtual uint32_t GetWindowPatternType() const
     {
         return 0;

@@ -563,10 +563,15 @@ void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& care
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
-    auto selectOverlay = GetSelectOverlay();
-    CHECK_NULL_VOID(selectOverlay);
     parentGlobalOffset_ = GetParentGlobalOffset();
-    auto textContentGlobalOffset = selectOverlay->GetHandleGlobalOffset() + contentRect_.GetOffset();
+    OffsetF textContentGlobalOffset;
+    if (selectionChild_) {
+        textContentGlobalOffset = selectionChild_->GetChildHandleGlobalOffset() + contentRect_.GetOffset();
+    } else {
+        auto selectOverlay = GetSelectOverlay();
+        CHECK_NULL_VOID(selectOverlay);
+        textContentGlobalOffset = selectOverlay->GetHandleGlobalOffset() + contentRect_.GetOffset();
+    }
     auto paragraphPaintOffset = textContentGlobalOffset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
@@ -3182,14 +3187,6 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     } else {
         HandleMouseLeftPressForLocal(textOffset);
     }
-    // auto scroll.
-    auto selectOverlay = GetSelectOverlay();
-    CHECK_NULL_VOID(selectOverlay);
-    scrollableParent_ = selectOverlay->FindScrollableParent();
-    auto host = GetHost();
-    if (scrollableParent_.Upgrade() && host) {
-        host->RegisterNodeChangeListener();
-    }
 }
 
 void TextPattern::CheckPressedSpanPosition(const Offset& textOffset)
@@ -3220,6 +3217,22 @@ void TextPattern::SetMouseMenuOffset(const OffsetF& mouseMenuOffset)
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->SetMouseMenuOffset(mouseMenuOffset);
     }
+}
+
+bool TextPattern::IsTriggerParentToScroll()
+{
+    if (selectionChild_) {
+        return selectionChild_->IsTriggerParentToScroll();
+    }
+    return selectOverlay_ && selectOverlay_->IsTriggerParentToScroll();
+}
+
+bool TextPattern::HasScrollableParent()
+{
+    if (selectionChild_) {
+        return selectionChild_->HasScrollableParent();
+    }
+    return scrollableParent_.Upgrade() != nullptr;
 }
 
 void TextPattern::SetSelectionHoldCallback()
@@ -3274,6 +3287,13 @@ void TextPattern::HandleMouseLeftPressForLocal(const Offset& textOffset)
         auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
         textSelector_.Update(start, start);
     }
+    auto selectOverlay = GetSelectOverlay();
+    CHECK_NULL_VOID(selectOverlay);
+    scrollableParent_ = selectOverlay->FindScrollableParent();
+    auto host = GetHost();
+    if (scrollableParent_.Upgrade() && host) {
+        host->RegisterNodeChangeListener();
+    }
 }
 
 void TextPattern::HandleMouseLeftReleaseForLocal(
@@ -3300,7 +3320,9 @@ void TextPattern::HandleMouseLeftReleaseForContainer(
             ResetSelection();
             return;
         }
-        selectionChild_->HandleSelectionUpdate(textOffset);
+        auto globalPoint = info.GetGlobalLocation();
+        selectionChild_->ProcessMouseLeftSelectionUpdate(textOffset,
+            OffsetF(globalPoint.GetX(), globalPoint.GetY()));
         selectionChild_->ProcessMouseLeftRelease(textOffset);
     }
     if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
@@ -3382,15 +3404,19 @@ void TextPattern::ResetMouseReleaseState(const MouseInfo& info)
     ResetMouseLeftPressedState();
     moveOverClickThreshold_ = false;
     mouseUpAndDownPointChange_ = false;
-    // stop auto scroll.
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto selectOverlay = GetSelectOverlay();
-    CHECK_NULL_VOID(selectOverlay);
-    if (host && scrollableParent_.Upgrade() && !SelectOverlayIsOn()) {
-        host->UnregisterNodeChangeListener();
+    if (selectionChild_) {
+        auto globalPoint = info.GetGlobalLocation();
+        selectionChild_->StopMouseSelectionTracking(OffsetF(globalPoint.GetX(), globalPoint.GetY()));
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto selectOverlay = GetSelectOverlay();
+        CHECK_NULL_VOID(selectOverlay);
+        if (host && scrollableParent_.Upgrade() && !SelectOverlayIsOn()) {
+            host->UnregisterNodeChangeListener();
+        }
+        selectOverlay->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), true);
     }
-    selectOverlay->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), true);
     isAutoScrollByMouse_ = false;
 }
 
@@ -3408,15 +3434,18 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
     if (isMousePressed_) {
         mouseStatus_ = MouseStatus::MOVE;
         if (selectionChild_) {
-            selectionChild_->HandleSelectionUpdate(textOffset);
+            auto globalPoint = info.GetGlobalLocation();
+            selectionChild_->ProcessMouseLeftSelectionUpdate(textOffset,
+                OffsetF(globalPoint.GetX(), globalPoint.GetY()));
         } else {
             CHECK_NULL_VOID(pManager_);
             auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
             HandleSelectionChange(textSelector_.baseOffset, end);
+            auto selectOverlay = GetSelectOverlay();
+            CHECK_NULL_VOID(selectOverlay);
+            selectOverlay->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(),
+                false);
         }
-        auto selectOverlay = GetSelectOverlay();
-        CHECK_NULL_VOID(selectOverlay);
-        selectOverlay->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), false);
         auto distance = (textOffset - leftMousePressedOffset_).GetDistance();
         if (distance >= CLICK_THRESHOLD.ConvertToPx()) {
             moveOverClickThreshold_ = true;
@@ -4543,7 +4572,9 @@ std::vector<RectF> TextPattern::GetTextBoxes()
 
 OffsetF TextPattern::GetParentGlobalOffset() const
 {
-    if (selectOverlay_) {
+    if (selectionChild_) {
+        selectionChild_->UpdateChildHandleGlobalOffset();
+    } else if (selectOverlay_) {
         selectOverlay_->UpdateHandleGlobalOffset();
     }
     auto host = GetHost();
@@ -4647,7 +4678,7 @@ void TextPattern::OnModifyDone()
             ParseOriText(textForDisplay_);
         }
         // textForDisplay_ is updated by ParseOriText
-        if (selectOverlay_ && textCache != textForDisplay_ && !selectOverlay_->IsTriggerParentToScroll()) {
+        if ((selectOverlay_ || selectionChild_) && textCache != textForDisplay_ && !IsTriggerParentToScroll()) {
             CloseSelectOverlay();
             ResetSelection();
         }
@@ -8022,7 +8053,7 @@ void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
     if (SelectOverlayIsOn()) {
         selectOverlay_->OnAncestorNodeChanged(flag);
     }
-    if (leftMousePressed_ && mouseStatus_ == MouseStatus::MOVE && scrollableParent_.Upgrade()) {
+    if (leftMousePressed_ && mouseStatus_ == MouseStatus::MOVE && HasScrollableParent()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
@@ -8123,7 +8154,7 @@ void TextPattern::StartGestureSelection(int32_t start, int32_t end, const Offset
 int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
 {
     OffsetF deltaOffset;
-    if (scrollableParent_.Upgrade()) {
+    if (HasScrollableParent()) {
         auto parentGlobalOffset = GetParentGlobalOffset();
         deltaOffset = parentGlobalOffset - parentGlobalOffset_;
     }
@@ -8135,8 +8166,10 @@ int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
 void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
     if (selectionChild_) {
-        auto localOffset = info.GetTouches().front().GetLocalLocation();
-        selectionChild_->HandleSelectionUpdate(localOffset);
+        auto touch = info.GetTouches().front();
+        auto globalPoint = touch.GetGlobalLocation();
+        selectionChild_->ProcessGestureSelectionUpdate(
+            touch.GetLocalLocation(), OffsetF(globalPoint.GetX(), globalPoint.GetY()));
         return;
     }
     if (!HasContent()) {
@@ -8148,7 +8181,7 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
         scrollableParent_.Upgrade(), info.GetTouches().front().GetGlobalLocation(), false);
     auto localOffset = info.GetTouches().front().GetLocalLocation();
     OffsetF deltaPaintOffset;
-    if (selectOverlay->IsTriggerParentToScroll()) {
+    if (IsTriggerParentToScroll()) {
         OffsetF currentPaintOffset = gestureSelectTextPaintOffset_;
         GetPaintOffsetWithoutTransform(currentPaintOffset);
         deltaPaintOffset = gestureSelectTextPaintOffset_ - currentPaintOffset;
@@ -8173,8 +8206,9 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
 void TextPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo)
 {
     if (selectionChild_) {
+        auto globalPoint = locationInfo.GetGlobalLocation();
         auto localOffset = locationInfo.GetLocalLocation();
-        selectionChild_->HandleSelectionEnd(localOffset);
+        selectionChild_->ProcessGestureSelectionEnd(localOffset, OffsetF(globalPoint.GetX(), globalPoint.GetY()));
         return;
     }
     auto selectOverlay = GetSelectOverlay();

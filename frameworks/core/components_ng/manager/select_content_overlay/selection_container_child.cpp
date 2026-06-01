@@ -20,6 +20,7 @@
 #include "core/components_ng/manager/select_content_overlay/selection_container.h"
 #include "core/components_ng/manager/select_content_overlay/selection_container_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -62,6 +63,32 @@ SelectionCopyPayload SelectionContainerChild::GetSelectionCopyPayload()
     payload.plainText = GetSelectionText();
     payload.spanString = GetSelectedSpanString();
     return payload;
+}
+
+ScrollableParentResult SelectionContainerChild::FindNearestScrollable() const
+{
+    auto node = GetHostNode();
+    CHECK_NULL_RETURN(node, {});
+    auto selectionContainer = GetSelectionContainer();
+    if (!selectionContainer) {
+        selectionContainer = GetSelectionContainerFromNode(node);
+    }
+    auto containerNode = selectionContainer ? selectionContainer->GetHostNode() : nullptr;
+    auto parent = node->GetAncestorNodeOfFrame(true);
+    bool passedContainer = false;
+    while (parent) {
+        if (containerNode && parent == containerNode) {
+            passedContainer = true;
+            parent = parent->GetAncestorNodeOfFrame(true);
+            continue;
+        }
+        auto scrollablePattern = parent->GetPattern<ScrollablePattern>();
+        if (scrollablePattern && scrollablePattern->IsScrollable()) {
+            return { scrollablePattern, !passedContainer };
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return {};
 }
 
 void SelectionContainerChild::RegisterChild()
@@ -141,7 +168,7 @@ bool SelectionContainerChild::HandleSelectionUpdate(const Offset& localPoint)
     return selectionContainerManager->HandleSelectionUpdate(selectionContainerId, eventInfo);
 }
 
-bool SelectionContainerChild::HandleSelectionEnd(const Offset& localPoint)
+bool SelectionContainerChild::ProcessGestureSelectionUpdate(const Offset& localPoint, const OffsetF& globalPoint)
 {
     auto node = GetHostNode();
     CHECK_NULL_RETURN(node, false);
@@ -156,15 +183,41 @@ bool SelectionContainerChild::HandleSelectionEnd(const Offset& localPoint)
 
     auto parentContainer = GetSelectionContainer();
     if (parentContainer) {
-        auto handled = parentContainer->ProcessGestureSelectionEnd(eventInfo);
-        return handled;
+        return parentContainer->ProcessGestureSelectionUpdate(eventInfo, globalPoint);
     }
 
     auto selectionContainerManager = GetSelectionContainerManagerFromNode(node);
     CHECK_NULL_RETURN(selectionContainerManager, false);
-    auto handled = selectionContainerManager->ProcessGestureSelectionEnd(selectionContainerId, eventInfo);
-    return handled;
+    auto container = selectionContainerManager->GetSelectionContainer(selectionContainerId);
+    CHECK_NULL_RETURN(container, false);
+    return container->ProcessGestureSelectionUpdate(eventInfo, globalPoint);
 }
+
+bool SelectionContainerChild::ProcessGestureSelectionEnd(const Offset& localPoint, const OffsetF& globalPoint)
+{
+    auto node = GetHostNode();
+    CHECK_NULL_RETURN(node, false);
+    auto selectionContainerId = node->GetSelectionContainerId();
+    if (selectionContainerId <= 0) {
+        return false;
+    }
+
+    SelectionEndEventInfo eventInfo;
+    eventInfo.child = Claim(this);
+    eventInfo.localPoint = OffsetF(localPoint.GetX(), localPoint.GetY());
+
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->ProcessGestureSelectionEnd(eventInfo, globalPoint);
+    }
+
+    auto selectionContainerManager = GetSelectionContainerManagerFromNode(node);
+    CHECK_NULL_RETURN(selectionContainerManager, false);
+    auto container = selectionContainerManager->GetSelectionContainer(selectionContainerId);
+    CHECK_NULL_RETURN(container, false);
+    return container->ProcessGestureSelectionEnd(eventInfo, globalPoint);
+}
+
 
 bool SelectionContainerChild::ProcessMouseLeftRelease(const Offset& localPoint)
 {
@@ -340,6 +393,85 @@ bool SelectionContainerChild::IsUsingMouse()
     return container->IsUsingMouse();
 }
 
+bool SelectionContainerChild::IsTriggerParentToScroll()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->IsTriggerParentToScroll();
+    }
+
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsTriggerParentToScroll();
+}
+
+bool SelectionContainerChild::HasScrollableParent()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->HasScrollableParent();
+    }
+
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_RETURN(container, false);
+    return container->HasScrollableParent();
+}
+
+void SelectionContainerChild::TriggerScrollableParentToScroll(const OffsetF& globalPoint, bool isStopAutoScroll)
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->TriggerScrollableParentToScroll(globalPoint, isStopAutoScroll);
+        return;
+    }
+
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->TriggerScrollableParentToScroll(globalPoint, isStopAutoScroll);
+}
+
+bool SelectionContainerChild::ProcessMouseLeftSelectionUpdate(const Offset& localPoint, const OffsetF& globalPoint)
+{
+    auto node = GetHostNode();
+    CHECK_NULL_RETURN(node, false);
+    auto selectionContainerId = node->GetSelectionContainerId();
+    if (selectionContainerId <= 0) {
+        return false;
+    }
+
+    SelectionEndEventInfo eventInfo;
+    eventInfo.child = Claim(this);
+    eventInfo.localPoint = OffsetF(localPoint.GetX(), localPoint.GetY());
+
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->ProcessMouseLeftSelectionUpdate(eventInfo, globalPoint);
+    }
+
+    auto selectionContainerManager = GetSelectionContainerManagerFromNode(node);
+    CHECK_NULL_RETURN(selectionContainerManager, false);
+    auto container = selectionContainerManager->GetSelectionContainer(selectionContainerId);
+    CHECK_NULL_RETURN(container, false);
+    return container->ProcessMouseLeftSelectionUpdate(eventInfo, globalPoint);
+}
+
+void SelectionContainerChild::StopMouseSelectionTracking(const OffsetF& globalPoint)
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->StopMouseSelectionTracking(globalPoint);
+        return;
+    }
+
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->StopMouseSelectionTracking(globalPoint);
+}
+
 void SelectionContainerChild::UpdateHandleColor()
 {
     auto parentContainer = GetSelectionContainer();
@@ -475,16 +607,22 @@ void SelectionContainerChild::MarkChildSortDirty()
 }
 void SelectionContainerChild::NotifySelectionChanged(const std::u16string& selectedText)
 {
+    auto hostNode = GetHostNode();
+    std::vector<ChildSelectionInfo> selectionState;
+    if (hostNode) {
+        auto indexes = GetSelectionIndexes();
+        selectionState.push_back({ hostNode->GetId(), indexes.startIndex, indexes.endIndex });
+    }
     auto parentContainer = GetSelectionContainer();
     if (parentContainer) {
-        parentContainer->OnSelectionRangeChanged({ selectedText });
+        parentContainer->OnSelectionRangeChanged({ selectedText }, selectionState);
         return;
     }
 
     auto node = GetHostNode();
     auto container = GetSelectionContainerFromNode(node);
     if (container) {
-        container->OnSelectionRangeChanged({ selectedText });
+        container->OnSelectionRangeChanged({ selectedText }, selectionState);
     }
 }
 

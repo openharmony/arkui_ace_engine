@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/geometry/offset.h"
+#include "base/geometry/transform_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "base/utils/utf_helper.h"
@@ -48,6 +49,39 @@ RectF ConvertRectToTargetNode(const RefPtr<FrameNode>& sourceNode, const RectF& 
     auto bottom = std::max({ leftTop.GetY(), rightTop.GetY(), leftBottom.GetY(), rightBottom.GetY() });
     return { left, top, right - left, bottom - top };
 }
+
+bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context)
+{
+    auto transformMatrix = context->GetTransformMatrix();
+    CHECK_NULL_RETURN(transformMatrix, false);
+    const int32_t xIndex = 0;
+    const int32_t yIndex = 1;
+    const int32_t zIndex = 2;
+    const int32_t wIndex = 3;
+    DecomposedTransform transform;
+    TransformUtil::DecomposeTransform(transform, transformMatrix.value());
+    if (!NearZero(transform.translate[zIndex])) {
+        return true;
+    }
+    Quaternion quaternionIdentity(0.0f, 0.0f, 0.0f, 1.0f);
+    if (transform.quaternion != quaternionIdentity) {
+        return true;
+    }
+    if (!NearEqual(transform.scale[xIndex], 1.0f) || !NearEqual(transform.scale[yIndex], 1.0f) ||
+        !NearEqual(transform.scale[zIndex], 1.0f)) {
+        return true;
+    }
+    Vector3F skewIdentity(0.0f, 0.0f, 0.0f);
+    Vector3F skewVector(transform.skew[xIndex], transform.skew[yIndex], transform.skew[zIndex]);
+    if (!(skewVector == skewIdentity)) {
+        return true;
+    }
+    if (!NearZero(transform.perspective[xIndex]) || !NearZero(transform.perspective[yIndex]) ||
+        !NearZero(transform.perspective[zIndex]) || !NearEqual(transform.perspective[wIndex], 1.0f)) {
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 TextSelectionChild::TextSelectionChild(const WeakPtr<TextPattern>& pattern) : pattern_(pattern) {}
@@ -71,20 +105,20 @@ RefPtr<FrameNode> TextSelectionChild::GetHostNode() const
     return pattern->GetHost();
 }
 
-std::optional<SelectHandleInfo> TextSelectionChild::GetFirstHandleInfo()
+std::optional<RectF> TextSelectionChild::GetFirstHandleRect()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, std::nullopt);
-    CHECK_NULL_RETURN(pattern->selectOverlay_, std::nullopt);
-    return pattern->selectOverlay_->GetFirstHandleInfo();
+    auto selector = pattern->GetTextSelector();
+    return selector.firstHandle;
 }
 
-std::optional<SelectHandleInfo> TextSelectionChild::GetSecondHandleInfo()
+std::optional<RectF> TextSelectionChild::GetSecondHandleRect()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, std::nullopt);
-    CHECK_NULL_RETURN(pattern->selectOverlay_, std::nullopt);
-    return pattern->selectOverlay_->GetSecondHandleInfo();
+    auto selector = pattern->GetTextSelector();
+    return selector.secondHandle;
 }
 
 RectF TextSelectionChild::GetSelectionArea(const RefPtr<FrameNode>& targetNode, SelectRectsType pos)
@@ -206,13 +240,12 @@ void TextSelectionChild::UpdateSelectionHandleInfo()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->selectOverlay_);
     CHECK_NULL_VOID(!pattern->GetTextSelector().SelectNothing());
     CHECK_NULL_VOID(pattern->HasContent());
     pattern->CalculateHandleOffsetAndShowOverlay();
 }
 
-bool TextSelectionChild::BetweenSelectedPosition(const Offset& globalOffset) const
+bool TextSelectionChild::BetweenSelectedPosition(const Offset& globalOffset)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -350,4 +383,90 @@ void TextSelectionChild::OnContainerPropertyUpdate(uint32_t flags)
         pattern->OnContainerSelectedBackgroundColorUpdate();
     }
 }
+
+OffsetF TextSelectionChild::GetChildPaintOffsetWithoutTransform() const
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, {});
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, {});
+    if (!childHasTransform_) {
+        return host->GetTransformRelativeOffset();
+    }
+    OffsetF offset;
+    auto parent = host;
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, {});
+        offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return offset;
+}
+
+bool TextSelectionChild::CheckChildHasTransformAttr() const
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto hasTransform = false;
+    VectorF scaleIdentity(1.0f, 1.0f);
+    Vector5F rotateIdentity(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    while (host) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            break;
+        }
+        if (renderContext->HasMotionPath()) {
+            hasTransform = true;
+            break;
+        }
+        auto rotateVector = renderContext->GetTransformRotate();
+        if (rotateVector.has_value() && !(rotateIdentity == rotateVector.value())) {
+            hasTransform = true;
+            break;
+        }
+        auto scaleVector = renderContext->GetTransformScale();
+        if (scaleVector.has_value() && !(scaleIdentity == scaleVector.value())) {
+            hasTransform = true;
+            break;
+        }
+        auto translate = renderContext->GetTransformTranslate();
+        if (translate && !NearZero(translate->z.Value())) {
+            hasTransform = true;
+            break;
+        }
+        if (CheckHasTransformMatrix(renderContext)) {
+            hasTransform = true;
+            break;
+        }
+        host = host->GetAncestorNodeOfFrame(true);
+    }
+    return hasTransform;
+}
+
+bool TextSelectionChild::HasOrUpdateRenderTransform()
+{
+    UpdateTransformFlag();
+    return childHasTransform_;
+}
+
+void TextSelectionChild::UpdateTransformFlag()
+{
+    childHasTransform_ = CheckChildHasTransformAttr();
+}
+
+void TextSelectionChild::UpdateChildHandleGlobalOffset()
+{
+    HasOrUpdateRenderTransform();
+    handleGlobalOffset_ = GetChildPaintOffsetWithoutTransform();
+}
+
+OffsetF TextSelectionChild::GetChildHandleGlobalOffset() const
+{
+    return handleGlobalOffset_;
+}
+
 } // namespace OHOS::Ace::NG

@@ -38,14 +38,18 @@ public:
 
     bool CheckHandleVisible(const RectF& paintRect) override;
     RefPtr<FrameNode> GetOwner() override;
+    bool CheckTouchInHostNode(const PointF& touchPoint) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     bool PreProcessOverlay(const OverlayRequest& request) override;
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
+    void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     std::string GetSelectedText() override;
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
+    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
@@ -61,16 +65,36 @@ protected:
     bool AllowShare() override;
 
 private:
+    class FlushHandleNodeGuard final {
+    public:
+        explicit FlushHandleNodeGuard(const RefPtr<SelectionSelectOverlay>& overlay);
+        ~FlushHandleNodeGuard();
+
+    private:
+        RefPtr<SelectionSelectOverlay> overlay_;
+    };
+
     bool IsShowTranslate() const;
     bool IsShowSearch() const;
     bool HasValidSelectedText() const;
+    void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void UpdateTransformFlag() override;
+    bool IsClipHandleWithViewPort() override;
+    bool CheckAndAdjustHandle(RectF& paintRect);
+    bool CheckAndAdjustHandleWithContent(const RectF& visibleContentRect, RectF& paintRect);
+    bool GetRenderClipValue() const;
     RectF GetSelectAreaFromHandleFallback();
     RectF GetContainerVisibleRect(
         const RefPtr<FrameNode>& containerNode, const RefPtr<FrameNode>& overlayRoot);
     void HandleOnAskCelia();
     bool IsAskCeliaSupported() const;
+    OffsetF GetHotPaintOffset();
+    void FlushHandleNodeIfNeeded();
 
     WeakPtr<SelectionContainerPattern> pattern_;
+    OffsetF hostPaintOffset_;
+    bool isDraggingFirstHandle_ = true;
+    bool isFlushingHandleNode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SelectionSelectOverlay);
 };
 
