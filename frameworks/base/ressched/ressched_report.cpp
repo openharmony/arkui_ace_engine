@@ -177,7 +177,7 @@ void ResSchedReport::TriggerModuleSerializer()
 }
 
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param,
-    int64_t tid)
+    int64_t tid, int64_t longTid)
 {
     std::unordered_map<std::string, std::string> payload = param;
     payload[Ressched::NAME] = name;
@@ -185,9 +185,12 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
     if (tid == ResDefine::INVALID_DATA) {
         tid = GetTid();
     }
+    if (longTid == ResDefine::INVALID_DATA) {
+        longTid = static_cast<int64_t>(GetPthreadSelf());
+    }
     int64_t pid = GetPid();
     if (pid != tid) {
-        payload["scrTid"] = std::to_string(static_cast<uint64_t>(GetPthreadSelf()));
+        payload["scrTid"] = std::to_string(longTid);
     }
 #endif
     if (!reportDataFunc_) {
