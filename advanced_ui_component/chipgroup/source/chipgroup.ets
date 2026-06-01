@@ -29,7 +29,10 @@ import deviceInfo from '@ohos.deviceInfo';
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
   chipGroupSpace: ChipGroupSpaceOptions;
-  chipGroupPadding: ChipGroupPaddingOptions
+  chipGroupPadding: ChipGroupPaddingOptions;
+  chipBackgroundSystemMaterial: uiMaterial.Material;
+  chipSelectedBackgroundSystemMaterial: uiMaterial.Material;
+  iconBackgroundSystemMaterial: uiMaterial.Material;
 }
 
 const noop = (selectedIndexes: Array<number>) => {
@@ -46,7 +49,17 @@ const defaultTheme: ChipGroupTheme = {
     selectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
   },
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
-  chipGroupPadding: { top: 14, bottom: 14 }
+  chipGroupPadding: { top: 14, bottom: 14 },
+  chipBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+  }),
+  chipSelectedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+    materialColor: $r('sys.color.comp_background_emphasize')
+  }),
+  iconBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+  })
 }
 
 const iconGroupSuffixTheme: IconGroupSuffixTheme = {
@@ -304,11 +317,21 @@ export struct IconGroupSuffix {
     if (deviceInfo.sdkApiVersion >= 26) {
       if (enableEffectComponent(this.iconBackgroundSystemMaterial)) {
         EffectComponent() {
-          this.IconButtonsBuilder(createSubECMaterial(this.iconBackgroundSystemMaterial))
+          this.IconButtonsBuilder(
+            createSubECMaterial(
+              withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+            )
+          )
         }
-        .systemMaterial(createECMaterial(this.iconBackgroundSystemMaterial))
+        .systemMaterial(
+          createECMaterial(
+            withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+          )
+        )
       } else {
-        this.IconButtonsBuilder(resolveSystemMaterial(this.iconBackgroundSystemMaterial))
+        this.IconButtonsBuilder(
+          withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+        )
       }
     } else {
       this.IconButtonsBuilder(undefined)
@@ -343,6 +366,11 @@ export struct IconGroupSuffix {
   }
 }
 
+interface ChipItemsBuilderOptions {
+  backgroundSystemMaterial?: uiMaterial.Material;
+  activatedBackgroundSystemMaterial?: uiMaterial.Material;
+}
+
 @Component
 export struct ChipGroup {
   @Prop @Watch('onItemsChange') items: ChipGroupItemOptions[] = [];
@@ -353,6 +381,7 @@ export struct ChipGroup {
   @Prop @Watch('onMultipleChange') multiple: boolean = false;
   @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace;
   @Prop backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Prop selectedBackgroundSystemMaterial?: uiMaterial.Material = undefined;
   @BuilderParam suffix?: Callback<void>;
   public onChange: Callback<Array<number>> = noop;
   private scroller: Scroller = new Scroller();
@@ -581,7 +610,7 @@ export struct ChipGroup {
   }
 
   @Builder
-  ChipItemsBuilder(material: uiMaterial.Material | undefined) {
+  ChipItemsBuilder(options: ChipItemsBuilderOptions) {
     Row({ space: this.getChipGroupItemSpace() }) {
       ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
         if (chipItem) {
@@ -601,7 +630,8 @@ export struct ChipGroup {
             enabled: true,
             activated: this.isSelected(index),
             backgroundColor: this.getBackgroundColor(),
-            backgroundSystemMaterial: createSubECMaterial(material),
+            backgroundSystemMaterial: options.backgroundSystemMaterial,
+            activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
             size: this.getChipSize(),
             activatedBackgroundColor: this.getSelectedBackgroundColor(),
             accessibilitySelectedType:
@@ -642,16 +672,22 @@ export struct ChipGroup {
             if (enableEffectComponent(this.backgroundSystemMaterial)) {
               EffectComponent() {
                 Row({ space: this.getChipGroupItemSpace() }) {
-                  this.ChipItemsBuilder(createSubECMaterial(this.backgroundSystemMaterial))
+                  this.ChipItemsBuilder({
+                    backgroundSystemMaterial: createSubECMaterial(this.getBackgroundSystemMaterial()),
+                    activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
+                  })
                 }
               }
-              .systemMaterial(createECMaterial(this.backgroundSystemMaterial))
+              .systemMaterial(createECMaterial(this.getBackgroundSystemMaterial())
+              )
             } else {
-              this.ChipItemsBuilder(resolveSystemMaterial(this.backgroundSystemMaterial))
+              this.ChipItemsBuilder({
+                backgroundSystemMaterial: this.getBackgroundSystemMaterial(),
+                activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
+              })
             }
-
           } else {
-            this.ChipItemsBuilder(undefined)
+            this.ChipItemsBuilder({})
           }
         }
         .padding({
@@ -679,7 +715,7 @@ export struct ChipGroup {
       }
       .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
       .layoutWeight(1)
-      .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
+      .blendMode(this.getOutsideBlendMode(), this.getOutsideBlendType())
       .alignContent(Alignment.End)
 
       if (this.suffix) {
@@ -693,6 +729,31 @@ export struct ChipGroup {
     }
     .align(Alignment.End)
     .width('100%')
+  }
+
+  private getSelectedBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    return withDefaultMaterial(
+      this.selectedBackgroundSystemMaterial,
+      defaultTheme.chipSelectedBackgroundSystemMaterial
+    );
+  }
+
+  private getBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    return withDefaultMaterial(this.backgroundSystemMaterial, defaultTheme.chipBackgroundSystemMaterial);
+  }
+
+  private getOutsideBlendType(): BlendApplyType | undefined {
+    if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+      return undefined;
+    }
+    return BlendApplyType.OFFSCREEN;
+  }
+
+  private getOutsideBlendMode(): BlendMode | undefined {
+    if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+      return undefined;
+    }
+    return BlendMode.SRC_OVER;
   }
 
   getPrefixIcon(chipItem: ChipGroupItemOptions): PrefixIconOptions {
@@ -726,25 +787,47 @@ export struct ChipGroup {
   }
 }
 
-function resolveSystemMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
-  let info = uiMaterial.getMaterialInfo();
+function withDefaultMaterial(
+  material: uiMaterial.Material | undefined, defaultMaterial: uiMaterial.Material
+): uiMaterial.Material | undefined {
+  const info = uiMaterial.getMaterialInfo();
   if (info.state === uiMaterial.MaterialState.DISABLE) {
     return undefined;
   }
-  return info.state === uiMaterial.MaterialState.ENABLE && !material ?
-    new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) : material;
+  if (info.state === uiMaterial.MaterialState.ENABLE && !material) {
+    return defaultMaterial;
+  }
+  return material;
+
 }
 
-function enableEffectComponent(material: uiMaterial.Material | undefined) {
+function enableEffectComponent(
+  material: uiMaterial.Material | undefined
+): boolean {
+  if (material) {
+    return material instanceof uiMaterial.ImmersiveMaterial;
+  }
   return false;
 }
 
 function createECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
-  return undefined;
+  if (!material) {
+    return undefined;
+  }
+  if (material instanceof uiMaterial.ImmersiveMaterial) {
+    return uiMaterial.convertToECMaterial(material);
+  }
+  return material;
 }
 
 function createSubECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
-  return resolveSystemMaterial(material);
+  if (!material) {
+    return undefined;
+  }
+  if (material instanceof uiMaterial.ImmersiveMaterial) {
+    return uiMaterial.convertToECSubMaterial(material);
+  }
+  return material;
 }
 
 
