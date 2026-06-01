@@ -561,7 +561,7 @@ void ResetSearchSearchIcon(ArkUINodeHandle node)
 }
 
 void ParseSearchButtonRegisterResource(FrameNode* frameNode, const struct ArkUISearchButtonOptionsStruct* value,
-    ArkUIImageIconRes* imageIconRes)
+    const Color& fontColor, ArkUIImageIconRes* imageIconRes)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
@@ -575,7 +575,7 @@ void ParseSearchButtonRegisterResource(FrameNode* frameNode, const struct ArkUIS
     pattern->UnRegisterResource("searchButtonFontColor");
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("searchButtonFontColor", resObj, Color(value->fontColor));
+        pattern->RegisterResource<Color>("searchButtonFontColor", resObj, fontColor);
     }
     pattern->UnRegisterResource("searchButtonValue");
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->srcObj) {
@@ -585,17 +585,18 @@ void ParseSearchButtonRegisterResource(FrameNode* frameNode, const struct ArkUIS
 }
 
 void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
-    ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView)
+    const ArkUI_InnerColor* fontColor, ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
+    const auto* colorPtr = reinterpret_cast<const Color*>(fontColor);
     SearchModelNG::SetSearchButton(frameNode, value->value, isJsView);
     SearchModelNG::SetSearchButtonFontSize(
         frameNode, CalcDimension(value->sizeValue, static_cast<DimensionUnit>(value->sizeUnit)));
-    SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor), isThemeColor);
+    SearchModelNG::SetSearchButtonFontColor(frameNode, *colorPtr, isThemeColor);
     SearchModelNG::SetSearchButtonAutoDisable(frameNode, value->autoDisable);
     if (isJsView) {
-        ParseSearchButtonRegisterResource(frameNode, value, imageIconRes);
+        ParseSearchButtonRegisterResource(frameNode, value, *colorPtr, imageIconRes);
         return;
     }
     auto pattern = frameNode->GetPattern();
@@ -609,7 +610,7 @@ void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonO
     }
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("searchButtonFontColor", resObj, Color(value->fontColor));
+        pattern->RegisterResource<Color>("searchButtonFontColor", resObj, *colorPtr);
     } else {
         pattern->UnRegisterResource("searchButtonFontColor");
     }
@@ -2128,7 +2129,7 @@ void SetSearchPlaceholderFontImpl(
 }
 
 void SetSearchSearchButtonImpl(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
-    ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView)
+    const ArkUI_InnerColor* fontColor, ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView)
 {
     GetSearchModelImpl()->SetSearchButton(value->value);
 }
