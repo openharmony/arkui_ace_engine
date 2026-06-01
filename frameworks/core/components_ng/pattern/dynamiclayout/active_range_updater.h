@@ -38,16 +38,6 @@ public:
         return visibleIndexes_;
     }
 
-    float GetAdjustStart() const
-    {
-        return adjustStart_;
-    }
-
-    float GetAdjustEnd() const
-    {
-        return adjustEnd_;
-    }
-
 private:
     struct RangeInfo {
         bool inView = false;
@@ -67,8 +57,6 @@ private:
     std::vector<int32_t> visibleIndexes_;
     std::vector<int32_t> inActiveChildren_;
     Axis axis_ = Axis::VERTICAL;
-    float adjustStart_ = 0.0f;
-    float adjustEnd_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

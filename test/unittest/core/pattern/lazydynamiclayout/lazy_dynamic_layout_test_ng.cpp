@@ -78,6 +78,7 @@ public:
         int32_t itemNumber, const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool, bool)>& createFunc);
 
     void CreateScroll();
+    void CreateHorizontalScroll();
     void CreateLazyDynamicLayout(Axis axis);
     void CreateStack(Axis axis);
     RefPtr<FrameNode> GetMainFrameNode();
@@ -141,6 +142,17 @@ void LazyDynamicLayoutTest::CreateScroll()
     scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
 }
 
+void LazyDynamicLayoutTest::CreateHorizontalScroll()
+{
+    ScrollModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetHeight(CalcLength(SCROLL_WIDTH));
+    model.SetAxis(Axis::HORIZONTAL);
+    scrollableFrameNode_ = GetMainFrameNode();
+    scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
+}
+
 RefPtr<FrameNode> LazyDynamicLayoutTest::GetMainFrameNode()
 {
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -163,6 +175,7 @@ void LazyDynamicLayoutTest::CreateStack(Axis axis)
 void LazyDynamicLayoutTest::CreateLazyDynamicLayout(Axis axis)
 {
     auto customParams = AceType::MakeRefPtr<LazyCustomLayoutAlgorithmParam>();
+    customParams->SetAxis(axis);
     LazyDynamicLayoutModelNG model;
     model.Create(customParams);
     if (axis == Axis::HORIZONTAL) {
@@ -174,7 +187,9 @@ void LazyDynamicLayoutTest::CreateLazyDynamicLayout(Axis axis)
     pattern_ = frameNode_->GetPattern<LazyDynamicLayoutPattern>();
     frameNode_->layoutProperty_ = AceType::MakeRefPtr<LazyGridLayoutProperty>();
     auto info = AceType::MakeRefPtr<LazyGridLayoutInfo>();
-    algorithm_ = AceType::MakeRefPtr<MockLazyGridLayoutAlgorithm>(info);
+    auto algorithm = AceType::MakeRefPtr<MockLazyGridLayoutAlgorithm>(info);
+    algorithm->SetAxis(axis);
+    algorithm_ = algorithm;
     auto weak = AceType::WeakClaim(AceType::RawPtr(algorithm_));
     customParams->SetOnMeasureSize([weak](LayoutWrapper* layoutWrapper) {
         auto algorithm = weak.Upgrade();
@@ -207,6 +222,57 @@ HWTEST_F(LazyDynamicLayoutTest, LayoutLazyForEachTest001, TestSize.Level1)
             stackModel.Create();
             ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
             ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+            auto node = ViewStackProcessor::GetInstance()->Finish();
+            return { std::to_string(index), node };
+        }
+    );
+    LazyForEachModelNG lazyForEachModelNG;
+    RefPtr<NG::LazyForEachBuilder> builder = mockLazy;
+    lazyForEachModelNG.Create(builder);
+    CreateDone();
+    EXPECT_EQ(*(pattern_->prevVisibleIndexes_.begin()), 0);
+    EXPECT_EQ(*(pattern_->prevVisibleIndexes_.rbegin()), 4);
+
+    /**
+     * @tc.steps: step2. Scroll 150px
+     * @tc.expected: layout visible items
+     */
+    scrollablePattern_->UpdateCurrentOffset(-120, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(*(pattern_->prevVisibleIndexes_.begin()), 1);
+    EXPECT_EQ(*(pattern_->prevVisibleIndexes_.rbegin()), 5);
+
+    /**
+     * @tc.steps: step3. Update LazyGrid0 lanes.
+     * @tc.expected: start and end index updated
+     */
+    auto layoutProperty = pattern_->GetLayoutProperty<LazyGridLayoutProperty>();
+    layoutProperty->UpdateColumnsTemplate("1fr 1fr");
+    FlushUITasks();
+    EXPECT_EQ(*(pattern_->prevVisibleIndexes_.begin()), 0);
+    EXPECT_EQ(*(pattern_->prevVisibleIndexes_.rbegin()), 9);
+    EXPECT_EQ(scrollablePattern_->GetTotalOffset(), 20);
+}
+
+/**
+ * @tc.name: LayoutHorizontalTest001
+ * @tc.desc: Test LazyVGridLayout HORIZONTAL layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyDynamicLayoutTest, LayoutHorizontalTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout with LazyForEach
+     * @tc.expected: layout visible items
+     */
+    CreateHorizontalScroll();
+    CreateLazyDynamicLayout(Axis::HORIZONTAL);
+    auto mockLazy = AceType::MakeRefPtr<CustomLazyForEachBuilder>(30,
+        [](int32_t index) -> std::pair<std::string, RefPtr<NG::UINode>> {
+            StackModelNG stackModel;
+            stackModel.Create();
+            ViewAbstract::SetHeight(CalcLength(1, DimensionUnit::PERCENT));
+            ViewAbstract::SetWidth(CalcLength(ITEM_HEIGHT));
             auto node = ViewStackProcessor::GetInstance()->Finish();
             return { std::to_string(index), node };
         }
