@@ -155,7 +155,7 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
     Media::DecodeOptions options;
     InitDecodeOptions(options, size, pixelMapConfig);
     auto pixmap = imageSource_->CreatePixelMapEx(index, options, errorCode);
-    if (errorCode != Media::SUCCESS) {
+    if (errorCode != Media::SUCCESS || !pixmap) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "create PixelMap from ImageSource failed, index = %{public}u, errorCode = %{public}u", index, errorCode);
         return nullptr;
@@ -168,7 +168,7 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap()
     uint32_t errorCode;
     Media::DecodeOptions decodeOpts;
     auto pixelMap = imageSource_->CreatePixelMap(decodeOpts, errorCode);
-    if (errorCode != Media::SUCCESS) {
+    if (errorCode != Media::SUCCESS || !pixelMap) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "create PixelMap from ImageSource failed, errorCode = %{public}u", errorCode);
         return nullptr;
     }
@@ -192,7 +192,7 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const DecodeOptions& options)
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(options.desiredFormat);
     auto pixelmap = imageSource_->CreatePixelMap(decodeOpts, errorCode);
-    if (errorCode != Media::SUCCESS) {
+    if (errorCode != Media::SUCCESS || !pixelmap) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "create pixelmap failed, errorCode = %{public}u", errorCode);
         return nullptr;
     }
