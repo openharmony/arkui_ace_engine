@@ -106,8 +106,9 @@ docs/
    - 推荐：`source_paths/api_paths`
    - 分类取值：`basic/container/selector/shape/media/data_display/rich_text/advanced/sdk/system`
    - 路径规范：
-     - KB 文档正文中的源码/API 引用使用 `OpenHarmony/.../file.cpp:line`（或 `:start-end`）格式
-     - `source_paths/api_paths` 使用 `<OH_ROOT>/...`
+     - **源码引用**（正文及 `source_paths`）：ace_engine 仓内文件使用仓根目录相对路径（如 `frameworks/core/components_ng/pattern/text/text_model_ng.cpp:37`），仓外文件使用 `<OH_ROOT>` 绝对路径（如 `<OH_ROOT>/foundation/graphic/graphic_2d/...`）
+     - **API 引用**（正文及 `api_paths`）：统一使用 `<OH_ROOT>` 绝对路径（如 `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text.d.ts`）
+     - 行号标注格式：`:line` 或 `:start-end`
      - 禁止仅写文件名+行号（如 `text_model_ng.cpp:37`）或本机绝对路径（如 `/home/...`）
 3. 更新本文件统计与目录快照。
 
