@@ -47,7 +47,8 @@ import {
   ButtonOptions,
   ButtonType,
   Color,
-  Text
+  Text,
+  EffectComponent
 } from '@ohos.arkui.component';
 
 import {
@@ -78,13 +79,18 @@ import {
 } from '@ohos.arkui.advanced.Chip';
 import resourceManager from '@ohos.resourceManager';
 import hilog from '@ohos.hilog';
+import uiMaterial from '@ohos.arkui.uiMaterial';
+import deviceInfo from '@ohos.deviceInfo';
 
 type InnerCallback<T, V = void> = (data: T) => V;
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
   chipGroupSpace: ChipGroupSpaceOptions;
-  chipGroupPadding: ChipGroupPaddingOptions
+  chipGroupPadding: ChipGroupPaddingOptions;
+  chipBackgroundSystemMaterial: uiMaterial.Material;
+  chipSelectedBackgroundSystemMaterial: uiMaterial.Material;
+  iconBackgroundSystemMaterial: uiMaterial.Material;
 }
 
 const noop = (selectedIndexes: Array<int>) => {
@@ -102,7 +108,17 @@ const defaultTheme: ChipGroupTheme = {
     selectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
   },
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
-  chipGroupPadding: { top: 14, bottom: 14 }
+  chipGroupPadding: { top: 14, bottom: 14 },
+  chipBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+  }),
+  chipSelectedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+    materialColor: $r('sys.color.comp_background_emphasize')
+  }),
+  iconBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+  })
 }
 
 const iconGroupSuffixTheme: IconGroupSuffixTheme = {
@@ -298,6 +314,7 @@ export struct IconGroupSuffix {
   @Watch('onItems')
   @PropRef items: (IconItemOptions | SymbolGlyphModifier | SymbolItemOptions)[] =
     new Array<IconItemOptions | SymbolGlyphModifier | SymbolItemOptions>();
+  @PropRef iconBackgroundSystemMaterial?: uiMaterial.Material = undefined;
   symbolEffect: SymbolEffect = new SymbolEffect();
 
   private onItems(_: string): void {
@@ -328,7 +345,7 @@ export struct IconGroupSuffix {
   }
 
   @Builder
-  SymbolItemBuilder(item: SymbolItemOptions) {
+  SymbolItemBuilder(item: SymbolItemOptions): void {
     SymbolGlyph()
       .fontColor([iconGroupSuffixTheme.fillColor])
       .fontSize(this.getIconSize())
@@ -340,7 +357,7 @@ export struct IconGroupSuffix {
   }
 
   @Builder
-  IconItemBuilder(item: IconItemOptions) {
+  IconItemBuilder(item: IconItemOptions): void {
     Image(item.icon.src)
       .fillColor(iconGroupSuffixTheme.fillColor)
       .size({
@@ -350,7 +367,8 @@ export struct IconGroupSuffix {
       .focusable(true)
   }
 
-  build() {
+  @Builder
+  IconButtonsBuilder(material: uiMaterial.Material | undefined): void {
     Row({ space: 8 } as RowOptions) {
       ForEach(this.items, (suffixItem: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions) => {
         Button({ type: ButtonType.Normal } as ButtonOptions) {
@@ -373,6 +391,7 @@ export struct IconGroupSuffix {
           width: this.getBackgroundSize(),
           height: this.getBackgroundSize()
         })
+        .systemMaterial(material)
         .backgroundColor(iconGroupSuffixTheme.backgroundColor)
         .borderRadius(iconGroupSuffixTheme.borderRadius)
         .accessibilityText(this.getAccessibilityText(suffixItem))
@@ -386,10 +405,34 @@ export struct IconGroupSuffix {
             (suffixItem as SymbolItemOptions).action();
           }
         })
-        .borderRadius(iconGroupSuffixTheme.borderRadius)
       }, (suffixItem: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions, index: int) => {
         return `${this.refreshCnt}_${index}`;
       })
+    }
+  }
+
+  build(): void {
+    if (deviceInfo.sdkApiVersion >= 26) {
+      if (enableEffectComponent(this.iconBackgroundSystemMaterial)) {
+        EffectComponent() {
+          this.IconButtonsBuilder(
+            createSubECMaterial(
+              withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+            )
+          )
+        }
+        .systemMaterial(
+          createECMaterial(
+            withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+          )
+        )
+      } else {
+        this.IconButtonsBuilder(
+          withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)
+        )
+      }
+    } else {
+      this.IconButtonsBuilder(undefined)
     }
   }
 
@@ -424,6 +467,11 @@ export struct IconGroupSuffix {
 @Builder
 export type ChipGroupSuffixBuilder = () => void;
 
+export interface ChipItemsBuilderOptions {
+  backgroundSystemMaterial?: uiMaterial.Material;
+  activatedBackgroundSystemMaterial?: uiMaterial.Material;
+}
+
 @Component
 export struct ChipGroup {
   @PropRef @Watch('onItemsChange') items: ChipGroupItemOptions[] = new Array<ChipGroupItemOptions>();
@@ -432,6 +480,8 @@ export struct ChipGroup {
   @PropRef selectedIndexes?: Array<int> = [0];
   @PropRef @Watch('onMultipleChange') multiple?: boolean = false;
   @PropRef chipGroupSpace?: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace;
+  @PropRef backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @PropRef selectedBackgroundSystemMaterial?: uiMaterial.Material = undefined;
   @BuilderParam suffix?: ChipGroupSuffixBuilder;
   public onChange: InnerCallback<Array<int>> = noop;
   private scroller: Scroller = new Scroller();
@@ -439,19 +489,19 @@ export struct ChipGroup {
   @PropRef chipGroupPadding?: ChipGroupPaddingOptions = defaultTheme.chipGroupPadding;
   @State refreshCnt: int = 0;
 
-  onItemsChange(value: string) {
+  onItemsChange(value: string): void {
     this.refreshCnt++;
   }
 
-  onMultipleChange(value: string) {
+  onMultipleChange(value: string): void {
     this.selectedIndexes = this.getSelectedIndexes();
   }
 
-  itemStyleOnChange(value?: string) {
+  itemStyleOnChange(value?: string): void {
     this.chipSize = this.getChipSize();
   }
 
-  aboutToAppear() {
+  aboutToAppear(): void {
     this.itemStyleOnChange();
     if (this.getSelectedIndexes().length === 0) {
       this.selectedIndexes = [0];
@@ -619,7 +669,6 @@ export struct ChipGroup {
         return (element == itemIndex);
       })
     }
-    return false;
   }
 
   private getPaddingTop() {
@@ -660,67 +709,118 @@ export struct ChipGroup {
     }
   }
 
-  build() {
+  private getBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    return withDefaultMaterial(this.backgroundSystemMaterial, defaultTheme.chipBackgroundSystemMaterial);
+  }
+
+  private getSelectedBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    return withDefaultMaterial(
+      this.selectedBackgroundSystemMaterial,
+      defaultTheme.chipSelectedBackgroundSystemMaterial
+    );
+  }
+
+  private getOutsideBlendType(): BlendApplyType | undefined {
+    if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+      return undefined;
+    }
+    return BlendApplyType.OFFSCREEN;
+  }
+
+  private getOutsideBlendMode(): BlendMode | undefined {
+    if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+      return undefined;
+    }
+    return BlendMode.SRC_OVER;
+  }
+
+  @Builder
+  ChipItemsBuilder(options: ChipItemsBuilderOptions): void {
+    Row({ space: this.getChipGroupItemSpace() } as RowOptions) {
+      ForEach(this.items, (chipItem: ChipGroupItemOptions, index: int) => {
+        if (chipItem) {
+          Chip({
+            prefixIcon: this.getPrefixIcon(chipItem),
+            prefixSymbol: chipItem?.prefixSymbol,
+            label: {
+              text: chipItem?.label?.text ?? ' ',
+              fontColor: this.getFontColor(),
+              activatedFontColor: this.getSelectedFontColor(),
+            } as LabelOptions,
+            suffixIcon: this.getSuffixIcon(chipItem),
+            suffixSymbol: chipItem?.suffixSymbol,
+            suffixSymbolOptions: chipItem.suffixSymbolOptions,
+            allowClose: chipItem.allowClose ?? false,
+            closeOptions: chipItem.closeOptions,
+            enabled: true,
+            activated: this.isSelected(index),
+            backgroundColor: this.getBackgroundColor(),
+            backgroundSystemMaterial: options.backgroundSystemMaterial,
+            activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
+            size: this.getChipSize(),
+            activatedBackgroundColor: this.getSelectedBackgroundColor(),
+            accessibilitySelectedType:
+            this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
+            accessibilityDescription: chipItem.accessibilityDescription,
+            accessibilityLevel: chipItem.accessibilityLevel,
+            onClicked: () => {
+              if (this.isSelected(index)) {
+                if (!(!this.isMultiple())) {
+                  if (this.getSelectedIndexes().length > 1) {
+                    this.selectedIndexes = this.selectedIndexes!.filter((v, _) => {
+                      return v !== index
+                    })
+                  }
+                }
+              } else {
+                if (!this.selectedIndexes || this.selectedIndexes!.length === 0) {
+                  this.selectedIndexes = this.getSelectedIndexes();
+                }
+                if (!this.isMultiple()) {
+                  this.selectedIndexes = [];
+                }
+                this.selectedIndexes!.push(index);
+              }
+              this.getOnChange()(this.getSelectedIndexes());
+            }
+          } as ChipOptions)
+        }
+      }, (chipItem: ChipGroupItemOptions, index: int) => {
+        return `${this.refreshCnt}_${index}`;
+      });
+    }
+  }
+
+  build(): void {
     Row() {
       Stack() {
         Scroll(this.scroller) {
-          Row({ space: this.getChipGroupItemSpace() } as RowOptions) {
-            ForEach(this.items, (chipItem: ChipGroupItemOptions, index: int) => {
-              if (chipItem) {
-                Chip({
-                  prefixIcon: this.getPrefixIcon(chipItem),
-                  prefixSymbol: chipItem?.prefixSymbol,
-                  label: {
-                    text: chipItem?.label?.text ?? ' ',
-                    fontColor: this.getFontColor(),
-                    activatedFontColor: this.getSelectedFontColor(),
-                  } as LabelOptions,
-                  suffixIcon: this.getSuffixIcon(chipItem),
-                  suffixSymbol: chipItem?.suffixSymbol,
-                  suffixSymbolOptions: chipItem.suffixSymbolOptions,
-                  allowClose: chipItem.allowClose ?? false,
-                  closeOptions: chipItem.closeOptions,
-                  enabled: true,
-                  activated: this.isSelected(index),
-                  backgroundColor: this.getBackgroundColor(),
-                  size: this.getChipSize(),
-                  activatedBackgroundColor: this.getSelectedBackgroundColor(),
-                  accessibilitySelectedType:
-                  this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
-                  accessibilityDescription: chipItem.accessibilityDescription,
-                  accessibilityLevel: chipItem.accessibilityLevel,
-                  onClicked: () => {
-                    if (this.isSelected(index)) {
-                      if (!(!this.isMultiple())) {
-                        if (this.getSelectedIndexes().length > 1) {
-                          this.selectedIndexes = this.selectedIndexes!.filter((v, _) => {
-                            return v !== index
-                          })
-                        }
-                      }
-                    } else {
-                      if (!this.selectedIndexes || this.selectedIndexes!.length === 0) {
-                        this.selectedIndexes = this.getSelectedIndexes();
-                      }
-                      if (!this.isMultiple()) {
-                        this.selectedIndexes = [];
-                      }
-                      this.selectedIndexes!.push(index);
-                    }
-                    this.getOnChange()(this.getSelectedIndexes());
-                  }
-                } as ChipOptions)
+          if (deviceInfo.sdkApiVersion >= 26) {
+            if (enableEffectComponent(this.backgroundSystemMaterial)) {
+              EffectComponent() {
+                Row({ space: this.getChipGroupItemSpace() } as RowOptions) {
+                  this.ChipItemsBuilder({
+                    backgroundSystemMaterial: createSubECMaterial(this.getBackgroundSystemMaterial()),
+                    activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
+                  })
+                }
               }
-            }, (chipItem: ChipGroupItemOptions, index: int) => {
-              return `${this.refreshCnt}_${index}`;
-            });
+              .systemMaterial(createECMaterial(this.getBackgroundSystemMaterial()))
+            } else {
+              this.ChipItemsBuilder({
+                backgroundSystemMaterial: this.getBackgroundSystemMaterial(),
+                activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
+              })
+            }
+          } else {
+            this.ChipItemsBuilder({})
           }
-          .padding({
-            left: this.getChipGroupStartSpace(),
-            right: this.getChipGroupEndSpace()
-          } as Padding)
-          .constraintSize({ minWidth: '100%' })
         }
+        .padding({
+          left: this.getChipGroupStartSpace(),
+          right: this.getChipGroupEndSpace()
+        } as Padding)
+        .constraintSize({ minWidth: '100%' })
         .scrollable(ScrollDirection.Horizontal)
         .scrollBar(BarState.Off)
         .align(Alignment.Start)
@@ -741,7 +841,7 @@ export struct ChipGroup {
       }
       .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() } as Padding)
       .layoutWeight(1)
-      .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
+      .blendMode(this.getOutsideBlendMode(), this.getOutsideBlendType())
       .alignContent(Alignment.End)
 
       if (this.suffix) {
@@ -782,4 +882,24 @@ export struct ChipGroup {
     }
     return undefined;
   }
+}
+
+function withDefaultMaterial(
+  material: uiMaterial.Material | undefined, defaultMaterial: uiMaterial.Material
+): uiMaterial.Material | undefined {
+  return material;
+}
+
+function enableEffectComponent(
+  material: uiMaterial.Material | undefined
+): boolean {
+  return false;
+}
+
+function createECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
+  return material;
+}
+
+function createSubECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
+  return material;
 }
