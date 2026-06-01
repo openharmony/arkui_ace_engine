@@ -668,7 +668,17 @@ bool ListPattern::UpdateStartListItemIndex()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    CHECK_EQUAL_RETURN(host->GetChildTrueTotalCount(), 0, false);
+    auto count = host->GetChildTrueTotalCount();
+    if (count == 0) {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return false;
+        }
+        if (startInfo_.index != -1) {
+            startInfo_ = {-1, -1, -1};
+            return true;
+        }
+        return false;
+    }
     auto startWrapper = host->GetOrCreateChildByIndex(startIndex_);
     int32_t startArea = -1;
     int32_t startItemIndexInGroup = -1;
@@ -698,7 +708,17 @@ bool ListPattern::UpdateEndListItemIndex()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    CHECK_EQUAL_RETURN(host->GetChildTrueTotalCount(), 0, false);
+    auto count = host->GetChildTrueTotalCount();
+    if (count == 0) {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return false;
+        }
+        if (endInfo_.index != -1) {
+            endInfo_ = {-1, -1, -1};
+            return true;
+        }
+        return false;
+    }
     auto endWrapper = host->GetOrCreateChildByIndex(endIndex_);
     int32_t endArea = -1;
     int32_t endItemIndexInGroup = -1;
