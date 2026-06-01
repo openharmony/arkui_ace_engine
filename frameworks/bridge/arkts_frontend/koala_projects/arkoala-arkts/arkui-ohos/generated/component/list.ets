@@ -19,7 +19,7 @@
 import { ArkThemeScopeManager } from '#arktheme'
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister, Finalizable, MaterializedBaseTag } from '@koalaui/interop'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { EditModeOptions_serializer, Bindable_Boolean_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, EditModeOptions, Bindable, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ExtendableCommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { EditModeOptions_serializer, Bindable_Boolean_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, EditModeOptions, Bindable, Callback as arkui_component_common_Callback, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ExtendableCommonMethod, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
 import { LengthConstrain_serializer, ItemFillPolicy_serializer, CacheCountInfo_serializer, Resource as arkui_component_units_Resource, LengthConstrain, ItemFillPolicy, Dimension, CacheCountInfo, Length, ResponsiveFillType, ResourceColor } from './units'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
@@ -799,6 +799,18 @@ export interface ListAttribute extends ScrollableCommonMethod {
             }
         }
         throw new Error('Unimplemented method enableEditMode')
+    }
+    onEditModeChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as ListAttribute).onEditModeChange(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('List attribute onEditModeChange can only be set when creating an extendable component.')
+            }
+        }
+        throw new Error('Unimplemented method onEditModeChange')
     }
     focusWrapMode(value: FocusWrapMode | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();

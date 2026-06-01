@@ -209,7 +209,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
     }
 }
 export interface GaugeOptions {
-    value: double | undefined;
+    value?: double | undefined;
     min?: double;
     max?: double;
 }

@@ -992,8 +992,6 @@ typedef struct Ark_Tuple_Double_Double Ark_Tuple_Double_Double;
 typedef struct Opt_Tuple_Double_Double Opt_Tuple_Double_Double;
 typedef struct Ark_Tuple_F64_F64 Ark_Tuple_F64_F64;
 typedef struct Opt_Tuple_F64_F64 Opt_Tuple_F64_F64;
-typedef struct Ark_Tuple_F64_F64_F64 Ark_Tuple_F64_F64_F64;
-typedef struct Opt_Tuple_F64_F64_F64 Opt_Tuple_F64_F64_F64;
 typedef struct Ark_Tuple_I32_I32 Ark_Tuple_I32_I32;
 typedef struct Opt_Tuple_I32_I32 Opt_Tuple_I32_I32;
 typedef struct Ark_Tuple_I32_I32_I32_I32 Ark_Tuple_I32_I32_I32_I32;
@@ -2201,6 +2199,8 @@ typedef struct Ark_BlankScreenDetails Ark_BlankScreenDetails;
 typedef struct Opt_BlankScreenDetails Opt_BlankScreenDetails;
 typedef struct Ark_BlankScreenDetectionConfig Ark_BlankScreenDetectionConfig;
 typedef struct Opt_BlankScreenDetectionConfig Opt_BlankScreenDetectionConfig;
+typedef struct Ark_Blender Ark_Blender;
+typedef struct Opt_Blender Opt_Blender;
 typedef struct Ark_BlurOptions Ark_BlurOptions;
 typedef struct Opt_BlurOptions Opt_BlurOptions;
 typedef struct Ark_BorderRadiuses_graphics Ark_BorderRadiuses_graphics;
@@ -2329,10 +2329,10 @@ typedef struct Ark_EditModeOptions Ark_EditModeOptions;
 typedef struct Opt_EditModeOptions Opt_EditModeOptions;
 typedef struct Ark_EffectComponentOptions Ark_EffectComponentOptions;
 typedef struct Opt_EffectComponentOptions Opt_EffectComponentOptions;
-typedef struct Ark_EmbedOptions Ark_EmbedOptions;
-typedef struct Opt_EmbedOptions Opt_EmbedOptions;
 typedef struct Ark_EmbeddedOptions Ark_EmbeddedOptions;
 typedef struct Opt_EmbeddedOptions Opt_EmbeddedOptions;
+typedef struct Ark_EmbedOptions Ark_EmbedOptions;
+typedef struct Opt_EmbedOptions Opt_EmbedOptions;
 typedef struct Ark_ErrorEvent Ark_ErrorEvent;
 typedef struct Opt_ErrorEvent Opt_ErrorEvent;
 typedef struct Ark_ErrorInformation Ark_ErrorInformation;
@@ -2767,6 +2767,8 @@ typedef struct Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPick
 typedef struct Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent;
 typedef struct Ark_Union_Array_ToolbarItem_CustomNodeBuilder Ark_Union_Array_ToolbarItem_CustomNodeBuilder;
 typedef struct Opt_Union_Array_ToolbarItem_CustomNodeBuilder Opt_Union_Array_ToolbarItem_CustomNodeBuilder;
+typedef struct Ark_Union_BlendMode_Blender Ark_Union_BlendMode_Blender;
+typedef struct Opt_Union_BlendMode_Blender Opt_Union_BlendMode_Blender;
 typedef struct Ark_Union_Boolean_Bindable_Boolean Ark_Union_Boolean_Bindable_Boolean;
 typedef struct Opt_Union_Boolean_Bindable_Boolean Opt_Union_Boolean_Bindable_Boolean;
 typedef struct Ark_Union_Boolean_Callback_DismissPopupAction_Void Ark_Union_Boolean_Callback_DismissPopupAction_Void;
@@ -2975,8 +2977,6 @@ typedef struct Ark_BindableResourceStr Ark_BindableResourceStr;
 typedef struct Opt_BindableResourceStr Opt_BindableResourceStr;
 typedef struct Ark_BlankScreenDetectionEventInfo Ark_BlankScreenDetectionEventInfo;
 typedef struct Opt_BlankScreenDetectionEventInfo Opt_BlankScreenDetectionEventInfo;
-typedef struct Ark_Blender Ark_Blender;
-typedef struct Opt_Blender Opt_Blender;
 typedef struct Ark_ButtonIconOptions Ark_ButtonIconOptions;
 typedef struct Opt_ButtonIconOptions Opt_ButtonIconOptions;
 typedef struct Ark_cacheDownload_DownloadInfo Ark_cacheDownload_DownloadInfo;
@@ -3231,8 +3231,6 @@ typedef struct Ark_Union_ArcDotIndicatorInner_Boolean Ark_Union_ArcDotIndicatorI
 typedef struct Opt_Union_ArcDotIndicatorInner_Boolean Opt_Union_ArcDotIndicatorInner_Boolean;
 typedef struct Ark_Union_BindableResourceStr_BindableResourceStrArray Ark_Union_BindableResourceStr_BindableResourceStrArray;
 typedef struct Opt_Union_BindableResourceStr_BindableResourceStrArray Opt_Union_BindableResourceStr_BindableResourceStrArray;
-typedef struct Ark_Union_BlendMode_Blender Ark_Union_BlendMode_Blender;
-typedef struct Opt_Union_BlendMode_Blender Opt_Union_BlendMode_Blender;
 typedef struct Ark_Union_Boolean_MenuMaskType Ark_Union_Boolean_MenuMaskType;
 typedef struct Opt_Union_Boolean_MenuMaskType Opt_Union_Boolean_MenuMaskType;
 typedef struct Ark_Union_Boolean_PopupMaskType Ark_Union_Boolean_PopupMaskType;
@@ -4934,6 +4932,14 @@ typedef struct Opt_EllipsisMode {
     Ark_Tag tag;
     Ark_EllipsisMode value;
 } Opt_EllipsisMode;
+typedef enum Ark_EmbeddedDpiFollowStrategy {
+    ARK_EMBEDDED_DPI_FOLLOW_STRATEGY_FOLLOW_HOST_DPI = 0,
+    ARK_EMBEDDED_DPI_FOLLOW_STRATEGY_FOLLOW_UI_EXTENSION_ABILITY_DPI = 1,
+} Ark_EmbeddedDpiFollowStrategy;
+typedef struct Opt_EmbeddedDpiFollowStrategy {
+    Ark_Tag tag;
+    Ark_EmbeddedDpiFollowStrategy value;
+} Opt_EmbeddedDpiFollowStrategy;
 typedef enum Ark_EmbeddedType {
     ARK_EMBEDDED_TYPE_EMBEDDED_UI_EXTENSION = 0,
 } Ark_EmbeddedType;
@@ -4941,6 +4947,14 @@ typedef struct Opt_EmbeddedType {
     Ark_Tag tag;
     Ark_EmbeddedType value;
 } Opt_EmbeddedType;
+typedef enum Ark_EmbeddedWindowModeFollowStrategy {
+    ARK_EMBEDDED_WINDOW_MODE_FOLLOW_STRATEGY_FOLLOW_HOST_WINDOW_MODE = 0,
+    ARK_EMBEDDED_WINDOW_MODE_FOLLOW_STRATEGY_FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1,
+} Ark_EmbeddedWindowModeFollowStrategy;
+typedef struct Opt_EmbeddedWindowModeFollowStrategy {
+    Ark_Tag tag;
+    Ark_EmbeddedWindowModeFollowStrategy value;
+} Opt_EmbeddedWindowModeFollowStrategy;
 typedef enum Ark_EnterKeyType {
     ARK_ENTER_KEY_TYPE_GO = 2,
     ARK_ENTER_KEY_TYPE_SEARCH = 3,
@@ -7708,6 +7722,14 @@ typedef struct Opt_TransitionType {
     Ark_Tag tag;
     Ark_TransitionType value;
 } Opt_TransitionType;
+typedef enum Ark_UIMaterialAnimationMode {
+    ARK_UIMATERIAL_ANIMATION_MODE_IMMERSIVE = 0,
+    ARK_UIMATERIAL_ANIMATION_MODE_NONE = 1,
+} Ark_UIMaterialAnimationMode;
+typedef struct Opt_UIMaterialAnimationMode {
+    Ark_Tag tag;
+    Ark_UIMaterialAnimationMode value;
+} Opt_UIMaterialAnimationMode;
 typedef enum Ark_UndoStyle {
     ARK_UNDO_STYLE_CLEAR_STYLE = 0,
     ARK_UNDO_STYLE_KEEP_STYLE = 1,
@@ -9477,16 +9499,6 @@ typedef struct Opt_Tuple_F64_F64 {
     Ark_Tag tag;
     Ark_Tuple_F64_F64 value;
 } Opt_Tuple_F64_F64;
-typedef struct Ark_Tuple_F64_F64_F64 {
-    /* kind: Interface */
-    Ark_Float64 value0;
-    Ark_Float64 value1;
-    Ark_Float64 value2;
-} Ark_Tuple_F64_F64_F64;
-typedef struct Opt_Tuple_F64_F64_F64 {
-    Ark_Tag tag;
-    Ark_Tuple_F64_F64_F64 value;
-} Opt_Tuple_F64_F64_F64;
 typedef struct Ark_Tuple_I32_I32 {
     /* kind: Interface */
     Ark_Int32 value0;
@@ -15169,6 +15181,18 @@ typedef struct Opt_BlankScreenDetectionConfig {
     Ark_Tag tag;
     Ark_BlankScreenDetectionConfig value;
 } Opt_BlankScreenDetectionConfig;
+typedef struct Ark_Blender {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_uiEffect_BrightnessBlender value0;
+        Ark_uiEffect_HdrBrightnessBlender value1;
+    };
+} Ark_Blender;
+typedef struct Opt_Blender {
+    Ark_Tag tag;
+    Ark_Blender value;
+} Opt_Blender;
 typedef struct Ark_BlurOptions {
     /* kind: Interface */
     Opt_Tuple_F64_F64 grayscale;
@@ -15834,6 +15858,17 @@ typedef struct Opt_EffectComponentOptions {
     Ark_Tag tag;
     Ark_EffectComponentOptions value;
 } Opt_EffectComponentOptions;
+typedef struct Ark_EmbeddedOptions {
+    /* kind: Interface */
+    Opt_ComponentContentBase placeholder;
+    Opt_Map_String_ComponentContentBase areaChangePlaceholder;
+    Opt_EmbeddedDpiFollowStrategy dpiFollowStrategy;
+    Opt_EmbeddedWindowModeFollowStrategy windowModeFollowStrategy;
+} Ark_EmbeddedOptions;
+typedef struct Opt_EmbeddedOptions {
+    Ark_Tag tag;
+    Ark_EmbeddedOptions value;
+} Opt_EmbeddedOptions;
 typedef struct Ark_EmbedOptions {
     /* kind: Interface */
     Opt_Boolean supportDefaultIntrinsicSize;
@@ -17914,16 +17949,6 @@ typedef struct Opt_Tuple_ResourceColor_ResourceColor {
     Ark_Tag tag;
     Ark_Tuple_ResourceColor_ResourceColor value;
 } Opt_Tuple_ResourceColor_ResourceColor;
-typedef struct Ark_EmbeddedOptions {
-    Opt_ComponentContentBase placeholder;
-    Opt_Map_String_ComponentContentBase areaChangePlaceholder;
-    Opt_DpiFollowStrategy dpiFollowStrategy;
-    Opt_WindowModeFollowStrategy windowModeFollowStrategy;
-} Ark_EmbeddedOptions;
-typedef struct Opt_EmbeddedOptions {
-    Ark_Tag tag;
-    Ark_EmbeddedOptions value;
-} Opt_EmbeddedOptions;
 typedef struct Ark_UIExtensionOptions {
     /* kind: Interface */
     Opt_Boolean isTransferringCaller;
@@ -18085,6 +18110,18 @@ typedef struct Opt_Union_Array_ToolbarItem_CustomNodeBuilder {
     Ark_Tag tag;
     Ark_Union_Array_ToolbarItem_CustomNodeBuilder value;
 } Opt_Union_Array_ToolbarItem_CustomNodeBuilder;
+typedef struct Ark_Union_BlendMode_Blender {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_BlendMode value0;
+        Ark_Blender value1;
+    };
+} Ark_Union_BlendMode_Blender;
+typedef struct Opt_Union_BlendMode_Blender {
+    Ark_Tag tag;
+    Ark_Union_BlendMode_Blender value;
+} Opt_Union_BlendMode_Blender;
 typedef struct Ark_Union_Boolean_Bindable_Boolean {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -19340,18 +19377,6 @@ typedef struct Opt_BlankScreenDetectionEventInfo {
     Ark_Tag tag;
     Ark_BlankScreenDetectionEventInfo value;
 } Opt_BlankScreenDetectionEventInfo;
-typedef struct Ark_Blender {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_uiEffect_BrightnessBlender value0;
-        Ark_uiEffect_HdrBrightnessBlender value1;
-    };
-} Ark_Blender;
-typedef struct Opt_Blender {
-    Ark_Tag tag;
-    Ark_Blender value;
-} Opt_Blender;
 typedef struct Ark_ButtonIconOptions {
     /* kind: Interface */
     Ark_Union_String_image_PixelMap_Resource shown;
@@ -20696,18 +20721,6 @@ typedef struct Opt_Union_BindableResourceStr_BindableResourceStrArray {
     Ark_Tag tag;
     Ark_Union_BindableResourceStr_BindableResourceStrArray value;
 } Opt_Union_BindableResourceStr_BindableResourceStrArray;
-typedef struct Ark_Union_BlendMode_Blender {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_BlendMode value0;
-        Ark_Blender value1;
-    };
-} Ark_Union_BlendMode_Blender;
-typedef struct Opt_Union_BlendMode_Blender {
-    Ark_Tag tag;
-    Ark_Union_BlendMode_Blender value;
-} Opt_Union_BlendMode_Blender;
 typedef struct Ark_Union_Boolean_MenuMaskType {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -25092,12 +25105,12 @@ typedef struct GENERATED_ArkUIEmbeddedComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setEmbeddedComponentOptions0)(Ark_NativePointer node,
-                                        Ark_Want loader,
-                                        const Opt_EmbeddedType* type);
+                                         Ark_Want loader,
+                                         const Opt_EmbeddedType* type);
     void (*setEmbeddedComponentOptions1)(Ark_NativePointer node,
-                                        Ark_Want loader,
-                                        const Opt_EmbeddedType* type,
-                                        const Opt_EmbeddedOptions* options);
+                                         Ark_Want loader,
+                                         const Opt_EmbeddedType* type,
+                                         const Opt_EmbeddedOptions* options);
     void (*setOnTerminated)(Ark_NativePointer node,
                             const Opt_Callback_TerminationInfo* value);
     void (*setOnError)(Ark_NativePointer node,
@@ -25496,7 +25509,7 @@ typedef struct GENERATED_ArkUILazyGridLayoutAttributeModifier {
     void (*setFooter)(Ark_NativePointer node,
                       const Opt_CustomNodeBuilder* builder);
     void (*setSticky)(Ark_NativePointer node,
-                      const Opt_StickyStyle* value);
+                      const Opt_StickyStyle* sticky);
     void (*setOnVisibleIndexesChange)(Ark_NativePointer node,
                                       const Opt_OnVisibleIndexesChangeCallback* callback_);
 } GENERATED_ArkUILazyGridLayoutAttributeModifier;
@@ -30149,7 +30162,7 @@ typedef struct GENERATED_ArkUILazyColumnLayoutExtenderAccessor {
     void (*footer)(Ark_NativePointer node,
                    const Opt_CustomNodeBuilder* builder);
     void (*sticky)(Ark_NativePointer node,
-                   const Opt_StickyStyle* value);
+                   const Opt_StickyStyle* sticky);
     void (*onVisibleIndexesChange)(Ark_NativePointer node,
                                    const Opt_OnVisibleIndexesChangeCallback* callback_);
 } GENERATED_ArkUILazyColumnLayoutExtenderAccessor;
@@ -30186,7 +30199,7 @@ typedef struct GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor {
     void (*footer)(Ark_NativePointer node,
                    const Opt_CustomNodeBuilder* builder);
     void (*sticky)(Ark_NativePointer node,
-                   const Opt_StickyStyle* value);
+                   const Opt_StickyStyle* sticky);
     void (*onVisibleIndexesChange)(Ark_NativePointer node,
                                    const Opt_OnVisibleIndexesChangeCallback* callback_);
 } GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor;
@@ -33053,3 +33066,4 @@ struct OH_AnyAPI {
 /* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
+

@@ -1156,6 +1156,18 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setShaderStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setPunctuationOverflowAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setPunctuationOverflow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setInputFilterAttribute(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1508,6 +1520,9 @@ export interface TextAreaAttribute extends CommonMethod {
     }
     shaderStyle(value: ShaderStyle | undefined): this {
         throw new Error('Unimplemented method shaderStyle')
+    }
+    punctuationOverflow(value: boolean | undefined): this {
+        throw new Error('Unimplemented method punctuationOverflow')
     }
     inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {
         throw new Error('Unimplemented method inputFilter')
@@ -1907,6 +1922,11 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     public shaderStyle(value: ShaderStyle | undefined): this {
         const value_casted = value as (ShaderStyle | undefined)
         this.getPeer()?.setShaderStyleAttribute(value_casted)
+        return this
+    }
+    public punctuationOverflow(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setPunctuationOverflowAttribute(value_casted)
         return this
     }
     public inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this {

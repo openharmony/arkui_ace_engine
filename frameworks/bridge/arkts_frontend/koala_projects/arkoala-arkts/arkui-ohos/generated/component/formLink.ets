@@ -111,6 +111,21 @@ export function FormLinkImpl(
     })
 }
 
+@memo
+export function FormLink(
+    @memo @memo_skip
+    style: ((attributes: FormLinkAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkFormLinkComponent>((): ArkFormLinkComponent => {
+        return new ArkFormLinkComponent()
+    })
+    NodeAttach<ArkFormLinkPeer>((): ArkFormLinkPeer => ArkFormLinkPeer.create(receiver), (_: ArkFormLinkPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class FormLinkOptions_serializer {
     public static write(buffer: SerializerBase, value: FormLinkOptions): void {
         let valueSerializer: SerializerBase = buffer

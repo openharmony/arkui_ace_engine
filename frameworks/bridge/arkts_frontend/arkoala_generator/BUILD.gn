@@ -27,7 +27,8 @@ if (ohos_indep_compiler_enable) {
   } else {
     libarkts_root_path = "$root_out_dir/clang_x64"
   }
-  libarkts_path = "$libarkts_root_path/obj/developtools/ace_ets2bundle/ets1.2/libarkts.tgz"
+  libarkts_path =
+      "$libarkts_root_path/obj/developtools/ace_ets2bundle/ets1.2/libarkts.tgz"
   pandasdk_path = "$libarkts_root_path/obj/developtools/ace_ets2bundle/ets1.2/libarkts/panda-sdk/panda_sdk.tgz"
 }
 
@@ -80,15 +81,9 @@ action("patch_sdk") {
     "--stamp",
     rebase_path("$target_out_dir/patch_sdk_stamp"),
   ]
-  outputs = [
-    "$target_out_dir/patch_sdk_stamp",
-  ]
-  deps = [
-    ":arkui_sdk_patch_files",
-  ]
-  external_deps = [
-    ohos_ets_api_deps,
-  ]
+  outputs = [ "$target_out_dir/patch_sdk_stamp" ]
+  deps = [ ":arkui_sdk_patch_files" ]
+  external_deps = [ ohos_ets_api_deps ]
 }
 
 action("runner_gen_code") {
@@ -99,16 +94,21 @@ action("runner_gen_code") {
     "--output",
     rebase_path(idlize_gen_output_path),
     "--arkgen-interop-types",
-    rebase_path("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h"),
+    rebase_path(
+        "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h"),
     "--panda-sdk-path",
     rebase_path("${pandasdk_path}"),
     "--libarkts-path",
     rebase_path("${libarkts_path}"),
     "--node-bin-path",
-    rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
     "--idl-files",
     rebase_path("./arkui_extra_idl/"),
   ]
+  if (idlize_debug_mode) {
+    args += [ "--debug-mode" ]
+  }
   inputs = [
     "generation_config/arkgen-config.json",
     "generation_config/etsgen-config.json",
@@ -125,9 +125,7 @@ action("runner_gen_code") {
     ":arkui_extra_idl",
     ":patch_sdk",
   ]
-  external_deps = [
-    ohos_ets_libarkts_deps,
-  ]
+  external_deps = [ ohos_ets_libarkts_deps ]
   outputs = [
     # bridges output
     "$idlize_gen_bridges_output_path/arkoala_api_generated.h",
@@ -136,6 +134,7 @@ action("runner_gen_code") {
     "$idlize_gen_bridges_output_path/bridge_generated.cc",
     "$idlize_gen_bridges_output_path/callback_deserialize_call.cc",
     "$idlize_gen_bridges_output_path/callback_managed_caller.cc",
+
     # ace engine internals output
     "$idlize_gen_output_path/libace/generated/interface/node_interface.gni",
     "$idlize_gen_output_path/libace/utility/generated/converter_generated.h",
@@ -144,9 +143,7 @@ action("runner_gen_code") {
 
 if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
   config("idlize_gen_config") {
-    include_dirs = [
-      "$idlize_gen_bridges_output_path",
-    ]
+    include_dirs = [ "$idlize_gen_bridges_output_path" ]
   }
   action("idlize_install") {
     script = "gn/command/deploy.py"
@@ -154,21 +151,16 @@ if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
       "--source",
       rebase_path(idlize_gen_output_path),
       "--destination",
-      rebase_path("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated"),
+      rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated"),
       "--config",
       rebase_path("./generation_config/instructive-config.json"),
       "--stamp",
       rebase_path("$target_out_dir/idlize_install_stamp"),
     ]
-    deps = [
-      ":runner_gen_code",
-    ]
-    public_deps = [
-      ":runner_gen_code",
-    ]
-    outputs = [
-      "$target_out_dir/idlize_install_stamp",
-    ]
+    deps = [ ":runner_gen_code" ]
+    public_deps = [ ":runner_gen_code" ]
+    outputs = [ "$target_out_dir/idlize_install_stamp" ]
   }
 } else {
   # dummy dep for native build. Bridges must not be built in that until problem

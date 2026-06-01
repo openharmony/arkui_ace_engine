@@ -40,9 +40,7 @@ link_abc_files("arkoala_abc") {
 
 ohos_prebuilt_etc("arkoala_abc_prebuild") {
   source = "$target_out_dir/arkoala.abc"
-  deps = [
-    ":arkoala_abc"
-  ]
+  deps = [ ":arkoala_abc" ]
   module_install_dir = "framework"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -58,7 +56,7 @@ template("arkts_frontend") {
       "$ace_root/build:libace_compatible",
       "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ani_utils_common",
     ]
-    
+
     if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
       deps += [ ":ArkoalaNative_ark" ]
     }
@@ -73,11 +71,11 @@ template("arkts_frontend") {
 
     sources += [ "$ace_root/adapter/ohos/entrance/dynamic_component/eaworker_task_wrapper_impl.cpp" ]
     external_deps = [
+      "ability_base:extractortool",
       "hilog:libhilog",
       "runtime_core:ani",
       "runtime_core:ani_helpers",
       "runtime_core:libarkruntime",
-      "ability_base:extractortool"
     ]
 
     subsystem_name = ace_engine_subsystem
@@ -159,13 +157,13 @@ ohos_shared_library("ArkoalaNative_ark") {
   ]
 
   sources = [
+    "$idlize_gen_bridges_output_path/bridge_generated.cc",
+    "$idlize_gen_bridges_output_path/callback_deserialize_call.cc",
+    "$idlize_gen_bridges_output_path/callback_managed_caller.cc",
     "koala_projects/arkoala-arkts/framework/native/src/DeserializerBase.cc",
     "koala_projects/arkoala-arkts/framework/native/src/error_helper.cc",
     "koala_projects/arkoala-arkts/framework/native/src/events.cc",
     "koala_projects/arkoala-arkts/framework/native/src/generated/bridge_custom.cc",
-    "$idlize_gen_bridges_output_path/bridge_generated.cc",
-    "$idlize_gen_bridges_output_path/callback_deserialize_call.cc",
-    "$idlize_gen_bridges_output_path/callback_managed_caller.cc",
     "koala_projects/arkoala-arkts/framework/native/src/generated/library.cc",
     "koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.cc",
     "koala_projects/arkoala-arkts/framework/native/src/vsync.cc",
@@ -182,15 +180,22 @@ ohos_shared_library("ArkoalaNative_ark") {
 
   configs = [ ":arkoala_native_config" ]
 
-  deps = [
-    "./arkoala_generator:idlize_gen"
-  ]
+  deps = [ "./arkoala_generator:idlize_gen" ]
+
+  if (idlize_debug_mode) {
+    sources +=
+        [ "koala_projects/arkoala-arkts/framework/native/src/idlize_trace.cc" ]
+  }
 
   external_deps = [
     "hilog:hilog_ndk",
     "hilog:libhilog",
     "runtime_core:ani",
   ]
+
+  if (idlize_debug_mode) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
 
   if (is_arkui_x) {
     deps += [ "//third_party/bounds_checking_function:libsec_static" ]

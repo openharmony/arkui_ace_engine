@@ -712,6 +712,10 @@ export enum SuperscriptStyle {
     SUPERSCRIPT = 1,
     SUBSCRIPT = 2
 }
+export enum MaxLinesMode {
+    CLIP = 0,
+    SCROLL = 1
+}
 export enum KeyboardFluidLightMode {
     NONE = 0,
     BACKGROUND_FLUID_LIGHT = 1
@@ -737,6 +741,12 @@ export enum TextVerticalAlign {
     CENTER = 2,
     TOP = 3
 }
+export interface MaxLinesOptions {
+    overflowMode?: MaxLinesMode;
+}
+export interface LineSpacingOptions {
+    onlyBetweenLines?: boolean;
+}
 export interface NumericTextTransitionOptions {
     flipDirection?: FlipDirection;
     enableBlur?: boolean;
@@ -747,16 +757,6 @@ export interface TextLayoutOptions {
 export interface KeyboardAppearanceConfig {
     gradientMode?: KeyboardGradientMode;
     fluidLightMode?: KeyboardFluidLightMode;
-}
-export enum MaxLinesMode {
-    CLIP = 0,
-    SCROLL = 1
-}
-export interface LineSpacingOptions {
-    onlyBetweenLines?: boolean;
-}
-export interface MaxLinesOptions {
-    overflowMode?: MaxLinesMode;
 }
 export interface VoiceButtonOptions {
     enabled?: boolean;

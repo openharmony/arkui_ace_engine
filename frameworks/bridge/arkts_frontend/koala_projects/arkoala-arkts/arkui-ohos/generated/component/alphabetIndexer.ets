@@ -47,10 +47,10 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setAlphabetIndexerOptionsAttribute(options: AlphabetIndexerOptions): void {
+    setAlphabetIndexerOptionsAttribute(info: AlphabetIndexerOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        AlphabetIndexerOptions_serializer.write(thisSerializer, options)
+        AlphabetIndexerOptions_serializer.write(thisSerializer, info)
         ArkUIGeneratedNativeModule._AlphabetIndexerInterface_setAlphabetIndexerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -560,7 +560,7 @@ export type OnAlphabetIndexerSelectCallback = (index: int32) => void;
 export type OnAlphabetIndexerPopupSelectCallback = (index: int32) => void;
 export type OnAlphabetIndexerRequestPopupDataCallback = (index: int32) => Array<string>;
 export interface AlphabetIndexerAttribute extends CommonMethod {
-    setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
+    setAlphabetIndexerOptions(info: AlphabetIndexerOptions): this {
         throw new Error('Unimplemented method setAlphabetIndexerOptions')
     }
     color(value: ResourceColor | undefined): this {
@@ -650,9 +650,9 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
     getPeer(): ArkAlphabetIndexerPeer {
         return (this.peer as ArkAlphabetIndexerPeer)
     }
-    public setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
-        const options_casted = options as (AlphabetIndexerOptions)
-        this.getPeer()?.setAlphabetIndexerOptionsAttribute(options_casted)
+    public setAlphabetIndexerOptions(info: AlphabetIndexerOptions): this {
+        const info_casted = info as (AlphabetIndexerOptions)
+        this.getPeer()?.setAlphabetIndexerOptionsAttribute(info_casted)
         this.applyOptionsFinish('AlphabetIndexerAttribute');
         return this
     }

@@ -935,6 +935,15 @@ export interface GridAttribute extends ScrollableCommonMethod {
         throw new Error('Unimplemented method enableEditMode')
     }
     onEditModeChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as GridAttribute).onEditModeChange(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Grid attribute onEditModeChange can only be set when creating an extendable component.')
+            }
+        }
         throw new Error('Unimplemented method onEditModeChange')
     }
     focusWrapMode(value: FocusWrapMode | undefined): this {

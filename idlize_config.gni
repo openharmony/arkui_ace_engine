@@ -11,6 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+declare_args() {
+  # Generate IDLize bridge code with trace markers for debugging.
+  idlize_debug_mode = false
+}
+
 # Define output path for generated code
 idlize_gen_output_path = "$root_gen_dir/foundation/arkui/ace_engine/idlize_gen"
-idlize_gen_bridges_output_path = "$idlize_gen_output_path/sig/arkoala-arkts/framework/native/src/generated"
+idlize_gen_bridges_output_path =
+    "$idlize_gen_output_path/sig/arkoala-arkts/framework/native/src/generated"

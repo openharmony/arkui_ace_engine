@@ -471,7 +471,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setPixelStretchEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setAccessibilityNextFocusId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _CommonMethod_setAccessibilityNextFocusId0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonMethod_setAccessibilityDefaultFocus(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -642,6 +642,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CommonMethod_setOnGestureRecognizerJudgeBegin1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Quick
     native static _CommonMethod_setDebugLine(ptr: KPointer, sourceLine: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _CommonMethod_setAccessibilityNextFocusId1(ptr: KPointer, nextId: KStringPtr, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _CommonShapeMethod_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -837,11 +839,15 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _EmbeddedComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _EmbeddedComponentInterface_setEmbeddedComponentOptions(ptr: KPointer, loader: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _EmbeddedComponentInterface_setEmbeddedComponentOptions0(ptr: KPointer, loader: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _EmbeddedComponentInterface_setEmbeddedComponentOptions1(ptr: KPointer, loader: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _EmbeddedComponentAttribute_setOnTerminated(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _EmbeddedComponentAttribute_setOnError(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _EmbeddedComponentAttribute_setOnDrawReady(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _Flex_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -1173,6 +1179,12 @@ export class ArkUIGeneratedNativeModule {
     native static _LazyGridLayoutAttribute_setRowsGap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _LazyGridLayoutAttribute_setColumnsGap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyGridLayoutAttribute_setHeader(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyGridLayoutAttribute_setFooter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyGridLayoutAttribute_setSticky(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _LazyGridLayoutAttribute_setOnVisibleIndexesChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -5432,6 +5444,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyColumnLayoutExtender_alignItems(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _LazyColumnLayoutExtender_header(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyColumnLayoutExtender_footer(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyColumnLayoutExtender_sticky(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _LazyColumnLayoutExtender_onVisibleIndexesChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     native static _LazyForEachOps_NotifyChange(node: KPointer, startIndex: KInt, endIndex: KInt, count: KInt): void
     @ani.unsafe.Direct
@@ -5450,6 +5468,12 @@ export class ArkUIGeneratedNativeModule {
     native static _LazyWaterFlowLayoutExtender_columnsGap(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _LazyWaterFlowLayoutExtender_columnsTemplate(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_header(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_footer(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _LazyWaterFlowLayoutExtender_sticky(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _LazyWaterFlowLayoutExtender_onVisibleIndexesChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

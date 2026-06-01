@@ -681,6 +681,10 @@ export enum InputEventInterceptAction {
     CONTINUE = 0,
     BLOCK = 1
 }
+export enum UIMaterialAnimationMode {
+    IMMERSIVE = 0,
+    NONE = 1
+}
 export enum GestureShortcut {
     PRIMARY = 0
 }
@@ -696,4 +700,14 @@ export enum OperateIntention {
     TAP = 0,
     SLIDE_FORWARD = 1,
     BACK_PRESS = 2
+}
+export enum EdgeLightPosition {
+    TOP_LEFT = 0,
+    TOP_RIGHT = 1,
+    BOTTOM_LEFT = 2,
+    BOTTOM_RIGHT = 3,
+    TOP = 4,
+    BOTTOM = 5,
+    LEFT = 6,
+    RIGHT = 7
 }

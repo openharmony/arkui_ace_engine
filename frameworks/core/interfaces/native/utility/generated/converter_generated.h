@@ -639,6 +639,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Blender& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_ColorFilterType& src)
 {
     switch (src.selector) {
@@ -875,6 +890,21 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Array_ToolbarItem_CustomNodeBuilder& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_BlendMode_Blender& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2067,21 +2097,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Blender& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Dimension& src)
 {
     switch (src.selector) {
@@ -2145,21 +2160,6 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_BindableResourceStr_BindableResourceStrArray& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_BlendMode_Blender& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3672,8 +3672,9 @@ ASSIGN_OPT(Opt_EffectScope)
 ASSIGN_OPT(Opt_EffectType)
 ASSIGN_OPT(Opt_EllipseShape)
 ASSIGN_OPT(Opt_EllipsisMode)
+ASSIGN_OPT(Opt_EmbeddedDpiFollowStrategy)
 ASSIGN_OPT(Opt_EmbeddedType)
-ASSIGN_OPT(Opt_EmbeddedOptions)
+ASSIGN_OPT(Opt_EmbeddedWindowModeFollowStrategy)
 ASSIGN_OPT(Opt_EnterKeyType)
 ASSIGN_OPT(Opt_EventLocationInfo)
 ASSIGN_OPT(Opt_EventQueryType)
@@ -4145,7 +4146,6 @@ ASSIGN_OPT(Opt_TransitionType)
 ASSIGN_OPT(Opt_TranslateResult)
 ASSIGN_OPT(Opt_Tuple_Double_Double)
 ASSIGN_OPT(Opt_Tuple_F64_F64)
-ASSIGN_OPT(Opt_Tuple_F64_F64_F64)
 ASSIGN_OPT(Opt_Tuple_I32_I32)
 ASSIGN_OPT(Opt_Tuple_I32_I32_I32_I32)
 ASSIGN_OPT(Opt_UICommonEvent)
@@ -4159,6 +4159,7 @@ ASSIGN_OPT(Opt_UIGestureEvent)
 ASSIGN_OPT(Opt_UIGridEvent)
 ASSIGN_OPT(Opt_UIListEvent)
 ASSIGN_OPT(Opt_uiMaterial_Material)
+ASSIGN_OPT(Opt_UIMaterialAnimationMode)
 ASSIGN_OPT(Opt_UIScrollableCommonEvent)
 ASSIGN_OPT(Opt_UIScrollEvent)
 ASSIGN_OPT(Opt_UIWaterFlowEvent)
@@ -4760,6 +4761,7 @@ ASSIGN_OPT(Opt_Bindable_String)
 ASSIGN_OPT(Opt_BindableResourceStrArray)
 ASSIGN_OPT(Opt_BlankScreenDetails)
 ASSIGN_OPT(Opt_BlankScreenDetectionConfig)
+ASSIGN_OPT(Opt_Blender)
 ASSIGN_OPT(Opt_BlurOptions)
 ASSIGN_OPT(Opt_BorderRadiuses_graphics)
 ASSIGN_OPT(Opt_BreakPoints)
@@ -4824,6 +4826,7 @@ ASSIGN_OPT(Opt_EdgeStyles)
 ASSIGN_OPT(Opt_EditMenuOptions)
 ASSIGN_OPT(Opt_EditModeOptions)
 ASSIGN_OPT(Opt_EffectComponentOptions)
+ASSIGN_OPT(Opt_EmbeddedOptions)
 ASSIGN_OPT(Opt_EmbedOptions)
 ASSIGN_OPT(Opt_ErrorEvent)
 ASSIGN_OPT(Opt_ErrorInformation)
@@ -5042,6 +5045,7 @@ ASSIGN_OPT(Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt)
 ASSIGN_OPT(Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent)
 ASSIGN_OPT(Opt_Union_Array_ToolbarItem_CustomNodeBuilder)
+ASSIGN_OPT(Opt_Union_BlendMode_Blender)
 ASSIGN_OPT(Opt_Union_Boolean_Bindable_Boolean)
 ASSIGN_OPT(Opt_Union_Boolean_Callback_DismissPopupAction_Void)
 ASSIGN_OPT(Opt_Union_Boolean_Resource)
@@ -5146,7 +5150,6 @@ ASSIGN_OPT(Opt_Bindable_Resource)
 ASSIGN_OPT(Opt_Bindable_ResourceStr)
 ASSIGN_OPT(Opt_BindableResourceStr)
 ASSIGN_OPT(Opt_BlankScreenDetectionEventInfo)
-ASSIGN_OPT(Opt_Blender)
 ASSIGN_OPT(Opt_ButtonIconOptions)
 ASSIGN_OPT(Opt_cacheDownload_DownloadInfo)
 ASSIGN_OPT(Opt_CalendarOptions)
@@ -5274,7 +5277,6 @@ ASSIGN_OPT(Opt_UnderlineColor)
 ASSIGN_OPT(Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions)
 ASSIGN_OPT(Opt_Union_ArcDotIndicatorInner_Boolean)
 ASSIGN_OPT(Opt_Union_BindableResourceStr_BindableResourceStrArray)
-ASSIGN_OPT(Opt_Union_BlendMode_Blender)
 ASSIGN_OPT(Opt_Union_Boolean_MenuMaskType)
 ASSIGN_OPT(Opt_Union_Boolean_PopupMaskType)
 ASSIGN_OPT(Opt_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions)

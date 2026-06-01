@@ -1040,6 +1040,18 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setIncrementalUpdatePolicy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setPunctuationOverflowAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setPunctuationOverflow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (fontValue !== undefined) {
@@ -1871,6 +1883,18 @@ export interface TextAttribute extends CommonMethod {
         }
         throw new Error('Unimplemented method incrementalUpdatePolicy')
     }
+    punctuationOverflow(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).punctuationOverflow(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute punctuationOverflow can only be set when creating an extendable component.')
+            }
+        }
+        throw new Error('Unimplemented method punctuationOverflow')
+    }
     font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -2331,6 +2355,11 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
     public incrementalUpdatePolicy(value: IncrementalUpdatePolicy | undefined): this {
         const value_casted = value as (IncrementalUpdatePolicy | undefined)
         this.getPeer()?.setIncrementalUpdatePolicyAttribute(value_casted)
+        return this
+    }
+    public punctuationOverflow(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setPunctuationOverflowAttribute(value_casted)
         return this
     }
     public font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {

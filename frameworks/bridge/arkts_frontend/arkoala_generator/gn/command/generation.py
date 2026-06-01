@@ -39,6 +39,8 @@ def parse_args():
                         help="Path to the Node.js bin directory")
     parser.add_argument("--idl-files", required=True,
                         help="IDL files for generation")
+    parser.add_argument("--debug-mode", action="store_true",
+                        help="Generate debug trace markers in important generated code")
     return parser.parse_args()
 
 def main():
@@ -155,6 +157,8 @@ def main():
         "--no-arkgen-dummy-impl",
         "--output", output_dir
     ]
+    if args.debug_mode:
+        cmd.append("--debug-mode")
 
     print(f"Step 5: Generation. Running command: {' '.join(cmd)}")
 

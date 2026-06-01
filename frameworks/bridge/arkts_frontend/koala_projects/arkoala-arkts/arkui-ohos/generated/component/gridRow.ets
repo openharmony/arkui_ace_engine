@@ -48,13 +48,13 @@ export class ArkGridRowPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setGridRowOptionsAttribute(option?: GridRowOptions): void {
+    setGridRowOptionsAttribute(options?: GridRowOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (option !== undefined) {
+        if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionTmpValue = option!
-            GridRowOptions_serializer.write(thisSerializer, optionTmpValue)
+            const optionsTmpValue = options!
+            GridRowOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -125,7 +125,7 @@ export interface GridRowOptions {
     direction?: GridRowDirection;
 }
 export interface GridRowAttribute extends CommonMethod {
-    setGridRowOptions(option?: GridRowOptions): this {
+    setGridRowOptions(options?: GridRowOptions): this {
         throw new Error('Unimplemented method setGridRowOptions')
     }
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
@@ -143,9 +143,9 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
     getPeer(): ArkGridRowPeer {
         return (this.peer as ArkGridRowPeer)
     }
-    public setGridRowOptions(option?: GridRowOptions): this {
-        const option_casted = option as (GridRowOptions | undefined)
-        this.getPeer()?.setGridRowOptionsAttribute(option_casted)
+    public setGridRowOptions(options?: GridRowOptions): this {
+        const options_casted = options as (GridRowOptions | undefined)
+        this.getPeer()?.setGridRowOptionsAttribute(options_casted)
         this.applyOptionsFinish('GridRowAttribute');
         return this
     }

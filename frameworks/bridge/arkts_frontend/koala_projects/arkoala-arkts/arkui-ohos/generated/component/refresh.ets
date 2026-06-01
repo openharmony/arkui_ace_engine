@@ -49,10 +49,10 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setRefreshOptionsAttribute(value: RefreshOptions): void {
+    setRefreshOptionsAttribute(options: RefreshOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        RefreshOptions_serializer.write(thisSerializer, value)
+        RefreshOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._RefreshInterface_setRefreshOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -191,7 +191,7 @@ export interface RefreshOptions {
     refreshingContent?: ComponentContentBase;
 }
 export interface RefreshAttribute extends CommonMethod {
-    setRefreshOptions(value: RefreshOptions): this {
+    setRefreshOptions(options: RefreshOptions): this {
         throw new Error('Unimplemented method setRefreshOptions')
     }
     onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
@@ -233,9 +233,9 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
     getPeer(): ArkRefreshPeer {
         return (this.peer as ArkRefreshPeer)
     }
-    public setRefreshOptions(value: RefreshOptions): this {
-        const value_casted = value as (RefreshOptions)
-        this.getPeer()?.setRefreshOptionsAttribute(value_casted)
+    public setRefreshOptions(options: RefreshOptions): this {
+        const options_casted = options as (RefreshOptions)
+        this.getPeer()?.setRefreshOptionsAttribute(options_casted)
         this.applyOptionsFinish('RefreshAttribute');
         return this
     }
