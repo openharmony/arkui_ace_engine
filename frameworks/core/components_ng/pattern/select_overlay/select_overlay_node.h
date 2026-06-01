@@ -140,6 +140,8 @@ public:
     {
         return scopeId_;
     }
+    static RefPtr<UiMaterial>& GetMenuUiMaterial(ColorMode colorMode = ColorMode::COLOR_MODE_UNDEFINED);
+    static void UpdateNewMaterialProperties(const RefPtr<FrameNode>& frameNode, ColorMode colorMode);
 
 private:
     void CreateToolBar();
@@ -198,8 +200,8 @@ private:
         const std::function<void()>& systemEvent, const MenuOptionsParam& item);
     RefPtr<FrameNode> GetExtensionMenuOutterrMenu(std::vector<OptionParam>& params, const MenuParam& menuParam,
         const RefPtr<FrameNode>& caller);
-    void InitExtensionMenu(
-        const RefPtr<FrameNode>& menu, const RefPtr<FrameNode>& caller, const MenuParam& menuParam);
+    void InitExtensionMenu(const RefPtr<FrameNode>& menu, const RefPtr<FrameNode>& caller,
+        const MenuParam& menuParam, ColorMode colorMode);
     void CreatExtensionMenu(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& caller);
 
     void MoreAnimation(bool noAnimation);
