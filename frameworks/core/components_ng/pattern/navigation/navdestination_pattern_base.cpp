@@ -592,20 +592,17 @@ void NavDestinationPatternBase::UpdateTitleBarOptions(float currentOffset)
     if (GreatNotEqual(currentOffset, startOffset) && LessNotEqual(currentOffset, endOffset)) {
         auto scrollScale =
             NearZero(endOffset - startOffset) ? 1.0 : (currentOffset - startOffset) / (endOffset - startOffset);
-        titleBarPattern->SetIsTitleBarBlurEnabled(true);
         titleBarPattern->SetScrollScale(scrollScale);
         SetTitleBarOptions(titleBarPattern, titleBarPattern->GetCurrentTitleBarBgStyle());
         return;
     }
     if (LessOrEqual(currentOffset, startOffset) && !titleBarPattern->IsTitleBarStyleStartUpdate()) {
-        titleBarPattern->SetIsTitleBarBlurEnabled(false);
         titleBarPattern->SetScrollScale(0.0);
         UpdateTitleBarStartOptions(titleBarPattern);
         SetTitleBarOptions(titleBarPattern, titleBarPattern->GetOriginalTitleBarBgStyle());
         return;
     }
     if (GreatOrEqual(currentOffset, endOffset) && !titleBarPattern->IsTitleBarStyleEndUpdate()) {
-        titleBarPattern->SetIsTitleBarBlurEnabled(true);
         titleBarPattern->SetScrollScale(1.0);
         UpdateTitleBarEndOptions(titleBarPattern);
         SetTitleBarOptions(titleBarPattern, titleBarPattern->GetScrollEffectTitleBarBgStyle());

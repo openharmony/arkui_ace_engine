@@ -397,7 +397,6 @@ public:
     void UpdateMenuIconEffect(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
     void UpdateMenuMaterial(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
     void UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
-    void SetIsTitleBarBlurEnabled(bool isEnable);
     void MarkMenuUIEffectNeedUpdate();
     RefPtr<UiMaterial> GetCurrentMaterial();
 
@@ -497,9 +496,7 @@ private:
     void UpdateBackButtonMaterialInner(const RefPtr<UiMaterial>& material);
     void UpdateBackButtonBrightnessEffect(bool forceUpdate = false);
     void UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, const RefPtr<UiMaterial>& material);
-    RefPtr<UiMaterial> GetOrCreateCommonBlurMaterial();
-    RefPtr<UiMaterial> GetOrCreateBeforeGradualBlurMaterial();
-    RefPtr<UiMaterial> GetOrCreateAfterGradualBlurMaterial();
+    RefPtr<UiMaterial> GetOrCreateGradualBlurMaterial();
     void CreateBrightnessEffectIfNeeded();
     void UpdateTitleBarUIEffectForColorModeChange();
 
@@ -507,8 +504,12 @@ private:
     void OnLuminanceUpdate(uint32_t luminance);
     ColorMode GetCurrentColorMode(bool enableColorInvert = false);
     bool IsColorInvertEnabled();
+    static bool IsApplyShadowEnabled(const RefPtr<UiMaterial>& material);
     void InitColorPickerIfNeeded();
     void UnregisterColorPicker();
+    bool IsTransparencyListenerNeeded();
+    void InitTransparencyListenerIfNeeded();
+    void UnregisterTransparencyListener();
     void StartColorInvertAnimation();
     void HandleColorInvert();
     static void UpdateSymbolIconColor(const RefPtr<FrameNode>& iconNode, const Color& color);
@@ -589,11 +590,7 @@ private:
     NavigationTitleBarStyle scrollEffectBgStyle_;
     NavigationTitleBarStyle currentBgStyle_;
 
-    bool isTitlebarBlurEnabled_ = false;
-    RefPtr<UiMaterial> commonBlurMaterial_ = nullptr;
-    RefPtr<UiMaterial> beforeGradualBlurMaterial_ = nullptr;
-    RefPtr<UiMaterial> afterGradualBlurMaterial_ = nullptr;
-    RefPtr<UiMaterial> currentDefaultMaterial_ = nullptr;
+    RefPtr<UiMaterial> gradualBlurMaterial_ = nullptr;
     std::optional<bool> isColorPickerDark_;
     bool isBackgroundDark_ = false;
     bool hasRegisterColorPicker_ = false;
@@ -603,6 +600,7 @@ private:
     bool needUpdateMenuEffect_ = false;
     bool needUpdateMenuMaterial_ = false;
     bool needUpdateMenuBrightness_ = false;
+    std::optional<int32_t> transparencyListenerId_;
 };
 
 } // namespace OHOS::Ace::NG

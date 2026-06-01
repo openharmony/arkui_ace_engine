@@ -19,10 +19,13 @@
 #define protected public
 #define private public
 
+#include "core/common/ace_application_info.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -34,6 +37,38 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t TEST_LUMINANCE_LOW = 100;
 constexpr uint32_t TEST_LUMINANCE_HIGH = 250;
+
+class ScopeUiMaterialLevel {
+public:
+    explicit ScopeUiMaterialLevel(UiMaterialLevel level)
+    {
+        backupLevel_ = g_uiMaterialLevel;
+        g_uiMaterialLevel = level;
+    }
+    ~ScopeUiMaterialLevel()
+    {
+        g_uiMaterialLevel = backupLevel_;
+    }
+
+private:
+    UiMaterialLevel backupLevel_;
+};
+
+class ScopeUIMaterialState {
+public:
+    explicit ScopeUIMaterialState(const std::string& state)
+    {
+        backupState_ = AceApplicationInfo::GetInstance().GetUIMaterialState();
+        AceApplicationInfo::GetInstance().SetUIMaterialState(state);
+    }
+    ~ScopeUIMaterialState()
+    {
+        AceApplicationInfo::GetInstance().SetUIMaterialState(backupState_);
+    }
+
+private:
+    std::string backupState_;
+};
 
 RefPtr<TitleBarNode> CreateTitleBarNode()
 {
@@ -273,5 +308,279 @@ HWTEST_F(TitleBarPatternTestTwoNg, UnregisterColorPicker002, TestSize.Level1)
     titleBarPattern->UnregisterColorPicker();
     EXPECT_FALSE(titleBarPattern->hasRegisterColorPicker_);
     EXPECT_TRUE(titleBarPattern->isColorPickerDark_.has_value());
+}
+
+/**
+ * @tc.name: IsColorInvertEnabled001
+ * @tc.desc: Branch: materialLevel != EXQUISITE && materialLevel != GENTLE => false
+ *           IsColorInvertEnabled returns false when material level is not EXQUISITE or GENTLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled001, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    ScopeUIMaterialState state("enable");
+    ScopeUiMaterialLevel level(UiMaterialLevel::SMOOTH);
+    EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
+}
+
+/**
+ * @tc.name: IsColorInvertEnabled002
+ * @tc.desc: Branch: GetCurrentMaterial() returns nullptr => false
+ *           IsColorInvertEnabled returns false when material is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled002, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    ScopeUIMaterialState state("enable");
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    titleBarPattern->options_.bgOptions.scrollEffectOptions = std::nullopt;
+    EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
+}
+
+/**
+ * @tc.name: IsColorInvertEnabled003
+ * @tc.desc: Branch: GetCurrentMaterial() returns material but immersiveOptions is null => false
+ *           IsColorInvertEnabled returns false when immersive options is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled003, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    ScopeUIMaterialState state("enable");
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    titleBarPattern->options_.bgOptions.scrollEffectOptions = ScrollEffectOptions();
+    titleBarPattern->options_.bgOptions.scrollEffectOptions->scrollEffectType = ScrollEffectType::GRADUAL_BLUR;
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    titleBarPattern->gradualBlurMaterial_ = material;
+    EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
+}
+
+/**
+ * @tc.name: IsColorInvertEnabled004
+ * @tc.desc: Branch: immersiveOptions exists but colorInvert is false => false
+ *           IsColorInvertEnabled returns false when colorInvert is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled004, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    ScopeUIMaterialState state("enable");
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    titleBarPattern->options_.bgOptions.scrollEffectOptions = ScrollEffectOptions();
+    titleBarPattern->options_.bgOptions.scrollEffectOptions->scrollEffectType = ScrollEffectType::GRADUAL_BLUR;
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    ImmersiveOptions options;
+    options.colorInvert = false;
+    material->SetImmersiveOptions(options);
+    titleBarPattern->gradualBlurMaterial_ = material;
+    EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
+}
+
+/**
+ * @tc.name: IsColorInvertEnabled005
+ * @tc.desc: Branch: Material is disabled via UIMaterialState => GetCurrentMaterial returns nullptr
+ *           IsColorInvertEnabled returns false when material is disabled globally
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled005, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    ScopeUIMaterialState state("disable");
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    titleBarPattern->options_.bgOptions.scrollEffectOptions = ScrollEffectOptions();
+    titleBarPattern->options_.bgOptions.scrollEffectOptions->scrollEffectType = ScrollEffectType::GRADUAL_BLUR;
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    ImmersiveOptions options;
+    options.colorInvert = true;
+    material->SetImmersiveOptions(options);
+    titleBarPattern->gradualBlurMaterial_ = material;
+    EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
+}
+
+/**
+ * @tc.name: IsColorInvertEnabled006
+ * @tc.desc: Branch: Material state is "default" => MaterialUtils::IsMaterialEnabled() returns false
+ *           IsColorInvertEnabled returns false when material state is default
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled006, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    ScopeUIMaterialState state("default");
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    titleBarPattern->options_.bgOptions.scrollEffectOptions = ScrollEffectOptions();
+    titleBarPattern->options_.bgOptions.scrollEffectOptions->scrollEffectType = ScrollEffectType::GRADUAL_BLUR;
+    EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
+}
+
+/**
+ * @tc.name: IsApplyShadowEnabled001
+ * @tc.desc: Branch: material is nullptr => false
+ *           IsApplyShadowEnabled returns false when material is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsApplyShadowEnabled001, TestSize.Level1)
+{
+    RefPtr<UiMaterial> nullMaterial = nullptr;
+    EXPECT_FALSE(TitleBarPattern::IsApplyShadowEnabled(nullMaterial));
+}
+
+/**
+ * @tc.name: IsApplyShadowEnabled002
+ * @tc.desc: Branch: material->GetImmersiveOptions() returns nullptr => false
+ *           IsApplyShadowEnabled returns false when immersive options is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsApplyShadowEnabled002, TestSize.Level1)
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    EXPECT_FALSE(TitleBarPattern::IsApplyShadowEnabled(material));
+}
+
+/**
+ * @tc.name: IsApplyShadowEnabled003
+ * @tc.desc: Branch: immersiveOptions exists, applyShadow is false => false
+ *           IsApplyShadowEnabled returns false when applyShadow is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsApplyShadowEnabled003, TestSize.Level1)
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    ImmersiveOptions options;
+    options.applyShadow = false;
+    material->SetImmersiveOptions(options);
+    EXPECT_FALSE(TitleBarPattern::IsApplyShadowEnabled(material));
+}
+
+/**
+ * @tc.name: IsApplyShadowEnabled004
+ * @tc.desc: Branch: immersiveOptions exists, applyShadow is true => true
+ *           IsApplyShadowEnabled returns true when applyShadow is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsApplyShadowEnabled004, TestSize.Level1)
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    ImmersiveOptions options;
+    options.applyShadow = true;
+    material->SetImmersiveOptions(options);
+    EXPECT_TRUE(TitleBarPattern::IsApplyShadowEnabled(material));
+}
+
+/**
+ * @tc.name: IsTransparencyListenerNeeded001
+ * @tc.desc: Branch: materialLevel != EXQUISITE && materialLevel != GENTLE => false
+ *           IsTransparencyListenerNeeded returns false when material level is not supported
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsTransparencyListenerNeeded001, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    ScopeUiMaterialLevel level(UiMaterialLevel::SMOOTH);
+    EXPECT_FALSE(titleBarPattern->IsTransparencyListenerNeeded());
+}
+
+/**
+ * @tc.name: IsTransparencyListenerNeeded002
+ * @tc.desc: Branch: GetCurrentMaterial() returns nullptr => false
+ *           IsTransparencyListenerNeeded returns false when material is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsTransparencyListenerNeeded002, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    ScopeUIMaterialState state("enable");
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    EXPECT_FALSE(titleBarPattern->IsTransparencyListenerNeeded());
+}
+
+/**
+ * @tc.name: IsTransparencyListenerNeeded003
+ * @tc.desc: Branch: immersiveOptions exists but colorInvert is false => false
+ *           IsTransparencyListenerNeeded returns false when colorInvert is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, IsTransparencyListenerNeeded003, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    ScopeUIMaterialState state("enable");
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    titleBarPattern->options_.bgOptions.scrollEffectOptions = ScrollEffectOptions();
+    titleBarPattern->options_.bgOptions.scrollEffectOptions->scrollEffectType = ScrollEffectType::GRADUAL_BLUR;
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(material, nullptr);
+    ImmersiveOptions options;
+    options.colorInvert = false;
+    material->SetImmersiveOptions(options);
+    titleBarPattern->gradualBlurMaterial_ = material;
+    EXPECT_FALSE(titleBarPattern->IsTransparencyListenerNeeded());
+}
+
+/**
+ * @tc.name: GetOrCreateGradualBlurMaterial001
+ * @tc.desc: Branch: gradualBlurMaterial_ already exists => return existing material
+ *           GetOrCreateGradualBlurMaterial returns cached material
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, GetOrCreateGradualBlurMaterial001, TestSize.Level1)
+{
+    auto titleBarNode = CreateTitleBarNode();
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    auto existingMaterial = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(existingMaterial, nullptr);
+    titleBarPattern->gradualBlurMaterial_ = existingMaterial;
+
+    auto result = titleBarPattern->GetOrCreateGradualBlurMaterial();
+    EXPECT_EQ(result, existingMaterial);
 }
 } // namespace OHOS::Ace::NG

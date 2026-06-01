@@ -22,6 +22,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -131,12 +132,7 @@ struct BrightnessBlenderParam {
     Rosen::Vector3f negativeCoeff;
     float fraction;
 };
-const BrightnessBlenderParam LIGHT_ICON_BACKGROUND_BRIGHTNESS_BLENDER_PARAM = {
-    0.2527f, -0.663f, 0.9099f, 0.4573f, 1.5f, { 1.2f, 1.8f, 1.0f }, { 2.0f, 2.2f, 0.5f }, 0.0f
-};
-const BrightnessBlenderParam DARK_ICON_BACKGROUND_BRIGHTNESS_BLENDER_PARAM = {
-    0.6933f, 1.2457f, -0.0824f, 0.1f, 2.0f, { 0.6f, 0.7f, 0.5f }, { 0.4f, 1.0f, 0.5f }, 0.0f
-};
+
 const BrightnessBlenderParam LIGHT_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM = {
     0.0f, 0.0f, 0.35f, -0.1176f, 3.5f, { 0.7f, 1.7f, 0.5f }, { 1.0f, 1.0f, 1.0f }, 0.0f
 };
@@ -144,16 +140,14 @@ const BrightnessBlenderParam DARK_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM = {
     0.0f, 0.0f, 0.1005f, 0.898f, 1.5f, { 1.0f, 0.5f, 0.5f }, { 2.0f, 2.5f, 0.5f }, 0.0f
 };
 
-std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender(bool isLight, bool isBackground)
+std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender(bool isLight)
 {
     auto blender = std::make_shared<Rosen::BrightnessBlender>();
     const BrightnessBlenderParam* param = nullptr;
     if (isLight) {
-        param = isBackground ? &LIGHT_ICON_BACKGROUND_BRIGHTNESS_BLENDER_PARAM :
-            &LIGHT_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM;
+        param = &LIGHT_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM;
     } else {
-        param = isBackground ? &DARK_ICON_BACKGROUND_BRIGHTNESS_BLENDER_PARAM :
-            &DARK_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM;
+        param = &DARK_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM;
     }
     blender->SetCubicRate(param->cubicRate);
     blender->SetQuadRate(param->quadRate);
@@ -166,22 +160,9 @@ std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender(bool isLight, 
     return blender;
 }
 
-std::shared_ptr<Rosen::VisualEffect> CreateVisualEffect(bool isLight)
-{
-    auto effect = std::make_shared<Rosen::VisualEffect>();
-    auto para = std::make_shared<Rosen::BackgroundColorEffectPara>();
-    auto blender = CreateBrightnessBlender(isLight, true);
-    para->SetBlender(blender);
-    effect->AddPara(para);
-    return effect;
-}
-
-// icon background
-static const auto LIGHT_ICON_VISUAL_EFFECT = CreateVisualEffect(true);
-static const auto DARK_ICON_VISUAL_EFFECT = CreateVisualEffect(false);
 // icon foreground
-static const auto LIGHT_ICON_BRIGHTNESS_BLENDER = CreateBrightnessBlender(true, false);
-static const auto DARK_ICON_BRIGHTNESS_BLENDER = CreateBrightnessBlender(false, false);
+static const auto LIGHT_ICON_BRIGHTNESS_BLENDER = CreateBrightnessBlender(true);
+static const auto DARK_ICON_BRIGHTNESS_BLENDER = CreateBrightnessBlender(false);
 #endif
 
 std::string TextLayoutPropertyToString(const RefPtr<TextLayoutProperty>& property)
@@ -833,17 +814,13 @@ bool TitleBarPattern::GetColorParamWithColorInvertSupported(IconColorParam& para
     const auto& options = options_.bgOptions.scrollEffectOptions;
     if (isColorInvertEnabled) {
         colorMode = GetCurrentColorMode(isColorInvertEnabled);
-    } else if (options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR &&
-        !isTitlebarBlurEnabled_) {
-        colorMode = ColorMode::DARK;
     } else {
         colorMode = GetCurrentColorMode(false);
     }
     const auto colors = GetOrCreateTitleBarTokenColors(context, colorMode);
     CHECK_NULL_RETURN(colors, false);
     if (options.has_value()) {
-        param.iconColor = (options->scrollEffectType == ScrollEffectType::COMMON_BLUR || isTitlebarBlurEnabled_) ?
-            colors->iconPrimary : colors->iconOnPrimary;
+        param.iconColor = colors->iconPrimary;
         param.iconColor = param.iconColor.ChangeOpacity(1.0);
         param.hoverColor = colors->interactiveHover;
         param.focusColor = colors->interactiveFocus;
@@ -867,11 +844,8 @@ std::optional<TitleBarPattern::IconColorParam> TitleBarPattern::GetCurrentIconCo
     CHECK_NULL_RETURN(context, std::nullopt);
     auto theme = context->GetTheme<NavigationBarTheme>();
     CHECK_NULL_RETURN(theme, std::nullopt);
-    ColorMode colorMode = ColorMode::DARK;
+    ColorMode colorMode = GetCurrentColorMode(false);
     const auto& options = options_.bgOptions.scrollEffectOptions;
-    if (!options.has_value() || options->scrollEffectType == ScrollEffectType::COMMON_BLUR || isTitlebarBlurEnabled_) {
-        colorMode = GetCurrentColorMode(false);
-    }
     const auto colors = GetOrCreateTitleBarTokenColors(context, colorMode);
     CHECK_NULL_RETURN(colors, std::nullopt);
     if (!options.has_value()) {
@@ -977,10 +951,18 @@ void TitleBarPattern::UpdateBackButtonMaterial()
 void TitleBarPattern::UpdateBackButtonMaterialInner(const RefPtr<UiMaterial>& material)
 {
     InitColorPickerIfNeeded();
+    InitTransparencyListenerIfNeeded();
     auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(host);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
+    auto titleRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(titleRenderContext);
+    if (IsApplyShadowEnabled(material)) {
+        titleRenderContext->UpdateClipEdge(false);
+    } else {
+        titleRenderContext->UpdateClipEdge(true);
+    }
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(backButtonNode), AceType::RawPtr(material));
 }
 
@@ -995,24 +977,6 @@ void TitleBarPattern::UpdateBackButtonBrightnessEffect(bool forceUpdate)
     CHECK_NULL_VOID(host);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    ColorMode colorMode = ColorMode::DARK;
-    bool isColorInvertEnabled = IsColorInvertEnabled();
-    const auto& options = options_.bgOptions.scrollEffectOptions;
-    if (isColorInvertEnabled) {
-        colorMode = GetCurrentColorMode(isColorInvertEnabled);
-    } else if (options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR &&
-        !isTitlebarBlurEnabled_) {
-        colorMode = ColorMode::DARK;
-    } else {
-        colorMode = GetCurrentColorMode(false);
-    }
-    auto material = GetCurrentMaterial();
-    const Rosen::VisualEffect* effect = nullptr;
-    if (options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR && !material) {
-        effect = colorMode == ColorMode::LIGHT ? LIGHT_ICON_VISUAL_EFFECT.get() : DARK_ICON_VISUAL_EFFECT.get();
-    }
-    // background
-    ViewAbstract::SetVisualEffect(AceType::RawPtr(backButtonNode), effect);
     if (backButtonNode->GetChildren().empty()) {
         return;
     }
@@ -1022,7 +986,10 @@ void TitleBarPattern::UpdateBackButtonBrightnessEffect(bool forceUpdate)
         return;
     }
     const Rosen::BrightnessBlender* blender = nullptr;
-    if (material) {
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (options_.bgOptions.scrollEffectOptions.has_value() && materialLevel != UiMaterialLevel::SMOOTH) {
+        bool isColorInvertEnabled = IsColorInvertEnabled();
+        auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
         blender = colorMode == ColorMode::LIGHT ?
             LIGHT_ICON_BRIGHTNESS_BLENDER.get() : DARK_ICON_BRIGHTNESS_BLENDER.get();
     }
@@ -1107,7 +1074,17 @@ void TitleBarPattern::UpdateMenuMaterial(const RefPtr<UINode>& menuNode, bool fo
 void TitleBarPattern::UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, const RefPtr<UiMaterial>& material)
 {
     CHECK_NULL_VOID(menuNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(titleRenderContext);
+    if (IsApplyShadowEnabled(material)) {
+        titleRenderContext->UpdateClipEdge(false);
+    } else {
+        titleRenderContext->UpdateClipEdge(true);
+    }
     InitColorPickerIfNeeded();
+    InitTransparencyListenerIfNeeded();
     auto children = menuNode->GetChildren();
     for (auto& child : children) {
         auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
@@ -1127,25 +1104,11 @@ void TitleBarPattern::UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode,
     needUpdateMenuBrightness_ = false;
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(menuNode);
-    ColorMode colorMode = ColorMode::DARK;
-    bool isColorInvertEnabled = IsColorInvertEnabled();
-    const auto& options = options_.bgOptions.scrollEffectOptions;
-    if (isColorInvertEnabled) {
-        colorMode = GetCurrentColorMode(isColorInvertEnabled);
-    } else if (options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR &&
-        !isTitlebarBlurEnabled_) {
-        colorMode = ColorMode::DARK;
-    } else {
-        colorMode = GetCurrentColorMode(false);
-    }
-    auto material = GetCurrentMaterial();
-    const Rosen::VisualEffect* effect = nullptr;
-    if (options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR && !material) {
-        effect = colorMode == ColorMode::LIGHT ?
-            LIGHT_ICON_VISUAL_EFFECT.get() : DARK_ICON_VISUAL_EFFECT.get();
-    }
     const Rosen::BrightnessBlender* blender = nullptr;
-    if (material) {
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (options_.bgOptions.scrollEffectOptions.has_value() && materialLevel != UiMaterialLevel::SMOOTH) {
+        bool isColorInvertEnabled = IsColorInvertEnabled();
+        auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
         blender = colorMode == ColorMode::LIGHT ?
             LIGHT_ICON_BRIGHTNESS_BLENDER.get() : DARK_ICON_BRIGHTNESS_BLENDER.get();
     }
@@ -1153,8 +1116,6 @@ void TitleBarPattern::UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode,
     for (auto& child : children) {
         auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_CONTINUE(menuItemNode);
-        // background
-        ViewAbstract::SetVisualEffect(AceType::RawPtr(menuItemNode), effect);
         if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG ||
             menuItemNode->GetChildren().empty()) {
             continue;
@@ -1678,6 +1639,7 @@ void TitleBarPattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
     UnregisterColorPicker();
+    UnregisterTransparencyListener();
 }
 
 void TitleBarPattern::InitFoldCreaseRegion()
@@ -1940,10 +1902,10 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
     return offset;
 }
 
-RefPtr<UiMaterial> TitleBarPattern::GetOrCreateCommonBlurMaterial()
+RefPtr<UiMaterial> TitleBarPattern::GetOrCreateGradualBlurMaterial()
 {
-    if (commonBlurMaterial_) {
-        return commonBlurMaterial_;
+    if (gradualBlurMaterial_) {
+        return gradualBlurMaterial_;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -1969,65 +1931,8 @@ RefPtr<UiMaterial> TitleBarPattern::GetOrCreateCommonBlurMaterial()
     lightEffectOptions.color = DEFAULT_LIGHT_EFFECT_COLOR;
     options.lightEffectOptions = lightEffectOptions;
     material->SetImmersiveOptions(options);
-    commonBlurMaterial_ = material;
-    return commonBlurMaterial_;
-}
-
-RefPtr<UiMaterial> TitleBarPattern::GetOrCreateBeforeGradualBlurMaterial()
-{
-    if (beforeGradualBlurMaterial_) {
-        return beforeGradualBlurMaterial_;
-    }
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    CHECK_NULL_RETURN(material, nullptr);
-    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
-    ImmersiveOptions options;
-    options.style = UiMaterialStyle::ULTRA_THIN;
-    options.colorInvert = true;
-    options.materialColor = Color::FromString("#00000000");
-    options.applyShadow = true;
-    options.interactive = true;
-    LightEffectOptions lightEffectOptions;
-    lightEffectOptions.color = DEFAULT_LIGHT_EFFECT_COLOR;
-    options.lightEffectOptions = lightEffectOptions;
-    options.colorMode = ColorMode::DARK;
-    material->SetImmersiveOptions(options);
-    beforeGradualBlurMaterial_ = material;
-    return beforeGradualBlurMaterial_;
-}
-
-RefPtr<UiMaterial> TitleBarPattern::GetOrCreateAfterGradualBlurMaterial()
-{
-    if (afterGradualBlurMaterial_) {
-        return afterGradualBlurMaterial_;
-    }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto themeScopeId = host->GetThemeScopeId();
-    auto tokenTheme = TokenThemeStorage::GetInstance()->GetTheme(themeScopeId);
-    if (!tokenTheme) {
-        tokenTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
-    }
-    CHECK_NULL_RETURN(tokenTheme, nullptr);
-    const auto& tokenColors = tokenTheme->Colors();
-    CHECK_NULL_RETURN(tokenColors, nullptr);
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    CHECK_NULL_RETURN(material, nullptr);
-    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
-    ImmersiveOptions options;
-    options.style = UiMaterialStyle::ULTRA_THIN;
-    options.colorInvert = true;
-    options.materialColor = tokenColors->CompBackgroundGray();
-    options.materialColor = options.materialColor.ChangeOpacity(0);
-    options.applyShadow = true;
-    options.interactive = true;
-    LightEffectOptions lightEffectOptions;
-    lightEffectOptions.color = DEFAULT_LIGHT_EFFECT_COLOR;
-    options.lightEffectOptions = lightEffectOptions;
-    options.colorMode = ColorMode::LIGHT;
-    material->SetImmersiveOptions(options);
-    afterGradualBlurMaterial_ = material;
-    return afterGradualBlurMaterial_;
+    gradualBlurMaterial_ = material;
+    return gradualBlurMaterial_;
 }
 
 RefPtr<UiMaterial> TitleBarPattern::GetCurrentMaterial()
@@ -2044,15 +1949,11 @@ RefPtr<UiMaterial> TitleBarPattern::GetCurrentMaterial()
         return nullptr;
     }
     // enable
-    if (!options_.bgOptions.scrollEffectOptions.has_value() ||
-        options_.bgOptions.scrollEffectOptions.value().scrollEffectType == ScrollEffectType::COMMON_BLUR) {
-        return GetOrCreateCommonBlurMaterial();
+    const auto& options = options_.bgOptions.scrollEffectOptions;
+    if (options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR) {
+        return GetOrCreateGradualBlurMaterial();
     }
-    if (isTitlebarBlurEnabled_) {
-        return GetOrCreateAfterGradualBlurMaterial();
-    } else {
-        return GetOrCreateBeforeGradualBlurMaterial();
-    }
+    return nullptr;
 }
 
 void TitleBarPattern::UpdateTitleBarUIEffectForColorModeChange()
@@ -2067,7 +1968,7 @@ void TitleBarPattern::UpdateTitleBarUIEffectForColorModeChange()
     if (!options.has_value() && !curMaterial) {
         return;
     }
-    if (options.has_value() && (options->scrollEffectType == ScrollEffectType::COMMON_BLUR || isTitlebarBlurEnabled_)) {
+    if (options.has_value()) {
         UpdateBackButtonIconEffect(true);
         UpdateMenuIconEffect(menuNode, true);
     }
@@ -2080,59 +1981,18 @@ void TitleBarPattern::UpdateTitleBarUIEffectForColorModeChange()
     const auto tokenColors = GetOrCreateTitleBarTokenColors(context, mode);
     CHECK_NULL_VOID(tokenColors);
     do {
-        CHECK_NULL_BREAK(commonBlurMaterial_);
-        auto options = commonBlurMaterial_->CopyImmersiveOptions();
+        CHECK_NULL_BREAK(gradualBlurMaterial_);
+        auto options = gradualBlurMaterial_->CopyImmersiveOptions();
         CHECK_NULL_BREAK(options);
         options->materialColor = tokenColors->compBackgroundGray;
         options->materialColor = options->materialColor.ChangeOpacity(0);
-        commonBlurMaterial_->SetImmersiveOptions(*options);
+        gradualBlurMaterial_->SetImmersiveOptions(*options);
     } while (false);
-    do {
-        CHECK_NULL_BREAK(afterGradualBlurMaterial_);
-        auto options = afterGradualBlurMaterial_->CopyImmersiveOptions();
-        CHECK_NULL_BREAK(options);
-        options->materialColor = tokenColors->compBackgroundGray;
-        options->materialColor = options->materialColor.ChangeOpacity(0);
-        afterGradualBlurMaterial_->SetImmersiveOptions(*options);
-    } while (false);
-    if (options_.material) {
-        return;
-    }
-    if (!MaterialUtils::IsMaterialEnabled()) {
-        return;
-    }
-    if (options_.bgOptions.scrollEffectOptions.has_value() &&
-        options_.bgOptions.scrollEffectOptions.value().scrollEffectType == ScrollEffectType::GRADUAL_BLUR &&
-        !isTitlebarBlurEnabled_) {
+    if (options_.material || !MaterialUtils::IsMaterialEnabled()) {
         return;
     }
     UpdateBackButtonMaterialInner(curMaterial);
     UpdateMenuMaterialInner(menuNode, curMaterial);
-}
-
-void TitleBarPattern::SetIsTitleBarBlurEnabled(bool isEnable)
-{
-    if (isTitlebarBlurEnabled_ == isEnable) {
-        return;
-    }
-    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(host);
-    auto preMaterial = GetCurrentMaterial();
-    isTitlebarBlurEnabled_ = isEnable;
-    auto curMaterial = GetCurrentMaterial();
-    if (preMaterial != curMaterial) {
-        UpdateBackButtonMaterialInner(curMaterial);
-        auto menuNode = AceType::DynamicCast<FrameNode>(host->GetMenu());
-        UpdateMenuMaterialInner(menuNode, curMaterial);
-    }
-    if (!options_.bgOptions.scrollEffectOptions.has_value()) {
-        return;
-    }
-    UpdateBackButtonIconEffect(true);
-    UpdateBackButtonBrightnessEffect(true);
-    auto menuNode = AceType::DynamicCast<FrameNode>(host->GetMenu());
-    UpdateMenuIconEffect(menuNode, true);
-    UpdateMenuBrightnessEffect(menuNode, true);
 }
 
 void TitleBarPattern::MarkMenuUIEffectNeedUpdate()
@@ -2152,7 +2012,29 @@ void TitleBarPattern::MarkMenuUIEffectNeedUpdate()
 
 bool TitleBarPattern::IsColorInvertEnabled()
 {
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel != UiMaterialLevel::EXQUISITE && materialLevel != UiMaterialLevel::GENTLE) {
+        return false;
+    }
     auto material = GetCurrentMaterial();
+    if (!material) {
+        return false;
+    }
+    const auto& options = material->GetImmersiveOptions();
+    if (!options || !options->colorInvert) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    if (materialLevel == UiMaterialLevel::EXQUISITE) {
+        return transparencyLevel == UiMaterialTransparency::THIN ||
+            transparencyLevel == UiMaterialTransparency::NORMAL;
+    }
+    return transparencyLevel == UiMaterialTransparency::GENTLE_THIN;
+}
+
+bool TitleBarPattern::IsApplyShadowEnabled(const RefPtr<UiMaterial>& material)
+{
     if (!material) {
         return false;
     }
@@ -2160,7 +2042,7 @@ bool TitleBarPattern::IsColorInvertEnabled()
     if (!options) {
         return false;
     }
-    return options->colorInvert;
+    return options->applyShadow;
 }
 
 ColorMode TitleBarPattern::GetCurrentColorMode(bool enableColorInvert)
@@ -2177,6 +2059,53 @@ ColorMode TitleBarPattern::GetCurrentColorMode(bool enableColorInvert)
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, ColorMode::COLOR_MODE_UNDEFINED);
     return context->GetColorMode();
+}
+
+bool TitleBarPattern::IsTransparencyListenerNeeded()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel != UiMaterialLevel::EXQUISITE && materialLevel != UiMaterialLevel::GENTLE) {
+        return false;
+    }
+    auto material = GetCurrentMaterial();
+    if (!material) {
+        return false;
+    }
+    const auto& options = material->GetImmersiveOptions();
+    if (!options || !options->colorInvert) {
+        return false;
+    }
+    return true;
+}
+
+void TitleBarPattern::InitTransparencyListenerIfNeeded()
+{
+    if (!IsTransparencyListenerNeeded()) {
+        UnregisterTransparencyListener();
+        InitColorPickerIfNeeded();
+        return;
+    }
+    if (transparencyListenerId_.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listener = [weakPattern = WeakClaim(this)](int32_t level) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Transparency change to %{public}d", level);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitColorPickerIfNeeded();
+    };
+    transparencyListenerId_ = TransparencyUtils::RegisterTransparencyListener(WeakPtr(host), std::move(listener));
+}
+
+void TitleBarPattern::UnregisterTransparencyListener()
+{
+    if (!transparencyListenerId_.has_value()) {
+        return;
+    }
+    TransparencyUtils::UnRegisterTransparencyListener(transparencyListenerId_.value());
+    transparencyListenerId_ = std::nullopt;
 }
 
 void TitleBarPattern::InitColorPickerIfNeeded()
@@ -2201,6 +2130,7 @@ void TitleBarPattern::InitColorPickerIfNeeded()
     CHECK_NULL_VOID(navMgr);
     navMgr->RegisterColorPicker(host, LUMINANCE_SAMPLER_INTERVAL, LUMINANCE_THRESHOLD_HIGH, LUMINANCE_THRESHOLD_LOW,
         [weakPattern = WeakClaim(this)](uint32_t luminance) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleBar luminance change to %{public}u", luminance);
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnLuminanceUpdate(luminance);
@@ -2263,9 +2193,6 @@ void TitleBarPattern::StartColorInvertAnimation()
 
 void TitleBarPattern::HandleColorInvert()
 {
-    if (!IsColorInvertEnabled()) {
-        return;
-    }
     auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(host);
     auto menuNode = AceType::DynamicCast<FrameNode>(host->GetMenu());

@@ -2565,7 +2565,7 @@ struct ArkUINavigationTitlebarOptions {
     ArkUIOptionalDimensionType paddingEnd;
     ArkUIOptionalBool enableHoverMode;
     ArkUIOptionalBool enableCustomTitlePaddingCheck;
-    void* material = nullptr;
+    void* material = NULL;
 
     struct resourceUpdater {
         OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> resObj;
