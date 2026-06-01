@@ -241,6 +241,9 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc082, TestSize.Level1)
  */
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc083, TestSize.Level1)
 {
+    /*
+     * @tc.step1: create textinput.
+     */
     CreateTextField();
     auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(
@@ -253,6 +256,9 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc083, TestSize.Level1)
     ASSERT_NE(textFieldManager, nullptr);
     MockContainer::SetUp();
     Offset menuOffset(-1.0f, 100);
+    /*
+     * @tc.step2: set click position.
+     */
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->SetClickPosition(menuOffset);
     EXPECT_NE(textFieldManager->optionalPosition_, menuOffset);
