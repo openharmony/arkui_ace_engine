@@ -710,6 +710,10 @@ build_component_ng("pattern_ng") {
         "window_manager:scene_session",
       ]
     }
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.hiviewdfx_api_metrics)) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+    }
     if (!build_ohos_sdk) {
       sources += [
         "form_button/form_button_model_ng.cpp",

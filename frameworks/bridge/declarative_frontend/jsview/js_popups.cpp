@@ -2223,7 +2223,7 @@ int32_t JSViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG
     return ViewAbstractModel::GetInstance()->GetPopupParam(param, customNode);
 }
 
-void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
+void JsBindContextMenuWithBuilderAndArray(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
     // Check the parameters
@@ -2253,6 +2253,52 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         return;
     }
 
+    if (!info[builderIndex]->IsObject()) {
+        return;
+    }
+ 
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[builderIndex]);
+    auto builder = menuObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+ 
+    ResponseType responseType = ResponseType::LONG_PRESS;
+    if (!info[NUM_ZERO]->IsBoolean() && info.Length() >= PARAMETER_LENGTH_SECOND && info[NUM_FIRST]->IsNumber()) {
+        auto response = info[NUM_FIRST]->ToNumber<int32_t>();
+        responseType = static_cast<ResponseType>(response);
+    }
+ 
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    std::function<void()> previewBuildFunc = nullptr;
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[NUM_SECOND]->IsObject()) {
+        ParseBindContentOptionParam(info, info[NUM_SECOND], menuParam, previewBuildFunc);
+    }
+ 
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                                          node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("BuildContextMenu");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute();
+    };
+ 
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
+    ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
+}
+
+void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
+{
+    NG::MenuParam menuParam;
+    // Check the parameters
+    if (info.Length() <= PARAMETER_LENGTH_ZERO) {
+        return;
+    }
+    size_t builderIndex = ParseBindContextMenuShow(info, menuParam);
     if (!info[builderIndex]->IsObject()) {
         return;
     }
@@ -2347,6 +2393,16 @@ void JSViewAbstract::JsBindContextMenuWithResponse(const JSCallbackInfo& info)
         };
 
     ViewAbstractModel::GetInstance()->BindContextMenu(buildFuncWithType, menuParam, previewBuildFunc);
+}
+
+void JSViewAbstract::JsBindContextMenuByResponseType(const JSCallbackInfo& info)
+{
+    JsBindContextMenuWithBuilderAndArray(info);
+}
+ 
+void JSViewAbstract::JsBindContextMenuByIsShow(const JSCallbackInfo& info)
+{
+    JsBindContextMenuWithBuilderAndArray(info);
 }
 #endif
 

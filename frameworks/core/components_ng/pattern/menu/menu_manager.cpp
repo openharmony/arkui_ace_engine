@@ -18,6 +18,8 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
+
 #include <cstdint>
 #include <string>
 #include <utility>
@@ -1224,9 +1226,28 @@ bool MenuManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, cons
     return true;
 }
 
+namespace {
+bool IsContextMenuType(const RefPtr<FrameNode>& menu)
+{
+    CHECK_NULL_RETURN(menu, false);
+    auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
+    CHECK_NULL_RETURN(wrapperPattern, false);
+    auto menuChild = wrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menuChild, false);
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->GetMenuType() == MenuType::CONTEXT_MENU;
+}
+} // namespace
+
 void MenuManager::ShowMenu(const RefPtr<OverlayManager>& overlayManager,
     int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
+    if (IsContextMenuType(menu)) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.BindContextMenu", 1);
+    } else {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.BindMenu", 1);
+    }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu enter");
     if (!ShowMenuHelper(menu, targetId, offset)) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
@@ -1266,6 +1287,11 @@ void MenuManager::ShowMenu(const RefPtr<OverlayManager>& overlayManager,
 void MenuManager::ShowMenuInSubWindow(const RefPtr<OverlayManager>& overlayManager,
     int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
+    if (IsContextMenuType(menu)) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.BindContextMenu", 1);
+    } else {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.BindMenu", 1);
+    }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu insubwindow enter");
     if (!ShowMenuHelper(menu, targetId, offset)) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
