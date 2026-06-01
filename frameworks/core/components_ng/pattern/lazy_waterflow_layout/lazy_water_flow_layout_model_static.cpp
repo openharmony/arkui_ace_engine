@@ -33,8 +33,11 @@ RefPtr<FrameNode> LazyWaterFlowLayoutModelStatic::CreateFrameNode(int32_t nodeId
 void LazyWaterFlowLayoutModelStatic::SetRowGap(FrameNode* frameNode, const std::optional<Dimension>& rowGap)
 {
     if (rowGap) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(rowGap.value(), LpxAttribute::LPX_ROWS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyWaterFlowLayoutProperty, RowGap, rowGap.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_ROWS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             LazyWaterFlowLayoutProperty, RowGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }
@@ -43,8 +46,11 @@ void LazyWaterFlowLayoutModelStatic::SetRowGap(FrameNode* frameNode, const std::
 void LazyWaterFlowLayoutModelStatic::SetColumnGap(FrameNode* frameNode, const std::optional<Dimension>& columnGap)
 {
     if (columnGap) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(columnGap.value(), LpxAttribute::LPX_COLUMNS_GAP, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyWaterFlowLayoutProperty, ColumnGap, columnGap.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_COLUMNS_GAP);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             LazyWaterFlowLayoutProperty, ColumnGap, PROPERTY_UPDATE_MEASURE, frameNode);
     }

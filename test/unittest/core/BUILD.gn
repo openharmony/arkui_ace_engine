@@ -44,12 +44,13 @@ group("scroll_test") {
   testonly = true
   deps = [
     "pattern/arc_list:arc_list_test_ng",
+    "pattern/grid:grid_test_custom",
     "pattern/grid:grid_test_ng",
     "pattern/grid:grid_test_regular",
-    "pattern/grid:grid_test_custom",
+    "pattern/lazy_layout:dynamiclayout_grid_test_ng",
     "pattern/lazy_layout:lazy_column_layout_test",
     "pattern/lazy_layout:lazy_grid_layout_test",
-    "pattern/lazy_layout:dynamiclayout_grid_test_ng",
+    "pattern/lazy_waterflow_layout:lazy_water_flow_layout_test",
     "pattern/list:list_test_ng",
     "pattern/refresh:refresh_test_ng",
     "pattern/scroll:scroll_test_ng",

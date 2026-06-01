@@ -35,8 +35,11 @@ RefPtr<FrameNode> LazyColumnLayoutModelStatic::CreateFrameNode(int32_t nodeId)
 void LazyColumnLayoutModelStatic::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
     if (space) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(space.value(), LpxAttribute::LPX_SPACE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyColumnLayoutProperty, Space, space.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(LazyColumnLayoutProperty, Space, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
