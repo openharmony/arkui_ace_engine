@@ -30,6 +30,7 @@
 
 #include "base/image/image_perf.h"
 #include "base/log/dump_log.h"
+#include "base/log/event_report.h"
 #include "base/network/download_manager.h"
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine_ext.h"
@@ -914,6 +915,7 @@ bool ImagePattern::GetAutoResizeForCtx(
     if (originImageSize.IsPositive() &&
         static_cast<double>(originImageSize.Width()) * static_cast<double>(originImageSize.Height()) >
             IMAGE_PIXEL_COUNT_THRESHOLD) {
+        EventReport::SendComponentException(ComponentExcepType::IMAGE_LARGE_PIXEL_COUNT_ERR);
         if (!autoResize) {
             TAG_LOGI(AceLogTag::ACE_IMAGE,
                 "AutoResize forced to true, image pixels(%{public}lf * %{public}lf) exceed threshold %{public}lf",

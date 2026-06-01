@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/animated_image.h"
 
+#include "base/log/event_report.h"
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #include "include/codec/SkCodec.h"
@@ -31,6 +32,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
+constexpr int32_t SHORT_FRAME_DURATION_THRESHOLD = 20;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
 constexpr float RESIZE_THRESHOLD = 0.7f;
 
@@ -99,8 +101,13 @@ std::vector<int> AnimatedImage::GenerateDuration(const std::unique_ptr<SkCodec>&
 {
     std::vector<int> duration;
     const auto frameInfos = codec->getFrameInfo();
+    bool shortFrameReported = false;
     for (const auto& frameInfo : frameInfos) {
         const int frameDuration = frameInfo.fDuration > 0 ? frameInfo.fDuration : STANDARD_FRAME_DURATION;
+        if (frameDuration < SHORT_FRAME_DURATION_THRESHOLD && !shortFrameReported) {
+            EventReport::SendComponentException(ComponentExcepType::ANIMATED_IMAGE_SHORT_DURATION_ERR);
+            shortFrameReported = true;
+        }
         duration.push_back(frameDuration);
     }
     return duration;
