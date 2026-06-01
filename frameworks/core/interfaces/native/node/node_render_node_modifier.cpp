@@ -28,10 +28,13 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_node_ext/custom_node_ext_modifier.h"
 #include "core/pipeline/base/render_node.h"
+
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/matrix4.h"
 #include "frameworks/core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/interfaces/native/utility/error_message_macros.h"
+
 namespace OHOS::Ace::NG {
 using OHOS::Rosen::RSNode;
 constexpr int NUM_0 = 0;
@@ -1066,6 +1069,7 @@ int32_t GetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* t
     *top = vector4.y_;
     *right = vector4.z_;
     *bottom = vector4.w_;
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("NativeRender.RenderNodeUtils.GetBorderStyle", vector4.x_ == vector4.w_);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1103,6 +1107,7 @@ int32_t GetBorderWidth(
     *top = vector4.y_;
     *right = vector4.z_;
     *bottom = vector4.w_;
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("NativeRender.RenderNodeUtils.GetBorderWidth", vector4.x_ == vector4.w_);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1139,6 +1144,8 @@ int32_t GetBorderColor(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* t
     *top = vector4.y_.AsArgbInt();
     *right = vector4.z_.AsArgbInt();
     *bottom = vector4.w_.AsArgbInt();
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(
+        "NativeRender.RenderNodeUtils.GetBorderColor", vector4.x_.AsArgbInt() == vector4.w_.AsArgbInt());
     return ERROR_CODE_NO_ERROR;
 }
 
