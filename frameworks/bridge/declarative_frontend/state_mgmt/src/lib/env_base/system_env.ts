@@ -38,3 +38,14 @@ class WritableEnvKey {
     static readonly DIRECTION: WritableSystemEnvKey<Direction> = new WritableSystemEnvKey<Direction>('system.arkui.layout.direction');
     static readonly FONT_SCALE: WritableSystemEnvKey<number> = new WritableSystemEnvKey<number>('system.arkui.fontScale');
 }
+
+class ReadonlyEnvKey {
+  static readonly WINDOW_AVOID_AREA: ReadonlySystemEnvKey<UIEnvAvoidArea> = new ReadonlySystemEnvKey<UIEnvAvoidArea>('system.window.avoidarea');
+  static readonly WINDOW_AVOID_AREA_PX: ReadonlySystemEnvKey<UIEnvAvoidArea> = new ReadonlySystemEnvKey<UIEnvAvoidArea>('system.window.avoidarea.px');
+  static readonly WINDOW_SIZE: ReadonlySystemEnvKey<SizeInVp> = new ReadonlySystemEnvKey<SizeInVp>('system.window.size');
+  static readonly WINDOW_SIZE_PX: ReadonlySystemEnvKey<Size> = new ReadonlySystemEnvKey<Size>('system.window.size.px');
+  static readonly WINDOW_DISPLAY_ID: ReadonlySystemEnvKey<number> = new ReadonlySystemEnvKey<number>('system.window.displayid');
+  static readonly WINDOW_SYSTEM_DENSITY: ReadonlySystemEnvKey<number> = new ReadonlySystemEnvKey<number>('system.window.density.system');
+  static readonly WINDOW_IS_FOCUSED: ReadonlySystemEnvKey<boolean> = new ReadonlySystemEnvKey<boolean>('system.window.focused');
+  static readonly WINDOW_IS_HIGHLIGHTED: ReadonlySystemEnvKey<boolean> = new ReadonlySystemEnvKey<boolean>('system.window.highlighted');
+}
