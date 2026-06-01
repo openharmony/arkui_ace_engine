@@ -2393,10 +2393,10 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(contentNode, false);
     auto renderContext = contentNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (NeedDistortion() && !isDialogShow_) {
+    if (NeedDistortion() && isDistortAnimationExecuting_.value_or(false)) {
         renderContext->UpdateDistortionParam(TERMINAL_DISTORTION_PARAM);
     }
-    CHECK_EQUAL_RETURN(isDialogShow_, false, false);
+    CHECK_NULL_RETURN(!isDistortAnimationExecuting_.has_value(), false);
 
     if (NeedDistortion()) {
         PlayDistortion();
@@ -2404,7 +2404,6 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (NeedEdgeLight()) {
         PlayFlowLight();
     }
-    isDialogShow_ = false;
     return true;
 }
 
@@ -3477,6 +3476,33 @@ std::vector<RefPtr<RenderContext>> GetFirstRenderContexts(const RefPtr<UINode>& 
     return childContexts;
 }
 
+void DialogPattern::StartMaskColorAnimation()
+{
+    /**
+     * Background color animation
+     * Animate from transparent to actual mask color value
+     * Uses same parameters as opacity animation in OpenDialogAnimationInner
+     */
+    auto dialogNode = GetHost();
+    CHECK_NULL_VOID(dialogNode);
+    Color maskColorStart = dialogTheme_->GetMaskColorStart();
+    auto dialogContext = dialogNode->GetRenderContext();
+    CHECK_NULL_VOID(dialogContext);
+    Color maskColorEnd = dialogContext->GetBackgroundColor().value_or(dialogTheme_->GetMaskColorEnd());
+    dialogContext->UpdateBackgroundColor(maskColorStart);
+    AnimationOption bgOption;
+    bgOption.SetCurve(Curves::SHARP);
+    bgOption.SetDuration(dialogTheme_->GetOpacityAnimationDurIn());
+    bgOption.SetFillMode(FillMode::FORWARDS);
+    bgOption.SetIteration(1);
+    bgOption.SetAnimationDirection(AnimationDirection::NORMAL);
+    AnimationUtils::Animate(bgOption, [weakRender = WeakPtr<RenderContext>(dialogContext), maskColorEnd]() {
+        auto render = weakRender.Upgrade();
+        CHECK_NULL_VOID(render);
+        render->UpdateBackgroundColor(maskColorEnd);
+    });
+}
+
 void DialogPattern::PlayDistortion()
 {
     auto dialogNode = GetHost();
@@ -3486,6 +3512,8 @@ void DialogPattern::PlayDistortion()
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     std::vector<RefPtr<RenderContext>> childContexts = GetFirstRenderContexts(columnNode);
+
+    StartMaskColorAnimation();
 
     /**
      * Stage 1: Initial distortion effect
@@ -3525,6 +3553,7 @@ void DialogPattern::PlayDistortion()
         }
     });
 
+    isDistortAnimationExecuting_ = true;
     /**
      * Stage 5: Add barrel distortion
      * Add slight barrel distortion effect, parameter {0.5, 0.5}
@@ -3563,6 +3592,15 @@ void DialogPattern::PlayDistortion()
         for (const auto& childContext : childContexts) {
             childContext->UpdateForegroundFilterDistortionParam(param3);
         }
+    }, [weakRender = WeakPtr<RenderContext>(renderContext), weak = WeakClaim(this)]() {
+        // Clear SDF shape after animation completes
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "dialog completes distortion animation.");
+        auto render = weakRender.Upgrade();
+        CHECK_NULL_VOID(render);
+        render->SetSDFShape(nullptr);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isDistortAnimationExecuting_ = false;
     });
 
     /**
