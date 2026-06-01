@@ -172,6 +172,11 @@ bool DepthComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
         return false;
     }
     CHECK_NULL_RETURN(dirty, false);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rsDepthNode = GetRSDepthNode();
+    CHECK_NULL_RETURN(rsDepthNode, false);
+    TransferCameraParams(rsDepthNode);
+#endif
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, !(config.skipMeasure || dirty->SkipMeasureContent()));
@@ -290,7 +295,9 @@ void DepthComponentPattern::ApplyOnErrorCallback(const RefPtr<FrameNode>& backgr
 void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode)
 {
     CHECK_NULL_VOID(backgroundImageNode);
-    auto depthLayoutProperty = GetHost()->GetLayoutProperty<DepthComponentLayoutProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
     CHECK_NULL_VOID(depthLayoutProperty);
     auto cameraParams = depthLayoutProperty->GetCameraParams();
     if (!cameraParams.has_value() || !cameraParams->cameraBufferCrop.has_value()) {
@@ -308,6 +315,9 @@ void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& 
     }
 
     const auto& crop = cameraParams->cameraBufferCrop.value();
+    if (crop.cropScale <= 0.0f) {
+        return;
+    }
     float scale = (1.0 / crop.cropScale);
     float offsetX = crop.cropOffset.x;
     float offsetY = crop.cropOffset.y;
@@ -322,11 +332,10 @@ void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& 
     auto imageRenderProperty = backgroundImageNode->GetPaintProperty<ImageRenderProperty>();
     if (imageLayoutProp) {
         imageLayoutProp->UpdateImageFit(ImageFit::MATRIX);
-        imageRenderProperty->UpdateImageFit(ImageFit::MATRIX);
     }
-    auto imageRenderProp = backgroundImageNode->GetPaintProperty<ImageRenderProperty>();
-    if (imageRenderProp) {
-        imageRenderProp->UpdateImageMatrix(matrix4);
+    if (imageRenderProperty) {
+        imageRenderProperty->UpdateImageFit(ImageFit::MATRIX);
+        imageRenderProperty->UpdateImageMatrix(matrix4);
     }
 }
 
@@ -351,13 +360,36 @@ void DepthComponentPattern::RemoveBackgroundImageNode()
     backgroundImageId_.reset();
 }
 
+bool DepthComponentPattern::IsCameraChange()
+{
+    ACE_SCOPED_TRACE("DepthComponent::IsCameraChange IN");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
+    CHECK_NULL_RETURN(depthLayoutProperty, false);
+    auto cameraParams = depthLayoutProperty->GetCameraParams();
+    CHECK_NULL_RETURN(cameraParams, false);
+    if (!preCameraParams_.has_value() ||
+        (cameraParams.has_value() && preCameraParams_.value() != cameraParams.value())) {
+        preCameraParams_ = cameraParams;
+        return true;
+    }
+    return false;
+}
+
 void DepthComponentPattern::OnPaint3D()
 {
     ACE_FUNCTION_TRACE();
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     if (IsGltfBackground() && mrtDepthAdapter_) {
-        mrtDepthAdapter_->RenderFrame();
-        MarkRender3D();
+        if (isGltfLoaded_) {
+            if (IsCameraChange() || isNeedRender_) {
+                mrtDepthAdapter_->RenderFrame();
+                isNeedRender_ = false;
+            }
+        } else {
+            MarkRender3D();
+        }
     }
 #endif
 }
@@ -490,12 +522,14 @@ void DepthComponentPattern::TransferCameraParams(const std::shared_ptr<OHOS::Ros
     auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
     CHECK_NULL_VOID(depthLayoutProperty);
     auto cameraParams = depthLayoutProperty->GetCameraParams();
-    if (!cameraParams.has_value()) {
+    if (!cameraParams.has_value() || (!isNeedRender_ &&
+        preCameraParams_.has_value() && (cameraParams.value() == preCameraParams_.value()))) {
         return;
     }
 
     const auto& camera = cameraParams.value();
     auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geoNode);
     float dcW = geoNode->GetFrameSize().Width();
     float dcH = geoNode->GetFrameSize().Height();
     auto [fov, xOffset, yOffset] = ComputeTiltShift(camera, dcW, dcH);
@@ -612,6 +646,7 @@ void DepthComponentPattern::InitGltfAdapter()
         mrtDepthAdapter_.reset();
         mrtDepthAdapter_ = Render3D::GetMrtDepthAdapterInstance();
         gltfSceneLoaded_ = false;
+        isGltfLoaded_ = false;
         nativeWindowSetUp_ = false;
         return;
     }
@@ -636,7 +671,7 @@ void DepthComponentPattern::UpdateGltfScene()
     if (lastLoadedGltfPath_ == backgroundSource.resolvedPath && gltfSceneLoaded_) {
         return;
     }
-
+    isNeedRender_ = true;
     lastLoadedGltfPath_ = backgroundSource.resolvedPath;
     auto loadCallback = CreateGltfLoadCallback();
     mrtDepthAdapter_->CreateSceneByGltfUri(lastLoadedGltfPath_, std::move(loadCallback));
@@ -669,7 +704,12 @@ std::function<void(bool)> DepthComponentPattern::CreateGltfLoadCallback()
             onError(errorEvent);
         }
     };
-    return [weakNode = WeakClaim(AceType::RawPtr(host)), fireCallback](bool success) {
+    return [weakPattern = WeakClaim(this), weakNode = WeakClaim(AceType::RawPtr(host)),
+            fireCallback](bool success) {
+        auto pattern = weakPattern.Upgrade();
+        if (pattern && success) {
+            pattern->isGltfLoaded_ = true;
+        }
         auto node = weakNode.Upgrade();
         CHECK_NULL_VOID(node);
         auto context = node->GetContext();
@@ -695,6 +735,7 @@ void DepthComponentPattern::UpdateGltfCamera()
     const auto& camera = cameraParams.value();
 
     auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geoNode);
     float dcW = geoNode->GetFrameSize().Width();
     float dcH = geoNode->GetFrameSize().Height();
     auto [fov, xOffset, yOffset] = ComputeTiltShift(camera, dcW, dcH);
@@ -740,6 +781,7 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
     surfaceRenderContext_.clear();
     gltfWindowsInitialized_ = false;
     gltfSceneLoaded_ = false;
+    isGltfLoaded_ = false;
     nativeWindowSetUp_ = false;
     lastLoadedGltfPath_.clear();
     if (clearAdapter) {
@@ -849,6 +891,7 @@ void DepthComponentPattern::UpdateWindowInfo()
     if (!NeedUpdateWindowInfo()) {
         return;
     }
+    isNeedRender_ = true;
     mrtDepthAdapter_->OnWindowChange(windowChangeInfos_);
     nativeWindowSetUp_ = true;
     lastWidth3d_ = width3d_;

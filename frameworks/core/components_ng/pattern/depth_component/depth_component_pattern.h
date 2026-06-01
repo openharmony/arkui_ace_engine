@@ -207,6 +207,7 @@ private:
     void ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode);
     void PropagateCropToChildren();
     void OnPaint3D();
+    bool IsCameraChange();
 
 #ifdef ENABLE_ROSEN_BACKEND
     void LoadDepthMap();
@@ -273,6 +274,9 @@ private:
     std::string lastLoadedDepthMapKey_;
     float depthMapWidth_ = 0.0f;
     float depthMapHeight_ = 0.0f;
+    bool isGltfLoaded_ = false;
+    bool isNeedRender_ = false;
+    std::optional<OHOS::Ace::DepthCameraParams> preCameraParams_;
 };
 
 } // namespace OHOS::Ace::NG
