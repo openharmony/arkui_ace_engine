@@ -46,5 +46,14 @@ enum class ForceSplitBehaviorMode {
     NAVIGATION,
 };
 
+// The minimum draggable ratio when dynamically dragging the forceSplitDivider
+constexpr float MIN_SPLIT_DRAG_RATIO = 1.0f / 7;
+// The maximum draggable ratio when dynamically dragging the forceSplitDivider
+constexpr float MAX_SPLIT_DRAG_RATIO = 6.0f / 7;
+
+// The minimum column ratio of the divider in non dragging state
+constexpr float MIN_SPLIT_RATIO = 1.0f / 3;
+// The maximum column ratio of the divider in non dragging state
+constexpr float MAX_SPLIT_RATIO = 2.0f / 3;
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FORCE_SPLIT_FORCE_SPLIT_CONSTANTS_H

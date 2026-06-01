@@ -21,6 +21,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -30,6 +31,11 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr Dimension DIVIDER_WIDTH = 1.0_px;
+constexpr Dimension DIVIDER_DRAG_BAR_WIDTH = 12.0_vp;
+constexpr Dimension DIVIDER_DRAG_BAR_HEIGHT = 48.0_vp;
+constexpr Dimension DRAG_BAR_ITEM_WIDTH = 2.0_vp;
+constexpr Dimension DRAG_BAR_ITEM_HEIGHT = 24.0_vp;
+constexpr float HALF_RATIO = 0.5f;
 
 bool IsVirtualStackBasedSplit(const RefPtr<FrameNode>& hostNode)
 {
@@ -141,6 +147,7 @@ void ParallelStageLayoutAlgorithm::MeasureInNewRouterSplitFlow(
     dividerConstraint.selfIdealSize.SetSize(dividerSize_);
     dividerWrapper->Measure(dividerConstraint);
     MeasureRouterSplitPages(hostNode, layoutWrapper);
+    MeasureDragBar(layoutWrapper, hostNode);
 }
 
 void ParallelStageLayoutAlgorithm::LayoutInNewRouterSplitFlow(
@@ -161,6 +168,7 @@ void ParallelStageLayoutAlgorithm::LayoutInNewRouterSplitFlow(
     dividerGeometry->SetMarginFrameOffset(dividerOffsetF);
     dividerWrapper->Layout();
     LayoutRouterSplitPages(hostNode, layoutWrapper);
+    LayoutDragBar(layoutWrapper, hostNode, primarySize_.Width());
 }
 
 void ParallelStageLayoutAlgorithm::MeasurePageInColumn(
@@ -266,8 +274,27 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (stagePattern->GetIsSplit() && forceSplitMgr->IsForceSplitDragging()) {
+        SizeCalculationForForceSplit(hostNode, size);
+        auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+        CHECK_NULL_VOID(dividerWrapper);
+        auto dividerProperty = dividerWrapper->GetLayoutProperty();
+        auto dividerConstraint = dividerProperty->CreateChildConstraint();
+        dividerConstraint.selfIdealSize.SetSize(dividerSize_);
+        dividerWrapper->Measure(dividerConstraint);
+        MeasureDragBar(layoutWrapper, hostNode);
+        MeasureForceSplitMaskNodes(layoutWrapper, hostNode);
+        return;
+    }
+
     if (IsVirtualStackBasedSplit(hostNode)) {
         MeasureInNewRouterSplitFlow(hostNode, layoutWrapper, stagePattern);
+        MeasureDragBar(layoutWrapper, hostNode);
         return;
     }
 
@@ -302,6 +329,7 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     MeasurePage(detailWrapper, secondarySize_);
+    MeasureDragBar(layoutWrapper, hostNode);
 }
 
 void ParallelStageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -313,6 +341,31 @@ void ParallelStageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(stagePattern);
     if (!stagePattern->GetIsSplit()) {
         BoxLayoutAlgorithm::Layout(layoutWrapper);
+        return;
+    }
+
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (stagePattern->GetIsSplit() && forceSplitMgr->IsForceSplitDragging()) {
+        float dragRatio = forceSplitMgr->GetTemporarySplitRatio().has_value() ?
+            forceSplitMgr->GetTemporarySplitRatio().value() : forceSplitMgr->GetSplitRatio();
+        float frameWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        float navBarOrPrimaryNodeWidth = (frameWidth - dividerSize_.Width()) * (1.0f - dragRatio);
+
+        auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+        CHECK_NULL_VOID(dividerWrapper);
+        auto dividerGeometry = dividerWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(dividerGeometry);
+        OffsetF dividerOffsetF;
+        dividerOffsetF.SetX(navBarOrPrimaryNodeWidth);
+        dividerOffsetF.SetY(0.0f);
+        dividerGeometry->SetMarginFrameOffset(dividerOffsetF);
+        dividerWrapper->Layout();
+
+        LayoutDragBar(layoutWrapper, hostNode, navBarOrPrimaryNodeWidth);
+        LayoutForceSplitMaskNodes(layoutWrapper, hostNode);
         return;
     }
 
@@ -389,6 +442,8 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(offset);
     detailPageWrapper->Layout();
+
+    LayoutDragBar(layoutWrapper, hostNode, primarySize_.Width());
 }
 
 void ParallelStageLayoutAlgorithm::MeasureDetailPage(const RefPtr<LayoutWrapper>& layoutWrapper)
@@ -440,15 +495,121 @@ void ParallelStageLayoutAlgorithm::SizeCalculationForForceSplit(const RefPtr<Fra
     CHECK_NULL_VOID(pipeline);
     auto forceSplitMgr = pipeline->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
-    auto detailPageRatio = forceSplitMgr->GetSplitRatio();
+    float ratio = forceSplitMgr->GetTemporarySplitRatio().has_value() ?
+         forceSplitMgr->GetTemporarySplitRatio().value() : forceSplitMgr->GetSplitRatio();
     float dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
     dividerWidth = std::ceil(dividerWidth);
-    auto secondaryWidth = (size.Width() - dividerWidth) * detailPageRatio;
+    auto secondaryWidth = (size.Width() - dividerWidth) * ratio;
     secondaryWidth = std::max(std::floor(secondaryWidth), 0.0f);
     auto primaryWidth = size.Width() - secondaryWidth - dividerWidth;
     primaryWidth = std::max(std::floor(primaryWidth), 0.0f);
     dividerSize_ = SizeF(dividerWidth, size.Height());
     primarySize_ = SizeF(primaryWidth, size.Height());
     secondarySize_ = SizeF(secondaryWidth, size.Height());
+}
+
+void ParallelStageLayoutAlgorithm::MeasureDragBar(
+    LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode)
+{
+    auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(stagePattern);
+    auto dragBarNode = stagePattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto index = hostNode->GetChildIndexById(dragBarNode->GetId());
+    auto dragWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(dragWrapper);
+    auto dragBarItem = AceType::DynamicCast<FrameNode>(dragBarNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(dragBarItem);
+    auto dragBarItemLayoutProperty = dragBarItem->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarItemLayoutProperty);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    bool shouldMeasureDragBar = stagePattern->GetIsSplit() && forceSplitMgr->IsSplitDraggable();
+    auto hostLayoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto constraint = hostLayoutProperty->CreateChildConstraint();
+    if (!shouldMeasureDragBar || NearZero(dividerSize_.Width())) {
+        constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
+        dragBarItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    } else {
+        constraint.selfIdealSize = OptionalSizeF(
+            static_cast<float>(DIVIDER_DRAG_BAR_WIDTH.ConvertToPx()),
+            static_cast<float>(DIVIDER_DRAG_BAR_HEIGHT.ConvertToPx()));
+        dragBarItemLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(DRAG_BAR_ITEM_WIDTH), CalcLength(DRAG_BAR_ITEM_HEIGHT)));
+    }
+    dragWrapper->Measure(constraint);
+}
+
+void ParallelStageLayoutAlgorithm::LayoutDragBar(
+    LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode, float primaryWidth)
+{
+    auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(stagePattern);
+    auto dragBarNode = stagePattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto index = hostNode->GetChildIndexById(dragBarNode->GetId());
+    auto dragWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(dragWrapper);
+    auto geometryNode = dragWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(navigationGeometryNode);
+    auto navigationWidth = navigationGeometryNode->GetFrameSize().Width();
+    auto navigationHeight = navigationGeometryNode->GetFrameSize().Height();
+    auto offsetX = primaryWidth - geometryNode->GetFrameSize().Width() * HALF_RATIO;
+    auto offsetY = navigationHeight * HALF_RATIO - geometryNode->GetFrameSize().Height() * HALF_RATIO;
+    OffsetT<float> dragOffset(offsetX, offsetY);
+    auto rtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (rtl) {
+        dragOffset.SetX(navigationWidth - primaryWidth - geometryNode->GetFrameSize().Width() * HALF_RATIO);
+    }
+    geometryNode->SetMarginFrameOffset(dragOffset);
+    dragWrapper->Layout();
+}
+
+void ParallelStageLayoutAlgorithm::MeasureForceSplitMaskNodes(
+    LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode)
+{
+    auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(stagePattern);
+    do {
+        auto leftMaskNode = stagePattern->GetOrCreateMaskNode(true);
+        CHECK_NULL_BREAK(leftMaskNode);
+        auto index = hostNode->GetChildIndexById(leftMaskNode->GetId());
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index, true);
+        CHECK_NULL_BREAK(childWrapper);
+        MeasurePage(childWrapper, primarySize_);
+    } while (false);
+    auto rightMaskNode = stagePattern->GetOrCreateMaskNode(false);
+    CHECK_NULL_VOID(rightMaskNode);
+    auto index = hostNode->GetChildIndexById(rightMaskNode->GetId());
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index, true);
+    CHECK_NULL_VOID(childWrapper);
+    MeasurePage(childWrapper, secondarySize_);
+}
+
+void ParallelStageLayoutAlgorithm::LayoutForceSplitMaskNodes(
+    LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode)
+{
+    auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(stagePattern);
+    do {
+        auto leftMaskNode = stagePattern->GetOrCreateMaskNode(true);
+        CHECK_NULL_BREAK(leftMaskNode);
+        auto index = hostNode->GetChildIndexById(leftMaskNode->GetId());
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index, true);
+        CHECK_NULL_BREAK(childWrapper);
+        LayoutPageInColumn(childWrapper, ForceSplitPageColumnType::PRIMARY);
+    } while (false);
+    auto rightMaskNode = stagePattern->GetOrCreateMaskNode(false);
+    CHECK_NULL_VOID(rightMaskNode);
+    auto index = hostNode->GetChildIndexById(rightMaskNode->GetId());
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index, true);
+    CHECK_NULL_VOID(childWrapper);
+    LayoutPageInColumn(childWrapper, ForceSplitPageColumnType::SECONDARY);
 }
 } // namespace OHOS::Ace::NG

@@ -451,6 +451,10 @@ public:
     {
         return std::move(primaryNodesToBeRemoved_);
     }
+    RefPtr<FrameNode> GetOrCreateMaskNode(bool isLeft);
+    void UpdateMaskNodeVisibility(bool isLeft, VisibleType type);
+    RefPtr<FrameNode> GetMaskContentNode(bool isLeft);
+    void UpdateMaskNodeContent(bool isLeft);
     //-------for force split------- end  ------
 
 protected:
@@ -546,6 +550,8 @@ private:
     // Use one counter so continuous split push/pop transitions only recover them after
     // the last running animation finishes.
     int32_t forceSplitRunningAnimationCount_ = 0;
+    RefPtr<FrameNode> leftMaskNode_ = nullptr;
+    RefPtr<FrameNode> rightMaskNode_ = nullptr;
     //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG

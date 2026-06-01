@@ -797,6 +797,17 @@ private:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
+    void HandleForceSplitDragStart();
+    void HandleForceSplitDragUpdate(float xOffset);
+    void HandleForceSplitDragEnd();
+    void CreateForceSplitMaskNodes();
+    void ShowForceSplitMask();
+    void RemoveForceSplitMask();
+    void InitForceSplitDragEvent();
+    void CreateForceSplitSnapProperty();
+    void PlayForceSplitSnapAnimation(float fromRatio, float toRatio);
+    void OnForceSplitSnapAnimationFinish(float finalRatio);
+    void StopForceSplitSnapAnimation();
     void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopDestination);
     bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node);
@@ -1139,6 +1150,8 @@ private:
     WeakPtr<NavDestinationNodeBase> splitPopExitNode_ = nullptr;
     WeakPtr<NavDestinationNodeBase> splitPopMoveNode_ = nullptr;
     WeakPtr<NavDestinationNodeBase> splitPopEnterNode_ = nullptr;
+    RefPtr<PanEvent> forceSplitDragEvent_;
+    std::shared_ptr<AnimationUtils::Animation> forceSplitSnapAnimation_;
     //-------for force split------- end  ------
 };
 

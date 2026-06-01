@@ -47,9 +47,13 @@ private:
     void MeasurePage(const RefPtr<LayoutWrapper>& layoutWrapper, const SizeF& size);
     void MeasurePageInColumn(const RefPtr<LayoutWrapper>& layoutWrapper, ForceSplitPageColumnType columnType);
     void MeasureRouterSplitPages(const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper);
+    void MeasureDragBar(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode);
     void LayoutInSplitMode(const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper);
     void LayoutPageInColumn(const RefPtr<LayoutWrapper>& layoutWrapper, ForceSplitPageColumnType columnType);
     void LayoutRouterSplitPages(const RefPtr<FrameNode>& hostNode, LayoutWrapper* layoutWrapper);
+    void LayoutDragBar(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode, float primaryWidth);
+    void LayoutForceSplitMaskNodes(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode);
+    void MeasureForceSplitMaskNodes(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode);
     void SizeCalculationForForceSplit(const RefPtr<FrameNode>& hostNode, const SizeF& size);
 
     SizeF dividerSize_ = SizeF(0.0f, 0.0f);
