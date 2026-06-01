@@ -1410,6 +1410,7 @@ void FlexLayoutAlgorithm::MeasureContainerReaderCrossAxisMatchParent(
         auto childConstraint = layoutConstraint;
         if (childLayoutProperty) {
             const auto& childCalcConstraint = childLayoutProperty->GetCalcLayoutConstraint();
+            CHECK_NULL_VOID(childCalcConstraint);
             float remainedMainAxisSize = mainAxisSize_ - allocatedSize_;
             UpdateLayoutConstraintOnMainAxisWithoutUserDefined(
                 childConstraint, remainedMainAxisSize, childCalcConstraint);
