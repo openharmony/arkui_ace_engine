@@ -6494,6 +6494,10 @@ void ArkUINativeModule::RegisterTextAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetIncrementalUpdatePolicy));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncrementalUpdatePolicy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetIncrementalUpdatePolicy));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTailIndents"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTailIndents));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTailIndents"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTailIndents));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 }
 

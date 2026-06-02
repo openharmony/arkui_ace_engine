@@ -732,6 +732,7 @@ struct ArkUIParagraphStyle {
     void* onGetLeadingMargin;
     std::optional<ArkUILinearGradientOptions> linearGradient = std::nullopt;
     std::optional<ArkUIRadialGradientOptions> radialGradient = std::nullopt;
+    std::optional<std::vector<ArkUI_Float32>> tailIndents = std::nullopt;
 };
 
 struct ArkUILeadingMarginSpanDrawInfo {
@@ -4106,6 +4107,12 @@ struct ArkUITextModifier {
     void (*resetFontVariations)(ArkUINodeHandle node);
     void (*setIncrementalUpdatePolicy)(ArkUINodeHandle node, ArkUI_Int32 policy);
     void (*resetIncrementalUpdatePolicy)(ArkUINodeHandle node);
+    void (*setTailIndents)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetTailIndents)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTailIndentsCount)(ArkUINodeHandle node);
+    void (*getTailIndents)(ArkUINodeHandle node, ArkUI_Float32* values,
+        ArkUI_Int32* units, ArkUI_Int32 size);
 };
 
 struct ArkUIButtonModifier {

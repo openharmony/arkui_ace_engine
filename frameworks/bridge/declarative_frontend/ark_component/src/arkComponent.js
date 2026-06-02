@@ -6450,6 +6450,37 @@ class TextSelectedDragPreviewStyleModifier extends ModifierWithKey {
 }
 TextSelectedDragPreviewStyleModifier.identity = Symbol('textSelectedDragPreviewStyle');
 
+class TextTailIndentsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTailIndents(node);
+    } else {
+      getUINativeModule().text.setTailIndents(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (!Array.isArray(this.stageValue) && !Array.isArray(this.value)) {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+    if (Array.isArray(this.stageValue) && Array.isArray(this.value)) {
+      if (this.stageValue.length !== this.value.length) {
+        return true;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        if (!isBaseOrResourceEqual(this.stageValue[i], this.value[i])) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return false;
+  }
+}
+TextTailIndentsModifier.identity = Symbol('textTailIndents');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6773,6 +6804,10 @@ class ArkTextComponent extends ArkComponent {
   incrementalUpdatePolicy(value) {
     modifierWithKey(this._modifiersWithKeys, TextIncrementalUpdatePolicyModifier.identity,
         TextIncrementalUpdatePolicyModifier, value);
+    return this;
+  }
+  tailIndents(value) {
+    modifierWithKey(this._modifiersWithKeys, TextTailIndentsModifier.identity, TextTailIndentsModifier, value);
     return this;
   }
 }

@@ -87,6 +87,26 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
         },
         []() {});
     ParseShaderStyle(src.shaderStyle, ret);
+
+    if (src.tailIndents.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::TailIndents tailIndents;
+        NG::TailIndentsArray indentsArray;
+        if (src.tailIndents.value.selector == 0) {
+            auto singleValue = Converter::Convert<Dimension>(src.tailIndents.value.value0);
+            indentsArray.push_back(singleValue);
+        } else if (src.tailIndents.value.selector == 1) {
+            auto& arrayValue = src.tailIndents.value.value1;
+            for (int i = 0; i < arrayValue.length; i++) {
+                auto dim = Converter::Convert<Dimension>(*(arrayValue.array + i));
+                indentsArray.push_back(dim);
+            }
+        }
+        if (!indentsArray.empty()) {
+            tailIndents.indentsArray = indentsArray;
+            ret.tailIndents = tailIndents;
+        }
+    }
+
     return ret;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -252,6 +272,23 @@ Opt_ShaderStyleProxy GetShaderStyleImpl(Ark_ParagraphStyle peer)
     auto color = style.colorShaderStyle;
     return ProcessShaderStyle(gradientOpt, color);
 }
+Opt_Array_F64 GetTailIndentsImpl(Ark_ParagraphStyle peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Array_F64>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    auto style = peer->span->GetParagraphStyle();
+    if (!style.tailIndents.has_value() || !style.tailIndents->HasValue()) {
+        return invalid;
+    }
+
+    auto& indentsArray = style.tailIndents->indentsArray.value();
+    std::vector<float> vpValues;
+    for (const auto& dim : indentsArray) {
+        vpValues.push_back(dim.ConvertToVp());
+    }
+    return Converter::ArkValue<Opt_Array_F64>(vpValues, Converter::FC);
+}
 } // ParagraphStyleAccessor
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
 {
@@ -270,6 +307,7 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
         ParagraphStyleAccessor::GetTextDirectionImpl,
         ParagraphStyleAccessor::GetLeadingMarginSpanImpl,
         ParagraphStyleAccessor::GetShaderStyleImpl,
+        ParagraphStyleAccessor::GetTailIndentsImpl,
     };
     return &ParagraphStyleAccessorImpl;
 }

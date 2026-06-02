@@ -215,6 +215,13 @@ RefPtr<SpanBase> ParseParagraphStyle(const ArkUISpanStyle& style, int32_t start,
     ParseLeadingMargin(spanParagraphStyle, paragraphStyle);
     spanParagraphStyle.textDirection = static_cast<OHOS::Ace::TextDirection>(paragraphStyle.textDirection);
     ParseShaderStyle(spanParagraphStyle, paragraphStyle);
+    if (paragraphStyle.tailIndents.has_value()) {
+        NG::TailIndentsArray indentsArray;
+        for (const auto& indent : paragraphStyle.tailIndents.value()) {
+            indentsArray.push_back(Dimension(indent, DimensionUnit::VP));
+        }
+        spanParagraphStyle.tailIndents = NG::TailIndents { indentsArray };
+    }
     auto paragraphStyleSpan = AceType::MakeRefPtr<NapiParagraphStyleSpan>(spanParagraphStyle, start, start + length);
     paragraphStyleSpan->onNapiDrawLeadingMargin_ = paragraphStyle.onDrawLeadingMargin;
     paragraphStyleSpan->onNapiGetLeadingMargin_ = paragraphStyle.onGetLeadingMargin;
@@ -1028,6 +1035,13 @@ void ApplyParagraphStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
     auto gradient = spanParagraphStyle.GetGradient();
     if (gradient.has_value()) {
         ApplyParagraphShaderStyle(gradient.value(), paragraphStyle);
+    }
+    if (spanParagraphStyle.tailIndents.has_value() && spanParagraphStyle.tailIndents->HasValue()) {
+        std::vector<ArkUI_Float32> indents;
+        for (const auto& dim : spanParagraphStyle.tailIndents->indentsArray.value()) {
+            indents.push_back(dim.ConvertToVp());
+        }
+        paragraphStyle.tailIndents = indents;
     }
     style.paragraphStyle = paragraphStyle;
 }

@@ -2516,4 +2516,59 @@ ArkUINativeModuleValue TextBridge::ResetIncrementalUpdatePolicy(ArkUIRuntimeCall
     GetArkUINodeModifiers()->getTextModifier()->resetIncrementalUpdatePolicy(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TextBridge::SetTailIndents(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+
+    NG::TailIndents tailIndents;
+    if (secondArg->IsArray(vm)) {
+        auto array = Local<panda::ArrayRef>(secondArg);
+        auto length = ArkTSUtils::GetArrayLength(vm, array);
+        NG::TailIndentsArray indentsArray;
+        for (uint32_t i = 0; i < length; i++) {
+            auto element = panda::ArrayRef::GetValueAt(vm, array, i);
+            CalcDimension dimension;
+            RefPtr<ResourceObject> resObj;
+            if (ArkTSUtils::ParseJsLengthMetrics(vm, element, dimension, resObj) ||
+                ArkTSUtils::ParseJsDimensionFpNG(vm, element, dimension, resObj)) {
+                indentsArray.emplace_back(static_cast<Dimension>(dimension));
+            } else {
+                dimension.Reset();
+                indentsArray.emplace_back(dimension);
+            }
+        }
+        tailIndents.indentsArray = indentsArray;
+    } else {
+        CalcDimension dimension;
+        RefPtr<ResourceObject> resObj;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, dimension, resObj) ||
+            ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, dimension, resObj)) {
+            NG::TailIndentsArray indentsArray;
+            indentsArray.emplace_back(static_cast<Dimension>(dimension));
+            tailIndents.indentsArray = indentsArray;
+        }
+    }
+
+    TextModelNG::SetTailIndents(frameNode, tailIndents);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetTailIndents(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetTailIndents(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

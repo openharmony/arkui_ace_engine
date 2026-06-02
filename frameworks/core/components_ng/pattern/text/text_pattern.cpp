@@ -1208,6 +1208,7 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::T
     textLineStyle.UpdateParagraphSpacing(textStyle->GetParagraphSpacing());
     textLineStyle.SetOptGradient(GradientConvert::ToNGGradient(textStyle->GetGradient()));
     textLineStyle.UpdateColorShaderStyle(textStyle->GetColorShaderStyle());
+    textLineStyle.UpdateTailIndents(textStyle->GetTailIndent());
 }
 
 RefPtr<TaskExecutor> TextPattern::GetTaskExecutorItem()

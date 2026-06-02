@@ -97,6 +97,7 @@ public:
     void SetEnableAutoSpacing(bool enabled) override {};
     void SetLineThicknessScale(float value) override {};
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override {};
+    void SetTailIndents(const NG::TailIndents& value) override {};
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

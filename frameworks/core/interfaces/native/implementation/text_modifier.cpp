@@ -496,6 +496,34 @@ void SetTextIndentImpl(Ark_NativePointer node,
     }
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
+void SetTailIndentsImpl(Ark_NativePointer node,
+                        const Opt_Union_LengthMetrics_Array_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<NG::TailIndents> indent = std::nullopt;
+    if (value && value->tag != INTEROP_TAG_UNDEFINED) {
+        NG::TailIndents tailIndents;
+        NG::TailIndentsArray indentsArray;
+        if (value->value.selector == 0) {
+            auto singleValue = Converter::Convert<Dimension>(value->value.value0);
+            indentsArray.push_back(singleValue);
+        } else if (value->value.selector == 1) {
+            auto& arrayValue = value->value.value1;
+            for (int i = 0; i < arrayValue.length; i++) {
+                auto dim = Converter::Convert<Dimension>(*(arrayValue.array + i));
+                indentsArray.push_back(dim);
+            }
+        }
+
+        if (!indentsArray.empty()) {
+            tailIndents.indentsArray = indentsArray;
+            indent = tailIndents;
+        }
+    }
+
+    TextModelStatic::SetTailIndents(frameNode, indent);
+}
 void SetWordBreakImpl(Ark_NativePointer node,
                       const Opt_WordBreak* value)
 {
@@ -1077,6 +1105,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetTextShadowImpl,
         TextAttributeModifier::SetHeightAdaptivePolicyImpl,
         TextAttributeModifier::SetTextIndentImpl,
+        TextAttributeModifier::SetTailIndentsImpl,
         TextAttributeModifier::SetWordBreakImpl,
         TextAttributeModifier::SetLineBreakStrategyImpl,
         TextAttributeModifier::SetOnCopyImpl,

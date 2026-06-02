@@ -2005,6 +2005,8 @@ void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "shaderStyle", &JSParagraphStyleSpan::GetShaderStyle, &JSParagraphStyleSpan::SetShaderStyle);
     JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "tailIndents", &JSParagraphStyleSpan::GetTailIndents, &JSParagraphStyleSpan::SetTailIndents);
 }
 
 void JSParagraphStyleSpan::Constructor(const JSCallbackInfo& args)
@@ -2072,6 +2074,7 @@ SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(
     ParseParagraphSpacing(obj, paragraphStyle);
     ParseJsTextDirection(obj, paragraphStyle);
     ParseJsShaderStyle(obj, paragraphStyle);
+    ParseJsTailIndents(obj, paragraphStyle);
     return paragraphStyle;
 }
 void JSParagraphStyleSpan::ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
@@ -2427,6 +2430,49 @@ void JSParagraphStyleSpan::ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanPa
     }
 }
 
+void JSParagraphStyleSpan::ParseJsTailIndents(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    CHECK_NULL_VOID(obj->HasProperty("tailIndents"));
+    auto tailIndentsObj = obj->GetProperty("tailIndents");
+    if (tailIndentsObj->IsNull() || tailIndentsObj->IsUndefined()) {
+        return;
+    }
+    NG::TailIndents tailIndents;
+    if (tailIndentsObj->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(tailIndentsObj);
+        NG::TailIndentsArray indentsArray;
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            CalcDimension dimension;
+            RefPtr<ResourceObject> resObj;
+            bool parsed = false;
+            if (value->IsObject()) {
+                JSRef<JSObject> valObj = JSRef<JSObject>::Cast(value);
+                parsed = JSViewAbstract::ParseJsLengthMetricsVpWithResObj(valObj, dimension, resObj);
+            }
+            if (!parsed) {
+                parsed = JSContainerBase::ParseJsDimensionFpNG(value, dimension, resObj);
+            }
+            if (parsed) {
+                indentsArray.emplace_back(static_cast<Dimension>(dimension));
+            }
+        }
+        tailIndents.indentsArray = indentsArray;
+    } else if (tailIndentsObj->IsObject()) {
+        JSRef<JSObject> valObj = JSRef<JSObject>::Cast(tailIndentsObj);
+        CalcDimension dimension;
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(valObj, dimension, resObj)) {
+            NG::TailIndentsArray indentsArray;
+            indentsArray.emplace_back(static_cast<Dimension>(dimension));
+            tailIndents.indentsArray = indentsArray;
+        }
+    }
+    if (tailIndents.HasValue()) {
+        paragraphStyle.tailIndents = tailIndents;
+    }
+}
+
 void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
     std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin)
 {
@@ -2593,6 +2639,20 @@ void JSParagraphStyleSpan::GetShaderStyle(const JSCallbackInfo& info)
 }
  
 void JSParagraphStyleSpan::SetShaderStyle(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetTailIndents(const JSCallbackInfo& info)
+{
+    auto paragraphStyle = GetParagraphStyle();
+    if (paragraphStyle.tailIndents.has_value() && paragraphStyle.tailIndents->HasValue()) {
+        auto array = JSRef<JSArray>::New();
+        for (const auto& dim : paragraphStyle.tailIndents->indentsArray.value()) {
+            array->SetValueAt(array->Length(), JSRef<JSVal>::Make(ToJSValue(dim.ConvertToVp())));
+        }
+        info.SetReturnValue(JSRef<JSVal>::Cast(array));
+    }
+}
+
+void JSParagraphStyleSpan::SetTailIndents(const JSCallbackInfo& info) {}
 
 JSRef<JSObject>& JSParagraphStyleSpan::GetJsLeadingMarginSpanObject()
 {

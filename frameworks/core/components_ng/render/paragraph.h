@@ -204,6 +204,7 @@ struct ParagraphStyle {
     bool fallbackLineSpacing = false;
     ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
     std::optional<Color> colorShaderStyle;
+    std::optional<NG::TailIndents> tailIndents;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -219,7 +220,8 @@ struct ParagraphStyle {
                compressLeadingPunctuation == others.compressLeadingPunctuation &&
                punctuationOverflow == others.punctuationOverflow &&
                includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing &&
-               propGradient == others.propGradient && colorShaderStyle == others.colorShaderStyle ;
+               propGradient == others.propGradient && colorShaderStyle == others.colorShaderStyle &&
+               tailIndents == others.tailIndents;
     }
 
     bool operator!=(const ParagraphStyle others) const

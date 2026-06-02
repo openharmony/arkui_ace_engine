@@ -69,7 +69,8 @@ struct SpanParagraphStyle {
     ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
     std::optional<Color> colorShaderStyle;
     RefPtr<ResourceObject> colorShaderStyleResObj;
- 
+    std::optional<NG::TailIndents> tailIndents;
+
     bool IsSameGradient(const SpanParagraphStyle& other) const
     {
         if (propGradient == nullptr) {
@@ -97,7 +98,7 @@ struct SpanParagraphStyle {
         auto flag = align == other.align && textVerticalAlign == other.textVerticalAlign &&
                     maxLines == other.maxLines && wordBreak == other.wordBreak && textOverflow == other.textOverflow &&
                     textIndent == other.textIndent && paragraphSpacing == other.paragraphSpacing &&
-                    textDirection == other.textDirection;
+                    textDirection == other.textDirection && tailIndents == other.tailIndents;
         if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
             flag &= leadingMargin.value().CheckLeadingMargin(other.leadingMargin.value());
         } else if (!leadingMargin.has_value() && !other.textOverflow.has_value()) {

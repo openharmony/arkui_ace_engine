@@ -3122,6 +3122,24 @@ typedef enum {
     NODE_TEXT_PUNCTUATION_OVERFLOW = 1055,
 
     /**
+     * @brief Defines the tail indentation for each line in a text block.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: tail indent value, in fp. When size is 1, all lines share the same tail indent.\n
+     * .size: number of tail indent values. When size > 1, the i-th value specifies the tail indent
+     * for the i-th line. If the number of text lines exceeds size, the last value is used
+     * for the remaining lines. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: first tail indent value, in vp. \n
+     * .size: number of tail indent values. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_TAIL_INDENTS = 1056,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

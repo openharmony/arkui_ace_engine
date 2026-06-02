@@ -280,6 +280,7 @@ public:
     virtual void SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy) {};
     virtual void ResetIncrementalUpdatePolicy() {};
     virtual void BindJSTextController(std::function<void()>&& func) {};
+    virtual void SetTailIndents(const NG::TailIndents& value) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

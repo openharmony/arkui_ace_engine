@@ -239,6 +239,8 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextDirection, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TailIndents, TailIndents, PROPERTY_UPDATE_MEASURE);
+
     TextDecoration GetTextDecorationFirst() const
     {
         auto decorations = GetTextDecoration();
