@@ -74,15 +74,14 @@ public:
     int32_t videoWidth_ = DEFAULT_WIDTH;
     int32_t videoHeight_ = DEFAULT_HEIGHT;
 
-    int32_t GetVideoWidth() override
+    TestableMockMediaPlayer()
     {
-        return videoWidth_;
+        ON_CALL(*this, GetVideoWidth()).WillByDefault(testing::Invoke([this]() { return videoWidth_; }));
+        ON_CALL(*this, GetVideoHeight()).WillByDefault(testing::Invoke([this]() { return videoHeight_; }));
     }
 
-    int32_t GetVideoHeight() override
-    {
-        return videoHeight_;
-    }
+    MOCK_METHOD0(GetVideoWidth, int32_t());
+    MOCK_METHOD0(GetVideoHeight, int32_t());
 };
 
 struct TestProperty {
