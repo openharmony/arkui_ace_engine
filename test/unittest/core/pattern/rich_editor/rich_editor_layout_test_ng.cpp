@@ -88,10 +88,16 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper001, TestSize.Level2)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     DirtySwapConfig config;
     config.skipMeasure = true;
+    /**
+     * @tc.steps1: test OnDirtyLayoutWrapperSwap when had focus
+     */
     auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
     focusHub->currentFocus_ = true;
     auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
+    /**
+     * @tc.steps2: test OnDirtyLayoutWrapperSwap when has inited
+     */
     richEditorPattern->isRichEditorInit_ = true;
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = 2;
