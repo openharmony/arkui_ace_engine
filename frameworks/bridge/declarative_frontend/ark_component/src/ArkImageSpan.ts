@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ImageSpanObjectFitModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -82,7 +81,7 @@ class ImageSpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
   constructor(value: LengthMetrics) {
     super(value);
   }
-  static identity = Symbol('imageSpanBaselineOffset');
+  static identity = Symbol('imagespanBaselineOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().imageSpan.resetBaselineOffset(node);
@@ -95,7 +94,7 @@ class ImageSpanAltModifier extends ModifierWithKey<PixelMap> {
   constructor(value: PixelMap) {
     super(value);
   }
-  static identity = Symbol('imageSpanAlt');
+  static identity = Symbol('imagespanAlt');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().imageSpan.resetAlt(node);
@@ -134,7 +133,7 @@ class ImageSpanColorFilterModifier extends ModifierWithKey<ColorFilter | Drawing
   constructor(value: ColorFilter) {
     super(value);
   }
-  static identity: Symbol = Symbol('imageSpanColorFilter');
+  static identity: Symbol = Symbol('ImageSpanColorFilter');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().imageSpan.resetColorFilter(node);
@@ -162,6 +161,46 @@ class ImageSpanSupportSvg2Modifier extends ModifierWithKey<boolean> {
     return this.stageValue !== this.value;
   }
 }
+declare class Utils {
+  static isApiVersionEQAbove(version: number): boolean;
+}
+class ImageSpanBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
+  constructor(value: Length | BorderRadiuses) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageSpanBorderRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().imageSpan.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        let keys = Object.keys(this.value);
+        if (Utils.isApiVersionEQAbove(20) &&
+          (keys.indexOf('topStart') >= 0 || keys.indexOf('topEnd') >= 0 ||
+          keys.indexOf('bottomStart') >= 0 || keys.indexOf('bottomEnd') >= 0)) {
+          let localizedBorderRadius = this.value as LocalizedBorderRadiuses;
+          getUINativeModule().imageSpan.setBorderRadius(node, localizedBorderRadius.topStart,
+            localizedBorderRadius.topEnd, localizedBorderRadius.bottomStart, localizedBorderRadius.bottomEnd);
+        } else {
+          getUINativeModule().imageSpan.setBorderRadius(node, (this.value as any).topLeft, (this.value as any).topRight,
+            (this.value as any).bottomLeft, (this.value as any).bottomRight);
+        }
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as any).topLeft === (this.value as any).topLeft &&
+        (this.stageValue as any).topRight === (this.value as any).topRight &&
+        (this.stageValue as any).bottomLeft === (this.value as any).bottomLeft &&
+        (this.stageValue as any).bottomRight === (this.value as any).bottomRight);
+    } else {
+      return true;
+    }
+  }
+}
 class ImageSpanSrcModifier extends ModifierWithKey<ResourceStr | PixelMap> {
   constructor(value: ResourceStr | PixelMap) {
     super(value);
@@ -176,41 +215,46 @@ class ImageSpanSrcModifier extends ModifierWithKey<ResourceStr | PixelMap> {
   }
 }
 
-class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
+class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  initialize(value: Object[]): ImageSpanAttribute {
+  initialize(value: Object[]): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanSrcModifier.identity, ImageSpanSrcModifier, value[0]);
     return this;
   }
-  objectFit(value: ImageFit): ImageSpanAttribute {
+  objectFit(value: ImageFit): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);
     return this;
   }
-  verticalAlign(value: ImageSpanAlignment): ImageSpanAttribute {
+  verticalAlign(value: ImageSpanAlignment): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanVerticalAlignModifier.identity, ImageSpanVerticalAlignModifier, value);
     return this;
   }
-  textBackgroundStyle(value: TextBackgroundStyle): ImageSpanAttribute {
+  textBackgroundStyle(value: TextBackgroundStyle): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanTextBackgroundStyleModifier.identity, ImageSpanTextBackgroundStyleModifier, value);
     return this;
   }
-  baselineOffset(value: LengthMetrics): ImageSpanAttribute {
+  baselineOffset(value: LengthMetrics): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanBaselineOffsetModifier.identity, ImageSpanBaselineOffsetModifier, value);
     return this;
   }
-  alt(value: PixelMap): ImageSpanAttribute {
+  alt(value: PixelMap): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanAltModifier.identity, ImageSpanAltModifier, value);
     return this;
   }
-  colorFilter(value: ColorFilter | DrawingColorFilter): ImageSpanAttribute {
+  colorFilter(value: ColorFilter | DrawingColorFilter): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanColorFilterModifier.identity,
       ImageSpanColorFilterModifier, value);
     return this;
   }
-  supportSvg2(value: boolean): ImageSpanAttribute {
+  supportSvg2(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanSupportSvg2Modifier.identity, ImageSpanSupportSvg2Modifier, value);
+    return this;
+  }
+  borderRadius(value: Length | BorderRadiuses): this {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageSpanBorderRadiusModifier.identity, ImageSpanBorderRadiusModifier, value);
     return this;
   }
   onComplete(
@@ -225,7 +269,7 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
       contentOffsetX: number;
       contentOffsetY: number;
     }) => void,
-  ): ImageSpanAttribute {
+  ): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanOnCompleteModifier.identity, ImageSpanOnCompleteModifier, callback);
     return this;
   }
@@ -233,16 +277,18 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
     componentWidth: number;
     componentHeight: number;
     message: string
-  }) => void): ImageSpanAttribute {
+  }) => void): this {
     modifierWithKey(this._modifiersWithKeys, ImageSpanOnErrorModifier.identity, ImageSpanOnErrorModifier, callback);
     return this;
   }
 }
 // @ts-ignore
-globalThis.ImageSpan.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkImageSpanComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.ImageSpanModifier(nativePtr, classType);
-  });
-};
+if (globalThis.ImageSpan !== undefined) {
+  (globalThis as any).ImageSpan.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkImageSpanComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ImageSpanModifier(nativePtr, classType);
+    });
+  };
+}

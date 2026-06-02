@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+class ArkParticleComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   disturbanceFields(value: Array<DisturbanceFieldOptions>): this {
-    modifierWithKey(this._modifiersWithKeys, ParticleModifier.identity, ParticleModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
     return this;
   }
 
@@ -28,18 +27,9 @@ class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     return this;
   }
 
-  rippleFields(value: Array<RippleFieldOptions>): this {
-    modifierWithKey(this._modifiersWithKeys, ParticleRippleModifier.identity, ParticleRippleModifier, value);
-    return this;
-  }
-
-  velocityFields(value: Array<VelocityFieldOptions>): this {
-    modifierWithKey(this._modifiersWithKeys, ParticleVelocityModifier.identity, ParticleVelocityModifier, value);
-    return this;
-  }
 }
 
-class ParticleModifier extends ModifierWithKey<Array<DisturbanceFieldOptions>> {
+class ParticleDisturbanceFieldModifier extends ModifierWithKey<any> {
   constructor(value: Array<DisturbanceFieldOptions>) {
     super(value);
   }
@@ -49,11 +39,11 @@ class ParticleModifier extends ModifierWithKey<Array<DisturbanceFieldOptions>> {
       getUINativeModule().particle.resetDisturbanceField(node);
     } else {
       let dataArray = [];
-      if (Array.isArray(this.value)) {
+      if (!Array.isArray(this.value)) {
         return;
       }
-      for (let i = 0; i < this.value.length; i++) {
-        let data = this.value[i];
+      for (let i = 0; i < (this.value as any).length; i++) {
+        let data = this.value[i] as any;
         dataArray.push(parseWithDefaultNumber(data.strength, 0));
         dataArray.push(parseWithDefaultNumber(data.shape, 0));
         if (isObject(data.size)) {
@@ -300,6 +290,7 @@ class ArkVelocityFieldOptions {
   isSetShape: number;
   shape: number | undefined;
   isSetPosition: number;
+  arkVelocityFieldOptions: number;
   positionX: number | undefined;
   positionY: number | undefined;
   isSetSize: number;
@@ -314,6 +305,7 @@ class ArkVelocityFieldOptions {
     this.isSetShape = 0;
     this.shape = undefined;
     this.isSetPosition = 0;
+    this.arkVelocityFieldOptions = 0;
     this.positionX = undefined;
     this.positionY = undefined;
     this.isSetSize = 0;
@@ -377,10 +369,24 @@ class ParticleVelocityModifier extends ModifierWithKey<Array<VelocityFieldOption
 }
 
 // @ts-ignore
-globalThis.Particle.attributeModifier = function (modifier: ArkComponent): void {
+(globalThis as any).Particle.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkParticleComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.PathModifier(nativePtr, classType);
   });
 };
+
+
+// @ts-ignore
+if (globalThis.Particle !== undefined) {
+
+  // @ts-ignore
+  (globalThis as any).Particle.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkParticleComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ParticleDisturbanceFieldModifier(nativePtr, classType);
+    });
+  };
+}

@@ -25,32 +25,8 @@ declare interface Resource {
 type ResourceColor = number | Color | string | Resource;
 
 // ArkBackground class
-declare class ArkBackground {
-  content: ResourceColor | undefined;
-  align?: Alignment | undefined;
-  ignoresLayoutSafeAreaEdges?: Array<number> | undefined;
-  isEqual(another: ArkBackground): boolean;
-}
-
 // ArkBindMenu class
-declare class ArkBindMenu {
-  content: Array<any> | CustomBuilder | undefined;
-  options: any | undefined;
-  isEqual(another: ArkBindMenu): boolean;
-}
-
 // ArkBorder class
-declare class ArkBorder {
-  arkWidth: any;
-  arkColor: any;
-  arkRadius: any;
-  arkStyle: any;
-  arkDashGap: any;
-  arkDashWidth: any;
-  isEqual(another: ArkBorder): boolean;
-  checkObjectDiff(another: ArkBorder): boolean;
-}
-
 // ArkSearchAutoCapitalization class
 declare class ArkSearchAutoCapitalization {
   autoCapitalizationMode: AutoCapitalizationMode;
@@ -73,7 +49,7 @@ declare class ArkTextInputAutoCapitalization {
 type ArkTextInputType = InputType;
 
 // Length type - using intersection type to support optional properties
-type Length = (string | number | Resource | LengthMetrics) & { direction?: number; style?: number };
+type Length = string | number | Resource | LengthMetrics;
 
 // EdgeWidths interface - made more flexible to accept LocalizedEdgeWidths
 declare interface EdgeWidths {
@@ -96,12 +72,6 @@ declare interface LocalizedEdgeWidths {
 }
 
 // ArkBorderRadiusOpts class
-declare class ArkBorderRadiusOpts {
-  value: Length | BorderRadiuses | LocalizedBorderRadius;
-  type: RenderStrategy;
-  isEqual(another: ArkBorderRadiusOpts): boolean;
-}
-
 // LocalizedBorderRadius interface
 declare interface LocalizedBorderRadius {
   topStart?: LengthMetrics;
@@ -176,18 +146,6 @@ declare enum GradientDirection {
 }
 
 // ArkOverlay class
-declare class ArkOverlay {
-  value: string | CustomBuilder | undefined;
-  align: number | undefined;
-  offsetX: number | undefined;
-  offsetY: number | undefined;
-  hasOptions: boolean | undefined;
-  hasOffset: boolean | undefined;
-  isEqual(another: ArkOverlay): boolean;
-  checkObjectDiff(another: ArkOverlay): boolean;
-  splitOverlayValue(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): boolean;
-}
-
 // EdgeColors interface
 declare interface EdgeColors {
   top?: ResourceColor;
@@ -240,11 +198,6 @@ declare enum ShadowType {
 }
 
 // ArkShadowStyle class (used with new)
-declare class ArkShadowStyle {
-  shadowStyle: number;
-  constructor();
-}
-
 // ShadowStyle enum
 declare enum ShadowStyle {
   OUTER_DEFAULT_XS = 0,
@@ -263,12 +216,6 @@ declare enum ShadowStyle {
 declare type ShadowValueWithStyle = ShadowOptions | (ArkShadowStyle & { shadowStyle: number });
 
 // ArkBlurOptions class
-declare class ArkBlurOptions {
-  value: number;
-  options?: BlurOptions;
-  disableSystemAdaptation?: boolean;
-}
-
 // BlurOptions interface
 declare interface BlurOptions {
   low?: number;
@@ -397,15 +344,6 @@ declare interface OutlineOptions {
   style?: EdgeOutlineStyles | OutlineStyle;
 }
 
-declare class ArkForegroundBlurStyle {
-  blurStyle: number | undefined;
-  colorMode: number | undefined;
-  adaptiveColor: number | undefined;
-  scale: number | undefined;
-  blurOptions?: BlurOptions;
-  disableSystemAdaptation?: boolean;
-}
-
 declare enum Alignment {
   TOP_START = 0,
   TOP = 1,
@@ -421,30 +359,6 @@ declare enum Alignment {
 declare interface ResizableOptions {
   slice?: EdgeWidths;
   lattice?: any;
-}
-
-declare class ArkLinearGradientBlur {
-  blurRadius: number | undefined;
-  fractionStops?: FractionStop[];
-  direction: number | undefined;
-  isEqual(another: ArkLinearGradientBlur): boolean;
-}
-
-declare class ArkBackgroundImage {
-  src: string | undefined | Resource | PixelMap;
-  repeat: number | undefined | object;
-}
-
-declare class ArkBackgroundBlurStyle {
-  blurStyle: number | undefined;
-  colorMode: number | undefined;
-  adaptiveColor: number | undefined;
-  scale: number | undefined;
-  blurOptions?: BlurOptions;
-  policy?: number;
-  inactiveColor?: ResourceColor;
-  type?: number;
-  disableSystemAdaptation?: boolean;
 }
 
 declare interface SizeOptions {
@@ -500,19 +414,9 @@ declare interface RotateAngleOptions {
   perspective?: number;
 }
 
-declare class ArkGeometryTransition {
-  id: string | undefined;
-  options: GeometryTransitionOptions | undefined;
-}
-
 declare interface GeometryTransitionOptions {
   follow?: boolean;
   hierarchyStrategy?: number;
-}
-
-declare class ArkBlendMode {
-  blendMode: number | Blender;
-  blendApplyType: number;
 }
 
 declare interface FractionStop {
@@ -538,12 +442,6 @@ declare interface PixelStretchEffectOptions {
 }
 
 // ArkUseEffect class
-declare class ArkUseEffect {
-  useEffect: boolean;
-  effectType: EffectType;
-  isEqual(another: ArkUseEffect): boolean;
-}
-
 // SystemBarEffectModifier class (extends ModifierWithKey<object>)
 declare class SystemBarEffectModifier {
   static identity: Symbol;
@@ -636,19 +534,7 @@ declare class ArkSpringLoadingContext {
 }
 
 // ArkDragSpringLoading class
-declare class ArkDragSpringLoading {
-  callback: ((context: ArkSpringLoadingContext) => void) | Function;
-  configuration: ArkDragSpringLoadingConfiguration | object | undefined;
-  isEqual(another: ArkDragSpringLoading): boolean;
-}
-
 // ArkOnDrop class
-declare class ArkOnDrop {
-  event: (event?: DragEvent, extraParams?: string) => void;
-  disableDataPrefetch: boolean | undefined;
-  isEqual(another: ArkOnDrop): boolean;
-}
-
 // TouchEvent interface
 declare interface TouchEvent {
   type: number;
@@ -685,7 +571,6 @@ declare namespace unifiedData {
 
 // Function declarations
 declare function getUINativeModule(): any;
-declare function deepCompareArrays(a: any, b: any): boolean;
 
 // Utility types
 type int32 = number;
@@ -865,7 +750,7 @@ declare interface AlignRuleOption {
   bias?: { horizontal?: number; vertical?: number };
 }
 
-declare type Padding = { top?: Length; right?: Length; bottom?: Length; left?: Length; };
+declare type Padding = any;
 declare interface LocalizedPadding { top?: LengthMetrics; end?: LengthMetrics; bottom?: LengthMetrics; start?: LengthMetrics; }
 declare type Margin = Padding;
 declare type LocalizedMargin = LocalizedPadding;
@@ -1077,7 +962,7 @@ declare type OnScrollVisibleContentChangeCallback = (start: any, end: any) => vo
 
 declare class ViewStackProcessor { static GetElmtIdToAccountFor(): void; }
 declare class JsPointerClass { invalid(): boolean; }
-declare class ModifierJS { [key: string]: Function; }
+declare class ModifierJS { [key: string]: Function & { new (...args: any[]): any }; }
 
 declare interface FocusBoxStyle { margin?: any; strokeColor?: any; strokeWidth?: any; }
 declare interface FocusMovement { forward?: string; backward?: string; up?: string; down?: string; left?: string; right?: string; }
@@ -1195,53 +1080,6 @@ declare class RectAttribute extends CommonShapeMethod<RectAttribute> { }
 type CircleShape = any; type EllipseShape = any; type PathShape = any; type RectShape = any;
 
 // Ark* internal types
-declare class ArkPadding { top?: Length; right?: Length; bottom?: Length; left?: Length; isEqual(another: ArkPadding): boolean; }
-declare class ArkSafeAreaExpandOpts { type?: string | number; edges?: string | number; isEqual(another: ArkSafeAreaExpandOpts): boolean; }
-declare class ArkTransition { type?: number; opacity?: number; translate?: TranslateOptions; scale?: ScaleOptions; rotate?: RotateOptions; transitionEffect?: TransitionOptions | TransitionEffect; callback?: (transitionIn: boolean) => void; isEqual(another: ArkTransition): boolean; }
-declare class ArkSharedTransition { id?: string; options?: sharedTransitionOptions; isEqual(another: ArkSharedTransition): boolean; }
-declare class ArkFocusScopeId { id?: string; isGroup?: boolean; arrowStepOut?: boolean; isEqual(another: ArkFocusScopeId): boolean; }
-declare class ArkFocusScopePriority { scopeId?: string; priority?: FocusPriority; isEqual(another: ArkFocusScopePriority): boolean; }
-declare class ArkOnAreaChange {
-  oldValue?: Area; newValue?: Area;
-  event?: (oldValue: Area, newValue: Area) => void;
-  expectedUpdateInterval?: number; hasOptionsArg?: boolean;
-  constructor(event?: (oldValue: Area, newValue: Area) => void, expectedUpdateInterval?: number, hasOptionsArg?: boolean);
-  isEqual(another: ArkOnAreaChange): boolean;
-}
-declare class ArkOnVisibleAreaChange { ratios?: number[]; event?: VisibleAreaChangeCallback; measureFromViewport?: boolean; isEqual(another: ArkOnVisibleAreaChange): boolean; }
-declare class ArkOnVisibleAreaApproximateChange { ratios?: number[]; expectedUpdateInterval?: number; measureFromViewport?: boolean; event?: VisibleAreaChangeCallback; isEqual(another: ArkOnVisibleAreaApproximateChange): boolean; }
-declare class ArkKeyBoardShortCut { value?: string | FunctionKey; keys?: Array<ModifierKey>; action?: () => void; isEqual(another: ArkKeyBoardShortCut): boolean; }
-declare class ArkAlignRules { left?: any; right?: any; middle?: any; top?: any; bottom?: any; center?: any; bias?: any; isEqual(another: ArkAlignRules): boolean; }
-declare class ArkBorderStyle {
-  arkWidth?: any; arkColor?: any; arkRadius?: any; arkStyle?: any; arkDashGap?: any; arkDashWidth?: any;
-  style?: BorderStyle; top?: BorderStyle; left?: BorderStyle; bottom?: BorderStyle; right?: BorderStyle;
-  parseBorderStyle(value: BorderStyle | EdgeStyles): boolean;
-  isEqual(another: ArkBorderStyle): boolean; checkObjectDiff(another: ArkBorderStyle): boolean;
-}
-declare class ArkChainWeight { horizontal?: number; vertical?: number; isEqual(another: ArkChainWeight): boolean; }
-declare class ArkChainMode { direction?: Axis; style?: ChainStyle; isEqual(another: ArkChainMode): boolean; }
-declare class ArkCustomProperty { name?: string; value?: Object; key?: string; isEqual(another: ArkCustomProperty): boolean; }
-declare class ArkDragPreview { builder?: CustomBuilder; onlyForLifting?: boolean; inspetorId?: string; pixelMap?: PixelMap; extraInfo?: string; isEqual(another: ArkDragPreview): boolean; }
-declare class ArkDragPreviewOptions {
-  options?: DragPreviewOptions; interactionOptions?: DragInteractionOptions; previewConfiguration?: PreviewConfiguration;
-  mode?: any; numberBadge?: boolean | number; sizeChangeEffect?: any;
-  isMultiSelectionEnabled?: boolean; defaultAnimationBeforeLifting?: boolean;
-  enableEdgeAutoScroll?: boolean; enableHapticFeedback?: boolean; isLiftingDisabled?: boolean;
-  isEqual(another: ArkDragPreviewOptions): boolean;
-}
-declare class ArkBindTipsOptions { message?: TipsMessageType; options?: TipsOptions; }
-declare class ArkBackgroundEffect {
-  radius: number | undefined;
-  saturation: number | undefined;
-  brightness: number | undefined;
-  color: ResourceColor | undefined;
-  adaptiveColor: number | undefined;
-  blurOptions: BlurOptions | undefined;
-  policy: number | undefined;
-  inactiveColor: ResourceColor | undefined;
-  disableSystemAdaptation: boolean | undefined;
-}
-
 // SourceTool enum (used in ArkGesture.ts)
 declare enum SourceTool { Unknown, Finger, Pen, MOUSE, TOUCHPAD, JOYSTICK }
 
@@ -1260,117 +1098,209 @@ declare enum FontWeight { Lighter, Normal, Regular, Medium, Bold, Bolder }
 declare enum SymbolRenderingStrategy { SINGLE = 0, MULTIPLE_COLOR = 1, MULTIPLE_OPACITY = 2 }
 declare enum SymbolEffectStrategy { NONE = 0, SCALE = 1, HIERARCHICAL = 2 }
 
-// Gesture types from ArkGesture.ts
-declare enum CommonGestureType {
-  TAP_GESTURE = 0,
-  LONG_PRESS_GESTURE,
-  PAN_GESTURE,
-  SWIPE_GESTURE,
-  PINCH_GESTURE,
-  ROTATION_GESTURE,
-  GESTURE_GROUP,
+// GestureHandler, TapGestureHandler, LongPressGestureHandler, PanGestureHandler,
+// SwipeGestureHandler, PinchGestureHandler, RotationGestureHandler, GestureGroupHandler
+// are defined in src/ArkGesture.ts - removed to avoid duplicate declarations
+
+// ===================== Missing type declarations for ArkTextArea =====================
+
+// Enums
+declare enum FontStyle { Normal, Italic }
+declare enum TextAlign { START, CENTER, END }
+declare enum TextOverflow { None, Clip, Ellipsis, Marquee }
+declare enum TextDecorationType { None, Underline, Overline, LineThrough }
+declare enum TextDecorationStyle { SOLID, DOUBLE, DOTTED, DASHED, WAVY }
+declare enum TextDirection { LTR, RTL, Auto }
+declare enum TextContentStyle { DEFAULT, INLINE }
+declare enum TextHeightAdaptivePolicy { MAX_LINES, MIN_FONT_SIZE, FONT_SIZE_ADJUST }
+declare enum BarState { Off, Auto, On }
+declare enum EllipsisMode { HEAD, MIDDLE, TAIL }
+declare enum CopyOptions { None, InApp, LocalDevice, CrossDevice }
+declare enum WordBreak { NORMAL, BREAK_ALL, BREAK_WORD }
+declare enum LineBreakStrategy { GREEDY, HIGH_QUALITY, BALANCED }
+declare enum EnterKeyType { GO, SEARCH, SEND, NEXT, DONE }
+declare enum ContentType { USER_NAME, PASSWORD, NEW_PASSWORD, NUMBER_PASSWORD, NUMBER }
+declare enum TextAreaType { NORMAL = 0, NUMBER = 2, PHONE_NUMBER = 3, EMAIL = 5, URL = 13, ONE_TIME_CODE = 14 }
+
+// Interfaces and types used as parameters
+declare interface Font { size?: number | string | Resource; weight?: number | string | FontWeight; family?: string | Resource; style?: FontStyle }
+declare interface FontFeature { fontFeature: string }
+declare interface CaretStyle { width?: number | string | Resource; color?: ResourceColor; cursorColor?: ResourceColor; cursorWidth?: number | string | Resource; cursorStyle?: number }
+declare interface ChangeValueInfo { value: string; previewText?: string }
+declare interface InsertValue { insertValue: string; previewText?: string }
+declare interface DeleteValue { deleteValue: string; previewText?: string }
+declare interface PasteEvent { pasteEvent: string }
+declare interface SubmitEvent { eventNumber: number }
+declare interface EditMenuOptions { creation?: any; response?: any }
+declare interface TextAreaOptions { placeholder?: string | Resource; text?: string | Resource; controller?: any }
+declare interface InputCounterOptions { highlightBorder?: boolean; thresholdPercentage?: number; counterTextColor?: ResourceColor; counterTextOverflowColor?: ResourceColor; direction?: number; borderStyle?: any }
+declare interface MaxLinesOptions { value?: number; overflowMode?: number }
+declare interface LineSpacingOptions { value?: number | string | Resource; onlyBetweenLines?: boolean }
+declare interface ColorMetrics { color: ResourceColor }
+declare interface IMEClient { attach?: any; detach?: any }
+
+// Ark* internal types for TextArea
+declare class ArkTextAreaFilter { value?: ResourceStr; error?: (value: string) => void; filter?: any; isEqual(another: ArkTextAreaFilter): boolean }
+// Additional types
+type SelectedDragPreviewStyle = any
+type ComponentContent = any
+declare interface TextAttribute {}
+
+// ArkTextComponent and ArkImageComponent are defined in ArkText.ts / ArkImage.ts
+
+// Missing types for ArkColumn
+declare interface PointLightStyle {
+  lightSource?: { positionX?: Dimension; positionY?: Dimension; positionZ?: Dimension; intensity?: number; color?: ResourceColor };
+  illuminated?: number;
+  bloom?: number;
+}
+declare enum FlexAlign { Start, Center, End, SpaceBetween, SpaceAround, SpaceEvenly }
+
+// Missing types for ArkDivider
+declare enum LineCapStyle { BUTT = 0, ROUND = 1, SQUARE = 2 }
+
+// Missing types for ArkFlex
+declare enum FlexDirection { Row, Column, RowReverse, ColumnReverse }
+declare enum FlexWrap { NoWrap, Wrap, WrapReverse }
+declare interface FlexSpaceOptions { main?: LengthMetrics; cross?: LengthMetrics }
+
+// Missing types for ArkGridRow
+declare interface GridRowColumnOption { xs?: number; sm?: number; md?: number; lg?: number; xl?: number; xxl?: number }
+declare interface GutterOption { x?: number | GridRowColumnOption; y?: number | GridRowColumnOption }
+declare interface BreakPoints { value?: Array<string>; reference?: number }
+
+// Missing types for ArkScrollable
+declare enum ContentClipMode { CLIP = 0, REVEAL = 1, NO_CLIP = 2 }
+declare enum EdgeEffect { Spring, Fade, None }
+declare interface EdgeEffectOptions { alwaysEnabled?: boolean; effectEdge?: number }
+declare interface FadingEdgeOptions { fadingEdgeLength?: Dimension }
+declare interface ScrollBarMargin { start?: Length; end?: Length }
+// Missing types for ArkGrid
+declare interface GridAttribute {}
+declare interface ComputedBarAttribute {}
+declare interface ItemDragInfo { x: number; y: number }
+declare interface EditModeOptions {}
+declare interface Scroller {}
+declare enum GridDirection { Row = 0, Column = 1, RowReverse = 2, ColumnReverse = 3 }
+declare enum GridItemAlignment { START = 0, CENTER = 1, END = 2 }
+declare enum ItemFillPolicy { NONE = 0, TOP_LEFT = 1, FIXED_SPAN = 2 }
+declare enum FocusWrapMode { DEFAULT = 0, INWARD = 1, FORWARD = 2 }
+declare interface NestedScrollOptions { scrollForward?: number; scrollBackward?: number }
+declare class GridLayoutOptions {
+  regularSize?: Array<number>; irregularIndexes?: Array<number>;
+  onGetIrregularSizeByIndex?: (index: number) => any;
+  onGetRectByIndex?: (index: number) => any;
+  onGetStartIndexByOffset?: (offset: number) => number;
+  onGetStartIndexByIndex?: (index: number) => number;
 }
 
-declare class GestureHandler {
-  gestureType: CommonGestureType;
-  gestureTag?: string;
-  allowedTypes?: Array<SourceTool>;
-  constructor(gestureType: CommonGestureType);
-}
+// Missing types for ArkGridCol
+declare interface GridColColumnOption { xs?: number; sm?: number; md?: number; lg?: number; xl?: number; xxl?: number }
 
-declare class TapGestureHandler extends GestureHandler {
-  fingers?: number;
-  count?: number;
-  distanceThreshold?: number;
-  limitFingerCount?: boolean;
-  onActionCallback?: Callback<GestureEvent>;
-  constructor(options?: TapGestureHandlerOptions);
-  onAction(event: Callback<GestureEvent>): TapGestureHandler;
-  tag(tag: string): TapGestureHandler;
-}
+// Missing types for ArkImage
+declare enum ImageFit { Contain, Cover, Auto, Fill, ScaleDown, None }
+declare enum ImageInterpolation { None, Low, Medium, High }
+declare enum ImageRenderMode { Original, Template }
+declare enum DynamicRangeMode { HIGH = 0, STANDARD = 1, RESTRICTED = 2 }
+declare enum ImageRotateOrientation { AUTO = 0, RESPECT_EXIF = 1, IGNORE_EXIF = 2 }
+declare type ImageRotateOrientaion = any
+declare type AIImageQuality = any
+declare type ResolutionQuality = any
+declare enum ContentTransitionEffect { NONE = 0, FADE_IN = 1 }
+declare type ColorFilter = any
+declare type DrawingColorFilter = any
+declare type DrawableDescriptor = any
+declare type ImageContent = any
 
-declare class LongPressGestureHandler extends GestureHandler {
-  fingers?: number;
-  repeat?: boolean;
-  duration?: number;
-  allowableMovement?: number;
-  limitFingerCount?: boolean;
-  onActionCallback?: Callback<GestureEvent>;
-  onActionEndCallback?: Callback<GestureEvent>;
-  onActionCancelCallback?: Callback<GestureEvent>;
-  constructor(options?: LongPressGestureHandlerOptions);
-  onAction(event: Callback<GestureEvent>): LongPressGestureHandler;
-  onActionEnd(event: Callback<GestureEvent>): LongPressGestureHandler;
-  onActionCancel(event: Callback<GestureEvent>): LongPressGestureHandler;
-  tag(tag: string): LongPressGestureHandler;
-}
+// Missing types for ArkImageAnimator
+declare interface ImageFrameInfo { src?: string | Resource; width?: number; height?: number; top?: number; left?: number; duration?: number }
+declare enum AnimationStatus { Initial, Running, Paused, Stopped }
+declare enum FillMode { None, Forwards }
 
-declare class PanGestureHandler extends GestureHandler {
-  fingers?: number;
-  direction?: PanDirection;
-  distance?: number;
-  limitFingerCount?: boolean;
-  distanceMap?: Map<SourceTool, number>;
-  onActionStartCallback?: Callback<GestureEvent>;
-  onActionUpdateCallback?: Callback<GestureEvent>;
-  onActionEndCallback?: Callback<GestureEvent>;
-  onActionCancelCallback?: Callback<GestureEvent>;
-  constructor(options?: PanGestureHandlerOptions);
-  onActionStart(event: Callback<GestureEvent>): PanGestureHandler;
-  onActionUpdate(event: Callback<GestureEvent>): PanGestureHandler;
-  onActionEnd(event: Callback<GestureEvent>): PanGestureHandler;
-  onActionCancel(event: Callback<GestureEvent>): PanGestureHandler;
-  tag(tag: string): PanGestureHandler;
-}
+// Missing types for ArkImageSpan
+declare interface TextBackgroundStyle { color?: ResourceColor; radius?: BorderRadiuses }
+declare enum ImageSpanAlignment { TOP = 0, CENTER = 1, BOTTOM = 2, BASELINE = 3 }
 
-declare class SwipeGestureHandler extends GestureHandler {
-  fingers?: number;
-  direction?: SwipeDirection;
-  speed?: number;
-  limitFingerCount?: boolean;
-  onActionCallback?: Callback<GestureEvent>;
-  constructor(options?: SwipeGestureHandlerOptions);
-  onAction(event: Callback<GestureEvent>): SwipeGestureHandler;
-  tag(tag: string): SwipeGestureHandler;
-}
+// Missing types for ArkLinearIndicator
+declare type LinearIndicatorStyle = any
+declare type OnLinearIndicatorChangeCallback = any
 
-declare class PinchGestureHandler extends GestureHandler {
-  fingers?: number;
-  distance?: number;
-  limitFingerCount?: boolean;
-  onActionStartCallback?: Callback<GestureEvent>;
-  onActionUpdateCallback?: Callback<GestureEvent>;
-  onActionEndCallback?: Callback<GestureEvent>;
-  onActionCancelCallback?: Callback<GestureEvent>;
-  constructor(options?: PinchGestureHandlerOptions);
-  onActionStart(event: Callback<GestureEvent>): PinchGestureHandler;
-  onActionUpdate(event: Callback<GestureEvent>): PinchGestureHandler;
-  onActionEnd(event: Callback<GestureEvent>): PinchGestureHandler;
-  onActionCancel(event: Callback<GestureEvent>): PinchGestureHandler;
-  tag(tag: string): PinchGestureHandler;
-}
+// Missing types for ArkSpan
+declare type ResponseRegion = any
+declare interface FontConfigs { fontWeightConfigs?: FontWeightConfigs }
+declare interface FontWeightConfigs { enableVariableFontWeight?: boolean; enableDeviceFontWeightCategory?: boolean }
+declare enum TextCase { NORMAL = 0, LOWER_CASE = 1, UPPER_CASE = 2 }
 
-declare class RotationGestureHandler extends GestureHandler {
-  fingers?: number;
-  angle?: number;
-  limitFingerCount?: boolean;
-  onActionStartCallback?: Callback<GestureEvent>;
-  onActionUpdateCallback?: Callback<GestureEvent>;
-  onActionEndCallback?: Callback<GestureEvent>;
-  onActionCancelCallback?: Callback<GestureEvent>;
-  constructor(options?: RotationGestureHandlerOptions);
-  onActionStart(event: Callback<GestureEvent>): RotationGestureHandler;
-  onActionUpdate(event: Callback<GestureEvent>): RotationGestureHandler;
-  onActionEnd(event: Callback<GestureEvent>): RotationGestureHandler;
-  onActionCancel(event: Callback<GestureEvent>): RotationGestureHandler;
-  tag(tag: string): RotationGestureHandler;
+// Missing types for ArkText
+declare interface TextDataDetectorConfigParam {
+  types?: any; onDetectResultUpdate?: (result: any) => void;
+  color?: ResourceColor; enablePreviewMenu?: boolean;
+  decoration?: { type?: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle };
 }
+declare interface MarqueeOptions {
+  start?: boolean; fromStart?: boolean; step?: number; loop?: boolean | number;
+  delay?: number; fadeout?: number; marqueeStartPolicy?: number; marqueeUpdatePolicy?: number; spacing?: number;
+}
+declare interface TextOptions {}
+declare enum TextContentAlign { START = 0, CENTER = 1, END = 2, JUSTIFY = 3 }
+declare enum TextSelectableMode { NONE = 0, SELECTABLE_ON = 1, SELECTABLE_OFF = 2 }
+declare enum TextVerticalAlign { TOP = 0, CENTER = 1, BOTTOM = 2, BASELINE = 3 }
+declare enum MarqueeState { RUNNING = 0, PAUSED = 1, FINISHED = 2, START_PENDING = 3, PAUSE_PENDING = 4, FINISH_PENDING = 5 }
+declare enum IncrementalUpdatePolicy { NONE = 0, INCREMENTAL = 1, FULL = 2 }
 
-declare class GestureGroupHandler extends GestureHandler {
-  mode?: GestureMode;
-  gestures?: GestureHandler[];
-  onCancelCallback?: Callback<void>;
-  constructor(options?: GestureGroupGestureHandlerOptions);
-  onCancel(event: Callback<void>): GestureGroupHandler;
-  tag(tag: string): GestureGroupHandler;
-}
+// Missing types for ArkTextArea (additional)
+declare enum JoinStyle { MITER = 0, ROUND = 1, BEVEL = 2 }
+
+// Missing types for ArkTextInput
+declare type KeyboardAppearance = string
+declare interface UnderlineColor { normal?: ResourceColor; typing?: ResourceColor; error?: ResourceColor; disable?: ResourceColor }
+declare interface PasswordIcon { onIconSrc?: string | Resource; offIconSrc?: string | Resource }
+declare type CancelButtonStyle = string
+declare type IconOptions = any
+declare type TextInputController = any
+declare type TextInputStyle = number
+
+// Missing types for ArkVideo
+declare type FullscreenInfo = any
+declare type PreparedInfo = any
+declare type PlaybackInfo = any
+declare type ErrorCallback = any
+declare type ImageAnalyzerConfig = any
+
+// Missing types for ArkClassDefine.ts
+declare type StyledString = any
+declare type MenuAlignType = any
+declare type Offset = any
+declare type ScrollDirectionalLockType = any
+declare type ScrollableBarModeOptions = any
+declare type DividerStyle = any
+declare type BarGridColumnOptions = any
+declare type TabsCacheMode = any
+declare type NestedScrollMode = any
+declare type MaxLinesMode = any
+declare class DotIndicator {}
+declare class DigitIndicator {}
+declare type ArrowStyle = any
+declare type SwiperAutoFill = any
+declare type PlaceholderStyle = any
+declare type ScrollSnapAlign = any
+declare type SymbolEffect = any
+declare type TextDataDetectorType = any
+declare type DragPreviewMode = any
+declare type DraggingSizeChangeEffect = any
+declare type GuideLinePosition = any
+declare type BarrierDirection = any
+declare type NavigationCommonTitle = any
+declare type NavigationCustomTitle = any
+declare type NavigationTitleOptions = any
+declare type NavigationMenuItem = any
+declare type NavigationMenuOptions = any
+declare type ToolbarItem = any
+declare type NavigationToolbarOptions = any
+
+// Missing types for ArkParticle
+declare type DisturbanceFieldOptions = any
+declare type EmitterProperty = any
+declare type RippleFieldOptions = any
+declare type VelocityFieldOptions = any
+

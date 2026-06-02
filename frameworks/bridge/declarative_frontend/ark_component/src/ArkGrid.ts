@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
-import { ArkScrollable } from "./ArkScrollable";
-class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttribute {
+class ArkGridComponent extends ArkScrollable<GridAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   allowChildTypes(): string[] {
     return ['GridItem'];
   }
-  initialize(value: Object[]): void {
+  initialize(value: Object[]): this {
     if (value.length === 1 && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, value[0]);
       modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
@@ -34,6 +32,7 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
       modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, undefined);
       modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
     }
+    return this;
   }
   columnsTemplate(value: string | ItemFillPolicy): this {
     modifierWithKey(this._modifiersWithKeys, GridColumnsTemplateModifier.identity, GridColumnsTemplateModifier, value);
@@ -51,7 +50,7 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridRowsGapModifier.identity, GridRowsGapModifier, value);
     return this;
   }
-  scrollBarWidth(value: string | number | Resource): this {
+  scrollBarWidth(value: string | number): this {
     modifierWithKey(this._modifiersWithKeys, GridScrollBarWidthModifier.identity, GridScrollBarWidthModifier, value);
     return this;
   }
@@ -71,17 +70,13 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridOnScrollIndexModifier.identity, GridOnScrollIndexModifier, event);
     return this;
   }
-  cachedCount(count: number, show?: boolean): GridAttribute {
+  cachedCount(count: number, show?: boolean): this {
     let opt = new ArkScrollableCacheOptions(count, show ? show : false);
     modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
     return this;
   }
   editMode(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, GridEditModeModifier.identity, GridEditModeModifier, value);
-    return this;
-  }
-  enableEditMode(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, GridEnableEditModeModifier.identity, GridEnableEditModeModifier, value);
     return this;
   }
   multiSelectable(value: boolean): this {
@@ -147,11 +142,11 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
   onScroll(event: (scrollOffset: number, scrollState: ScrollState) => void): this {
     throw new BusinessError(100201, 'onScroll not supported in attributeModifier scenario.');
   }
-  onReachStart(event: () => void): this {
+  onReachStart(event: () => void) {
     modifierWithKey(this._modifiersWithKeys, GridOnReachStartModifier.identity, GridOnReachStartModifier, event);
     return this;
   }
-  onReachEnd(event: () => void): this {
+  onReachEnd(event: () => void) {
     modifierWithKey(this._modifiersWithKeys, GridOnReachEndModifier.identity, GridOnReachEndModifier, event);
     return this;
   }
@@ -171,10 +166,6 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridClipModifier.identity, GridClipModifier, value);
     return this;
   }
-  flingSpeedLimit(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, GridFlingSpeedLimitModifier.identity, GridFlingSpeedLimitModifier, value);
-    return this;
-  }
   alignItems(value: GridItemAlignment): this {
     modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
     return this;
@@ -189,6 +180,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
   }
   onEditModeChange(callback: Callback<boolean> | undefined): this {
     modifierWithKey(this._modifiersWithKeys, GridOnEditModeChangeModifier.identity, GridOnEditModeChangeModifier, callback);
+    return this;
+  }
+  enableEditMode(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, GridEnableEditModeModifier.identity, GridEnableEditModeModifier, value);
     return this;
   }
   onWillScroll(callback: (xOffset: number, yOffset: number,
@@ -314,8 +309,8 @@ class GridRowsGapModifier extends ModifierWithKey<Length> {
   }
 }
 
-class GridScrollBarWidthModifier extends ModifierWithKey<string | number | Resource> {
-  constructor(value: string | number | Resource) {
+class GridScrollBarWidthModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
     super(value);
   }
   static identity: Symbol = Symbol('gridScrollBarWidth');
@@ -366,20 +361,6 @@ class GridEditModeModifier extends ModifierWithKey<boolean> {
       getUINativeModule().grid.resetEditMode(node);
     } else {
       getUINativeModule().grid.setEditMode(node, this.value);
-    }
-  }
-}
-
-class GridEnableEditModeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridEnableEditMode');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetGridEnableEditMode(node);
-    } else {
-      getUINativeModule().grid.setGridEnableEditMode(node, this.value);
     }
   }
 }
@@ -525,7 +506,7 @@ class GridSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey<boolean>
   constructor(value) {
     super(value);
   }
-  static identity: Symbol = Symbol('gridSupportLazyLoadingEmptyBranch');
+  static identity: Symbol = Symbol('gridSupportEmptyBranchInLazyLoading');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().grid.setSupportLazyLoadingEmptyBranch(node, false);
@@ -591,20 +572,6 @@ class GridOnScrollStopModifier extends ModifierWithKey<() => void> {
   }
 }
 
-class GridOnScrollBarUpdateModifier extends ModifierWithKey<(index: number, offset: number) => ComputedBarAttribute> {
-  constructor(value: (index: number, offset: number) => ComputedBarAttribute) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridOnScrollBarUpdate');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetOnScrollBarUpdate(node);
-    } else {
-      getUINativeModule().grid.setOnScrollBarUpdate(node, this.value);
-    }
-  }
-}
-
 class GridOnScrollIndexModifier extends ModifierWithKey<(first: number, last: number) => void> {
   constructor(value: (first: number, last: number) => void) {
     super(value);
@@ -615,6 +582,20 @@ class GridOnScrollIndexModifier extends ModifierWithKey<(first: number, last: nu
       getUINativeModule().grid.resetOnScrollIndex(node);
     } else {
       getUINativeModule().grid.setOnScrollIndex(node, this.value);
+    }
+  }
+}
+
+class GridOnScrollBarUpdateModifier extends ModifierWithKey<(index: number, offset: number) => ComputedBarAttribute> {
+  constructor(value: (index: number, offset: number) => ComputedBarAttribute) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridOnScrollBarUpdate');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollBarUpdate(node);
+    } else {
+      getUINativeModule().grid.setOnScrollBarUpdate(node, this.value);
     }
   }
 }
@@ -776,20 +757,6 @@ class GridClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
-class GridFlingSpeedLimitModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('gridFlingSpeedLimit');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().grid.resetFlingSpeedLimit(node);
-    } else {
-      getUINativeModule().grid.setFlingSpeedLimit(node, this.value);
-    }
-  }
-}
-
 class GridAlignItemsModifier extends ModifierWithKey<GridItemAlignment> {
   constructor(value: GridItemAlignment) {
     super(value);
@@ -819,8 +786,8 @@ class GridSyncLoadModifier extends ModifierWithKey<boolean> {
 }
 
 class GridEditModeOptionsModifier extends ModifierWithKey<EditModeOptions | undefined> {
-  constructor(options: EditModeOptions | undefined) {
-    super(options);
+  constructor(value: EditModeOptions | undefined) {
+    super(value);
   }
   static identity: Symbol = Symbol('gridEditModeOptions');
   applyPeer(node: KNode, reset: boolean): void {
@@ -833,8 +800,8 @@ class GridEditModeOptionsModifier extends ModifierWithKey<EditModeOptions | unde
 }
 
 class GridOnEditModeChangeModifier extends ModifierWithKey<Callback<boolean> | undefined> {
-  constructor(callback: Callback<boolean> | undefined) {
-    super(callback);
+  constructor(value: Callback<boolean> | undefined) {
+    super(value);
   }
   static identity: Symbol = Symbol('gridOnEditModeChange');
   applyPeer(node: KNode, reset: boolean): void {
@@ -846,36 +813,47 @@ class GridOnEditModeChangeModifier extends ModifierWithKey<Callback<boolean> | u
   }
 }
 
+class GridEnableEditModeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridEnableEditMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetGridEnableEditMode(node);
+    } else {
+      getUINativeModule().grid.setGridEnableEditMode(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
-globalThis.Grid.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkGridComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.GridModifier(nativePtr, classType);
-  });
-};
-
-globalThis.Grid.onWillStopDragging = function (value: (velocity: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
-};
-
-globalThis.Grid.onWillStartDragging = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
-};
-
-globalThis.Grid.onDidStopDragging = function (value: (isWillFling: boolean) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
-};
-
-globalThis.Grid.onWillStartFling = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
-};
-
-globalThis.Grid.onDidStopFling = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
-};
+if (globalThis.Grid !== undefined) {
+  (globalThis as any).Grid.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkGridComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.GridModifier(nativePtr, classType);
+    });
+  };
+  (globalThis as any).Grid.onWillStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+  };
+  (globalThis as any).Grid.onWillStartDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
+  };
+  (globalThis as any).Grid.onDidStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
+  };
+  (globalThis as any).Grid.onWillStartFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
+  };
+  (globalThis as any).Grid.onDidStopFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
+  };
+}
