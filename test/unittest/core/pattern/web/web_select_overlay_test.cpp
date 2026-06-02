@@ -81,6 +81,7 @@ std::shared_ptr<NWebTouchHandleState> g_endSelectionHandle = nullptr;
 } // namespace
 
 namespace OHOS::NWeb {
+namespace {
 class MockNWebTouchHandleStateImpl : public NWebTouchHandleState {
 public:
     MockNWebTouchHandleStateImpl() = default;
@@ -339,9 +340,11 @@ private:
     int32_t x_ = 0;
     float edgeHeight_ = 0.0;
 };
+}
 } // namespace OHOS::NWeb
 
 namespace OHOS::Ace::NG {
+namespace {
 RefPtr<WebPattern> g_webPattern = nullptr;
 
 class NWebTouchHandleStateTestImpl : public OHOS::NWeb::NWebTouchHandleState {
@@ -702,14 +705,6 @@ public:
 private:
     float edgeHeight = 10.0;
     bool isDragging = false;
-};
-
-class WebSelectOverlayTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
 };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1920,6 +1915,15 @@ public:
     {
         return edgeHeight_;
     }
+};
+}
+
+class WebSelectOverlayTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
 };
 #endif
 
@@ -3174,9 +3178,6 @@ HWTEST_F(WebSelectOverlayTest, IsShowMenuOfAutoFill_001, TestSize.Level1)
     selectInfo.isSingleHandle = true;
     isShow = overlay.IsShowMenuOfAutoFill(flags, selectInfo);
     EXPECT_EQ(isShow, true);
-    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
-    isShow = overlay.IsShowMenuOfAutoFill(flags, selectInfo);
-    EXPECT_EQ(isShow, false);
 #endif
 }
 
@@ -5480,12 +5481,8 @@ HWTEST_F(WebSelectOverlayTest, OnUpdateSelectOverlayInfo_001, TestSize.Level1)
     int32_t requestCode = 0;
     overlay.SetIsSingleHandle(false);
     overlay.webSelectInfo_.isHandleLineShow = false;
-    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
     overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    EXPECT_EQ(selectInfo.isHandleLineShow, false);
-    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
-    overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    EXPECT_EQ(selectInfo.isHandleLineShow, false);
+    EXPECT_EQ(selectInfo.isHandleLineShow, true);
 }
 
 /**

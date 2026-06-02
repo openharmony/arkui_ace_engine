@@ -35,7 +35,7 @@ using namespace testing::ext;
 using namespace OHOS::Ace;
 
 namespace OHOS::Ace::NG {
-
+namespace {
 class MockWebContextMenuParam : public WebContextMenuParam {
     DECLARE_ACE_TYPE(MockWebContextMenuParam, WebContextMenuParam);
 public:
@@ -114,6 +114,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 };
+}
 
 void WebContextSelectOverlayTest::SetUpTestCase() {}
 void WebContextSelectOverlayTest::TearDownTestCase() {}

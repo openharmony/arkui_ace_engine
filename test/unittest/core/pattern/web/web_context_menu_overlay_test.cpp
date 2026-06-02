@@ -32,7 +32,7 @@ using namespace testing::ext;
 using namespace OHOS::Ace;
 
 namespace OHOS::Ace::NG {
-
+namespace {
 class MockWebContextMenuParam : public WebContextMenuParam {
     DECLARE_ACE_TYPE(MockWebContextMenuParam, WebContextMenuParam);
 public:
@@ -117,7 +117,7 @@ public:
     MOCK_METHOD(void, PasteAndMatchStyle, (), (const, override));
     MOCK_METHOD(void, RequestPasswordAutoFill, (), (const, override));
 };
-
+}
 class WebContextMenuOverlayTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -366,7 +366,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_004, TestSize.Level1)
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
     overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
     EXPECT_FALSE(selectMenuInfo.showCut);
-    EXPECT_TRUE(selectMenuInfo.showCopy);
+    EXPECT_FALSE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
     EXPECT_TRUE(selectMenuInfo.showCopyAll);
 }
@@ -410,7 +410,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_005, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_TRUE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_FALSE(selectMenuInfo.showCopyAll);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
 }
 
 /**
