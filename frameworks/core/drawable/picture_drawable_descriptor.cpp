@@ -47,12 +47,15 @@ bool PictureDrawableDescriptor::IsHdrConfigValid() const
 
 RefPtr<PixelMap> PictureDrawableDescriptor::DoComposeFOV()
 {
-    if (!picture_) {
+    if (!picture_ || !picture_->GetMainPixel()) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "DoComposeFOV picture is null");
         return nullptr;
     }
     ACE_SCOPED_TRACE("DoComposeFOV");
-    auto oriPixelMap = picture_->GetHdrComposedPixelMap(PixelFormat::UNKNOWN);
+    auto oriPixelMap = picture_->GetMainPixel();
+    if (!oriPixelMap->IsHdr()) {
+        oriPixelMap = picture_->GetHdrComposedPixelMap(PixelFormat::UNKNOWN);
+    }
     auto lhdrPixelMap = picture_->GetAuxPicturePixelMap(AuxiliaryPictureType::LHDR_GAINMAP);
     if (!oriPixelMap || !lhdrPixelMap) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "DoComposeFOV pixelMap is null, ori=%{public}d lhdr=%{public}d",
