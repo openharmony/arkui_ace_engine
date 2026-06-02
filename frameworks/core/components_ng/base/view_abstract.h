@@ -271,8 +271,15 @@ public:
     static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetDashGap(const Dimension &value);
     static void SetDashGap(const BorderWidthProperty &value);
+    static void CheckBorderDashGapLPX(const BorderWidthProperty& value);
+    static void CheckNodeBorderDashGapLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value);
+    static void CheckNodeBorderDashGapLPX(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetDashWidth(const Dimension &value);
     static void SetDashWidth(const BorderWidthProperty &value);
+    static void CheckBorderDashWidthLPX(const BorderWidthProperty& value);
+    static void CheckNodeBorderDashWidthLPX(
+        RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value);
+    static void CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetOpacity(double opacity);
     static void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);

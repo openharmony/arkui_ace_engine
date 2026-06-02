@@ -13,25 +13,16 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <optional>
-
 #define private public
 #define protected public
 
 #include "gtest/gtest.h"
 
-#include "core/accessibility/accessibility_manager.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
