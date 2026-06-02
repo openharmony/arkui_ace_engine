@@ -26,5 +26,6 @@ class ClickRecognizerTest : public GesturesTestBase {};
 // Placeholder test to ensure compilation
 HWTEST_F(ClickRecognizerTest, GesturesTestPlaceholder, TestSize.Level1)
 {
-    EXPECT_TRUE(true);
+    auto* fixture = dynamic_cast<GesturesTestBase*>(this);
+    EXPECT_NE(fixture, nullptr);
 }

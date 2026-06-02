@@ -15,6 +15,7 @@
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
 #include "core/components_ng/event/event_constants.h"
+#include "securec.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -3452,5 +3453,244 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerReconcileFromTest002, TestSize.Level1
      */
     bool result = panRecognizer1.ReconcileFrom(panRecognizer2);
     EXPECT_FALSE(result);
+}
+
+constexpr int32_t PAN_GESTURE_TEST_FINGERS = 2;
+constexpr int32_t PAN_GESTURE_TEST_FINGERS_ALT = 3;
+constexpr double PAN_GESTURE_TEST_DISTANCE = 10.0;
+constexpr double PAN_GESTURE_TEST_DISTANCE_ALT = 20.0;
+constexpr int32_t PAN_GESTURE_BUFFER_SIZE = 4096;
+constexpr int32_t PAN_GESTURE_TEST_USER_DATA = 42;
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest003, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension distanceMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, distanceMap, true);
+    ASSERT_NE(panGesture, nullptr);
+    EXPECT_EQ(panGesture->fingers_, PAN_GESTURE_TEST_FINGERS);
+    EXPECT_TRUE(panGesture->isLimitFingerCount_);
+    auto resultDistanceMap = panGesture->GetDistanceMap();
+    EXPECT_EQ(resultDistanceMap.size(), 1);
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest004, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension distanceMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, distanceMap, false);
+    ASSERT_NE(panGesture, nullptr);
+
+    auto recognizer = panGesture->CreateRecognizer();
+    ASSERT_NE(recognizer, nullptr);
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(recognizer);
+    ASSERT_NE(panRecognizer, nullptr);
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest005, TestSize.Level1)
+{
+    MockPipelineContext::TearDown();
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension distanceMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, distanceMap, false);
+    ASSERT_NE(panGesture, nullptr);
+
+    auto recognizer = panGesture->CreateRecognizer();
+    EXPECT_EQ(recognizer, nullptr);
+    MockPipelineContext::SetUp();
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest006, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension distanceMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, distanceMap, false);
+    ASSERT_NE(panGesture, nullptr);
+    panGesture->SetPriority(GesturePriority::High);
+    panGesture->SetGestureMask(GestureMask::IgnoreInternal);
+
+    auto recognizer = panGesture->CreateRecognizer();
+    ASSERT_NE(recognizer, nullptr);
+    EXPECT_EQ(recognizer->GetPriority(), GesturePriority::High);
+    EXPECT_EQ(recognizer->GetPriorityMask(), GestureMask::IgnoreInternal);
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest007, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension distanceMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, distanceMap, false);
+    ASSERT_NE(panGesture, nullptr);
+    int32_t userData = PAN_GESTURE_TEST_USER_DATA;
+    panGesture->SetUserData(reinterpret_cast<void*>(&userData));
+
+    auto recognizer = panGesture->CreateRecognizer();
+    ASSERT_NE(recognizer, nullptr);
+    auto gestureInfo = recognizer->GetGestureInfo();
+    ASSERT_NE(gestureInfo, nullptr);
+    EXPECT_EQ(gestureInfo->GetUserData(), reinterpret_cast<void*>(&userData));
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest008, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension distanceMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, distanceMap, false);
+    ASSERT_NE(panGesture, nullptr);
+
+    int32_t size = panGesture->SizeofMe();
+    EXPECT_GT(size, 0);
+    size_t expectedDistanceMapSize = sizeof(int32_t) + (sizeof(SourceTool) + sizeof(double)) * distanceMap.size();
+    int32_t expectedSize = sizeof(int32_t) + sizeof(GestureType) + sizeof(PanDirection) +
+        expectedDistanceMapSize + sizeof(Matrix4) + sizeof(int32_t) +
+        sizeof(GesturePriority) + sizeof(GestureMask);
+    EXPECT_EQ(size, expectedSize);
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest009, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension emptyDistanceMap;
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, emptyDistanceMap, false);
+    ASSERT_NE(panGesture, nullptr);
+
+    int32_t size = panGesture->SizeofMe();
+    EXPECT_GT(size, 0);
+    size_t expectedDistanceMapSize = sizeof(int32_t);
+    int32_t expectedSize = sizeof(int32_t) + sizeof(GestureType) + sizeof(PanDirection) +
+        expectedDistanceMapSize + sizeof(Matrix4) + sizeof(int32_t) +
+        sizeof(GesturePriority) + sizeof(GestureMask);
+    EXPECT_EQ(size, expectedSize);
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest010, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension distanceMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, distanceMap, false);
+    ASSERT_NE(panGesture, nullptr);
+
+    auto buffer = std::make_unique<char[]>(PAN_GESTURE_BUFFER_SIZE);
+    ASSERT_NE(buffer, nullptr);
+    EXPECT_EQ(memset_s(buffer.get(), PAN_GESTURE_BUFFER_SIZE, 0, PAN_GESTURE_BUFFER_SIZE), EOK);
+
+    char* payloadStart = buffer.get() + sizeof(GestureType) + sizeof(int32_t);
+    panGesture->SerializeTo(payloadStart);
+
+    int32_t deserializedFingers = *reinterpret_cast<int32_t*>(payloadStart);
+    EXPECT_EQ(deserializedFingers, PAN_GESTURE_TEST_FINGERS);
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest011, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::HORIZONTAL | PanDirection::VERTICAL;
+    PanDistanceMapDimension distanceMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) },
+        { SourceTool::FINGER, Dimension(PAN_GESTURE_TEST_DISTANCE_ALT, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS_ALT, panDirection, distanceMap, true);
+    ASSERT_NE(panGesture, nullptr);
+    panGesture->SetPriority(GesturePriority::High);
+    panGesture->SetGestureMask(GestureMask::IgnoreInternal);
+
+    int32_t size = panGesture->SizeofMe();
+    EXPECT_GT(size, 0);
+
+    auto buffer = std::make_unique<char[]>(PAN_GESTURE_BUFFER_SIZE);
+    ASSERT_NE(buffer, nullptr);
+    EXPECT_EQ(memset_s(buffer.get(), PAN_GESTURE_BUFFER_SIZE, 0, PAN_GESTURE_BUFFER_SIZE), EOK);
+
+    int32_t serializedSize = panGesture->Serialize(buffer.get());
+    EXPECT_EQ(serializedSize, size);
+
+    auto deserializedGesture = AceType::MakeRefPtr<PanGesture>(
+        DEFAULT_PAN_FINGER, PanDirection(), DEFAULT_PAN_DISTANCE.Value(), false);
+    ASSERT_NE(deserializedGesture, nullptr);
+
+    int32_t deserializedSize = deserializedGesture->Deserialize(buffer.get());
+    EXPECT_EQ(deserializedSize, size);
+    EXPECT_EQ(deserializedGesture->fingers_, PAN_GESTURE_TEST_FINGERS_ALT);
+    EXPECT_EQ(deserializedGesture->priority_, GesturePriority::High);
+    EXPECT_EQ(deserializedGesture->gestureMask_, GestureMask::IgnoreInternal);
+    EXPECT_EQ(deserializedGesture->direction_.type, panDirection.type);
+    auto deserializedDistanceMap = deserializedGesture->GetDistanceMap();
+    EXPECT_EQ(deserializedDistanceMap.size(), distanceMap.size());
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest012, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    PanDistanceMapDimension emptyDistanceMap;
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, emptyDistanceMap, false);
+    ASSERT_NE(panGesture, nullptr);
+    panGesture->SetPriority(GesturePriority::Low);
+    panGesture->SetGestureMask(GestureMask::Normal);
+
+    int32_t size = panGesture->SizeofMe();
+    auto buffer = std::make_unique<char[]>(PAN_GESTURE_BUFFER_SIZE);
+    ASSERT_NE(buffer, nullptr);
+    EXPECT_EQ(memset_s(buffer.get(), PAN_GESTURE_BUFFER_SIZE, 0, PAN_GESTURE_BUFFER_SIZE), EOK);
+
+    int32_t serializedSize = panGesture->Serialize(buffer.get());
+    EXPECT_EQ(serializedSize, size);
+
+    auto deserializedGesture = AceType::MakeRefPtr<PanGesture>(
+        PAN_GESTURE_TEST_FINGERS_ALT, PanDirection(), DEFAULT_PAN_DISTANCE.Value(), false);
+    EXPECT_EQ(deserializedGesture->priority_, GesturePriority::Low);
+    EXPECT_EQ(deserializedGesture->gestureMask_, GestureMask::Normal);
+}
+
+HWTEST_F(PanRecognizerTestNg, PanGestureTest013, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    PanDistanceMapDimension initialMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::PX) }
+    };
+    auto panGesture =
+        AceType::MakeRefPtr<PanGesture>(PAN_GESTURE_TEST_FINGERS, panDirection, initialMap, false);
+    ASSERT_NE(panGesture, nullptr);
+    EXPECT_EQ(panGesture->GetDistanceMap().size(), 1);
+
+    PanDistanceMapDimension newMap = {
+        { SourceTool::UNKNOWN, Dimension(PAN_GESTURE_TEST_DISTANCE_ALT, DimensionUnit::PX) },
+        { SourceTool::FINGER, Dimension(PAN_GESTURE_TEST_DISTANCE, DimensionUnit::VP) }
+    };
+    panGesture->SetDistanceMap(newMap);
+    EXPECT_EQ(panGesture->GetDistanceMap().size(), 2);
 }
 } // namespace OHOS::Ace::NG
