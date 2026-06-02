@@ -15,6 +15,7 @@
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
 #include "gtest/gtest.h"
+#include "iremote_object.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
@@ -50,12 +51,13 @@ class TestAICaller : public AICallerHelper {
 public:
     TestAICaller() = default;
     ~TestAICaller() override = default;
-    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    std::pair<bool, std::string> onAIFunctionCaller(const std::string& funcName, const std::string&,
+        const sptr<IRemoteObject>&) override
     {
         if (funcName.compare("Success") == 0) {
-            return true;
+            return { true, "success" };
         }
-        return false;
+        return { false, "" };
     }
 };
 
@@ -2882,7 +2884,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg312, TestSize.Level1)
      * @tc.steps3: call ai function without set
      * @tc.excepted: step3 return AI_CALLER_INVALID means AI helper not setted.
      */
-    EXPECT_EQ(frameNode->CallAIFunction("Success", ""), AI_CALLER_INVALID);
+    auto result = frameNode->CallAIFunction("Success", "", nullptr);
+    EXPECT_EQ(result.first, AI_CALLER_INVALID);
+    EXPECT_TRUE(result.second.empty());
 
     /**
      * @tc.steps4: set ai helper instance.
@@ -2895,13 +2899,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg312, TestSize.Level1)
      * @tc.steps5: call ai function success after set.
      * @tc.excepted: step5 ai function called success.
      */
-    EXPECT_EQ(frameNode->CallAIFunction("Success", "params1: 1"), AI_CALL_SUCCESS);
+    result = frameNode->CallAIFunction("Success", "params1: 1", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_SUCCESS);
+    EXPECT_EQ(result.second, "success");
 
     /**
      * @tc.steps6: call invalid function after set.
      * @tc.excepted: step6 ai function not found and return AI_CALL_FUNCNAME_INVALID.
      */
-    EXPECT_EQ(frameNode->CallAIFunction("OTHERFunction", "params1: 1"), AI_CALL_FUNCNAME_INVALID);
+    result = frameNode->CallAIFunction("OTHERFunction", "params1: 1", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_FUNCNAME_INVALID);
+    EXPECT_TRUE(result.second.empty());
 }
 
 

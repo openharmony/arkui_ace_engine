@@ -973,36 +973,46 @@ void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& f
 }
 
 void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(
-    std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback)
+    ExeAppAIFunctionFunction&& callback)
 {
     std::lock_guard<std::mutex> lock(pipelineExeAppAIFunctionCallbackMutex_);
     pipelineExeAppAIFunctionCallback_ = std::move(callback);
 }
 
-void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const std::string& params)
+void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const std::string& params,
+    const sptr<IRemoteObject>& remoteObj, int32_t nodeId)
 {
-    std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback;
+    ExeAppAIFunctionFunction pipelineExeAppAIFunctionCallback;
     {
         std::lock_guard<std::mutex> lock(pipelineExeAppAIFunctionCallbackMutex_);
         pipelineExeAppAIFunctionCallback = pipelineExeAppAIFunctionCallback_;
     }
     if (pipelineExeAppAIFunctionCallback) {
-        auto result = pipelineExeAppAIFunctionCallback(funcName, params);
-        SendExeAppAIFunctionResult(result);
+        auto [result, data] = pipelineExeAppAIFunctionCallback(funcName, params, remoteObj, nodeId);
+        SendExeAppAIFunctionResult(result, data);
     }
 }
 
-void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
+void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result, const std::string& data)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (const auto& pair : reportObjectMap_) {
-        auto reportService = iface_cast<ReportService>(pair.second);
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    auto processIter = processMap_.find("ExeAppAIFunction");
+    if (processIter == processMap_.end() || processIter->second.empty()) {
+        LOGW("SendExeAppAIFunctionResult no report proxy");
+        return;
+    }
+    for (const auto& pid : processIter->second) {
+        auto reportIter = reportObjectMap_.find(pid);
+        auto reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
         if (reportService != nullptr) {
-            reportService->SendExeAppAIFunctionResult(result);
+            reportService->SendExeAppAIFunctionResult(result, data);
         } else {
-            LOGW("report send execute application AI function result failed, process id:%{public}d", pair.first);
+            LOGW("report send execute application AI function result failed, process id:%{public}d", pid);
         }
     }
+    processIter->second.clear();
 }
 
 void UiSessionManagerOhos::RegisterContentChangeCallback(const ContentChangeConfig& config)

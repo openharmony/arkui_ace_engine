@@ -101,7 +101,7 @@ public:
         MultiImageQueryErrorCode arkUIErrorCode) override;
     void SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
             std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode) override;
-    void SendExeAppAIFunctionResult(uint32_t result) override;
+    void SendExeAppAIFunctionResult(uint32_t result, const std::string& data) override;
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
     void SendWebInfoRequestResult(

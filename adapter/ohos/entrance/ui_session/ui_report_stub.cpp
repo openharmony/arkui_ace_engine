@@ -205,7 +205,8 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         }
         case SEND_EXE_APP_AI_FUNCTION_RESULT: {
             uint32_t result = data.ReadUint32();
-            SendExeAppAIFunctionResult(result);
+            std::string dataString = data.ReadString();
+            SendExeAppAIFunctionResult(result, dataString);
             break;
         }
         case SEND_SPECIFIED_CONTENT_OFFSETS: {
@@ -640,15 +641,15 @@ void UiReportStub::SendArkWebImagesById(int32_t windowId, const std::map<int32_t
     }
 }
 
-void UiReportStub::RegisterExeAppAIFunction(const std::function<void(uint32_t)>& finishCallback)
+void UiReportStub::RegisterExeAppAIFunction(const std::function<void(uint32_t, std::string)>& finishCallback)
 {
     exeAppAIFunctionCallback_ = std::move(finishCallback);
 }
 
-void UiReportStub::SendExeAppAIFunctionResult(uint32_t result)
+void UiReportStub::SendExeAppAIFunctionResult(uint32_t result, const std::string& data)
 {
     if (exeAppAIFunctionCallback_) {
-        exeAppAIFunctionCallback_(result);
+        exeAppAIFunctionCallback_(result, data);
     }
 }
 

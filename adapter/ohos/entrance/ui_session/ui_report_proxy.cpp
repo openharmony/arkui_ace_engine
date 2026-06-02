@@ -526,7 +526,7 @@ void UiReportProxy::SendArkWebImagesById(int32_t windowId, const std::map<int32_
     }
 }
 
-void UiReportProxy::SendExeAppAIFunctionResult(uint32_t result)
+void UiReportProxy::SendExeAppAIFunctionResult(uint32_t result, const std::string& data)
 {
     MessageParcel messageData;
     MessageParcel reply;
@@ -535,7 +535,7 @@ void UiReportProxy::SendExeAppAIFunctionResult(uint32_t result)
         LOGW("SendExeAppAIFunctionResult write interface token failed");
         return;
     }
-    if (!messageData.WriteUint32(result)) {
+    if (!messageData.WriteUint32(result) || !messageData.WriteString(data)) {
         LOGW("SendExeAppAIFunctionResult write result  failed");
         return;
     }

@@ -8615,15 +8615,17 @@ void FrameNode::SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCalle
     aiCallerHelper_ = aiCallerHelper;
 }
 
-uint32_t FrameNode::CallAIFunction(const std::string& functionName, const std::string& params)
+std::pair<uint32_t, std::string> FrameNode::CallAIFunction(const std::string& functionName, const std::string& params,
+    const sptr<IRemoteObject>& remoteObj)
 {
     static constexpr uint32_t AI_CALL_SUCCESS = 0;
     static constexpr uint32_t AI_CALLER_INVALID = 1;
     static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
     if (aiCallerHelper_) {
-        return aiCallerHelper_->onAIFunctionCaller(functionName, params) ? AI_CALL_SUCCESS : AI_CALL_FUNCNAME_INVALID;
+        auto [status, data] = aiCallerHelper_->onAIFunctionCaller(functionName, params, remoteObj);
+        return status ? std::make_pair(AI_CALL_SUCCESS, data) : std::make_pair(AI_CALL_FUNCNAME_INVALID, "");
     }
-    return AI_CALLER_INVALID;
+    return { AI_CALLER_INVALID, "" };
 }
 
 void FrameNode::UpdateBackground(bool frameSizeChange)

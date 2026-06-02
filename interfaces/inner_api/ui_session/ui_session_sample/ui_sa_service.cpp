@@ -474,20 +474,22 @@ void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::v
     if (params.size() >= EXE_APP_AI_FUNCTION_PARAMS) {
         std::string funcName = params[1];
         std::string paramsJson = params[2];
-        auto finishCallback = [](uint32_t result) {
+        int32_t nodeId = params.size() > EXE_APP_AI_FUNCTION_PARAMS ? std::atoi(params[3].c_str()) : -1;
+        auto finishCallback = [](uint32_t result, const std::string& data) {
             std::map<uint32_t, std::string> resultMap = {
                 { 0, "AI_CALL_SUCCESS" },
                 { 1, "AI_CALLER_INVALID" },
                 { 2, "AI_CALL_FUNCNAME_INVALID" },
                 { 3, "AI_CALL_NODE_INVALID" },
                 { 4, "AI_CALL_ENV_INVALID" },
+                { 5, "AI_CALL_NODE_AMBIGUOUS" },
             };
-            LOGI("[ExeAppAIFunction] finishCallback result=%{public}d(%{public}s)", result,
-                (resultMap.count(result) ? resultMap[result] : "").c_str());
+            LOGI("[ExeAppAIFunction] finishCallback result=%{public}d(%{public}s), data=%{public}s", result,
+                (resultMap.count(result) ? resultMap[result] : "").c_str(), data.c_str());
         };
-        service->ExeAppAIFunction(funcName, paramsJson, finishCallback);
-        LOGI("[ExeAppAIFunction] call ExeAppAIFunction funcName=%{public}s, params=%{public}s", funcName.c_str(),
-            paramsJson.c_str());
+        service->ExeAppAIFunction(funcName, paramsJson, nullptr, nodeId, finishCallback);
+        LOGI("[ExeAppAIFunction] call ExeAppAIFunction funcName=%{public}s, params=%{public}s, nodeId=%{public}d",
+            funcName.c_str(), paramsJson.c_str(), nodeId);
     }
 }
 

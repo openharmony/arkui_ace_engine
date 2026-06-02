@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
+#include "iremote_object.h"
 #include "core/event/resample_algo.h"
 
 #define private public
@@ -3107,8 +3108,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg256, TestSize.Level1)
     context_->rootNode_ = nullptr;
     EXPECT_EQ(context_->rootNode_, nullptr);
 
-    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
-    EXPECT_EQ(result, AI_CALL_NODE_INVALID);
+    auto result = context_->ExeAppAIFunctionCallback("Success", "", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_NODE_INVALID);
+    EXPECT_TRUE(result.second.empty());
 }
 
 /**
@@ -3134,8 +3136,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg257, TestSize.Level1)
     /**
      * @tc.steps3: topNavNode cannot be found.
      */
-    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
-    EXPECT_EQ(result, AI_CALL_NODE_INVALID);
+    auto result = context_->ExeAppAIFunctionCallback("Success", "", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_NODE_INVALID);
+    EXPECT_TRUE(result.second.empty());
 }
 
 /**
@@ -3187,8 +3190,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg258, TestSize.Level1)
     navPathList.emplace_back(std::make_pair("pageFour", navDestinationNode4));
     navigationPattern->navigationStack_->SetNavPathList(navPathList);
 
-    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
-    EXPECT_EQ(result, AI_CALL_NODE_INVALID);
+    auto result = context_->ExeAppAIFunctionCallback("Success", "", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_NODE_AMBIGUOUS);
+    EXPECT_FALSE(result.second.empty());
 }
 
 /**

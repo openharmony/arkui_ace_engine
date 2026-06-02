@@ -17,9 +17,15 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_UI_SESSION_AI_CALLER_HELPER_H
 
 #include <string>
+#include <utility>
 
 #include "ui/base/macros.h"
 
+namespace OHOS {
+class IRemoteObject;
+template<typename T>
+class sptr;
+} // namespace OHOS
 namespace OHOS::Ace {
 // the interface class for AI assistant, the ai assistante instance should be setted in FrameNode.
 class ACE_FORCE_EXPORT AICallerHelper {
@@ -31,8 +37,11 @@ public:
      * @description: this callback triggered by ai assistant by ui_session proxy.
      * @param funcName function name of the target function.
      * @param params params for target function in json format.
+     * @param remoteObj remote object.
+     * @return pair containing success status and result data.
      */
-    virtual bool onAIFunctionCaller(const std::string& funcName, const std::string& params) = 0;
+    virtual std::pair<bool, std::string> onAIFunctionCaller(const std::string& funcName, const std::string& params,
+        const sptr<IRemoteObject>& remoteObj) = 0;
 };
-}
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_UI_SESSION_AI_CALLER_HELPER_H

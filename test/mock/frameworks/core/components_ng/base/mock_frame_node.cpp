@@ -268,6 +268,22 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     return nullptr;
 }
 
+std::pair<uint32_t, std::string> FrameNode::CallAIFunction(const std::string& functionName, const std::string& params,
+    const sptr<IRemoteObject>& remoteObj)
+{
+    static constexpr uint32_t AI_CALL_SUCCESS = 0;
+    static constexpr uint32_t AI_CALLER_INVALID = 1;
+    static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
+    if (aiCallerHelper_) {
+        auto [status, data] = aiCallerHelper_->onAIFunctionCaller(functionName, params, remoteObj);
+        if (status) {
+            return { AI_CALL_SUCCESS, data };
+        }
+        return { AI_CALL_FUNCNAME_INVALID, "" };
+    }
+    return { AI_CALLER_INVALID, "" };
+}
+
 RefPtr<GestureEventHub> FrameNode::GetOrCreateGestureEventHub()
 {
     return nullptr;

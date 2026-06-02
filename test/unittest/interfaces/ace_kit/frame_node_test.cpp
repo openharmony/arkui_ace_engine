@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "iremote_object.h"
 
 #define private public
 #define protected public
@@ -41,12 +42,13 @@ class TestAICaller : public AICallerHelper {
 public:
     TestAICaller() = default;
     ~TestAICaller() override = default;
-    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    std::pair<bool, std::string> onAIFunctionCaller(const std::string& funcName, const std::string&,
+        const sptr<IRemoteObject>&) override
     {
         if (funcName.compare("Success") == 0) {
-            return true;
+            return { true, "success" };
         }
-        return false;
+        return { false, "" };
     }
 };
 
@@ -768,6 +770,9 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest115, TestSize.Level1)
      */
     constexpr char tag[] = "TEST115";
     const int32_t id = 115;
+    static constexpr uint32_t AI_CALL_SUCCESS = 0;
+    static constexpr uint32_t AI_CALLER_INVALID = 1;
+    static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
@@ -780,9 +785,11 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest115, TestSize.Level1)
     auto myAICaller = std::make_shared<TestAICaller>();
     /**
      * @tc.steps3: call ai function without set
-     * @tc.excepted: step3 return 1 means AI helper not setted.
+     * @tc.excepted: step3 return AI_CALLER_INVALID means AI helper not setted.
      */
-    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("Success", ""), 1);
+    auto result = frameNodeImpl->frameNode_->CallAIFunction("Success", "", nullptr);
+    EXPECT_EQ(result.first, AI_CALLER_INVALID);
+    EXPECT_TRUE(result.second.empty());
     /**
      * @tc.steps4: set ai helper instance.
      * @tc.excepted: step4 AI helper not null and setted success.
@@ -793,12 +800,16 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest115, TestSize.Level1)
      * @tc.steps5: call ai function success after set.
      * @tc.excepted: step5 ai function called success.
      */
-    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("Success", "params1: 1"), 0);
+    result = frameNodeImpl->frameNode_->CallAIFunction("Success", "params1: 1", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_SUCCESS);
+    EXPECT_EQ(result.second, "success");
     /**
      * @tc.steps6: call invalid function after set.
-     * @tc.excepted: step6 ai function not found and return 2.
+     * @tc.excepted: step6 ai function not found and return AI_CALL_FUNCNAME_INVALID.
      */
-    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("OTHERFunction", "params1: 1"), 2);
+    result = frameNodeImpl->frameNode_->CallAIFunction("OTHERFunction", "params1: 1", nullptr);
+    EXPECT_EQ(result.first, AI_CALL_FUNCNAME_INVALID);
+    EXPECT_TRUE(result.second.empty());
 }
 
 /**
