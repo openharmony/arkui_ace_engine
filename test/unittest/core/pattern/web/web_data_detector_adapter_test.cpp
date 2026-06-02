@@ -238,6 +238,11 @@ HWTEST_F(WebDataDetectorAdapterTest, ProcessRequest_001, TestSize.Level0)
     
     adapter->ProcessRequest(R"({"requestId": "1", "nodes": [1]})");
     EXPECT_EQ(adapter->contextMap_.empty(), true);
+
+    auto mockTaskExecutor = AceType::DynamicCast<MockTaskExecutor>(
+        MockContainer::Current()->taskExecutor_);
+    ASSERT_NE(mockTaskExecutor, nullptr);
+    mockTaskExecutor->delayRun_ = true;
     
     adapter->ProcessRequest(R"({"requestId": "1", "nodes": [{"path": "1", "text": "12345678901"}]})");
     EXPECT_EQ(adapter->contextMap_.empty(), false);
@@ -250,6 +255,7 @@ HWTEST_F(WebDataDetectorAdapterTest, ProcessRequest_001, TestSize.Level0)
 
     adapter->ProcessRequest(R"({"requestId": "1", "nodes": [{"path": "1", "text": "12345678901"}]})");
     EXPECT_EQ(adapter->contextMap_.size(), 1);
+    mockTaskExecutor->delayRun_ = false;
 #endif
 }
 
