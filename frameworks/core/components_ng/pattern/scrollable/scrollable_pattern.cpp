@@ -1337,16 +1337,14 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
                 source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_CROWN ||
                 source == SCROLL_FROM_BAR_OVER_DRAG ||
                 (source == SCROLL_FROM_ANIMATION_CONTROLLER && animateCanOverScroll_)))) {
-        if (isAtTop && Positive(offset)) {
-            animateOverScroll_ = false;
-            return false;
-        }
-        if (isAtBottom && Negative(offset)) {
-            animateOverScroll_ = false;
+        if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
+            animateOverScrollStart_ = false;
+            animateOverScrollEnd_ = false;
             return false;
         }
     }
-    animateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && (isAtTop || isAtBottom);
+    animateOverScrollStart_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && isAtTop;
+    animateOverScrollEnd_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && isAtBottom;
     isAnimateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && animateCanOverScroll_ &&
                            ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset)));
     return true;
@@ -4102,9 +4100,10 @@ void ScrollablePattern::AddScrollableFrameInfo(int32_t scrollSource)
         scrollableFrameInfos_.pop_front();
     }
     uint32_t canOverScrollInfo = IsScrollableSpringEffect();
+    auto animateOverScroll = animateOverScrollStart_ || animateOverScrollEnd_;
     canOverScrollInfo = (canOverScrollInfo << 1) | IsScrollable();
     canOverScrollInfo = (canOverScrollInfo << 1) | ScrollableIdle();
-    canOverScrollInfo = (canOverScrollInfo << 1) | animateOverScroll_;
+    canOverScrollInfo = (canOverScrollInfo << 1) | animateOverScroll;
     canOverScrollInfo = (canOverScrollInfo << 1) | animateCanOverScroll_;
     scrollableFrameInfos_.push_back(ScrollableFrameInfo({
         .scrollStateTime_ = GetSysTimestamp(),

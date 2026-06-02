@@ -478,6 +478,25 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToIndex010
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToIndex010, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(8);
+    CreateDone();
+    int32_t index = 7;
+
+    ScrollToIndex(index, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    EXPECT_FALSE(pattern_->animateOverScrollEnd_);
+}
+
+/**
  * @tc.name: ScrollToIndexTwice001
  * @tc.desc: Test the state after calling ScrollToIndex twice
  * @tc.type: FUNC

@@ -503,8 +503,7 @@ public:
     {
         auto canOverScroll =
             (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR && IsScrollable() &&
-                (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_ ||
-                    source == SCROLL_FROM_BAR_OVER_DRAG));
+                (!ScrollableIdle() || animateCanOverScroll_ || source == SCROLL_FROM_BAR_OVER_DRAG));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -513,11 +512,11 @@ public:
     }
     bool CanOverScrollStart(int32_t source)
     {
-        return CanOverScroll(source) && GetEffectEdge() != EffectEdge::END;
+        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::END) || animateOverScrollStart_;
     }
     bool CanOverScrollEnd(int32_t source)
     {
-        return CanOverScroll(source) && GetEffectEdge() != EffectEdge::START;
+        return (CanOverScroll(source) && GetEffectEdge() != EffectEdge::START) || animateOverScrollEnd_;
     }
     void SetCanStayOverScroll(bool canStayOverScroll)
     {
@@ -1054,7 +1053,8 @@ protected:
     RefPtr<ScrollableController> positionController_;
 
     bool scrollStop_ = false;
-    bool animateOverScroll_ = false;
+    bool animateOverScrollStart_ = false;
+    bool animateOverScrollEnd_ = false;
     bool animateCanOverScroll_ = false;
 
     // for onReachStart of the first layout

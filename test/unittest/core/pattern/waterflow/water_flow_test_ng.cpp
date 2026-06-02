@@ -987,7 +987,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
 
     // enable overScroll
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
-    pattern_->animateOverScroll_ = true;
+    pattern_->animateOverScrollStart_ = true;
     pattern_->layoutInfo_->startIndex_ = 0;
     // total offset = ITEM_MAIN_SIZE
     pattern_->layoutInfo_->UpdateOffset(WATER_FLOW_HEIGHT);

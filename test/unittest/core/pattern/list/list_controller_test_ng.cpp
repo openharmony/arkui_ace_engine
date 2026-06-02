@@ -248,20 +248,12 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Align006, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::CENTER;
     ScrollToIndex(0, smooth, align);
-    if (smooth) {
-        EXPECT_TRUE(TickPosition(150));
-    } else {
-        EXPECT_TRUE(TickPosition(0));
-    }
-    
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the middle item in view
     ScrollToIndex(1, smooth, align);
-    if (smooth) {
-        EXPECT_TRUE(TickPosition(50));
-    } else {
-        EXPECT_TRUE(TickPosition(0));
-    }
+    EXPECT_TRUE(TickPosition(0));
+
     // Scroll to the item out of view
     ScrollToIndex(5, smooth, align);
     EXPECT_TRUE(TickPosition(-350.0f));
@@ -296,19 +288,11 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Align007, TestSize.Level1)
     bool smooth = GetParam();
     ScrollAlign align = ScrollAlign::END;
     ScrollToIndex(0, smooth, align);
-    if (smooth) {
-        EXPECT_TRUE(TickPosition(300));
-    } else {
-        EXPECT_TRUE(TickPosition(0));
-    }
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the middle item in view
     ScrollToIndex(1, smooth, align);
-    if (smooth) {
-        EXPECT_TRUE(TickPosition(200));
-    } else {
-        EXPECT_TRUE(TickPosition(0));
-    }
+    EXPECT_TRUE(TickPosition(0));
 
     // Scroll to the item out of view
     ScrollToIndex(5, smooth, align);
