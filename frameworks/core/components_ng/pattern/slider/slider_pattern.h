@@ -426,7 +426,6 @@ private:
     void UpdateDragPointNode();
     void UpdateBlurCoverNode();
     void UpdateSelectedTrackFrameNode();
-    void UpdateParticleFrameNode();
     void UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius);
     void UpdateMaterialFrameNode(
         const RefPtr<FrameNode>& frameNode, float newSize, float posX, float posY, float borderRadiusValue);
