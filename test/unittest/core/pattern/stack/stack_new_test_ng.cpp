@@ -34,12 +34,24 @@ class StackNewTestNG : public StackBaseTestNG {};
  */
 HWTEST_F(StackNewTestNG, CalculateStackAlignment001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create parentSize and childSize.
+     * @tc.expected: step1. Create parentSize(500,500) and childSize(100,100) successfully.
+     */
     SizeF parentSize(500.0f, 500.0f);
     SizeF childSize(100.0f, 100.0f);
 
+    /**
+     * @tc.steps: step2. Set CENTER alignment and calculate offset.
+     * @tc.expected: step2. Calculate offset with CENTER alignment successfully.
+     */
     Alignment align(Alignment::CENTER);
     auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
 
+    /**
+     * @tc.steps: step3. Calculate expected offset and verify result.
+     * @tc.expected: step3. The offset equals ((parentSize-childSize)/2, (parentSize-childSize)/2).
+     */
     float expectedX = (500.0f - 100.0f) / 2.0f;
     float expectedY = (500.0f - 100.0f) / 2.0f;
     EXPECT_EQ(offset.GetX(), expectedX);

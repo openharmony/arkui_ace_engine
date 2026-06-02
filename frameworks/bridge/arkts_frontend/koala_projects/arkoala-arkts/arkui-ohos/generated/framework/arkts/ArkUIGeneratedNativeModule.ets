@@ -2255,8 +2255,8 @@ export class ArkUIGeneratedNativeModule {
     native static _StackAttribute_setAlignContent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _StackAttribute_setPointLight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Quick
-    native static _StackAttribute_setSyncLoad(ptr: KPointer, value: boolean): void
+    @ani.unsafe.Direct
+    native static _StackAttribute_setSyncLoad(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _Swiper_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct

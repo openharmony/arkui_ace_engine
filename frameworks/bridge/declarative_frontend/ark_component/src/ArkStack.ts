@@ -104,8 +104,8 @@ class StackAlignContentModifier extends ModifierWithKey<number> {
   }
 }
 
-class StackSyncLoadModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class StackSyncLoadModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
     super(value);
   }
   static identity: Symbol = Symbol('stackSyncLoad');
