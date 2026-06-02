@@ -1556,6 +1556,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
     JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);
     JSClass<JSText>::StaticMethod("incrementalUpdatePolicy", &JSText::SetIncrementalUpdatePolicy);
+    JSClass<JSText>::StaticMethod("tailIndents", &JSText::SetTailIndents);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1915,5 +1916,51 @@ void JSText::SetIncrementalUpdatePolicy(const JSCallbackInfo& info)
     }
     auto policy = static_cast<IncrementalUpdatePolicy>(policyValue);
     TextModel::GetInstance()->SetIncrementalUpdatePolicy(policy);
+}
+
+void JSText::SetTailIndents(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    UnRegisterResource("TailIndents");
+
+    NG::TailIndents tailIndents;
+    RefPtr<ResourceObject> firstResObj;
+    NG::TailIndentsArray indentsArray;
+
+    auto parseDimension = [&firstResObj, &indentsArray, isFirst = true](const JSRef<JSVal>& value) mutable {
+        CalcDimension dimension;
+        RefPtr<ResourceObject> resObj;
+        bool parsed = value->IsObject() &&
+            JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(value), dimension, resObj);
+        if (!parsed) {
+            parsed = ParseJsDimensionFpNG(value, dimension, resObj);
+        }
+        if (parsed) {
+            indentsArray.emplace_back(static_cast<Dimension>(dimension));
+            if (isFirst && resObj) {
+                firstResObj = resObj;
+                isFirst = false;
+            }
+        } else {
+            dimension.Reset();
+            indentsArray.emplace_back(dimension);
+        }
+    };
+
+    if (args->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
+        for (size_t i = 0; i < array->Length(); i++) {
+            parseDimension(array->GetValueAt(i));
+        }
+    } else {
+        parseDimension(args);
+    }
+
+    tailIndents.indentsArray = indentsArray;
+
+    if (SystemProperties::ConfigChangePerform() && firstResObj) {
+        RegisterResource<NG::TailIndents>("TailIndents", firstResObj, tailIndents);
+    }
+    TextModel::GetInstance()->SetTailIndents(tailIndents);
 }
 } // namespace OHOS::Ace::Framework

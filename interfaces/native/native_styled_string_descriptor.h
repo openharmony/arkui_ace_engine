@@ -1966,6 +1966,41 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetRadialGradient(
     const OH_ArkUI_ParagraphStyle* paragraphStyle, OH_ArkUI_RadialGradientOptions* radialGradient);
 
 /**
+ * @brief Set tail indents of paragraph style.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param paragraphStyle Pointer to the <b>OH_ArkUI_ParagraphStyle</b> object.
+ * @param tailIndents The tail indent values, in vp. When size is 1, all lines share the same tail indent.
+ * When size > 1, the i-th value specifies the tail indent for the i-th line. If the number of text
+ * lines exceeds size, the last value is used for the remaining lines.
+ * @param size The number of tail indent values.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetTailIndents(
+    OH_ArkUI_ParagraphStyle* paragraphStyle, const float* tailIndents, uint32_t size);
+ 	 
+/**
+ * @brief Get tail indents of paragraph style.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param paragraphStyle Pointer to the <b>OH_ArkUI_ParagraphStyle</b> object.
+ * @param tailIndents The tail indent values, in vp.
+ * @param tailIndentsSize The size of the tailIndents buffer provided by the caller.
+ * @param writeLength The actual number of tail indent values written to the buffer.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than
+ *         the minimum buffer size.
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetTailIndents(const OH_ArkUI_ParagraphStyle* paragraphStyle,
+    float** tailIndents, uint32_t tailIndentsSize, uint32_t* writeLength);
+
+/**
  * @brief Create an <b>OH_ArkUI_GestureStyle</b> object.
  *
  * @note When the object is no longer in use, invoke <b> OH_ArkUI_GestureStyle_Destroy </b> to destroy it.

@@ -115,6 +115,13 @@ ArkUIParagraphStyle ConvertToOriginParagraphStyle(const OH_ArkUI_ParagraphStyle&
         options.colors = gradient.colorStop;
         originStyle.radialGradient = options;
     }
+    if (paragraphStyle.tailIndents.has_value()) {
+        std::vector<ArkUI_Float32> indents;
+        for (const auto& indent : paragraphStyle.tailIndents.value()) {
+            indents.push_back(indent);
+        }
+        originStyle.tailIndents = indents;
+    }
     return originStyle;
 }
 
@@ -448,6 +455,13 @@ OH_ArkUI_ParagraphStyle ConvertToCParagraphStyle(const ArkUIParagraphStyle& styl
         options.repeating = gradient.repeating;
         options.colorStop = gradient.colors;
         paragraphStyle.radialGradient = options;
+    }
+    if (style.tailIndents.has_value()) {
+        std::vector<float> indents;
+        for (const auto& indent : style.tailIndents.value()) {
+            indents.push_back(indent);
+        }
+        paragraphStyle.tailIndents = indents;
     }
     return paragraphStyle;
 }
@@ -873,6 +887,9 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetParagraphStyle(
     if (paragraphStyle->radialGradient.has_value()) {
         style.radialGradient = paragraphStyle->radialGradient.value();
     }
+    if (paragraphStyle->tailIndents.has_value()) {
+        style.tailIndents = paragraphStyle->tailIndents.value();
+    }
     spanStyle->paragraphStyle = style;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -908,6 +925,9 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetParagraphStyle(
     }
     if (spanStyle->paragraphStyle.radialGradient.has_value()) {
         paragraphStyle->radialGradient = spanStyle->paragraphStyle.radialGradient.value();
+    }
+    if (spanStyle->paragraphStyle.tailIndents.has_value()) {
+        paragraphStyle->tailIndents = spanStyle->paragraphStyle.tailIndents.value();
     }
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1640,6 +1660,84 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetRadialGradient(
     radialGradient->radius = paragraphStyle->radialGradient->radius;
     radialGradient->repeating = paragraphStyle->radialGradient->repeating;
     radialGradient->colorStop = paragraphStyle->radialGradient->colorStop;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetTailIndents(
+    OH_ArkUI_ParagraphStyle* paragraphStyle, const float* tailIndents, uint32_t size)
+{
+    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (size > 0 && tailIndents != nullptr) {
+        std::vector<float> indents(tailIndents, tailIndents + size);
+        paragraphStyle->tailIndents = indents;
+    } else {
+        paragraphStyle->tailIndents.reset();
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetTailIndents(const OH_ArkUI_ParagraphStyle* paragraphStyle,
+    float** tailIndents, uint32_t tailIndentsSize, uint32_t* writeLength)
+{
+    CHECK_NULL_RETURN(paragraphStyle && tailIndents && *tailIndents && writeLength,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    
+    if (!paragraphStyle->tailIndents.has_value()) {
+        *writeLength = 0;
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+    }
+    
+    const auto& indents = paragraphStyle->tailIndents.value();
+    uint32_t actualSize = static_cast<uint32_t>(indents.size());
+    *writeLength = actualSize;
+    if (tailIndentsSize < actualSize) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+
+    float* buffer = *tailIndents;
+    for (uint32_t i = 0; i < actualSize; i++) {
+        buffer[i] = indents[i];
+    }
+
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetTailIndents(
+    OH_ArkUI_ParagraphStyle* paragraphStyle, const float* tailIndents, uint32_t size)
+{
+    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (size > 0 && tailIndents != nullptr) {
+        std::vector<float> indents(tailIndents, tailIndents + size);
+        paragraphStyle->tailIndents = indents;
+    } else {
+        paragraphStyle->tailIndents.reset();
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetTailIndents(const OH_ArkUI_ParagraphStyle* paragraphStyle,
+    float** tailIndents, uint32_t tailIndentsSize, uint32_t* writeLength)
+{
+    CHECK_NULL_RETURN(paragraphStyle && tailIndents && *tailIndents && writeLength,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    
+    if (!paragraphStyle->tailIndents.has_value()) {
+        *writeLength = 0;
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+    }
+    
+    const auto& indents = paragraphStyle->tailIndents.value();
+    uint32_t actualSize = static_cast<uint32_t>(indents.size());
+    *writeLength = actualSize;
+    if (tailIndentsSize < actualSize) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+
+    float* buffer = *tailIndents;
+    for (uint32_t i = 0; i < actualSize; i++) {
+        buffer[i] = indents[i];
+    }
+
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 

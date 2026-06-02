@@ -2211,4 +2211,14 @@ void TextModelNG::SetStyledString(FrameNode* frameNode, SpanString* value)
     mutableSpanString->AppendSpanString(target);
     pattern->SetStyledString(mutableSpanString, true, true);
 }
+
+void TextModelNG::SetTailIndents(const NG::TailIndents& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TailIndents, value);
+}
+
+void TextModelNG::SetTailIndents(FrameNode* frameNode, const NG::TailIndents& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TailIndents, value, frameNode);
+}
 } // namespace OHOS::Ace::NG

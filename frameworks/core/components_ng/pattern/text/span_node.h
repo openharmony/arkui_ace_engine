@@ -1093,6 +1093,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE,
         SpanItem::LPX_FLAG_ParagraphSpacing);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ColorShaderStyle, Color, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TailIndents, NG::TailIndents, ChangeFlag::RE_CREATE, SpanItem::LPX_FLAG_NONE);
 
    std::optional<NG::Gradient> GetGradient()
     {

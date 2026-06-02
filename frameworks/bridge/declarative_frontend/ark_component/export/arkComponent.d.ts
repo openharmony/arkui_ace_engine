@@ -814,6 +814,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         repeating?: boolean;
     }): this;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAttribute;
+    tailIndents(value: LengthMetrics | Array<LengthMetrics>): TextAttribute;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

@@ -1111,6 +1111,9 @@ void ParagraphStyleSpan::AddParagraphStylePart2(const RefPtr<NG::SpanItem>& span
     if (paragraphStyle_.HasGradient()) {
         spanItem->textLineStyle->SetOptGradient(paragraphStyle_.GetOptGradient());
     }
+    if (paragraphStyle_.tailIndents.has_value()) {
+        spanItem->textLineStyle->UpdateTailIndents(paragraphStyle_.tailIndents.value());
+    }
 }
 
 void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
@@ -1180,6 +1183,7 @@ void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanIt
     spanItem->textLineStyle->ResetTextDirection();
     spanItem->textLineStyle->ResetColorShaderStyle();
     spanItem->textLineStyle->ResetGradient();
+    spanItem->textLineStyle->ResetTailIndents();
 }
 
 bool ParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const

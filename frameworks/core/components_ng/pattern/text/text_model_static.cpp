@@ -568,4 +568,12 @@ void TextModelStatic::SetSelectDetectEnable(FrameNode* frameNode, const std::opt
         TextModelNG::ResetSelectDetectEnable(frameNode);
     }
 }
+void TextModelStatic::SetTailIndents(FrameNode* frameNode, const std::optional<TailIndents>& value)
+{
+    if (value.has_value()) {
+        TextModelNG::SetTailIndents(frameNode, value.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TailIndents, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

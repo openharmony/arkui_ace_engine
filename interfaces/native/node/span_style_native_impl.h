@@ -88,6 +88,7 @@ struct OH_ArkUI_ParagraphStyle {
     ArkUI_TextDirection textDirection;
     std::optional<OH_ArkUI_LinearGradientOptions> linearGradient = std::nullopt;
     std::optional<OH_ArkUI_RadialGradientOptions> radialGradient = std::nullopt;
+    std::optional<std::vector<float>> tailIndents = std::nullopt;
 };
 
 struct OH_ArkUI_LeadingMarginSpanDrawInfo {

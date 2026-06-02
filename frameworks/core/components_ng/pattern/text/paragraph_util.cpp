@@ -47,7 +47,8 @@ ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing(),
         .propGradient = GradientConvert::ToOptNGGradient(textStyle.GetGradient()),
-        .colorShaderStyle = textStyle.GetColorShaderStyle()
+        .colorShaderStyle = textStyle.GetColorShaderStyle(),
+        .tailIndents = textStyle.GetTailIndent()
         };
 }
 
@@ -150,6 +151,9 @@ void ParagraphUtil::GetSpanParagraphStyle(
     }
     if (lineStyle->HasOrphanCharOptimization()) {
         pStyle.orphanCharOptimization = lineStyle->GetOrphanCharOptimizationValue();
+    }
+    if (lineStyle->HasTailIndents()) {
+        pStyle.tailIndents = lineStyle->GetTailIndentsValue();
     }
     // spanGroup.empty()代表ConstructParagraphSpanGroup时调用，不用于实际布局，仅用于比较段落间是否一致
     if (spanGroup.empty()) {

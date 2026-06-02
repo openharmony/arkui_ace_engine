@@ -116,6 +116,7 @@ public:
     static void SetFallbackLineSpacing(const JSCallbackInfo& info);
     static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
     static void SetIncrementalUpdatePolicy(const JSCallbackInfo& info);
+    static void SetTailIndents(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

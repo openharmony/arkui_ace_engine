@@ -2943,6 +2943,64 @@ void ResetFontVariations(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetFontVariations(frameNode);
 }
+
+void SetTailIndents(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::TailIndents tailIndents;
+    if (values != nullptr && units != nullptr && length > 0) {
+        NG::TailIndentsArray indentArray;
+        for (ArkUI_Int32 i = 0; i < length; i++) {
+            indentArray.emplace_back(Dimension(values[i], static_cast<DimensionUnit>(units[i])));
+        }
+        tailIndents.indentsArray = indentArray;
+    }
+    TextModelNG::SetTailIndents(frameNode, tailIndents);
+}
+
+void ResetTailIndents(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTailIndents(frameNode, NG::TailIndents());
+}
+
+ArkUI_Int32 GetTailIndentsCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    auto tailIndents = layoutProperty->GetTailIndents();
+    if (tailIndents.has_value() && tailIndents->indentsArray.has_value()) {
+        return static_cast<ArkUI_Int32>(tailIndents->indentsArray->size());
+    }
+    return 0;
+}
+
+void GetTailIndents(ArkUINodeHandle node, ArkUI_Float32* values,
+    ArkUI_Int32* units, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (values == nullptr || units == nullptr) {
+        return;
+    }
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto tailIndents = layoutProperty->GetTailIndents();
+    if (tailIndents.has_value() && tailIndents->indentsArray.has_value()) {
+        auto& indentArray = tailIndents->indentsArray.value();
+        ArkUI_Int32 copySize = std::min(size, static_cast<ArkUI_Int32>(indentArray.size()));
+        for (ArkUI_Int32 i = 0; i < copySize; i++) {
+            values[i] = indentArray[i].Value();
+            units[i] = static_cast<ArkUI_Int32>(indentArray[i].Unit());
+        }
+    }
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -3161,6 +3219,10 @@ const ArkUITextModifier* GetTextModifier()
         .setStyledString = SetStyledString,
         .setFontVariations = SetFontVariations,
         .resetFontVariations = ResetFontVariations,
+        .setTailIndents = SetTailIndents,
+        .resetTailIndents = ResetTailIndents,
+        .getTailIndentsCount = GetTailIndentsCount,
+        .getTailIndents = GetTailIndents,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -3303,6 +3365,10 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetTextOnClick = ResetOnClick,
         .setTextResponseRegion = SetResponseRegion,
         .resetTextResponseRegion = ResetResponseRegion,
+        .setTailIndents = SetTailIndents,
+        .resetTailIndents = ResetTailIndents,
+        .getTailIndentsCount = GetTailIndentsCount,
+        .getTailIndents = GetTailIndents,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

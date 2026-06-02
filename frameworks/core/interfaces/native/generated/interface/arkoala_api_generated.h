@@ -2837,6 +2837,8 @@ typedef struct Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResou
 typedef struct Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
 typedef struct Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent;
 typedef struct Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent;
+typedef struct Ark_Union_LengthMetrics_Array_LengthMetrics Ark_Union_LengthMetrics_Array_LengthMetrics;
+typedef struct Opt_Union_LengthMetrics_Array_LengthMetrics Opt_Union_LengthMetrics_Array_LengthMetrics;
 typedef struct Ark_Union_LengthMetrics_F64 Ark_Union_LengthMetrics_F64;
 typedef struct Opt_Union_LengthMetrics_F64 Opt_Union_LengthMetrics_F64;
 typedef struct Ark_Union_LengthMetrics_String Ark_Union_LengthMetrics_String;
@@ -18528,6 +18530,18 @@ typedef struct Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageCont
     Ark_Tag tag;
     Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent value;
 } Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent;
+typedef struct Ark_Union_LengthMetrics_Array_LengthMetrics {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_LengthMetrics value0;
+        Array_LengthMetrics value1;
+    };
+} Ark_Union_LengthMetrics_Array_LengthMetrics;
+typedef struct Opt_Union_LengthMetrics_Array_LengthMetrics {
+    Ark_Tag tag;
+    Ark_Union_LengthMetrics_Array_LengthMetrics value;
+} Opt_Union_LengthMetrics_Array_LengthMetrics;
 typedef struct Ark_Union_LengthMetrics_F64 {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -23715,6 +23729,7 @@ typedef struct Ark_ParagraphStyleInterface {
     Opt_TextDirection textDirection;
     Opt_LeadingMarginSpan leadingMarginSpan;
     Opt_ShaderStyleProxy shaderStyle;
+    Opt_Union_LengthMetrics_Array_LengthMetrics tailIndents;
 } Ark_ParagraphStyleInterface;
 typedef struct Opt_ParagraphStyleInterface {
     Ark_Tag tag;
@@ -27160,6 +27175,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                     const Opt_TextHeightAdaptivePolicy* value);
     void (*setTextIndent)(Ark_NativePointer node,
                           const Opt_Length* value);
+    void (*setTailIndents)(Ark_NativePointer node,
+                           const Opt_Union_LengthMetrics_Array_LengthMetrics* value);
     void (*setWordBreak)(Ark_NativePointer node,
                          const Opt_WordBreak* value);
     void (*setLineBreakStrategy)(Ark_NativePointer node,
@@ -30853,6 +30870,7 @@ typedef struct GENERATED_ArkUIParagraphStyleAccessor {
     Opt_TextDirection (*getTextDirection)(Ark_ParagraphStyle peer);
     Opt_LeadingMarginSpan (*getLeadingMarginSpan)(Ark_ParagraphStyle peer);
     Opt_ShaderStyleProxy (*getShaderStyle)(Ark_ParagraphStyle peer);
+    Opt_Array_F64 (*getTailIndents)(Ark_ParagraphStyle peer);
 } GENERATED_ArkUIParagraphStyleAccessor;
 
 typedef struct GENERATED_ArkUIParticleHelperAccessor {

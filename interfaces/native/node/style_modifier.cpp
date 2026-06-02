@@ -14672,6 +14672,69 @@ int32_t SetTextController(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetTailIndents(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    if (item->size <= 0) {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetTailIndents(node->uiNodeHandle);
+        return ERROR_CODE_NO_ERROR;
+    }
+    auto values = std::make_unique<ArkUI_Float32[]>(item->size);
+    auto units = std::make_unique<ArkUI_Int32[]>(item->size);
+    for (int32_t i = 0; i < item->size; i++) {
+        values[i] = item->value[i].f32;
+        units[i] = GetDefaultUnit(node, UNIT_FP);
+    }
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            fullImpl->getNodeModifiers()->getTextModifier()->setTailIndents(
+                node->uiNodeHandle, values.get(), units.get(), item->size);
+            break;
+        default:
+            break;
+    }
+
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTailIndents(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            fullImpl->getNodeModifiers()->getTextModifier()->resetTailIndents(node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+}
+
+const ArkUI_AttributeItem* GetTailIndents(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Int32 count = fullImpl->getNodeModifiers()->getTextModifier()->getTailIndentsCount(node->uiNodeHandle);
+
+    if (count > 0 && count < MAX_ATTRIBUTE_ITEM_LEN) {
+        auto values = std::make_unique<ArkUI_Float32[]>(count);
+        auto units = std::make_unique<ArkUI_Int32[]>(count);
+        fullImpl->getNodeModifiers()->getTextModifier()->getTailIndents(
+            node->uiNodeHandle, values.get(), units.get(), count);
+        for (ArkUI_Int32 i = 0; i < count; i++) {
+            g_numberValues[i].f32 = values[i];
+        }
+        g_attributeItem.size = count;
+    } else {
+        g_attributeItem.size = 0;
+    }
+
+    return &g_attributeItem;
+}
+
 int32_t SetIncludeFontPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == NUM_0) {
@@ -20921,7 +20984,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetSelectDetectorEnable, nullptr, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple,
         nullptr, SetEditMenuOption, SetTextBindSelectionMenu, SetTextTextSelection, SetOrphanCharOptimization,
         SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, SetTextMarqueeOptions, SetTextDirection,
-        SetSelectedDragPreviewStyle, SetTextController, SetPunctuationOverflow };
+        SetSelectedDragPreviewStyle, SetTextController, SetPunctuationOverflow, SetTailIndents };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -20941,7 +21004,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         nullptr, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager,
         nullptr, nullptr, GetTextTextSelection, GetOrphanCharOptimization, GetCompressLeadingPunctuation, GetIncludeFontPadding,
         GetFallbackLineSpacing, GetTextMarqueeOptions, GetTextDirection, GetSelectedDragPreviewStyle, nullptr,
-        GetPunctuationOverflow };
+        GetPunctuationOverflow, GetTailIndents };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -20963,7 +21026,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSelectDetectorEnable, nullptr, ResetMinLineHeight, ResetMaxLineHeight,
         ResetLineHeightMultiple, nullptr, ResetEditMenuOption, ResetTextBindSelectionMenu, ResetTextTextSelection,
         ResetOrphanCharOptimization, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing,
-        ResetTextMarqueeOptions, ResetTextDirection, ResetSelectedDragPreviewStyle, nullptr, ResetPunctuationOverflow };
+        ResetTextMarqueeOptions, ResetTextDirection, ResetSelectedDragPreviewStyle, nullptr, ResetPunctuationOverflow,
+        ResetTailIndents };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

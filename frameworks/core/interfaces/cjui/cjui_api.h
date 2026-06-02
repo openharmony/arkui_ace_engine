@@ -728,6 +728,12 @@ struct CJUITextModifier {
     void (*setTextResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
     void (*resetTextResponseRegion)(ArkUINodeHandle node);
+    void (*setTailIndents)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetTailIndents)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTailIndentsCount)(ArkUINodeHandle node);
+    void (*getTailIndents)(ArkUINodeHandle node, ArkUI_Float32* values,
+        ArkUI_Int32* units, ArkUI_Int32 size);
 };
 
 struct CJUIButtonModifier {

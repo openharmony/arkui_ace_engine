@@ -107,6 +107,12 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.orphanCharOptimization = paraStyle.orphanCharOptimization;
     style.compressHeadPunctuation = paraStyle.compressLeadingPunctuation;
     style.punctuationOverflow = paraStyle.punctuationOverflow;
+    if (paraStyle.tailIndents.has_value() && paraStyle.tailIndents->HasValue()) {
+        style.tailIndents.clear();
+        for (const auto& indent : paraStyle.tailIndents->indentsArray.value()) {
+            style.tailIndents.push_back(indent.ConvertToPx());
+        }
+    }
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);

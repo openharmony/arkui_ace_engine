@@ -129,6 +129,7 @@ public:
     void SetIncrementalUpdatePolicy(IncrementalUpdatePolicy policy) override;
     void ResetIncrementalUpdatePolicy() override;
     void BindJSTextController(std::function<void()>&& func) override;
+    void SetTailIndents(const NG::TailIndents& value) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
     static void InitText(FrameNode* frameNode, std::u16string& value);
@@ -312,6 +313,7 @@ public:
         FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback);
     static std::optional<void*> GetInnerParagraph(FrameNode* frameNode);
     static void SetStyledString(FrameNode* frameNode, SpanString* value);
+    static void SetTailIndents(FrameNode* frameNode, const NG::TailIndents& value);
 };
 } // namespace OHOS::Ace::NG
 
