@@ -10975,7 +10975,6 @@ void RichEditorPattern::RemoveOverlayModifier()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->RemoveOverlayModifier(hostOverlayMod_);
-    SetScrollBarOverlayModifier(nullptr);
     hostOverlayMod_.Reset();
 }
 
