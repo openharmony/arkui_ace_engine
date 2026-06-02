@@ -170,11 +170,6 @@ void BubblePattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    CHECK_NULL_VOID(targetNode);
-    if (!hasOnAreaChange_) {
-        pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
-    }
     pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_);
 
     // Clear JS callbacks to prevent memory leaks
@@ -183,6 +178,18 @@ void BubblePattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
         popupParam_->SetOnStateChange(nullptr);
     }
     UnRegisterAvoidInfoChangeListener(frameNode);
+}
+
+void BubblePattern::OnRemoveChild(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+    CHECK_NULL_VOID(targetNode);
+    if (!hasOnAreaChange_) {
+        pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+    }
 }
 
 void BubblePattern::OnAttachToMainTree()

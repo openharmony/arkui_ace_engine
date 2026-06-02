@@ -432,6 +432,7 @@ public:
     RefPtr<PopupTheme> GetPopupTheme();
     ThemeColorMode GetStyleOptionColorMode();
     NG::RectF GetWindowButtonRect(const RefPtr<FrameNode>& frameNode);
+    void OnRemoveChild(const RefPtr<FrameNode>& node) override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
