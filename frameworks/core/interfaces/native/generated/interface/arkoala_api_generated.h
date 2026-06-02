@@ -2717,8 +2717,6 @@ typedef struct Ark_Tuple_ResourceColor_F64 Ark_Tuple_ResourceColor_F64;
 typedef struct Opt_Tuple_ResourceColor_F64 Opt_Tuple_ResourceColor_F64;
 typedef struct Ark_Tuple_ResourceColor_ResourceColor Ark_Tuple_ResourceColor_ResourceColor;
 typedef struct Opt_Tuple_ResourceColor_ResourceColor Opt_Tuple_ResourceColor_ResourceColor;
-typedef struct Ark_uiEffect_HdrDarkenBlender Ark_uiEffect_HdrDarkenBlender;
-typedef struct Opt_uiEffect_HdrDarkenBlender Opt_uiEffect_HdrDarkenBlender;
 typedef struct Ark_UIExtensionOptions Ark_UIExtensionOptions;
 typedef struct Opt_UIExtensionOptions Opt_UIExtensionOptions;
 typedef struct Ark_uiObserver_NavigationInfo Ark_uiObserver_NavigationInfo;
@@ -17688,15 +17686,6 @@ typedef struct Opt_Tuple_ResourceColor_ResourceColor {
     Ark_Tag tag;
     Ark_Tuple_ResourceColor_ResourceColor value;
 } Opt_Tuple_ResourceColor_ResourceColor;
-typedef struct Ark_uiEffect_HdrDarkenBlender {
-    /* kind: Interface */
-    Ark_Float64 hdrBrightnessRatio;
-    Opt_Tuple_F64_F64_F64 grayscaleFactor;
-} Ark_uiEffect_HdrDarkenBlender;
-typedef struct Opt_uiEffect_HdrDarkenBlender {
-    Ark_Tag tag;
-    Ark_uiEffect_HdrDarkenBlender value;
-} Opt_uiEffect_HdrDarkenBlender;
 typedef struct Ark_UIExtensionOptions {
     /* kind: Interface */
     Opt_Boolean isTransferringCaller;
@@ -19084,7 +19073,6 @@ typedef struct Ark_Blender {
     union {
         Ark_uiEffect_BrightnessBlender value0;
         Ark_uiEffect_HdrBrightnessBlender value1;
-        Ark_uiEffect_HdrDarkenBlender value2;
     };
 } Ark_Blender;
 typedef struct Opt_Blender {
