@@ -218,7 +218,7 @@ ohos_source_set("ace_unittest_trace") {
 }
 
 # ace components base
-ohos_source_set("ace_components_base") {
+ohos_static_library("ace_components_base") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -283,7 +283,7 @@ ohos_source_set("ace_components_base") {
 }
 
 # ace components event
-ohos_source_set("ace_components_event") {
+ohos_static_library("ace_components_event") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -326,7 +326,7 @@ ohos_source_set("ace_components_event") {
 }
 
 # ace components gestures
-ohos_source_set("ace_components_gestures") {
+ohos_static_library("ace_components_gestures") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -362,7 +362,7 @@ ohos_source_set("ace_components_gestures") {
 }
 
 # ace components layout
-ohos_source_set("ace_components_layout") {
+ohos_static_library("ace_components_layout") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -384,7 +384,7 @@ ohos_source_set("ace_components_layout") {
 }
 
 # ace components property
-ohos_source_set("ace_components_property") {
+ohos_static_library("ace_components_property") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -412,7 +412,7 @@ ohos_source_set("ace_components_property") {
   }
 }
 
-ohos_source_set("ace_components_manager") {
+ohos_static_library("ace_components_manager") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -482,7 +482,7 @@ ohos_source_set("ace_components_manager") {
 }
 
 # ace components syntax
-ohos_source_set("ace_components_syntax") {
+ohos_static_library("ace_components_syntax") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -517,7 +517,7 @@ ohos_source_set("ace_components_syntax") {
 }
 
 # ace components token theme
-ohos_source_set("ace_components_token_theme") {
+ohos_static_library("ace_components_token_theme") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -529,7 +529,7 @@ ohos_source_set("ace_components_token_theme") {
 }
 
 # ace components render
-ohos_source_set("ace_components_render") {
+ohos_static_library("ace_components_render") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -561,7 +561,7 @@ ohos_source_set("ace_components_render") {
 }
 
 # ace base
-ohos_source_set("ace_base") {
+ohos_static_library("ace_base") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -620,7 +620,7 @@ ohos_source_set("ace_base") {
 }
 
 # ace core animation
-ohos_source_set("ace_core_animation") {
+ohos_static_library("ace_core_animation") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -649,7 +649,7 @@ ohos_source_set("ace_core_animation") {
 }
 
 # ace components extra - special
-ohos_source_set("ace_core_extra") {
+ohos_static_library("ace_core_extra") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -762,13 +762,13 @@ ohos_source_set("ace_core_extra") {
   }
 }
 
-ohos_source_set("ace_engine_unittest_flutter_deps") {
+ohos_static_library("ace_engine_unittest_flutter_deps") {
   testonly = true
   cflags_cc = [ "-Wno-thread-safety-attributes" ]
   external_deps = [ "eventhandler:libeventhandler" ]
 }
 
-ohos_source_set("ace_components_mock") {
+ohos_static_library("ace_components_mock") {
   testonly = true
   defines = [ "ENHANCED_ANIMATION" ]
   sources = [
@@ -900,7 +900,7 @@ ohos_source_set("ace_components_mock") {
   }
 }
 
-ohos_source_set("ace_components_pattern") {
+ohos_static_library("ace_components_pattern") {
   testonly = true
   sources = [
     "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
