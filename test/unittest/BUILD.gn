@@ -1378,6 +1378,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",

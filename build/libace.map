@@ -1809,6 +1809,7 @@
       "OHOS::Ace::NG::ScrollablePattern::OnColorConfigurationUpdate()";
       "OHOS::Ace::NG::ScrollablePattern::OnDetachFromFrameNode(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::ScrollablePattern::OnDetachFromMainTree()";
+      "OHOS::Ace::NG::ScrollablePattern::OnDetachFromMainTreeMultiThread()";
       "OHOS::Ace::NG::ScrollablePattern::OnInjectionEventByRatio(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ScrollablePattern::OnScrollCallback(float, int)";
       "OHOS::Ace::NG::ScrollablePattern::OnScrollDragEndRecursive()";
@@ -2187,6 +2188,7 @@
       "OHOS::Ace::NG::TextPattern::OnColorModeChange(unsigned int)";
       "OHOS::Ace::NG::TextPattern::OnDetachFromFrameNode(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::TextPattern::OnDetachFromMainTree()";
+      "OHOS::Ace::NG::TextPattern::OnDetachFromMainTreeMultiThread()";
       "OHOS::Ace::NG::TextPattern::OnDirtyLayoutWrapperSwap(OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutWrapper> const&, OHOS::Ace::NG::DirtySwapConfig const&)";
       "OHOS::Ace::NG::TextPattern::OnDragStart(OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::TextPattern::OnFrameNodeChanged(unsigned int)";
@@ -2988,6 +2990,7 @@
       "OHOS::Ace::StrokeJoinStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::StrokeJoinStyle, Ark_StrokeJoinStyle>(Ark_StrokeJoinStyle const&)";
       "OHOS::Ace::StylusDetectorMgr::AddTextFieldFrameNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, OHOS::Ace::WeakPtr<OHOS::Ace::NG::LayoutInfoInterface> const&)";
       "OHOS::Ace::StylusDetectorMgr::GetInstance()";
+      "OHOS::Ace::StylusDetectorMgr::RemoveTextFieldFrameNode(int)";
       "OHOS::Ace::SubwindowManager::ClearMenu()";
       "OHOS::Ace::SubwindowManager::ClearMenuNG(int, int, bool, bool)";
       "OHOS::Ace::SubwindowManager::CloseMenu()";
