@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -147,15 +148,22 @@ public:
     {
         mockPipelineContext_ = AceType::MakeRefPtr<MockPipelineContext>();
         ASSERT_NE(mockPipelineContext_, nullptr);
+        MockContainer::SetUp(mockPipelineContext_);
     }
 
     static void TearDownTestCase()
     {
         mockPipelineContext_.Reset();
+        MockContainer::TearDown();
+    }
+    void SetUp() override
+    {
+        mockContainer_ = MockContainer::Current();
     }
 
 protected:
     inline static RefPtr<MockPipelineContext> mockPipelineContext_ = nullptr;
+    RefPtr<MockContainer> mockContainer_;
 };
 
 class ScrollCommandParserConstructorTest : public ScrollCommandParserTest {};
@@ -476,6 +484,29 @@ HWTEST_F(ScrollCommandParserParseModeTest, ParseDirection_AllDirections_Correct,
     EXPECT_EQ(dir, RelaxedScrollDirection::FORWARD);
 }
 
+HWTEST_F(ScrollCommandParserParseModeTest, ParseDirection_InCorrect, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+
+    RelaxedScrollDirection dir;
+
+    auto json1 = JsonUtil::ParseJsonString(R"({
+        "direct": "backward"
+    })");
+    ASSERT_TRUE(parser.ParseDirection(json1.get(), dir));
+    EXPECT_EQ(dir, RelaxedScrollDirection::FORWARD);
+
+    auto json2 = JsonUtil::ParseJsonString(R"({
+        "direction": 123
+    })");
+    EXPECT_FALSE(parser.ParseDirection(json2.get(), dir));
+
+    std::unique_ptr<JsonValue> json3;
+    ASSERT_TRUE(parser.ParseDirection(json3.get(), dir));
+    EXPECT_EQ(dir, RelaxedScrollDirection::FORWARD);
+}
+
 HWTEST_F(ScrollCommandParserParseTest, Parse_InvalidDirection_ReturnsEmpty, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
@@ -769,5 +800,145 @@ HWTEST_F(ScrollCommandParserParseTest, ParseCoordinates_MissingObject_ReturnsFal
     Command cmd;
     bool ret = parser.ParseCoordinates(json->GetValue("action_info").get(), cmd);
     EXPECT_FALSE(ret);
+}
+
+HWTEST_F(ScrollCommandParserParseTest, ParseCoordinates_MissingX2_ReturnsTrueAndSetsValues, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "action_info": {
+            "coordinates": {
+                "x1": 10,
+                "y1": 20,
+                "y2": 40
+            }
+        }
+    })");
+    Command cmd;
+    bool ret = parser.ParseCoordinates(json->GetValue("action_info").get(), cmd);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(cmd.actionInfo.coordinates.x1, 10);
+    EXPECT_EQ(cmd.actionInfo.coordinates.y1, 20);
+    EXPECT_FALSE(cmd.isY2Set);
+}
+
+HWTEST_F(ScrollCommandParserParseTest, ParseCoordinates_MissingY2_ReturnsTrueAndSetsValues, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "action_info": {
+            "coordinates": {
+                "x1": 10,
+                "y1": 20,
+                "x2": 40
+            }
+        }
+    })");
+    Command cmd;
+    bool ret = parser.ParseCoordinates(json->GetValue("action_info").get(), cmd);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(cmd.actionInfo.coordinates.x1, 10);
+    EXPECT_EQ(cmd.actionInfo.coordinates.y1, 20);
+    EXPECT_FALSE(cmd.isY2Set);
+}
+
+HWTEST_F(ScrollCommandParserParseTest, ParseCoordinates_Y2ISNOTNUM_ReturnsTrueAndSetsValues, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "action_info": {
+            "coordinates": {
+                "x1": 10,
+                "y1": 20,
+                "x2": 40,
+                "y2": "Y2"
+            }
+        }
+    })");
+    Command cmd;
+    bool ret = parser.ParseCoordinates(json->GetValue("action_info").get(), cmd);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(cmd.actionInfo.coordinates.x1, 10);
+    EXPECT_EQ(cmd.actionInfo.coordinates.y1, 20);
+    EXPECT_FALSE(cmd.isY2Set);
+}
+
+HWTEST_F(ScrollCommandParserParseTest, ParseCoordinates_X2ISNOTNUM_ReturnsTrueAndSetsValues, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "action_info": {
+            "coordinates": {
+                "x1": 10,
+                "y1": 20,
+                "x2": "X2",
+                "y2": 50
+            }
+        }
+    })");
+    Command cmd;
+    bool ret = parser.ParseCoordinates(json->GetValue("action_info").get(), cmd);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(cmd.actionInfo.coordinates.x1, 10);
+    EXPECT_EQ(cmd.actionInfo.coordinates.y1, 20);
+    EXPECT_FALSE(cmd.isY2Set);
+}
+
+HWTEST_F(ScrollCommandParserParseTest, ParseCoordinates_X2Y2ISNOTNUM_ReturnsTrueAndSetsValues, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+    auto json = JsonUtil::ParseJsonString(R"({
+        "action_info": {
+            "coordinates": {
+                "x1": 10,
+                "y1": 20,
+                "x2": "X2",
+                "y2": "Y2"
+            }
+        }
+    })");
+    Command cmd;
+    bool ret = parser.ParseCoordinates(json->GetValue("action_info").get(), cmd);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(cmd.actionInfo.coordinates.x1, 10);
+    EXPECT_EQ(cmd.actionInfo.coordinates.y1, 20);
+    EXPECT_FALSE(cmd.isY2Set);
+}
+
+HWTEST_F(ScrollCommandParserTest, GetDefaultScrollDistance_CoverIfBranch, TestSize.Level1)
+{
+    ASSERT_NE(mockContainer_, nullptr);
+    auto displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetHeight(1200.0f);
+
+    mockContainer_->SetDisplayInfo(displayInfo);
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+    float distance = parser.GetDefaultScrollDistance();
+    EXPECT_FLOAT_EQ(distance, 400.0f);
+}
+
+HWTEST_F(ScrollCommandParserTest, GetDefaultScrollDistance_NoDisplayInfo, TestSize.Level1)
+{
+    ASSERT_NE(mockContainer_, nullptr);
+    SystemProperties::SetDevicePhysicalHeight(1500.0f);
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+    float distance = parser.GetDefaultScrollDistance();
+    EXPECT_LT(distance, 10000.0f);
+}
+
+HWTEST_F(ScrollCommandParserTest, GetDefaultScrollDistance_NoContainer, TestSize.Level1)
+{
+    SystemProperties::SetDevicePhysicalHeight(1500.0f);
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    ScrollCommandParser parser(context);
+    float distance = parser.GetDefaultScrollDistance();
+    EXPECT_LT(distance, 10000.0f);
 }
 } // namespace OHOS::Ace::NG
