@@ -23,6 +23,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t INVALID_HDR_TYPE = -1;
+
 void SetControllerOnCreatedCallback(EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& createdFunc)
 {
     if (createdFunc->IsFunction(vm)) {
@@ -552,11 +554,14 @@ ArkUINativeModuleValue XComponentBridge::SetHdrBrightness(ArkUIRuntimeCallInfo *
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(ARG_TYPE);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     if (secondArg->IsNumber()) {
         float hdrBrightness = secondArg->ToNumber(vm)->Value();
-        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentHdrBrightness(nativeNode, hdrBrightness);
+        auto hdrType = thirdArg->IsNumber() ? thirdArg->Int32Value(vm) : INVALID_HDR_TYPE;
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentHdrBrightness(nativeNode,
+            hdrBrightness, hdrType);
     } else {
         GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentHdrBrightness(nativeNode);
     }
