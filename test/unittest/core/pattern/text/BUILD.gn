@@ -13,46 +13,53 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("text_test_ng") {
-  module_name = "TextSet-Text"
-  type = "new"
-  sources = [
-    "paragraph_manager_test_ng.cpp",
-    "preview_menu_controller_test_ng.cpp",
-    "text_arkoala_test.cpp",
-    "text_base.cpp",
-    "text_pattern_test_ng.cpp",
-    "text_pattern_test_ng_two.cpp",
-    "text_test_ng.cpp",
-    "text_testeight_ng.cpp",
-    "text_testeleven_ng.cpp",
-    "text_testfive_ng.cpp",
-    "text_testfour_ng.cpp",
-    "text_testnine_ng.cpp",
-    "text_testseven_ng.cpp",
-    "text_testsix_ng.cpp",
-    "text_testten_ng.cpp",
-    "text_testthirteen_ng.cpp",
-    "text_testthree_ng.cpp",
-    "text_testtwelve_ng.cpp",
-    "typed_text_test_ng.cpp",
-  ]
+test_sources = [
+  "paragraph_manager_test_ng.cpp",
+  "preview_menu_controller_test_ng.cpp",
+  "text_arkoala_test.cpp",
+  "text_base.cpp",
+  "text_nullptr_ng.cpp",
+  "text_pattern_test_ng.cpp",
+  "text_pattern_test_ng_two.cpp",
+  "text_test_core.cpp",
+  "text_test_min.cpp",
+  "text_test_ng.cpp",
+  "text_testeight_ng.cpp",
+  "text_testeleven_ng.cpp",
+  "text_testfive_ng.cpp",
+  "text_testfour_ng.cpp",
+  "text_testnine_ng.cpp",
+  "text_testseven_ng.cpp",
+  "text_testsix_ng.cpp",
+  "text_testten_ng.cpp",
+  "text_testthirteen_ng.cpp",
+  "text_testthree_ng.cpp",
+  "text_testtwelve_ng.cpp",
+  "typed_text_test_ng.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "text_test_core.cpp",
-      "text_test_min.cpp",
-    ]
-  } else {
-    sources += [
-      "text_test_core.cpp",
-      "text_test_min.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("text_test_ng") {
+    type = "host_components"
+    module_name = "TextSet-Text"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
   }
+} else {
+  ace_unittest("text_test_ng") {
+    module_name = "TextSet-Text"
+    type = "new"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources -= [
+        "text_test_core.cpp",
+        "text_test_min.cpp",
+      ]
+    }
 
-  defines = [ "ENABLE_ROSEN_BACKEND" ]
-  cflags = [ "-fno-access-control" ]
+    defines = [ "ENABLE_ROSEN_BACKEND" ]
+    cflags = [ "-fno-access-control" ]
+  }
 }
 
 ace_unittest("selection_container_test_ng") {

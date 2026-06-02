@@ -42,11 +42,6 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::UpdateScrollSnapStartOffset(double offset) {}
 
-void Scrollable::StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity)
-{
-    scrollSnapMotion_ = AceType::MakeRefPtr<SpringMotion>(0, predictSnapOffset, scrollSnapVelocity, nullptr);
-}
-
 void Scrollable::UpdateScrollSnapEndWithOffset(double offset) {}
 
 void Scrollable::SetAxis(Axis axis) {}
@@ -55,7 +50,5 @@ bool Scrollable::IsSpringStopped() const
 {
     return true;
 }
-
-void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity) {}
 void Scrollable::StartScrollAnimation(float, float) {}
 } // namespace OHOS::Ace

@@ -33,13 +33,13 @@ ace_unittest("geometry_test") {
   if (!ace_enable_full_test_suite) {
     sources = []
     sources = [
-      "base_test_min.cpp",
       "base_test_core.cpp",
+      "base_test_min.cpp",
     ]
   } else {
     sources += [
-      "base_test_min.cpp",
       "base_test_core.cpp",
+      "base_test_min.cpp",
     ]
   }
 }
@@ -62,29 +62,19 @@ ace_unittest("util_test") {
 
   if (!ace_enable_full_test_suite) {
     sources = []
-    sources = [
-      "base_test_min.cpp",
-    ]
+    sources = [ "base_test_min.cpp" ]
   } else {
     sources += [ "base_test_min.cpp" ]
   }
 
   external_deps = [
-    "bounds_checking_function:libsec_shared",
-    "icu:shared_icui18n",
-    "icu:shared_icuuc",
+    "bounds_checking_function:libsec_static",
+    "icu:static_icui18n",
+    "icu:static_icuuc",
   ]
 }
 
 group("base_unittest") {
-  testonly = true
-  deps = [
-    ":geometry_test",
-    ":util_test",
-  ]
-}
-
-group("linux_base_unittest") {
   testonly = true
   deps = [
     ":geometry_test",

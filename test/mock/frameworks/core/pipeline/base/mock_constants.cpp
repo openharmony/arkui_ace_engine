@@ -1,22 +1,22 @@
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-#include "core/pipeline/base/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 const double ACE_PI = 3.14159265358979323846;
 const double ACE_E = 2.71828182845904523536;
-
-const Alignment Alignment::TOP_LEFT = Alignment(-1.0, -1.0);
-const Alignment Alignment::TOP_CENTER = Alignment(0.0, -1.0);
-const Alignment Alignment::TOP_RIGHT = Alignment(1.0, -1.0);
-const Alignment Alignment::CENTER_LEFT = Alignment(-1.0, 0.0);
-const Alignment Alignment::CENTER = Alignment(0.0, 0.0);
-const Alignment Alignment::CENTER_RIGHT = Alignment(1.0, 0.0);
-const Alignment Alignment::BOTTOM_LEFT = Alignment(-1.0, 1.0);
-const Alignment Alignment::BOTTOM_CENTER = Alignment(0.0, 1.0);
-const Alignment Alignment::BOTTOM_RIGHT = Alignment(1.0, 1.0);
 } // namespace OHOS::Ace

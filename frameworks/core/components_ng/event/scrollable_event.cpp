@@ -213,4 +213,26 @@ void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffs
         scrollable_->OnCollectTouchTarget(result, frameNode, targetComponent, responseLinkResult);
     }
 }
+
+void ScrollableActuator::AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
+{
+    scrollableEvents_[scrollableEvent->GetAxis()] = scrollableEvent;
+}
+
+void ScrollableActuator::RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
+{
+    scrollableEvents_.erase(scrollableEvent->GetAxis());
+}
+
+void ScrollableActuator::AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+{
+    for (auto it = scrollableEvents_.begin(); it != scrollableEvents_.end(); ++it) {
+        auto scrollableEvent = it->second;
+        if (!scrollableEvent) {
+            continue;
+        }
+        scrollableEvent->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
+        break;
+    }
+}
 } // namespace OHOS::Ace::NG

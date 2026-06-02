@@ -13,25 +13,30 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("image_animator_test_ng") {
-  type = "new"
-  module_name = "ImageSet-DrawableDescriptor"
-  sources = [
-    "controlled_animator_test_ng.cpp",
-    "image_animator_pattern_test_ng.cpp",
-    "image_animator_test_ng.cpp",
-  ]
+test_sources = [
+  "controlled_animator_test_ng.cpp",
+  "image_animator_pattern_test_ng.cpp",
+  "image_animator_test_core.cpp",
+  "image_animator_test_min.cpp",
+  "image_animator_test_ng.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "image_animator_test_min.cpp",
-      "image_animator_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "image_animator_test_min.cpp",
-      "image_animator_test_core.cpp",
-    ]
+if (is_host_product) {
+  ace_unittest("image_animator_test_ng") {
+    type = "host_components"
+    module_name = "ImageSet-DrawableDescriptor"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("image_animator_test_ng") {
+    type = "new"
+    module_name = "ImageSet-DrawableDescriptor"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources -= [
+        "image_animator_test_core.cpp",
+        "image_animator_test_min.cpp",
+      ]
+    }
   }
 }

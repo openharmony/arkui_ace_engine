@@ -87,7 +87,7 @@ void RenderContext::RequestNextFrame(bool isOffScreenNode) const
 void RenderContext::SetSystemMaterial(const RefPtr<UiMaterial>& material)
 {
     if (!uiMaterial_) {
-        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.material = material});
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo { .material = material });
         return;
     }
     uiMaterial_->material = material;
@@ -101,7 +101,7 @@ RefPtr<UiMaterial> RenderContext::GetSystemMaterial() const
 void RenderContext::SetImmersiveMaterialConfig(const std::optional<ImmersiveMaterialConfig>& config)
 {
     if (!uiMaterial_) {
-        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.immersiveConfig = config});
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo { .immersiveConfig = config });
         return;
     }
     uiMaterial_->immersiveConfig = config;
@@ -120,7 +120,7 @@ std::optional<int32_t> RenderContext::GetTransparencyCallbackId() const
 void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
 {
     if (!uiMaterial_) {
-        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.transparencyCallbackId = id});
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo { .transparencyCallbackId = id });
         return;
     }
     uiMaterial_->transparencyCallbackId = id;
@@ -237,15 +237,11 @@ void MockRenderContext::AttachNodeAnimatableProperty(const RefPtr<NodeAnimatable
     InitProp(modifier->GetProperty());
 }
 
-void MockRenderContext::CancelTranslateXYAnimation()
-{
-}
+void MockRenderContext::CancelTranslateXYAnimation() {}
 OffsetF MockRenderContext::GetTranslateXYProperty()
 {
     return {};
 }
-void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset)
-{
-}
+void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset) {}
 #endif
 } // namespace OHOS::Ace::NG

@@ -184,27 +184,9 @@ public:
     explicit ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~ScrollableActuator() override;
 
-    void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
-    {
-        scrollableEvents_[scrollableEvent->GetAxis()] = scrollableEvent;
-    }
-
-    void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
-    {
-        scrollableEvents_.erase(scrollableEvent->GetAxis());
-    }
-
-    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
-    {
-        for (auto it = scrollableEvents_.begin(); it != scrollableEvents_.end(); ++it) {
-            auto scrollableEvent = it->second;
-            if (!scrollableEvent) {
-                continue;
-            }
-            scrollableEvent->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
-            break;
-        }
-    }
+    void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent);
+    void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent);
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd);
 
     void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect);
     bool RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect);

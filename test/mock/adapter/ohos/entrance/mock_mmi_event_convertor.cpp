@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,4 +26,18 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
 void CalculatePointerEvent(
     const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode, bool useRealtimeMatrix)
 {}
+
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
+{
+    uint64_t modifierKeysState = 0;
+    return modifierKeysState;
+}
+
+TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
+{
+    std::chrono::microseconds microseconds(12);
+    TimeStamp time(microseconds);
+    return time;
+}
+
 } // namespace OHOS::Ace::Platform

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <shared_mutex>
+
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
@@ -20,10 +22,11 @@ namespace OHOS::Ace::NG {
 
 std::shared_mutex ImageDecoder::pixelMapMtx_;
 std::unordered_map<std::string, WeakPtr<PixelMap>> ImageDecoder::weakPixelMapCache_;
+
 RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage(
     const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig)
 {
-    return MakeRefPtr<DrawingImage>(nullptr);
+    return nullptr;
 }
 
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
@@ -37,8 +40,6 @@ WeakPtr<PixelMap> ImageDecoder::GetFromPixelMapCache(const ImageSourceInfo& imag
     return nullptr;
 }
 
-void ImageDecoder::ClearPixelMapCache()
-{
-}
+void ImageDecoder::ClearPixelMapCache() {}
 
 } // namespace OHOS::Ace::NG

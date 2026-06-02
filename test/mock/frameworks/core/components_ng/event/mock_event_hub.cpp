@@ -1,10 +1,19 @@
 /*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
@@ -27,8 +36,8 @@ RefPtr<GestureEventHub> EventHub::CreateGestureEventHub()
     return nullptr;
 }
 
-RefPtr<FocusHub> EventHub::GetOrCreateFocusHub(
-    FocusType type, bool focusable, FocusStyleType focusStyleType, const std::unique_ptr<FocusPaintParam>& paintParamsPtr)
+RefPtr<FocusHub> EventHub::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
+    const std::unique_ptr<FocusPaintParam>& paintParamsPtr)
 {
     auto frameNode = GetFrameNode();
     if (!frameNode) {
@@ -91,4 +100,15 @@ void EventHub::SetVisibleAreaRatiosAndCallback(
     (void)ratios;
     (void)isUser;
 }
+
+bool EventHub::HasOnAreaChanged() const
+{
+    return false;
+}
+VisibleCallbackInfo& EventHub::GetVisibleAreaCallback(bool)
+{
+    static VisibleCallbackInfo info;
+    return info;
+}
+void EventHub::SetDefaultOnDragStart(OnDragStartFunc&&) {}
 } // namespace OHOS::Ace::NG
