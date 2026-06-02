@@ -310,6 +310,8 @@ namespace Converter {
     std::optional<Dimension> OptConvertFromF64ResourceStr(
         const Opt_Union_F64_ResourceStr& src, DimensionUnit defaultUnit);
     Font OptConvertFromFont(const Opt_arkui_component_units_Font& src, bool isSubTabStyle);
+    ACE_FORCE_EXPORT std::optional<Color> OptConvertColorForMaterial(const Opt_ResourceColor* value);
+    ACE_FORCE_EXPORT std::optional<Color> OptConvertColorForMaterial(const Ark_ResourceColor& value);
 
     template<typename T, typename P>
     ACE_FORCE_EXPORT void AssignCast(std::optional<T>& dst, const P& src)

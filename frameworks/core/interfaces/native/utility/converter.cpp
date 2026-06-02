@@ -4416,4 +4416,34 @@ void AssignCast(std::optional<LightEffectOptions>& dst, const Ark_LightEffectOpt
     }
     dst = lightEffectOptions;
 }
+
+std::optional<Color> OptConvertColorForMaterial(const Opt_ResourceColor* value)
+{
+    if (!value || value->tag == INTEROP_TAG_UNDEFINED) {
+        return std::nullopt;
+    }
+    return OptConvertColorForMaterial(value->value);
+}
+
+std::optional<Color> OptConvertColorForMaterial(const Ark_ResourceColor& value)
+{
+    std::optional<Color> result;
+    AssignUnionTo(result, value);
+    if (result.has_value() && value.selector == SELECTOR_ID_3) {
+        const Ark_Resource& resource = value.value3;
+        int64_t resourceId = resource.id;
+        if (resourceId != -1) {
+            result->FillColorPlaceholderIfNeed(static_cast<uint32_t>(resourceId));
+        } else {
+            if (resource.params.tag != INTEROP_TAG_UNDEFINED && resource.params.value.length > 0) {
+                auto& firstParam = resource.params.value.array[0];
+                if (firstParam.selector == SELECTOR_ID_0) {
+                    std::string resourceName = Convert<std::string>(firstParam.value0);
+                    result->FillColorPlaceholderIfNeed(resourceName);
+                }
+            }
+        }
+    }
+    return result;
+}
 } // namespace OHOS::Ace::NG::Converter
