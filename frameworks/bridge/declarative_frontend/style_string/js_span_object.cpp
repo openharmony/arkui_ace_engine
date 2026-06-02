@@ -2473,49 +2473,6 @@ void JSParagraphStyleSpan::ParseJsTailIndents(const JSRef<JSObject>& obj, SpanPa
     }
 }
 
-void JSParagraphStyleSpan::ParseJsTailIndents(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
-{
-    CHECK_NULL_VOID(obj->HasProperty("tailIndents"));
-    auto tailIndentsObj = obj->GetProperty("tailIndents");
-    if (tailIndentsObj->IsNull() || tailIndentsObj->IsUndefined()) {
-        return;
-    }
-    NG::TailIndents tailIndents;
-    if (tailIndentsObj->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(tailIndentsObj);
-        NG::TailIndentsArray indentsArray;
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> value = array->GetValueAt(i);
-            CalcDimension dimension;
-            RefPtr<ResourceObject> resObj;
-            bool parsed = false;
-            if (value->IsObject()) {
-                JSRef<JSObject> valObj = JSRef<JSObject>::Cast(value);
-                parsed = JSViewAbstract::ParseJsLengthMetricsVpWithResObj(valObj, dimension, resObj);
-            }
-            if (!parsed) {
-                parsed = JSContainerBase::ParseJsDimensionFpNG(value, dimension, resObj);
-            }
-            if (parsed) {
-                indentsArray.emplace_back(static_cast<Dimension>(dimension));
-            }
-        }
-        tailIndents.indentsArray = indentsArray;
-    } else if (tailIndentsObj->IsObject()) {
-        JSRef<JSObject> valObj = JSRef<JSObject>::Cast(tailIndentsObj);
-        CalcDimension dimension;
-        RefPtr<ResourceObject> resObj;
-        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(valObj, dimension, resObj)) {
-            NG::TailIndentsArray indentsArray;
-            indentsArray.emplace_back(static_cast<Dimension>(dimension));
-            tailIndents.indentsArray = indentsArray;
-        }
-    }
-    if (tailIndents.HasValue()) {
-        paragraphStyle.tailIndents = tailIndents;
-    }
-}
-
 void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
     std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin)
 {

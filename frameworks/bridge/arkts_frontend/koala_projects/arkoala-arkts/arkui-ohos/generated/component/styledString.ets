@@ -2869,34 +2869,6 @@ export class ParagraphStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForTailIndents = value.tailIndents
-        if (valueHolderForTailIndents !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTailIndentsTmpValue = valueHolderForTailIndents!
-            if (valueHolderForTailIndentsTmpValue instanceof arkui_component_units_LengthMetrics) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForTailIndentsTmpValueForIdx0 = valueHolderForTailIndentsTmpValue as arkui_component_units_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTailIndentsTmpValueForIdx0)
-            } else if (valueHolderForTailIndentsTmpValue instanceof Array) {
-                if (valueHolderForTailIndentsTmpValue.length == 0) {
-                    valueSerializer.writeInt8((1).toByte())
-                    valueSerializer.writeInt32(0)
-                } else {
-                    const valueHolderForTailIndentsTmpValueElem = valueHolderForTailIndentsTmpValue[0]
-                    if (valueHolderForTailIndentsTmpValueElem instanceof arkui_component_units_LengthMetrics) {
-                        valueSerializer.writeInt8((1).toByte())
-                        const valueHolderForTailIndentsTmpValueForIdx1 = valueHolderForTailIndentsTmpValue as Array<arkui_component_units_LengthMetrics>
-                        valueSerializer.writeInt32((valueHolderForTailIndentsTmpValueForIdx1.length).toInt())
-                        for (let valueHolderForTailIndentsTmpValueForIdx1CounterI = 0; valueHolderForTailIndentsTmpValueForIdx1CounterI < valueHolderForTailIndentsTmpValueForIdx1.length; valueHolderForTailIndentsTmpValueForIdx1CounterI++) {
-                            const valueHolderForTailIndentsTmpValueForIdx1TmpElement: arkui_component_units_LengthMetrics = valueHolderForTailIndentsTmpValueForIdx1[valueHolderForTailIndentsTmpValueForIdx1CounterI]
-                            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTailIndentsTmpValueForIdx1TmpElement)
-                        }
-                    }
-                }
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
     }
     public static read(buffer: DeserializerBase): ParagraphStyleInterface {
         let valueDeserializer: DeserializerBase = buffer

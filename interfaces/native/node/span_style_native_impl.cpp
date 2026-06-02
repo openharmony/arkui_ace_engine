@@ -1702,45 +1702,6 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetTailIndents(const OH_ArkUI_ParagraphS
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetTailIndents(
-    OH_ArkUI_ParagraphStyle* paragraphStyle, const float* tailIndents, uint32_t size)
-{
-    CHECK_NULL_RETURN(paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    if (size > 0 && tailIndents != nullptr) {
-        std::vector<float> indents(tailIndents, tailIndents + size);
-        paragraphStyle->tailIndents = indents;
-    } else {
-        paragraphStyle->tailIndents.reset();
-    }
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetTailIndents(const OH_ArkUI_ParagraphStyle* paragraphStyle,
-    float** tailIndents, uint32_t tailIndentsSize, uint32_t* writeLength)
-{
-    CHECK_NULL_RETURN(paragraphStyle && tailIndents && *tailIndents && writeLength,
-        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    
-    if (!paragraphStyle->tailIndents.has_value()) {
-        *writeLength = 0;
-        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-    }
-    
-    const auto& indents = paragraphStyle->tailIndents.value();
-    uint32_t actualSize = static_cast<uint32_t>(indents.size());
-    *writeLength = actualSize;
-    if (tailIndentsSize < actualSize) {
-        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
-    }
-
-    float* buffer = *tailIndents;
-    for (uint32_t i = 0; i < actualSize; i++) {
-        buffer[i] = indents[i];
-    }
-
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
 OH_ArkUI_GestureStyle* OH_ArkUI_GestureStyle_Create()
 {
     return new OH_ArkUI_GestureStyle();

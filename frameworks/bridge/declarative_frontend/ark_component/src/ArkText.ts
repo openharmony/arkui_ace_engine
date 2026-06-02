@@ -1248,38 +1248,6 @@ class TextTailIndentsModifier extends ModifierWithKey<LengthMetrics | Array<Leng
   }
 }
 
-class TextTailIndentsModifier extends ModifierWithKey<LengthMetrics | Array<LengthMetrics>> {
-  constructor(value: LengthMetrics | Array<LengthMetrics>) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textTailIndents');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().text.resetTailIndents(node);
-    } else {
-      getUINativeModule().text.setTailIndents(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    if (!Array.isArray(this.stageValue) && !Array.isArray(this.value)) {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
-    if (Array.isArray(this.stageValue) && Array.isArray(this.value)) {
-      if (this.stageValue.length !== this.value.length) {
-        return true;
-      }
-      for (let i = 0; i < this.value.length; i++) {
-        if (!isBaseOrResourceEqual(this.stageValue[i], this.value[i])) {
-          return true;
-        }
-      }
-      return false;
-    }
-    return true;
-  }
-}
-
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
