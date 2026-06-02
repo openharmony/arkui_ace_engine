@@ -239,10 +239,10 @@ def generate_gitignore(dst_dir, ignore_list):
         for i in range(1, len(parts)):
             ignore_dirs.add(str(Path(*parts[:i])))
     for dirname in sorted(ignore_dirs):
-        lines.append(f"!{dirname}/")
+        lines.append(f"!/{dirname}/")
 
     for filename in sorted(ignore_list):
-        lines.append(f"!{filename}")
+        lines.append(f"!/{filename}")
 
     content = "\n".join(lines) + "\n"
 
