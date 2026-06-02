@@ -515,8 +515,7 @@ void FrontendDelegateImpl::CallPopPage()
 
 void FrontendDelegateImpl::ResetStagingPage()
 {
-    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS,
-        "ArkUIResetStagingPage");
+    taskExecutor_->PostTask(resetStagingPage_, TaskExecutor::TaskType::JS, "ArkUIResetStagingPage");
 }
 
 void FrontendDelegateImpl::OnApplicationDestroy(const std::string& packageName)
@@ -2055,18 +2054,17 @@ SingleTaskExecutor FrontendDelegateImpl::GetUiTask()
 
 void FrontendDelegateImpl::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    context->SetOnPageShow([weak = AceType::WeakClaim(this)] {
-        auto delegate = weak.Upgrade();
-        if (delegate) {
-            delegate->OnPageShow();
-        }
-    });
-    context->SetAnimationCallback([weak = AceType::WeakClaim(this)] {
-        auto delegate = weak.Upgrade();
-        if (delegate) {
-            delegate->FlushAnimationTasks();
-        }
-    });
+    const auto makeWeakCallback = [weak = AceType::WeakClaim(this)](const auto& action) {
+        return [weak, action]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                action(*delegate);
+            }
+        };
+    };
+    context->SetOnPageShow(makeWeakCallback([](FrontendDelegateImpl& delegate) { delegate.OnPageShow(); }));
+    context->SetAnimationCallback(
+        makeWeakCallback([](FrontendDelegateImpl& delegate) { delegate.FlushAnimationTasks(); }));
     pipelineContextHolder_.Attach(context);
     jsAccessibilityManager_->SetPipelineContext(context);
     jsAccessibilityManager_->InitializeCallback();

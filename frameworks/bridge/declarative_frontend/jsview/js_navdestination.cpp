@@ -53,6 +53,95 @@ NavDestinationModel* NavDestinationModel::GetInstance()
 namespace OHOS::Ace::Framework {
 
 namespace {
+RefPtr<JSNavDestinationScrollableProcessor> CreateNavDestinationScrollableProcessor()
+{
+    return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>();
+}
+
+class JSNavDestinationBuilderCallback {
+public:
+    JSNavDestinationBuilderCallback(const JSExecutionContext& context, JSRef<JSVal> builder)
+        : context_(context), builder_(std::move(builder))
+    {}
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE(context_);
+        JSRef<JSFunc>::Cast(builder_)->Call(JSRef<JSObject>());
+    }
+
+private:
+    JSExecutionContext context_;
+    JSRef<JSVal> builder_;
+};
+
+template<typename FuncT>
+class JsNavDestinationVoidCallback {
+public:
+    JsNavDestinationVoidCallback(const JSExecutionContext& execCtx, RefPtr<FuncT> func, const char* scoringEvent)
+        : execCtx_(execCtx), func_(std::move(func)), scoringEvent_(scoringEvent)
+    {}
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(scoringEvent_);
+        func_->ExecuteJS();
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<FuncT> func_;
+    const char* scoringEvent_ = nullptr;
+};
+
+template<typename FuncT>
+class JsNavDestinationReasonCallback {
+public:
+    JsNavDestinationReasonCallback(const JSExecutionContext& execCtx, RefPtr<FuncT> func, const char* scoringEvent)
+        : execCtx_(execCtx), func_(std::move(func)), scoringEvent_(scoringEvent)
+    {}
+
+    void operator()(int32_t reason) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(scoringEvent_);
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
+        func_->ExecuteJS(1, params);
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<FuncT> func_;
+    const char* scoringEvent_ = nullptr;
+};
+
+template<typename FuncT>
+class JsNavDestinationReasonNodeCallback {
+public:
+    JsNavDestinationReasonNodeCallback(const JSExecutionContext& execCtx, RefPtr<FuncT> func,
+        WeakPtr<NG::FrameNode> node, const char* scoringEvent)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), scoringEvent_(scoringEvent)
+    {}
+
+    void operator()(int32_t reason) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(scoringEvent_);
+        PipelineContext::SetCallBackNode(node_);
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
+        func_->ExecuteJS(1, params);
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<FuncT> func_;
+    WeakPtr<NG::FrameNode> node_;
+    const char* scoringEvent_ = nullptr;
+};
+
 constexpr int32_t PARAMATER_LENGTH_ONE = 1;
 constexpr int32_t PARAMATER_LENGTH_TWO = 2;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_NONE = 1;
@@ -225,16 +314,14 @@ void ParseBackButtonText(const JSCallbackInfo& info, RefPtr<PixelMap>& pixMap,
 void JSNavDestination::Create()
 {
     NavDestinationModel::GetInstance()->Create();
-    NavDestinationModel::GetInstance()->SetScrollableProcessor(
-        []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
+    NavDestinationModel::GetInstance()->SetScrollableProcessor(CreateNavDestinationScrollableProcessor);
 }
 
 void JSNavDestination::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0) {
         NavDestinationModel::GetInstance()->Create();
-        NavDestinationModel::GetInstance()->SetScrollableProcessor(
-            []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
+        NavDestinationModel::GetInstance()->SetScrollableProcessor(CreateNavDestinationScrollableProcessor);
         return;
     }
 
@@ -244,17 +331,13 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         // input format: builder/pathInfo
         if (info[0]->IsFunction()) {
             // first parameter = builder
-            auto builderFunctionJS = info[0];
-            auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
-                JAVASCRIPT_EXECUTION_SCOPE(context)
-                JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
-            };
+            auto builderFunc =
+                JSNavDestinationBuilderCallback(info.GetExecutionContext(), JSRef<JSVal>(info[0]));
             auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
             auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
             ctx->SetNavPathInfo(navPathInfo);
             NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
-            NavDestinationModel::GetInstance()->SetScrollableProcessor(
-                []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
+            NavDestinationModel::GetInstance()->SetScrollableProcessor(CreateNavDestinationScrollableProcessor);
             return;
         } else if (info[0]->IsObject()) {
             // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB}
@@ -267,8 +350,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
             pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
             NavDestinationModel::GetInstance()->Create();
-            NavDestinationModel::GetInstance()->SetScrollableProcessor(
-                []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
+            NavDestinationModel::GetInstance()->SetScrollableProcessor(CreateNavDestinationScrollableProcessor);
             NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
             return;
         }
@@ -281,11 +363,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "buider or pageInfo is invalid");
             return;
         }
-        auto builderFunctionJS = info[0];
-        auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
-            JAVASCRIPT_EXECUTION_SCOPE(context)
-            JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
-        };
+        auto builderFunc = JSNavDestinationBuilderCallback(info.GetExecutionContext(), JSRef<JSVal>(info[0]));
         auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
         auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
         ctx->SetNavPathInfo(navPathInfo);
@@ -299,8 +377,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
         pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
         NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
-        NavDestinationModel::GetInstance()->SetScrollableProcessor(
-            []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
+        NavDestinationModel::GetInstance()->SetScrollableProcessor(CreateNavDestinationScrollableProcessor);
         NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
     }
 }
@@ -438,15 +515,8 @@ void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
 
     auto onShownCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onShown =
-        [execCtx = info.GetExecutionContext(), func = std::move(onShownCallback), node = targetNode](int32_t reason) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("NavDestination.onShown");
-            PipelineContext::SetCallBackNode(node);
-            JSRef<JSVal> params[1];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
-            func->ExecuteJS(1, params);
-        };
+    auto onShown = JsNavDestinationReasonNodeCallback<JsFunction>(info.GetExecutionContext(),
+        std::move(onShownCallback), targetNode, "NavDestination.onShown");
     NavDestinationModel::GetInstance()->SetOnShown(std::move(onShown));
     info.ReturnSelf();
 }
@@ -458,15 +528,8 @@ void JSNavDestination::SetOnHidden(const JSCallbackInfo& info)
     }
     auto onHiddenCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onHidden =
-        [execCtx = info.GetExecutionContext(), func = std::move(onHiddenCallback), node = targetNode](int32_t reason) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("NavDestination.onHidden");
-            PipelineContext::SetCallBackNode(node);
-            JSRef<JSVal> params[1];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
-            func->ExecuteJS(1, params);
-        };
+    auto onHidden = JsNavDestinationReasonNodeCallback<JsFunction>(info.GetExecutionContext(),
+        std::move(onHiddenCallback), targetNode, "NavDestination.onHidden");
     NavDestinationModel::GetInstance()->SetOnHidden(std::move(onHidden));
     info.ReturnSelf();
 }
@@ -586,11 +649,9 @@ void JSNavDestination::SetWillAppear(const JSCallbackInfo& info)
     }
 
     auto willAppear = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onWillAppear = [execCtx = info.GetExecutionContext(), func = std::move(willAppear)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("NavDestination.WillAppear");
-        func->ExecuteJS();
-    };
+    auto onWillAppear =
+        JsNavDestinationVoidCallback<JsFunction>(info.GetExecutionContext(), std::move(willAppear),
+            "NavDestination.WillAppear");
     NavDestinationModel::GetInstance()->SetOnWillAppear(std::move(onWillAppear));
     info.ReturnSelf();
 }
@@ -602,11 +663,8 @@ void JSNavDestination::SetWillHide(const JSCallbackInfo& info)
     }
 
     auto willHideCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onWillHide = [execCtx = info.GetExecutionContext(), func = std::move(willHideCallback)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("NavDestination.WillHide");
-        func->ExecuteJS();
-    };
+    auto onWillHide = JsNavDestinationVoidCallback<JsFunction>(info.GetExecutionContext(),
+        std::move(willHideCallback), "NavDestination.WillHide");
     NavDestinationModel::GetInstance()->SetOnWillHide(std::move(onWillHide));
     info.ReturnSelf();
 }
@@ -618,11 +676,8 @@ void JSNavDestination::SetWillShow(const JSCallbackInfo& info)
     }
 
     auto willShowCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onWillShow = [execCtx = info.GetExecutionContext(), func = std::move(willShowCallback)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("NavDestination.WillShow");
-        func->ExecuteJS();
-    };
+    auto onWillShow = JsNavDestinationVoidCallback<JsFunction>(info.GetExecutionContext(),
+        std::move(willShowCallback), "NavDestination.WillShow");
     NavDestinationModel::GetInstance()->SetOnWillShow(std::move(onWillShow));
     info.ReturnSelf();
 }
@@ -634,11 +689,8 @@ void JSNavDestination::SetWillDisAppear(const JSCallbackInfo& info)
     }
 
     auto WillDisAppear = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onWillDisAppear = [execCtx = info.GetExecutionContext(), func = std::move(WillDisAppear)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("NavDestination.WillDisAppear");
-        func->ExecuteJS();
-    };
+    auto onWillDisAppear = JsNavDestinationVoidCallback<JsFunction>(info.GetExecutionContext(),
+        std::move(WillDisAppear), "NavDestination.WillDisAppear");
     NavDestinationModel::GetInstance()->SetOnWillDisAppear(std::move(onWillDisAppear));
     info.ReturnSelf();
 }
@@ -954,13 +1006,8 @@ void JSNavDestination::SetOnActive(const JSCallbackInfo& info)
         return;
     }
     auto onActive = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onActiveCallback = [exeCtx = info.GetExecutionContext(), func = std::move(onActive)](int32_t reason) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(exeCtx);
-        ACE_SCORING_EVENT("NavDestination.OnActive");
-        JSRef<JSVal> params[1];
-        params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
-        func->ExecuteJS(1, params);
-    };
+    auto onActiveCallback = JsNavDestinationReasonCallback<JsFunction>(info.GetExecutionContext(),
+        std::move(onActive), "NavDestination.OnActive");
     NavDestinationModel::GetInstance()->SetOnActive(std::move(onActiveCallback));
     info.ReturnSelf();
 }
@@ -974,13 +1021,8 @@ void JSNavDestination::SetOnInactive(const JSCallbackInfo& info)
         return;
     }
     auto onInactive = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onInactiveCallback = [execCtx = info.GetExecutionContext(), func = std::move(onInactive)](int32_t reason) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("NavDestination.OnInactive");
-        JSRef<JSVal> params[1];
-        params[0] = JSRef<JSVal>::Make(ToJSValue(reason));
-        func->ExecuteJS(1, params);
-    };
+    auto onInactiveCallback = JsNavDestinationReasonCallback<JsFunction>(info.GetExecutionContext(),
+        std::move(onInactive), "NavDestination.OnInactive");
     NavDestinationModel::GetInstance()->SetOnInactive(std::move(onInactiveCallback));
     info.ReturnSelf();
 }

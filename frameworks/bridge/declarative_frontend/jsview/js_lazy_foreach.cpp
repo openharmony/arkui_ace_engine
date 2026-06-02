@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_lazy_foreach_theme.h"
+#include "bridge/declarative_frontend/engine/functions/js_callback_state.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h"
@@ -277,6 +278,20 @@ LazyForEachOptions ParseOptions(const JSRef<JSVal>& optionsVal)
 
 } // namespace
 
+namespace {
+void CallJsFuncWithIndex(const JSRef<JSFunc>& func, int32_t index)
+{
+    auto params = ConvertToJSValues(index);
+    func->Call(JSRef<JSObject>(), params.size(), params.data());
+}
+
+void CallJsFuncWithFromTo(const JSRef<JSFunc>& func, int32_t from, int32_t to)
+{
+    auto params = ConvertToJSValues(from, to);
+    func->Call(JSRef<JSObject>(), params.size(), params.data());
+}
+} // namespace
+
 void JSLazyForEach::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLazyForEach>::Declare("LazyForEach");
@@ -365,11 +380,8 @@ void JSLazyForEach::OnMove(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
         auto context = info.GetExecutionContext();
-        auto onMove = [execCtx = context, func = JSRef<JSFunc>::Cast(info[0])](int32_t from, int32_t to) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(from, to);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        auto onMove = JsCallbackWithoutNode<void(int32_t, int32_t)>(
+            context, JSRef<JSFunc>::Cast(info[0]), &CallJsFuncWithFromTo);
         LazyForEachModel::GetInstance()->OnMove(std::move(onMove));
         if ((info.Length() > 1) && info[1]->IsObject()) {
             JsParseItemDragEventHandler(context, info[1]);
@@ -388,42 +400,29 @@ void JSLazyForEach::JsParseItemDragEventHandler(
     auto onLongPress = itemDragEventObj->GetProperty("onLongPress");
     std::function<void(int32_t)> onLongPressCallback;
     if (onLongPress->IsFunction()) {
-        onLongPressCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onLongPress)](int32_t index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(index);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        onLongPressCallback = JsCallbackWithoutNode<void(int32_t)>(
+            context, JSRef<JSFunc>::Cast(onLongPress), &CallJsFuncWithIndex);
     }
 
     auto onDragStart = itemDragEventObj->GetProperty("onDragStart");
     std::function<void(int32_t)> onDragStartCallback;
     if (onDragStart->IsFunction()) {
-        onDragStartCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onDragStart)](int32_t index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(index);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        onDragStartCallback = JsCallbackWithoutNode<void(int32_t)>(
+            context, JSRef<JSFunc>::Cast(onDragStart), &CallJsFuncWithIndex);
     }
 
     auto onMoveThrough = itemDragEventObj->GetProperty("onMoveThrough");
     std::function<void(int32_t, int32_t)> onMoveThroughCallback;
     if (onMoveThrough->IsFunction()) {
-        onMoveThroughCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onMoveThrough)](
-                                    int32_t from, int32_t to) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(from, to);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        onMoveThroughCallback = JsCallbackWithoutNode<void(int32_t, int32_t)>(
+            context, JSRef<JSFunc>::Cast(onMoveThrough), &CallJsFuncWithFromTo);
     }
 
     auto onDrop = itemDragEventObj->GetProperty("onDrop");
     std::function<void(int32_t)> onDropCallback;
     if (onDrop->IsFunction()) {
-        onDropCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onDrop)](int32_t index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(index);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        onDropCallback = JsCallbackWithoutNode<void(int32_t)>(
+            context, JSRef<JSFunc>::Cast(onDrop), &CallJsFuncWithIndex);
     }
     LazyForEachModel::GetInstance()->SetItemDragHandler(std::move(onLongPressCallback), std::move(onDragStartCallback),
         std::move(onMoveThroughCallback), std::move(onDropCallback));

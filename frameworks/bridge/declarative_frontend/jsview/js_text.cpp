@@ -83,6 +83,28 @@ const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr uint32_t MIN_LINES = 0;
 const int32_t DEFAULT_LINE_HEIGHT = 28;
 
+class JsTextNoArgNodeCallback {
+public:
+    JsTextNoArgNodeCallback(const JSExecutionContext& execCtx, RefPtr<JsFunction> func,
+        WeakPtr<NG::FrameNode> node, const char* eventName)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), eventName_(eventName)
+    {}
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(eventName_);
+        PipelineContext::SetCallBackNode(node_);
+        func_->Execute();
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<JsFunction> func_;
+    WeakPtr<NG::FrameNode> node_;
+    const char* eventName_ = nullptr;
+};
+
 void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
     int32_t& variableFontWeight, FontWeight& fontWeightEnum)
 {
@@ -1232,13 +1254,8 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     }
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
-                                          node = frameNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("BindSelectionMenu");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute();
-    };
+    std::function<void()> buildFunc = JsTextNoArgNodeCallback(info.GetExecutionContext(), std::move(builderFunc),
+        frameNode, "BindSelectionMenu");
 
     // SelectionMenuOptions
     NG::SelectMenuParam menuParam;
@@ -1675,14 +1692,8 @@ void JSText::ParseMenuParam(
     if (onDisappearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
-        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
-                               node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDisappear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        menuParam.onDisappear = std::move(onDisappear);
+        menuParam.onDisappear = JsTextNoArgNodeCallback(info.GetExecutionContext(), std::move(jsOnDisAppearFunc),
+            frameNode, "onDisappear");
     }
     menuParam.onMenuShow = ParseMenuCallback(frameNode, menuOptions, info, "onMenuShow");
     menuParam.onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");

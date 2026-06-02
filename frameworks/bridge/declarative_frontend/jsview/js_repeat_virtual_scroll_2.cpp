@@ -20,6 +20,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/engine/functions/js_callback_state.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_model_ng.h"
 
@@ -38,6 +39,20 @@ RepeatVirtualScroll2Model* RepeatVirtualScroll2Model::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+void CallJsFuncWithIndex(const JSRef<JSFunc>& func, int32_t index)
+{
+    auto params = ConvertToJSValues(index);
+    func->Call(JSRef<JSObject>(), params.size(), params.data());
+}
+
+void CallJsFuncWithFromTo(const JSRef<JSFunc>& func, int32_t from, int32_t to)
+{
+    auto params = ConvertToJSValues(from, to);
+    func->Call(JSRef<JSObject>(), params.size(), params.data());
+}
+} // namespace
 
 enum {
     PARAM_ARR_LEN = 0,
@@ -346,12 +361,8 @@ void JSRepeatVirtualScroll2::OnMove(const JSCallbackInfo& info)
         return;
     }
     auto context = info.GetExecutionContext();
-    auto onMove = [execCtx = context, func = JSRef<JSFunc>::Cast(info[OnMoveParam::ON_MOVE])](
-                      int32_t from, int32_t to) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto params = ConvertToJSValues(from, to);
-        func->Call(JSRef<JSObject>(), params.size(), params.data());
-    };
+    auto onMove = JsCallbackWithoutNode<void(int32_t, int32_t)>(
+        context, JSRef<JSFunc>::Cast(info[OnMoveParam::ON_MOVE]), &CallJsFuncWithFromTo);
     RepeatVirtualScroll2Model::GetInstance()->OnMove(repeatElmtId, std::move(onMove));
     if ((info.Length() > 2) && info[ITEM_DRAG_HANDLER]->IsObject()) { // 2: Array length
         JsParseItemDragEventHandler(context, info[ITEM_DRAG_HANDLER], repeatElmtId);
@@ -366,40 +377,27 @@ void JSRepeatVirtualScroll2::JsParseItemDragEventHandler(
     auto onLongPress = itemDragEventObj->GetProperty("onLongPress");
     std::function<void(int32_t)> onLongPressCallback;
     if (onLongPress->IsFunction()) {
-        onLongPressCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onLongPress)](int32_t index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(index);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        onLongPressCallback = JsCallbackWithoutNode<void(int32_t)>(
+            context, JSRef<JSFunc>::Cast(onLongPress), &CallJsFuncWithIndex);
     }
 
     auto onDragStart = itemDragEventObj->GetProperty("onDragStart");
     std::function<void(int32_t)> onDragStartCallback;
     if (onDragStart->IsFunction()) {
-        onDragStartCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onDragStart)](int32_t index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(index);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        onDragStartCallback = JsCallbackWithoutNode<void(int32_t)>(
+            context, JSRef<JSFunc>::Cast(onDragStart), &CallJsFuncWithIndex);
     }
     auto onMoveThrough = itemDragEventObj->GetProperty("onMoveThrough");
     std::function<void(int32_t, int32_t)> onMoveThroughCallback;
     if (onMoveThrough->IsFunction()) {
-        onMoveThroughCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onMoveThrough)](
-                                    int32_t from, int32_t to) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(from, to);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        onMoveThroughCallback = JsCallbackWithoutNode<void(int32_t, int32_t)>(
+            context, JSRef<JSFunc>::Cast(onMoveThrough), &CallJsFuncWithFromTo);
     }
     auto onDrop = itemDragEventObj->GetProperty("onDrop");
     std::function<void(int32_t)> onDropCallback;
     if (onDrop->IsFunction()) {
-        onDropCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onDrop)](int32_t index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(index);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+        onDropCallback = JsCallbackWithoutNode<void(int32_t)>(
+            context, JSRef<JSFunc>::Cast(onDrop), &CallJsFuncWithIndex);
     }
     RepeatVirtualScroll2Model::GetInstance()->SetItemDragHandler(repeatElmtId, std::move(onLongPressCallback),
         std::move(onDragStartCallback), std::move(onMoveThroughCallback), std::move(onDropCallback));
