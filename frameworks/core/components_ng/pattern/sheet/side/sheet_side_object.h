@@ -103,6 +103,7 @@ private:
     void TransformTranslateExit();
     void DecreaseScrollHeightInSideSheet(uint32_t decreaseHeight);
     float GetUpOffsetCaretNeed();
+    void PropertyCloseAniRequestFrame(bool isTransitionIn);
 
     float resizeDecreasedHeight_ = 0.0f;
 };

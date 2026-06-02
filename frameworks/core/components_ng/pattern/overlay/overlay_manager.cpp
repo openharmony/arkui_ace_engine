@@ -3515,17 +3515,6 @@ bool OverlayManager::RemoveModalInOverlay()
 {
     auto topModalNode = GetModalStackTop();
     CHECK_NULL_RETURN(topModalNode, false);
-    auto rootNode = FindWindowScene(topModalNode);
-    CHECK_NULL_RETURN(rootNode, true);
-    auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
-    if (overlay && overlay->GetTag() == V2::SHEET_WRAPPER_TAG) {
-        auto sheetWrapperPattern = overlay->GetPattern<SheetWrapperPattern>();
-        CHECK_NULL_RETURN(sheetWrapperPattern, false);
-        if (sheetWrapperPattern->GetSheetPageNode() != topModalNode) {
-            TAG_LOGD(AceLogTag::ACE_SHEET, "Refuse to back because sheet is in animation");
-            return true;
-        }
-    }
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
@@ -3931,7 +3920,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     auto pattern = overlay->GetPattern();
     auto ret = RemoveOverlayCommon(rootNode, overlay, pattern, false, false);
     if (InstanceOf<SheetWrapperPattern>(pattern)) {
-        ret = SheetManager::GetInstance().RemoveSheetByESC() ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+        ret = RemoveModalInOverlay() ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (ret == OVERLAY_EXISTS) {
         return false;
