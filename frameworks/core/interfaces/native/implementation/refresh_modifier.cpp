@@ -145,7 +145,7 @@ void SetOnRefreshingImpl(Ark_NativePointer node,
         RefreshModelStatic::SetOnRefreshing(frameNode, nullptr);
         return;
     }
-    auto onRefreshing = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    auto onRefreshing = GetAsyncInvoker(*optValue);
     RefreshModelStatic::SetOnRefreshing(frameNode, std::move(onRefreshing));
 }
 void SetRefreshOffset0Impl(Ark_NativePointer node, const Opt_Float64* value)

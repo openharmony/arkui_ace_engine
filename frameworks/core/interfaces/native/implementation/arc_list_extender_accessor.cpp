@@ -205,9 +205,7 @@ void OnReachStartImpl(Ark_NativePointer node, const Opt_VoidCallback* handler)
     if (!optValue) {
         return;
     }
-    auto onReachStart = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onReachStart = GetAsyncInvoker(*optValue);
     ListModelStatic::SetOnReachStart(frameNode, std::move(onReachStart));
 }
 void OnReachEndImpl(Ark_NativePointer node, const Opt_VoidCallback* handler)
@@ -218,9 +216,7 @@ void OnReachEndImpl(Ark_NativePointer node, const Opt_VoidCallback* handler)
     if (!optValue) {
         return;
     }
-    auto onReachEnd = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onReachEnd = GetAsyncInvoker(*optValue);
     ListModelStatic::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 void OnScrollStartImpl(Ark_NativePointer node, const Opt_VoidCallback* handler)
@@ -231,9 +227,7 @@ void OnScrollStartImpl(Ark_NativePointer node, const Opt_VoidCallback* handler)
     if (!optValue) {
         return;
     }
-    auto onScrollStart = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onScrollStart = GetAsyncInvoker(*optValue);
     ListModelStatic::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
 void OnScrollStopImpl(Ark_NativePointer node, const Opt_VoidCallback* handler)
@@ -244,9 +238,7 @@ void OnScrollStopImpl(Ark_NativePointer node, const Opt_VoidCallback* handler)
     if (!optValue) {
         return;
     }
-    auto onScrollStop = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onScrollStop = GetAsyncInvoker(*optValue);
     ListModelStatic::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 void OnWillScrollImpl(Ark_NativePointer node, const Opt_OnWillScrollCallback* handler)

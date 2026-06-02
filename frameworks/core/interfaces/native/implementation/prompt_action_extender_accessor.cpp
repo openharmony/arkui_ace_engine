@@ -115,66 +115,42 @@ auto g_bindMenuOptionsParamCallbacks = [](
     const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
     auto onAppearValue = OptConvert<Callback_Void>(menuOptions.onAppear);
     if (onAppearValue) {
-        auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto onAppear = GetSyncInvokerWithNode(onAppearValue.value(), weakNode);
         menuParam.onAppear = std::move(onAppear);
     }
     auto onDisappearValue = OptConvert<Callback_Void>(menuOptions.onDisappear);
     if (onDisappearValue) {
-        auto onDisappear = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto onDisappear = GetSyncInvokerWithNode(onDisappearValue.value(), weakNode);
         menuParam.onDisappear = std::move(onDisappear);
     }
     auto aboutToAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToAppear);
     if (aboutToAppearValue) {
-        auto aboutToAppear = [arkCallback = CallbackHelper(aboutToAppearValue.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto aboutToAppear = GetSyncInvokerWithNode(aboutToAppearValue.value(), weakNode);
         menuParam.aboutToAppear = std::move(aboutToAppear);
     }
     auto aboutToDisAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToDisappear);
     if (aboutToDisAppearValue) {
-        auto aboutToDisappear = [arkCallback = CallbackHelper(aboutToDisAppearValue.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto aboutToDisappear = GetSyncInvokerWithNode(aboutToDisAppearValue.value(), weakNode);
         menuParam.aboutToDisappear = std::move(aboutToDisappear);
     }
     auto onDidAppearValue = OptConvert<VoidCallback>(menuOptions.onDidAppear);
     if (onDidAppearValue) {
-        auto onDidAppear = [arkCallback = CallbackHelper(onDidAppearValue.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto onDidAppear = GetSyncInvokerWithNode(onDidAppearValue.value(), weakNode);
         menuParam.onDidAppear = std::move(onDidAppear);
     }
     auto onDidDisappearValue = OptConvert<VoidCallback>(menuOptions.onDidDisappear);
     if (onDidDisappearValue) {
-        auto onDidDisappear = [arkCallback = CallbackHelper(onDidDisappearValue.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto onDidDisappear = GetSyncInvokerWithNode(onDidDisappearValue.value(), weakNode);
         menuParam.onDidDisappear = std::move(onDidDisappear);
     }
     auto onWillAppearValue = OptConvert<VoidCallback>(menuOptions.onWillAppear);
     if (onWillAppearValue) {
-        auto onWillAppear = [arkCallback = CallbackHelper(onWillAppearValue.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto onWillAppear = GetSyncInvokerWithNode(onWillAppearValue.value(), weakNode);
         menuParam.onWillAppear = std::move(onWillAppear);
     }
     auto onWillDisappearValue = OptConvert<VoidCallback>(menuOptions.onWillDisappear);
     if (onWillDisappearValue) {
-        auto onWillDisappear = [arkCallback = CallbackHelper(onWillDisappearValue.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto onWillDisappear = GetSyncInvokerWithNode(onWillDisappearValue.value(), weakNode);
         menuParam.onWillDisappear = std::move(onWillDisappear);
     }
 };

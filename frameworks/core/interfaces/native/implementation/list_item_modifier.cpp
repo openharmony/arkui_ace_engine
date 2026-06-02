@@ -29,9 +29,7 @@ void AssignVoidCallback(std::function<void()>& dst, const Opt_Callback_Void& src
 {
     auto arkCallback = Converter::OptConvert<Callback_Void>(src);
     if (arkCallback) {
-        dst = [callback = CallbackHelper(arkCallback.value())]() {
-            callback.Invoke();
-        };
+        dst = GetAsyncInvoker(arkCallback.value());
     }
 }
 

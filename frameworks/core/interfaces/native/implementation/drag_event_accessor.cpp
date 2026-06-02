@@ -186,9 +186,7 @@ void ExecuteDropAnimationImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer);
     auto info = peer->dragInfo;
     CHECK_NULL_VOID(info);
-    auto customDropAnimationCallback = [callback = CallbackHelper(*customDropAnimation)]() {
-        callback.InvokeSync();
-    };
+    auto customDropAnimationCallback = GetSyncInvoker(*customDropAnimation);
     info->SetDropAnimation(std::move(customDropAnimationCallback));
 }
 void ExecuteFollowHandMorphDropAnimationImpl(Ark_DragEvent peer,

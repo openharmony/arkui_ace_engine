@@ -34,6 +34,40 @@ constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
 constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
 constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
+
+void DispatchNavDestinationCustomTitle(FrameNode* frameNode, Ark_NativePointer node, const CustomNodeBuilder& builder)
+{
+    CallbackHelper(builder).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) {
+            CalcDimension titleHeight;
+            NavDestinationModelStatic::SetTitleHeight(frameNode, titleHeight, false);
+            NavDestinationModelStatic::SetCustomTitle(frameNode, uiNode);
+        },
+        node);
+}
+
+void DispatchNavDestinationCustomTitleNode(
+    FrameNode* frameNode, Ark_NativePointer node, const Ark_NavDestinationCustomTitle& customTitle)
+{
+    CallbackHelper(customTitle.builder).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) { NavDestinationModelStatic::SetCustomTitle(frameNode, uiNode); },
+        node);
+}
+
+void DispatchNavDestinationCustomMenu(FrameNode* frameNode, Ark_NativePointer node, const CustomNodeBuilder& builder)
+{
+    CallbackHelper(builder).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) { NavDestinationModelStatic::SetCustomMenu(frameNode, uiNode); },
+        node);
+}
+
+void DispatchNavDestinationCustomToolbar(
+    FrameNode* frameNode, Ark_NativePointer node, const CustomNodeBuilder& builder)
+{
+    CallbackHelper(builder).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) { NavDestinationModelStatic::SetCustomToolBar(frameNode, uiNode); },
+        node);
+}
 } // namespace
 namespace NavDestinationModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -175,9 +209,7 @@ void SetOnWillAppearImpl(Ark_NativePointer node,
         NavDestinationModelStatic::SetOnWillAppear(frameNode, nullptr);
         return;
     }
-    auto onWillAppearEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.InvokeSync();
-    };
+    auto onWillAppearEvent = GetSyncInvoker(*optValue);
     NavDestinationModelStatic::SetOnWillAppear(frameNode, std::move(onWillAppearEvent));
 }
 void SetOnWillDisappearImpl(Ark_NativePointer node,
@@ -190,9 +222,7 @@ void SetOnWillDisappearImpl(Ark_NativePointer node,
         NavDestinationModelStatic::SetOnWillDisAppear(frameNode, nullptr);
         return;
     }
-    auto onWillDisappearEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.InvokeSync();
-    };
+    auto onWillDisappearEvent = GetSyncInvoker(*optValue);
     NavDestinationModelStatic::SetOnWillDisAppear(frameNode, std::move(onWillDisappearEvent));
 }
 void SetOnWillShowImpl(Ark_NativePointer node,
@@ -205,9 +235,7 @@ void SetOnWillShowImpl(Ark_NativePointer node,
         NavDestinationModelStatic::SetOnWillShow(frameNode, nullptr);
         return;
     }
-    auto onWillShowEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.InvokeSync();
-    };
+    auto onWillShowEvent = GetSyncInvoker(*optValue);
     NavDestinationModelStatic::SetOnWillShow(frameNode, std::move(onWillShowEvent));
 }
 void SetOnWillHideImpl(Ark_NativePointer node,
@@ -220,9 +248,7 @@ void SetOnWillHideImpl(Ark_NativePointer node,
         NavDestinationModelStatic::SetOnWillHide(frameNode, nullptr);
         return;
     }
-    auto onWillHideEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.InvokeSync();
-    };
+    auto onWillHideEvent = GetSyncInvoker(*optValue);
     NavDestinationModelStatic::SetOnWillHide(frameNode, std::move(onWillHideEvent));
 }
 void SetSystemBarStyleImpl(Ark_NativePointer node,
@@ -463,14 +489,7 @@ void SetTitleImpl(Ark_VMContext vmContext,
     }
     const int8_t customTitleSelector = 1;
     if (selector == customTitleSelector) {
-        CallbackHelper(value->value.value1)
-            .BuildAsync(
-                [frameNode](const RefPtr<UINode>& uiNode) {
-                    CalcDimension titleHeight;
-                    NavDestinationModelStatic::SetTitleHeight(frameNode, titleHeight, false);
-                    NavDestinationModelStatic::SetCustomTitle(frameNode, uiNode);
-                },
-                node);
+        DispatchNavDestinationCustomTitle(frameNode, node, value->value.value1);
         NavDestinationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
         return;
     }
@@ -503,11 +522,7 @@ void SetTitleImpl(Ark_VMContext vmContext,
                 NavDestinationModelStatic::SetTitleHeight(frameNode, length);
             }
         }
-        CallbackHelper(value->value.value3.builder)
-            .BuildAsync(
-                [frameNode](
-                    const RefPtr<UINode>& uiNode) { NavDestinationModelStatic::SetCustomTitle(frameNode, uiNode); },
-                node);
+        DispatchNavDestinationCustomTitleNode(frameNode, node, value->value.value3);
         NavDestinationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
         return;
     }
@@ -610,9 +625,7 @@ void SetMenusImpl(Ark_VMContext vmContext,
             auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(items->value.value0);
             NavDestinationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
         } else if (typeValue == 1) {
-            CallbackHelper(items->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                NavDestinationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
-            }, node);
+            DispatchNavDestinationCustomMenu(frameNode, node, items->value.value1);
         }
     } else {
         CallbackHelper(items->value.value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
@@ -657,12 +670,7 @@ void SetToolbarConfigurationImpl(Ark_VMContext vmContext,
             auto toolbarItemArray = Converter::Convert<std::vector<NG::BarItem>>(toolbarParam->value.value0);
             NavDestinationModelStatic::SetToolbarConfiguration(frameNode, std::move(toolbarItemArray));
         } else if (typeValue == 1) {
-            CallbackHelper(toolbarParam->value.value1)
-                .BuildAsync(
-                    [frameNode](const RefPtr<UINode>& uiNode) {
-                        NavDestinationModelStatic::SetCustomToolBar(frameNode, uiNode);
-                    },
-                    node);
+            DispatchNavDestinationCustomToolbar(frameNode, node, toolbarParam->value.value1);
         }
     } else {
         NavDestinationModelStatic::SetToolbarMorebuttonOptions(frameNode, NG::MoreButtonOptions());

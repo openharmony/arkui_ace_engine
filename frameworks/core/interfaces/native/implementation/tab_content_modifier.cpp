@@ -311,9 +311,7 @@ void SetOnWillShowImpl(Ark_NativePointer node,
         TabContentModelStatic::SetOnWillShow(frameNode, nullptr);
         return;
     }
-    auto onWillShow = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.InvokeSync();
-    };
+    auto onWillShow = GetSyncInvoker(*optValue);
     TabContentModelStatic::SetOnWillShow(frameNode, std::move(onWillShow));
 }
 void SetOnWillHideImpl(Ark_NativePointer node,
@@ -326,9 +324,7 @@ void SetOnWillHideImpl(Ark_NativePointer node,
         TabContentModelStatic::SetOnWillHide(frameNode, nullptr);
         return;
     }
-    auto onWillHide = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.InvokeSync();
-    };
+    auto onWillHide = GetSyncInvoker(*optValue);
     TabContentModelStatic::SetOnWillHide(frameNode, std::move(onWillHide));
 }
 } // TabContentAttributeModifier

@@ -191,9 +191,7 @@ void SetOnStartImpl(Ark_NativePointer node,
         ImageAnimatorModelNG::SetOnStart(frameNode, nullptr);
         return;
     }
-    auto onStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
+    auto onStart = GetAsyncInvoker(*optValue);
     ImageAnimatorModelNG::SetOnStart(frameNode, std::move(onStart));
 }
 void SetOnPauseImpl(Ark_NativePointer node,
@@ -206,9 +204,7 @@ void SetOnPauseImpl(Ark_NativePointer node,
         ImageAnimatorModelNG::SetOnPause(frameNode, nullptr);
         return;
     }
-    auto onPause = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
+    auto onPause = GetAsyncInvoker(*optValue);
     ImageAnimatorModelNG::SetOnPause(frameNode, std::move(onPause));
 }
 void SetOnRepeatImpl(Ark_NativePointer node,
@@ -221,9 +217,7 @@ void SetOnRepeatImpl(Ark_NativePointer node,
         ImageAnimatorModelNG::SetOnRepeat(frameNode, nullptr);
         return;
     }
-    auto onRepeat = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
+    auto onRepeat = GetAsyncInvoker(*optValue);
     ImageAnimatorModelNG::SetOnRepeat(frameNode, onRepeat);
 }
 void SetOnCancelImpl(Ark_NativePointer node,
@@ -236,9 +230,7 @@ void SetOnCancelImpl(Ark_NativePointer node,
         ImageAnimatorModelNG::SetOnCancel(frameNode, nullptr);
         return;
     }
-    auto onCancel = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
+    auto onCancel = GetAsyncInvoker(*optValue);
     ImageAnimatorModelNG::SetOnCancel(frameNode, onCancel);
 }
 void SetOnFinishImpl(Ark_NativePointer node,
@@ -251,9 +243,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
         ImageAnimatorModelNG::SetOnFinish(frameNode, nullptr);
         return;
     }
-    auto onFinish = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
+    auto onFinish = GetAsyncInvoker(*optValue);
     ImageAnimatorModelNG::SetOnFinish(frameNode, onFinish);
 }
 } // ImageAnimatorAttributeModifier

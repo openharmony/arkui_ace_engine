@@ -511,9 +511,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
         ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
         return;
     }
-    auto onFinish = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
-    };
+    auto onFinish = GetAsyncInvoker(*optValue);
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onFinish));
 }
 void SetEnableAnalyzerImpl(Ark_NativePointer node,

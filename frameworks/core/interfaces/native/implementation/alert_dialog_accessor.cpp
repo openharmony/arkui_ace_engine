@@ -318,25 +318,23 @@ DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
     AddOnWillDismiss(dialogProps, props.onWillDismiss);
     auto onDidAppear = Converter::OptConvert<VoidCallback>(props.onDidAppear);
     if (onDidAppear) {
-        dialogProps.onDidAppear = [arkCallback = CallbackHelper(onDidAppear.value())]() { arkCallback.InvokeSync(); };
+        dialogProps.onDidAppear = GetSyncInvoker(onDidAppear.value());
     }
     auto onDidDisappear = Converter::OptConvert<VoidCallback>(props.onDidDisappear);
     if (onDidDisappear) {
-        dialogProps.onDidDisappear = [arkCallback = CallbackHelper(onDidDisappear.value())]() { arkCallback.Invoke(); };
+        dialogProps.onDidDisappear = GetAsyncInvoker(onDidDisappear.value());
     }
     auto onWillAppear = Converter::OptConvert<VoidCallback>(props.onWillAppear);
     if (onWillAppear) {
-        dialogProps.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() { arkCallback.Invoke(); };
+        dialogProps.onWillAppear = GetAsyncInvoker(onWillAppear.value());
     }
     auto onWillDisappear = Converter::OptConvert<VoidCallback>(props.onWillDisappear);
     if (onWillDisappear) {
-        dialogProps.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
-            arkCallback.Invoke();
-        };
+        dialogProps.onWillDisappear = GetAsyncInvoker(onWillDisappear.value());
     }
     auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(props.cancel);
     if (cancelCallbackOpt) {
-        auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        auto cancelFunc = GetAsyncInvoker(*cancelCallbackOpt);
         dialogProps.onCancel = cancelFunc;
     }
     dialogProps.onLanguageChange = [props, updateDialogProperties = UpdateDynamicDialogProperties](
