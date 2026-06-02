@@ -1368,6 +1368,7 @@ declare class ArkMenuItemComponent extends ArkComponent implements MenuItemAttri
     contentFontColor(value: ResourceColor): this;
     labelFont(value: Font): this;
     labelFontColor(value: ResourceColor): this;
+    subMenuBuilder(value: () => void): this;
 }
 declare class ArkMenuItemGroupComponent extends ArkComponent implements MenuItemGroupAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

@@ -215,6 +215,18 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._MenuItemAttribute_setLabelFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSubMenuBuilderAttribute(value: CustomBuilder | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MenuItemAttribute_setSubMenuBuilder(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface MenuItemOptions {
     startIcon?: ResourceStr;
@@ -249,6 +261,9 @@ export interface MenuItemAttribute extends CommonMethod {
     }
     labelFontColor(value: ResourceColor | undefined): this {
         throw new Error('Unimplemented method labelFontColor')
+    }
+    subMenuBuilder(value: CustomBuilder | undefined): this {
+        throw new Error('Unimplemented method subMenuBuilder')
     }
     attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -298,6 +313,11 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
     public labelFontColor(value: ResourceColor | undefined): this {
         const value_casted = value as (ResourceColor | undefined)
         this.getPeer()?.setLabelFontColorAttribute(value_casted)
+        return this
+    }
+    public subMenuBuilder(value: CustomBuilder | undefined): this {
+        const value_casted = value as (CustomBuilder | undefined)
+        this.getPeer()?.setSubMenuBuilderAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {

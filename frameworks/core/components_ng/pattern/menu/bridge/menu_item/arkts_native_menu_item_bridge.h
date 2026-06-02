@@ -35,6 +35,8 @@ public:
     static ArkUINativeModuleValue ResetSelectIcon(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSubMenuBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSubMenuBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };

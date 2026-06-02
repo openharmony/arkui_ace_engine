@@ -189,6 +189,23 @@ void SetOnChangeImpl(Ark_NativePointer node,
     };
     MenuItemModelStatic::SetOnChange(frameNode, onChange);
 }
+void SetSubMenuBuilderImpl(Ark_NativePointer node,
+                           const Opt_CustomNodeBuilder* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        MenuItemModelStatic::SetSubBuilder(frameNode, nullptr);
+        return;
+    }
+    auto builder = [callback = CallbackHelper(*optValue), node]() -> RefPtr<UINode> {
+        auto subMenuNode = callback.BuildSync(node);
+        ViewStackProcessor::GetInstance()->Push(subMenuNode);
+        return subMenuNode;
+    };
+    MenuItemModelStatic::SetSubBuilder(frameNode, std::move(builder));
+}
 void SetContentFontImpl(Ark_NativePointer node,
                         const Opt_arkui_component_units_Font* value)
 {
@@ -252,6 +269,7 @@ const GENERATED_ArkUIMenuItemModifier* GetMenuItemStaticModifier()
         MenuItemAttributeModifier::SetContentFontColorImpl,
         MenuItemAttributeModifier::SetLabelFontImpl,
         MenuItemAttributeModifier::SetLabelFontColorImpl,
+        MenuItemAttributeModifier::SetSubMenuBuilderImpl,
     };
     return &ArkUIMenuItemModifierImpl;
 }

@@ -1352,6 +1352,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _MenuItemAttribute_setLabelFontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _MenuItemAttribute_setSubMenuBuilder(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _MenuItemGroup_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _MenuItemGroupInterface_setMenuItemGroupOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
