@@ -73,6 +73,9 @@
 #include "frameworks/compatible/components/canvas/rosen_render_custom_paint.h"
 #endif
 
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material_enums.h"
+#include "ui/base/utils/utils.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t OPTION_INDEX_CUT = 0;
@@ -106,6 +109,7 @@ constexpr Dimension MENU_BUTTON_SPACING = 4.0_vp;
 #ifdef OHOS_PLATFORM
 constexpr Dimension DEFAULT_ICON_SIZE = 24.0_vp;
 #endif
+const float EDGELIGHT_LENGTH_RATIO = 0.4f;
 
 std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
     { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
@@ -407,7 +411,7 @@ void PlayExtensionMenuDistortionAnimations(const RefPtr<FrameNode>& extensionMen
 {
     AnimationOption option;
     option.SetDuration(1000);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18));
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 342, 29));
     AnimationUtils::Animate(option, [renderContext, menuChildRenderContext, positionInfo]() {
         renderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(positionInfo.adjustedMenuPosition.GetX() + positionInfo.menuOffset.GetX()),
@@ -438,7 +442,7 @@ void PlayExtensionMenuDistortionAnimations(const RefPtr<FrameNode>& extensionMen
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(options.param2);
         }
     }, nullptr, nullptr, extensionMenu->GetContextRefPtr());
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 110, 18));
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 247, 21));
     AnimationUtils::Animate(option, [renderContext, menuChildRenderContext, options]() {
         renderContext->UpdateDistortionParam(options.param3);
         if (menuChildRenderContext) {
@@ -446,7 +450,7 @@ void PlayExtensionMenuDistortionAnimations(const RefPtr<FrameNode>& extensionMen
         }
     }, nullptr, nullptr, extensionMenu->GetContextRefPtr());
     option.SetDelay(120);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 17));
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 247, 21));
     AnimationUtils::Animate(option, [renderContext, menuChildRenderContext, options]() {
         renderContext->UpdateDistortionParam(options.param4);
         if (menuChildRenderContext) {
@@ -2141,8 +2145,10 @@ RefPtr<FrameNode> GetRightClickMenuWrapper(std::vector<OptionParam>& params,
 {
     auto caller = info->callerFrameNode.Upgrade();
     int32_t themeScopeId = 0;
+    auto colorMode = ColorMode::COLOR_MODE_UNDEFINED;
     if (caller) {
         themeScopeId = caller->GetThemeScopeId();
+        colorMode = caller->GetLocalColorMode();
     }
     RefPtr<FrameNode> menuWrapper = nullptr;
     auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -2154,8 +2160,11 @@ RefPtr<FrameNode> GetRightClickMenuWrapper(std::vector<OptionParam>& params,
     }
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     CHECK_NULL_RETURN(menuViewModifier, nullptr);
-    menuWrapper = menuViewModifier->createWithCustomNode(innerMenuNode, targetNodeId, "SelectOverlayMenuByRightClick",
-        { .isShowInSubWindow = false, .type = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU }, true, nullptr);
+    menuWrapper = menuViewModifier->createWithCustomNode(
+        innerMenuNode, targetNodeId, "SelectOverlayMenuByRightClick",
+        { .isShowInSubWindow = false, .type = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU,
+        .systemMaterial = UseNewAnimation(caller)? SelectOverlayNode::GetMenuUiMaterial(colorMode) : nullptr },
+        true, nullptr);
     menuWrapper->UpdateInspectorId("select_overlay_right_click_menuWrapper");
     if (innerMenuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         auto menu = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
@@ -2743,34 +2752,48 @@ void SelectOverlayNode::PlayExtensionMenuLightAnimation(
     auto extensionMenuPattern = extensionMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(extensionMenuPattern);
     auto selectMenuPaintRect = extensionMenuPattern->GetSelectMenuPaintRect();
+    auto menuWidth = adjustedExtensionMenuRect.Width();
+    auto menuHeight = adjustedExtensionMenuRect.Height();
+    auto edgeLightLength = std::max(menuWidth, menuHeight) * EDGELIGHT_LENGTH_RATIO;
     EdgeLightParam param1 {
         .edgeLightPosition = EdgeLightPosition::BOTTOM,
-        .length = 150,
-        .intensity = 0.1,
+        .length = edgeLightLength,
+        .intensity = 0.2,
         .thickness = 250.0,
         .color = Color::WHITE
     };
-    EdgeLightParam param2 {
-        .edgeLightPosition = EdgeLightPosition::TOP,
-        .length = 150,
-        .intensity = 0.1,
-        .thickness = 250.0,
-        .color = Color::WHITE
-    };
+    EdgeLightParam param2 = param1;
+    param2.edgeLightPosition = EdgeLightPosition::TOP;
     UpdateExtensionMenuLightParams(finalPlacement, adjustedExtensionMenuRect, selectMenuPaintRect, param1, param2);
 
     renderContext->UpdateEdgeLightParam(param1);
     AnimationOption option;
     option.SetDuration(1000);
-    option.SetCurve(Curves::FRICTION);
-    option.SetOnFinishEvent([weakRender = WeakPtr<RenderContext>(renderContext)]() {
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::Animate(option, [renderContext, param2]() {
+        renderContext->UpdateEdgeLightParam(param2);
+    }, nullptr, nullptr, extensionMenu->GetContextRefPtr());
+
+    EdgeLightParam param3 {
+        .edgeLightPosition = param2.edgeLightPosition,
+        .length = edgeLightLength,
+        .intensity = 0.0,
+        .thickness = 0.0,
+        .color = Color::WHITE
+    };
+
+    AnimationOption option1;
+    option1.SetDuration(150);
+    option1.SetCurve(Curves::LINEAR);
+    option1.SetDelay(120);
+    option1.SetOnFinishEvent([weakRender = WeakPtr<RenderContext>(renderContext)]() {
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->ResetEdgeLightParam();
     });
-    AnimationUtils::Animate(option, [renderContext, param2]() {
-        renderContext->UpdateEdgeLightParam(param2);
-    }, option.GetOnFinishEvent(), nullptr, extensionMenu->GetContextRefPtr());
+    AnimationUtils::Animate(option1, [renderContext, param3]() {
+        renderContext->UpdateEdgeLightParam(param3);
+    }, option1.GetOnFinishEvent(), nullptr, extensionMenu->GetContextRefPtr());
 }
 
 void SelectOverlayNode::ContinuePlayExtensionMenuDistortAnimation(
@@ -3440,11 +3463,11 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params, co
 
     auto menu = GetExtensionMenuOutterrMenu(params, menuParam, caller);
     CHECK_NULL_VOID(menu);
-    InitExtensionMenu(menu, caller, menuParam);
+    InitExtensionMenu(menu, caller, menuParam, colorMode);
 }
 
 void SelectOverlayNode::InitExtensionMenu(
-    const RefPtr<FrameNode>& menu, const RefPtr<FrameNode>& caller, const MenuParam& menuParam)
+    const RefPtr<FrameNode>& menu, const RefPtr<FrameNode>& caller, const MenuParam& menuParam, ColorMode colorMode)
 {
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_VOID(menuModifier);
@@ -3474,6 +3497,7 @@ void SelectOverlayNode::InitExtensionMenu(
     extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     extensionMenu_->MarkModifyDone();
     menuModifier->setSelectOverlayExtensionMenuShow(menu);
+    UpdateNewMaterialProperties(extensionMenu_, colorMode);
     auto extensionMenuPattern = extensionMenu_->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(extensionMenuPattern);
     extensionMenuPattern->SetBeforeExtensionMenuDistortAnimationCallback(
@@ -3632,9 +3656,11 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty(const RefPtr<FrameNode>& 
     if (caller) {
         colorMode = caller->GetLocalColorMode();
     }
-    if (shadowTheme) {
-        selectMenu_->GetRenderContext()->UpdateBackShadow(
-            shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+    if (!UseNewMaterial(selectMenu_)) {
+        if (shadowTheme) {
+            selectMenu_->GetRenderContext()->UpdateBackShadow(
+                shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+        }
     }
     selectMenu_->GetRenderContext()->SetClipToFrame(true);
 
@@ -3653,12 +3679,16 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty(const RefPtr<FrameNode>& 
     selectMenuInner_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     selectMenuInner_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 
-    selectMenu_->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = menuTheme ?
-        static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle()) : BlurStyle::COMPONENT_ULTRA_THICK;
-    styleOption.colorMode = ConvertColorMode(colorMode);
-    selectMenu_->GetRenderContext()->UpdateBackBlurStyle(styleOption);
+    if (UseNewMaterial(selectMenu_)) {
+        UpdateNewMaterialProperties(selectMenu_, colorMode);
+    } else {
+        selectMenu_->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = menuTheme ?
+            static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle()) : BlurStyle::COMPONENT_ULTRA_THICK;
+        styleOption.colorMode = ConvertColorMode(colorMode);
+        selectMenu_->GetRenderContext()->UpdateBackBlurStyle(styleOption);
+    }
 
     selectMenuInner_->GetRenderContext()->UpdateOpacity(1.0);
     selectMenuInner_->GetRenderContext()->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
@@ -3750,6 +3780,41 @@ std::optional<float> SelectOverlayNode::GetParentWidth()
     auto renderContext = rootNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, std::nullopt);
     return renderContext->GetPaintRectWithoutTransform().Width();
+}
+
+RefPtr<UiMaterial>& SelectOverlayNode::GetMenuUiMaterial(ColorMode colorMode)
+{
+    static RefPtr<UiMaterial> menuMaterial_ = AceType::MakeRefPtr<UiMaterial>();
+    menuMaterial_->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options {
+        .style = UiMaterialStyle::THICK,
+        .colorMode = colorMode,
+    };
+    menuMaterial_->SetImmersiveOptions(options);
+    return menuMaterial_;
+}
+
+void SelectOverlayNode::UpdateNewMaterialProperties(const RefPtr<FrameNode>& frameNode, ColorMode colorMode)
+{
+    if (UseNewMaterial(frameNode)) {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+            ViewAbstract::SetSystemMaterial(
+                AceType::RawPtr(frameNode), AceType::RawPtr(GetMenuUiMaterial(colorMode)));
+        } else {
+            // 降档材质
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+            CHECK_NULL_VOID(textOverlayTheme);
+            renderContext->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColorLowEnd());
+            auto dipScale = pipeline->GetDipScale();
+            auto shadow = MaterialUtils::GetImmersiveShadow(dipScale);
+            renderContext->UpdateBackShadow(shadow);
+        }
+    }
 }
 
 bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocatedSize)
@@ -4861,15 +4926,19 @@ void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
     }
     auto renderContext = selectMenu_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (shadowTheme) {
-        renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+    if (UseNewMaterial(selectMenu_)) {
+        UpdateNewMaterialProperties(selectMenu_, colorMode);
+    } else {
+        if (shadowTheme) {
+            renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
+        }
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = menuTheme ?
+            static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle()) : BlurStyle::COMPONENT_ULTRA_THICK;
+        styleOption.colorMode = ConvertColorMode(colorMode);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackBlurStyle(styleOption);
     }
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = menuTheme ?
-        static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle()) : BlurStyle::COMPONENT_ULTRA_THICK;
-    styleOption.colorMode = ConvertColorMode(colorMode);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    renderContext->UpdateBackBlurStyle(styleOption);
 }
 
 void UpdateButtonColor(const RefPtr<FrameNode>& button, const Color& clickedColor, const Color& hoverColor)
