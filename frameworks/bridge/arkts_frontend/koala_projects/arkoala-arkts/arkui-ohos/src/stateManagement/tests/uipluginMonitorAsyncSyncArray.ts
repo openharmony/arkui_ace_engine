@@ -62,14 +62,14 @@ function makeMonitorByMode(
 
 // === Mock components =======================================================
 
-interface ComponentWithArray_init_update_struct {
+interface ComponentWithNumberArray_init_update_struct {
     arr?: MyArray<number>;
 }
 
-class ComponentWithArray extends ExtendableComponent {
+class ComponentWithNumberArray extends ExtendableComponent {
     private _backing_state_arr: ILocalDecoratedVariable<MyArray<number>>;
     get arr(): MyArray<number> {
-        console.log('ComponentWithArray.arr()');
+        console.log('ComponentWithNumberArray.arr()');
         return this._backing_state_arr!.get() as MyArray<number>;
     }
     set arr(newArr: MyArray<number>) {
@@ -87,7 +87,7 @@ class ComponentWithArray extends ExtendableComponent {
         return TestMSM.getRefCnt(this._backing_state_arr.get().meta_, key);
     }
 
-    constructor(parent: ExtendableComponent | null, param: ComponentWithArray_init_update_struct) {
+    constructor(parent: ExtendableComponent | null, param: ComponentWithNumberArray_init_update_struct) {
         super(parent);
 
         this._backing_state_arr = StateMgmtFactory.makeLocal<MyArray<number>>(
@@ -100,11 +100,11 @@ class ComponentWithArray extends ExtendableComponent {
     }
 }
 
-interface ParentComponentWithArrayItems_init_update_struct {
+interface ComponentWithMonitoredObjectArray_init_update_struct {
     // @Local nothing, @Local can not init from parent @Component/V2
 }
 
-class ParentComponentWithArrayItems extends ExtendableComponent {
+class ComponentWithMonitoredObjectArray extends ExtendableComponent {
     // @Local arr: MyArray<ClassA_ObserveAnyProp_NoAnyMeta> = new MyArray<...>(new ClassA(), new ClassA());
     private _backing_arr: ILocalDecoratedVariable<MyArray<ClassA_ObserveAnyProp_NoAnyMeta>>;
     get arr(): MyArray<ClassA_ObserveAnyProp_NoAnyMeta> {
@@ -126,7 +126,7 @@ class ParentComponentWithArrayItems extends ExtendableComponent {
 
     constructor(
         parent: ExtendableComponent | null,
-        param: ParentComponentWithArrayItems_init_update_struct,
+        param: ComponentWithMonitoredObjectArray_init_update_struct,
         isSync: boolean,
     ) {
         super(parent)
@@ -181,11 +181,68 @@ class ParentComponentWithArrayItems extends ExtendableComponent {
     }
 }
 
+interface ComponentWithWildcardMonitoredObjectArray_init_update_struct {
+    // @Local nothing, @Local can not init from parent @Component/V2
+}
+
+// Same shape as ComponentWithMonitoredObjectArray, but with wildcard paths on
+// the first two array slots instead of explicit nested-property paths. Used to
+// verify that reassigning `arr` to a different array fires every per-index
+// wildcard whose LSV reference changes.
+class ComponentWithWildcardMonitoredObjectArray extends ExtendableComponent {
+    private _backing_arr: ILocalDecoratedVariable<MyArray<ClassA_ObserveAnyProp_NoAnyMeta>>;
+    get arr(): MyArray<ClassA_ObserveAnyProp_NoAnyMeta> {
+        return this._backing_arr.get();
+    }
+    set arr(newValue: MyArray<ClassA_ObserveAnyProp_NoAnyMeta>) {
+        this._backing_arr.set(newValue);
+    }
+
+    public monitorFunctionRunCount: number = 0;
+
+    // @Monitor("arr.0.*", "arr.1.*") onArrChanged(m: IMonitor)
+    private _monitor: IMonitorDecoratedVariable;
+    public onArrChanged?: (m: IMonitor) => void;
+
+    constructor(
+        parent: ExtendableComponent | null,
+        param: ComponentWithWildcardMonitoredObjectArray_init_update_struct,
+        isSync: boolean,
+    ) {
+        super(parent);
+        this._backing_arr = StateMgmtFactory.makeLocal<MyArray<ClassA_ObserveAnyProp_NoAnyMeta>>(
+            this,
+            'arr',
+            new MyArray<ClassA_ObserveAnyProp_NoAnyMeta>(
+                new ClassA_ObserveAnyProp_NoAnyMeta()
+            ));
+
+        const wildcardPathInfos: IMonitorPathInfo[] = [
+            {
+                path: 'arr.0.*',
+                valueCallback: () => this.arr[0],
+                enableWildcard: true,
+            } as IMonitorPathInfo,
+            {
+                path: 'arr.1.*',
+                valueCallback: () => this.arr[1],
+                enableWildcard: true,
+            } as IMonitorPathInfo,
+        ];
+        const callback: MonitorCallback = (m: IMonitor): void => {
+            this.onArrChanged!(m);
+        };
+        this._monitor = isSync
+            ? StateMgmtFactory.makeSyncMonitor(wildcardPathInfos, callback, undefined)
+            : StateMgmtFactory.makeMonitor(wildcardPathInfos, callback);
+    }
+}
+
 // Component holding a @Local MyArray<ClassA_ObserveAnyProp_NoAnyMeta>. Used by
 // the index-path / restore-reference test below where the items must be
 // distinguishable by reference (numbers compare by value and would mask the
 // "same reference restored" semantics).
-class ComponentWithArrayOfA extends ExtendableComponent {
+class ComponentWithObjectArray extends ExtendableComponent {
     private _backing_arr: ILocalDecoratedVariable<MyArray<ClassA_ObserveAnyProp_NoAnyMeta>>;
     get arr(): MyArray<ClassA_ObserveAnyProp_NoAnyMeta> {
         return this._backing_arr.get();
@@ -207,7 +264,7 @@ class ComponentWithArrayOfA extends ExtendableComponent {
 function doMonitorOnArrayWildcard(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
     let count: int = 0;
-    const arrayComp = new ComponentWithArray(null, {});
+    const arrayComp = new ComponentWithNumberArray(null, {});
 
     const valueCallback: MonitorValueCallback = () => {
         console.log('valueCallback comp.arr');
@@ -244,7 +301,7 @@ function doMonitorOnArrayWildcard(isSync: boolean): void {
 function doMonitorOnArrayWildcardWithPush(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
     let count: int = 0;
-    const arrayComp = new ComponentWithArray(null, {});
+    const arrayComp = new ComponentWithNumberArray(null, {});
 
     const valueCallback: MonitorValueCallback = () => {
         console.log('valueCallback comp.arr');
@@ -290,7 +347,7 @@ function doMonitorOnArrayWildcardWithPush(isSync: boolean): void {
 function doMonitorOnArrayPushVariants(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
     let count: int = 0;
-    const arrayComp = new ComponentWithArray(null, {});
+    const arrayComp = new ComponentWithNumberArray(null, {});
 
     const valueCallback: MonitorValueCallback = () => arrayComp.arr;
 
@@ -362,7 +419,7 @@ function doMonitorOnArrayLengthVsWildcard(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
     let lengthCount: int = 0;
     let wildcardCount: int = 0;
-    const arrayComp = new ComponentWithArray(null, {});
+    const arrayComp = new ComponentWithNumberArray(null, {});
 
     const _lengthMonitor = makeMonitorByMode(
         isSync,
@@ -448,7 +505,7 @@ function doMonitorOnArrayLengthVsWildcard(isSync: boolean): void {
 function doMonitorOnArrayCopyMethodsDoNotFire(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
     let count: int = 0;
-    const arrayComp = new ComponentWithArray(null, {}); // [1,2,3]
+    const arrayComp = new ComponentWithNumberArray(null, {}); // [1,2,3]
 
     const _wildcardMonitor = makeMonitorByMode(
         isSync,
@@ -508,7 +565,7 @@ function doMonitorOnArrayCopyMethodsDoNotFire(isSync: boolean): void {
 function doMonitorOnArraySpliceVariants(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
     let count: int = 0;
-    const arrayComp = new ComponentWithArray(null, {}); // [1,2,3]
+    const arrayComp = new ComponentWithNumberArray(null, {}); // [1,2,3]
 
     const _monitor = makeMonitorByMode(
         isSync,
@@ -569,7 +626,7 @@ function doMonitorOnArrayIndexShiftUnshiftRestoresRef(isSync: boolean): void {
     const a2 = new ClassA_ObserveAnyProp_NoAnyMeta();
     const a3 = new ClassA_ObserveAnyProp_NoAnyMeta();
     const newHead = new ClassA_ObserveAnyProp_NoAnyMeta();
-    const arrayComp = new ComponentWithArrayOfA(null,
+    const arrayComp = new ComponentWithObjectArray(null,
         new MyArray<ClassA_ObserveAnyProp_NoAnyMeta>(a0, origA1, a2, a3));
 
     let count: int = 0;
@@ -652,12 +709,12 @@ function doMonitorOnArrayIndexShiftUnshiftRestoresRef(isSync: boolean): void {
 
 // === Test bodies (async-monitor migrated, parameterized) ===================
 
-// Multi-path monitor on ParentComponentWithArrayItems: change an existing array
+// Multi-path monitor on ComponentWithMonitoredObjectArray: change an existing array
 // item's nested @Track property. Only the 'arr.1.classB.propB1' path becomes
 // dirty, fired in a single callback.
 function doMonitorOnArrayItemChange(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
-    let comp = new ParentComponentWithArrayItems(null, {}, isSync);
+    let comp = new ComponentWithMonitoredObjectArray(null, {}, isSync);
     comp.onArrChanged = (m: IMonitor) => {
         stateMgmtConsole.debug(`tcase #2 [${tag}] onArrChanged`);
 
@@ -676,13 +733,13 @@ function doMonitorOnArrayItemChange(isSync: boolean): void {
     test(`[${tag}] @Monitor function has run`, eq(comp.monitorFunctionRunCount, 1));
 }
 
-// Multi-path monitor on ParentComponentWithArrayItems: push() adds a new item
+// Multi-path monitor on ComponentWithMonitoredObjectArray: push() adds a new item
 // to the array, satisfying the previously-unbound 'arr.2.classB' path AND
 // changing the 'length' path. Both paths fire in a single callback.
 function doMonitorOnArrayPushNewItem(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
     const newItem: ClassA_ObserveAnyProp_NoAnyMeta = new ClassA_ObserveAnyProp_NoAnyMeta();
-    let comp = new ParentComponentWithArrayItems(null, {}, isSync);
+    let comp = new ComponentWithMonitoredObjectArray(null, {}, isSync);
 
     comp.onArrChanged = (m: IMonitor) => {
         stateMgmtConsole.debug(`tcase #3 [${tag}] onArrChanged`);
@@ -708,7 +765,7 @@ function doMonitorOnArrayPushNewItem(isSync: boolean): void {
 // trigger any mutation, so the count stays at 0 in both modes.
 function doMonitorOnArrayPropChange(isSync: boolean): void {
     const tag = isSync ? 'sync' : 'async';
-    let comp = new ParentComponentWithArrayItems(null, {}, isSync);
+    let comp = new ComponentWithMonitoredObjectArray(null, {}, isSync);
     comp.onArrPropChanged = (m: IMonitor) => {
         stateMgmtConsole.debug(`tcase #4 [${tag}] onArrPropChanged`);
 
@@ -719,6 +776,59 @@ function doMonitorOnArrayPropChange(isSync: boolean): void {
     }
 
     // (no mutation triggered — count stays 0)
+}
+
+// Wildcard monitors on 'arr.0.*' and 'arr.1.*' with initial arr length 1.
+// Walks three reassignments and verifies which paths fire per step:
+//   step 1: [a0] -> [b0]      arr.0.* fires (a0 -> b0); arr.1.* stays
+//                              undefined so no fire
+//   step 2: [b0] -> [c0, c1]  both fire: arr.0.* (b0 -> c0),
+//                              arr.1.* (undefined -> c1)
+//   step 3: [c0, c1] -> [d0]  both fire: arr.0.* (c0 -> d0),
+//                              arr.1.* (c1 -> undefined via OOB-throw
+//                              translated to undefined by the framework)
+function doMonitorOnArrayReassignWildcards(isSync: boolean): void {
+    const tag = isSync ? 'sync' : 'async';
+    let comp = new ComponentWithWildcardMonitoredObjectArray(null, {}, isSync);
+    comp.onArrChanged = (m: IMonitor) => {
+        comp.monitorFunctionRunCount += 1;
+        const step: number = comp.monitorFunctionRunCount;
+        console.log(`### Monitor[${tag}] reassign step ${step} dirty: ${JSON.stringify(m.dirty)}`);
+
+        if (step === 1) {
+            test(`[${tag}] step1 m.dirty length`, eq(m.dirty.length, 1));
+            test(`[${tag}] step1 m.dirty[0]`, eq(m.dirty[0], 'arr.0.*'));
+        } else if (step === 2) {
+            test(`[${tag}] step2 m.dirty length`, eq(m.dirty.length, 2));
+            test(`[${tag}] step2 m.dirty[0]`, eq(m.dirty[0], 'arr.0.*'));
+            test(`[${tag}] step2 m.dirty[1]`, eq(m.dirty[1], 'arr.1.*'));
+        } else if (step === 3) {
+            test(`[${tag}] step3 m.dirty length`, eq(m.dirty.length, 2));
+            test(`[${tag}] step3 m.dirty[0]`, eq(m.dirty[0], 'arr.0.*'));
+            test(`[${tag}] step3 m.dirty[1]`, eq(m.dirty[1], 'arr.1.*'));
+        }
+    }
+
+    // step 1: replace single-element array with a different single-element array
+    stateMgmtConsole.log('step 1: comp.arr = new MyArray(b0)');
+    comp.arr = new MyArray<ClassA_ObserveAnyProp_NoAnyMeta>(
+        new ClassA_ObserveAnyProp_NoAnyMeta());
+    if (!isSync) { ObserveSingleton.instance.updateDirty(); }
+
+    // step 2: grow to two elements
+    stateMgmtConsole.log('step 2: comp.arr = new MyArray(c0, c1)');
+    comp.arr = new MyArray<ClassA_ObserveAnyProp_NoAnyMeta>(
+        new ClassA_ObserveAnyProp_NoAnyMeta(),
+        new ClassA_ObserveAnyProp_NoAnyMeta());
+    if (!isSync) { ObserveSingleton.instance.updateDirty(); }
+
+    // step 3: shrink back to one element
+    stateMgmtConsole.log('step 3: comp.arr = new MyArray(d0)');
+    comp.arr = new MyArray<ClassA_ObserveAnyProp_NoAnyMeta>(
+        new ClassA_ObserveAnyProp_NoAnyMeta());
+    if (!isSync) { ObserveSingleton.instance.updateDirty(); }
+
+    test(`[${tag}] @Monitor function fired 3 times`, eq(comp.monitorFunctionRunCount, 3));
 }
 
 // === Suite wiring ==========================================================
@@ -774,6 +884,11 @@ function runArraySuite(isSync: boolean): void {
     tcase(`### ${factoryName} on 'arr.arrProp': callback set, no mutation, count stays 0`)
     {
         doMonitorOnArrayPropChange(isSync);
+    }
+
+    tcase(`### ${factoryName} wildcards 'arr.0.*'+'arr.1.*': reassign fires both in one callback`)
+    {
+        doMonitorOnArrayReassignWildcards(isSync);
     }
 }
 
