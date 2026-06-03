@@ -1435,6 +1435,8 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout00
     EXPECT_EQ(lazyGridPattern1->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(0, 13)));
     EXPECT_EQ(layoutInfo1->startIndex_, 0);
     EXPECT_EQ(layoutInfo1->endIndex_, layoutInfo1->totalItemCount_ - 1);
+    EXPECT_EQ(layoutInfo1->cachedStartIndex_, 0);
+    EXPECT_EQ(layoutInfo1->cachedEndIndex_, layoutInfo1->totalItemCount_ - 1);
 
     /**
      * @tc.steps: step4. Verify second LazyVGridLayout preload range
@@ -1447,6 +1449,8 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout00
     EXPECT_EQ(lazyGridPattern2->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
     EXPECT_EQ(layoutInfo2->startIndex_, 0);
     EXPECT_EQ(layoutInfo2->endIndex_, 3);
+    EXPECT_EQ(layoutInfo2->cachedStartIndex_, 0);
+    EXPECT_EQ(layoutInfo2->cachedEndIndex_, 7);
 
     /**
      * @tc.steps: step5. Verify third LazyVGridLayout preload range
@@ -1460,6 +1464,8 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout00
     EXPECT_EQ(lazyGridPattern3->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
     EXPECT_EQ(layoutInfo3->startIndex_, -1);
     EXPECT_EQ(layoutInfo3->endIndex_, -1);
+    EXPECT_EQ(layoutInfo3->cachedStartIndex_, -1);
+    EXPECT_EQ(layoutInfo3->cachedEndIndex_, -1);
 }
 
 /**
@@ -1536,6 +1542,8 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout00
     EXPECT_EQ(lazyGridPattern3->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(0, 13)));
     EXPECT_EQ(layoutInfo3->startIndex_, 0);
     EXPECT_EQ(layoutInfo3->endIndex_, 13);
+    EXPECT_EQ(layoutInfo3->cachedStartIndex_, 0);
+    EXPECT_EQ(layoutInfo3->cachedEndIndex_, 13);
 
     /**
      * @tc.steps: step4. Verify second LazyVGridLayout preload range (stackFromEnd order)
@@ -1548,6 +1556,8 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout00
     EXPECT_EQ(lazyGridPattern2->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
     EXPECT_EQ(layoutInfo2->startIndex_, 10);
     EXPECT_EQ(layoutInfo2->endIndex_, 13);
+    EXPECT_EQ(layoutInfo2->cachedStartIndex_, 6);
+    EXPECT_EQ(layoutInfo2->cachedEndIndex_, 13);
 
     /**
      * @tc.steps: step5. Verify first LazyVGridLayout preload range (stackFromEnd order)
@@ -1560,5 +1570,7 @@ HWTEST_F(ListContentClipTestNg, ContentClipSafeAreaWithMultipleLazyVGridLayout00
     EXPECT_EQ(lazyGridPattern1->GetVisibleIndexesRangeForCallback(), (std::make_pair<int32_t, int32_t>(-1, -1)));
     EXPECT_EQ(layoutInfo1->startIndex_, -1);
     EXPECT_EQ(layoutInfo1->endIndex_, -1);
+    EXPECT_EQ(layoutInfo1->cachedStartIndex_, layoutInfo1->totalItemCount_);
+    EXPECT_EQ(layoutInfo1->cachedEndIndex_, layoutInfo1->totalItemCount_);
 }
 } // namespace OHOS::Ace::NG

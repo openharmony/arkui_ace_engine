@@ -570,6 +570,12 @@ void LazyColumnLayoutAlgorithm::CheckCacheRecycle()
             break;
         }
     }
+    if (layoutedStartIndex_ >= totalItemCount_) {
+        layoutedEndIndex_ = totalItemCount_;
+        layoutedEnd_ = totalMainSize_;
+        cachedEndIndex_ = layoutedEndIndex_;
+        return;
+    }
     it = layoutInfo_->posMap_.find(layoutInfo_->cachedEndIndex_);
     if (it == layoutInfo_->posMap_.end()) {
         return;
@@ -584,6 +590,12 @@ void LazyColumnLayoutAlgorithm::CheckCacheRecycle()
         } else {
             break;
         }
+    }
+    if (layoutedEndIndex_ < 0) {
+        layoutedStartIndex_ = -1;
+        layoutedStart_ = 0.0f;
+        cachedStartIndex_ = layoutedStartIndex_;
+        return;
     }
 }
 
