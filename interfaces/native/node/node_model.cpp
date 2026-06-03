@@ -193,6 +193,14 @@ ArkUIFullNodeAPI* GetFullImpl()
     return impl;
 }
 
+ArkUIFullNodeAPI* GetOrCreateFullImpl()
+{
+    if (!impl && !InitialFullImpl()) {
+        return nullptr;
+    }
+    return impl;
+}
+
 ArkUIFullNodeAPI* GetFullImplForErrorMessage()
 {
     if (!errorMessageImpl && !InitialFullNodeImpl(ARKUI_NODE_API_VERSION, errorMessageImpl)) {
