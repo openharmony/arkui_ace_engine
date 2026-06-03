@@ -1241,23 +1241,43 @@ private onHourChange(selectedIndex: int): void {
     // 这样即使periodArray只有一个选项也能正确映射
     const selectedPeriodStr = this.periodArray[selectedIndex];
     this.selectedPeriod = selectedPeriodStr === this.formatPeriod(true) ? 0 : 1;
+    
     if (!this.useMilitaryTime) {
-      const displayHourIndex: int = this.getHourSelectedIndex();
-      const displayHour: int = displayHourIndex + 1;
-      if (displayHour === 12) {
-        if (this.selectedPeriod === 0) {
-      this.selectedHour = 0;
-        } else {
-      this.selectedHour = 12;
+      // 更新hourArray
+      this.updateHourArrayFor12Hour();
+      
+      // 根据新的period调整selectedHour
+      const isAM = this.selectedPeriod === 0;
+      if (isAM) {
+        // 切换到AM时段
+        const minHour = Math.max(0, this.startHour).toInt();
+        const maxHour = Math.min(11, this.endHour < 12 ? this.endHour : 11).toInt();
+        
+        // 如果当前hour不在AM范围内，调整到范围内
+        if (this.selectedHour >= 12 || this.selectedHour < minHour) {
+          this.selectedHour = minHour;
+        }
+        if (this.selectedHour > maxHour) {
+          this.selectedHour = maxHour;
         }
       } else {
-        if (this.selectedPeriod === 0) {
-      this.selectedHour = displayHour;
-        } else {
-      this.selectedHour = displayHour + 12;
+        // 切换到PM时段
+        const minHour = Math.max(12, this.startHour >= 12 ? this.startHour : 12).toInt();
+        const maxHour = Math.min(23, this.endHour).toInt();
+        
+        // 如果当前hour不在PM范围内，调整到范围内
+        if (this.selectedHour < 12 || this.selectedHour < minHour) {
+          this.selectedHour = minHour;
+        }
+        if (this.selectedHour > maxHour) {
+          this.selectedHour = maxHour;
         }
       }
+      
+      // 更新minute和second数组
+      this.updateTimeArrays();
     }
+    
     this.timeOnChange(this.getResult());
   }
   
