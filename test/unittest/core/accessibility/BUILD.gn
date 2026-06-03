@@ -163,6 +163,7 @@ ace_unittest("accessibility_adapter_test_ng") {
     "js_accessibility_manager_test_three.cpp",
     "js_accessibility_manager_test_two.cpp",
     "js_accessibitlity_manager_test.cpp",
+    "js_accessibility_manager_detach_focus_test.cpp",
     "js_third_accessibility_hover_ng_test.cpp",
     "js_third_provider_interaction_operation_test.cpp",
     "js_third_provider_interaction_operation_utils_test.cpp",

@@ -2077,6 +2077,25 @@ void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChan
 
 void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
 {
+    if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
+        if (preVisibility == VisibleType::VISIBLE && currentVisibility != VisibleType::VISIBLE) {
+            auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+            if (accessibilityProperty && accessibilityProperty->GetAccessibilityFocusState()) {
+                TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+                    "[DetachFocusFallback] Node(%{public}s/%{public}d) visibility changed "
+                    "%{public}d->%{public}d with a11y focus, trigger detach focus fallback.",
+                    tag_.c_str(), nodeId_,
+                    static_cast<int32_t>(preVisibility), static_cast<int32_t>(currentVisibility));
+                auto pipeline = GetContextRefPtr();
+                if (pipeline) {
+                    auto accessibilityManager = pipeline->GetAccessibilityManager();
+                    if (accessibilityManager) {
+                        accessibilityManager->OnAccessbibilityDetachFromMainTree(AceType::Claim(this));
+                    }
+                }
+            }
+        }
+    }
     if ((preVisibility != currentVisibility &&
             (preVisibility == VisibleType::GONE || currentVisibility == VisibleType::GONE)) &&
         SelfExpansive()) {

@@ -78,12 +78,14 @@ constexpr uint32_t SUB_TREE_OFFSET_IN_PAGE_ID = 16;
 constexpr int32_t MAX_PAGE_ID_WITH_SUB_TREE = (1 << SUB_TREE_OFFSET_IN_PAGE_ID);
 constexpr size_t MIN_PARAMS_SIZE = 2;
 constexpr int32_t MIN_NUM = 2;
+constexpr int32_t MAX_CANDIDATE_ID_NUMBER = 3;
 constexpr int64_t INVALID_NODE_ID = -1;
 constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 constexpr uint64_t WEB_MAX_ELEMENT_ID = 0xFFFFFFFFFF;
 constexpr int32_t WEB_TREE_MODE = 8;
 constexpr size_t MAX_DUMP_INFO_SIZE = 5000;
-
+constexpr char DETACH_FOCUS_LOG_PREFIX[] = "[DetachFocusFallback]";
+const std::string CANDIDATE_IDS = "candidateIds";
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
 const std::string ACTION_ARGU_FOCUS_TYPE_STUB = "accessibilityFocusScene";
@@ -307,6 +309,7 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT,
             Accessibility::EventType::TYPE_VIEW_REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT },
         { AccessibilityEventType::SCROLLING_EVENT, Accessibility::EventType::TYPE_VIEW_SCROLLING_EVENT },
+        { AccessibilityEventType::FOCUS_INVISIBLE, Accessibility::EventType::TYPE_FOCUS_INVISIBLE },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
     int64_t idx = BinarySearchFindIndex(eventTypeMap, ArraySize(eventTypeMap), type);
@@ -9625,8 +9628,259 @@ void JsAccessibilityManager::UpdateAccessibilityNodeRect(const RefPtr<NG::FrameN
     }
 }
 
+bool JsAccessibilityManager::SendRequestFocusToCandidate(const RefPtr<NG::FrameNode>& candidateNode)
+{
+    CHECK_NULL_RETURN(candidateNode, false);
+    auto elementId = candidateNode->GetAccessibilityId();
+    if (elementId < 0) {
+        return false;
+    }
+    auto context = candidateNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, false);
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT;
+    event.nodeId = elementId;
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "%{public}s Send a11y request-focus event to candidate nodeId:%{public}" PRId64,
+        DETACH_FOCUS_LOG_PREFIX, elementId);
+    context->SendEventToAccessibilityWithNode(event, candidateNode);
+    return true;
+}
+
+namespace {
+bool IsFocusNodeInsideScrollableContainer(NG::FrameNode* focusNode)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    auto parent = focusNode->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto accessibilityProperty = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty && accessibilityProperty->IsScrollable()) {
+            return true;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return false;
+}
+} // namespace
+
+bool JsAccessibilityManager::IsDetachFocusCacheClearEvent(AccessibilityEventType eventType) const
+{
+    switch (eventType) {
+        case AccessibilityEventType::PAGE_CHANGE:
+        case AccessibilityEventType::CHANGE:
+        case AccessibilityEventType::PAGE_OPEN:
+        case AccessibilityEventType::PAGE_CLOSE:
+            return true;
+        case AccessibilityEventType::SCROLLING_EVENT:
+        case AccessibilityEventType::SCROLL_END:
+        case AccessibilityEventType::SCROLL_START: {
+            if (currentFocusNodeId_ == INVALID_NODE_ID) {
+                return false;
+            }
+            auto focusNode = ElementRegister::GetInstance()->GetFrameNodePtrById(currentFocusNodeId_);
+            if (IsFocusNodeInsideScrollableContainer(focusNode)) {
+                return true;
+            }
+            return false;
+        }
+        default:
+            return false;
+    }
+}
+
+void JsAccessibilityManager::ClearDetachFocusFallbackCache(int32_t instanceId)
+{
+    std::lock_guard<std::mutex> lock(detachFocusFallbackCacheMutex_);
+    auto erased = detachFocusFallbackCache_.erase(instanceId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "%{public}s Clear detach-focus cache, instanceId:%{public}d, erased:%{public}zu",
+        DETACH_FOCUS_LOG_PREFIX, instanceId, erased);
+}
+
+void JsAccessibilityManager::CacheDetachFocusFallbackCandidates(
+    int32_t instanceId, int64_t focusNodeId, const std::vector<int64_t>& candidateIds)
+{
+    std::lock_guard<std::mutex> lock(detachFocusFallbackCacheMutex_);
+    DetachFocusFallbackData data;
+    data.focusNodeId = focusNodeId;
+    data.candidateIds = candidateIds;
+    detachFocusFallbackCache_[instanceId] = std::move(data);
+}
+
+JsAccessibilityManager::DetachFocusFallbackData
+JsAccessibilityManager::GetAndClearDetachFocusFallbackCandidates(int32_t instanceId)
+{
+    std::lock_guard<std::mutex> lock(detachFocusFallbackCacheMutex_);
+    auto it = detachFocusFallbackCache_.find(instanceId);
+    if (it == detachFocusFallbackCache_.end()) {
+        return {};
+    }
+    auto result = std::move(it->second);
+    detachFocusFallbackCache_.erase(it);
+    return result;
+}
+
+RefPtr<NG::FrameNode> JsAccessibilityManager::FindCandidateByFocusMove(
+    const RefPtr<NG::FrameNode>& focusNode, int32_t direction)
+{
+    CHECK_NULL_RETURN(focusNode, nullptr);
+    auto context = focusNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, nullptr);
+    AccessibilityElementInfo nodeInfo;
+    AccessibilityFocusMoveParam param {
+        .direction = static_cast<OHOS::Accessibility::FocusMoveDirection>(direction),
+        .condition = DetailCondition::BYPASS_SELF,
+    };
+    auto result = FocusMoveSearchWithConditionNG(focusNode->GetAccessibilityId(), param, context, nodeInfo);
+    if (result.resultType != FocusMoveResultType::SEARCH_SUCCESS) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "%{public}s FocusMoveSearchWithConditionNG failed, source:%{public}" PRId64
+            ", direction:%{public}d, result:%{public}d",
+            DETACH_FOCUS_LOG_PREFIX, focusNode->GetAccessibilityId(), direction,
+            static_cast<int32_t>(result.resultType));
+        return nullptr;
+    }
+    if (nodeInfo.GetAccessibilityId() < 0) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "%{public}s FocusMoveSearchWithConditionNG invalid target, source:%{public}" PRId64
+            ", direction:%{public}d",
+            DETACH_FOCUS_LOG_PREFIX, focusNode->GetAccessibilityId(), direction);
+        return nullptr;
+    }
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "%{public}s FocusMoveSearchWithConditionNG candidate found, source:%{public}" PRId64
+        ", direction:%{public}d, target:%{public}" PRId64,
+        DETACH_FOCUS_LOG_PREFIX, focusNode->GetAccessibilityId(), direction, nodeInfo.GetAccessibilityId());
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    return NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, nodeInfo.GetAccessibilityId());
+}
+
+std::vector<int64_t> JsAccessibilityManager::QueryDetachFocusFallbackCandidates(
+    const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::PipelineContext>& context, size_t maxCount)
+{
+    std::vector<int64_t> candidateIds;
+    CHECK_NULL_RETURN(focusNode, candidateIds);
+    CHECK_NULL_RETURN(context, candidateIds);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, candidateIds);
+    std::unordered_set<int64_t> dedup;
+
+    auto appendCandidate = [this, &candidateIds, &dedup, maxCount, focusNode](const RefPtr<NG::FrameNode>& node) {
+        if (!node || candidateIds.size() >= maxCount) {
+            return;
+        }
+        auto id = node->GetAccessibilityId();
+        if (id <= 0 || id == focusNode->GetAccessibilityId() || dedup.count(id) > 0 ||
+            !CheckAccessibilityVisible(node)) {
+            return;
+        }
+        dedup.insert(id);
+        candidateIds.emplace_back(id);
+    };
+
+    appendCandidate(GetNextFocusNodeByManager(focusNode, rootNode));
+    appendCandidate(GetPrevFocusNodeByManager(focusNode, rootNode, context));
+
+    auto cursor = focusNode;
+    while (candidateIds.size() < maxCount && cursor) {
+        auto nextNode = FindCandidateByFocusMove(cursor, FocusMoveDirection::FORWARD);
+        if (!nextNode) {
+            break;
+        }
+        auto oldSize = candidateIds.size();
+        appendCandidate(nextNode);
+        if (candidateIds.size() == oldSize) {
+            break;
+        }
+        cursor = nextNode;
+    }
+    return candidateIds;
+}
+
+void JsAccessibilityManager::HandleDetachFocusFallbackCallback(int32_t instanceId)
+{
+    auto fallbackData = GetAndClearDetachFocusFallbackCandidates(instanceId);
+    if (fallbackData.focusNodeId == INVALID_NODE_ID) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "%{public}s Detach focus fallback callback skipped, focusNodeId invalid. instanceId:%{public}d",
+            DETACH_FOCUS_LOG_PREFIX, instanceId);
+        return;
+    }
+    auto context = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+
+    int32_t windowId = static_cast<int32_t>(ngPipeline->GetRealHostWindowId());
+    AccessibilityEventInfo eventInfo;
+    eventInfo.SetWindowId(windowId);
+    AccessibilityEventType eventType = AccessibilityEventType::FOCUS_INVISIBLE;
+    auto type = ConvertAceEventType(eventType);
+    if (type == Accessibility::EventType::TYPE_VIEW_INVALID) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "%{public}s FOCUS_INVISIBLE maps to TYPE_VIEW_INVALID, abort.", DETACH_FOCUS_LOG_PREFIX);
+        return;
+    }
+    eventInfo.SetEventType(type);
+    eventInfo.SetSource(fallbackData.focusNodeId);
+    eventInfo.SetTimeStamp(GetMicroTickCount());
+    eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+
+    ExtraEventInfo extraEventInfo;
+    std::ostringstream candidateIdStr;
+    for (size_t i = 0; i < fallbackData.candidateIds.size(); ++i) {
+        if (i > 0) {
+            candidateIdStr << ", ";
+        }
+        candidateIdStr << fallbackData.candidateIds[i];
+    }
+    extraEventInfo.SetExtraEventInfo(CANDIDATE_IDS, candidateIdStr.str());
+    eventInfo.SetExtraEvent(extraEventInfo);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "%{public}s Send FOCUS_INVISIBLE event, instanceId:%{public}d, focusNodeId:%{public}" PRId64
+        ", candidateCount:%{public}zu",
+        DETACH_FOCUS_LOG_PREFIX, instanceId, fallbackData.focusNodeId, fallbackData.candidateIds.size());
+
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.type = eventType;
+    accessibilityEvent.nodeId = fallbackData.focusNodeId;
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIA11yFocusInvisible");
+}
+
+void JsAccessibilityManager::NotifyAccessibilityFocusDetachOrInvisible(const RefPtr<NG::FrameNode>& focusNode)
+{
+    CHECK_NULL_VOID(focusNode);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(focusNode->GetContextRefPtr());
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+    auto candidateIds = QueryDetachFocusFallbackCandidates(focusNode, context, MAX_CANDIDATE_ID_NUMBER);
+    CacheDetachFocusFallbackCandidates(instanceId, focusNode->GetAccessibilityId(), candidateIds);
+    context->AddAccessibilityCallbackEvent(
+        AccessibilityCallbackEventId::ON_SEND_DETACH_FOCUS_FALLBACK, static_cast<int64_t>(instanceId));
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "%{public}s Fallback candidates cached, instanceId:%{public}d, ids:[%{public}" PRId64 ", %{public}" PRId64
+        ", %{public}" PRId64 "]",
+        DETACH_FOCUS_LOG_PREFIX, instanceId,
+        candidateIds.size() > 0 ? candidateIds[0] : static_cast<int64_t>(-1),
+        candidateIds.size() > 1 ? candidateIds[1] : static_cast<int64_t>(-1),
+        candidateIds.size() > 2 ? candidateIds[2] : static_cast<int64_t>(-1));
+}
+
 void JsAccessibilityManager::OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& focusNode)
 {
+    CHECK_NULL_VOID(focusNode);
+    if (currentFocusNodeId_ != focusNode->GetAccessibilityId()) {
+        return;
+    }
+
+
     auto paintNode = focusNode->GetPaintNode();
     CHECK_NULL_VOID(paintNode);
     auto paintNodePattern = AceType::DynamicCast<NG::AccessibilityFocusPaintNodePattern>(paintNode->GetPattern());
@@ -9637,6 +9891,7 @@ void JsAccessibilityManager::OnAccessbibilityDetachFromMainTree(const RefPtr<NG:
         paintNodePattern->OnDetachFromFocusNode();
         RemoveAccessibilityFocusPaint(focusNode);
     }
+    NotifyAccessibilityFocusDetachOrInvisible(focusNode);
 }
 
 bool JsAccessibilityManager::CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node)
