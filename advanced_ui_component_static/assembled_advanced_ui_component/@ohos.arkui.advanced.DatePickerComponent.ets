@@ -399,8 +399,6 @@ export struct DatePickerComponent {
       for (let i: int = this.startHour; i <= this.endHour; i++) {
         this.hourArray.push(this.formatNumber(i));
       }
-    } else {
-      this.updateHourArrayFor12Hour();
     }
   
     this.minuteArray = [];
