@@ -157,6 +157,9 @@
             "@ohos.arkui.components.ArkDynamicLayout": [
                 "./@ohos.arkui.components.ArkDynamicLayout"
             ],
+            "@ohos.arkui.WithEnv": [
+                "./@ohos.arkui.WithEnv"
+            ],
             "@component/customComponent": [
                 "./arkui/component/customComponent.ets"
             ],
