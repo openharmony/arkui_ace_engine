@@ -803,6 +803,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo063, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create custome node,SetIsV2 false,isLazyForEachNode true
+     * @tc.expected: ret is true
      */
     const RefPtr<FrameNode> testNode1 =
         FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -831,6 +832,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo064, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create node without child
+     * @tc.expected: ret size is 1
      */
     const RefPtr<FrameNode> testNode1 =
         FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -841,6 +843,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo064, TestSize.Level1)
 
     /**
      * @tc.steps: step2. create node with child
+     * @tc.expected: ret size is 3
      */
     const RefPtr<FrameNode> testNode2 =
         FrameNode::CreateFrameNode("testNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
@@ -865,6 +868,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo065, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create FrameNode with child
+     * @tc.expected: count is 4
      */
     const RefPtr<FrameNode> testNode1 =
         FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -926,6 +930,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo067, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create FrameNode with child
+     * @tc.expected: ret is nullptr
      */
     auto testNode1 = TestNode::CreateTestNode(21);
     auto testNode2 = TestNode::CreateTestNode(22);
@@ -947,6 +952,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo068, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create custome node,SetIsV2 false,isLazyForEachNode true
+     * @tc.expected: GetChildren size is 3
      */
     auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
     auto childId = ElementRegister::GetInstance()->MakeUniqueId();
