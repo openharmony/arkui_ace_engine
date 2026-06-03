@@ -51,6 +51,7 @@ public:
         std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr);
     static void SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject);
     static void SetJSUrlStyle(const std::u16string& urlAddress, JSRef<JSObject>& resultObj);
+    static void SetRichEditorKeyboardAppearanceConfig(const JSCallbackInfo& info);
 };
 
 class JSRichEditorBaseControllerBinding : public JSRichEditorBaseController {

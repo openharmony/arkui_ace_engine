@@ -1154,6 +1154,14 @@ void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppe
     pattern->SetKeyboardAppearance(value);
 }
 
+void RichEditorModelNG::SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearanceConfig(config);
+}
+
 KeyboardAppearance RichEditorModelNG::GetKeyboardAppearance(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, KeyboardAppearance::NONE_IMMERSIVE);

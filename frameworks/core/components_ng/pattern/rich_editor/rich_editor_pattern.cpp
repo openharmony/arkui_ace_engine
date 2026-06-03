@@ -5982,6 +5982,8 @@ void RichEditorPattern::BeforeAttachInputMethod(MiscServices::TextConfig& textCo
 {
     auto clientInfo = GetIMEClientInfo();
     FireOnWillAttachIME(clientInfo);
+    textConfig.inputAttribute.gradientMode = static_cast<int32_t>(imeGradientMode_);
+    textConfig.inputAttribute.fluidLightMode = static_cast<int32_t>(imeFluidLightMode_);
     CHECK_NULL_VOID(clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo());
     textConfig.inputAttribute.extraConfig =
         *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
@@ -15113,6 +15115,14 @@ void RichEditorPattern::SetKeyboardAppearance(KeyboardAppearance value)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
     keyboardAppearance_ = value;
+}
+
+void RichEditorPattern::SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearanceConfig, config=[%{public}d,%{public}d]",
+        config.gradientMode, config.fluidLightMode);
+    imeGradientMode_ = config.gradientMode;
+    imeFluidLightMode_ = config.fluidLightMode;
 }
 
 KeyboardAppearance RichEditorPattern::GetKeyboardAppearance() const
