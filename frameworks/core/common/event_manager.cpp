@@ -1497,6 +1497,7 @@ void EventManager::NotifyDragTouchEventListener(const TouchEvent& touchEvent)
 void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEvent,
     TouchTestResult touchTestResult, bool sendOnTouch)
 {
+    bool isTriggeredInteractionEvent = false;
     bool isStopTouchEvent = false;
     for (const auto& entry : touchTestResult) {
         if (touchEvent.passThrough) {
@@ -1513,6 +1514,9 @@ void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEv
             isStopTouchEvent = !entry->HandleMultiContainerEvent(touchEvent);
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+        }
+        if (!recognizer && sendOnTouch && !isTriggeredInteractionEvent) {
+            isTriggeredInteractionEvent |= entry->HandleInteractionEvent(touchEvent);
         }
     }
 }

@@ -1785,4 +1785,310 @@ HWTEST_F(TextTestNgTwo, CustomSpanMeasureWithInfiniteMaxWidth001, TestSize.Level
      */
     EXPECT_TRUE(contentSize.has_value());
 }
+
+class TestTextLayoutAlgorithm : public TextLayoutAlgorithm {
+public:
+    using MultipleParagraphLayoutAlgorithm::SetContentOffset;
+    using MultipleParagraphLayoutAlgorithm::paragraphManager_;
+    using MultipleParagraphLayoutAlgorithm::baselineOffset_;
+    using MultipleParagraphLayoutAlgorithm::contentHeight_;
+};
+
+namespace {
+constexpr float SET_OFFSET_FRAME_WIDTH = 200.0f;
+constexpr float SET_OFFSET_FRAME_HEIGHT = 200.0f;
+constexpr float SET_OFFSET_CONTENT_WIDTH = 100.0f;
+constexpr float SET_OFFSET_CONTENT_HEIGHT = 50.0f;
+constexpr float SET_OFFSET_PM_HEIGHT_LARGE = 300.0f;
+constexpr float SET_OFFSET_PM_HEIGHT_SMALL = 100.0f;
+constexpr float SET_OFFSET_BASELINE = 10.0f;
+constexpr int32_t SET_OFFSET_PARAGRAPH_START = 0;
+constexpr int32_t SET_OFFSET_PARAGRAPH_END = 10;
+} // namespace
+
+/**
+ * @tc.name: SetContentOffsetNoTextContentAlign001
+ * @tc.desc: Test SetContentOffset does not add alignOffsetY when HasTextContentAlign returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, SetContentOffsetNoTextContentAlign001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(SET_OFFSET_FRAME_WIDTH, SET_OFFSET_FRAME_HEIGHT));
+    geometryNode->SetContentSize(SizeF(SET_OFFSET_CONTENT_WIDTH, SET_OFFSET_CONTENT_HEIGHT));
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+
+    auto algorithm = AceType::MakeRefPtr<TestTextLayoutAlgorithm>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    algorithm->paragraphManager_ = pManager;
+
+    auto result = algorithm->SetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // Alignment::GetAlignPosition with CENTER_LEFT: Y = (1+0)*(200-50)/2 = 75
+    constexpr float expectedYNoAlign = 75.0f;
+    EXPECT_FLOAT_EQ(result.GetY(), expectedYNoAlign);
+}
+
+/**
+ * @tc.name: SetContentOffsetNoParagraphManager001
+ * @tc.desc: Test SetContentOffset does not add alignOffsetY when paragraphManager_ is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, SetContentOffsetNoParagraphManager001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::CENTER);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(SET_OFFSET_FRAME_WIDTH, SET_OFFSET_FRAME_HEIGHT));
+    geometryNode->SetContentSize(SizeF(SET_OFFSET_CONTENT_WIDTH, SET_OFFSET_CONTENT_HEIGHT));
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+
+    auto algorithm = AceType::MakeRefPtr<TestTextLayoutAlgorithm>();
+    // paragraphManager_ is null by default
+
+    auto result = algorithm->SetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // GetAlignPosition with CENTER: Y = 1*(200-0)/2 = 100, no alignOffsetY added
+    constexpr float expectedYNoPm = 100.0f;
+    EXPECT_FLOAT_EQ(result.GetY(), expectedYNoPm);
+}
+
+/**
+ * @tc.name: SetContentOffsetContentHeightNotLess001
+ * @tc.desc: Test SetContentOffset does not add alignOffsetY when contentHeight >= paragraphManager height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, SetContentOffsetContentHeightNotLess001, TestSize.Level1)
+{
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(Return(SET_OFFSET_PM_HEIGHT_SMALL));
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::CENTER);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(SET_OFFSET_FRAME_WIDTH, SET_OFFSET_FRAME_HEIGHT));
+    geometryNode->SetContentSize(SizeF(SET_OFFSET_CONTENT_WIDTH, SET_OFFSET_CONTENT_HEIGHT));
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+
+    auto algorithm = AceType::MakeRefPtr<TestTextLayoutAlgorithm>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = mockParagraph;
+    info.start = SET_OFFSET_PARAGRAPH_START;
+    info.end = SET_OFFSET_PARAGRAPH_END;
+    pManager->AddParagraph(std::move(info));
+    algorithm->paragraphManager_ = pManager;
+
+    // contentHeight = 200 + 0 = 200, pmHeight = 100, contentHeight >= pmHeight
+    auto result = algorithm->SetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // GetAlignPosition with CENTER: Y = 1*(200-0)/2 = 100, no alignOffsetY
+    constexpr float expectedYNoAlignOffset = 100.0f;
+    EXPECT_FLOAT_EQ(result.GetY(), expectedYNoAlignOffset);
+}
+
+/**
+ * @tc.name: SetContentOffsetAlignTop001
+ * @tc.desc: Test SetContentOffset with TextContentAlign::TOP when contentHeight < pmHeight,
+ *           alignOffsetY should be 0 because static_cast<int32_t>(TOP) is 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, SetContentOffsetAlignTop001, TestSize.Level1)
+{
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(Return(SET_OFFSET_PM_HEIGHT_LARGE));
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::TOP);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(SET_OFFSET_FRAME_WIDTH, SET_OFFSET_FRAME_HEIGHT));
+    geometryNode->SetContentSize(SizeF(SET_OFFSET_CONTENT_WIDTH, SET_OFFSET_CONTENT_HEIGHT));
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+
+    auto algorithm = AceType::MakeRefPtr<TestTextLayoutAlgorithm>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = mockParagraph;
+    info.start = SET_OFFSET_PARAGRAPH_START;
+    info.end = SET_OFFSET_PARAGRAPH_END;
+    pManager->AddParagraph(std::move(info));
+    algorithm->paragraphManager_ = pManager;
+
+    auto result = algorithm->SetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // GetAlignPosition with TOP (=0): Y = 0*(200-0)/2 = 0
+    // alignOffsetY = 0*(200-300)/2 = 0
+    constexpr float expectedYTop = 0.0f;
+    EXPECT_FLOAT_EQ(result.GetY(), expectedYTop);
+}
+
+/**
+ * @tc.name: SetContentOffsetAlignCenter001
+ * @tc.desc: Test SetContentOffset adds correct alignOffsetY when TextContentAlign is CENTER
+ *           and contentHeight < paragraphManager height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, SetContentOffsetAlignCenter001, TestSize.Level1)
+{
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(Return(SET_OFFSET_PM_HEIGHT_LARGE));
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::CENTER);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(SET_OFFSET_FRAME_WIDTH, SET_OFFSET_FRAME_HEIGHT));
+    geometryNode->SetContentSize(SizeF(SET_OFFSET_CONTENT_WIDTH, SET_OFFSET_CONTENT_HEIGHT));
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+
+    auto algorithm = AceType::MakeRefPtr<TestTextLayoutAlgorithm>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = mockParagraph;
+    info.start = SET_OFFSET_PARAGRAPH_START;
+    info.end = SET_OFFSET_PARAGRAPH_END;
+    pManager->AddParagraph(std::move(info));
+    algorithm->paragraphManager_ = pManager;
+
+    auto result = algorithm->SetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // GetAlignPosition with CENTER (=1): Y = 1*(200-0)/2 = 100
+    // alignOffsetY = 1*(200-300)/2 = -50
+    // Final Y = 100 + (-50) = 50
+    constexpr float expectedBaseY = 100.0f;
+    constexpr float expectedAlignOffsetY = -50.0f;
+    EXPECT_FLOAT_EQ(result.GetY(), expectedBaseY + expectedAlignOffsetY);
+    // Verify content->SetOffset was called with base offset (not including alignOffsetY)
+    auto contentOffset = geometryNode->GetContent()->GetRect().GetOffset();
+    EXPECT_FLOAT_EQ(contentOffset.GetY(), expectedBaseY);
+}
+
+/**
+ * @tc.name: SetContentOffsetAlignBottom001
+ * @tc.desc: Test SetContentOffset adds correct alignOffsetY when TextContentAlign is BOTTOM
+ *           and contentHeight < paragraphManager height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, SetContentOffsetAlignBottom001, TestSize.Level1)
+{
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(Return(SET_OFFSET_PM_HEIGHT_LARGE));
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::BOTTOM);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(SET_OFFSET_FRAME_WIDTH, SET_OFFSET_FRAME_HEIGHT));
+    geometryNode->SetContentSize(SizeF(SET_OFFSET_CONTENT_WIDTH, SET_OFFSET_CONTENT_HEIGHT));
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+
+    auto algorithm = AceType::MakeRefPtr<TestTextLayoutAlgorithm>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = mockParagraph;
+    info.start = SET_OFFSET_PARAGRAPH_START;
+    info.end = SET_OFFSET_PARAGRAPH_END;
+    pManager->AddParagraph(std::move(info));
+    algorithm->paragraphManager_ = pManager;
+
+    auto result = algorithm->SetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // GetAlignPosition with BOTTOM (=2): Y = 2*(200-0)/2 = 200
+    // alignOffsetY = 2*(200-300)/2 = -100
+    // Final Y = 200 + (-100) = 100
+    constexpr float expectedYBottom = 100.0f;
+    EXPECT_FLOAT_EQ(result.GetY(), expectedYBottom);
+}
+
+/**
+ * @tc.name: SetContentOffsetWithBaselineOffset001
+ * @tc.desc: Test SetContentOffset incorporates baselineOffset into contentHeight calculation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, SetContentOffsetWithBaselineOffset001, TestSize.Level1)
+{
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(Return(SET_OFFSET_PM_HEIGHT_LARGE));
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::CENTER);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(SET_OFFSET_FRAME_WIDTH, SET_OFFSET_FRAME_HEIGHT));
+    geometryNode->SetContentSize(SizeF(SET_OFFSET_CONTENT_WIDTH, SET_OFFSET_CONTENT_HEIGHT));
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+
+    auto algorithm = AceType::MakeRefPtr<TestTextLayoutAlgorithm>();
+    algorithm->baselineOffset_ = SET_OFFSET_BASELINE;
+
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphManager::ParagraphInfo info;
+    info.paragraph = mockParagraph;
+    info.start = SET_OFFSET_PARAGRAPH_START;
+    info.end = SET_OFFSET_PARAGRAPH_END;
+    pManager->AddParagraph(std::move(info));
+    algorithm->paragraphManager_ = pManager;
+
+    auto result = algorithm->SetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+
+    // GetAlignPosition with CENTER (=1): Y = 1*(200-0)/2 = 100
+    // contentHeight = 200 + fabs(10) = 210, alignOffsetY = 1*(210-300)/2 = -45
+    // Final Y = 100 + (-45) = 55
+    constexpr float expectedYWithBaseline = 55.0f;
+    EXPECT_FLOAT_EQ(result.GetY(), expectedYWithBaseline);
+}
 } // namespace OHOS::Ace::NG

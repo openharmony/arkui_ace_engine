@@ -60,6 +60,48 @@ class OnVisibleIndexesChangeModifier extends ModifierWithKey {
 }
 OnVisibleIndexesChangeModifier.identity = Symbol('onVisibleIndexesChange');
 
+class LazyColumnStickyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isNumber(this.value)) {
+      getUINativeModule().lazyColumnLayout.resetSticky(node);
+    } else {
+      getUINativeModule().lazyColumnLayout.setSticky(node, this.value);
+    }
+  }
+}
+LazyColumnStickyModifier.identity = Symbol('lazyColumnLayoutSticky');
+
+class LazyColumnHeaderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyColumnLayout.resetHeader(node);
+    } else {
+      getUINativeModule().lazyColumnLayout.setHeader(node, this.value);
+    }
+  }
+}
+LazyColumnHeaderModifier.identity = Symbol('lazyColumnLayoutHeader');
+
+class LazyColumnFooterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyColumnLayout.resetFooter(node);
+    } else {
+      getUINativeModule().lazyColumnLayout.setFooter(node, this.value);
+    }
+  }
+}
+LazyColumnFooterModifier.identity = Symbol('lazyColumnLayoutFooter');
+
 class ArkLazyColumnLayoutComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -70,6 +112,18 @@ class ArkLazyColumnLayoutComponent extends ArkComponent {
   }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, AlignItemsModifier.identity, AlignItemsModifier, value);
+    return this;
+  }
+  sticky(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnStickyModifier.identity, LazyColumnStickyModifier, value);
+    return this;
+  }
+  header(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnHeaderModifier.identity, LazyColumnHeaderModifier, value);
+    return this;
+  }
+  footer(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyColumnFooterModifier.identity, LazyColumnFooterModifier, value);
     return this;
   }
   onVisibleIndexesChange(event) {
@@ -89,6 +143,18 @@ class LazyColumnLayout extends JSContainerBase {
   }
   static alignItems(value) {
     getUINativeModule().lazyColumnLayout.setAlignItems(true, value);
+    return this;
+  }
+  static sticky(value) {
+    getUINativeModule().lazyColumnLayout.setSticky(true, value);
+    return this;
+  }
+  static header(value) {
+    getUINativeModule().lazyColumnLayout.setHeader(true, value);
+    return this;
+  }
+  static footer(value) {
+    getUINativeModule().lazyColumnLayout.setFooter(true, value);
     return this;
   }
   static onVisibleIndexesChange(value) {

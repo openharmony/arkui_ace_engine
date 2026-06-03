@@ -1,0 +1,64 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "parent",
+      "value": "生命周期"
+    },
+    {
+      "name": "parentExample",
+      "value": "自定义组件生命周期"
+    },
+    {
+      "name": "AnimatablePropertyText",
+      "value": "动画装饰器2"
+    },
+    {
+      "name": "StylesDecorator",
+      "value": "Style装饰器"
+    },
+    {
+      "name": "fancyAndglobalFancy",
+      "value": "Style装饰器1"
+    },
+    {
+      "name": "FancyUse",
+      "value": "Style装饰器2"
+    },
+    {
+      "name": "StateStyles",
+      "value": "基础场景"
+    },
+    {
+      "name": "StateStylesExample",
+      "value": "基础场景示例"
+    },
+    {
+      "name": "MyComponent",
+      "value": "按压态"
+    },
+    {
+      "name": "MyComponentExample",
+      "value": "按压态示例"
+    },
+    {
+      "name": "CompWithInlineStateStyles",
+      "value": "获焦变色"
+    },
+    {
+      "name": "CompWithInlineStateStylesExample",
+      "value": "获焦变色示例"
+    }
+  ]
+}

@@ -77,6 +77,7 @@ template("arkts_frontend") {
       "runtime_core:ani",
       "runtime_core:ani_helpers",
       "runtime_core:libarkruntime",
+      "ability_base:extractortool"
     ]
 
     subsystem_name = ace_engine_subsystem

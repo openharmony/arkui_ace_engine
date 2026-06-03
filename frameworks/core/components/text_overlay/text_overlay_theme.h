@@ -79,6 +79,7 @@ public:
             theme->shareSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.share");
             theme->aiMenuSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
             theme->askCeliaSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
+            theme->menuBackgroundColorLowEnd_ = themeConstants->GetColorByName("sys.color.comp_background_primary");
         }
 
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
@@ -644,6 +645,11 @@ public:
     {
         return overlayMenuHorizontalGap_;
     }
+
+    const Color& GetMenuBackgroundColorLowEnd() const
+    {
+        return menuBackgroundColorLowEnd_;
+    }
 protected:
     TextOverlayTheme() = default;
     TextStyle menuButtonTextStyle_;
@@ -722,6 +728,8 @@ private:
     std::string askCelia_;
     Dimension maxOverlayMenuWidth_ = MAX_OVERLAY_MENU_WIDTH;
     Dimension overlayMenuHorizontalGap_ = OVERLAY_MENU_HORIZONTAL_GAP;
+
+    Color menuBackgroundColorLowEnd_;
 };
 
 } // namespace OHOS::Ace

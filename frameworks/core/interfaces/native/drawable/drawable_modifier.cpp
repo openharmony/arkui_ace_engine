@@ -22,6 +22,7 @@
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/drawable_descriptor.h"
 #include "core/drawable/layered_drawable_descriptor.h"
+#include "core/drawable/picture_drawable_descriptor.h"
 #include "core/drawable/pixel_map_drawable_descriptor.h"
 #include "core/interfaces/ani/ani_api.h"
 #include "core/interfaces/drawable/drawable_api.h"
@@ -258,7 +259,7 @@ void DecreaseRef(void* object)
 
 void* CreateDrawableDescriptorByType(uint32_t type)
 {
-    if (type > static_cast<uint32_t>(DrawableType::PIXELMAP)) {
+    if (type > static_cast<uint32_t>(DrawableType::PICTURE)) {
         return nullptr;
     }
     auto enumType = static_cast<DrawableType>(type);
@@ -270,6 +271,8 @@ void* CreateDrawableDescriptorByType(uint32_t type)
         return new AnimatedDrawableDescriptor();
     } else if (enumType == DrawableType::PIXELMAP) {
         return new PixelMapDrawableDescriptor();
+    } else if (enumType == DrawableType::PICTURE) {
+        return new PictureDrawableDescriptor();
     }
     return nullptr;
 }
@@ -489,6 +492,35 @@ int32_t GetAnimatedStatus(void* object)
     return status;
 }
 
+void SetPicture(void* object, void* picture)
+{
+    if (object == nullptr || picture == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::PictureDrawableDescriptor*>(object);
+    drawable->SetPicture(Picture::Create(picture));
+}
+
+void SetHdrComposition(void* object, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::PictureDrawableDescriptor*>(object);
+    OHOS::Ace::HdrCompositionConfig config;
+    config.rect = { x, y, width, height };
+    drawable->SetHdrComposition(config);
+}
+
+void Invalidate(void* object)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::DrawableDescriptor*>(object);
+    drawable->Invalidate();
+}
+
 } // namespace OHOS::Ace
 
 extern "C" {
@@ -532,7 +564,10 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor()
         .resumeAnimated = OHOS::Ace::ResumeAnimated,
         .getAnimatedStatus = OHOS::Ace::GetAnimatedStatus,
         .setAnimatedStopMode = OHOS::Ace::SetAnimatedStopMode,
-        .getAnimatedStopMode = OHOS::Ace::GetAnimatedStopMode
+        .getAnimatedStopMode = OHOS::Ace::GetAnimatedStopMode,
+        .setPicture = OHOS::Ace::SetPicture,
+        .setHdrComposition = OHOS::Ace::SetHdrComposition,
+        .invalidate = OHOS::Ace::Invalidate
     };
     return &impl;
 }

@@ -16,17 +16,22 @@
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/common/container.h"
 
+#include "base/image/pixel_map.h"
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/force_split/force_split_constants.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_SPLIT_RATIO = 0.5f;
+constexpr uint32_t DRAG_MASK_NODE_FOREGROUND_COLOR = 0xAAFFFFFF;
 }
 
 ForceSplitManager::ForceSplitManager()
@@ -272,7 +277,10 @@ void ForceSplitManager::OnForceSplitRatioUpdate(float ratio)
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
     FlushArkUIHook();
-
+    auto winMgr = context->GetWindowManager();
+    if (winMgr && IsSplitDraggable()) {
+        winMgr->UpdateForceSplitRatio(ratio);
+    }
     // Update Dialog ratio
     auto listeners = forceSplitRatioListeners_;
     for (auto pair : listeners) {
@@ -342,5 +350,112 @@ bool ForceSplitManager::IsTransitionShouldMovePageToPrimary(const std::string& f
         return !IsTransPage(from) && !IsTransPage(to);
     }
     return IsPagePair(from, to);
+}
+
+bool ForceSplitManager::IsSplitDraggable() const
+{
+    if (mode_ == ForceSplitMode::NOT_SPLIT) {
+        return false;
+    }
+    if (mode_ == ForceSplitMode::WIDE_SPLIT) {
+        return wideSplitIsDraggable_;
+    }
+    return squareSplitIsDraggable_;
+}
+
+void ForceSplitManager::SetSplitRatioDirectly(float ratio)
+{
+    splitRatio_ = ratio;
+    OnForceSplitRatioUpdate(ratio);
+}
+
+float ForceSplitManager::FindNearestSnapRatio(float currentRatio) const
+{
+    constexpr float SNAP_BOUNDARY_LOWER = 5.0f / 12.0f;
+    constexpr float SNAP_BOUNDARY_UPPER = 7.0f / 12.0f;
+    if (currentRatio < SNAP_BOUNDARY_LOWER) {
+        return MIN_SPLIT_RATIO;
+    }
+    if (currentRatio < SNAP_BOUNDARY_UPPER) {
+        return DEFAULT_SPLIT_RATIO;
+    }
+    return MAX_SPLIT_RATIO;
+}
+
+RefPtr<FrameNode> ForceSplitManager::CreateDragMaskNode()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto stackNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stackNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, stackNodeId, AceType::MakeRefPtr<StackPattern>());
+    CHECK_NULL_RETURN(stackNode, nullptr);
+    auto stackLayoutProperty = stackNode->GetLayoutProperty<StackLayoutProperty>();
+    CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    auto imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(imageNode, nullptr);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    if (imagePattern) {
+        imagePattern->SetSyncLoad(true);
+    }
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+    auto fullPercent = CalcLength(1.0, DimensionUnit::PERCENT);
+    auto fullSize = CalcSize(fullPercent, fullPercent);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(fullSize);
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateAutoResize(false);
+    auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    if (imageRenderProperty) {
+        imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    }
+    stackNode->AddChild(imageNode);
+    auto stackRenderContext = stackNode->GetRenderContext();
+    CHECK_NULL_RETURN(stackRenderContext, nullptr);
+    Color foregroundColor = Color(DRAG_MASK_NODE_FOREGROUND_COLOR);
+    stackRenderContext->UpdateForegroundColor(foregroundColor);
+    stackRenderContext->UpdateForegroundColorFlag(true);
+    stackRenderContext->UpdateFrontBlurRadius(40.77_vp);
+    imageNode->MarkModifyDone();
+    stackNode->MarkModifyDone();
+    return stackNode;
+}
+
+void ForceSplitManager::UpdateDragMaskNodeContent(
+    const RefPtr<FrameNode>& maskNode, RefPtr<FrameNode> contentNode)
+{
+    CHECK_NULL_VOID(maskNode);
+    CHECK_NULL_VOID(contentNode);
+    const auto& children = maskNode->GetChildren();
+    if (maskNode->GetTag() != V2::STACK_ETS_TAG || children.empty()) {
+        return;
+    }
+    auto imageNode = AceType::DynamicCast<FrameNode>(children.front());
+    if (!imageNode || imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
+        return;
+    }
+    auto pixelMap = CreateSnapshot(contentNode);
+    if (!pixelMap) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Failed to get snapshot for drag maskNode");
+        return;
+    }
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    ImageSourceInfo sourceInfo(pixelMap);
+    imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    imageNode->MarkModifyDone();
+}
+
+RefPtr<OHOS::Ace::PixelMap> ForceSplitManager::CreateSnapshot(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    if (createSnapshotCallback_) {
+        return createSnapshotCallback_(node);
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

@@ -214,6 +214,14 @@ bool UiMaterial::IsForceShadow() const
     return false;
 }
 
+std::optional<bool> UiMaterial::IsInteractived() const
+{
+    if (immersiveOptions_) {
+        return immersiveOptions_->interactive;
+    }
+    return false;
+}
+
 std::size_t UiMaterialMapKeyHasher::operator()(const UiMaterialMapKey& key) const
 {
     static constexpr int levelDigit = 8;
@@ -249,11 +257,15 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
         colorMode = ColorMode::LIGHT;
     }
     auto materialLevel = SystemProperties::GetUiMaterialLevel();
-    ImmersiveMaterialConfig result { .applyShadow = options->applyShadow, .dipScale = dipScale };
+    ImmersiveMaterialConfig result {
+        .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false),
+        .lightEffectOptions = options->lightEffectOptions
+    };
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
             .level = UiMaterialLevel::SMOOTH,
-            .colorMode = colorMode,
+            .colorMode = (options->colorMode == ColorMode::COLOR_MODE_UNDEFINED) ?
+                                    colorMode : options->colorMode,
         };
         return result;
     }
@@ -263,6 +275,8 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     result.materialColor = options->materialColor;
     if (finalInvertColor) {
         colorMode = ColorMode::LIGHT;
+    } else if (options->colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = options->colorMode;
     }
     result.key = UiMaterialMapKey {
         .level = materialLevel,

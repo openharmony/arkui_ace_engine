@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/layout/drawing_layout_utils.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
+#include "core/components_ng/pattern/video/video_state_machine_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -46,13 +47,21 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
+    auto pattern = host->GetPattern();
+    bool isFullScreen = false;
+    auto stateMachinePattern = DynamicCast<VideoStateMachinePattern>(pattern);
+    if (stateMachinePattern) {
+        isFullScreen = stateMachinePattern->IsFullScreen();
+    } else {
+        auto videoPattern = DynamicCast<VideoPattern>(pattern);
+        CHECK_NULL_VOID(videoPattern);
+        isFullScreen = videoPattern->IsFullScreen();
+    }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             child->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
-            auto controlBarHeight = CalControlBarHeight(pattern->IsFullScreen());
+            auto controlBarHeight = CalControlBarHeight(isFullScreen);
             auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
             child->GetGeometryNode()->SetMarginFrameOffset(
                 { contentOffset.GetX(), contentOffset.GetY() + contentSize.Height() - controlBarHeight });
@@ -71,8 +80,16 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
+    auto pattern = host->GetPattern();
+    bool isFullScreen = false;
+    auto stateMachinePattern = DynamicCast<VideoStateMachinePattern>(pattern);
+    if (stateMachinePattern) {
+        isFullScreen = stateMachinePattern->IsFullScreen();
+    } else {
+        auto videoPattern = DynamicCast<VideoPattern>(pattern);
+        CHECK_NULL_VOID(videoPattern);
+        isFullScreen = videoPattern->IsFullScreen();
+    }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             auto layoutConstraintForImage = layoutConstraint;
@@ -81,7 +98,7 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraintForImage.UpdateMinSizeWithCheck(contentSize);
             child->Measure(layoutConstraintForImage);
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG && layoutProperty->GetControlsValue(true)) {
-            auto controlBarHeight = CalControlBarHeight(pattern->IsFullScreen());
+            auto controlBarHeight = CalControlBarHeight(isFullScreen);
             SizeF controlBarSize(contentSize.Width(), controlBarHeight);
             auto layoutConstraintForControlBar = layoutConstraint;
             layoutConstraintForControlBar.UpdateSelfMarginSizeWithCheck(OptionalSizeF(controlBarSize));
@@ -97,7 +114,7 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    if (pattern->IsFullScreen()) {
+    if (isFullScreen) {
         SizeF fullSize = { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
         layoutWrapper->GetGeometryNode()->SetFrameSize(fullSize);
         return;
@@ -110,14 +127,25 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
-    auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
-    CHECK_NULL_RETURN(pattern, std::nullopt);
-    if (pattern->IsFullScreen()) {
+    auto pattern = host->GetPattern();
+    auto stateMachinePattern = DynamicCast<VideoStateMachinePattern>(pattern);
+    if (stateMachinePattern) {
+        if (stateMachinePattern->IsFullScreen()) {
+            SizeF fullSize = { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
+            return fullSize;
+        }
+        auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
+                                                                     : contentConstraint.maxSize;
+        MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
+        return layoutSize;
+    }
+    auto videoPattern = DynamicCast<VideoPattern>(pattern);
+    if (videoPattern && videoPattern->IsFullScreen()) {
         SizeF fullSize = { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
         return fullSize;
     }
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
-                                                                : contentConstraint.maxSize;
+                                                                 : contentConstraint.maxSize;
     MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
     return layoutSize;
 }

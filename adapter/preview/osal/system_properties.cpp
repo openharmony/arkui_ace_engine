@@ -653,4 +653,9 @@ int32_t SystemProperties::GetFormTaskPriority()
 {
     return DEFAULT_FORM_TASK_PRIORITY;
 }
+
+bool SystemProperties::IsSensorCorrectionEnabled()
+{
+    return false;
+}
 } // namespace OHOS::Ace

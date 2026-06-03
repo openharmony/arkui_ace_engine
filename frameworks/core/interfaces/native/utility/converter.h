@@ -64,6 +64,7 @@ namespace OHOS::Ace {
 class DrawableDescriptor;
 class SpanBase;
 class ResponseRegion;
+class UiMaterial;
 enum class AutoCapitalizationMode;
 enum class CanvasUnit;
 enum class CancelButtonStyle;
@@ -97,6 +98,7 @@ struct TextMetrics;
 struct UserUnderlineColor;
 struct RenderingContextOptions;
 struct UpdateParagraphStyle;
+struct LightEffectOptions;
 
 namespace NG {
 // SORTED_SECTION
@@ -910,7 +912,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> void AssignCast(std::optional<EdgeLightPosition>& dst, const Ark_EdgeLightPosition& src);
     template<> void AssignCast(std::optional<EffectLayer>& dst, const Ark_EffectLayer& src);
+    template<> void AssignCast(std::optional<UnionMode>& dst, const Ark_UnionMode& src);
     template<> void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src);
     template<> void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src);
     template<> void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src);
@@ -1123,6 +1127,8 @@ namespace Converter {
     void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_UnionEffectContainerOptions& src);
     template<> void AssignCast(std::optional<ScrollDirectionalLockType>& dst,
         const Ark_ScrollDirectionalLockType& src);
+    template<> void AssignCast(std::optional<ImmersiveOptions>& dst, const Ark_ImmersiveOptionsInner& src);
+    template<> void AssignCast(std::optional<LightEffectOptions>& dst, const Ark_LightEffectOptionsInner& src);
     // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     template<typename From>

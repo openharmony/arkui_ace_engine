@@ -74,7 +74,46 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
         this.backing_!.setNoCheck(processedNewValue);
     }
 
+    public rebindProviderOnReparent(): void {
+
+        const owner = this.owningComponent;
+        if (owner === undefined) {
+            return;
+        }
+
+        let newProvider: IProviderDecoratedVariable<T> | undefined = undefined;
+        try {
+            newProvider = owner.__findProvider__Internal<T>(this.provideAlias_);
+        } catch (e) {
+            // Provider lookup can throw if the parent_ chain is partially torn down
+            // (e.g. during cross-parent reuse before the new parent is fully wired).
+            // Treat as 'no provider found' and let resetOnReuse fall through to
+            // the local-value path.
+            return;
+        }
+
+        if (newProvider === this.sourceProvider_) return;
+
+        this.sourceProvider_ = newProvider;
+
+        // If we now have a provider but no backing_, that's fine — get()/set()
+        // will route through sourceProvider_. If we have neither, allocate a
+        // backing_ for the local-value path so callers don't NPE.
+        if (this.sourceProvider_ === undefined && this.backing_ === undefined) {
+            this.backing_ = FactoryInternal.mkDecoratorValue(this._varName, undefined as T);
+        }
+
+        // Notify subscribers — guard trackingDFXMeta in case the instance is in
+        // a partially torn-down state.
+        if (this.trackingDFXMeta !== undefined) {
+            this.trackingDFXMeta.fireChange();
+        }
+    }
+
     resetOnReuse(newValue: T): void {
+
+        this.rebindProviderOnReparent();
+
         if (this.sourceProvider_) {
             return;
         }

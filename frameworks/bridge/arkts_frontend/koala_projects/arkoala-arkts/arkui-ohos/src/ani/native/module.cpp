@@ -102,6 +102,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutCustomLayoutAlgorithm)
         },
         ani_native_function {
+            "_SetDynamicLayoutGridLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutGridLayoutAlgorithm)
+        },
+        ani_native_function {
             "_Extractors_ToDrawableDescriptorPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawableDescriptorPtr)
@@ -1177,6 +1182,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_CheckThreadValid",
             "zl:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CheckThreadValid)
+        },
+        ani_native_function {
+            "_FireArkUIObjectLifecycleCallback",
+            "C{std.core.Object}C{std.core.String}C{std.core.String}l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::FireArkUIObjectLifecycleCallback)
         },
         ani_native_function {
             "_Common_SetCustomPropertyCallBack",

@@ -185,6 +185,8 @@ public:
         std::function<void(const RefPtr<NavigationStack>&)>&& setHomePathInfoCallback) override;
     void SetEnableVisibilityLifecycleWithContentCover(bool isEnable) override;
     static void SetEnableVisibilityLifecycleWithContentCover(FrameNode* frameNode, bool isEnable);
+    void SetNavigationConfiguration(const NavigationConfiguration& config) override;
+    static void SetNavigationConfiguration(FrameNode* frameNode, const NavigationConfiguration& config);
     static void SetBackButtonTitleResource(FrameNode* frameNode, std::string text,
         const RefPtr<ResourceObject>& resObj);
     void UpdateDividerColor(const Color& color, const RefPtr<ResourceObject>& res) override;

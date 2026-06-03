@@ -107,6 +107,12 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.orphanCharOptimization = paraStyle.orphanCharOptimization;
     style.compressHeadPunctuation = paraStyle.compressLeadingPunctuation;
     style.punctuationOverflow = paraStyle.punctuationOverflow;
+    if (paraStyle.tailIndents.has_value() && paraStyle.tailIndents->HasValue()) {
+        style.tailIndents.clear();
+        for (const auto& indent : paraStyle.tailIndents->indentsArray.value()) {
+            style.tailIndents.push_back(indent.ConvertToPx());
+        }
+    }
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
@@ -286,7 +292,7 @@ float TxtParagraph::GetHeight()
     auto paragrah = GetParagraph();
     CHECK_NULL_RETURN(paragrah, 0.0f);
     auto height = static_cast<float>(paragrah->GetHeight());
-    if (paraStyle_.isEndAddParagraphSpacing && text_.empty() && placeholderCnt_ == 0) {
+    if (paraStyle_.isEndAddParagraphSpacing && text_.empty() && placeholderCnt_ == 0 && paraStyle_.maxLines != 0) {
         height += static_cast<float>(paraStyle_.paragraphSpacing.ConvertToPx());
     }
     return height;

@@ -1522,7 +1522,7 @@ panda::Local<panda::JSValueRef> HookXComponentSetAnalyzerConfig(panda::JsiRuntim
         return panda::JSValueRef::Undefined(vm);
     }
     auto peerPointer = static_cast<int64_t>(peerValueRef->ToNumber(vm)->Value());
-    auto* peer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerPeerImpl*>(peerPointer);
+    auto* peer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerNativePeerImpl*>(peerPointer);
     CHECK_NULL_RETURN(peer, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::JSValueRef> analyzerConfigValueRef = runtimeCallInfo->GetCallArgRef(1);
     if (analyzerConfigValueRef.IsNull() || analyzerConfigValueRef->IsUndefined()) {

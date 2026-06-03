@@ -34,6 +34,7 @@ void LoadingProgressModelImpl::SetColor(const Color& value)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto loadingProgress = AceType::DynamicCast<LoadingProgressComponent>(component);
+    CHECK_NULL_VOID(loadingProgress);
     loadingProgress->SetProgressColor(value);
 }
 } // namespace OHOS::Ace::Framework

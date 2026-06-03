@@ -135,6 +135,26 @@ const GENERATED_ArkUITextClockContentModifier* GetTextClockContentModifier()
     }
     return cachedModifier;
 }
+
+RefPtr<FrameNode> GetOrCreateContentBoxNode(Ark_NativePointer node)
+{
+    auto boxNode = GeneratedApiImpl::GetContentNode(node);
+    if (boxNode == nullptr) {
+        boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+        GeneratedApiImpl::SetContentNode(node, boxNode);
+    }
+    return boxNode;
+}
+
+void ReplaceContentBoxNodeChild(const RefPtr<FrameNode>& boxNode, const RefPtr<UINode>& uiNode)
+{
+    auto old = boxNode->GetChildAtIndex(0);
+    if (old != nullptr) {
+        boxNode->RemoveChildSilently(old);
+    }
+    boxNode->AddChild(uiNode);
+    boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace
 namespace ContentModifierHelperAccessor {
 void ContentModifierButtonImpl(Ark_NativePointer node,
@@ -159,18 +179,9 @@ void ContentModifierButtonImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<ButtonTriggerClickCallback>(handler);
         arkConfig.triggerClick = triggerCallback.ArkValue();
-        auto boxNode = GeneratedApiImpl::GetContentNode(node);
-        if (boxNode == nullptr) {
-            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-            GeneratedApiImpl::SetContentNode(node, boxNode);
-        }
+        auto boxNode = GetOrCreateContentBoxNode(node);
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            auto old = boxNode->GetChildAtIndex(0);
-            if (old != nullptr) {
-                boxNode->RemoveChildSilently(old);
-            }
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            ReplaceContentBoxNodeChild(boxNode, uiNode);
             }, node, arkConfig);
         return boxNode;
     };
@@ -213,18 +224,9 @@ void ContentModifierDataPanelImpl(Ark_NativePointer node,
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.values = Converter::ArkValue<Array_F64>(config.values_, Converter::FC);
         arkConfig.maxValue = Converter::ArkValue<Ark_Float64>(config.maxValue_);
-        auto boxNode = GeneratedApiImpl::GetContentNode(node);
-        if (boxNode == nullptr) {
-            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-            GeneratedApiImpl::SetContentNode(node, boxNode);
-        }
+        auto boxNode = GetOrCreateContentBoxNode(node);
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            auto old = boxNode->GetChildAtIndex(0);
-            if (old != nullptr) {
-                boxNode->RemoveChildSilently(old);
-            }
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            ReplaceContentBoxNodeChild(boxNode, uiNode);
             }, node, arkConfig);
         return boxNode;
     };
@@ -273,18 +275,9 @@ void ContentModifierLoadingProgressImpl(Ark_NativePointer node,
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.enableLoading = Converter::ArkValue<Ark_Boolean>(config.enableloading_);
-        auto boxNode = GeneratedApiImpl::GetContentNode(node);
-        if (boxNode == nullptr) {
-            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-            GeneratedApiImpl::SetContentNode(node, boxNode);
-        }
+        auto boxNode = GetOrCreateContentBoxNode(node);
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            auto old = boxNode->GetChildAtIndex(0);
-            if (old != nullptr) {
-                boxNode->RemoveChildSilently(old);
-            }
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            ReplaceContentBoxNodeChild(boxNode, uiNode);
             }, node, arkConfig);
         return boxNode;
     };
@@ -311,18 +304,9 @@ void ContentModifierProgressImpl(Ark_NativePointer node,
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.value = Converter::ArkValue<Ark_Float64>(config.value_);
         arkConfig.total = Converter::ArkValue<Ark_Float64>(config.total_);
-        auto boxNode = GeneratedApiImpl::GetContentNode(node);
-        if (boxNode == nullptr) {
-            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-            GeneratedApiImpl::SetContentNode(node, boxNode);
-        }
+        auto boxNode = GetOrCreateContentBoxNode(node);
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            auto old = boxNode->GetChildAtIndex(0);
-            if (old != nullptr) {
-                boxNode->RemoveChildSilently(old);
-            }
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            ReplaceContentBoxNodeChild(boxNode, uiNode);
             }, node, arkConfig);
         return boxNode;
     };
@@ -496,18 +480,9 @@ void ContentModifierTextTimerImpl(Ark_NativePointer node,
         arkConfig.started = Converter::ArkValue<Ark_Boolean>(config.started_);
         arkConfig.elapsedTime = Converter::ArkValue<Ark_Int64>(static_cast<int32_t>(config.elapsedTime_));
         arkConfig.startTime = Converter::ArkValue<Opt_Int32>(config.startTime_);
-        auto boxNode = GeneratedApiImpl::GetContentNode(node);
-        if (boxNode == nullptr) {
-            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-            GeneratedApiImpl::SetContentNode(node, boxNode);
-        }
+        auto boxNode = GetOrCreateContentBoxNode(node);
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            auto old = boxNode->GetChildAtIndex(0);
-            if (old != nullptr) {
-                boxNode->RemoveChildSilently(old);
-            }
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            ReplaceContentBoxNodeChild(boxNode, uiNode);
             }, node, arkConfig);
         return boxNode;
     };
@@ -540,18 +515,9 @@ void ContentModifierToggleImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto boxNode = GeneratedApiImpl::GetContentNode(node);
-        if (boxNode == nullptr) {
-            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-            GeneratedApiImpl::SetContentNode(node, boxNode);
-        }
+        auto boxNode = GetOrCreateContentBoxNode(node);
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            auto old = boxNode->GetChildAtIndex(0);
-            if (old != nullptr) {
-                boxNode->RemoveChildSilently(old);
-            }
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            ReplaceContentBoxNodeChild(boxNode, uiNode);
             }, node, arkConfig);
         return boxNode;
     };

@@ -356,6 +356,8 @@ class __RepeatVirtualScroll2Impl<T> {
     // they are no longer associated with a data item
     private spareRid_: Set<number> = new Set<number>();
 
+    private template4RestoreCache_: Map<number, string> = new Map<number, string>();
+
     private implicitAnimationOpen_: boolean = false;
     private allowAnimation_: boolean = false;
 
@@ -375,6 +377,9 @@ class __RepeatVirtualScroll2Impl<T> {
 
     // prevents reRender() trigger
     private preventReRender_: boolean = false;
+
+    // memory optimization strategy
+    private memOptStrategy_: RepeatMemOptStrategy = RepeatMemOptStrategy.DEFAULT;
 
     // when access view model record dependency on 'this'.
     private startRecordDependencies(clearBindings: boolean = false): void {
@@ -487,6 +492,8 @@ class __RepeatVirtualScroll2Impl<T> {
 
             this.mkRepeatItem_ = config.mkRepeatItem;
 
+            this.memOptStrategy_ = config.memOptStrategy ?? RepeatMemOptStrategy.DEFAULT;
+
             if (!(this.owningViewV2_ instanceof ViewV2)) {
                 stateMgmtConsole.applicationWarn(`${this.constructor.name}(${this.repeatElmtId_}))`,
                     `it is not allowed to use Repeat virtualScroll inside a @Component!`);
@@ -522,12 +529,13 @@ class __RepeatVirtualScroll2Impl<T> {
         const arrLen = this.onLazyLoadingFunc_ ? this.totalCount() : this.arr_.length;
         // Create the RepeatVirtualScroll2Node object
         // pass the C++ to TS callback functions.
-        RepeatVirtualScroll2Native.create(arrLen, this.totalCount(), {
+        RepeatVirtualScroll2Native.create(arrLen, this.totalCount(), this.memOptStrategy_, {
             onGetRid4Index: this.onGetRid4Index.bind(this),
             onRecycleItems: this.onRecycleItems.bind(this),
             onActiveRange: this.onActiveRange.bind(this),
             onMoveFromTo: this.onMoveFromTo.bind(this),
             onPurge: this.onPurge.bind(this),
+            onPurgeAll: this.onPurgeAll.bind(this),
             onUpdateDirty:this.onUpdateDirty.bind(this)
         });
 
@@ -953,19 +961,21 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     /**
-     * called from C++ GetFrameChild whenever need to create new node and add to L1 
+     * called from C++ GetFrameChild whenever need to create new node and add to L1
      * or update spare node and add back to L1
      *
-     * @param forIndex 
-     * @returns 
+     * @param forIndex
+     * @param implicitAnimationOpen
+     * @param isRestoreCache - if template unchanged, skip canUpdateTryMatch and create new child cache, else return null
+     * @returns
      */
-    private onGetRid4Index(forIndex: number, implicitAnimationOpen: boolean): [number, number] {
+    private onGetRid4Index(forIndex: number, implicitAnimationOpen: boolean, isRestoreCache: boolean): [number, number] {
         if (forIndex < 0 || forIndex >= this.totalCount()) {
             stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}` +
                 `\ndata array length: ${this.arr_.length}, totalCount: ${this.totalCount()}: ` +
                 `Out of range, application error.`);
             this.activeDataItems_[forIndex] = ActiveDataItem.createMissingDataItem();
- 	        return [0, /* failed to create or update */ 0];
+            return [0, /* failed to create or update */ 0];
         }
         const [dataItemExists, dataItem] = this.getItemUnmonitored(forIndex);
         if (!dataItemExists) {
@@ -976,20 +986,49 @@ class __RepeatVirtualScroll2Impl<T> {
         }
 
         const ttype = this.computeTtype(dataItem, forIndex, /* enable monitored access */ true);
+        if (isRestoreCache) {
+            if (!this.template4RestoreCache_.has(forIndex) || ttype !== this.template4RestoreCache_.get(forIndex)) {
+                return [0, /* skip restore if template changed */ 0];
+            }
+            const cachedCountLimit = this.getCachedCountByType(ttype);
+            let cachedCount = 0;
+            for (const rid of this.spareRid_) {
+                const ridMeta = this.meta4Rid_.get(rid);
+                if (ridMeta && ridMeta.ttype_ === ttype) {
+                    cachedCount++;
+                }
+            }
+            if (cachedCount >= cachedCountLimit) {
+                return [0, /* skip restore if exceeds cachedCountLimit */ 0];
+            }
+        }
         const key = this.computeKey(dataItem, forIndex, /* monitor access*/ true, this.activeDataItems_);
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}, `,
             `ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
         // spare UINode / RID available to update?
-        const optRid = this.canUpdateTryMatch(forIndex, ttype, dataItem, key, implicitAnimationOpen);
+        // skip canUpdateTryMatch if isRestoreCache is true
+        const optRid = isRestoreCache ? -1 : this.canUpdateTryMatch(forIndex, ttype, dataItem, key, implicitAnimationOpen);
 
         const result: [number, number] = (optRid > 0)
             ? this.updateChild(optRid, ttype, forIndex, key)
             : this.createNewChild(forIndex, ttype, key);
 
+        if (isRestoreCache && result[1] === 1) {
+            this.spareRid_.add(result[0]);
+        }
+
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex} `,
             `ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - DONE`);
         return result;
+    }
+
+    private getCachedCountByType(type: string): number {
+        if (Object.prototype.hasOwnProperty.call(this.templateOptions_, type)) {
+            const opts = this.templateOptions_[type];
+            return typeof opts.cachedCount === 'number' ? opts.cachedCount : 0;
+        }
+        return 0;
     }
 
     // return RID of Node that can be updated (matching ttype), 
@@ -1739,6 +1778,41 @@ class __RepeatVirtualScroll2Impl<T> {
         this.meta4Rid_.delete(rid);
         this.spareRid_.delete(rid);
         RepeatVirtualScroll2Native.removeNode(rid);
+    }
+
+    private onPurgeAll(): void {
+        stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) purgeAll(), totalCount: `,
+            `${this.totalCount()} - start`);
+
+        // deep copy templateOptions_
+        let availableCachedCount: { [ttype: string]: number } = {};
+        Object.entries(this.templateOptions_).forEach((pair) => {
+            availableCachedCount[pair[0]] = pair[1].cachedCount as number;
+        });
+
+        // Purge ALL nodes in spareRid_, ignoring cache limits, clear TS-side tracking structures
+        const spareRidArray: Array<number> = Array.from(this.spareRid_);
+        const indexesArray: Array<number> = new Array<number>();
+        this.template4RestoreCache_ = new Map<number, string>();
+        for (const rid of spareRidArray) {
+            const ridMeta = this.meta4Rid_.get(rid);
+            this.meta4Rid_.delete(rid);
+            this.spareRid_.delete(rid);
+            if (!ridMeta) {
+                continue;
+            }
+            const ttype: string = ridMeta.ttype_;
+            if (availableCachedCount[ttype] > 0 && ridMeta.repeatItem_ && typeof ridMeta.repeatItem_.index === 'number') {
+                indexesArray.push(ridMeta.repeatItem_.index);
+                this.template4RestoreCache_.set(ridMeta.repeatItem_.index, ttype);
+                availableCachedCount[ttype] -= 1;
+            }
+        }
+
+        // Remove all nodes at once with both rids and indices
+        RepeatVirtualScroll2Native.removeNodes(spareRidArray, indexesArray);
+
+        stateMgmtConsole.debug(`onPurgeAll after applying changes: \n${this.dumpSpareRid()}\n${this.dumpDataItems()}`);
     }
 
     private dumpSpareRid(): string {

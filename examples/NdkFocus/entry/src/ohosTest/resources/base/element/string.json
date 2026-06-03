@@ -1,0 +1,12 @@
+{
+  "string": [
+    {
+      "name": "TestAbility_desc",
+      "value": "Test Ability for Focus Interface Testing"
+    },
+    {
+      "name": "TestAbility_label",
+      "value": "Focus Test"
+    }
+  ]
+}

@@ -22,7 +22,6 @@
 
 #include "base/utils/system_properties.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"

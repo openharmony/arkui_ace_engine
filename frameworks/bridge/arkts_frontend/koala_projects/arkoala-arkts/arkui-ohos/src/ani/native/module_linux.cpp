@@ -51,6 +51,11 @@ ani_long VideoSetErrorCallback([[maybe_unused]] ani_env* env, [[maybe_unused]] a
 {
     return 0L;
 }
+ani_long ExtractorsToWebviewWebviewControllerPtr([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass,
+    [[maybe_unused]] ani_object object)
+{
+    return 0L;
+}
 } // namespace Stubs
 } // namespace
 
@@ -68,6 +73,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array staticMethods = {
+        ani_native_function {
+            "_Extractors_ToWebviewWebviewControllerPtr",
+            nullptr,
+            reinterpret_cast<void*>(Stubs::ExtractorsToWebviewWebviewControllerPtr)
+        },
         ani_native_function {
             "_CustomNode_QueryNavigationInfo",
             nullptr,

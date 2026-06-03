@@ -48,6 +48,7 @@ namespace OHOS::Ace::NG {
 class FrameNode;
 class UINode;
 class PipelineContext;
+class OverlayManager;
 struct CalendarSettingData;
 struct ContentCoverParam;
 
@@ -85,6 +86,7 @@ struct PopupInfo {
     bool isAvoidKeyboard = false;
     bool isTips = false;
     int32_t disappearingTimeWithContinuousOperation = 700;
+    RefPtr<OverlayManager> embeddedOveraly = nullptr;
 };
 
 struct GatherNodeChildInfo {
@@ -940,6 +942,7 @@ private:
 
     void SetDetachedFreeRootProxy(const RefPtr<UINode>& node, int32_t targetId);
     void ResetDetachedFreeRootProxy(int32_t targetId);
+    const WeakPtr<UINode>& GetEmbeddedNode(const PopupInfo& popupInfo) const;
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

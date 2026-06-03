@@ -36,8 +36,6 @@ public:
         value->propBackgroundSource_ = CloneBackgroundSource();
         value->propCameraParams_ = CloneCameraParams();
         value->propLightParams_ = CloneLightParams();
-        value->propBackgroundOffset_ = CloneBackgroundOffset();
-        value->propBackgroundScale_ = CloneBackgroundScale();
         return value;
     }
 
@@ -47,8 +45,6 @@ public:
         ResetBackgroundSource();
         ResetCameraParams();
         ResetLightParams();
-        ResetBackgroundOffset();
-        ResetBackgroundScale();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -59,8 +55,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundSource, OHOS::Ace::DepthBackgroundSource, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraParams, OHOS::Ace::DepthCameraParams, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LightParams, OHOS::Ace::DepthLightParams, PROPERTY_UPDATE_NORMAL);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundOffset, OHOS::Ace::DepthBackgroundOffset, PROPERTY_UPDATE_NORMAL);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundScale, std::optional<NG::VectorF>, PROPERTY_UPDATE_NORMAL);
 };
 
 } // namespace OHOS::Ace::NG

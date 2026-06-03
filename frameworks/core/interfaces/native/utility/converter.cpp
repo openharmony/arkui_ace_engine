@@ -61,6 +61,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2067,9 +2068,7 @@ OptionParam Convert(const Ark_MenuElement& src)
 {
     OptionParam param;
     param.value = Converter::OptConvert<std::string>(src.value).value_or(param.value);
-    param.action = [arkCallback = CallbackHelper(src.action)]() {
-        arkCallback.Invoke();
-    };
+    param.action = GetAsyncInvoker(src.action);
     param.icon = Converter::OptConvert<std::string>(src.icon).value_or(param.icon);
     param.enabled = Converter::OptConvert<bool>(src.enabled).value_or(param.enabled);
     auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(src.symbolIcon);
@@ -3752,10 +3751,7 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     }
     auto optOnDisappear = Converter::GetOpt(src.onDisappear);
     if (optOnDisappear.has_value()) {
-        selectMenuParam.onDisappear =
-            [arkCallback = CallbackHelper(optOnDisappear.value())]() {
-                arkCallback.InvokeSync();
-        };
+        selectMenuParam.onDisappear = GetSyncInvoker(optOnDisappear.value());
     }
     auto optOnMenuShow = Converter::OptConvert<MenuCallback>(src.onMenuShow);
     if (optOnMenuShow.has_value()) {
@@ -4027,6 +4023,23 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
         options.effectOption = effectOption;
     }
+    if (src.scrollEffectOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::ScrollEffectOptions scrollEffectOpt;
+        const auto& srcEffect = src.scrollEffectOptions.value;
+        if (srcEffect.scrollEffectType.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.scrollEffectType =
+                static_cast<NG::ScrollEffectType>(srcEffect.scrollEffectType.value);
+        }
+        if (srcEffect.blurEffectiveStartOffset.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.blurEffectiveStartOffset =
+                Converter::Convert<CalcDimension>(srcEffect.blurEffectiveStartOffset.value);
+        }
+        if (srcEffect.blurEffectiveEndOffset.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            scrollEffectOpt.blurEffectiveEndOffset =
+                Converter::Convert<CalcDimension>(srcEffect.blurEffectiveEndOffset.value);
+        }
+        options.scrollEffectOptions = scrollEffectOpt;
+    }
     return options;
 }
 
@@ -4091,14 +4104,10 @@ template<>
 NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src)
 {
     NG::NavDestinationTransition dst{};
-    dst.event = [callback = CallbackHelper(src.event)]() {
-        callback.Invoke();
-    };
+    dst.event = GetAsyncInvoker(src.event);
     auto optCallback = GetOpt(src.onTransitionEnd);
     if (optCallback) {
-        dst.onTransitionEnd = [callback = CallbackHelper(*optCallback)]() {
-            callback.Invoke();
-        };
+        dst.onTransitionEnd = GetAsyncInvoker(*optCallback);
     }
     dst.duration = Converter::OptConvert<int32_t>(src.duration).value_or(DEFAULT_NAVDESTINATION_TRANSITION_DURATION);
     dst.delay = Converter::OptConvert<int32_t>(src.delay).value_or(0);
@@ -4355,5 +4364,47 @@ void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_Union
     dst = UnionEffectContainerOptions{};
     auto spacing = Converter::OptConvert<float>(src.spacing);
     dst->spacing = spacing.value_or(0.0f);
+}
+
+template<>
+void AssignCast(std::optional<ImmersiveOptions>& dst, const Ark_ImmersiveOptionsInner& src)
+{
+    auto immersiveOptions = ImmersiveOptions();
+    auto style = Converter::OptConvert<int32_t>(src.style);
+    if (style.has_value()) {
+        immersiveOptions.style = static_cast<UiMaterialStyle>(style.value());
+    }
+    auto materialColor = Converter::OptConvert<Color>(src.materialColor);
+    if (materialColor.has_value()) {
+        immersiveOptions.materialColor = materialColor.value();
+    }
+    auto colorInvert = Converter::OptConvert<bool>(src.colorInvert);
+    if (colorInvert.has_value()) {
+        immersiveOptions.colorInvert = colorInvert.value();
+    }
+    auto applyShadow = Converter::OptConvert<bool>(src.applyShadow);
+    if (applyShadow.has_value()) {
+        immersiveOptions.applyShadow = applyShadow.value();
+    }
+    auto interactive = Converter::OptConvert<bool>(src.interactive);
+    if (interactive.has_value()) {
+        immersiveOptions.interactive = interactive;
+    }
+    auto lightEffectOptions = Converter::OptConvert<LightEffectOptions>(src.lightEffect);
+    if (lightEffectOptions.has_value()) {
+        immersiveOptions.lightEffectOptions = lightEffectOptions;
+    }
+
+    dst = immersiveOptions;
+}
+template<>
+void AssignCast(std::optional<LightEffectOptions>& dst, const Ark_LightEffectOptionsInner& src)
+{
+    auto lightEffectColor = Converter::OptConvert<Color>(src.color);
+    LightEffectOptions lightEffectOptions;
+    if (lightEffectColor.has_value()) {
+        lightEffectOptions.color = lightEffectColor.value();
+    }
+    dst = lightEffectOptions;
 }
 } // namespace OHOS::Ace::NG::Converter

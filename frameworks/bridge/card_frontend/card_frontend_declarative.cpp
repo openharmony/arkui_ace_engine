@@ -16,6 +16,10 @@
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include <tuple>
+#include <type_traits>
+#include <utility>
+
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
@@ -23,6 +27,36 @@ namespace OHOS::Ace {
 namespace {
 
 const char FILE_TYPE_BIN[] = ".abc";
+
+template<typename Owner, typename... Args>
+struct WeakDispatchTask {
+    using Dispatch = void (*)(Owner&, const Args& ...);
+
+    WeakPtr<Owner> weak;
+    Dispatch dispatch;
+    std::tuple<Args...> args;
+
+    void operator()() const
+    {
+        auto target = weak.Upgrade();
+        if (!target) {
+            return;
+        }
+        std::apply(
+            [this, &target](const auto&... unpacked) {
+                dispatch(*target, unpacked...);
+            },
+            args);
+    }
+};
+
+template<typename Owner, typename... Args>
+WeakDispatchTask<Owner, std::decay_t<Args>...> MakeWeakDispatchTask(
+    const WeakPtr<Owner>& weak, typename WeakDispatchTask<Owner, std::decay_t<Args>...>::Dispatch dispatch,
+    Args&&... args)
+{
+    return { weak, dispatch, std::tuple<std::decay_t<Args>...>{std::forward<Args>(args)...} };
+}
 
 } // namespace
 
@@ -116,31 +150,32 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
     auto jsCommands = std::make_shared<std::vector<RefPtr<Framework::JsCommand>>>();
     page->PopAllCommands(*jsCommands);
     page->SetPipelineContext(holder_.Get());
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), page, jsCommands] {
-            auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID(frontend);
-            // Flush all JS commands.
-            for (const auto& command : *jsCommands) {
-                command->Execute(page);
+    using Dispatch =
+        WeakDispatchTask<CardFrontendDeclarative, RefPtr<Framework::JsAcePage>,
+            std::shared_ptr<std::vector<RefPtr<Framework::JsCommand>>>>::Dispatch;
+    static constexpr Dispatch dispatch =
+        [](CardFrontendDeclarative& frontend, const RefPtr<Framework::JsAcePage>& loadedPage,
+            const std::shared_ptr<std::vector<RefPtr<Framework::JsCommand>>>& commands) {
+            for (const auto& command : *commands) {
+                command->Execute(loadedPage);
             }
 
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(frontend->holder_.Get());
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(frontend.holder_.Get());
             CHECK_NULL_VOID(pipelineContext);
-            auto minSdk = frontend->manifestParser_->GetMinPlatformVersion();
+            auto minSdk = frontend.manifestParser_->GetMinPlatformVersion();
             pipelineContext->SetMinPlatformVersion(minSdk);
 
-            auto document = page->GetDomDocument();
-            if (frontend->pageLoaded_) {
-                page->ClearShowCommand();
+            auto document = loadedPage->GetDomDocument();
+            if (frontend.pageLoaded_) {
+                loadedPage->ClearShowCommand();
                 std::vector<NodeId> dirtyNodes;
-                page->PopAllDirtyNodes(dirtyNodes);
+                loadedPage->PopAllDirtyNodes(dirtyNodes);
                 if (dirtyNodes.empty()) {
                     return;
                 }
                 auto rootNodeId = dirtyNodes.front();
                 if (rootNodeId == DOM_ROOT_NODE_ID_BASE) {
-                    auto patchComponent = page->BuildPagePatch(rootNodeId);
+                    auto patchComponent = loadedPage->BuildPagePatch(rootNodeId);
                     if (patchComponent) {
                         pipelineContext->ScheduleUpdate(patchComponent);
                     }
@@ -149,7 +184,7 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
                     // When a component is configured with "position: fixed", there is a proxy node in root tree
                     // instead of the real composed node. So here updates the real composed node.
                     for (int32_t nodeId : document->GetProxyRelatedNodes()) {
-                        auto patchComponent = page->BuildPagePatch(nodeId);
+                        auto patchComponent = loadedPage->BuildPagePatch(nodeId);
                         if (patchComponent) {
                             pipelineContext->ScheduleUpdate(patchComponent);
                         }
@@ -158,8 +193,7 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
                 return;
             }
 
-            // Just clear all dirty nodes.
-            page->ClearAllDirtyNodes();
+            loadedPage->ClearAllDirtyNodes();
             if (document) {
                 document->HandleComponentPostBinding();
             }
@@ -167,23 +201,24 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
                 pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
             }
             if (pipelineContext->CanPushPage()) {
-                pipelineContext->PushPage(page->BuildPage(page->GetUrl()));
-                frontend->pageLoaded_ = true;
+                pipelineContext->PushPage(loadedPage->BuildPage(loadedPage->GetUrl()));
+                frontend.pageLoaded_ = true;
             }
-        },
+        };
+    taskExecutor_->PostTask(
+        MakeWeakDispatchTask(AceType::WeakClaim(this), dispatch, page, jsCommands),
         TaskExecutor::TaskType::UI, "ArkUICardFrontendPageLoaded");
 }
 
 void CardFrontendDeclarative::UpdateData(const std::string& dataList)
 {
+    using Dispatch = WeakDispatchTask<CardFrontendDeclarative, std::string>::Dispatch;
+    static constexpr Dispatch dispatch = [](CardFrontendDeclarative& frontend, const std::string& updateDataList) {
+        frontend.UpdatePageData(updateDataList);
+    };
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), dataList] {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->UpdatePageData(dataList);
-            }
-        },
-        TaskExecutor::TaskType::UI, "ArkUICardFrontendUpdatePageData"); // eTSCard UI == Main JS/UI/PLATFORM
+        MakeWeakDispatchTask(AceType::WeakClaim(this), dispatch, dataList), TaskExecutor::TaskType::UI,
+        "ArkUICardFrontendUpdatePageData"); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
 void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
@@ -197,18 +232,17 @@ void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
 
 void CardFrontendDeclarative::SetColorMode(ColorMode colorMode)
 {
+    using Dispatch = WeakDispatchTask<CardFrontendDeclarative, ColorMode>::Dispatch;
+    static constexpr Dispatch dispatch = [](CardFrontendDeclarative& frontend, const ColorMode& newColorMode) {
+        frontend.colorMode_ = newColorMode;
+        if (!frontend.delegate_) {
+            return;
+        }
+        frontend.OnMediaFeatureUpdate();
+    };
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), colorMode]() {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->colorMode_ = colorMode;
-                if (!frontend->delegate_) {
-                    return;
-                }
-                frontend->OnMediaFeatureUpdate();
-            }
-        },
-        TaskExecutor::TaskType::JS, "ArkUICardFrontendSetColorMode");
+        MakeWeakDispatchTask(AceType::WeakClaim(this), dispatch, colorMode), TaskExecutor::TaskType::JS,
+        "ArkUICardFrontendSetColorMode");
 }
 
 void CardFrontendDeclarative::RebuildAllPages()
@@ -217,13 +251,13 @@ void CardFrontendDeclarative::RebuildAllPages()
 
 void CardFrontendDeclarative::OnSurfaceChanged(int32_t width, int32_t height)
 {
+    using Dispatch = WeakDispatchTask<CardFrontendDeclarative, int32_t, int32_t>::Dispatch;
+    static constexpr Dispatch dispatch = [](CardFrontendDeclarative& frontend, const int32_t& changedWidth,
+                                         const int32_t& changedHeight) {
+        frontend.HandleSurfaceChanged(changedWidth, changedHeight);
+    };
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), width, height] {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->HandleSurfaceChanged(width, height);
-            }
-        },
+        MakeWeakDispatchTask(AceType::WeakClaim(this), dispatch, width, height),
         TaskExecutor::TaskType::JS, "ArkUICardFrontendSurfaceChanged");
 }
 

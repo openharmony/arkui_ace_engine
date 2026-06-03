@@ -48,6 +48,13 @@ void SetOnListScrollStopCallBack(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollVisibleContentChange(ArkUINodeHandle node, void* extraParam);
 void SetOnListEditModeChange(ArkUINodeHandle node, void* extraParam);
 void SetOnListEditModeChangeCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnArcListScrollIndex(ArkUINodeHandle node, void* extraParam);
+void SetOnArcListScrollStart(ArkUINodeHandle node, void* extraParam);
+void SetOnArcListScrollStop(ArkUINodeHandle node, void* extraParam);
+void SetOnArcListWillScroll(ArkUINodeHandle node, void* extraParam);
+void SetOnArcListDidScroll(ArkUINodeHandle node, void* extraParam);
+void SetOnArcListReachStart(ArkUINodeHandle node, void* extraParam);
+void SetOnArcListReachEnd(ArkUINodeHandle node, void* extraParam);
 
 void ResetOnListScroll(ArkUINodeHandle node);
 void ResetOnListScrollIndex(ArkUINodeHandle node);
@@ -66,6 +73,14 @@ void ResetOnItemDragMove(ArkUINodeHandle node);
 void ResetOnItemDragLeave(ArkUINodeHandle node);
 void ResetOnItemDrop(ArkUINodeHandle node);
 void ResetOnListEditModeChange(ArkUINodeHandle node);
+void ResetOnArcListScrollIndex(ArkUINodeHandle node);
+void ResetOnArcListScrollStart(ArkUINodeHandle node);
+void ResetOnArcListScrollStop(ArkUINodeHandle node);
+void ResetOnArcListWillScroll(ArkUINodeHandle node);
+void ResetOnArcListDidScroll(ArkUINodeHandle node);
+void ResetOnArcListReachStart(ArkUINodeHandle node);
+void ResetOnArcListReachEnd(ArkUINodeHandle node);
+
 void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj);
 void ParseResObjDividerStrokeWidth(ArkUINodeHandle node, void* resObj);
 void ParseResObjDividerColor(ArkUINodeHandle node, void* resObj);

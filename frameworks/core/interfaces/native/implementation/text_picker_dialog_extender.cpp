@@ -415,26 +415,22 @@ TextPickerDialogEvent BuildTextPickerDialogEvents(const Ark_TextPickerDialogOpti
     TextPickerDialogEvent dialogEvent;
     auto didAppearCallbackOpt = Converter::OptConvert<synthetic_Callback_Void>(options.onDidAppear);
     if (didAppearCallbackOpt) {
-        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        auto onDidAppear = GetAsyncInvoker(*didAppearCallbackOpt);
         dialogEvent.onDidAppear = onDidAppear;
     }
     auto didDisappearCallbackOpt = Converter::OptConvert<synthetic_Callback_Void>(options.onDidDisappear);
     if (didDisappearCallbackOpt) {
-        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
+        auto onDidDisappear = GetAsyncInvoker(*didDisappearCallbackOpt);
         dialogEvent.onDidDisappear = onDidDisappear;
     }
     auto willAppearCallbackOpt = Converter::OptConvert<synthetic_Callback_Void>(options.onWillAppear);
     if (willAppearCallbackOpt) {
-        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        auto onWillAppear = GetAsyncInvoker(*willAppearCallbackOpt);
         dialogEvent.onWillAppear = onWillAppear;
     }
     auto willDisappearCallbackOpt = Converter::OptConvert<synthetic_Callback_Void>(options.onWillDisappear);
     if (willDisappearCallbackOpt) {
-        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
+        auto onWillDisappear = GetAsyncInvoker(*willDisappearCallbackOpt);
         dialogEvent.onWillDisappear = onWillDisappear;
     }
     return dialogEvent;
@@ -445,26 +441,22 @@ TextPickerDialogEvent BuildTextPickerDialogEventsExt(const Ark_TextPickerDialogO
     TextPickerDialogEvent dialogEvent;
     auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
     if (didAppearCallbackOpt) {
-        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        auto onDidAppear = GetAsyncInvoker(*didAppearCallbackOpt);
         dialogEvent.onDidAppear = onDidAppear;
     }
     auto didDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidDisappear);
     if (didDisappearCallbackOpt) {
-        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
+        auto onDidDisappear = GetAsyncInvoker(*didDisappearCallbackOpt);
         dialogEvent.onDidDisappear = onDidDisappear;
     }
     auto willAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillAppear);
     if (willAppearCallbackOpt) {
-        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        auto onWillAppear = GetAsyncInvoker(*willAppearCallbackOpt);
         dialogEvent.onWillAppear = onWillAppear;
     }
     auto willDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillDisappear);
     if (willDisappearCallbackOpt) {
-        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
+        auto onWillDisappear = GetAsyncInvoker(*willDisappearCallbackOpt);
         dialogEvent.onWillDisappear = onWillDisappear;
     }
     return dialogEvent;
@@ -530,7 +522,7 @@ TextPickerInteractiveEvent BuildSelectInteractiveEvents(const Ark_TextPickerDial
     // onCancel
     auto cancelCallbackOpt = Converter::OptConvert<synthetic_Callback_Void>(arkOptions.onCancel);
     if (cancelCallbackOpt) {
-        events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        events.cancelEvent = GetAsyncInvoker(*cancelCallbackOpt);
     }
     return events;
 }
@@ -541,7 +533,7 @@ TextPickerInteractiveEvent BuildSelectInteractiveEventsExt(const Ark_TextPickerD
     // onCancel
     auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(arkOptions.onCancel);
     if (cancelCallbackOpt) {
-        events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        events.cancelEvent = GetAsyncInvoker(*cancelCallbackOpt);
     }
     return events;
 }

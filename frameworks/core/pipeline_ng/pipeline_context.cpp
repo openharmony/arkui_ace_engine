@@ -63,6 +63,7 @@
 #include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
+#include "base/utils/feature_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/back_press_handler_manager.h"
@@ -951,6 +952,7 @@ void PipelineContext::ReloadNodesResource()
                 bool forceDarkAllowed = frameNode->GetForceDarkAllowed();
                 ResourceParseUtils::SetNeedReload(forceDarkAllowed);
                 SetIsSystemColorChange(true);
+                frameNode->SetRerenderable(true);
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
                 SetIsSystemColorChange(originIsSystemColorChange);
                 ResourceParseUtils::SetNeedReload(false);
@@ -959,6 +961,7 @@ void PipelineContext::ReloadNodesResource()
             bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
             ResourceParseUtils::SetNeedReload(forceDarkAllowed);
             SetIsSystemColorChange(true);
+            needReloadNode->SetRerenderable(true);
             needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
             SetIsSystemColorChange(originIsSystemColorChange);
             ResourceParseUtils::SetNeedReload(false);
@@ -1198,26 +1201,20 @@ void PipelineContext::FlushMouseEventVoluntarily()
     CHECK_NULL_VOID(rootNode_);
     ACE_SCOPED_TRACE("FlushMouseEventVoluntarily x:%f y:%f", lastMouseEvent_->x, lastMouseEvent_->y);
 
-    MouseEvent event;
+    auto scaleEvent = lastMouseEvent_->CreateScaleEvent(viewScale_);
     if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT) {
-        event.mockFlushEvent = true;
+        scaleEvent.mockFlushEvent = true;
     }
-    event.x = lastMouseEvent_->x;
-    event.y = lastMouseEvent_->y;
-    event.time = lastMouseEvent_->time;
-    event.action = MouseAction::MOVE;
-    event.button = MouseButton::NONE_BUTTON;
-    event.sourceType = SourceType::MOUSE;
-    event.deviceId = lastMouseEvent_->deviceId;
-    event.sourceTool = SourceTool::MOUSE;
-    event.targetDisplayId = lastMouseEvent_->targetDisplayId;
+    scaleEvent.action = MouseAction::MOVE;
+    scaleEvent.button = MouseButton::NONE_BUTTON;
+    scaleEvent.sourceType = SourceType::MOUSE;
+    scaleEvent.sourceTool = SourceTool::MOUSE;
 
-    auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
-    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceType = scaleEvent.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    touchRestrict.sourceTool = event.sourceTool;
+    touchRestrict.sourceTool = scaleEvent.sourceTool;
 
     eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
@@ -2633,6 +2630,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         FlushVsync(GetTimeFromExternalTimer(), 0);
     }
 #endif
+    FireLpxUpdateCallbacks();
     MarkLpxDirtyNodes();
 }
 
@@ -4342,6 +4340,19 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true });
         DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-featuremanager") {
+        if (params.size() < PARAM_NUM) {
+            DumpLog::GetInstance().Print("Error: -featuremanager needs key");
+        } else {
+            std::string value;
+            auto ret = FeatureManager::GetInstance().GetFeatureParam(params[1], value);
+            if (ret == FeatureManager::SUCCESS) {
+                DumpLog::GetInstance().Print(value);
+            } else {
+                DumpLog::GetInstance().Print(
+                    "Error: FeatureManager get feature param failed, ret: " + std::to_string(ret));
+            }
+        }
     } else if (params[0] == "-resource") {
         DumpResLoadError();
     } else if (params[0] == "-start") {
@@ -4780,21 +4791,10 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     if (!lastMouseEvent_) {
         lastMouseEvent_ = std::make_unique<MouseEvent>();
     }
+    *lastMouseEvent_ = event;
     if (event.mockFlushEvent && event.action == MouseAction::WINDOW_LEAVE) {
         lastMouseEvent_->isMockWindowTransFlag = true;
     }
-    lastMouseEvent_->x = event.x;
-    lastMouseEvent_->y = event.y;
-    lastMouseEvent_->button = event.button;
-    lastMouseEvent_->action = event.action;
-    lastMouseEvent_->sourceType = event.sourceType;
-    lastMouseEvent_->time = event.time;
-    lastMouseEvent_->touchEventId = event.touchEventId;
-    lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
-    lastMouseEvent_->pointerEvent = event.pointerEvent;
-    lastMouseEvent_->deviceId = event.deviceId;
-    lastMouseEvent_->sourceTool = event.sourceTool;
-    lastMouseEvent_->targetDisplayId = event.targetDisplayId;
     lastSourceType_ = event.sourceType;
 }
 
@@ -8002,6 +8002,18 @@ void PipelineContext::UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
     lpxDirtyNodes_.erase(node);
 }
 
+void PipelineContext::FireLpxUpdateCallbacks()
+{
+    auto lpxDirtyNodes = lpxDirtyNodes_;
+    for (auto& nodeWeak : lpxDirtyNodes) {
+        auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
+        node->FireLpxUpdateCallbacks();
+    }
+}
+
 void PipelineContext::MarkLpxDirtyNodes()
 {
     auto lpxDirtyNodes = lpxDirtyNodes_;
@@ -8069,6 +8081,7 @@ void PipelineContext::InitManagers()
     toolbarManager_ = MakeRefPtr<ToolbarManager>();
     environmentManager_ = MakeRefPtr<EnvironmentManager>();
     recycleManager_ = std::make_unique<RecycleManager>();
+    privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
 }
 
 const RefPtr<ForceSplitManager>& PipelineContext::GetForceSplitManager() const
@@ -8201,4 +8214,5 @@ RefPtr<DynamicComponentSafeManager> PipelineContext::GetDynamicComponentSafeMana
     }
     return dynamicComponentSafeManager_;
 }
+
 } // namespace OHOS::Ace::NG

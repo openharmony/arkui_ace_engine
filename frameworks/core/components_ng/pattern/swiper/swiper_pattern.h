@@ -1420,6 +1420,8 @@ private:
     void ShowNextWithStep(bool needCheckWillScroll, std::optional<int32_t> step);
     void ShowPreviousWithStep(bool needCheckWillScroll, std::optional<int32_t> step);
 
+    void CleanPreMakeNode();
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;

@@ -129,6 +129,7 @@ const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
 
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
+const std::string EXT_BUNDLE = "@bundle:";
 
 #ifdef PREVIEW
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
@@ -675,7 +676,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload js enums
-    LOGI("preload js enums in PreloadAceModuleWorker");
     PreloadJsEnums(arkRuntime);
 
     // preload requireNative
@@ -1993,7 +1993,7 @@ bool JsiDeclarativeEngine::InnerExecuteDynamicAbc(
     }
 
     const char binExt[] = ".abc";
-    std::string urlName = entryPoint.substr(bundleName.size() + 1) + binExt;
+    std::string urlName = EXT_BUNDLE + entryPoint + binExt;
     LOGD("InnerExecuteDynamicAbc ExecuteJsBin urlName: %{public}s", urlName.c_str());
     runtime->ExecuteJsBin(urlName);
     if (trycatch.HasCaught()) {

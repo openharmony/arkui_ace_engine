@@ -3065,6 +3065,26 @@ bool TextFieldModelNG::GetCompressLeadingPunctuation(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetPunctuationOverflow(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PunctuationOverflow, enabled);
+}
+
+void TextFieldModelNG::SetPunctuationOverflow(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PunctuationOverflow, enabled, frameNode);
+}
+
+bool TextFieldModelNG::GetPunctuationOverflow(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, PunctuationOverflow, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetIncludeFontPadding(bool enabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IncludeFontPadding, enabled);

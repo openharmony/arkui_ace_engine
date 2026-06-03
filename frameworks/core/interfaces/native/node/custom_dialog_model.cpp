@@ -19,6 +19,7 @@
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
@@ -633,10 +634,10 @@ void openCustomDialogWithNewPipeline(std::function<void(int32_t)>&& callback)
 
 ArkUI_Int32 SetDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandle contentNode)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(contentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(contentNode, ERROR_CODE_PARAM_INVALID, "contentNode is null");
     auto* frameNode = reinterpret_cast<FrameNode*>(contentNode);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(frameNode, ERROR_CODE_PARAM_INVALID, "frameNode is null");
     frameNode->IncRefCount();
     controllerHandler->contentHandle = frameNode;
     return ERROR_CODE_NO_ERROR;
@@ -644,10 +645,10 @@ ArkUI_Int32 SetDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandl
 
 ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle controllerHandler)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     if (controllerHandler->contentHandle) {
         auto* frameNode = reinterpret_cast<FrameNode*>(controllerHandler->contentHandle);
-        CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+        CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(frameNode, ERROR_CODE_PARAM_INVALID, "frameNode is null");
         frameNode->DecRefCount();
         controllerHandler->contentHandle = nullptr;
     }
@@ -657,8 +658,9 @@ ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle controllerHandler)
 ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle controllerHandler,
     ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     if (alignment < DEFAULT_DIALOG_ALIGNMENT || alignment > ARKUI_ALIGNMENT_BOTTOM_END_INDEX) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "alignment is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     controllerHandler->alignment = alignment;
@@ -669,7 +671,7 @@ ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle controllerHandler,
 
 ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle controllerHandler)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->alignment = DEFAULT_DIALOG_ALIGNMENT;
     controllerHandler->offsetX = 0.0f;
     controllerHandler->offsetY = 0.0f;
@@ -678,21 +680,21 @@ ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle controllerHandler)
 
 ArkUI_Int32 SetDialogModalMode(ArkUIDialogHandle controllerHandler, bool isModal)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->isModal = isModal;
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle controllerHandler, bool autoCancel)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->autoCancel = autoCancel;
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetDialogMask(ArkUIDialogHandle controllerHandler, ArkUI_Uint32 maskColor, ArkUIRect* rect)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->maskColor = maskColor;
     controllerHandler->hasCustomMaskColor = true;
     if (rect) {
@@ -704,7 +706,7 @@ ArkUI_Int32 SetDialogMask(ArkUIDialogHandle controllerHandler, ArkUI_Uint32 mask
 
 ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle controllerHandler, ArkUI_Uint32 backgroundColor)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->backgroundColor = backgroundColor;
     controllerHandler->hasCustomBackgroundColor = true;
     return ERROR_CODE_NO_ERROR;
@@ -713,7 +715,7 @@ ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle controllerHandler, ArkUI_
 ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle controllerHandler, ArkUI_Float32 topLeft,
     ArkUI_Float32 topRight, ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->cornerRadiusRect = new ArkUICornerRadius({ .topLeft = topLeft, .topRight = topRight,
     .bottomLeft = bottomLeft, .bottomRight = bottomRight });
     return ERROR_CODE_NO_ERROR;
@@ -721,21 +723,21 @@ ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle controllerHandler, ArkUI_Flo
 
 ArkUI_Int32 SetDialogGridColumnCount(ArkUIDialogHandle controllerHandler, ArkUI_Int32 gridCount)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->gridCount = gridCount;
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 EnableDialogCustomStyle(ArkUIDialogHandle controllerHandler, bool enableCustomStyle)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->enableCustomStyle = enableCustomStyle;
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle controllerHandler, bool enableCustomAnimation)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->enableCustomAnimation = enableCustomAnimation;
     return ERROR_CODE_NO_ERROR;
 }
@@ -743,12 +745,12 @@ ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle controllerHandler, boo
 // 基于传入的控制器可以多次显示Dialog，但需注意Close只会关闭最新一次创建的Dialog
 ArkUI_Int32 ShowDialog(ArkUIDialogHandle controllerHandler, bool showInSubWindow)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->showInSubWindow = showInSubWindow;
     DialogProperties dialogProperties;
     ParseDialogProperties(dialogProperties, controllerHandler);
     auto* contentNode = reinterpret_cast<FrameNode*>(controllerHandler->contentHandle);
-    CHECK_NULL_RETURN(contentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(contentNode, ERROR_CODE_PARAM_INVALID, "contentNode is null");
     auto contentPtr = AceType::Claim<FrameNode>(contentNode);
     auto dialogNode = CustomDialogControllerModelNG::SetOpenDialogWithNode(dialogProperties, contentPtr);
     ACE_UINODE_TRACE(dialogNode);
@@ -764,9 +766,9 @@ ArkUI_Int32 ShowDialog(ArkUIDialogHandle controllerHandler, bool showInSubWindow
 
 ArkUI_Int32 CloseDialog(ArkUIDialogHandle controllerHandler)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
-    CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(dialogNode, ERROR_CODE_PARAM_INVALID, "dialogNode is null");
     ACE_UINODE_TRACE(dialogNode);
     CustomDialogControllerModelNG::SetCloseDialogForNDK(dialogNode);
     // 关闭Dialog时同步解绑节点上的OnWillDismiss事件，防止悬空指针回调
@@ -780,7 +782,7 @@ ArkUI_Int32 CloseDialog(ArkUIDialogHandle controllerHandler)
 
 ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle controllerHandler, bool (*eventHandler)(ArkUI_Int32))
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->onWillDismissCall = eventHandler;
     return ERROR_CODE_NO_ERROR;
 }
@@ -788,7 +790,7 @@ ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle controllerHandler, boo
 ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->onWillDismissCallByNDK  = callback;
     controllerHandler->userData = userData;
     return ERROR_CODE_NO_ERROR;
@@ -796,9 +798,9 @@ ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
 
 ArkUI_Int32 GetDialogState(ArkUIDialogHandle controllerHandler, ArkUI_Int32* dialogState)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
-    CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(dialogNode, ERROR_CODE_PARAM_INVALID, "dialogNode is null");
     ACE_UINODE_TRACE(dialogNode);
     *dialogState = static_cast<int32_t>(CustomDialogControllerModelNG::GetStateWithNode(dialogNode));
     return ERROR_CODE_NO_ERROR;
@@ -807,7 +809,7 @@ ArkUI_Int32 GetDialogState(ArkUIDialogHandle controllerHandler, ArkUI_Int32* dia
 ArkUI_Int32 SetKeyboardAvoidDistance(
     ArkUIDialogHandle controllerHandler, float distance, ArkUI_Int32 unit)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->keyboardAvoidDistanceValue = distance;
     controllerHandler->keyboardAvoidDistanceUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
     return ERROR_CODE_NO_ERROR;
@@ -815,28 +817,28 @@ ArkUI_Int32 SetKeyboardAvoidDistance(
 
 ArkUI_Int32 SetLevelMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 mode)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->levelMode = mode;
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetLevelUniqueId(ArkUIDialogHandle controllerHandler, ArkUI_Int32 uniqueId)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->levelUniqueId = uniqueId;
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetImmersiveMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 mode)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->immersiveMode = mode;
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle controllerHandler, ArkUI_Float64 levelOrder)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->levelOrder = levelOrder;
     return ERROR_CODE_NO_ERROR;
 }
@@ -844,7 +846,7 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle controllerHandler, ArkUI_Float64 lev
 ArkUI_Int32 RegisterOnWillAppearDialog(
     ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->onWillAppear = callback;
     controllerHandler->onWillAppearData = userData;
     return ERROR_CODE_NO_ERROR;
@@ -853,7 +855,7 @@ ArkUI_Int32 RegisterOnWillAppearDialog(
 ArkUI_Int32 RegisterOnDidAppearDialog(
     ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->onDidAppear = callback;
     controllerHandler->onDidAppearData = userData;
     return ERROR_CODE_NO_ERROR;
@@ -862,7 +864,7 @@ ArkUI_Int32 RegisterOnDidAppearDialog(
 ArkUI_Int32 RegisterOnWillDisappearDialog(
     ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->onWillDisappear = callback;
     controllerHandler->onWillDisappearData = userData;
     return ERROR_CODE_NO_ERROR;
@@ -871,7 +873,7 @@ ArkUI_Int32 RegisterOnWillDisappearDialog(
 ArkUI_Int32 RegisterOnDidDisappearDialog(
     ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->onDidDisappear = callback;
     controllerHandler->onDidDisappearData = userData;
     return ERROR_CODE_NO_ERROR;
@@ -879,7 +881,7 @@ ArkUI_Int32 RegisterOnDidDisappearDialog(
 
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
 {
-    CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, "handle is null");
     g_dialogProperties.maskRect = std::nullopt;
     g_dialogProperties.borderRadius = std::nullopt;
     g_dialogProperties.width = std::nullopt;
@@ -903,7 +905,7 @@ ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
 {
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
-        CHECK_NULL_RETURN(delegate, ERROR_CODE_PARAM_INVALID);
+        CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(delegate, ERROR_CODE_PARAM_INVALID, "delegate is null");
         delegate->CloseCustomDialog(dialogId);
     } else if (SubwindowManager::GetInstance() != nullptr) {
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
@@ -913,7 +915,7 @@ ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
 
 ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
 {
-    CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(handle, ERROR_CODE_PARAM_INVALID, "handle is null");
     ParseDialogProperties(g_dialogProperties, handle);
     auto promptDialogAttr = ParseDialogPropertiesFromProps(g_dialogProperties);
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -928,9 +930,9 @@ ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_
         g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
         auto node = g_dialogProperties.customCNode;
         auto nodePtr = node.Upgrade();
-        CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
+        CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(nodePtr, ERROR_CODE_PARAM_INVALID, "nodePtr is null");
         auto context = nodePtr->GetContextWithCheck();
-        CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+        CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(context, ERROR_CODE_PARAM_INVALID, "context is null");
         auto overlayManager = context->GetOverlayManager();
         context->GetTaskExecutor()->PostTask(
             [node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
@@ -949,7 +951,7 @@ ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_
 
 ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle controllerHandler, bool showInSubWindow)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->showInSubWindow = showInSubWindow;
     return ERROR_CODE_NO_ERROR;
 }
@@ -971,7 +973,7 @@ ArkUI_Int32 SetSystemMaterial(ArkUIDialogHandle controllerHandler, ArkUI_Immersi
 ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle controllerHandler, ArkUI_Float32 top, ArkUI_Float32 right,
     ArkUI_Float32 bottom, ArkUI_Float32 left, ArkUI_Int32 unit)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->borderWidthEdgeWidths =
         new ArkUIBorderWidth({ .top = top, .right = right, .bottom = bottom, .left = left });
     controllerHandler->borderWidthUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
@@ -981,7 +983,7 @@ ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle controllerHandler, ArkUI_Floa
 ArkUI_Int32 SetDialogBorderColor(
     ArkUIDialogHandle controllerHandler, ArkUI_Uint32 top, ArkUI_Uint32 right, ArkUI_Uint32 bottom, ArkUI_Uint32 left)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->borderColors =
         new ArkUIBorderColor({ .top = top, .right = right, .bottom = bottom, .left = left });
     controllerHandler->hasCustomBorderColor = true;
@@ -991,7 +993,7 @@ ArkUI_Int32 SetDialogBorderColor(
 ArkUI_Int32 SetDialogBorderStyle(
     ArkUIDialogHandle controllerHandler, ArkUI_Int32 top, ArkUI_Int32 right, ArkUI_Int32 bottom, ArkUI_Int32 left)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->borderStyles =
         new ArkUIBorderStyle({ .top = top, .right = right, .bottom = bottom, .left = left });
     return ERROR_CODE_NO_ERROR;
@@ -999,7 +1001,7 @@ ArkUI_Int32 SetDialogBorderStyle(
 
 ArkUI_Int32 SetWidth(ArkUIDialogHandle controllerHandler, float width, ArkUI_Int32 unit)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->widthValue = width;
     controllerHandler->widthUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
     return ERROR_CODE_NO_ERROR;
@@ -1007,7 +1009,7 @@ ArkUI_Int32 SetWidth(ArkUIDialogHandle controllerHandler, float width, ArkUI_Int
 
 ArkUI_Int32 SetHeight(ArkUIDialogHandle controllerHandler, float height, ArkUI_Int32 unit)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->heightValue = height;
     controllerHandler->heightUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
     return ERROR_CODE_NO_ERROR;
@@ -1032,9 +1034,10 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
 ArkUI_Int32 SetShadow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 shadow)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     if (static_cast<OHOS::Ace::ShadowStyle>(shadow) < OHOS::Ace::ShadowStyle::OuterDefaultXS ||
         static_cast<OHOS::Ace::ShadowStyle>(shadow) >= OHOS::Ace::ShadowStyle::None) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "shadow style is invalid");
         return ERROR_CODE_PARAM_INVALID;
     } else {
         Shadow shadows;
@@ -1048,7 +1051,7 @@ ArkUI_Int32 SetShadow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 shadow)
 ArkUI_Int32 SetDialogCustomShadow(
     ArkUIDialogHandle controllerHandler, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     if (length == NUM_1) {
         Shadow shadow;
         auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0].i32);
@@ -1085,35 +1088,35 @@ ArkUI_Int32 SetDialogCustomShadow(
 
 ArkUI_Int32 SetBackgroundBlurStyle(ArkUIDialogHandle controllerHandler, ArkUI_Int32 blurStyle)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->blurStyle = ConvertBlurStyle(blurStyle);
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetKeyboardAvoidMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 keyboardAvoidMode)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->keyboardAvoidMode = static_cast<OHOS::Ace::KeyboardAvoidMode>(keyboardAvoidMode);
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 EnableHoverMode(ArkUIDialogHandle controllerHandler, bool enableHoverMode)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->enableHoverMode = enableHoverMode;
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetHoverModeArea(ArkUIDialogHandle controllerHandler, ArkUI_Int32 hoverModeAreaType)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->hoverModeAreaType = static_cast<OHOS::Ace::HoverModeAreaType>(hoverModeAreaType);
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     controllerHandler->focusable = focusable;
     return ERROR_CODE_NO_ERROR;
 }
@@ -1121,7 +1124,7 @@ ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
 ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, ArkUI_Int32 (*intArray)[3],
     ArkUI_Float32 scale, ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     BlurStyleOption blurStyleOption;
     blurStyleOption.colorMode = static_cast<ThemeColorMode>((*intArray)[NUM_0]);
     blurStyleOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_1]);
@@ -1144,7 +1147,7 @@ ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, A
 ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float32 (*floatArray)[3],
     ArkUI_Int32 (*intArray)[2], ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool (*boolArray)[2])
 {
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(controllerHandler, ERROR_CODE_PARAM_INVALID, "controllerHandler is null");
     CalcDimension radius((*floatArray)[NUM_0], DimensionUnit::VP);
     EffectOption effectOption;
     effectOption.radius = radius;

@@ -2428,4 +2428,117 @@ HWTEST_F(PinchRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
     EXPECT_THAT(result, HasSubstr("PE:1"));
     EXPECT_THAT(result, HasSubstr("LPF:0"));
 }
+
+/**
+ * @tc.name: PinchRecognizerDumpTest001
+ * @tc.desc: Test PinchRecognizer function: Dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerDumpTest001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+    auto dump = pinchRecognizer->Dump();
+    ASSERT_NE(dump, nullptr);
+    EXPECT_THAT(dump->customInfo, HasSubstr("distance:"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("fingers:"));
+}
+
+/**
+ * @tc.name: PinchRecognizerOnResetStatusTest001
+ * @tc.desc: Test PinchRecognizer function: OnResetStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerOnResetStatusTest001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+
+    pinchRecognizer->initialDev_ = 10.0;
+    pinchRecognizer->currentDev_ = 12.0;
+    pinchRecognizer->scale_ = 2.0;
+    pinchRecognizer->isFlushTouchEventsEnd_ = true;
+    pinchRecognizer->isPinchEnd_ = true;
+    pinchRecognizer->isLastPinchFinished_ = false;
+    pinchRecognizer->pinchCenter_ = Offset(10.0, 10.0);
+    pinchRecognizer->localMatrix_.emplace_back();
+
+    pinchRecognizer->OnResetStatus();
+    EXPECT_EQ(pinchRecognizer->initialDev_, 0.0);
+    EXPECT_EQ(pinchRecognizer->currentDev_, 0.0);
+    EXPECT_EQ(pinchRecognizer->scale_, 1.0);
+    EXPECT_FALSE(pinchRecognizer->isFlushTouchEventsEnd_);
+    EXPECT_FALSE(pinchRecognizer->isPinchEnd_);
+    EXPECT_TRUE(pinchRecognizer->isLastPinchFinished_);
+    EXPECT_EQ(pinchRecognizer->pinchCenter_, Offset());
+    EXPECT_TRUE(pinchRecognizer->localMatrix_.empty());
+}
+
+/**
+ * @tc.name: PinchRecognizerProcessAxisRejectTest001
+ * @tc.desc: Test PinchRecognizer function: ProcessAxisReject
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerProcessAxisRejectTest001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    EXPECT_TRUE(pinchRecognizer->ProcessAxisReject());
+    EXPECT_EQ(pinchRecognizer->disposal_, GestureDisposal::REJECT);
+
+    bool endCallbackCalled = false;
+    pinchRecognizer->onActionEnd_ = std::make_unique<GestureEventFunc>(
+        [&endCallbackCalled](GestureEvent& info) { endCallbackCalled = true; });
+    pinchRecognizer->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer->isPinchEnd_ = false;
+    EXPECT_TRUE(pinchRecognizer->ProcessAxisReject());
+    EXPECT_EQ(pinchRecognizer->refereeState_, RefereeState::READY);
+    EXPECT_TRUE(pinchRecognizer->isPinchEnd_);
+    EXPECT_TRUE(endCallbackCalled);
+
+    pinchRecognizer->refereeState_ = RefereeState::READY;
+    EXPECT_FALSE(pinchRecognizer->ProcessAxisReject());
+}
+
+/**
+ * @tc.name: PinchRecognizerHandleReportsUpdateTest001
+ * @tc.desc: Test PinchRecognizer function: HandleReports with ACTION/UPDATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerHandleReportsUpdateTest001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+    GestureEvent info;
+    auto oldState = pinchRecognizer->refereeState_;
+    pinchRecognizer->HandleReports(info, GestureCallbackType::ACTION);
+    pinchRecognizer->HandleReports(info, GestureCallbackType::UPDATE);
+    EXPECT_EQ(pinchRecognizer->refereeState_, oldState);
+}
+
+/**
+ * @tc.name: PinchRecognizerIsCtrlBeingPressedTest001
+ * @tc.desc: Test PinchRecognizer function: IsCtrlBeingPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerIsCtrlBeingPressedTest001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+
+    AxisEvent eventWithCtrl;
+    eventWithCtrl.pressedCodes = { KeyCode::KEY_A, KeyCode::KEY_CTRL_LEFT };
+    EXPECT_TRUE(pinchRecognizer->IsCtrlBeingPressed(eventWithCtrl));
+
+    AxisEvent eventWithoutCtrl;
+    eventWithoutCtrl.pressedCodes = { KeyCode::KEY_A, KeyCode::KEY_B };
+    EXPECT_FALSE(pinchRecognizer->IsCtrlBeingPressed(eventWithoutCtrl));
+}
 } // namespace OHOS::Ace::NG

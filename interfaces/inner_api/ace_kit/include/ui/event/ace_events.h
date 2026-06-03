@@ -281,6 +281,18 @@ public:
         return eventHandleId_;
     }
 protected:
+    size_t GetApproximateBaseEventSize() const
+    {
+        // Estimate sizes for standard strings (type, id, patternName) assuming they exceed SSO
+        constexpr size_t ESTIMATED_STRING_LENGTH = 32;
+        constexpr size_t ESTIMATED_PRESSED_KEY_CODES = 2;
+
+        constexpr size_t stringOverhead = ESTIMATED_STRING_LENGTH * 4; // type_, target_.id, target_.type, patternName_
+        constexpr size_t keysOverhead = ESTIMATED_PRESSED_KEY_CODES * sizeof(KeyCode);
+
+        return stringOverhead + keysOverhead;
+    }
+
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
     // The origin event time stamp.

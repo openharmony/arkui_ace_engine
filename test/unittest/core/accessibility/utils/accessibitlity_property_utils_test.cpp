@@ -22,7 +22,6 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "base/log/dump_log.h"
-#include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "core/accessibility/utils/accessibility_property_utils.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/property/accessibility_property.h"
@@ -386,7 +385,7 @@ HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController003, TestSize
 
 /**
  * @tc.name: CheckAndGetStateController004
- * @tc.desc: test CheckAndGetStateController when frameNode2 is not visibile
+ * @tc.desc: test CheckAndGetStateController when parent node is not visible
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController004, TestSize.Level1)
@@ -406,13 +405,16 @@ HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController004, TestSize
 
     frameNode2->tag_ = V2::BUTTON_ETS_TAG;
 
+    /**
+     * @tc.steps: step2. set Visible false
+     */
     ASSERT_EQ(frameNode1->IsVisible(), true);
     ASSERT_EQ(frameNode2->IsVisible(), true);
-    NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(frameNode2);
-    ASSERT_EQ(frameNode2->GetAccessibilityVisible(), false);
+    frameNode1->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    ASSERT_EQ(frameNode1->IsVisible(), false);
 
     /**
-     * @tc.steps: step2. construct AccessibilityGroupOptions
+     * @tc.steps: step3. construct AccessibilityGroupOptions
      */
     AccessibilityGroupOptions accessibilityGroupOptions;
     EXPECT_TRUE(accessibilityGroupOptions.stateControllerByInspector.empty());
@@ -426,6 +428,7 @@ HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController004, TestSize
     auto result = AccessibilityPropertyUtils::CheckAndGetStateController(frameNode1, controllerNode);
     EXPECT_EQ(result, StateControllerType::CONTROLLER_NONE);
 }
+
 /**
  * @tc.name: CheckAndGetActionController001
  * @tc.desc: test CheckAndGetActionController when node is nullptr

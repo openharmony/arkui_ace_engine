@@ -35,6 +35,8 @@ struct ForceSplitConfig {
     bool navigationDisablePlaceholder = false;
     bool navigationDisableDivider = false;
     bool dialogSupportSplit = true;
+    bool wideSplitIsDraggable = false;
+    bool squareSplitIsDraggable = false;
     std::optional<std::string> navigationId;
     std::optional<int32_t> navigationDepth;
     std::unordered_set<std::string> fullScreenPages;
@@ -56,18 +58,16 @@ public:
     static bool IsHomePageNavDestination(const RefPtr<NavDestinationGroupNode>& node);
     static bool IsHomePageNavBar(const RefPtr<NavBarNode>& navBar);
     static RefPtr<FrameNode> CreatePlaceHolderNode();
-    static bool ParseSystemForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config);
-    static bool ParseAppForceSplitConfig(bool isRouter, const std::string& configJsonStr, ForceSplitConfig& config);
-    static void LogSystemForceSplitConfig(bool isRouter, const std::string& homePage, const ForceSplitConfig& config);
-    static void LogAppForceSplitConfig(bool isRouter, const ForceSplitConfig& config);
+    static bool ParseForceSplitConfig(bool isRouter, const std::string& configJsonStr, ForceSplitConfig& config);
+    static void LogForceSplitConfig(bool isRouter, const ForceSplitConfig& config);
 private:
     static bool ParseCommonConfig(const std::unique_ptr<JsonValue>& configJson, ForceSplitConfig& config);
     static bool ParseBehaviorModeConfig(const std::unique_ptr<JsonValue>& configJson, ForceSplitConfig& config);
     static bool ParseNavigationOptions(const std::unique_ptr<JsonValue>& navigationOptions, ForceSplitConfig& config);
     static bool ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitConfig& config);
     static bool ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor, ForceSplitConfig& config);
-    static bool ParseSplitParam(
-        const std::unique_ptr<JsonValue>& split, const std::string& splitType, std::optional<float>& splitRatio);
+    static bool ParseSplitParam(const std::unique_ptr<JsonValue>& split, const std::string& splitType,
+                                std::optional<float>& splitRatio, bool& isDraggable);
     static bool ParsePagePairs(const std::unique_ptr<JsonValue>& pagePairs, ForceSplitConfig& config);
     static bool ParseTransPages(const std::unique_ptr<JsonValue>& transPages, ForceSplitConfig& config);
 };

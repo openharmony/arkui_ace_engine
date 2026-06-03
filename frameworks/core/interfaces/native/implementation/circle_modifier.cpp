@@ -17,6 +17,7 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_model_static.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -61,11 +62,30 @@ void SetCircleOptionsImpl(Ark_NativePointer node,
     }
 }
 } // CircleInterfaceModifier
+namespace CircleAttributeModifier {
+void SetStrokeImpl(Ark_NativePointer node,
+                   const Opt_Union_ResourceColor_ColorMetricsExt* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelStatic::SetStroke(frameNode, Converter::OptConvertPtr<Color>(value));
+}
+
+void SetFillImpl(Ark_NativePointer node,
+                 const Opt_Union_ResourceColor_ColorMetricsExt* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value));
+}
+} // CircleAttributeModifier
 const GENERATED_ArkUICircleModifier* GetCircleModifier()
 {
     static const GENERATED_ArkUICircleModifier ArkUICircleModifierImpl {
         CircleModifier::ConstructImpl,
         CircleInterfaceModifier::SetCircleOptionsImpl,
+        CircleAttributeModifier::SetStrokeImpl,
+        CircleAttributeModifier::SetFillImpl,
     };
     return &ArkUICircleModifierImpl;
 }

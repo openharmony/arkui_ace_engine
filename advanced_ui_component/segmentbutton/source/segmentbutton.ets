@@ -355,6 +355,8 @@ export class SegmentButtonOptions {
   public localizedButtonPadding?: LocalizedPadding
   public showText: boolean = false
   public showIcon: boolean = false
+  public hasFontSize: boolean = false;
+  public hasSelectedFontSize: boolean = false;
   public iconTextRadius?: number
   public iconTextBackgroundRadius?: number
   public backgroundBlurStyle: BlurStyle
@@ -381,8 +383,10 @@ export class SegmentButtonOptions {
   constructor(options: TabSegmentButtonOptions | CapsuleSegmentButtonOptions) {
     this.fontColor = options.fontColor ?? segmentButtonTheme.FONT_COLOR
     this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR
-    this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE
-    this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE
+    this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE;
+    this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE;
+    this.hasFontSize = options.fontSize !== undefined ? true : false;
+    this.hasSelectedFontSize = options.selectedFontSize !== undefined ? true : false;
     this.fontWeight = options.fontWeight ?? initFontWeight(FontWeight.Regular)
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium
     this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR
@@ -1630,7 +1634,7 @@ export struct SegmentButton {
           .animation({ duration: 0 })
           .borderRadius(getBackgroundBorderRadius(
             this.options,
-            this.getUIContext().px2vp(this.layoutAlgorithm.selHeight) / 2
+            this.componentSize.height as number / 2
           ))
           .translate({ x: this.selectedItemOffsetX })
 
@@ -1889,8 +1893,7 @@ export struct SegmentButton {
             const startX = Math.min(alg.getButtonX(0), alg.getButtonX(buttonLength - 1))
             const endX = Math.max(alg.getButtonX(0), alg.getButtonX(buttonLength - 1))
 
-            const fingerOffset = this.isShouldMirror() ? this.panGestureStartPoint.x - fingerInfo.globalX :
-              fingerInfo.globalX - this.panGestureStartPoint.x
+            const fingerOffset = this.getUIContext().vp2px(fingerInfo.globalX - this.panGestureStartPoint.x)
             const currentButtonX = alg.getButtonX(this.selectedIndexes[0])
             let nowX = fingerOffset + currentButtonX
             nowX = Math.max(startX, nowX)
@@ -2092,12 +2095,16 @@ export struct SegmentButton {
     } else {
       setAnimatedPropertyFunc();
     }
+    this.updateButtonFont();
+  }
+
+  updateButtonFont(): void {
     this.buttonItemsSelected.forEach((selected, index) => {
-      const selectedFontSize = this.options.selectedFontSize ?? 
+      const selectedFontSize = this.options.hasSelectedFontSize ? this.options.selectedFontSize: 
         (this.useAdaptiveLineHeight ? 
           segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : 
           segmentButtonTheme.SELECTED_FONT_SIZE);
-      const normalFontSize = this.options.fontSize ?? 
+      const normalFontSize = this.options.hasFontSize ? this.options.fontSize:  
         (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
       this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :

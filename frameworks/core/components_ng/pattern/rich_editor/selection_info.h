@@ -190,9 +190,9 @@ struct ParagraphInfo {
     std::optional<double> paragraphSpacing;
     std::optional<int32_t> textVerticalAlign;
     std::optional<int32_t> textDirection;
+    std::pair<int32_t, int32_t> range;
     ACE_DEFINE_TEXT_STYLE_GRADIENT_OPTIONAL_TYPE();
     std::optional<Color> colorShaderStyle;
-    std::pair<int32_t, int32_t> range;
 };
 } // namespace OHOS::Ace
 

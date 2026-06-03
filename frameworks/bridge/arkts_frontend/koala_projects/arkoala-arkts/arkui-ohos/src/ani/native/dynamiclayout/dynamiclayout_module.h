@@ -30,6 +30,8 @@ void SetDynamicLayoutColumnLayoutAlgorithm(
 void SetDynamicLayoutCustomLayoutAlgorithm(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object customLayoutAlgorithm,
     ani_object frameNode);
+void SetDynamicLayoutGridLayoutAlgorithm(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object gridLayoutAlgorithm);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_DYNAMICLAYOUT_MODULE

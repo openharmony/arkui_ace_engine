@@ -49,9 +49,6 @@ const char TOP_START_PROPERTY[] = "topStart";
 const char TOP_END_PROPERTY[] = "topEnd";
 const char BOTTOM_START_PROPERTY[] = "bottomStart";
 const char BOTTOM_END_PROPERTY[] = "bottomEnd";
-const char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
-const char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
-const char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
 
 std::string GetBundleNameFromContainer()
 {

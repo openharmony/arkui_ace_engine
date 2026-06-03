@@ -85,6 +85,7 @@ public:
         LAYERED,
         ANIMATED,
         PIXELMAP,
+        PICTURE,
     };
 
     DrawableDescriptor() = default;

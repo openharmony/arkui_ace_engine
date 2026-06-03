@@ -428,6 +428,8 @@ public:
 
     bool IsWindowSizeChangedWithUndefinedReason(int32_t width, int32_t height, WindowSizeChangeReason type);
 
+    void ReachToBottomWhenCloseAndRotate();
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     bool HasTitleNode() const

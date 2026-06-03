@@ -659,4 +659,25 @@ HWTEST_F(DividerNewTestNG, ResetDividerColorWithFrameNodeTest001, TestSize.Level
     EXPECT_EQ(paintProperty->GetDividerColorSetByUser().value_or(false), false);
     OHOS::Ace::g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: DividerLpxAttribute001
+ * @tc.desc: Test StrokeWidth with LPX unit registers/unregisters LPX_DIVIDER_STROKE_WIDTH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerNewTestNG, DividerLpxAttribute001, TestSize.Level1)
+{
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    auto frameNode = CreateDivider([lpxDim](DividerModelNG model) {
+        model.StrokeWidth(lpxDim);
+    });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    Dimension vpDim(10.0, DimensionUnit::VP);
+    DividerModelNG::StrokeWidth(frameNode.GetRawPtr(), vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

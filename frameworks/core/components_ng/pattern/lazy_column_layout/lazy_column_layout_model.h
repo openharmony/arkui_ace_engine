@@ -24,6 +24,9 @@
 
 namespace OHOS::Ace::NG {
 
+class UINode;
+enum class StickyStyle : uint32_t;
+
 class ACE_EXPORT LazyColumnLayoutModel {
 public:
     using VisibleIndexesChangeEvent = std::function<void(int32_t, int32_t)>;
@@ -35,6 +38,26 @@ public:
     static void SetAlignItems(FrameNode* frameNode, HorizontalAlign align);
     static void SetOnVisibleIndexesChange(VisibleIndexesChangeEvent&& onVisibleIndexesChange);
     static void SetOnVisibleIndexesChange(FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange);
+    // Set the header / footer sticky behavior (declarative).
+    static void SetSticky(StickyStyle stickyStyle);
+    // Set the header / footer sticky behavior (per-node).
+    static void SetSticky(FrameNode* frameNode, StickyStyle stickyStyle);
+    // Declare a header via builder closure (declarative).
+    static void SetHeader(std::function<void()>&& header);
+    // Declare a footer via builder closure (declarative).
+    static void SetFooter(std::function<void()>&& footer);
+    // Mount an already-constructed header node (per-node).
+    static void SetHeader(FrameNode* frameNode, const RefPtr<UINode>& headerNode);
+    // Mount an already-constructed footer node (per-node).
+    static void SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footerNode);
+    // Remove the header (declarative).
+    static void RemoveHeader();
+    // Remove the footer (declarative).
+    static void RemoveFooter();
+    // Remove the header (per-node).
+    static void RemoveHeader(FrameNode* frameNode);
+    // Remove the footer (per-node).
+    static void RemoveFooter(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

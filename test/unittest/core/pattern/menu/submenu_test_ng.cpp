@@ -60,6 +60,7 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/ui_material_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1487,5 +1488,21 @@ HWTEST_F(SubMenuTestNg, MenuVerticalPan001, TestSize.Level1)
     OffsetF positionThree = { 400, 600 };
     auto offset4 = subMenuLayoutAlgorithm.MenuVerticalPan(positionThree, size, menuItemNode);
     EXPECT_EQ(offset4, 510);
+}
+
+/**
+ * @tc.name: UiMaterialTheme
+ * @tc.desc: Verify UiMaterialTheme001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, UiMaterialTheme001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    UiMaterialTheme theme;
+    std::optional<UiMaterialParam> params = theme.GetUiMaterialParam(MaterialType::SEMI_TRANSPARENT, frameNode);
+
+    EXPECT_EQ(params, std::nullopt);
 }
 } // namespace OHOS::Ace::NG

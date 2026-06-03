@@ -102,7 +102,7 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get ptr %{public}d", ret);
         return nullptr;
     }
-    auto* controllerPeer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerPeerImpl*>(ptr);
+    auto* controllerPeer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerNativePeerImpl*>(ptr);
     if (controllerPeer == nullptr) {
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue controllerPeer is null");
         return nullptr;

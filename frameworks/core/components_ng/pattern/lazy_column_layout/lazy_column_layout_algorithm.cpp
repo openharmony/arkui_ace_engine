@@ -22,6 +22,7 @@
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -40,11 +41,15 @@ void LazyColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         contentIdealSize.SetWidth(maxSize);
     }
-    totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    UpdateHeaderFooterIndexes(layoutWrapper);
+    totalItemCount_ = CalculateItemCount(layoutWrapper);
     totalMainSize_ = layoutInfo_->totalMainSize_;
     UpdatePosReference(layoutWrapper, contentConstraint.viewPosRef);
     UpdateAttribute(layoutProperty, contentConstraint);
     UpdateChildConstraint(layoutProperty, contentIdealSize);
+
+    // Measure header first so the body baseline starts at headerMainSize_.
+    MeasureHeader(layoutWrapper);
 
     if (totalItemCount_ == 0) {
         layoutInfo_->SetTotalItemCount(0);
@@ -64,7 +69,35 @@ void LazyColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureItemsLazy(layoutWrapper);
     }
 
+    // Measure footer last so its size is available before we recompute total main size below.
+    MeasureFooter(layoutWrapper);
+    // body span is the lane content excluding footer; clamp at headerMainSize_ so an empty list still
+    // reports header height as the body baseline (mirrors LazyVWaterFlowLayout body-height semantics).
+    const auto bodyEnd = std::max(layoutInfo_->headerMainSize_, totalMainSize_);
+    totalMainSize_ = bodyEnd + layoutInfo_->footerMainSize_;
+    layoutInfo_->totalMainSize_ = totalMainSize_;
+
     SetFrameSize(layoutWrapper, contentIdealSize);
+}
+
+void LazyColumnLayoutAlgorithm::MeasureHeader(LayoutWrapper* layoutWrapper)
+{
+    float headerMainSize = 0.0f;
+    if (header_.Upgrade() && headerIndex_ >= 0) {
+        headerMainSize = HeaderFooterUtils::MeasureHeaderFooter(
+            layoutWrapper, headerIndex_, edgeLayoutConstraint_, Axis::VERTICAL);
+    }
+    layoutInfo_->headerMainSize_ = headerMainSize;
+}
+
+void LazyColumnLayoutAlgorithm::MeasureFooter(LayoutWrapper* layoutWrapper)
+{
+    float footerMainSize = 0.0f;
+    if (footer_.Upgrade() && footerIndex_ >= 0) {
+        footerMainSize = HeaderFooterUtils::MeasureHeaderFooter(
+            layoutWrapper, footerIndex_, edgeLayoutConstraint_, Axis::VERTICAL);
+    }
+    layoutInfo_->footerMainSize_ = footerMainSize;
 }
 
 void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
@@ -127,6 +160,49 @@ void LazyColumnLayoutAlgorithm::UpdateChildConstraint(const RefPtr<LazyColumnLay
     childLayoutConstraint.percentReference.SetWidth(width);
     childLayoutConstraint.viewPosRef.reset();
     childLayoutConstraint_ = childLayoutConstraint;
+
+    // Header/footer measure against the full cross size with infinite main size, like content items.
+    edgeLayoutConstraint_ = childLayoutConstraint;
+}
+
+int32_t LazyColumnLayoutAlgorithm::CalculateItemCount(LayoutWrapper* layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0);
+    // rawCount is the host's total child count. Content item count = rawCount - header(0/1) - footer(0/1).
+    // hasFooter additionally requires footerIndex_ != headerIndex_ so the (unlikely) case where one slot is held by
+    // both edges is not subtracted twice.
+    const auto rawCount = layoutWrapper->GetTotalChildCount();
+    const bool hasHeader = headerIndex_ >= 0 && headerIndex_ < rawCount;
+    const bool hasFooter = footerIndex_ >= 0 && footerIndex_ < rawCount && footerIndex_ != headerIndex_;
+    return std::max(rawCount - (hasHeader ? 1 : 0) - (hasFooter ? 1 : 0), 0);
+}
+
+void LazyColumnLayoutAlgorithm::UpdateHeaderFooterIndexes(LayoutWrapper* layoutWrapper)
+{
+    if (!layoutWrapper) {
+        headerIndex_ = -1;
+        footerIndex_ = -1;
+        return;
+    }
+    const auto rawCount = layoutWrapper->GetTotalChildCount();
+    // Header / footer are normalized by SyncHeaderFooter(): header at raw index 0, footer at raw index last.
+    const bool hasHeader = header_.Upgrade() != nullptr && rawCount > 0;
+    const bool hasFooter = footer_.Upgrade() != nullptr && rawCount > (hasHeader ? 1 : 0);
+    headerIndex_ = hasHeader ? 0 : -1;
+    footerIndex_ = hasFooter ? rawCount - 1 : -1;
+}
+
+int32_t LazyColumnLayoutAlgorithm::GetRawIndexForItem(int32_t itemIndex) const
+{
+    return itemIndex + (headerIndex_ >= 0 ? 1 : 0);
+}
+
+StickyStyle LazyColumnLayoutAlgorithm::ResolveStickyStyle(LayoutWrapper* layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, StickyStyle::NONE);
+    auto layoutProperty = AceType::DynamicCast<LazyColumnLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, StickyStyle::NONE);
+    return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
 }
 
 bool LazyColumnLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -143,12 +219,13 @@ bool LazyColumnLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& la
 
 void LazyColumnLayoutAlgorithm::MeasureAllItems(LayoutWrapper* layoutWrapper)
 {
-    float totalSize = 0.0f;
+    // h/f/s: shift the baseline so the first content item starts after the header.
+    float totalSize = layoutInfo_->headerMainSize_;
     layoutInfo_->posMap_.clear();
     layoutInfo_->space_ = space_;
     int32_t curIndex = 0;
     while (curIndex < totalItemCount_) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex);
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetRawIndexForItem(curIndex));
         if (!wrapper) {
             curIndex++;
             continue;
@@ -180,22 +257,26 @@ void LazyColumnLayoutAlgorithm::MeasureAllItems(LayoutWrapper* layoutWrapper)
 
 void LazyColumnLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
 {
-    if (GreatNotEqual(startPos_, totalMainSize_)) {
+    // h/f/s: the body baseline is headerMainSize_, and bodyEnd = totalMainSize_ - footerMainSize_.
+    const auto headerSize = layoutInfo_->headerMainSize_;
+    const auto footerSize = layoutInfo_->footerMainSize_;
+    const auto bodyEnd = totalMainSize_ - footerSize;
+    if (GreatNotEqual(startPos_, bodyEnd)) {
         index = layoutInfo_->totalItemCount_;
-        pos = totalMainSize_;
+        pos = bodyEnd;
         return;
-    } else if (LessNotEqual(endPos_, 0)) {
-        pos = 0.0f;
+    } else if (LessNotEqual(endPos_, headerSize)) {
+        pos = headerSize;
         index = -1;
         return;
-    } else if (LessOrEqual(startPos_, 0) || layoutInfo_->endIndex_ < 0) {
-        pos = 0.0f;
+    } else if (LessOrEqual(startPos_, headerSize) || layoutInfo_->endIndex_ < 0) {
+        pos = headerSize;
         index = 0;
         return;
     }
     auto it = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
     if (it == layoutInfo_->posMap_.end()) {
-        pos = 0.0f;
+        pos = headerSize;
         index = 0;
         return;
     }
@@ -221,23 +302,27 @@ void LazyColumnLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
 
 void LazyColumnLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
 {
-    if (LessNotEqual(endPos_, 0)) {
+    // h/f/s: the body baseline is headerMainSize_, and bodyEnd = totalMainSize_ - footerMainSize_.
+    const auto headerSize = layoutInfo_->headerMainSize_;
+    const auto footerSize = layoutInfo_->footerMainSize_;
+    const auto bodyEnd = totalMainSize_ - footerSize;
+    if (LessNotEqual(endPos_, headerSize)) {
         index = -1;
-        pos = 0;
+        pos = headerSize;
         return;
-    } else if (GreatNotEqual(startPos_, totalMainSize_)) {
-        index = layoutInfo_->totalItemCount_;
-        pos = totalMainSize_;
+    } else if (GreatNotEqual(startPos_, bodyEnd)) {
+        index = totalItemCount_;
+        pos = bodyEnd;
         return;
-    } else if (GreatOrEqual(endPos_, totalMainSize_) ||
+    } else if (GreatOrEqual(endPos_, bodyEnd) ||
                layoutInfo_->endIndex_ >= layoutInfo_->totalItemCount_) {
-        pos = totalMainSize_;
+        pos = bodyEnd;
         index = totalItemCount_ - 1;
         return;
     }
     auto it = layoutInfo_->posMap_.find(layoutInfo_->endIndex_);
     if (it == layoutInfo_->posMap_.end()) {
-        pos = totalMainSize_;
+        pos = bodyEnd;
         index = layoutInfo_->totalItemCount_ - 1;
         return;
     }
@@ -325,7 +410,7 @@ void LazyColumnLayoutAlgorithm::ApplyLazyNodeAdjustOffset(
 bool LazyColumnLayoutAlgorithm::MeasureItem(
     LayoutWrapper* layoutWrapper, int32_t curIndex, float currentPos, bool forward, float& mainSize)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetRawIndexForItem(curIndex));
     if (!wrapper) {
         return false;
     }
@@ -346,7 +431,7 @@ bool LazyColumnLayoutAlgorithm::MeasureItem(
 void LazyColumnLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos)
 {
     float currentPos = startPos;
-    int32_t curIndex = startIndex;
+    int32_t curIndex = std::max(startIndex, 0);
     auto estimateItemSize = layoutInfo_->GetEstimateItemSize();
     while (LessOrEqual(currentPos, endPos_) && curIndex < totalItemCount_) {
         auto mainSize = 0.0f;
@@ -506,7 +591,8 @@ void LazyColumnLayoutAlgorithm::MeasureItemsLazy(LayoutWrapper* layoutWrapper)
 {
     if (forwardLayout_) {
         int32_t startIndex = 0;
-        float startPos = 0.0f;
+        // h/f/s: start the first content row right after the header.
+        float startPos = layoutInfo_->headerMainSize_;
         GetStartIndexInfo(startIndex, startPos);
         layoutInfo_->SetTotalItemCount(totalItemCount_);
         layoutInfo_->SetSpace(space_);
@@ -518,7 +604,8 @@ void LazyColumnLayoutAlgorithm::MeasureItemsLazy(LayoutWrapper* layoutWrapper)
         }
     } else {
         int32_t endIndex = layoutInfo_->endIndex_;
-        float endPos = totalMainSize_;
+        // h/f/s: body ends at totalMainSize_ - footerMainSize_; backwards walks the body only.
+        float endPos = totalMainSize_ - layoutInfo_->footerMainSize_;
         GetEndIndexInfo(endIndex, endPos);
         layoutInfo_->SetTotalItemCount(totalItemCount_);
         layoutInfo_->SetSpace(space_);
@@ -610,8 +697,17 @@ void LazyColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutInfo_->deadline_.reset();
         return;
     }
+    auto stickyStyle = ResolveStickyStyle(layoutWrapper);
+    const HeaderFooterStickyMetrics stickyMetrics { startPos_, endPos_, totalMainSize_,
+        layoutInfo_->headerMainSize_, layoutInfo_->footerMainSize_ };
+    const auto stickyHeaderPos = HeaderFooterUtils::CalcStickyHeaderPos(stickyMetrics);
+    const auto stickyFooterPos = HeaderFooterUtils::CalcStickyFooterPos(stickyMetrics);
+
+    // Layout order follows section semantics: header -> content items -> footer.
+    LayoutHeader(layoutWrapper, crossSize, paddingOffset, stickyStyle, stickyHeaderPos);
     LayoutItems(layoutWrapper, crossSize, paddingOffset);
     LayoutCachedItems(layoutWrapper, crossSize, paddingOffset);
+    LayoutFooter(layoutWrapper, crossSize, paddingOffset, stickyStyle, stickyFooterPos);
 }
 
 float LazyColumnLayoutAlgorithm::CalculateCrossOffset(float crossSize, float childCrossSize) const
@@ -665,7 +761,7 @@ void LazyColumnLayoutAlgorithm::PredictLayoutForward(
             break;
         }
         int32_t index = currIndex + 1;
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetRawIndexForItem(index));
         if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
             break;
         }
@@ -711,7 +807,7 @@ void LazyColumnLayoutAlgorithm::PredictLayoutBackward(
             break;
         }
         int32_t index = currIndex - 1;
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetRawIndexForItem(index));
         if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
             break;
         }
@@ -761,7 +857,26 @@ void LazyColumnLayoutAlgorithm::SyncPredictLayoutInfo(LayoutWrapper* layoutWrapp
     // Update active child range if cache boundaries changed
     if ((layoutInfo_->cachedStartIndex_ != cachedStartIndex_) ||
         (layoutInfo_->cachedEndIndex_ != cachedEndIndex_)) {
-        layoutWrapper->SetActiveChildRange(cachedStartIndex_, cachedEndIndex_);
+        // h/f/s: same translation as LayoutCachedItems; keep header / footer active alongside the item cache.
+        if (headerIndex_ < 0 && footerIndex_ < 0) {
+            layoutWrapper->SetActiveChildRange(cachedStartIndex_, cachedEndIndex_);
+        } else if (cachedStartIndex_ < 0 || cachedEndIndex_ < cachedStartIndex_) {
+            SetHeaderFooterActive(layoutWrapper);
+        } else {
+            ActiveChildSets activeChildSets;
+            const auto rawStart = GetRawIndexForItem(cachedStartIndex_);
+            const auto rawEnd = GetRawIndexForItem(cachedEndIndex_);
+            for (auto i = rawStart; i <= rawEnd; ++i) {
+                activeChildSets.activeItems.insert(i);
+            }
+            if (headerIndex_ >= 0) {
+                activeChildSets.activeItems.insert(headerIndex_);
+            }
+            if (footerIndex_ >= 0) {
+                activeChildSets.activeItems.insert(footerIndex_);
+            }
+            layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
+        }
     }
     // Sync prediction results back to layoutInfo
     layoutInfo_->layoutedStartIndex_ = layoutedStartIndex_;
@@ -797,7 +912,8 @@ void LazyColumnLayoutAlgorithm::LayoutItems(
 {
     auto iter = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
     for (; iter != layoutInfo_->posMap_.end() && iter->first <= layoutInfo_->endIndex_; iter++) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(iter->first);
+        // h/f/s: posMap_ keys are item indices; translate to raw indices for child fetches.
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetRawIndexForItem(iter->first));
         if (!wrapper) {
             continue;
         }
@@ -815,11 +931,13 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItemsForward(
 {
     auto iter = layoutInfo_->posMap_.begin();
     if (layoutInfo_->endIndex_ >= totalItemCount_ - 1) {
-        layoutedEnd_ = totalMainSize_;
+        // h/f/s: footer is laid out separately, so cache window ends at body end (= totalMainSize_ - footer).
+        layoutedEnd_ = totalMainSize_ - layoutInfo_->footerMainSize_;
         cachedEndIndex_ = layoutInfo_->endIndex_;
     } else if (layoutInfo_->endIndex_ < 0) {
         cachedEndIndex_ = -1;
-        layoutedEnd_ = 0;
+        // h/f/s: empty body still sits below the header.
+        layoutedEnd_ = layoutInfo_->headerMainSize_;
     } else {
         cachedEndIndex_ = layoutInfo_->endIndex_;
         iter = layoutInfo_->posMap_.find(layoutInfo_->endIndex_);
@@ -836,7 +954,8 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItemsForward(
         if (cachedEndIndex_ + 1 != iter->first) {
             break;
         }
-        auto wrapper = layoutWrapper->GetChildByIndex(iter->first, true);
+        // h/f/s: posMap_ keys are item indices; translate to raw indices for child fetches.
+        auto wrapper = layoutWrapper->GetChildByIndex(GetRawIndexForItem(iter->first), true);
         if (!wrapper) {
             break;
         }
@@ -858,10 +977,12 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItemsBackward(
 {
     auto rIter = layoutInfo_->posMap_.rbegin();
     if (layoutInfo_->startIndex_ == 0) {
-        layoutedStart_ = 0.0f;
+        // h/f/s: body starts right below the header.
+        layoutedStart_ = layoutInfo_->headerMainSize_;
         cachedStartIndex_ = 0;
     } else if (layoutInfo_->startIndex_ >= totalItemCount_) {
-        layoutedStart_ = totalMainSize_;
+        // h/f/s: when fully scrolled past the body, anchor the cache marker to body end (excludes footer).
+        layoutedStart_ = totalMainSize_ - layoutInfo_->footerMainSize_;
         cachedStartIndex_ = totalItemCount_;
     } else {
         cachedStartIndex_ = layoutInfo_->startIndex_;
@@ -880,7 +1001,8 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItemsBackward(
         if (cachedStartIndex_ - 1 != rIter->first) {
             break;
         }
-        auto wrapper = layoutWrapper->GetChildByIndex(rIter->first, true);
+        // h/f/s: posMap_ keys are item indices; translate to raw indices for child fetches.
+        auto wrapper = layoutWrapper->GetChildByIndex(GetRawIndexForItem(rIter->first), true);
         if (!wrapper) {
             break;
         }
@@ -903,7 +1025,27 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItems(
     LayoutCachedItemsForward(layoutWrapper, crossSize, paddingOffset);
     LayoutCachedItemsBackward(layoutWrapper, crossSize, paddingOffset);
     FixIndexRange(cachedStartIndex_, cachedEndIndex_);
-    layoutWrapper->SetActiveChildRange(cachedStartIndex_, cachedEndIndex_, 0, 0);
+    // h/f/s: translate item indices to raw indices for SetActiveChildRange. When header / footer are mounted,
+    // use ActiveChildSets so the edges stay active alongside the item cache window.
+    if (headerIndex_ < 0 && footerIndex_ < 0) {
+        layoutWrapper->SetActiveChildRange(cachedStartIndex_, cachedEndIndex_, 0, 0);
+    } else if (cachedStartIndex_ < 0 || cachedEndIndex_ < cachedStartIndex_) {
+        SetHeaderFooterActive(layoutWrapper);
+    } else {
+        ActiveChildSets activeChildSets;
+        const auto rawStart = GetRawIndexForItem(cachedStartIndex_);
+        const auto rawEnd = GetRawIndexForItem(cachedEndIndex_);
+        for (auto i = rawStart; i <= rawEnd; ++i) {
+            activeChildSets.activeItems.insert(i);
+        }
+        if (headerIndex_ >= 0) {
+            activeChildSets.activeItems.insert(headerIndex_);
+        }
+        if (footerIndex_ >= 0) {
+            activeChildSets.activeItems.insert(footerIndex_);
+        }
+        layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
+    }
     layoutInfo_->layoutedStart_ = layoutedStart_;
     layoutInfo_->layoutedEnd_ = layoutedEnd_;
     layoutInfo_->layoutedStartIndex_ = layoutedStartIndex_;
@@ -912,5 +1054,66 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItems(
     layoutInfo_->cacheEndPos_ = cacheEndPos_;
     layoutInfo_->cachedStartIndex_ = cachedStartIndex_;
     layoutInfo_->cachedEndIndex_ = cachedEndIndex_;
+}
+
+void LazyColumnLayoutAlgorithm::SetHeaderFooterActive(LayoutWrapper* layoutWrapper) const
+{
+    ActiveChildSets activeChildSets;
+    if (headerIndex_ >= 0) {
+        activeChildSets.activeItems.insert(headerIndex_);
+    }
+    if (footerIndex_ >= 0) {
+        activeChildSets.activeItems.insert(footerIndex_);
+    }
+    layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
+}
+
+void LazyColumnLayoutAlgorithm::LayoutHeaderFooter(
+    LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset, float crossSize, bool isSticky) const
+{
+    if (rawIndex < 0) {
+        return;
+    }
+    auto child = layoutWrapper->GetChildByIndex(rawIndex);
+    if (!child) {
+        child = layoutWrapper->GetOrCreateChildByIndex(rawIndex);
+    }
+    CHECK_NULL_VOID(child);
+    auto hostNode = child->GetHostNode();
+    // Once promoted by sticky the zIndex stays at 1 even after sticky toggles off; for a header/footer with no
+    // overlapping sibling the value is visually neutral, and not restoring sidesteps the ambiguity between
+    // framework-set 1 and user-set 1.
+    if (isSticky) {
+        HeaderFooterUtils::EnsureStickyDefaultZIndex(hostNode);
+    }
+    auto geometryNode = child->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto finalOffset = offset;
+    if (isRtl_) {
+        finalOffset.SetX(offset.GetX() + crossSize - geometryNode->GetMarginFrameSize().Width());
+    }
+    geometryNode->SetMarginFrameOffset(finalOffset);
+    // Header / footer must always be in the render tree on every layout pass. GetChildByIndex() above does not
+    // activate the child, so a stale inactive state from a prior frame would otherwise suppress
+    // SyncGeometryProperties() and freeze the edge at its previous rendered position.
+    child->SetActive(true);
+    child->Layout();
+}
+
+void LazyColumnLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, float crossSize,
+    const OffsetF& paddingOffset, StickyStyle stickyStyle, float stickyHeaderPos) const
+{
+    auto isSticky = stickyStyle == StickyStyle::HEADER || stickyStyle == StickyStyle::BOTH;
+    auto offset = paddingOffset + (isSticky ? OffsetF(0.0f, stickyHeaderPos) : OffsetF());
+    LayoutHeaderFooter(layoutWrapper, headerIndex_, offset, crossSize, isSticky);
+}
+
+void LazyColumnLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, float crossSize,
+    const OffsetF& paddingOffset, StickyStyle stickyStyle, float stickyFooterPos) const
+{
+    auto isSticky = stickyStyle == StickyStyle::FOOTER || stickyStyle == StickyStyle::BOTH;
+    auto footerPos = isSticky ? stickyFooterPos : totalMainSize_ - layoutInfo_->footerMainSize_;
+    auto offset = OffsetF(paddingOffset.GetX(), paddingOffset.GetY() + footerPos);
+    LayoutHeaderFooter(layoutWrapper, footerIndex_, offset, crossSize, isSticky);
 }
 } // namespace OHOS::Ace::NG

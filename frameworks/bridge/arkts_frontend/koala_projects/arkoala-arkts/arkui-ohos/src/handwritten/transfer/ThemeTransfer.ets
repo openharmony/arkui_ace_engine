@@ -77,6 +77,21 @@ export class ColorsTransfer {
             colors.confirm = ResourceColorTransfer.transferStatic(confirmVal.unwrap());
         }
 
+        let primaryVal = inputVal.getProperty('primary');
+        if (!primaryVal.isNull() && !primaryVal.isUndefined()) {
+            colors.primary = ResourceColorTransfer.transferStatic(primaryVal.unwrap());
+        }
+
+        let onPrimaryVal = inputVal.getProperty('onPrimary');
+        if (!onPrimaryVal.isNull() && !onPrimaryVal.isUndefined()) {
+            colors.onPrimary = ResourceColorTransfer.transferStatic(onPrimaryVal.unwrap());
+        }
+
+        let containerVal = inputVal.getProperty('container');
+        if (!containerVal.isNull() && !containerVal.isUndefined()) {
+            colors.container = ResourceColorTransfer.transferStatic(containerVal.unwrap());
+        }
+
         let fontPrimaryVal = inputVal.getProperty('fontPrimary');
         if (!fontPrimaryVal.isNull() && !fontPrimaryVal.isUndefined()) {
             colors.fontPrimary = ResourceColorTransfer.transferStatic(fontPrimaryVal.unwrap());
@@ -350,6 +365,21 @@ export class ColorsTransfer {
             dynamicValue.setProperty('confirm', confirm);
         }
 
+        if (staticValue.primary !== undefined && staticValue.primary !== null) {
+            const primary = ResourceColorTransfer.transferDynamic(staticValue.primary);
+            dynamicValue.setProperty('primary', primary);
+        }
+
+        if (staticValue.onPrimary !== undefined && staticValue.onPrimary !== null) {
+            const onPrimary = ResourceColorTransfer.transferDynamic(staticValue.onPrimary);
+            dynamicValue.setProperty('onPrimary', onPrimary);
+        }
+
+        if (staticValue.container !== undefined && staticValue.container !== null) {
+            const container = ResourceColorTransfer.transferDynamic(staticValue.container);
+            dynamicValue.setProperty('container', container);
+        }
+
         if (staticValue.fontPrimary !== undefined && staticValue.fontPrimary !== null) {
             const fontPrimary = ResourceColorTransfer.transferDynamic(staticValue.fontPrimary);
             dynamicValue.setProperty('fontPrimary', fontPrimary);
@@ -618,6 +648,21 @@ export class CustomColorsTransfer {
         let confirmVal = inputVal.getProperty('confirm');
         if (!confirmVal.isNull() && !confirmVal.isUndefined()) {
             colors.confirm = ResourceColorTransfer.transferStatic(confirmVal.unwrap());
+        }
+
+        let primaryVal = inputVal.getProperty('primary');
+        if (!primaryVal.isNull() && !primaryVal.isUndefined()) {
+            colors.primary = ResourceColorTransfer.transferStatic(primaryVal.unwrap());
+        }
+
+        let onPrimaryVal = inputVal.getProperty('onPrimary');
+        if (!onPrimaryVal.isNull() && !onPrimaryVal.isUndefined()) {
+            colors.onPrimary = ResourceColorTransfer.transferStatic(onPrimaryVal.unwrap());
+        }
+
+        let containerVal = inputVal.getProperty('container');
+        if (!containerVal.isNull() && !containerVal.isUndefined()) {
+            colors.container = ResourceColorTransfer.transferStatic(containerVal.unwrap());
         }
 
         let fontPrimaryVal = inputVal.getProperty('fontPrimary');
@@ -893,6 +938,21 @@ export class CustomColorsTransfer {
             dynamicValue.setProperty('confirm', confirm);
         }
 
+        if (staticValue.primary !== undefined && staticValue.primary !== null) {
+            const primary = ResourceColorTransfer.transferDynamic(staticValue.primary);
+            dynamicValue.setProperty('primary', primary);
+        }
+
+        if (staticValue.onPrimary !== undefined && staticValue.onPrimary !== null) {
+            const onPrimary = ResourceColorTransfer.transferDynamic(staticValue.onPrimary);
+            dynamicValue.setProperty('onPrimary', onPrimary);
+        }
+
+        if (staticValue.container !== undefined && staticValue.container !== null) {
+            const container = ResourceColorTransfer.transferDynamic(staticValue.container);
+            dynamicValue.setProperty('container', container);
+        }
+
         if (staticValue.fontPrimary !== undefined && staticValue.fontPrimary !== null) {
             const fontPrimary = ResourceColorTransfer.transferDynamic(staticValue.fontPrimary);
             dynamicValue.setProperty('fontPrimary', fontPrimary);
@@ -1146,6 +1206,9 @@ export class ThemeTransfer {
                 warning: 0,
                 alert: 0,
                 confirm: 0,
+                primary: 0,
+                onPrimary: 0,
+                container: 0,
                 fontPrimary: 0,
                 fontSecondary: 0,
                 fontTertiary: 0,
@@ -1199,6 +1262,9 @@ export class ThemeTransfer {
                 warning: 0,
                 alert: 0,
                 confirm: 0,
+                primary: 0,
+                onPrimary: 0,
+                container: 0,
                 fontPrimary: 0,
                 fontSecondary: 0,
                 fontTertiary: 0,

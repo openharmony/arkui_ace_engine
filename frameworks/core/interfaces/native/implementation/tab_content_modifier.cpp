@@ -15,6 +15,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/bottom_tab_bar_style_peer.h"
@@ -310,9 +311,7 @@ void SetOnWillShowImpl(Ark_NativePointer node,
         TabContentModelStatic::SetOnWillShow(frameNode, nullptr);
         return;
     }
-    auto onWillShow = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.InvokeSync();
-    };
+    auto onWillShow = GetSyncInvoker(*optValue);
     TabContentModelStatic::SetOnWillShow(frameNode, std::move(onWillShow));
 }
 void SetOnWillHideImpl(Ark_NativePointer node,
@@ -325,9 +324,7 @@ void SetOnWillHideImpl(Ark_NativePointer node,
         TabContentModelStatic::SetOnWillHide(frameNode, nullptr);
         return;
     }
-    auto onWillHide = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.InvokeSync();
-    };
+    auto onWillHide = GetSyncInvoker(*optValue);
     TabContentModelStatic::SetOnWillHide(frameNode, std::move(onWillHide));
 }
 } // TabContentAttributeModifier

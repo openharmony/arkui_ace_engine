@@ -194,6 +194,8 @@ public:
     void SetOnTouchEvent(TouchEventFunc&& touchEventFunc);
     // Set by JS FrameNode.
     void SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEventFunc);
+    void AddMaterialInteractionEvent(const RefPtr<TouchEventImpl>& touchEvent);
+    void RemoveMaterialInteractionEvent();
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);

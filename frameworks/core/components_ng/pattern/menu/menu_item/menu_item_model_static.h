@@ -41,6 +41,7 @@ public:
     static void AddRowChild(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent);
+    static void SetSubBuilder(FrameNode* frameNode, std::function<void()>&& subBuilder);
     static void SetSymbolStartIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetSymbolEndIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
 private:

@@ -70,6 +70,21 @@ public:
         header_ = header;
     }
 
+    RefPtr<FrameNode> GetHeader() const
+    {
+        return header_;
+    }
+
+    void ResetHeader()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        CHECK_NULL_VOID(header_);
+        host->RemoveChild(header_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        header_ = nullptr;
+    }
+
     void FixScrollParam(float mainPos, float& correctVelocity, float& finalPos);
 
     bool IsNeedAddContentOffset(bool isContentLessThanSize) override

@@ -30,7 +30,8 @@ public:
     {}
     ~SelectContentOverlayPattern() override = default;
 
-    void UpdateMenuIsShow(bool menuIsShow, bool noAnimation = false, bool showSubMenu = false);
+    void UpdateMenuIsShow(
+        bool menuIsShow, bool noAnimation = false, bool showSubMenu = false, bool useNewAnimation = false);
     void UpdateMenuInfo(const SelectMenuInfo& info);
     void UpdateIsShowHandleLine(bool isShowHandleLine);
     void UpdateIsSingleHandle(bool isSingleHandle);

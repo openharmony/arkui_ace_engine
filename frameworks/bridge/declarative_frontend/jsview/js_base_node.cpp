@@ -433,7 +433,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
 
 void JSBaseNode::PostInputEvent(const JSCallbackInfo& info)
 {
-    auto node = realNode_.Upgrade();
+    auto node = viewNode_;
     if (!node || info.Length() < 1 || !info[0]->IsObject()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEvent params invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
@@ -552,7 +552,7 @@ void JSBaseNode::PostAxisEventWithStrategy(const JSCallbackInfo& info, const Ref
 
 void JSBaseNode::PostInputEventWithStrategy(const JSCallbackInfo& info)
 {
-    auto node = realNode_.Upgrade();
+    auto node = viewNode_;
     if (!node || info.Length() < 1 || !info[0]->IsObject()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventWithStrategy params invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));

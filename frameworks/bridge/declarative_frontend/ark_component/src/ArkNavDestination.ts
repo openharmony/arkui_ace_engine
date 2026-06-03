@@ -210,6 +210,10 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
     return this;
   }
+  fullScreenOverlay(value: Optional<boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, FullScreenOverlayModifier.identity, FullScreenOverlayModifier, value);
+    return this;
+  }
   preferredOrientation(orientation: Optional<number>): this {
     modifierWithKey(this._modifiersWithKeys, PreferredOrientationModifier.identity, PreferredOrientationModifier, orientation);
     return this;
@@ -428,6 +432,21 @@ class NavDestinationRecoverableModifier extends ModifierWithKey<boolean | undefi
       getUINativeModule().navDestination.resetRecoverable(node);
     } else {
       getUINativeModule().navDestination.setRecoverable(node, this.value);
+    }
+  }
+}
+
+class FullScreenOverlayModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('fullScreenOverlay');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetFullScreenOverlay(node);
+    } else {
+      getUINativeModule().navDestination.setFullScreenOverlay(node, this.value);
     }
   }
 }

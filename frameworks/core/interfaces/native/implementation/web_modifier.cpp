@@ -29,6 +29,10 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -236,6 +240,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = WebModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::WEB_ETS_TAG, id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -2551,33 +2560,21 @@ void InitCallbackParams_(FrameNode* frameNode,
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto arkOnDisappear = Converter::OptConvert<VoidCallback>(options.onDisappear);
     if (arkOnDisappear) {
-        auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto onDisappear = GetSyncInvokerWithNode(arkOnDisappear.value(), weakNode);
         dst->menuParam.onDisappear = std::move(onDisappear);
     }
     auto arkOnAppear = Converter::OptConvert<VoidCallback>(options.onAppear);
     if (arkOnAppear) {
-        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        auto onAppear = GetSyncInvokerWithNode(arkOnAppear.value(), weakNode);
         dst->menuParam.onAppear = std::move(onAppear);
     }
     auto arkOnMenuShow = Converter::OptConvert<VoidCallback>(options.onMenuShow);
     if (arkOnMenuShow) {
-        dst->onMenuShow = [arkCallback = CallbackHelper(arkOnMenuShow.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        dst->onMenuShow = GetSyncInvokerWithNode(arkOnMenuShow.value(), weakNode);
     }
     auto arkOnMenuHide = Converter::OptConvert<VoidCallback>(options.onMenuHide);
     if (arkOnMenuHide) {
-        dst->onMenuHide = [arkCallback = CallbackHelper(arkOnMenuHide.value()), weakNode]() {
-            PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.InvokeSync();
-        };
+        dst->onMenuHide = GetSyncInvokerWithNode(arkOnMenuHide.value(), weakNode);
     }
 }
 

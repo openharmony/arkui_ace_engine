@@ -418,6 +418,37 @@ abstract class ViewPU extends PUV2ViewBase
     return ''; // for lint warning
   }
 
+  /**
+   * @function __releaseRecyclePool__Internal
+   * @description
+   * Unified interface for releasing recycle pool with boolean flags.
+   *
+   * @param {number} remainingTimeMs - The remaining time in ms (only used if isProgressive is true)
+   * @param {boolean} isProgressive - Whether to use progressive release (with time limit)
+   * @param {boolean} shouldCollect - Whether to collect nodes before releasing (prepare phase)
+   * @returns {boolean} - true if all nodes have been released, false if more work remains
+   */
+  public __releaseRecyclePool__Internal(remainingTimeMs: number, isProgressive: boolean, shouldCollect: boolean): boolean {
+    this.__setHasStartMemOpt__Internal(false);
+    if (!this.recycleManager_) {
+      return true; // No pool exists, considered "complete"
+    }
+
+    // Sync mode: no time limit, batch release
+    if (!isProgressive) {
+      this.recycleManager_.purgeAllCachedRecycleNode();
+      return true;
+    }
+
+    // Collect nodes need to release progressively
+    if (shouldCollect) {
+      this.recycleManager_.preparePurgeAllCachedRecycleNodeProgressive();
+    }
+
+    // Progressive mode: with time limit, collect nodes only once
+    return this.recycleManager_.releaseCachedNodesProgressive(remainingTimeMs);
+  }
+
    /**
    * Indicate if this @Component is allowed to freeze by calling with freezeState=true
    * Called with value of the @Component decorator 'freezeWhenInactive' parameter
@@ -789,6 +820,13 @@ abstract class ViewPU extends PUV2ViewBase
     this.watchedProps.set(propStr, callback);
   }
 
+  protected override __notifyDecoratedWatch__Internal(varName: string): void {
+    const cb = this.watchedProps.get(varName);
+    if (cb && typeof cb === 'function') {
+      cb.call(this, varName);
+    }
+  }
+
   /**
    * This View @Provide's a variable under given name
    * Call this function from the constructor of the sub class
@@ -1114,6 +1152,10 @@ abstract class ViewPU extends PUV2ViewBase
   getOrCreateRecycleManager(): RecycleManager {
     if (!this.recycleManager_) {
       this.recycleManager_ = new RecycleManager;
+      // Set callback to request progressive release from C++ side
+      this.recycleManager_.setRequestProgressiveReleaseCallback(() => {
+        this.__requestProgressiveRelease__Internal();
+      });
     }
     return this.recycleManager_;
   }
@@ -1386,6 +1428,9 @@ abstract class ViewPU extends PUV2ViewBase
     // Check if Legacy Reuse Pool exists
     if (!globalPool && parent && !(parent as ViewPU).isDeleting_) {
       parent.getOrCreateRecycleManager().pushRecycleNode(name, this);
+      if (this.__getReusableMemOptStrategy__Internal() === 1) {
+        parent.__startMemOpt__Internal();
+      }
       this.hasBeenRecycled_ = true;
     } else if (globalPool && globalPool.isActive()) {
       // Global Rewse Pool

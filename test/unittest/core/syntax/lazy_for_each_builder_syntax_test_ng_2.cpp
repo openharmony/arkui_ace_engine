@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,17 @@ const std::unordered_map<int32_t, std::optional<std::string>> LAZY_FOR_EACH_CACH
 const std::list<int32_t> LAZY_FOR_EACH_ITEMS = { 0, 1, 2, 3, 4, 5 };
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t INDEX_0 = 0;
+constexpr int32_t INDEX_2 = 2;
+constexpr int32_t INDEX_3 = 3;
+constexpr int32_t INDEX_4 = 4;
+constexpr int32_t INDEX_5 = 5;
+constexpr int32_t THEME_SCOPE_ID = 42;
+const std::string TEST_KEY_0 = "key0";
+const std::string TEST_KEY_1 = "key1";
+const std::string TEST_KEY_2 = "key2";
+const std::string TEST_KEY_3 = "key3";
+const std::string TEST_KEY_4 = "key4";
+const std::string TEST_KEY_5 = "key5";
 } // namespace
 
 class LazyForEachSyntaxTestNg2 : public testing::Test {
@@ -1338,5 +1349,175 @@ HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilder38, TestSize.Level1)
     EXPECT_FALSE(childNode->CheckIsDarkMode());
     lazyForEachBuilder->NotifyColorModeChange(1, true);
     EXPECT_TRUE(childNode->CheckIsDarkMode());
+}
+
+/**
+ * @tc.name: LazyForEachBuilder_UpdateThemeScopeUpdate_EmptyCollections
+ * @tc.desc: UpdateThemeScopeUpdate with all three collections empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilder_UpdateThemeScopeUpdate_EmptyCollections, TestSize.Level1)
+{
+    auto builder = AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    ASSERT_NE(builder, nullptr);
+
+    builder->cachedItems_.clear();
+    builder->expiringItem_.clear();
+    builder->nodeList_.clear();
+
+    builder->UpdateThemeScopeUpdate(THEME_SCOPE_ID);
+
+    EXPECT_TRUE(builder->cachedItems_.empty());
+    EXPECT_TRUE(builder->expiringItem_.empty());
+    EXPECT_TRUE(builder->nodeList_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachBuilder_UpdateThemeScopeUpdate_NonNullNodes
+ * @tc.desc: UpdateThemeScopeUpdate with non-null UINodes in all three collections
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilder_UpdateThemeScopeUpdate_NonNullNodes, TestSize.Level1)
+{
+    auto builder = AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    ASSERT_NE(builder, nullptr);
+
+    auto uiNode1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto uiNode2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto uiNode3 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(uiNode1, nullptr);
+    ASSERT_NE(uiNode2, nullptr);
+    ASSERT_NE(uiNode3, nullptr);
+
+    builder->cachedItems_[INDEX_0] = LazyForEachChild(TEST_KEY_0, uiNode1);
+    builder->expiringItem_[TEST_KEY_1] = LazyForEachCacheChild(INDEX_1, uiNode2);
+    builder->nodeList_.emplace_back(TEST_KEY_2, uiNode3);
+
+    builder->UpdateThemeScopeUpdate(THEME_SCOPE_ID);
+
+    EXPECT_EQ(builder->cachedItems_.size(), 1);
+    EXPECT_EQ(builder->cachedItems_[INDEX_0].first, TEST_KEY_0);
+    EXPECT_EQ(builder->cachedItems_[INDEX_0].second, uiNode1);
+    EXPECT_EQ(builder->expiringItem_.size(), 1);
+    EXPECT_EQ(builder->expiringItem_[TEST_KEY_1].first, INDEX_1);
+    EXPECT_EQ(builder->expiringItem_[TEST_KEY_1].second, uiNode2);
+    EXPECT_EQ(builder->nodeList_.size(), 1);
+    EXPECT_EQ(builder->nodeList_.front().first, TEST_KEY_2);
+    EXPECT_EQ(builder->nodeList_.front().second, uiNode3);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder_UpdateThemeScopeUpdate_NullNodes
+ * @tc.desc: UpdateThemeScopeUpdate with null UINodes in all three collections, verifying skip branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilder_UpdateThemeScopeUpdate_NullNodes, TestSize.Level1)
+{
+    auto builder = AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    ASSERT_NE(builder, nullptr);
+
+    builder->cachedItems_[INDEX_0] = LazyForEachChild(TEST_KEY_0, nullptr);
+    builder->expiringItem_[TEST_KEY_1] = LazyForEachCacheChild(INDEX_1, nullptr);
+    builder->nodeList_.emplace_back(TEST_KEY_2, nullptr);
+
+    builder->UpdateThemeScopeUpdate(THEME_SCOPE_ID);
+
+    EXPECT_EQ(builder->cachedItems_.size(), 1);
+    EXPECT_EQ(builder->cachedItems_[INDEX_0].second, nullptr);
+    EXPECT_EQ(builder->expiringItem_.size(), 1);
+    EXPECT_EQ(builder->expiringItem_[TEST_KEY_1].second, nullptr);
+    EXPECT_EQ(builder->nodeList_.size(), 1);
+    EXPECT_EQ(builder->nodeList_.front().second, nullptr);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder_SetDestroying_NullNodes
+ * @tc.desc: SetDestroying with null UINodes in both collections verifies skip branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilder_SetDestroying_NullNodes, TestSize.Level1)
+{
+    auto builder = AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    ASSERT_NE(builder, nullptr);
+
+    builder->cachedItems_[INDEX_0] = LazyForEachChild(TEST_KEY_0, nullptr);
+    builder->expiringItem_[TEST_KEY_1] = LazyForEachCacheChild(INDEX_1, nullptr);
+
+    builder->SetDestroying(true, true);
+
+    EXPECT_EQ(builder->cachedItems_.size(), 1);
+    EXPECT_EQ(builder->cachedItems_[INDEX_0].second, nullptr);
+    EXPECT_EQ(builder->expiringItem_.size(), 1);
+    EXPECT_EQ(builder->expiringItem_[TEST_KEY_1].second, nullptr);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder_SetDestroying_ReusableNodes
+ * @tc.desc: SetDestroying with IsReusableNode()=true nodes in both
+ * collections verifies SetDestroying(isDestroying, false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilder_SetDestroying_ReusableNodes, TestSize.Level1)
+{
+    auto builder = AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    ASSERT_NE(builder, nullptr);
+
+    auto reusableNode1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto reusableNode2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(reusableNode1, nullptr);
+    ASSERT_NE(reusableNode2, nullptr);
+    reusableNode1->isCNode_ = true;
+    reusableNode2->isCNode_ = true;
+    EXPECT_TRUE(reusableNode1->IsReusableNode());
+    EXPECT_TRUE(reusableNode2->IsReusableNode());
+
+    reusableNode1->isInDestroying_ = false;
+    reusableNode2->isInDestroying_ = false;
+
+    builder->cachedItems_[INDEX_2] = LazyForEachChild(TEST_KEY_2, reusableNode1);
+    builder->expiringItem_[TEST_KEY_3] = LazyForEachCacheChild(INDEX_3, reusableNode2);
+
+    builder->SetDestroying(true, true);
+
+    EXPECT_EQ(builder->cachedItems_.size(), 1);
+    EXPECT_EQ(builder->cachedItems_[INDEX_2].second, reusableNode1);
+    EXPECT_EQ(builder->expiringItem_.size(), 1);
+    EXPECT_EQ(builder->expiringItem_[TEST_KEY_3].second, reusableNode2);
+    EXPECT_TRUE(reusableNode1->isInDestroying_);
+    EXPECT_TRUE(reusableNode2->isInDestroying_);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder_SetDestroying_NonReusableNodes
+ * @tc.desc: SetDestroying with IsReusableNode()=false nodes in both collections
+ * verifies SetDestroying(isDestroying, cleanStatus)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilder_SetDestroying_NonReusableNodes, TestSize.Level1)
+{
+    auto builder = AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    ASSERT_NE(builder, nullptr);
+
+    auto nonReusableNode1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto nonReusableNode2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(nonReusableNode1, nullptr);
+    ASSERT_NE(nonReusableNode2, nullptr);
+    EXPECT_FALSE(nonReusableNode1->IsReusableNode());
+    EXPECT_FALSE(nonReusableNode2->IsReusableNode());
+
+    nonReusableNode1->isInDestroying_ = false;
+    nonReusableNode2->isInDestroying_ = false;
+
+    builder->cachedItems_[INDEX_4] = LazyForEachChild(TEST_KEY_4, nonReusableNode1);
+    builder->expiringItem_[TEST_KEY_5] = LazyForEachCacheChild(INDEX_5, nonReusableNode2);
+
+    builder->SetDestroying(true, true);
+
+    EXPECT_EQ(builder->cachedItems_.size(), 1);
+    EXPECT_EQ(builder->cachedItems_[INDEX_4].second, nonReusableNode1);
+    EXPECT_EQ(builder->expiringItem_.size(), 1);
+    EXPECT_EQ(builder->expiringItem_[TEST_KEY_5].second, nonReusableNode2);
+    EXPECT_TRUE(nonReusableNode1->isInDestroying_);
+    EXPECT_TRUE(nonReusableNode2->isInDestroying_);
 }
 }

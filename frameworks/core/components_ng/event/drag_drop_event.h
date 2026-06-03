@@ -51,7 +51,8 @@ public:
     void NotifyPreDragStatus(const PreDragStatus preDragStatus) override;
 
 private:
-    void InitPanAction();
+    void InitPanAction(bool isStylusMouseMode);
+    void InitPanMouseDistance(bool isStylusMouseMode);
     void InitLongPressAction();
     const GestureEventFunc GetSequenceOnActionCancel();
     RefPtr<FrameNode> GetFrameNode() const;

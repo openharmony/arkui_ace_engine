@@ -654,8 +654,12 @@ bool TextLayoutAlgorithm::UpdateParagraphBySpanWithCache(LayoutWrapper* layoutWr
     if (SystemProperties::GetTextTraceEnabled()) {
         size_t cacheSize = paragraphCache_ ? paragraphCache_->Size() : 0;
         ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::UpdateParagraphBySpanWithCache "
-            "[spanGroupHash:%zu][spanGroupStyleHash:%zu][spans:%zu][cacheSize:%zu]",
-            spanGroupHash.size(), spanGroupStyleHash.size(), spans_.size(), cacheSize);
+            "[spanGroupHash:%zu][spanGroupStyleHash:%zu][spans:%zu][cacheSize:%zu]"
+            "[needReCreateParagraph:%d][reLayoutTextStyleBitmap:%s][reLayoutParagraphStyleBitmap:%s]",
+            spanGroupHash.size(), spanGroupStyleHash.size(), spans_.size(), cacheSize,
+            textStyle.NeedReCreateParagraph(),
+            textStyle.GetReLayoutTextStyleBitmap().to_string().c_str(),
+            textStyle.GetReLayoutParagraphStyleBitmap().to_string().c_str());
     }
     if (!paragraphCache_) {
         return MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
@@ -868,7 +872,7 @@ bool TextLayoutAlgorithm::LayoutParagraphs(float maxWidth)
     for (auto pIter = paragraphInfo.begin(); pIter != paragraphInfo.end(); pIter++) {
         auto paragraph = pIter->paragraph;
         CHECK_NULL_RETURN(paragraph, false);
-        if (!NearEqual(maxWidth, paragraph->GetMaxWidth()) || NearEqual(0.0f, paragraph->GetMaxWidth())) {
+        if (NearEqual(0.0f, paragraph->GetMaxWidth()) || !NearEqual(maxWidth, paragraph->GetMaxWidth())) {
             paragraph->Layout(maxWidth);
         }
     }

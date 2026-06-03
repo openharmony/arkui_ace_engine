@@ -456,6 +456,7 @@ if (globalThis.Search === undefined) {
       getUINativeModule().loadNativeModule("Search");
       var module = globalThis.requireNapi('arkui.components.arksearch');
       module.exportView();
+      module.loadComponent();
       getUINativeModule().search.jsCreate(params);
     },
     name: 'JSSearch'

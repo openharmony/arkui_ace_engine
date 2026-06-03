@@ -1523,6 +1523,22 @@ void GestureEventHub::SetTouchEvent(TouchEventFunc&& touchEventFunc)
     touchEventActuator_->ReplaceTouchEvent(std::move(touchEventFunc));
 }
 
+void GestureEventHub::AddMaterialInteractionEvent(const RefPtr<TouchEventImpl>& touchEvent)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->AddMaterialInteractionEvent(touchEvent);
+}
+
+void GestureEventHub::RemoveMaterialInteractionEvent()
+{
+    if (!touchEventActuator_) {
+        return;
+    }
+    touchEventActuator_->RemoveMaterialInteractionEvent();
+}
+
 void GestureEventHub::AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
 {
     if (!touchEventActuator_) {

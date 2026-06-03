@@ -120,6 +120,22 @@ class MenuItemSelectIconModifier extends ModifierWithKey {
   }
 }
 MenuItemSelectIconModifier.identity = Symbol('selectIcon');
+class SubMenuBuilderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menuitem.resetSubMenuBuilder(node);
+    } else {
+      getUINativeModule().menuitem.setSubMenuBuilder(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+SubMenuBuilderModifier.identity = Symbol('subMenuBuilder');
 class MenuItemOnChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -165,6 +181,10 @@ class ArkMenuItemComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, LabelFontColorModifier.identity, LabelFontColorModifier, value);
     return this;
   }
+  subMenuBuilder(value) {
+    modifierWithKey(this._modifiersWithKeys, SubMenuBuilderModifier.identity, SubMenuBuilderModifier, value);
+    return this;
+  }
 }
 
 class JSMenuItem extends JSContainerBase {
@@ -191,6 +211,9 @@ class JSMenuItem extends JSContainerBase {
   }
   static onChange(callback) {
     getUINativeModule().menuitem.setOnChange(true, callback);
+  }
+  static subMenuBuilder(builder) {
+    getUINativeModule().menuitem.setSubMenuBuilder(true, builder);
   }
   static attributeModifier(modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {

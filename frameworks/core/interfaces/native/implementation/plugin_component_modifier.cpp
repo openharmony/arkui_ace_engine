@@ -20,6 +20,10 @@
 #include "core/components_ng/pattern/plugin/plugin_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #endif
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 #include "arkoala_api_generated.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -61,6 +65,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     ACE_UINODE_TRACE(id);
     auto frameNode = PluginModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::PLUGIN_ETS_TAG, id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

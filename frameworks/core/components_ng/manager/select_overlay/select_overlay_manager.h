@@ -27,6 +27,7 @@
 #include "core/common/font_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
+#include "core/components_ng/manager/select_content_overlay/selection_container_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
@@ -113,6 +114,7 @@ public:
     void ResetSelection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode);
 
     const RefPtr<SelectContentOverlayManager>& GetSelectContentOverlayManager();
+    const RefPtr<SelectionContainerManager>& GetSelectionContainerManager();
     void CloseSelectContentOverlay(int32_t overlayId, CloseReason reason, bool animation);
 
     void OnFontChanged() override;
@@ -157,6 +159,7 @@ private:
     std::map<int32_t, std::map<int32_t, ScrollableParentCallback>> parentScrollCallbacks_;
 
     RefPtr<SelectContentOverlayManager> selectContentManager_;
+    RefPtr<SelectionContainerManager> selectionContainerManager_;
     TextMenuOptions textMenuOptions_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayManager);

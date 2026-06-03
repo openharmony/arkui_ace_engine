@@ -61,23 +61,12 @@ enum class DirectionStatus : uint8_t {
 
 // Describe where caret is and how tall visually.
 struct CaretMetrics {
-    void Reset()
-    {
-        offset.Reset();
-        height = 0.0;
-    }
+    void Reset();
+    std::string ToString() const;
 
     Offset offset;
     // When caret is close to different glyphs, the height will be different.
     double height = 0.0;
-    std::string ToString() const
-    {
-        std::string result = "Offset: ";
-        result += offset.ToString();
-        result += ", height: ";
-        result += std::to_string(height);
-        return result;
-    }
 };
 
 class TextOverlayBase : public virtual AceType {
@@ -87,25 +76,10 @@ public:
     TextOverlayBase() = default;
     ~TextOverlayBase() override;
 
-    void SetUpdateHandlePosition(const std::function<void(const OverlayShowOption&)>& updateHandlePosition)
-    {
-        updateHandlePosition_ = updateHandlePosition;
-    }
-
-    void SetUpdateHandleDiameter(const std::function<void(const double&)>& updateHandleDiameter)
-    {
-        updateHandleDiameter_ = updateHandleDiameter;
-    }
-
-    void SetUpdateHandleDiameterInner(const std::function<void(const double&)>& updateHandleDiameterInner)
-    {
-        updateHandleDiameterInner_ = updateHandleDiameterInner;
-    }
-
-    void SetOnClipRectChanged(const std::function<void(const Rect&)>& onClipRectChanged)
-    {
-        onClipRectChanged_ = onClipRectChanged;
-    }
+    void SetUpdateHandlePosition(const std::function<void(const OverlayShowOption&)>& updateHandlePosition);
+    void SetUpdateHandleDiameter(const std::function<void(const double&)>& updateHandleDiameter);
+    void SetUpdateHandleDiameterInner(const std::function<void(const double&)>& updateHandleDiameterInner);
+    void SetOnClipRectChanged(const std::function<void(const Rect&)>& onClipRectChanged);
 
     static bool IsSelectiveDevice()
     {
@@ -113,10 +87,7 @@ public:
                 SystemProperties::GetDeviceType() != DeviceType::WATCH);
     }
 
-    void MarkIsOverlayShowed(bool isOverlayShowed)
-    {
-        isOverlayShowed_ = isOverlayShowed;
-    }
+    void MarkIsOverlayShowed(bool isOverlayShowed);
 
     bool IsOverlayShowed() const
     {
@@ -202,46 +173,15 @@ public:
     explicit TextOverlayManager(const WeakPtr<PipelineContext>& context);
     ~TextOverlayManager() override;
 
-    void SetTextOverlayBase(const WeakPtr<TextOverlayBase>& textOverlayBase)
-    {
-        textOverlayBase_ = textOverlayBase;
-    }
-
-    const RefPtr<TextOverlayBase> GetTextOverlayBase() const
-    {
-        auto textOverlayBase = textOverlayBase_.Upgrade();
-        if (!textOverlayBase) {
-            return nullptr;
-        }
-        return textOverlayBase;
-    }
-
-    const std::vector<Rect>& GetTextOverlayRect() const
-    {
-        return textOverlayRect_;
-    }
-
-    void AddTextOverlayRect(const Rect& textOverlayRect)
-    {
-        textOverlayRect_.emplace_back(textOverlayRect);
-    }
-
-    void ClearTextOverlayRect()
-    {
-        textOverlayRect_.clear();
-    }
-
+    void SetTextOverlayBase(const WeakPtr<TextOverlayBase>& textOverlayBase);
+    const RefPtr<TextOverlayBase> GetTextOverlayBase() const;
+    const std::vector<Rect>& GetTextOverlayRect() const;
+    void AddTextOverlayRect(const Rect& textOverlayRect);
+    void ClearTextOverlayRect();
     // Coordinate offset is used to calculate the local location of the touch point in the event manager.
-    void SetCoordinateOffset(const Offset& coordinateOffset)
-    {
-        coordinateOffset_ = coordinateOffset;
-    }
-
+    void SetCoordinateOffset(const Offset& coordinateOffset);
     // Gets the coordinate offset to calculate the local location of the touch point by manually.
-    const Offset& GetCoordinateOffset() const
-    {
-        return coordinateOffset_;
-    }
+    const Offset& GetCoordinateOffset() const;
 
     const RefPtr<RenderNode> GetTargetNode() const;
     ACE_FORCE_EXPORT void PopTextOverlay();

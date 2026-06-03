@@ -31,6 +31,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -150,7 +151,7 @@ public:
         std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops,
-        const int32_t mapIdx = 0);
+        const int32_t mapIdx = 0, bool loadRes = false);
     static void NewGetJsGradientColorStopsCheck(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -579,7 +580,7 @@ public:
     static void JsRadialGradient(const JSCallbackInfo& info);
     static void JsSweepGradient(const JSCallbackInfo& info);
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
-    static void NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient);
+    static void NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient, bool loadRes = false);
     static void SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction);
     static void ParseJsTextShaderStyle(std::optional<NG::Gradient>& gradientShaderStyle,
         std::optional<Color>& colorShaderStyle, JSRef<JSObject>& obj, RefPtr<ResourceObject>& resObj);
@@ -589,7 +590,7 @@ public:
     static void ParseLinearGradient(const NG::Gradient& gradient, JSRef<JSObject>& options);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
-    static void NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient);
+    static void NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient, bool loadRes = false);
     static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
     static void JsMotionPath(const JSCallbackInfo& info);
     static void JsMotionBlur(const JSCallbackInfo& info);

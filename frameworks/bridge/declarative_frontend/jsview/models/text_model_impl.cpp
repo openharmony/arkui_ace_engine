@@ -222,6 +222,8 @@ void TextModelImpl::SetOptimizeTrailingSpace(bool trim) {}
 
 void TextModelImpl::SetCompressLeadingPunctuation(bool enabled) {}
 
+void TextModelImpl::SetPunctuationOverflow(bool enabled) {}
+
 void TextModelImpl::SetGradientShaderStyle(NG::Gradient& gradient) {}
 
 void TextModelImpl::SetColorShaderStyle(const Color& value) {}

@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_engine_loader.h"
@@ -57,6 +58,13 @@ SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* la
         return SmartLayoutType::ROW;
     }
     if (hostTag == V2::FLEX_ETS_TAG) {
+        auto hostNode = layoutWrapper->GetHostNode();
+        if (hostNode) {
+            auto flexPattern = hostNode->GetPattern<FlexLayoutPattern>();
+            if (flexPattern && flexPattern->GetIsWrap()) {
+                return SmartLayoutType::UNKNOWN;
+            }
+        }
         auto layoutProp = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
         if (layoutProp) {
             auto direction = layoutProp->GetFlexDirection().value_or(FlexDirection::ROW);
@@ -211,6 +219,9 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
 
     auto renderContext = hostNode->GetRenderContext();
     if (renderContext != nullptr) {
+        if (renderContext->HasPosition()) {
+            return;
+        }
         renderContext->SetRenderPivot(0.0f, 0.0f);
         renderContext->SetScale(static_cast<float>(sizeScale), static_cast<float>(sizeScale));
     }

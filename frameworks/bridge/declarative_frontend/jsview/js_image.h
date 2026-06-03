@@ -85,6 +85,7 @@ public:
     static void JsImageResizable(const JSCallbackInfo& info);
     static bool IsDrawable(const JSRef<JSVal>& jsValue);
     static ImageType ParseImageType(const JSRef<JSVal>& jsValue);
+    static void ResolveImageSource(const JSRef<JSVal>& imageInfo, ImageInfoConfig& config);
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(ImageColorFilter* obj);
     static bool ParseContentTransitionEffect(const JSRef<JSVal>& jsValue, ContentTransitionType& contentTransitionType);

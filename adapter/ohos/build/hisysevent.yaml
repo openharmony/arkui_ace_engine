@@ -63,7 +63,7 @@ FRAMEWORK_PAGE_ROUTER_EXCEPTION:
   PAGE_LOAD_COST: {type: STRING, arrsize: 5, desc: pages loading cost too long }
 
 COMPONENT_EXCEPTION:
-  __BASE: { type: FAULT, level: MINOR, desc: component exception }
+  __BASE: { type: FAULT, level: CRITICAL, desc: component exception }
   ERROR_TYPE: { type: INT32, desc: error type }
   PACKAGE_NAME: { type: STRING, desc: package name }
   NODE_TYPE: {type: INT32 , desc: node type }

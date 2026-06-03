@@ -23,6 +23,10 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_static.h"
 #endif // XCOMPONENT_SUPPORTED
+#if defined(PREVIEW)
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/utility/preview_placeholder.h"
+#endif
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
@@ -46,6 +50,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 #ifdef XCOMPONENT_SUPPORTED
     ACE_UINODE_TRACE(id);
     auto frameNode = XComponentModelStatic::CreateFrameNode(id, false);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#elif defined(PREVIEW)
+    auto frameNode = CreatePreviewPlaceholder(V2::XCOMPONENT_ETS_TAG, id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
@@ -74,7 +83,7 @@ void SetXComponentOptionsImpl(Ark_NativePointer node,
             };
             XComponentModelStatic::SetNativeXComponentHandler(frameNode, handler);
             if (src.controller.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-                auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(src.controller.value);
+                auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(src.controller.value.nativeObj);
                 CHECK_NULL_VOID(peerImpl);
                 XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
             }
@@ -84,8 +93,11 @@ void SetXComponentOptionsImpl(Ark_NativePointer node,
             ACE_UINODE_TRACE(frameNode);
             XComponentType type = ConvertXComponentType(src.type);
             XComponentModelStatic::SetXComponentType(frameNode, type);
-            auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(src.controller);
+            auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(src.controller.nativeObj);
             CHECK_NULL_VOID(peerImpl);
+            peerImpl->SetOnSurfaceCreatedEvent(src.controller.onSurfaceCreated);
+            peerImpl->SetOnSurfaceChangedEvent(src.controller.onSurfaceChanged);
+            peerImpl->SetOnSurfaceDestroyedEvent(src.controller.onSurfaceDestroyed);
             bool isUpdated = XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
             CHECK_EQUAL_VOID(isUpdated, false);
             XComponentModelNG::SetControllerOnCreated(frameNode, std::move(peerImpl->onSurfaceCreatedEvent));

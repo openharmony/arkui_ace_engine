@@ -217,4 +217,9 @@ void PerfMonitor::ReportSurface(const uint64_t& uniqueId, const std::string& sur
     PerfInterfaces::ReportSurface(uniqueId, surfaceName, componentName, bundleName, pid);
 }
 
+void PerfMonitor::ReportComponentDetach(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid)
+{
+    PerfInterfaces::ReportComponentDetach(uniqueId, surfaceName, componentName, bundleName, pid);
+}
 } // namespace OHOS::Ace

@@ -526,7 +526,7 @@ ArkUINativeModuleValue SearchBridge::JsCreate(ArkUIRuntimeCallInfo* runtimeCallI
     if (changeEventValIsValid) {
         ParseSearchValueObject(vm, changeEventVal);
     }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         Framework::JSSearchTheme::ApplyTheme();
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1308,10 +1308,12 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
                           : nativeNode;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     bool isTheme = false;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, fourArg, fontColor, colorObject, nodeInfo)) {
+    if (!fourArg->IsUndefined() && !fourArg->IsNull() &&
+        ArkTSUtils::ParseJsColorAlphaForMaterial(vm, fourArg, fontColor, colorObject, nodeInfo)) {
         value.fontColor = static_cast<int32_t>(fontColor.GetValue());
     } else {
         value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
+        fontColor = theme->GetSearchButtonTextColor();
         isTheme = true;
     }
 
@@ -1322,7 +1324,8 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     if (fiveArg->IsBoolean()) {
         value.autoDisable = fiveArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(
-            nativeNode, &value, &searchButtonObj, isTheme, isJsView);
+            nativeNode, &value, reinterpret_cast<ArkUI_InnerColor*>(&fontColor),
+            &searchButtonObj, isTheme, isJsView);
     } else {
         if (isJsView) {
             value.autoDisable = false;
@@ -1332,7 +1335,8 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     }
 
     GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(
-        nativeNode, &value, &searchButtonObj, isTheme, isJsView);
+        nativeNode, &value, reinterpret_cast<ArkUI_InnerColor*>(&fontColor),
+        &searchButtonObj, isTheme, isJsView);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -6200,6 +6200,14 @@
         "name": "OH_ArkUI_ParagraphStyle_GetRadialGradient"
     },
     {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ParagraphStyle_SetTailIndents"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_ParagraphStyle_GetTailIndents"
+    },
+    {
         "first_introduced": "24",
         "name": "OH_ArkUI_GestureStyle_Create"
     },

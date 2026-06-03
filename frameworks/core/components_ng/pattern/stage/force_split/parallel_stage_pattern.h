@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 enum class PageMode {
@@ -104,6 +105,22 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
 
+    const RefPtr<FrameNode>& GetDragBarNode() const
+    {
+        return dragBarNode_;
+    }
+
+    bool HasDragBarNode() const
+    {
+        return hasDragBarNode_;
+    }
+
+    void InitForceSplitDragIfNeeded();
+
+    RefPtr<FrameNode> GetOrCreateMaskNode(bool isLeft);
+    RefPtr<FrameNode> GetMaskContentNode(bool isLeft);
+    void UpdateMaskNodeContent(bool isLeft);
+
 private:
     void FireModeChangeCallback();
     void CreateDividerNodeIfNeeded();
@@ -115,14 +132,33 @@ private:
     void UpdateDividerNode(const RefPtr<FrameNode>& hostNode, bool needResetHomeTransitionEffect = true);
     void UpdateDividerNodeInVirtualStackBasedSplit(const RefPtr<FrameNode>& hostNode);
 
+    void CreateDragBarNodeIfNeeded();
+    RefPtr<FrameNode> CreateDragBarItemNode();
+    void InitForceSplitDragEvent();
+    void HandleForceSplitDragStart();
+    void HandleForceSplitDragUpdate(float xOffset);
+    void HandleForceSplitDragEnd();
+    void ShowForceSplitMask();
+    void RemoveForceSplitMask();
+    void CreateForceSplitSnapProperty();
+    void PlayForceSplitSnapAnimation(float fromRatio, float toRatio);
+    void OnForceSplitSnapAnimationFinish(float finalRatio);
+    void StopForceSplitSnapAnimation();
+
     WeakPtr<FrameNode> homePageNode_;
     RefPtr<FrameNode> dividerNode_;
     RefPtr<FrameNode> placeHolderPage_;
     RefPtr<FrameNode> relatedPage_;
+    RefPtr<FrameNode> dragBarNode_;
     PageMode mode_ = PageMode::STACK;
     bool hasDividerNode_ = false;
+    bool hasDragBarNode_ = false;
     std::function<void()> modeChangeCallback_;
     std::function<void(bool)> windowStateChangeCallback_;
+    RefPtr<PanEvent> forceSplitDragEvent_;
+    RefPtr<FrameNode> leftMaskNode_ = nullptr;
+    RefPtr<FrameNode> rightMaskNode_ = nullptr;
+    std::shared_ptr<AnimationUtils::Animation> forceSplitSnapAnimation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelStagePattern);
 };

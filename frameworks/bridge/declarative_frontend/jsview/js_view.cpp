@@ -789,6 +789,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         recycleNode->ResetRecycle();
     };
 
+    auto releaseRecyclePoolFunc =
+        [weak = AceType::WeakClaim(this)](int32_t remainingTimeMs, bool isProgressive, bool shouldCollect) -> bool {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, true);
+        CHECK_NULL_RETURN(jsView->jsViewFunction_, true);
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->jsViewFunction_->ExecuteReleaseRecyclePool(remainingTimeMs, isProgressive, shouldCollect);
+    };
+
     auto triggerLifecycleFunc = [weak = AceType::WeakClaim(this)](int32_t eventId) -> bool {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, false);
@@ -863,6 +872,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .hasNodeUpdateFunc = std::move(hasNodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
+        .releaseRecyclePoolFunc = std::move(releaseRecyclePoolFunc),
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
@@ -876,7 +886,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .isStatic = IsStatic(),
         .creatorId = GetCreatorId(),
         .jsViewName = GetJSViewName(),
-        .isV2 = GetJSIsV2() };
+        .isV2 = GetJSIsV2(),
+        .reusableMemOptStrategy = GetJSReusableMemOptStrategy() };
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
@@ -1372,6 +1383,26 @@ void JSViewPartialUpdate::JSGetUniqueId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nodeId)));
 }
 
+void JSViewPartialUpdate::JSResetRecycleCustomNode(const JSCallbackInfo& info)
+{
+    recycleCustomNode_.Reset();
+}
+
+void JSViewPartialUpdate::JSSetReusableMemOptStrategy(const int32_t reusableMemOptStrategy)
+{
+    reusableMemOptStrategy_ = reusableMemOptStrategy;
+}
+
+void JSViewPartialUpdate::JSStartMemOpt()
+{
+    ViewPartialUpdateModel::GetInstance()->StartMemOpt(viewNode_);
+}
+
+void JSViewPartialUpdate::JSRequestProgressiveRelease()
+{
+    ViewPartialUpdateModel::GetInstance()->RequestProgressiveRelease(viewNode_);
+}
+
 void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 {
 #if defined(PREVIEW) || !defined(OHOS_PLATFORM)
@@ -1612,6 +1643,11 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("findEnvValueByKey", &JSViewPartialUpdate::JSFindSystemEnvValueByKey);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
+    JSClass<JSViewPartialUpdate>::Method(
+        "setReusableMemOptStrategy", &JSViewPartialUpdate::JSSetReusableMemOptStrategy);
+    JSClass<JSViewPartialUpdate>::Method("startMemOpt", &JSViewPartialUpdate::JSStartMemOpt);
+    JSClass<JSViewPartialUpdate>::Method(
+        "requestProgressiveRelease", &JSViewPartialUpdate::JSRequestProgressiveRelease);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
     JSClass<JSViewPartialUpdate>::Method(
         "allowReusableV2Descendant", &JSViewPartialUpdate::JSAllowReusableV2Descendant);

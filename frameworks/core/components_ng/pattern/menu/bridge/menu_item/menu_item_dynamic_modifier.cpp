@@ -465,6 +465,25 @@ void ResetMenuItemOnChange(ArkUINodeHandle node)
     MenuItemModelNG::SetOnChange(frameNode, nullptr);
 }
 
+void SetSubMenuBuilder(ArkUINodeHandle node, void* callback)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto subBuilder = reinterpret_cast<std::function<void()>*>(callback);
+        MenuItemModelNG::SetSubBuilder(frameNode, std::move(*subBuilder));
+    } else {
+        MenuItemModelNG::SetSubBuilder(frameNode, nullptr);
+    }
+}
+
+void ResetSubMenuBuilder(ArkUINodeHandle node)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuItemModelNG::SetSubBuilder(frameNode, nullptr);
+}
+
 ArkUINodeHandle CreateMenuItem(ArkUI_Int32 nodeId, ArkUI_Bool enable, ArkUI_CharPtr value)
 {
     OptionParam param;
@@ -538,6 +557,8 @@ const ArkUIMenuItemModifier* GetMenuItemDynamicModifier()
             .resetSelectIconSymbol = ResetSelectIconSymbol,
             .setOnChange = SetMenuItemOnChange,
             .resetOnChange = ResetMenuItemOnChange,
+            .setSubMenuBuilder = SetSubMenuBuilder,
+            .resetSubMenuBuilder = ResetSubMenuBuilder,
             .createMenuItemFrameNode = CreateMenuItemFrameNode,
             .setLabelFontColorInt = SetLabelFontColor,
         };

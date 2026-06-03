@@ -17,7 +17,9 @@
 #include "interfaces/native/node/list_option.h"
 
 #include "base/error/error_code.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -155,15 +157,22 @@ void ResetListItemStyle(ArkUINodeHandle node)
 ArkUI_Int32 Expand(ArkUINodeHandle node, ArkUI_Int32 direction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (frameNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_ERROR, "node type is not ListItem");
         return ERROR_CODE_PARAM_ERROR;
     }
     if (static_cast<int32_t>(ListItemSwipeActionDirection::START) > direction ||
         static_cast<int32_t>(ListItemSwipeActionDirection::END) < direction) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "direction is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!frameNode->IsOnMainTree()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE,
+            "node is not on main tree");
         return ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
     }
     ListItemModelNG::ExpandSwipeAction(frameNode, static_cast<ListItemSwipeActionDirection>(direction));
@@ -173,15 +182,44 @@ ArkUI_Int32 Expand(ArkUINodeHandle node, ArkUI_Int32 direction)
 ArkUI_Int32 Collapse(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    if (frameNode == nullptr) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "frame node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_ERROR, "node type is not ListItem");
         return ERROR_CODE_PARAM_ERROR;
     }
     if (!frameNode->IsOnMainTree()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE,
+            "node is not on main tree");
         return ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
     }
     ListItemModelNG::CollapseSwipeAction(frameNode);
     return ERROR_CODE_NO_ERROR;
+}
+
+void SetAutoScale(ArkUINodeHandle node, ArkUI_Bool autoScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetAutoScale(frameNode, autoScale);
+}
+
+ArkUI_Bool GetAutoScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<ArcListItemLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    return layoutProperty->GetAutoScale().value_or(true);
+}
+
+void ResetAutoScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetAutoScale(frameNode, true);
 }
 
 namespace NodeModifier {
@@ -201,6 +239,9 @@ const ArkUIListItemModifier* GetListItemModifier()
         .resetListItemStyle = ResetListItemStyle,
         .expand = Expand,
         .collapse = Collapse,
+        .setAutoScale = SetAutoScale,
+        .getAutoScale = GetAutoScale,
+        .resetAutoScale = ResetAutoScale,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

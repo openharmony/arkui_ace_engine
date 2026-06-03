@@ -38,6 +38,16 @@ public:
     static void SetRowGap(FrameNode* frameNode, const std::optional<Dimension>& rowGap);
     static void SetColumnGap(FrameNode* frameNode, const std::optional<Dimension>& columnGap);
     static void SetOnVisibleIndexesChange(FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange);
+    // Set sticky style; nullopt resets to NONE. The integer must match the NG::StickyStyle enum.
+    static void SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle);
+    // Mount the header node directly.
+    static void SetHeader(FrameNode* frameNode, const RefPtr<UINode>& headerNode);
+    // Mount the footer node directly.
+    static void SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footerNode);
+    // Remove the header.
+    static void RemoveHeader(FrameNode* frameNode);
+    // Remove the footer.
+    static void RemoveFooter(FrameNode* frameNode);
 };
 
 class ACE_EXPORT LazyVWaterFlowLayoutModelStatic : public LazyWaterFlowLayoutModelStatic {

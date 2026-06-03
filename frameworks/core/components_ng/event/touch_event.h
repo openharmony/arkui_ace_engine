@@ -78,6 +78,21 @@ public:
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
+    void AddMaterialInteractionEvent(const RefPtr<TouchEventImpl>& touchEvent)
+    {
+        if (interactionEventCallback_) {
+            return;
+        }
+        interactionEventCallback_ = std::move(touchEvent);
+    }
+
+    void RemoveMaterialInteractionEvent()
+    {
+        if (interactionEventCallback_) {
+            interactionEventCallback_.Reset();
+        }
+    }
+
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (touchEvents_.empty()) {
@@ -118,6 +133,7 @@ public:
 
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
+    bool HandleInteractionEvent(const TouchEvent& point) override;
 
     void SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& callback)
     {
@@ -144,6 +160,7 @@ public:
     }
 
 private:
+    bool TriggerInteractionCallBack(TouchEventInfo& event);
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
     bool ShouldResponse() override;
     void TriggerCallBacks(TouchEventInfo& event);
@@ -157,6 +174,7 @@ private:
     RefPtr<TouchEventImpl> userCallback_;
     RefPtr<TouchEventImpl> onTouchEventCallback_;
     RefPtr<TouchEventImpl> commonTouchEventCallback_;
+    RefPtr<TouchEventImpl> interactionEventCallback_;
     // isFlushTouchEventsEnd_ means the last one touch event info during one vsync period, used only for web_pattern
     // if isFlushTouchEventsEnd_ is true, web_pattern start to send touch event list to chromium
     bool isFlushTouchEventsEnd_ = false;

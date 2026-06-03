@@ -29,6 +29,12 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+
+enum class ReusableMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+};
+
 class ACE_FORCE_EXPORT CustomNodeBase : public virtual AceType {
     DECLARE_ACE_TYPE(CustomNodeBase, AceType);
 
@@ -45,6 +51,11 @@ public:
 
     void SetIsV2(bool isV2);
     bool GetIsV2();
+
+    void SetReusableMemOptStrategy(int32_t reusableMemOptStrategy);
+    ReusableMemOptStrategy GetReusableMemOptStrategy();
+    void TryEnableParentCustomNodeMemOpt();
+    void SetReleaseRecyclePoolFunction(std::function<bool(int32_t, bool, bool)>&& callback);
 
     void SetThisFunc(std::function<void*()>&& getThisFunc);
     void* FireThisFunc();
@@ -144,6 +155,9 @@ protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
     bool isV2_ = false;
+    ReusableMemOptStrategy reusableMemOptStrategy_ = ReusableMemOptStrategy::DEFAULT;
+    // int32_t remainingTimeMs, bool isProgressive, bool shouldCollect
+    std::function<bool(int32_t, bool, bool)> releaseRecyclePoolFunc_;
     bool executeFireOnAppear_ = false;
     std::string reuseId_;
     std::string creatorId_;

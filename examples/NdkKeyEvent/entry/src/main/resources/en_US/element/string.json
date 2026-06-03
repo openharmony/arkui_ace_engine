@@ -1,0 +1,100 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "NdkKeyEvent"
+    },
+    {
+      "name": "event_info",
+      "value": "\uD83C\uDFB9 Press any key to view the key event information..."
+    },
+    {
+      "name": "demo_title",
+      "value": "\uD83C\uDFB9 Key event example"
+    },
+    {
+      "name": "demo_introduce",
+      "value": "This example demonstrates the key event handling functionality in the Native API (CAPI), including: "
+    },
+    {
+      "name": "demo_introduce_item1",
+      "value": "• NODE_ON_KEY_EVENT - Standard key press event handling"
+    },
+    {
+      "name": "demo_introduce_item2",
+      "value": "• NODE_ON_KEY_PRE_IME - The incident of the front button of the input method"
+    },
+    {
+      "name": "demo_introduce_item3",
+      "value": "• NODE_DISPATCH_KEY_EVENT - Key press event distribution processing"
+    },
+    {
+      "name": "demo_introduce_item4",
+      "value": "• Demonstration of Event Bubbling and Consumption Mechanism (Column+Button Hierarchical Structure)"
+    },
+    {
+      "name": "key_count",
+      "value": "Number of key presses"
+    },
+    {
+      "name": "last_key",
+      "value": "The last button press"
+    },
+    {
+      "name": "native_component",
+      "value": "\uD83C\uDFAF Native Key press event component"
+    },
+    {
+      "name": "use_direction",
+      "value": "\uD83D\uDCA1 Instructions for Use"
+    },
+    {
+      "name": "basic_test",
+      "value": "\uD83D\uDCCC Basic function test: "
+    },
+    {
+      "name": "test_step1",
+      "value": "1. Click the three buttons above to bring them into focus and test the different types of key event handling for each"
+    },
+    {
+      "name": "test_step2",
+      "value": "2. Use the keyboard to input keys and observe the real-time update of event information"
+    },
+    {
+      "name": "test_step3",
+      "value": "3. The third button can be used to test the distribution of key events. Once a key event is detected, it will jump to the first button to continue processing the key event logic"
+    },
+    {
+      "name": "other_test",
+      "value": "\uD83D\uDD04 Event Bubbling and Consumption Testing: "
+    },
+    {
+      "name": "test_step4",
+      "value": "4. On the sub-buttons in the event bubble demonstration area: "
+    },
+    {
+      "name": "test_step4_1",
+      "value": "   • Press ESC key - Demo event consumption"
+    },
+    {
+      "name": "test_step4_2",
+      "value": "   • Press the F1 key - Demo stopPropagation"
+    },
+    {
+      "name": "test_step4_3",
+      "value": "   • Press other keys - The event will bubble up to the parent container normally"
+    },
+    {
+      "name": "test_step5",
+      "value": "5. Supported common keys: letters, numbers, direction keys, function keys, etc"
+    }
+  ]
+}

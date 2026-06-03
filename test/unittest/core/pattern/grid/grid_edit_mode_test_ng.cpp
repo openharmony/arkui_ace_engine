@@ -20,6 +20,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/back_press_handler_manager.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
@@ -854,6 +855,42 @@ HWTEST_F(GridEditModeTestNg, EditModeChangedOnModifyDoneRepeatedCalls001, TestSi
 
     pattern_->OnModifyDone();
     EXPECT_FALSE(pattern_->IsEditModeChanged());
+}
+
+/**
+ * @tc.name: BackPressExitSwipeSelectMode001
+ * @tc.desc: Test back press exits grid swipe-select edit mode before page navigation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEditModeTestNg, BackPressExitSwipeSelectMode001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6);
+    CreateDone();
+    EditModeOptions options;
+    options.enableFingerMultiSelect = false;
+    pattern_->SetEditModeOptions(options);
+
+    int32_t callbackCount = 0;
+    bool lastEnableEditMode = false;
+    GridModelNG::SetEnableEditModeChangeEvent(
+        AceType::RawPtr(frameNode_), [&callbackCount, &lastEnableEditMode](bool enableEditMode) {
+            ++callbackCount;
+            lastEnableEditMode = enableEditMode;
+        });
+    GridModelNG::SetEnableEditMode(AceType::RawPtr(frameNode_), true);
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_TRUE(pattern_->hasBackPressHandlerRegistered_);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetBackPressHandlerManager();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_TRUE(manager->HandleBackPressed());
+    EXPECT_FALSE(pattern_->GetEnableEditMode());
+    EXPECT_FALSE(pattern_->hasBackPressHandlerRegistered_);
+    EXPECT_FALSE(lastEnableEditMode);
+    EXPECT_EQ(callbackCount, 2);
 }
 
 } // namespace OHOS::Ace::NG

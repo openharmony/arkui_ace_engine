@@ -278,6 +278,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     InitPageHeight();
     sheetObject_->DirtyLayoutProcess(layoutAlgorithmWrapper);
+    ReachToBottomWhenCloseAndRotate();
     UpdateFontScaleStatus();
     UpdateCloseIconStatus();
     UpdateTitlePadding();
@@ -583,12 +584,7 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.systemMaterial) {
-        auto sheetRenderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(sheetRenderContext);
-        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
-        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial))) {
-            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
-        }
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
     }
 }
 
@@ -601,13 +597,7 @@ void SheetPresentationPattern::ClearSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (!sheetStyle.systemMaterial) {
-        auto sheetRenderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(sheetRenderContext);
-        sheetRenderContext->SetSystemMaterial(nullptr);
-        if (!MaterialUtils::CallSetMaterial(AceType::RawPtr(host), nullptr)) {
-            ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(host), nullptr);
-        }
-        RemoveResObj("sheet.uiMaterial"); // check
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), nullptr);
     }
 }
 
@@ -723,13 +713,15 @@ void SheetPresentationPattern::SetShadowStyle(bool isFocused)
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.shadow.has_value() || sheetStyle.systemMaterial) {
-        return;
-    }
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (sheetStyle.shadow.has_value() ||
+        (renderContext->GetSystemMaterial() && renderContext->GetSystemMaterial()->IsForceShadow())) {
+        // Check if the sheetStyle has shadow or if the system material is set and apply material's shadow
+        return;
+    }
     auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
@@ -2641,6 +2633,30 @@ bool SheetPresentationPattern::IsWindowSizeChangedWithUndefinedReason(
                            (windowSize_->Width() != width || windowSize_->Height() != height));
     }
     return isWindowChanged;
+}
+
+void SheetPresentationPattern::ReachToBottomWhenCloseAndRotate()
+{
+    if (isOnDisappearing_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE ||
+            sheetType_ == SheetType::SHEET_CENTER) {
+            renderContext->UpdateTransformTranslate({ 0.0f, pageHeight_, 0.0f });
+        }
+        auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+        if (sheetType_ == SheetType::SHEET_CONTENT_COVER &&
+            sheetStyle.modalTransition.value_or(ModalTransition::DEFAULT) == ModalTransition::DEFAULT) {
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto height = geometryNode->GetFrameSize().Height();
+            renderContext->UpdateTransformTranslate({ 0.0f, height, 0.0f });
+        }
+    }
 }
 
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

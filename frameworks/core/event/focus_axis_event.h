@@ -353,10 +353,9 @@ public:
         return action_;
     }
 
-    size_t GetSize() const
+    size_t GetApproximateSize() const
     {
-        static constexpr size_t FOCUS_AXIS_EVENT_INFO_SIZE = 560;
-        return FOCUS_AXIS_EVENT_INFO_SIZE;
+        return sizeof(*this) + GetApproximateBaseEventSize();
     }
 
 private:

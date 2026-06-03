@@ -1212,4 +1212,33 @@ HWTEST_F(RichEditorScrollControllerTest, CalculateDestination002, TestSize.Level
     auto dest = scrollController->CalculateDestination(0, 6, false);
     EXPECT_NE(dest.GetX(), 0.0f);
 }
+
+/**
+ * @tc.name: RemoveOverlayModifierScrollBarOverlay001
+ * @tc.desc: Test scrollBarOverlayModifier_ remains valid after toggling horizontal scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, RemoveOverlayModifierScrollBarOverlay001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto scrollBarOverlayModifierBefore = richEditorPattern->GetScrollBarOverlayModifier();
+    EXPECT_NE(scrollBarOverlayModifierBefore, nullptr);
+
+    richEditorPattern->SetHorizontalScrolling(true);
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_TRUE(richEditorPattern->isHorizontalScrolling_);
+
+    auto scrollBarOverlayModifierDuring = richEditorPattern->GetScrollBarOverlayModifier();
+    EXPECT_NE(scrollBarOverlayModifierDuring, nullptr);
+
+    richEditorPattern->SetHorizontalScrolling(false);
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_FALSE(richEditorPattern->isHorizontalScrolling_);
+
+    auto scrollBarOverlayModifierAfter = richEditorPattern->GetScrollBarOverlayModifier();
+    EXPECT_NE(scrollBarOverlayModifierAfter, nullptr);
+}
 }

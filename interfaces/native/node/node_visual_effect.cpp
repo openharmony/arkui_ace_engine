@@ -20,6 +20,7 @@
 
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
+#include "interfaces/native/native_error_message_macros.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,12 +52,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_SetX(ArkUI_Matrix4ScaleOptions* opt
         options->x = scaleX;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_GetX(const ArkUI_Matrix4ScaleOptions* options, float* scaleX)
 {
     if (!options || !scaleX) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or scaleX is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *scaleX = options->x;
@@ -69,12 +72,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_SetY(ArkUI_Matrix4ScaleOptions* opt
         options->y = scaleY;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_GetY(const ArkUI_Matrix4ScaleOptions* options, float* scaleY)
 {
     if (!options || !scaleY) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or scaleY is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *scaleY = options->y;
@@ -87,12 +92,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_SetZ(ArkUI_Matrix4ScaleOptions* opt
         options->z = scaleZ;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_GetZ(const ArkUI_Matrix4ScaleOptions* options, float* scaleZ)
 {
     if (!options || !scaleZ) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or scaleZ is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *scaleZ = options->z;
@@ -105,12 +112,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_SetCenterX(ArkUI_Matrix4ScaleOption
         options->centerX = centerX;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_GetCenterX(const ArkUI_Matrix4ScaleOptions* options, float* centerX)
 {
     if (!options || !centerX) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or centerX is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *centerX = options->centerX;
@@ -123,12 +132,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_SetCenterY(ArkUI_Matrix4ScaleOption
         options->centerY = centerY;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4ScaleOptions_GetCenterY(const ArkUI_Matrix4ScaleOptions* options, float* centerY)
 {
     if (!options || !centerY) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or centerY is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *centerY = options->centerY;
@@ -163,12 +174,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_SetX(ArkUI_Matrix4RotationOption
         options->isSetX = true;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_GetX(const ArkUI_Matrix4RotationOptions* options, float* x)
 {
     if (!options || !x || !options->isSetX) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options, x is null or isSetX is false");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *x = options->x;
@@ -182,12 +195,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_SetY(ArkUI_Matrix4RotationOption
         options->isSetY = true;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_GetY(const ArkUI_Matrix4RotationOptions* options, float* y)
 {
     if (!options || !y || !options->isSetY) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options, y is null or isSetY is false");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *y = options->y;
@@ -201,12 +216,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_SetZ(ArkUI_Matrix4RotationOption
         options->isSetZ = true;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_GetZ(const ArkUI_Matrix4RotationOptions* options, float* z)
 {
     if (!options || !z || !options->isSetZ) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options, z is null or isSetZ is false");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *z = options->z;
@@ -219,12 +236,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_SetAngle(ArkUI_Matrix4RotationOp
         options->angle = angle;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_GetAngle(const ArkUI_Matrix4RotationOptions* options, float* angle)
 {
     if (!options || !angle) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or angle is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *angle = options->angle;
@@ -237,12 +256,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_SetCenterX(ArkUI_Matrix4Rotation
         options->centerX = centerX;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_GetCenterX(const ArkUI_Matrix4RotationOptions* options, float* centerX)
 {
     if (!options || !centerX) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or centerX is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *centerX = options->centerX;
@@ -255,12 +276,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_SetCenterY(ArkUI_Matrix4Rotation
         options->centerY = centerY;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4RotationOptions_GetCenterY(const ArkUI_Matrix4RotationOptions* options, float* centerY)
 {
     if (!options || !centerY) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or centerY is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *centerY = options->centerY;
@@ -288,12 +311,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4TranslationOptions_SetX(ArkUI_Matrix4Translation
         options->x = x;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4TranslationOptions_GetX(const ArkUI_Matrix4TranslationOptions* options, float* x)
 {
     if (!options || !x) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or x is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *x = options->x;
@@ -306,12 +331,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4TranslationOptions_SetY(ArkUI_Matrix4Translation
         options->y = y;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4TranslationOptions_GetY(const ArkUI_Matrix4TranslationOptions* options, float* y)
 {
     if (!options || !y) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or y is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *y = options->y;
@@ -324,12 +351,14 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4TranslationOptions_SetZ(ArkUI_Matrix4Translation
         options->z = z;
         return ARKUI_ERROR_CODE_NO_ERROR;
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options is null");
     return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 ArkUI_ErrorCode OH_ArkUI_Matrix4TranslationOptions_GetZ(const ArkUI_Matrix4TranslationOptions* options, float* z)
 {
     if (!options || !z) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "options or z is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     *z = options->z;
@@ -382,7 +411,12 @@ ArkUI_Matrix4* OH_ArkUI_Matrix4_Copy(const ArkUI_Matrix4* matrix)
 ArkUI_ErrorCode OH_ArkUI_Matrix4_Invert(ArkUI_Matrix4* matrix)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!matrix || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!matrix) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "matrix is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getMatrix4Modifier()->invert(matrix->matrix);
@@ -392,7 +426,12 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Invert(ArkUI_Matrix4* matrix)
 ArkUI_ErrorCode OH_ArkUI_Matrix4_Combine(ArkUI_Matrix4* oriMatrix, const ArkUI_Matrix4* anotherMatrix)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!oriMatrix || !anotherMatrix || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!oriMatrix || !anotherMatrix) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "oriMatrix or anotherMatrix is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getMatrix4Modifier()->combine(oriMatrix->matrix, anotherMatrix->matrix);
@@ -402,7 +441,12 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Combine(ArkUI_Matrix4* oriMatrix, const ArkUI_M
 ArkUI_ErrorCode OH_ArkUI_Matrix4_Translate(ArkUI_Matrix4* matrix, const ArkUI_Matrix4TranslationOptions* translate)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!matrix || !translate || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!matrix || !translate) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "matrix or translate is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getMatrix4Modifier()->translate(matrix->matrix, translate->x, translate->y, translate->z);
@@ -412,7 +456,12 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Translate(ArkUI_Matrix4* matrix, const ArkUI_Ma
 ArkUI_ErrorCode OH_ArkUI_Matrix4_Scale(ArkUI_Matrix4* matrix, const ArkUI_Matrix4ScaleOptions* scale)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!matrix || !scale || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!matrix || !scale) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "matrix or scale is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getMatrix4Modifier()->scale(matrix->matrix, scale);
@@ -422,7 +471,12 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Scale(ArkUI_Matrix4* matrix, const ArkUI_Matrix
 ArkUI_ErrorCode OH_ArkUI_Matrix4_Rotate(ArkUI_Matrix4* matrix, const ArkUI_Matrix4RotationOptions* rotate)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!matrix || !rotate || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!matrix || !rotate) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "matrix or rotate is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getMatrix4Modifier()->rotate(matrix->matrix, rotate);
@@ -432,7 +486,12 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_Rotate(ArkUI_Matrix4* matrix, const ArkUI_Matri
 ArkUI_ErrorCode OH_ArkUI_Matrix4_Skew(ArkUI_Matrix4* matrix, const float skewX, const float skewY)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!matrix || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!matrix) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "matrix is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getMatrix4Modifier()->skew(matrix->matrix, skewX, skewY);
@@ -443,7 +502,12 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_TransformPoint(
     const ArkUI_Matrix4* matrix, const ArkUI_PointF* oriPoint, ArkUI_PointF* result)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!matrix || !oriPoint || !result || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!matrix || !oriPoint || !result) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "matrix, oriPoint or result is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getMatrix4Modifier()->transformPoint(
@@ -455,10 +519,16 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_SetPolyToPoly(
     ArkUI_Matrix4* matrix, const ArkUI_PointF* src, const ArkUI_PointF* dst, const uint32_t pointCount)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!matrix || !src || !dst || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!matrix || !src || !dst) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "matrix, src or dst is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (pointCount > NUM_4) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "pointCount is greater than 4");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     std::vector<std::pair<float, float>> srcPoints;
@@ -474,7 +544,12 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_SetPolyToPoly(
 ArkUI_ErrorCode OH_ArkUI_Matrix4_GetElements(const ArkUI_Matrix4* matrix, float* result)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!matrix || !result || !impl) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!matrix || !result) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "matrix or result is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getMatrix4Modifier()->getElements(matrix->matrix, result);

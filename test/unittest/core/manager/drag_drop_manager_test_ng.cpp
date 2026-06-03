@@ -2382,4 +2382,103 @@ HWTEST_F(DragDropManagerTestNg, ResetDragDropClearTest001, TestSize.Level1)
      */
     EXPECT_TRUE(dragDropManager->velocityTracker_.isFirstPoint_);
 }
+
+/**
+ * @tc.name: DisableArkuiAnimation001
+ * @tc.desc: Test DisableArkuiAnimation function with null renderContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, DisableArkuiAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragDropManager instance
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DisableArkuiAnimation with null renderContext
+     * @tc.expected: No crash occurs
+     */
+    int32_t containerId = WINDOW_ID;
+    RefPtr<RenderContext> renderContext = nullptr;
+    dragDropManager->DisableArkuiAnimation(containerId, renderContext);
+}
+
+/**
+ * @tc.name: DisableArkuiAnimation002
+ * @tc.desc: Test DisableArkuiAnimation function with valid renderContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, DisableArkuiAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragDropManager instance
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create MockRenderContext
+     */
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. Call DisableArkuiAnimation with valid renderContext
+     * @tc.expected: No crash occurs, opacity is updated
+     */
+    int32_t containerId = WINDOW_ID;
+    dragDropManager->DisableArkuiAnimation(containerId, mockRenderContext);
+}
+
+/**
+ * @tc.name: DisableArkuiAnimation003
+ * @tc.desc: Test DisableArkuiAnimation function creates nodes and sets opacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, DisableArkuiAnimation003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragDropManager instance
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create mock gatherNode and badgeNode with renderContext
+     */
+    auto gatherNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto gatherNode = FrameNode::GetOrCreateFrameNode("gatherNode", gatherNodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(gatherNode, nullptr);
+
+    auto badgeNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto badgeNode = FrameNode::GetOrCreateFrameNode("badgeNode", badgeNodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(badgeNode, nullptr);
+
+    auto gatherRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    auto badgeRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    gatherNode->renderContext_ = gatherRenderContext;
+    badgeNode->renderContext_ = badgeRenderContext;
+
+    /**
+     * @tc.steps: step3. Create frameNode with renderContext
+     */
+    auto frameNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(NODE_TAG, frameNodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto frameRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = frameRenderContext;
+
+    /**
+     * @tc.steps: step4. Call DisableArkuiAnimation
+     * @tc.expected: No crash occurs
+     */
+    int32_t containerId = WINDOW_ID;
+    dragDropManager->DisableArkuiAnimation(containerId, frameRenderContext);
+}
+
 } // namespace OHOS::Ace::NG

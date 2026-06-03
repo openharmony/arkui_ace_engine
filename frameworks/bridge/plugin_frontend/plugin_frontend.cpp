@@ -208,6 +208,12 @@ void PluginFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 
 void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
+    const auto invokeOnJsEngine = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](auto method) {
+        auto jsEngine = weakEngine.Upgrade();
+        CHECK_NULL_VOID(jsEngine);
+        ((*jsEngine).*method)();
+    };
+
     const auto& loadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
                                    const RefPtr<Framework::JsAcePage>& jsPage, bool isMainPage) {
         auto jsEngine = weakEngine.Upgrade();
@@ -244,10 +250,8 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
         jsEngine->UpdateStagingPage(jsPage);
     };
 
-    const auto& resetStagingPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
-        auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID(jsEngine);
-        jsEngine->ResetStagingPage();
+    const auto& resetStagingPageCallback = [invokeOnJsEngine]() {
+        invokeOnJsEngine(&Framework::JsEngine::ResetStagingPage);
     };
 
     const auto& destroyPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t pageId) {
@@ -294,17 +298,9 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
         CHECK_NULL_VOID(jsEngine);
         jsEngine->OnNewWant(data);
     };
-    const auto& onActiveCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
-        auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID(jsEngine);
-        jsEngine->OnActive();
-    };
+    const auto& onActiveCallBack = [invokeOnJsEngine]() { invokeOnJsEngine(&Framework::JsEngine::OnActive); };
 
-    const auto& onInactiveCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
-        auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID(jsEngine);
-        jsEngine->OnInactive();
-    };
+    const auto& onInactiveCallBack = [invokeOnJsEngine]() { invokeOnJsEngine(&Framework::JsEngine::OnInactive); };
 
     const auto& onConfigurationUpdatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                      const std::string& data) {
@@ -357,10 +353,8 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
         CHECK_NULL_VOID(jsEngine);
         jsEngine->OnCompleteContinuation(code);
     };
-    const auto& onRemoteTerminatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
-        auto jsEngine = weakEngine.Upgrade();
-        CHECK_NULL_VOID(jsEngine);
-        jsEngine->OnRemoteTerminated();
+    const auto& onRemoteTerminatedCallBack = [invokeOnJsEngine]() {
+        invokeOnJsEngine(&Framework::JsEngine::OnRemoteTerminated);
     };
     const auto& onSaveDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& savedData) {
         auto jsEngine = weakEngine.Upgrade();

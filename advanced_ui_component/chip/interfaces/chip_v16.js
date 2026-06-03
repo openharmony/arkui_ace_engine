@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
@@ -123,7 +124,7 @@ export function Chip(options, parent = null) {
             undefined,
             elmtId,
             () => {},
-            { page: 'components/src/main/ets/components/Chip.ets', line: 284, col: 3 }
+            { page: 'library/src/main/ets/components/Chip.ets', line: 286, col: 3 }
           );
           ViewPU.create(componentCall);
           let paramsLambda = () => {
@@ -200,14 +201,14 @@ export class ChipComponent extends ViewPU {
       prefixIcon: {
         normalSize: {
           width: {
-            id: -1,
+            id: 125834625,
             type: 10002,
             params: ['sys.float.chip_normal_icon_size'],
             bundleName: '__harDefaultBundleName__',
             moduleName: '__harDefaultModuleName__',
           },
           height: {
-            id: -1,
+            id: 125834625,
             type: 10002,
             params: ['sys.float.chip_normal_icon_size'],
             bundleName: '__harDefaultBundleName__',
@@ -216,14 +217,14 @@ export class ChipComponent extends ViewPU {
         },
         smallSize: {
           width: {
-            id: -1,
+            id: 125834626,
             type: 10002,
             params: ['sys.float.chip_small_icon_size'],
             bundleName: '__harDefaultBundleName__',
             moduleName: '__harDefaultModuleName__',
           },
           height: {
-            id: -1,
+            id: 125834626,
             type: 10002,
             params: ['sys.float.chip_small_icon_size'],
             bundleName: '__harDefaultBundleName__',
@@ -231,28 +232,28 @@ export class ChipComponent extends ViewPU {
           },
         },
         fillColor: {
-          id: -1,
+          id: 125834645,
           type: 10001,
           params: ['sys.color.chip_usually_icon_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedFillColor: {
-          id: -1,
+          id: 125834646,
           type: 10001,
           params: ['sys.color.chip_active_icon_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusFillColor: {
-          id: -1,
+          id: 125834647,
           type: 10001,
           params: ['sys.color.chip_icon_focus_fill'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusActivatedColor: {
-          id: -1,
+          id: 125834648,
           type: 10001,
           params: ['sys.color.chip_icon_activated_focus_color'],
           bundleName: '__harDefaultBundleName__',
@@ -261,49 +262,49 @@ export class ChipComponent extends ViewPU {
       },
       label: {
         normalFontSize: {
-          id: -1,
+          id: 125834629,
           type: 10002,
           params: ['sys.float.chip_normal_font_size'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         smallFontSize: {
-          id: -1,
+          id: 125834630,
           type: 10002,
           params: ['sys.float.chip_small_font_size'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         adaptiveItemFontSize: {
-          id: -1,
+          id: 125830974,
           type: 10002,
           params: ['sys.float.Caption_M'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusFontColor: {
-          id: -1,
+          id: 125834640,
           type: 10001,
           params: ['sys.color.chip_focus_text'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusActiveFontColor: {
-          id: -1,
+          id: 125834649,
           type: 10001,
           params: ['sys.color.chip_activated_focus_font_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         fontColor: {
-          id: -1,
+          id: 125834643,
           type: 10001,
           params: ['sys.color.chip_font_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedFontColor: {
-          id: -1,
+          id: 125834636,
           type: 10001,
           params: ['sys.color.chip_activated_fontcolor'],
           bundleName: '__harDefaultBundleName__',
@@ -311,14 +312,14 @@ export class ChipComponent extends ViewPU {
         },
         fontFamily: 'HarmonyOS Sans',
         fontWeight: {
-          id: -1,
+          id: 125834631,
           type: 10002,
           params: ['sys.float.chip_text_font_weight'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedFontWeight: {
-          id: -1,
+          id: 125835720,
           type: 10002,
           params: ['sys.float.chip_activated_text_font_weight'],
           bundleName: '__harDefaultBundleName__',
@@ -353,14 +354,14 @@ export class ChipComponent extends ViewPU {
       suffixIcon: {
         normalSize: {
           width: {
-            id: -1,
+            id: 125834625,
             type: 10002,
             params: ['sys.float.chip_normal_icon_size'],
             bundleName: '__harDefaultBundleName__',
             moduleName: '__harDefaultModuleName__',
           },
           height: {
-            id: -1,
+            id: 125834625,
             type: 10002,
             params: ['sys.float.chip_normal_icon_size'],
             bundleName: '__harDefaultBundleName__',
@@ -369,14 +370,14 @@ export class ChipComponent extends ViewPU {
         },
         smallSize: {
           width: {
-            id: -1,
+            id: 125834626,
             type: 10002,
             params: ['sys.float.chip_small_icon_size'],
             bundleName: '__harDefaultBundleName__',
             moduleName: '__harDefaultModuleName__',
           },
           height: {
-            id: -1,
+            id: 125834626,
             type: 10002,
             params: ['sys.float.chip_small_icon_size'],
             bundleName: '__harDefaultBundleName__',
@@ -384,35 +385,35 @@ export class ChipComponent extends ViewPU {
           },
         },
         fillColor: {
-          id: -1,
+          id: 125834645,
           type: 10001,
           params: ['sys.color.chip_usually_icon_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedFillColor: {
-          id: -1,
+          id: 125834646,
           type: 10001,
           params: ['sys.color.chip_active_icon_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusFillColor: {
-          id: -1,
+          id: 125834647,
           type: 10001,
           params: ['sys.color.chip_icon_focus_fill'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusActivatedColor: {
-          id: -1,
+          id: 125834648,
           type: 10001,
           params: ['sys.color.chip_icon_activated_focus_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         defaultDeleteIcon: {
-          id: -1,
+          id: 125830347,
           type: 20000,
           params: ['sys.media.ohos_ic_public_cancel', 16, 16],
           bundleName: '__harDefaultBundleName__',
@@ -420,7 +421,7 @@ export class ChipComponent extends ViewPU {
         },
         focusable: false,
         isShowMargin: {
-          id: -1,
+          id: 125834632,
           type: 10002,
           params: ['sys.float.chip_show_close_icon_margin'],
           bundleName: '__harDefaultBundleName__',
@@ -430,7 +431,7 @@ export class ChipComponent extends ViewPU {
       defaultSymbol: {
         normalFontColor: [
           {
-            id: -1,
+            id: 125834645,
             type: 10001,
             params: ['sys.color.chip_usually_icon_color'],
             bundleName: '__harDefaultBundleName__',
@@ -439,7 +440,7 @@ export class ChipComponent extends ViewPU {
         ],
         activatedFontColor: [
           {
-            id: -1,
+            id: 125834646,
             type: 10001,
             params: ['sys.color.chip_active_icon_color'],
             bundleName: '__harDefaultBundleName__',
@@ -454,28 +455,28 @@ export class ChipComponent extends ViewPU {
         suitAgeScale: 1.75,
         minLabelWidth: 12,
         normalHeight: {
-          id: -1,
+          id: 125834619,
           type: 10002,
           params: ['sys.float.chip_normal_height'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         smallHeight: {
-          id: -1,
+          id: 125834620,
           type: 10002,
           params: ['sys.float.chip_small_height'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedNormalHeight: {
-          id: -1,
+          id: 125835715,
           type: 10002,
           params: ['sys.float.chip_activated_normal_height'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedSmallHeight: {
-          id: -1,
+          id: 125835716,
           type: 10002,
           params: ['sys.float.chip_activated_small_height'],
           bundleName: '__harDefaultBundleName__',
@@ -484,21 +485,34 @@ export class ChipComponent extends ViewPU {
         enabled: true,
         activated: false,
         backgroundColor: {
-          id: -1,
+          id: 125834642,
           type: 10001,
           params: ['sys.color.chip_background_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedBackgroundColor: {
-          id: -1,
+          id: 125834635,
           type: 10001,
           params: ['sys.color.chip_container_activated_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
+        backgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+          style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+        }),
+        activatedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+          style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+          materialColor: {
+            id: 125831009,
+            type: 10001,
+            params: ['sys.color.comp_background_emphasize'],
+            bundleName: '__harDefaultBundleName__',
+            moduleName: '__harDefaultModuleName__',
+          },
+        }),
         focusOutlineColor: {
-          id: -1,
+          id: 125829180,
           type: 10001,
           params: ['sys.color.ohos_id_color_focused_outline'],
           bundleName: '__harDefaultBundleName__',
@@ -506,42 +520,42 @@ export class ChipComponent extends ViewPU {
         },
         focusOutlineMargin: 2,
         borderColor: {
-          id: -1,
+          id: 125834633,
           type: 10001,
           params: ['sys.color.chip_border_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         defaultBorderWidth: {
-          id: -1,
+          id: 125834621,
           type: 10002,
           params: ['sys.float.chip_border_width'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedBorderColor: {
-          id: -1,
+          id: 125834634,
           type: 10001,
           params: ['sys.color.chip_activated_border_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         normalBorderRadius: {
-          id: -1,
+          id: 125834241,
           type: 10002,
           params: ['sys.float.chip_border_radius_normal'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         smallBorderRadius: {
-          id: -1,
+          id: 125834242,
           type: 10002,
           params: ['sys.float.chip_border_radius_small'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         activatedBorderWidth: {
-          id: -1,
+          id: 125835717,
           type: 10002,
           params: ['sys.float.chip_activated_border_width'],
           bundleName: '__harDefaultBundleName__',
@@ -549,14 +563,14 @@ export class ChipComponent extends ViewPU {
         },
         borderWidth: 2,
         focusBtnScaleX: {
-          id: -1,
+          id: 125834624,
           type: 10002,
           params: ['sys.float.chip_focused_btn_scale'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusBtnScaleY: {
-          id: -1,
+          id: 125834624,
           type: 10002,
           params: ['sys.float.chip_focused_btn_scale'],
           bundleName: '__harDefaultBundleName__',
@@ -587,28 +601,28 @@ export class ChipComponent extends ViewPU {
           bottom: LengthMetrics.vp(4),
         },
         hoverBlendColor: {
-          id: -1,
+          id: 125834637,
           type: 10001,
           params: ['sys.color.chip_hover_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         pressedBlendColor: {
-          id: -1,
+          id: 125834644,
           type: 10001,
           params: ['sys.color.chip_press_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusBgColor: {
-          id: -1,
+          id: 125834638,
           type: 10001,
           params: ['sys.color.chip_focus_color'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         focusActivatedBgColor: {
-          id: -1,
+          id: 125834639,
           type: 10001,
           params: ['sys.color.chip_container_activated_focus_color'],
           bundleName: '__harDefaultBundleName__',
@@ -616,14 +630,14 @@ export class ChipComponent extends ViewPU {
         },
         opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
         normalShadowStyle: {
-          id: -1,
+          id: 125834622,
           type: 10002,
           params: ['sys.float.chip_normal_shadow_style'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
         smallShadowStyle: {
-          id: -1,
+          id: 125834623,
           type: 10002,
           params: ['sys.float.chip_small_shadow_style'],
           bundleName: '__harDefaultBundleName__',
@@ -1251,8 +1265,8 @@ export class ChipComponent extends ViewPU {
       Button.size(this.getChipSize());
       Button.enabled(this.isChipEnabled());
       Button.direction(this.chipDirection);
-      Button.backgroundColor(this.getChipBackgroundColor());
       Button.systemMaterial(this.getBackgroundSystemMaterial());
+      Button.backgroundColor(this.getChipBackgroundColor());
       Button.borderWidth(this.getChipNodeBorderWidth());
       Button.borderColor(this.getChipNodeBorderColor());
       Button.borderRadius(this.getChipBorderRadius());
@@ -1434,28 +1448,28 @@ export class ChipComponent extends ViewPU {
             Button.accessibilityLevel(this.getCloseIconAccessibilityLevel());
             Button.responseRegion({
               x: {
-                id: -1,
+                id: 125836837,
                 type: 10002,
                 params: ['sys.float.chip_touch_hot_zone_x'],
                 bundleName: '__harDefaultBundleName__',
                 moduleName: '__harDefaultModuleName__',
               },
               y: {
-                id: -1,
+                id: 125836838,
                 type: 10002,
                 params: ['sys.float.chip_touch_hot_zone_y'],
                 bundleName: '__harDefaultBundleName__',
                 moduleName: '__harDefaultModuleName__',
               },
               width: {
-                id: -1,
+                id: 125836839,
                 type: 10002,
                 params: ['sys.float.chip_touch_hot_zone_width'],
                 bundleName: '__harDefaultBundleName__',
                 moduleName: '__harDefaultModuleName__',
               },
               height: {
-                id: -1,
+                id: 125836840,
                 type: 10002,
                 params: ['sys.float.chip_touch_hot_zone_height'],
                 bundleName: '__harDefaultBundleName__',
@@ -1473,7 +1487,7 @@ export class ChipComponent extends ViewPU {
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create({
-              id: -1,
+              id: 125831487,
               type: 40000,
               params: ['sys.symbol.xmark'],
               bundleName: '__harDefaultBundleName__',
@@ -1512,7 +1526,7 @@ export class ChipComponent extends ViewPU {
   getCloseIconAccessibilityText() {
     if (typeof this.closeOptions?.accessibilityText === 'undefined') {
       return {
-        id: -1,
+        id: 125834251,
         type: 10003,
         params: ['sys.string.delete_used_for_accessibility_text'],
         bundleName: '__harDefaultBundleName__',
@@ -2041,18 +2055,18 @@ export class ChipComponent extends ViewPU {
     if (deviceInfo.sdkApiVersion < 26) {
       return undefined;
     }
-    let info = uiMaterial.getMaterialInfo();
+    const info = uiMaterial.getMaterialInfo();
     if (info.state === uiMaterial.MaterialState.DISABLE) {
       return undefined;
     }
     if (this.isChipActivated()) {
-      return info.state === uiMaterial.MaterialState.ENABLE && !this.activatedBackgroundSystemMaterial ?
-        new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) :
-        this.activatedBackgroundSystemMaterial;
+      return info.state === uiMaterial.MaterialState.ENABLE && !this.activatedBackgroundSystemMaterial
+        ? this.theme.chipNode.activatedBackgroundSystemMaterial
+        : this.activatedBackgroundSystemMaterial;
     }
-    return info.state === uiMaterial.MaterialState.ENABLE && !this.backgroundSystemMaterial ?
-      new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) :
-      this.backgroundSystemMaterial;
+    return info.state === uiMaterial.MaterialState.ENABLE && !this.backgroundSystemMaterial
+      ? this.theme.chipNode.backgroundSystemMaterial
+      : this.backgroundSystemMaterial;
   }
   getColor(color, defaultColor) {
     if (!color) {

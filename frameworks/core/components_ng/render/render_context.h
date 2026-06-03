@@ -898,6 +898,8 @@ public:
     }
     virtual void SetBaseRotateInZ(float degree) {}
 
+    virtual void UpdateMaterialInteractionEffect(float scaleX, float scaleY, float offsetX, float offsetY) {}
+
     virtual void UpdateWindowBlur() {}
     virtual size_t GetAnimationsCount() const
     {

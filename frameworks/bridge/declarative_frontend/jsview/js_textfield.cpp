@@ -325,16 +325,17 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     UnRegisterResource("placeholderColor");
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    Color color = theme->GetPlaceholderColor();
+    Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor", resourceObject)) {
+    if (!info[0]->IsUndefined() && !info[0]->IsNull() &&
+        ParseJsColorForMaterial(info[0], color, resourceObject)) {
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("placeholderColor", resourceObject, color);
+        }
+        TextFieldModel::GetInstance()->SetPlaceholderColor(color);
+    } else {
         TextFieldModel::GetInstance()->ResetPlaceholderColor();
-        return;
     }
-    if (SystemProperties::ConfigChangePerform() && resourceObject) {
-        RegisterResource<Color>("placeholderColor", resourceObject, color);
-    }
-    TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
 void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
@@ -744,14 +745,15 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     RefPtr<ResourceObject> resourceObject;
     UnRegisterResource("fontColor");
-    if (!ParseJsColor(info[0], textColor, resourceObject)) {
+    if (!info[0]->IsUndefined() && !info[0]->IsNull() &&
+        ParseJsColorForMaterial(info[0], textColor, resourceObject)) {
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<Color>("fontColor", resourceObject, textColor);
+        }
+        TextFieldModel::GetInstance()->SetTextColor(textColor);
+    } else {
         TextFieldModel::GetInstance()->ResetTextColor();
-        return;
     }
-    if (SystemProperties::ConfigChangePerform() && resourceObject) {
-        RegisterResource<Color>("fontColor", resourceObject, textColor);
-    }
-    TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
 
 void JSTextField::SetWordBreak(const JSCallbackInfo& info)
@@ -1384,7 +1386,7 @@ void JSTextField::SetOnWillCopy(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+        JSRef<JSFunc>::Cast(args), CreateSimpleJsOnWillObj);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                         const std::u16string& value) -> bool {
@@ -1419,7 +1421,7 @@ void JSTextField::SetOnWillCut(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+        JSRef<JSFunc>::Cast(args), CreateSimpleJsOnWillObj);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                         const std::u16string& value) -> bool {
@@ -2606,6 +2608,15 @@ void JSTextField::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCompressLeadingPunctuation(enabled);
 }
 
+void JSTextField::SetPunctuationOverflow(const JSCallbackInfo& info)
+{
+    bool enabled = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetPunctuationOverflow(enabled);
+}
+
 void JSTextField::SetIncludeFontPadding(const JSCallbackInfo& info)
 {
     bool enabled = false;
@@ -2758,7 +2769,11 @@ void JSTextField::SetKeyboardAppearanceConfig(const JSCallbackInfo& info)
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
     auto jsTargetNode = info[0];
-    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto localHandle = jsTargetNode->GetLocalHandle();
+    if (!localHandle->IsNativePointer(vm)) {
+        return;
+    }
+    auto* targetNodePtr = localHandle->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
     CHECK_NULL_VOID(frameNode);
     if (!info[1]->IsObject()) {
@@ -2836,7 +2851,11 @@ void JSTextField::SetSearchKeyboardAppearanceConfig(const JSCallbackInfo& info)
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
     auto jsTargetNode = info[0];
-    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto localHandle = jsTargetNode->GetLocalHandle();
+    if (!localHandle->IsNativePointer(vm)) {
+        return;
+    }
+    auto* targetNodePtr = localHandle->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
     CHECK_NULL_VOID(frameNode);
     if (!info[1]->IsObject()) {

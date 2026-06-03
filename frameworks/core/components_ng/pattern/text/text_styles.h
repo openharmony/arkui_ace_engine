@@ -388,7 +388,8 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDirection, TextDirection);
     ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorShaderStyle, Color);
- 
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TailIndents, NG::TailIndents);
+
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,

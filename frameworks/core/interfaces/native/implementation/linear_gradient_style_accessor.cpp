@@ -37,7 +37,9 @@ Ark_LinearGradientStyle ConstructImpl(const Ark_LinearGradientOptions* options)
     constexpr float DEFAULT_ANGLE = 180.0f;
     Converter::ConvertAngleWithDefault(options->angle, degreeOpt, DEFAULT_ANGLE);
     if (degreeOpt) {
-        linear->angle = CalcDimension(degreeOpt.value(), DimensionUnit::PX);
+        // This unit is just a tag for differentiating number and string types, carrying no actual semantic meaning.
+        auto unit = (options->angle.value.selector == 1) ? DimensionUnit::PX : DimensionUnit::VP;
+        linear->angle = CalcDimension(degreeOpt.value(), unit);
         degreeOpt.reset();
     }
     auto direction = Converter::OptConvert<GradientDirection>(options->direction);
@@ -77,7 +79,8 @@ void SetOptionsImpl(Ark_LinearGradientStyle peer,
     constexpr float DEFAULT_ANGLE = 180.0f;
     Converter::ConvertAngleWithDefault(options->angle, degreeOpt, DEFAULT_ANGLE);
     if (degreeOpt) {
-        linear->angle = CalcDimension(degreeOpt.value(), DimensionUnit::PX);
+        auto unit = (options->angle.value.selector == 1) ? DimensionUnit::PX : DimensionUnit::VP;
+        linear->angle = CalcDimension(degreeOpt.value(), unit);
         degreeOpt.reset();
     }
     auto direction = Converter::OptConvert<GradientDirection>(options->direction);

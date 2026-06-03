@@ -249,8 +249,10 @@ void TextModelStatic::SetCopyOption(FrameNode* frameNode, const std::optional<Co
 {
     if (copyOption.has_value()) {
         TextModelNG::SetCopyOption(frameNode, copyOption.value());
+        TextModelNG::SetCopyOptionFlagByUser(frameNode, true);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, frameNode);
+        TextModelNG::SetCopyOptionFlagByUser(frameNode, false);
     }
 }
 
@@ -369,8 +371,10 @@ void TextModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, const std
 {
     if (value.has_value()) {
         TextModelNG::SetSelectedBackgroundColor(frameNode, value.value());
+        TextModelNG::SetSelectedBackgroundColorFlagByUser(frameNode, true);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, frameNode);
+        TextModelNG::SetSelectedBackgroundColorFlagByUser(frameNode, false);
     }
 }
 
@@ -429,12 +433,18 @@ void TextModelStatic::SetHalfLeading(FrameNode* frameNode, const std::optional<b
 
 void TextModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state)
 {
-    TextModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true));
+    bool flagByUser = state.has_value() ? true : false;
+    TextModelNG::SetEnableHapticFeedback(frameNode, state.value_or(true), flagByUser);
 }
 
 void TextModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& enable)
 {
     TextModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
+}
+
+void TextModelStatic::SetPunctuationOverflow(FrameNode* frameNode, const std::optional<bool>& enable)
+{
+    TextModelNG::SetPunctuationOverflow(frameNode, enable.value_or(false));
 }
 
 void TextModelStatic::SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt)
@@ -556,6 +566,14 @@ void TextModelStatic::SetSelectDetectEnable(FrameNode* frameNode, const std::opt
         TextModelNG::SetSelectDetectEnable(frameNode, value.value());
     } else {
         TextModelNG::ResetSelectDetectEnable(frameNode);
+    }
+}
+void TextModelStatic::SetTailIndents(FrameNode* frameNode, const std::optional<TailIndents>& value)
+{
+    if (value.has_value()) {
+        TextModelNG::SetTailIndents(frameNode, value.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TailIndents, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

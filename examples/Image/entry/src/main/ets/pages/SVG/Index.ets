@@ -126,6 +126,12 @@ struct Index {
         this.NavigationButton('SVG Advanced Effects', 'Demonstrates comprehensive SVG advanced effects including filters, masks, animations',
           'pages/SVG/svgExample018')
 
+        this.NavigationButton('SVG Dashboard & UI Components (Part 1)', 'Demonstrates SVG usage in dashboard-style UI: metrics, gauges, progress, pie/bar charts, steppers, timelines, tree views, tabs, sidebar, notifications, badges',
+          'pages/SVG/svgExample019')
+
+        this.NavigationButton('SVG Dashboard & UI Components (Part 2)', 'Demonstrates SVG usage in dashboard-style UI: carousel, ratings, media controls, color filters, transforms, shadows, gradients, neon glow, card gallery, status indicators, icon sets, tooltips, toasts',
+          'pages/SVG/svgExample020')
+
         Button('Back')
           .margin({ top: 20, bottom: 20 })
           .onClick(() => {

@@ -25,6 +25,35 @@ public:
     static void TearDownTestSuite();
 };
 
+class NullGestureClickRecognizer : public ClickRecognizer {
+    DECLARE_ACE_TYPE(NullGestureClickRecognizer, ClickRecognizer);
+
+public:
+    NullGestureClickRecognizer() : ClickRecognizer(FINGER_NUMBER, COUNT) {}
+    ~NullGestureClickRecognizer() override = default;
+
+    RefPtr<Gesture> CreateGestureFromRecognizer() const override
+    {
+        return nullptr;
+    }
+};
+
+class CountingExclusiveRecognizer : public ExclusiveRecognizer {
+    DECLARE_ACE_TYPE(CountingExclusiveRecognizer, ExclusiveRecognizer);
+
+public:
+    using ExclusiveRecognizer::ExclusiveRecognizer;
+    ~CountingExclusiveRecognizer() override = default;
+
+    void OnRejected() override
+    {
+        ++onRejectedCount_;
+        ExclusiveRecognizer::OnRejected();
+    }
+
+    int32_t onRejectedCount_ = 0;
+};
+
 void RecognizerGroupTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
@@ -389,5 +418,221 @@ HWTEST_F(RecognizerGroupTestNg, GetGestureInfoString001, TestSize.Level1)
 
     std::string result = recognizerTest->GetGestureInfoString();
     EXPECT_THAT(result, HasSubstr("RCRS:1"));
+}
+
+/**
+ * @tc.name: RecognizerGroupTest014
+ * @tc.desc: Test UpdateGestureReferee AttachFrameNode and OnFinishGestureReferee.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest014, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { clickRecognizer };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+
+    auto referee = AceType::MakeRefPtr<GestureReferee>();
+    exclusiveRecognizer->UpdateGestureReferee(referee);
+    EXPECT_EQ(exclusiveRecognizer->GetRefereeWithStrategy().Upgrade(), referee);
+    EXPECT_EQ(clickRecognizer->GetRefereeWithStrategy().Upgrade(), referee);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizer);
+
+    auto frameNode = FrameNode::CreateFrameNode("group_attach", 101, AceType::MakeRefPtr<Pattern>());
+    exclusiveRecognizer->AttachFrameNode(frameNode);
+    EXPECT_EQ(exclusiveRecognizer->GetAttachedNode().Upgrade(), frameNode);
+    EXPECT_EQ(clickRecognizer->GetAttachedNode().Upgrade(), frameNode);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 7;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    exclusiveRecognizer->OnFinishGestureReferee(touchEvent.id, false);
+    EXPECT_EQ(clickRecognizer->touchPoints_.count(touchEvent.id), 0);
+}
+
+/**
+ * @tc.name: RecognizerGroupTest015
+ * @tc.desc: Test AddChildren with SetGestureGroup failure and RemoveRecognizerInGroup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest015, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> ownerRecognizers { clickRecognizer };
+    auto ownerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(ownerRecognizers);
+
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers;
+    auto targetGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(emptyRecognizers);
+
+    std::list<RefPtr<NGGestureRecognizer>> inputRecognizers { nullptr, clickRecognizer };
+    targetGroup->AddChildren(inputRecognizers);
+    EXPECT_EQ(targetGroup->recognizers_.size(), 0);
+
+    clickRecognizer->SetGestureGroup(nullptr);
+    std::list<RefPtr<NGGestureRecognizer>> inputRecognizers2 { clickRecognizer, clickRecognizer };
+    targetGroup->AddChildren(inputRecognizers2);
+    EXPECT_EQ(targetGroup->recognizers_.size(), 1);
+
+    auto otherClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    targetGroup->RemoveRecognizerInGroup(otherClickRecognizer);
+    EXPECT_EQ(targetGroup->recognizers_.size(), 1);
+    targetGroup->RemoveRecognizerInGroup(clickRecognizer);
+    EXPECT_TRUE(targetGroup->recognizers_.empty());
+
+    (void)ownerGroup;
+}
+
+/**
+ * @tc.name: RecognizerGroupTest016
+ * @tc.desc: Test CreateGestureFromRecognizer skip null child and null gesture child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest016, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto nullGestureRecognizer = AceType::MakeRefPtr<NullGestureClickRecognizer>();
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { clickRecognizer };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    exclusiveRecognizer->recognizers_.push_back(nullGestureRecognizer);
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+
+    auto gesture = exclusiveRecognizer->CreateGestureFromRecognizer();
+    auto gestureGroup = AceType::DynamicCast<GestureGroup>(gesture);
+    ASSERT_NE(gestureGroup, nullptr);
+    EXPECT_EQ(gestureGroup->gestures_.size(), 1);
+}
+
+/**
+ * @tc.name: RecognizerGroupTest017
+ * @tc.desc: Test CheckStates branch with touchId filtering and nested group pending state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest017, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->refereeState_ = RefereeState::DETECTING;
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { clickRecognizer };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    auto state = exclusiveRecognizer->CheckStates(88);
+    EXPECT_EQ(state, RefereeState::READY);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 88;
+    clickRecognizer->touchPoints_[88] = touchEvent;
+    state = exclusiveRecognizer->CheckStates(88);
+    EXPECT_EQ(state, RefereeState::PENDING);
+
+    auto childClick = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    childClick->refereeState_ = RefereeState::DETECTING;
+    childClick->touchPoints_[88] = touchEvent;
+    std::vector<RefPtr<NGGestureRecognizer>> childRecognizers { childClick };
+    auto childGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(childRecognizers);
+    std::vector<RefPtr<NGGestureRecognizer>> parentRecognizers { childGroup };
+    auto parentGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(parentRecognizers);
+
+    childClick->refereeState_ = RefereeState::READY;
+    EXPECT_EQ(parentGroup->CheckStates(88), RefereeState::READY);
+}
+
+/**
+ * @tc.name: RecognizerGroupTest018
+ * @tc.desc: Test ForceReject bridge mode and self fail branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest018, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->refereeState_ = RefereeState::DETECTING;
+    clickRecognizer->SetBridgeMode(true);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { clickRecognizer };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<CountingExclusiveRecognizer>(recognizers);
+    exclusiveRecognizer->refereeState_ = RefereeState::READY;
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(clickRecognizer->GetRefereeState(), RefereeState::DETECTING);
+    EXPECT_EQ(exclusiveRecognizer->onRejectedCount_, 1);
+
+    clickRecognizer->SetBridgeMode(false);
+    clickRecognizer->refereeState_ = RefereeState::DETECTING;
+    exclusiveRecognizer->onRejectedCount_ = 0;
+    exclusiveRecognizer->refereeState_ = RefereeState::FAIL;
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(exclusiveRecognizer->onRejectedCount_, 0);
+    EXPECT_EQ(clickRecognizer->GetRefereeState(), RefereeState::FAIL);
+
+    std::vector<RefPtr<NGGestureRecognizer>> nestedRecognizers;
+    auto nestedGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(nestedRecognizers);
+    std::vector<RefPtr<NGGestureRecognizer>> parentRecognizers { nestedGroup };
+    auto parentGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(parentRecognizers);
+    parentGroup->ForceReject();
+    EXPECT_EQ(nestedGroup->GetRefereeState(), RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: RecognizerGroupTest019
+ * @tc.desc: Test CheckAllFailed IsReady and GetGestureInfoString false branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest019, TestSize.Level1)
+{
+    auto clickFailRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickFailRecognizer->refereeState_ = RefereeState::FAIL;
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { clickFailRecognizer };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    EXPECT_TRUE(exclusiveRecognizer->CheckAllFailed());
+
+    auto clickReadyRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickReadyRecognizer->refereeState_ = RefereeState::READY;
+    exclusiveRecognizer->recognizers_.push_back(clickReadyRecognizer);
+    EXPECT_FALSE(exclusiveRecognizer->CheckAllFailed());
+
+    exclusiveRecognizer->refereeState_ = RefereeState::READY;
+    clickReadyRecognizer->refereeState_ = RefereeState::DETECTING;
+    EXPECT_FALSE(exclusiveRecognizer->IsReady());
+
+    clickReadyRecognizer->refereeState_ = RefereeState::READY;
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+
+    exclusiveRecognizer->remainChildOnResetStatus_ = false;
+    auto result = exclusiveRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("RCRS:0"));
+}
+
+/**
+ * @tc.name: RecognizerGroupTest020
+ * @tc.desc: Test SetRecognizerInfoRecursively and AddHittedRecognizerType recursion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest020, TestSize.Level1)
+{
+    auto innerClick = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> innerRecognizers { innerClick };
+    auto innerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(innerRecognizers);
+    std::vector<RefPtr<NGGestureRecognizer>> outerRecognizers { innerGroup };
+    auto outerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(outerRecognizers);
+
+    auto frameNode = FrameNode::CreateFrameNode("set_info", 202, AceType::MakeRefPtr<Pattern>());
+    auto targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    Offset coordinateOffset(3.0, 4.0);
+    GetEventTargetImpl getEventTargetImpl = []() -> std::optional<EventTarget> {
+        EventTarget target;
+        return target;
+    };
+    outerGroup->SetRecognizerInfoRecursively(coordinateOffset, frameNode, targetComponent, getEventTargetImpl);
+
+    EXPECT_EQ(innerClick->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
+    EXPECT_EQ(innerClick->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
+    EXPECT_EQ(innerClick->GetAttachedNode().Upgrade(), frameNode);
+    EXPECT_EQ(innerClick->GetTargetComponent(), targetComponent);
+    EXPECT_TRUE(innerClick->GetEventTarget().has_value());
+
+    auto clickWithoutNode = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    outerGroup->recognizers_.push_back(clickWithoutNode);
+    std::map<std::string, std::list<TouchTestResultInfo>> hittedRecognizerInfo;
+    outerGroup->AddHittedRecognizerType(hittedRecognizerInfo);
+    auto clickTypeName = AceType::TypeName(clickWithoutNode);
+    EXPECT_NE(hittedRecognizerInfo.find(clickTypeName), hittedRecognizerInfo.end());
 }
 }; // namespace OHOS::Ace::NG

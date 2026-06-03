@@ -81,7 +81,9 @@ void RepeatVirtual2ModelTestNg::TearDown()
  */
 HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCreateTest001, TestSize.Level1)
 {
-    auto onGetRid4Index = [](int32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+    constexpr int32_t testMemOptStrategy = 0;
+    auto onGetRid4Index = [](int32_t index, bool inAnimation, bool forceCreateNewChild) -> std::pair<uint32_t, uint32_t>
+    {
         return { static_cast<uint32_t>(index), 0 };
     };
     auto onRecycleItems = [](int32_t start, int32_t end) {};
@@ -89,10 +91,11 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCreateTest001, Tes
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onMoveFromTo = [](int32_t from, int32_t to) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     RepeatVirtualScroll2ModelNG model;
-    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, onGetRid4Index, onRecycleItems,
-        onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, testMemOptStrategy, onGetRid4Index, onRecycleItems,
+        onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
 }
 
 /**
@@ -102,7 +105,9 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCreateTest001, Tes
  */
 HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCreateTest002, TestSize.Level1)
 {
-    auto onGetRid4Index = [](int32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+    constexpr int32_t testMemOptStrategy = 0;
+    auto onGetRid4Index = [](int32_t index, bool inAnimation, bool forceCreateNewChild) -> std::pair<uint32_t, uint32_t>
+    {
         return { static_cast<uint32_t>(index), 0 };
     };
     auto onRecycleItems = [](int32_t start, int32_t end) {};
@@ -110,12 +115,13 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCreateTest002, Tes
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onMoveFromTo = [](int32_t from, int32_t to) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     RepeatVirtualScroll2ModelNG model;
-    model.Create(TEST_ARR_LEN_2, TEST_TOTAL_COUNT, onGetRid4Index, onRecycleItems,
-        onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
-    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT_2, onGetRid4Index, onRecycleItems,
-        onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    model.Create(TEST_ARR_LEN_2, TEST_TOTAL_COUNT, testMemOptStrategy, onGetRid4Index, onRecycleItems,
+        onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
+    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT_2, testMemOptStrategy, onGetRid4Index, onRecycleItems,
+        onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     SUCCEED();
 }
 
@@ -126,7 +132,9 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCreateTest002, Tes
  */
 HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxRemoveNodeTest003, TestSize.Level1)
 {
-    auto onGetRid4Index = [](int32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+    constexpr int32_t testMemOptStrategy = 0;
+    auto onGetRid4Index = [](int32_t index, bool inAnimation, bool forceCreateNewChild) -> std::pair<uint32_t, uint32_t>
+    {
         return { static_cast<uint32_t>(index), 0 };
     };
     auto onRecycleItems = [](int32_t start, int32_t end) {};
@@ -134,10 +142,11 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxRemoveNodeTest003,
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onMoveFromTo = [](int32_t from, int32_t to) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     RepeatVirtualScroll2ModelNG model;
-    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, onGetRid4Index, onRecycleItems,
-        onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, testMemOptStrategy, onGetRid4Index, onRecycleItems,
+        onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     model.RemoveNode(TEST_RID);
     SUCCEED();
 }
@@ -149,7 +158,9 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxRemoveNodeTest003,
  */
 HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxRemoveNodeTest004, TestSize.Level1)
 {
-    auto onGetRid4Index = [](int32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+    constexpr int32_t testMemOptStrategy = 0;
+    auto onGetRid4Index = [](int32_t index, bool inAnimation, bool forceCreateNewChild) -> std::pair<uint32_t, uint32_t>
+    {
         return { static_cast<uint32_t>(index), 0 };
     };
     auto onRecycleItems = [](int32_t start, int32_t end) {};
@@ -157,10 +168,11 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxRemoveNodeTest004,
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onMoveFromTo = [](int32_t from, int32_t to) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     RepeatVirtualScroll2ModelNG model;
-    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, onGetRid4Index, onRecycleItems,
-        onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, testMemOptStrategy, onGetRid4Index, onRecycleItems,
+        onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     model.RemoveNode(TEST_RID);
     model.RemoveNode(TEST_RID_2);
 }
@@ -362,7 +374,9 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxSetCreateByTemplat
  */
 HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCompleteFlowTest019, TestSize.Level1)
 {
-    auto onGetRid4Index = [](int32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+    constexpr int32_t testMemOptStrategy = 0;
+    auto onGetRid4Index = [](int32_t index, bool inAnimation, bool forceCreateNewChild) -> std::pair<uint32_t, uint32_t>
+    {
         return { static_cast<uint32_t>(index), 0 };
     };
     auto onRecycleItems = [](int32_t start, int32_t end) {};
@@ -370,10 +384,11 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCompleteFlowTest01
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onMoveFromTo = [](int32_t from, int32_t to) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     RepeatVirtualScroll2ModelNG model;
-    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, onGetRid4Index, onRecycleItems,
-        onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, testMemOptStrategy, onGetRid4Index, onRecycleItems,
+        onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     auto onMoveCallback = [](int32_t from, int32_t to) {};
     model.OnMove(TEST_REPEAT_ELMT_ID, std::move(onMoveCallback));
     model.SetInvalid(TEST_REPEAT_ELMT_ID, TEST_RID);
@@ -388,7 +403,9 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCompleteFlowTest01
  */
 HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxZeroArrLenTest020, TestSize.Level1)
 {
-    auto onGetRid4Index = [](int32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+    constexpr int32_t testMemOptStrategy = 0;
+    auto onGetRid4Index = [](int32_t index, bool inAnimation, bool forceCreateNewChild) -> std::pair<uint32_t, uint32_t>
+    {
         return { 0, 0 };
     };
     auto onRecycleItems = [](int32_t start, int32_t end) {};
@@ -396,10 +413,11 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxZeroArrLenTest020,
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onMoveFromTo = [](int32_t from, int32_t to) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     RepeatVirtualScroll2ModelNG model;
-    model.Create(0, TEST_TOTAL_COUNT, onGetRid4Index, onRecycleItems,
-        onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    model.Create(0, TEST_TOTAL_COUNT, testMemOptStrategy, onGetRid4Index, onRecycleItems,
+        onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     SUCCEED();
 }
 
@@ -410,7 +428,9 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxZeroArrLenTest020,
  */
 HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCallbackExecutionTest021, TestSize.Level1)
 {
-    auto onGetRid4Index = [](int32_t index, bool inAnimation) -> std::pair<uint32_t, uint32_t> {
+    constexpr int32_t testMemOptStrategy = 0;
+    auto onGetRid4Index = [](int32_t index, bool inAnimation, bool forceCreateNewChild) -> std::pair<uint32_t, uint32_t>
+    {
         return { static_cast<uint32_t>(index), 0 };
     };
     auto onRecycleItems = [](int32_t start, int32_t end) {};
@@ -418,10 +438,11 @@ HWTEST_F(RepeatVirtual2ModelTestNg, RepeatVirtualScroll2SyntaxCallbackExecutionT
         int32_t cacheEnd, bool isCache, bool isImmediate) {};
     auto onMoveFromTo = [](int32_t from, int32_t to) {};
     auto onPurge = []() {};
+    auto onPurgeAll = []() {};
     auto onUpdateDirty = []() {};
     RepeatVirtualScroll2ModelNG model;
-    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, onGetRid4Index, onRecycleItems,
-        onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+    model.Create(TEST_ARR_LEN, TEST_TOTAL_COUNT, testMemOptStrategy, onGetRid4Index, onRecycleItems,
+        onActiveRange, onMoveFromTo, onPurge, onPurgeAll, onUpdateDirty);
     SUCCEED();
 }
 

@@ -32,6 +32,7 @@ import { UIContext } from '@ohos/arkui/UIContext';
 import { ArkUINativeModule } from '#components';
 import { FreeRootNode } from '../CallbackTransformer';
 import { CustomNodeBuilder } from '#generated';
+import { UIContext } from '@ohos/arkui/UIContext';
 
 export class ArkRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -159,6 +160,11 @@ export class ArkCustomComponentRootPeer extends PeerNode {
         this.envFunc = envFunc;
         ArkUIAniCustomNodeModule._CustomNode_EnvFunction(this.peer.ptr, envFunc);
         return;
+    }
+    updateFreeRootUIContext(oldContext: UIContext, newContext: UIContext): void {
+        this.freezeRoot.forEach((root: FreeRootNode) => {
+            root.updateUIContext(oldContext, newContext);
+        });
     }
 }
 export interface Root {

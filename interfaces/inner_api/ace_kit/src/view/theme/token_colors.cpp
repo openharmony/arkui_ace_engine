@@ -80,8 +80,11 @@ static const std::vector<TokenColorData> colorData = {
     { "interactiveActive", 125831022 }, /* INTERACTIVE_ACTIVE = 48 */
     { "interactiveSelect", 125831023 }, /* INTERACTIVE_SELECT = 49 */
     { "interactiveClick", 125831024 }, /* INTERACTIVE_CLICK = 50 */
+    { "primary", -1 }, /* PRIMARY = 51 */
+    { "onPrimary", -1 }, /* ON_PRIMARY = 52 */
+    { "container", -1 }, /* CONTAINER = 53 */
 
-    { nullptr, -1 } /* TOTAL_NUMBER = 51; */
+    { nullptr, -1 } /* TOTAL_NUMBER = 54; */
 };
 
 void TokenColors::SetColors(const std::vector<Color>& colors)
@@ -136,6 +139,21 @@ Color TokenColors::Alert() const
 Color TokenColors::Confirm() const
 {
     return GetColorWithResourceObject(CONFIRM);
+}
+
+Color TokenColors::Primary() const
+{
+    return GetColorWithResourceObject(PRIMARY);
+}
+
+Color TokenColors::OnPrimary() const
+{
+    return GetColorWithResourceObject(ON_PRIMARY);
+}
+
+Color TokenColors::Container() const
+{
+    return GetColorWithResourceObject(CONTAINER);
 }
 
 Color TokenColors::FontPrimary() const

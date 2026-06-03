@@ -230,7 +230,7 @@ struct UpdateParagraphStyle {
     std::optional<Dimension> paragraphSpacing;
     std::optional<TextVerticalAlign> textVerticalAlign;
     std::optional<TextDirection> textDirection;
-    ACE_DEFINE_TEXT_STYLE_GRADIENT_OPTIONAL_TYPE();
+    ACE_DEFINE_TEXT_STYLE_NG_GRADIENT_OPTIONAL_TYPE();
     std::optional<Color> colorShaderStyle;
  
     struct resourceUpdater {

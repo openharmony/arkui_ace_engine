@@ -31,7 +31,7 @@ export default {
   PathModifier, PatternLockModifier, PluginComponentModifier, PolygonModifier, PolylineModifier,
   ProgressModifier, QRCodeModifier, RadioModifier, RatingModifier, RectModifier, RefreshModifier,
   RelativeContainerModifier, RichEditorModifier, RowModifier, RowSplitModifier, ScrollModifier,
-  SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier,
+  SearchModifier, SelectModifier, SelectionContainerModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier,
   StackModifier, StepperModifier, StepperItemModifier, SwiperModifier, TabsModifier, TabContentModifier,
   TextModifier, TextAreaModifier, TextClockModifier, TextInputModifier, TextPickerModifier,
   TextTimerModifier, TimePickerModifier, ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier,

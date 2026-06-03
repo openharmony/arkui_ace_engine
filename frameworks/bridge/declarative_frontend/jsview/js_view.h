@@ -342,10 +342,7 @@ public:
     void JSGetUniqueId(const JSCallbackInfo& info);
 
     // Release the UINode hold on the JS object and trigger the delete phase.
-    void JSResetRecycleCustomNode(const JSCallbackInfo& info)
-    {
-        recycleCustomNode_.Reset();
-    }
+    void JSResetRecycleCustomNode(const JSCallbackInfo& info);
 
     void JSSendStateInfo(const std::string& stateInfo);
 
@@ -409,6 +406,16 @@ public:
         return isV2_;
     }
 
+    void JSSetReusableMemOptStrategy(const int32_t reusableMemOptStrategy);
+
+    int32_t GetJSReusableMemOptStrategy() const
+    {
+        return reusableMemOptStrategy_;
+    }
+
+    void JSStartMemOpt();
+    void JSRequestProgressiveRelease();
+
     void OnDumpInfo(const std::vector<std::string>& params) override;
 
     void JSGetDialogController(const JSCallbackInfo& info);
@@ -469,6 +476,7 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
+    int32_t reusableMemOptStrategy_ = 0;
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;

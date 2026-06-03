@@ -632,6 +632,8 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (!canExpandCurrentWindow_ && isContainerModal_) {
             LimitContainerModalMenuRect(width_, height_, menuPattern);
+        } else {
+            AdjustWrapperRectForPCMode(host);
         }
     }
     CalculateSafeAreaIntersection(safeAreaInsets);
@@ -2137,6 +2139,8 @@ OffsetF MenuLayoutAlgorithm::UpdateMenuPosition(LayoutWrapper* layoutWrapper, co
     } else {
         menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow_, layoutWrapper);
     }
+    menuPosition = menuPattern->GetIsExtensionMenuEnableNewAnimation() ?
+        menuPattern->GetAdjustedExtensionMenuPosition(menuPosition) : menuPosition;
     menuPattern->UpdateLastPosition(menuPosition);
     menuPattern->UpdateLastPlacement(placement_);
     CalculateChildOffset(didNeedArrow_);
@@ -2144,8 +2148,7 @@ OffsetF MenuLayoutAlgorithm::UpdateMenuPosition(LayoutWrapper* layoutWrapper, co
     TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPositionWithArrow.ToString().c_str());
     auto renderContext = menuNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, menuPosition);
-    // show animation will be interrupted by repeated update
-    if (lastPosition_.value_or(OffsetF()) != menuPositionWithArrow) {
+    if (lastPosition_.value_or(OffsetF()) != menuPositionWithArrow) { // animation be interrupted by repeated update
         renderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPositionWithArrow.GetX()), Dimension(menuPositionWithArrow.GetY())));
     }
@@ -2615,6 +2618,17 @@ void MenuLayoutAlgorithm::LimitContainerModalMenuRect(
                             static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
     rectWidth -= containerOffsetX;
     rectHeight -= containerOffsetY;
+}
+
+void MenuLayoutAlgorithm::AdjustWrapperRectForPCMode(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    if (!SystemProperties::IsPCMode()) {
+        return;
+    }
+    auto parentOffset = host->GetPaintRectOffset(true, true);
+    width_ -= parentOffset.GetX();
+    height_ -= parentOffset.GetY();
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
@@ -3987,14 +4001,15 @@ void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     const auto& menuParam = menuWrapperPattern->GetMenuParam();
-    if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial)) {
+    if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial) ||
+        menuPattern->GetIsExtensionMenuEnableNewAnimation()) {
         auto menuSDFShape = GetMenuSDFShape(didNeedArrow);
         auto menuNode = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(menuNode);
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetSDFShape(menuSDFShape);
-        if (!menuPattern->IsUseDistortionAnimation()) {
+        if (!menuPattern->IsUseDistortionAnimation() && !menuPattern->GetIsExtensionMenuEnableNewAnimation()) {
             renderContext->UpdateSubmenuDistortionParam();
         }
     }

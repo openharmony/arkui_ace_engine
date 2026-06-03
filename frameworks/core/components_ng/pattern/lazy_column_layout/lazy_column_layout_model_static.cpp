@@ -18,6 +18,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -34,8 +35,11 @@ RefPtr<FrameNode> LazyColumnLayoutModelStatic::CreateFrameNode(int32_t nodeId)
 void LazyColumnLayoutModelStatic::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
     if (space) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(space.value(), LpxAttribute::LPX_SPACE, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyColumnLayoutProperty, Space, space.value(), frameNode);
     } else {
+        CHECK_NULL_VOID(frameNode);
+        frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SPACE);
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(LazyColumnLayoutProperty, Space, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
@@ -57,6 +61,61 @@ void LazyColumnLayoutModelStatic::SetOnVisibleIndexesChange(
     auto pattern = frameNode->GetPattern<LazyColumnLayoutPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnVisibleIndexesChange(std::move(onVisibleIndexesChange));
+}
+
+void LazyColumnLayoutModelStatic::SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle)
+{
+    if (stickyStyle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            LazyColumnLayoutProperty, StickyStyle, static_cast<StickyStyle>(stickyStyle.value()), frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty<LazyColumnLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            LazyColumnLayoutProperty, StickyStyle, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void LazyColumnLayoutModelStatic::SetHeader(FrameNode* frameNode, const RefPtr<UINode>& headerNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyColumnLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!headerNode) {
+        pattern->RemoveHeader();
+        return;
+    }
+    pattern->AddHeader(headerNode);
+}
+
+void LazyColumnLayoutModelStatic::SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footerNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyColumnLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!footerNode) {
+        pattern->RemoveFooter();
+        return;
+    }
+    pattern->AddFooter(footerNode);
+}
+
+void LazyColumnLayoutModelStatic::RemoveHeader(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyColumnLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveHeader();
+}
+
+void LazyColumnLayoutModelStatic::RemoveFooter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyColumnLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveFooter();
 }
 
 } // namespace OHOS::Ace::NG

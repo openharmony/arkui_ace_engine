@@ -270,6 +270,8 @@ void LazyGridLayoutInfo::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("itemStartIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("itemEndIndex:" + std::to_string(endIndex_));
     DumpLog::GetInstance().AddDesc("itemTotalCount:" + std::to_string(totalItemCount_));
+    DumpLog::GetInstance().AddDesc("headerMainSize:" + std::to_string(headerMainSize_));
+    DumpLog::GetInstance().AddDesc("footerMainSize:" + std::to_string(footerMainSize_));
     DumpLog::GetInstance().AddDesc("spaceWidth:" + std::to_string(spaceWidth_));
     DumpLog::GetInstance().AddDesc("totalMainSize:" + std::to_string(totalMainSize_));
 }
@@ -279,6 +281,8 @@ void LazyGridLayoutInfo::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("itemStartIndex", startIndex_);
     json->Put("itemEndIndex", endIndex_);
     json->Put("itemTotalCount", totalItemCount_);
+    json->Put("headerMainSize", headerMainSize_);
+    json->Put("footerMainSize", footerMainSize_);
     json->Put("spaceWidth", spaceWidth_);
     json->Put("totalMainSize", totalMainSize_);
 }

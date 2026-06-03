@@ -19,6 +19,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 
 #include <cinttypes>
 #include <unordered_set>
@@ -636,6 +637,20 @@ public:
         auto guard = GetGuard();
         for (const auto& child : children_) {
             child.node->OnSetCacheCount(cacheCount, itemConstraint);
+        }
+    }
+
+    void RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes)
+    {
+        auto guard = GetGuard();
+        for (const auto& node : nodes) {
+            for (auto it = partFrameNodeChildren_.begin(); it != partFrameNodeChildren_.end();) {
+                if (it->second && it->second->GetHostNode() == node) {
+                    it = partFrameNodeChildren_.erase(it);
+                } else {
+                    ++it;
+                }
+            }
         }
     }
 
@@ -1477,6 +1492,27 @@ void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
 bool FrameNode::IsVisibleAndActive() const
 {
     return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
+}
+
+bool FrameNode::IsDisappearOrNoVisibleArea(uint64_t timestamp)
+{
+    if (IsFrameDisappear(timestamp)) {
+        return true;
+    }
+    CacheVisibleRectResult visibleResult = GetCacheVisibleRect(timestamp, false);
+    const RectF& visibleRect = visibleResult.visibleRect;
+    const RectF& frameRect = visibleResult.frameRect;
+    if (visibleRect.IsEmpty() || frameRect.IsEmpty()) {
+        return true;
+    }
+    double totalArea = frameRect.Width() * frameRect.Height();
+    if (totalArea <= 0.0) {
+        return true;
+    }
+    double visibleArea = visibleRect.Width() * visibleRect.Height();
+    double visibleRatio = visibleArea / totalArea;
+    visibleRatio = std::clamp(visibleRatio, 0.0, 1.0);
+    return NearEqual(visibleRatio, VISIBLE_RATIO_MIN);
 }
 
 void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
@@ -6593,6 +6629,11 @@ void FrameNode::RecycleItemsByIndex(int32_t start, int32_t end)
     frameProxy_->RecycleItemsByIndex(start, end);
 }
 
+void FrameNode::RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes)
+{
+    frameProxy_->RemoveFromPartFrameNodeChildren(nodes);
+}
+
 void FrameNode::RemoveChildInRenderTree(uint32_t index)
 {
     frameProxy_->RemoveChildInRenderTree(index);
@@ -8775,6 +8816,30 @@ bool FrameNode::IsPreMakeAndScroll()
         return true;
     }
     return false;
+}
+
+void FrameNode::RegisterLpxUpdateCallback(LpxAttribute attribute, std::function<void()>&& callback)
+{
+    if (!callback) {
+        LOGW("RegisterLpxUpdateCallback with null callback");
+        return;
+    }
+    lpxUpdateCallbacks_[attribute] = std::move(callback);
+}
+
+void FrameNode::UnRegisterLpxUpdateCallback(LpxAttribute attribute)
+{
+    lpxUpdateCallbacks_.erase(attribute);
+}
+
+void FrameNode::FireLpxUpdateCallbacks()
+{
+    for (const auto& entry : lpxUpdateCallbacks_) {
+        const auto& callback = entry.second;
+        if (callback) {
+            callback();
+        }
+    }
 }
 
 template<typename T>

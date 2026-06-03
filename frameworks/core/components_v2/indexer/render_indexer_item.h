@@ -21,6 +21,7 @@
 #include "core/animation/keyframe_animation.h"
 #include "core/components/box/render_box.h"
 #include "core/components/text/text_component.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/transform/render_transform.h"
 
 namespace OHOS::Ace::V2 {

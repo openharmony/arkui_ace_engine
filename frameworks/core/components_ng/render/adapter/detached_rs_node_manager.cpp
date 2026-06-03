@@ -23,11 +23,10 @@
 #include "base/log/ace_trace.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/frontend.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "bridge/common/utils/engine_helper.h"
-#include "native_engine/native_engine.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -129,29 +128,34 @@ void DetachedRsNodeManager::FlushInstance(uint64_t nanoTimestamp, int32_t instan
         static_cast<long long>(durationMs));
 }
 
-void DetachedRsNodeManager::TryRegisterExternalClearCallback()
+void DetachedRsNodeManager::TryRegisterExternalClearCallback(int32_t instanceId)
 {
     if (externalClearRegistered_) {
         return;
     }
-    auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        LOGD("RegisterExternalClearCallback skip, engine is null");
+    auto container = Container::GetContainer(instanceId);
+    if (!container) {
+        LOGD("RegisterExternalClearCallback skip, container is null");
         return;
     }
-    auto nativeEngine = engine->GetNativeEngine();
-    if (!nativeEngine) {
-        LOGD("RegisterExternalClearCallback skip, nativeEngine is null");
+    auto frontend = container->GetFrontend();
+    if (!frontend) {
+        LOGD("RegisterExternalClearCallback skip, frontend is null");
         return;
     }
-    nativeEngine->SetExternalClearCallback([]() { PreFreezeFlushForAllContexts(); });
-    externalClearRegistered_ = true;
+    if (frontend->SetExternalClearCallback([]() { PreFreezeFlushForAllContexts(); })) {
+        externalClearRegistered_ = true;
+    } else {
+        LOGW("RegisterExternalClearCallback failed, instanceId:%{public}d, "
+             "jsEngine or nativeEngine not available yet, will retry on next Foreground",
+            instanceId);
+    }
 }
 
 void DetachedRsNodeManager::RegisterPreFreezeInstance(int32_t instanceId)
 {
     std::lock_guard<std::mutex> lock(registeredMutex_);
-    TryRegisterExternalClearCallback();
+    TryRegisterExternalClearCallback(instanceId);
     registeredInstances_.insert(instanceId);
 }
 

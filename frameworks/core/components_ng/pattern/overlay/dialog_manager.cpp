@@ -16,6 +16,8 @@
 
 #include "base/error/error_code.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
@@ -24,6 +26,9 @@
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace {
 SINGLETON_INSTANCE_IMPL(NG::DialogManager);
@@ -176,4 +181,74 @@ RefPtr<PipelineContext> DialogManager::GetMainPipelineContext(const RefPtr<Frame
     }
     return context;
 }
+
+bool DialogManager::ShouldHandleSmoothImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial)
+{
+    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+        return false;
+    }
+
+    if (!systemMaterial) {
+        return false;
+    }
+
+    auto materialType = static_cast<Ace::MaterialType>(systemMaterial->GetType());
+    return materialType == Ace::MaterialType::IMMERSIVE;
+}
+
+bool DialogManager::ShouldApplySystemMaterialShadow(const RefPtr<UiMaterial>& systemMaterial)
+{
+    if (!systemMaterial) {
+        return false;
+    }
+
+    auto immersiveOptions = systemMaterial->GetImmersiveOptions();
+    return immersiveOptions && immersiveOptions->applyShadow;
+}
+
+bool DialogManager::HandleSmoothImmersiveMaterial(
+    const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial)
+{
+    CHECK_NULL_RETURN(columnNode, false);
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+
+    SetSmoothImmersiveBackground(renderContext);
+    SetSmoothImmersiveShadow(columnNode, systemMaterial);
+    return true;
+}
+
+void DialogManager::SetSmoothImmersiveBackground(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+
+    auto resId = Ace::TokenColors::GetSystemColorResIdByIndex(Ace::TokenColors::COMP_BACKGROUND_PRIMARY);
+    auto backgroundColor = themeConstants->GetColor(resId);
+    renderContext->UpdateBackgroundColor(backgroundColor);
+}
+
+void DialogManager::SetSmoothImmersiveShadow(
+    const RefPtr<FrameNode>& columnNode, const RefPtr<UiMaterial>& systemMaterial)
+{
+    CHECK_NULL_VOID(columnNode);
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (!ShouldApplySystemMaterialShadow(systemMaterial)) {
+        return;
+    }
+
+    auto pipelineContext = columnNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dipScale = pipelineContext->GetDipScale();
+    auto shadow = Ace::MaterialUtils::GetImmersiveShadow(dipScale);
+    renderContext->UpdateBackShadow(shadow);
+}
+
 } // namespace OHOS::Ace::NG

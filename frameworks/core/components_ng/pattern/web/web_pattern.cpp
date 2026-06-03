@@ -45,12 +45,12 @@
 #include "base/image/file_uri_helper.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/utils/utils.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "base/view_data/ace_auto_fill_error.h"
 #include "arkweb_utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/accessibility/accessibility_manager.h"
@@ -4758,6 +4758,7 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnableAutoFill(GetEnableAutoFill().value_or(true));
         delegate_->SetEnableDrag(GetEnableDrag().value_or(true));
         UpdateScrollbarLayout();
+        delegate_->UpdateTouchEventFeatureDetectionEnabled();
     }
 
     // Set the default background color when the component did not set backgroundColor()

@@ -676,6 +676,8 @@ public:
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
 
+    bool IsDisappearOrNoVisibleArea(uint64_t timestamp);
+
     bool IsPrivacySensitive() const
     {
         return isPrivacySensitive_;
@@ -1162,6 +1164,7 @@ public:
     void DoSetActiveChildRange(
         int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
+    void RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes);
     const std::string& GetHostTag() const override
     {
         return GetTag();
@@ -1687,6 +1690,9 @@ public:
 
     void RegisterLpxAttribute(LpxAttribute attribute);
     void UnRegisterLpxAttribute(LpxAttribute attribute);
+    void RegisterLpxUpdateCallback(LpxAttribute attribute, std::function<void()>&& callback);
+    void UnRegisterLpxUpdateCallback(LpxAttribute attribute);
+    void FireLpxUpdateCallbacks();
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -2059,6 +2065,7 @@ private:
     std::shared_ptr<AICallerHelper> aiCallerHelper_;
 
     std::unordered_set<LpxAttribute> lpxAttributes_;
+    std::unordered_map<LpxAttribute, std::function<void()>> lpxUpdateCallbacks_;
     uint64_t ownedTid_ = 0;
 };
 

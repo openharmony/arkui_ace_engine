@@ -24,15 +24,16 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_pattern.h"
-#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const std::string DEFAULT_COLUMNS_TEMPLATE = "1fr";
 constexpr Dimension DEFAULT_COLUMNS_GAP = 0.0_fp;
 constexpr Dimension DEFAULT_ROWS_GAP = 0.0_fp;
+constexpr int32_t DEFAULT_STICKY_STYLE = static_cast<int32_t>(StickyStyle::NONE);
 using VisibleIndexesChangeFunc = std::function<void(int32_t, int32_t)>;
 
 FrameNode* GetLazyWaterFlowLayoutFrameNode(ArkUINodeHandle node)
@@ -53,6 +54,18 @@ Dimension ParseResourceLength(const ArkUIResourceLength* length)
         return CalcDimension(length->string, DimensionUnit::CALC);
     }
     return CalcDimension(length->value, unitEnum);
+}
+
+RefPtr<UINode> ClaimHeaderFooterNode(ArkUINodeHandle edge)
+{
+    auto* rawNode = reinterpret_cast<UINode*>(edge);
+    CHECK_NULL_RETURN(rawNode, nullptr);
+    auto node = AceType::Claim(rawNode);
+    if (!HeaderFooterUtils::GetHeaderFooterFrameNode(node)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout rejects invalid header / footer node");
+        return nullptr;
+    }
+    return node;
 }
 
 void SetVisibleIndexesChangeCallback(FrameNode* frameNode, void* extraParam)
@@ -122,6 +135,64 @@ void ResetLazyWaterFlowLayoutColumnsTemplate(ArkUINodeHandle node)
     LazyVWaterFlowLayoutModel::SetColumnsTemplate(frameNode, DEFAULT_COLUMNS_TEMPLATE);
 }
 
+void SetLazyWaterFlowLayoutSticky(ArkUINodeHandle node, int32_t stickyStyle)
+{
+    auto* frameNode = GetLazyWaterFlowLayoutFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (stickyStyle < static_cast<int32_t>(StickyStyle::NONE) ||
+        stickyStyle > static_cast<int32_t>(StickyStyle::BOTH)) {
+        stickyStyle = DEFAULT_STICKY_STYLE;
+    }
+    LazyWaterFlowLayoutModel::SetSticky(frameNode, static_cast<StickyStyle>(stickyStyle));
+}
+
+void ResetLazyWaterFlowLayoutSticky(ArkUINodeHandle node)
+{
+    auto* frameNode = GetLazyWaterFlowLayoutFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyWaterFlowLayoutModel::SetSticky(frameNode, StickyStyle::NONE);
+}
+
+void SetLazyWaterFlowLayoutHeader(ArkUINodeHandle node, ArkUINodeHandle header)
+{
+    auto* frameNode = GetLazyWaterFlowLayoutFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    auto headerNode = ClaimHeaderFooterNode(header);
+    CHECK_NULL_VOID(headerNode);
+    if (AceType::RawPtr(headerNode) == static_cast<UINode*>(frameNode)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout rejects itself as header node");
+        return;
+    }
+    LazyWaterFlowLayoutModel::SetHeader(frameNode, headerNode);
+}
+
+void ResetLazyWaterFlowLayoutHeader(ArkUINodeHandle node)
+{
+    auto* frameNode = GetLazyWaterFlowLayoutFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyWaterFlowLayoutModel::RemoveHeader(frameNode);
+}
+
+void SetLazyWaterFlowLayoutFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
+{
+    auto* frameNode = GetLazyWaterFlowLayoutFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    auto footerNode = ClaimHeaderFooterNode(footer);
+    CHECK_NULL_VOID(footerNode);
+    if (AceType::RawPtr(footerNode) == static_cast<UINode*>(frameNode)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout rejects itself as footer node");
+        return;
+    }
+    LazyWaterFlowLayoutModel::SetFooter(frameNode, footerNode);
+}
+
+void ResetLazyWaterFlowLayoutFooter(ArkUINodeHandle node)
+{
+    auto* frameNode = GetLazyWaterFlowLayoutFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyWaterFlowLayoutModel::RemoveFooter(frameNode);
+}
+
 void SetLazyWaterFlowLayoutOnVisibleIndexesChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = GetLazyWaterFlowLayoutFrameNode(node);
@@ -166,6 +237,12 @@ const ArkUILazyWaterFlowLayoutModifier* GetLazyWaterFlowLayoutDynamicModifier()
         .resetRowsGap = ResetLazyWaterFlowLayoutRowsGap,
         .setColumnsTemplate = SetLazyWaterFlowLayoutColumnsTemplate,
         .resetColumnsTemplate = ResetLazyWaterFlowLayoutColumnsTemplate,
+        .setSticky = SetLazyWaterFlowLayoutSticky,
+        .resetSticky = ResetLazyWaterFlowLayoutSticky,
+        .setHeader = SetLazyWaterFlowLayoutHeader,
+        .resetHeader = ResetLazyWaterFlowLayoutHeader,
+        .setFooter = SetLazyWaterFlowLayoutFooter,
+        .resetFooter = ResetLazyWaterFlowLayoutFooter,
         .setOnVisibleIndexesChange = SetLazyWaterFlowLayoutOnVisibleIndexesChange,
         .resetOnVisibleIndexesChange = ResetLazyWaterFlowLayoutOnVisibleIndexesChange,
         .setItemFillPolicy = SetLazyWaterFlowLayoutItemFillPolicy,

@@ -1591,6 +1591,20 @@ class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey<boolea
   }
 }
 
+class TextInputPunctuationOverflowModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputPunctuationOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetPunctuationOverflow(node);
+    } else {
+      getUINativeModule().textInput.setPunctuationOverflow(node, this.value!);
+    }
+  }
+}
+
 class TextInputIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -2214,6 +2228,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   orphanCharOptimization(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOrphanCharOptimizationModifier.identity,
       TextInputOrphanCharOptimizationModifier, value);
+    return this;
+  }
+  punctuationOverflow(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputPunctuationOverflowModifier.identity,
+        TextInputPunctuationOverflowModifier, value);
     return this;
   }
   includeFontPadding(value: boolean): this {

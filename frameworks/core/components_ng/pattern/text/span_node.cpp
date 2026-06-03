@@ -1036,6 +1036,7 @@ void SpanItem::UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextS
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, TailIndents, TailIndent);
 }
 
 void SpanItem::UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle)
@@ -1423,7 +1424,12 @@ void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
     COPY_TEXT_STYLE(textLineStyle, TextDirection, UpdateTextDirection);
     COPY_TEXT_STYLE(textLineStyle, ColorShaderStyle, UpdateColorShaderStyle);
-    sameSpan->textLineStyle->SetOptGradient(textLineStyle->GetGradient());
+    if (textLineStyle->HasGradient()) {
+        sameSpan->textLineStyle->SetOptGradient(textLineStyle->GetOptGradient());
+    } else {
+        sameSpan->textLineStyle->ResetGradient();
+    }
+    COPY_TEXT_STYLE(textLineStyle, TailIndents, UpdateTailIndents);
 }
 
 void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const

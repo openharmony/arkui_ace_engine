@@ -120,8 +120,8 @@ bool UiMaterialTheme::GetThemeColor(
     auto container = Container::GetContainer(node->GetInstanceId());
     CHECK_NULL_RETURN(container, false);
     auto bundleName = container->GetBundleName();
-    auto moudleName = container->GetModuleName();
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName, node->GetInstanceId());
+    auto moduleName = container->GetModuleName();
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, node->GetInstanceId());
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {

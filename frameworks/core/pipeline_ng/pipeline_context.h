@@ -1359,6 +1359,7 @@ public:
 
     void RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
+    void FireLpxUpdateCallbacks();
     void MarkLpxDirtyNodes();
     void SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager);
     RefPtr<DynamicComponentSafeManager> GetDynamicComponentSafeManager();

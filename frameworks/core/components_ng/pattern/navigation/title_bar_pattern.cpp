@@ -22,7 +22,9 @@
 #include "base/utils/multi_thread.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
@@ -37,12 +39,131 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_v2/inspector/utils.h"
+
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui_effect/effect/include/background_color_effect_para.h"
+#include "render_service_client/core/ui_effect/effect/include/brightness_blender.h"
+#include "render_service_client/core/ui_effect/effect/include/visual_effect.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr int32_t TITLE_RATIO = 2;
+constexpr int32_t LUMINANCE_SAMPLER_INTERVAL = 200;
+constexpr uint32_t LUMINANCE_THRESHOLD_LOW = 150;
+constexpr uint32_t LUMINANCE_THRESHOLD_HIGH = 220;
+const Color DEFAULT_LIGHT_EFFECT_COLOR = Color::FromString("#33FFFFFF");
+constexpr int32_t INVERT_COLOR_ANIMATION_DURATION = 133;
+
+constexpr char ICON_PRIMARY_COLOR_NAME[] = "sys.color.icon_primary";
+constexpr char ICON_ON_PRIMARY_COLOR_NAME[] = "sys.color.icon_on_primary";
+constexpr char INTERACTIVE_HOVER_COLOR_NAME[] = "sys.color.interactive_hover";
+constexpr char INTERACTIVE_PRESSED_COLOR_NAME[] = "sys.color.interactive_pressed";
+constexpr char INTERACTIVE_FOCUS_COLOR_NAME[] = "sys.color.interactive_focus";
+constexpr char COMP_BACKGROUND_GRAY_COLOR_NAME[] = "sys.color.comp_background_gray";
+
+struct TitleBarTokenColors {
+    Color iconPrimary;
+    Color iconOnPrimary;
+    Color interactiveHover;
+    Color interactivePressed;
+    Color interactiveFocus;
+    Color compBackgroundGray;
+};
+struct TitleBarDefaultColors {
+    TitleBarTokenColors lightColor;
+    TitleBarTokenColors darkColor;
+};
+
+static std::once_flag g_initDefaultColorFlag;
+static TitleBarDefaultColors g_titleBarDefaultColors;
+
+const TitleBarTokenColors* GetOrCreateTitleBarTokenColors(const RefPtr<PipelineContext>& context, ColorMode mode)
+{
+    CHECK_NULL_RETURN(context, nullptr);
+    std::call_once(g_initDefaultColorFlag, [weakContext = WeakPtr(context)]() {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto bundleName = context->GetBundleName();
+        auto moduleName = context->GetModuleName();
+        auto instanceId = context->GetInstanceId();
+        auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, instanceId);
+        CHECK_NULL_VOID(resourceObject);
+        auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        CHECK_NULL_VOID(adapterInCache);
+        ResourceConfiguration resConfig;
+        resConfig.SetColorMode(ColorMode::LIGHT);
+        ConfigurationChange configChange { .colorModeUpdate = true };
+        auto lightResourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+        CHECK_NULL_VOID(lightResourceAdapter);
+        auto& lightColor = g_titleBarDefaultColors.lightColor;
+        lightColor.iconPrimary = lightResourceAdapter->GetColorByName(ICON_PRIMARY_COLOR_NAME);
+        lightColor.iconOnPrimary = lightResourceAdapter->GetColorByName(ICON_ON_PRIMARY_COLOR_NAME);
+        lightColor.interactiveHover = lightResourceAdapter->GetColorByName(INTERACTIVE_HOVER_COLOR_NAME);
+        lightColor.interactivePressed = lightResourceAdapter->GetColorByName(INTERACTIVE_PRESSED_COLOR_NAME);
+        lightColor.interactiveFocus = lightResourceAdapter->GetColorByName(INTERACTIVE_FOCUS_COLOR_NAME);
+        lightColor.compBackgroundGray = lightResourceAdapter->GetColorByName(COMP_BACKGROUND_GRAY_COLOR_NAME);
+
+        resConfig.SetColorMode(ColorMode::DARK);
+        auto darkResourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+        CHECK_NULL_VOID(darkResourceAdapter);
+        auto& darkColor = g_titleBarDefaultColors.darkColor;
+        darkColor.iconPrimary = darkResourceAdapter->GetColorByName(ICON_PRIMARY_COLOR_NAME);
+        darkColor.iconOnPrimary = darkResourceAdapter->GetColorByName(ICON_ON_PRIMARY_COLOR_NAME);
+        darkColor.interactiveHover = darkResourceAdapter->GetColorByName(INTERACTIVE_HOVER_COLOR_NAME);
+        darkColor.interactivePressed = darkResourceAdapter->GetColorByName(INTERACTIVE_PRESSED_COLOR_NAME);
+        darkColor.interactiveFocus = darkResourceAdapter->GetColorByName(INTERACTIVE_FOCUS_COLOR_NAME);
+        darkColor.compBackgroundGray = darkResourceAdapter->GetColorByName(COMP_BACKGROUND_GRAY_COLOR_NAME);
+    });
+    return mode == ColorMode::LIGHT ? &g_titleBarDefaultColors.lightColor : &g_titleBarDefaultColors.darkColor;
+}
+
+#ifdef ENABLE_ROSEN_BACKEND
+struct BrightnessBlenderParam {
+    float cubicRate;
+    float quadRate;
+    float linearRate;
+    float degree;
+    float saturation;
+    Rosen::Vector3f positiveCoeff;
+    Rosen::Vector3f negativeCoeff;
+    float fraction;
+};
+
+const BrightnessBlenderParam LIGHT_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM = {
+    0.0f, 0.0f, 0.35f, -0.1176f, 3.5f, { 0.7f, 1.7f, 0.5f }, { 1.0f, 1.0f, 1.0f }, 0.0f
+};
+const BrightnessBlenderParam DARK_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM = {
+    0.0f, 0.0f, 0.1005f, 0.898f, 1.5f, { 1.0f, 0.5f, 0.5f }, { 2.0f, 2.5f, 0.5f }, 0.0f
+};
+
+std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender(bool isLight)
+{
+    auto blender = std::make_shared<Rosen::BrightnessBlender>();
+    const BrightnessBlenderParam* param = nullptr;
+    if (isLight) {
+        param = &LIGHT_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM;
+    } else {
+        param = &DARK_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM;
+    }
+    blender->SetCubicRate(param->cubicRate);
+    blender->SetQuadRate(param->quadRate);
+    blender->SetLinearRate(param->linearRate);
+    blender->SetDegree(param->degree);
+    blender->SetSaturation(param->saturation);
+    blender->SetPositiveCoeff(param->positiveCoeff);
+    blender->SetNegativeCoeff(param->negativeCoeff);
+    blender->SetFraction(param->fraction);
+    return blender;
+}
+
+// icon foreground
+static const auto LIGHT_ICON_BRIGHTNESS_BLENDER = CreateBrightnessBlender(true);
+static const auto DARK_ICON_BRIGHTNESS_BLENDER = CreateBrightnessBlender(false);
+#endif
 
 std::string TextLayoutPropertyToString(const RefPtr<TextLayoutProperty>& property)
 {
@@ -661,6 +782,359 @@ RefPtr<LayoutAlgorithm> TitleBarPattern::CreateLayoutAlgorithm()
     return titleBarLayoutAlgorithm;
 }
 
+bool TitleBarPattern::IsSymbolOrSVGIcon(const RefPtr<FrameNode>& iconNode)
+{
+    CHECK_NULL_RETURN(iconNode, false);
+    auto tag = iconNode->GetTag();
+    if (tag == V2::SYMBOL_ETS_TAG) {
+        return true;
+    }
+    if (tag != V2::BACK_BUTTON_IMAGE_ETS_TAG && tag != V2::IMAGE_ETS_TAG) {
+        return false;
+    }
+    auto iconProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(iconProperty, false);
+    auto imageSourceInfo = iconProperty->GetImageSourceInfo();
+    if (!imageSourceInfo.has_value()) {
+        return false;
+    }
+    return imageSourceInfo.value().IsSvg();
+}
+
+bool TitleBarPattern::GetColorParamWithColorInvertSupported(IconColorParam& param)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, false);
+    auto theme = context->GetTheme<NavigationBarTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    ColorMode colorMode = ColorMode::DARK;
+    bool isColorInvertEnabled = IsColorInvertEnabled();
+    const auto& options = options_.bgOptions.scrollEffectOptions;
+    if (isColorInvertEnabled) {
+        colorMode = GetCurrentColorMode(isColorInvertEnabled);
+    } else {
+        colorMode = GetCurrentColorMode(false);
+    }
+    const auto colors = GetOrCreateTitleBarTokenColors(context, colorMode);
+    CHECK_NULL_RETURN(colors, false);
+    if (options.has_value()) {
+        param.iconColor = colors->iconPrimary;
+        param.iconColor = param.iconColor.ChangeOpacity(1.0);
+        param.hoverColor = colors->interactiveHover;
+        param.focusColor = colors->interactiveFocus;
+        return true;
+    }
+    param.iconColor = isColorInvertEnabled ? colors->iconPrimary : theme->GetIconColor();
+    param.hoverColor = theme->GetBackgroundHoverColor();
+    param.focusColor = theme->GetBackgroundFocusOutlineColor();
+    return true;
+}
+
+std::optional<TitleBarPattern::IconColorParam> TitleBarPattern::GetCurrentIconColorParam()
+{
+    IconColorParam param;
+    if (!GetColorParamWithColorInvertSupported(param)) {
+        return std::nullopt;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto theme = context->GetTheme<NavigationBarTheme>();
+    CHECK_NULL_RETURN(theme, std::nullopt);
+    ColorMode colorMode = GetCurrentColorMode(false);
+    const auto& options = options_.bgOptions.scrollEffectOptions;
+    const auto colors = GetOrCreateTitleBarTokenColors(context, colorMode);
+    CHECK_NULL_RETURN(colors, std::nullopt);
+    if (!options.has_value()) {
+        param.pressedColor = theme->GetBackgroundPressedColor();
+        param.disableOpacity = theme->GetIconDisableAlpha();
+        return param;
+    }
+    param.pressedColor = colors->interactivePressed;
+    param.disableOpacity = theme->GetIconDisableAlpha();
+    return param;
+}
+
+void TitleBarPattern::UpdateBackButtonUIEffect()
+{
+    UpdateBackButtonMaterial();
+    UpdateBackButtonIconEffect();
+    UpdateBackButtonBrightnessEffect();
+}
+
+void TitleBarPattern::UpdateBackButtonIconEffect(bool forceUpdate)
+{
+    if (!needUpdateBackButtonEffect_ && !forceUpdate) {
+        return;
+    }
+    needUpdateBackButtonEffect_ = false;
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    auto param = GetCurrentIconColorParam();
+    if (!param.has_value()) {
+        return;
+    }
+    buttonPattern->SetBlendColor(param->pressedColor, param->hoverColor);
+    buttonPattern->SetFocusBorderColor(param->focusColor);
+    if (backButtonNode->GetChildren().empty()) {
+        return;
+    }
+    auto iconNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    CHECK_NULL_VOID(iconNode);
+    if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        UpdateSymbolIconColor(iconNode, param->iconColor);
+        return;
+    }
+    if (iconNode->GetTag() != V2::BACK_BUTTON_IMAGE_ETS_TAG) {
+        return;
+    }
+    UpdateSvgImageColor(iconNode, param->iconColor);
+}
+
+void TitleBarPattern::UpdateSymbolIconColor(const RefPtr<FrameNode>& iconNode, const Color& color)
+{
+    CHECK_NULL_VOID(iconNode);
+    auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    std::vector<Color> colors{ color };
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, colors, iconNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true, iconNode);
+    iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    iconNode->MarkModifyDone();
+}
+
+void TitleBarPattern::UpdateSvgImageColor(const RefPtr<FrameNode>& iconNode, const Color& color)
+{
+    CHECK_NULL_VOID(iconNode);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto info = imageLayoutProperty->GetImageSourceInfo();
+    if (!info.has_value() || !info->IsSvg()) {
+        return;
+    }
+    info->SetFillColor(color);
+    imageLayoutProperty->UpdateImageSourceInfo(info.value());
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color, iconNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, iconNode);
+
+    auto renderContext = iconNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
+    }
+    renderContext->UpdateForegroundColor(Color::FOREGROUND);
+    renderContext->UpdateForegroundColorFlag(true);
+    iconNode->MarkModifyDone();
+}
+
+void TitleBarPattern::UpdateBackButtonMaterial()
+{
+    if (!needUpdateBackButtonMaterial_) {
+        return;
+    }
+    needUpdateBackButtonMaterial_ = false;
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
+    auto material = GetCurrentMaterial();
+    UpdateBackButtonMaterialInner(material);
+}
+
+void TitleBarPattern::UpdateBackButtonMaterialInner(const RefPtr<UiMaterial>& material)
+{
+    InitColorPickerIfNeeded();
+    InitTransparencyListenerIfNeeded();
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    auto titleRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(titleRenderContext);
+    if (IsApplyShadowEnabled(material)) {
+        titleRenderContext->UpdateClipEdge(false);
+    } else {
+        titleRenderContext->UpdateClipEdge(true);
+    }
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(backButtonNode), AceType::RawPtr(material));
+}
+
+void TitleBarPattern::UpdateBackButtonBrightnessEffect(bool forceUpdate)
+{
+    if (!needUpdateBackButtonBrightness_ && !forceUpdate) {
+        return;
+    }
+    needUpdateBackButtonBrightness_ = false;
+#ifdef ENABLE_ROSEN_BACKEND
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    if (backButtonNode->GetChildren().empty()) {
+        return;
+    }
+    auto iconNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    CHECK_NULL_VOID(iconNode);
+    if (!IsSymbolOrSVGIcon(iconNode)) {
+        return;
+    }
+    const Rosen::BrightnessBlender* blender = nullptr;
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (options_.bgOptions.scrollEffectOptions.has_value() && materialLevel != UiMaterialLevel::SMOOTH) {
+        bool isColorInvertEnabled = IsColorInvertEnabled();
+        auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
+        blender = colorMode == ColorMode::LIGHT ?
+            LIGHT_ICON_BRIGHTNESS_BLENDER.get() : DARK_ICON_BRIGHTNESS_BLENDER.get();
+    }
+    // foreground
+    ViewAbstract::SetBlender(AceType::RawPtr(iconNode), blender);
+#endif
+}
+
+void TitleBarPattern::UpdateMenuUIEffect(const RefPtr<UINode>& menuNode, bool forceUpdate)
+{
+    CHECK_NULL_VOID(menuNode);
+    UpdateMenuMaterial(menuNode, forceUpdate);
+    UpdateMenuIconEffect(menuNode, forceUpdate);
+    UpdateMenuBrightnessEffect(menuNode, forceUpdate);
+}
+
+void TitleBarPattern::UpdateMenuIconEffect(const RefPtr<UINode>& menuNode, bool forceUpdate)
+{
+    if (!needUpdateMenuEffect_ && !forceUpdate) {
+        return;
+    }
+    needUpdateMenuEffect_ = false;
+    CHECK_NULL_VOID(menuNode);
+    if (menuNode->GetTag() != V2::NAVIGATION_MENU_ETS_TAG) {
+        return;
+    }
+    auto param = GetCurrentIconColorParam();
+    if (!param.has_value()) {
+        return;
+    }
+    auto children = menuNode->GetChildren();
+    for (auto& child : children) {
+        auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(menuItemNode);
+        if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG) {
+            continue;
+        }
+        auto buttonPattern = menuItemNode->GetPattern<ButtonPattern>();
+        CHECK_NULL_CONTINUE(buttonPattern);
+        buttonPattern->SetBlendColor(param->pressedColor, param->hoverColor);
+        buttonPattern->SetFocusBorderColor(param->focusColor);
+        auto buttonEvent = menuItemNode->GetEventHub<ButtonEventHub>();
+        CHECK_NULL_VOID(buttonEvent);
+        bool isButtonEnabled = buttonEvent->IsEnabled();
+        if (menuItemNode->GetChildren().empty()) {
+            continue;
+        }
+        auto barItemNode = AceType::DynamicCast<FrameNode>(menuItemNode->GetChildren().front());
+        CHECK_NULL_CONTINUE(barItemNode);
+        if (barItemNode->GetTag() != V2::BAR_ITEM_ETS_TAG || barItemNode->GetChildren().empty()) {
+            continue;
+        }
+        auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+        CHECK_NULL_CONTINUE(iconNode);
+        auto color = isButtonEnabled ? param->iconColor : param->iconColor.BlendOpacity(param->disableOpacity);
+        if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+            UpdateSymbolIconColor(iconNode, color);
+            continue;
+        } else if (iconNode->GetTag() == V2::IMAGE_ETS_TAG) {
+            UpdateSvgImageColor(iconNode, color);
+        }
+    }
+}
+
+void TitleBarPattern::UpdateMenuMaterial(const RefPtr<UINode>& menuNode, bool forceUpdate)
+{
+    if (!needUpdateMenuMaterial_ && !forceUpdate) {
+        return;
+    }
+    needUpdateMenuMaterial_ = false;
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(menuNode);
+    if (menuNode->GetTag() != V2::NAVIGATION_MENU_ETS_TAG) {
+        return;
+    }
+    auto material = GetCurrentMaterial();
+    UpdateMenuMaterialInner(menuNode, material);
+}
+
+void TitleBarPattern::UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, const RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(titleRenderContext);
+    if (IsApplyShadowEnabled(material)) {
+        titleRenderContext->UpdateClipEdge(false);
+    } else {
+        titleRenderContext->UpdateClipEdge(true);
+    }
+    InitColorPickerIfNeeded();
+    InitTransparencyListenerIfNeeded();
+    auto children = menuNode->GetChildren();
+    for (auto& child : children) {
+        auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(menuItemNode);
+        if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG) {
+            continue;
+        }
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuItemNode), AceType::RawPtr(material));
+    }
+}
+
+void TitleBarPattern::UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode, bool forceUpdate)
+{
+    if (!needUpdateMenuBrightness_ && !forceUpdate) {
+        return;
+    }
+    needUpdateMenuBrightness_ = false;
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(menuNode);
+    const Rosen::BrightnessBlender* blender = nullptr;
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (options_.bgOptions.scrollEffectOptions.has_value() && materialLevel != UiMaterialLevel::SMOOTH) {
+        bool isColorInvertEnabled = IsColorInvertEnabled();
+        auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
+        blender = colorMode == ColorMode::LIGHT ?
+            LIGHT_ICON_BRIGHTNESS_BLENDER.get() : DARK_ICON_BRIGHTNESS_BLENDER.get();
+    }
+    auto children = menuNode->GetChildren();
+    for (auto& child : children) {
+        auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(menuItemNode);
+        if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG ||
+            menuItemNode->GetChildren().empty()) {
+            continue;
+        }
+        auto barItemNode = AceType::DynamicCast<FrameNode>(menuItemNode->GetChildren().front());
+        if (!barItemNode || barItemNode->GetTag() != V2::BAR_ITEM_ETS_TAG || barItemNode->GetChildren().empty()) {
+            continue;
+        }
+        auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+        CHECK_NULL_CONTINUE(iconNode);
+        if (!IsSymbolOrSVGIcon(iconNode)) {
+            continue;
+        }
+        // foreground
+        ViewAbstract::SetBlender(AceType::RawPtr(iconNode), blender);
+    }
+#endif
+}
+
 void TitleBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -684,6 +1158,7 @@ void TitleBarPattern::OnModifyDone()
     if (options_.enableHoverMode && currentFoldCreaseRegion_.empty()) {
         InitFoldCreaseRegion();
     }
+    UpdateBackButtonUIEffect();
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
@@ -1155,6 +1630,7 @@ void TitleBarPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    UpdateIsBackgroundDark();
 }
 
 void TitleBarPattern::OnDetachFromMainTree()
@@ -1162,6 +1638,8 @@ void TitleBarPattern::OnDetachFromMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    UnregisterColorPicker();
+    UnregisterTransparencyListener();
 }
 
 void TitleBarPattern::InitFoldCreaseRegion()
@@ -1315,8 +1793,14 @@ void TitleBarPattern::OnColorConfigurationUpdate()
     UpdateBackgroundStyle(host);
     SetNeedResetMainTitleProperty(true);
     SetNeedResetSubTitleProperty(true);
+    UpdateBackButtonColor();
+    UpdateIsBackgroundDark();
+    UpdateTitleBarUIEffectForColorModeChange();
+}
 
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(host);
+void TitleBarPattern::UpdateBackButtonColor()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
     auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButton);
@@ -1418,6 +1902,307 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
     return offset;
 }
 
+RefPtr<UiMaterial> TitleBarPattern::GetOrCreateGradualBlurMaterial()
+{
+    if (gradualBlurMaterial_) {
+        return gradualBlurMaterial_;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto themeScopeId = host->GetThemeScopeId();
+    auto tokenTheme = TokenThemeStorage::GetInstance()->GetTheme(themeScopeId);
+    if (!tokenTheme) {
+        tokenTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    }
+    CHECK_NULL_RETURN(tokenTheme, nullptr);
+    const auto& tokenColors = tokenTheme->Colors();
+    CHECK_NULL_RETURN(tokenColors, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    CHECK_NULL_RETURN(material, nullptr);
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.style = UiMaterialStyle::ULTRA_THIN;
+    options.colorInvert = true;
+    options.materialColor = tokenColors->CompBackgroundGray();
+    options.materialColor = options.materialColor.ChangeOpacity(0);
+    options.applyShadow = true;
+    options.interactive = true;
+    LightEffectOptions lightEffectOptions;
+    lightEffectOptions.color = DEFAULT_LIGHT_EFFECT_COLOR;
+    options.lightEffectOptions = lightEffectOptions;
+    material->SetImmersiveOptions(options);
+    gradualBlurMaterial_ = material;
+    return gradualBlurMaterial_;
+}
+
+RefPtr<UiMaterial> TitleBarPattern::GetCurrentMaterial()
+{
+    // disable
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return nullptr;
+    }
+    if (options_.material) {
+        return options_.material;
+    }
+    // default;
+    if (!MaterialUtils::IsMaterialEnabled()) {
+        return nullptr;
+    }
+    // enable
+    const auto& options = options_.bgOptions.scrollEffectOptions;
+    if (options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR) {
+        return GetOrCreateGradualBlurMaterial();
+    }
+    return nullptr;
+}
+
+void TitleBarPattern::UpdateTitleBarUIEffectForColorModeChange()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto menuNode = host->GetMenu();
+    const auto& options = options_.bgOptions.scrollEffectOptions;
+    auto curMaterial = GetCurrentMaterial();
+    if (!options.has_value() && !curMaterial) {
+        return;
+    }
+    if (options.has_value()) {
+        UpdateBackButtonIconEffect(true);
+        UpdateMenuIconEffect(menuNode, true);
+    }
+    UpdateBackButtonBrightnessEffect(true);
+    UpdateMenuBrightnessEffect(menuNode, true);
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
+    auto mode = GetCurrentColorMode(false);
+    const auto tokenColors = GetOrCreateTitleBarTokenColors(context, mode);
+    CHECK_NULL_VOID(tokenColors);
+    do {
+        CHECK_NULL_BREAK(gradualBlurMaterial_);
+        auto options = gradualBlurMaterial_->CopyImmersiveOptions();
+        CHECK_NULL_BREAK(options);
+        options->materialColor = tokenColors->compBackgroundGray;
+        options->materialColor = options->materialColor.ChangeOpacity(0);
+        gradualBlurMaterial_->SetImmersiveOptions(*options);
+    } while (false);
+    if (options_.material || !MaterialUtils::IsMaterialEnabled()) {
+        return;
+    }
+    UpdateBackButtonMaterialInner(curMaterial);
+    UpdateMenuMaterialInner(menuNode, curMaterial);
+}
+
+void TitleBarPattern::MarkMenuUIEffectNeedUpdate()
+{
+    const auto& options = options_.bgOptions.scrollEffectOptions;
+    if (options.has_value()) {
+        needUpdateMenuEffect_ = true;
+        needUpdateMenuBrightness_ = true;
+    }
+    auto material = GetCurrentMaterial();
+    if (material) {
+        needUpdateMenuMaterial_ = true;
+        needUpdateMenuEffect_ = true;
+        needUpdateMenuBrightness_ = true;
+    }
+}
+
+bool TitleBarPattern::IsColorInvertEnabled()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel != UiMaterialLevel::EXQUISITE && materialLevel != UiMaterialLevel::GENTLE) {
+        return false;
+    }
+    auto material = GetCurrentMaterial();
+    if (!material) {
+        return false;
+    }
+    const auto& options = material->GetImmersiveOptions();
+    if (!options || !options->colorInvert) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    if (materialLevel == UiMaterialLevel::EXQUISITE) {
+        return transparencyLevel == UiMaterialTransparency::THIN ||
+            transparencyLevel == UiMaterialTransparency::NORMAL;
+    }
+    return transparencyLevel == UiMaterialTransparency::GENTLE_THIN;
+}
+
+bool TitleBarPattern::IsApplyShadowEnabled(const RefPtr<UiMaterial>& material)
+{
+    if (!material) {
+        return false;
+    }
+    const auto& options = material->GetImmersiveOptions();
+    if (!options) {
+        return false;
+    }
+    return options->applyShadow;
+}
+
+ColorMode TitleBarPattern::GetCurrentColorMode(bool enableColorInvert)
+{
+    if (enableColorInvert && isColorPickerDark_.has_value()) {
+        return isColorPickerDark_.value() ? ColorMode::DARK : ColorMode::LIGHT;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ColorMode::COLOR_MODE_UNDEFINED);
+    auto localMode = host->GetLocalColorMode();
+    if (localMode != ColorMode::COLOR_MODE_UNDEFINED) {
+        return localMode;
+    }
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, ColorMode::COLOR_MODE_UNDEFINED);
+    return context->GetColorMode();
+}
+
+bool TitleBarPattern::IsTransparencyListenerNeeded()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel != UiMaterialLevel::EXQUISITE && materialLevel != UiMaterialLevel::GENTLE) {
+        return false;
+    }
+    auto material = GetCurrentMaterial();
+    if (!material) {
+        return false;
+    }
+    const auto& options = material->GetImmersiveOptions();
+    if (!options || !options->colorInvert) {
+        return false;
+    }
+    return true;
+}
+
+void TitleBarPattern::InitTransparencyListenerIfNeeded()
+{
+    if (!IsTransparencyListenerNeeded()) {
+        UnregisterTransparencyListener();
+        InitColorPickerIfNeeded();
+        return;
+    }
+    if (transparencyListenerId_.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listener = [weakPattern = WeakClaim(this)](int32_t level) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Transparency change to %{public}d", level);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitColorPickerIfNeeded();
+    };
+    transparencyListenerId_ = TransparencyUtils::RegisterTransparencyListener(WeakPtr(host), std::move(listener));
+}
+
+void TitleBarPattern::UnregisterTransparencyListener()
+{
+    if (!transparencyListenerId_.has_value()) {
+        return;
+    }
+    TransparencyUtils::UnRegisterTransparencyListener(transparencyListenerId_.value());
+    transparencyListenerId_ = std::nullopt;
+}
+
+void TitleBarPattern::InitColorPickerIfNeeded()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (!IsColorInvertEnabled()) {
+        auto isDark = isBackgroundDark_;
+        UnregisterColorPicker();
+        if (isDark != isBackgroundDark_) {
+            StartColorInvertAnimation();
+        }
+        return;
+    }
+    if (hasRegisterColorPicker_) {
+        return;
+    }
+    hasRegisterColorPicker_ = true;
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    navMgr->RegisterColorPicker(host, LUMINANCE_SAMPLER_INTERVAL, LUMINANCE_THRESHOLD_HIGH, LUMINANCE_THRESHOLD_LOW,
+        [weakPattern = WeakClaim(this)](uint32_t luminance) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleBar luminance change to %{public}u", luminance);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnLuminanceUpdate(luminance);
+    });
+}
+
+void TitleBarPattern::UpdateIsBackgroundDark()
+{
+    isBackgroundDark_ = GetCurrentColorMode(true) == ColorMode::DARK;
+}
+
+void TitleBarPattern::OnLuminanceUpdate(uint32_t luminance)
+{
+    if (static_cast<int32_t>(luminance) < LUMINANCE_THRESHOLD_LOW) {
+        isColorPickerDark_ = true;
+    } else if (static_cast<int32_t>(luminance) > LUMINANCE_THRESHOLD_HIGH) {
+        isColorPickerDark_ = false;
+    }
+    if (!IsColorInvertEnabled()) {
+        return;
+    }
+    if (!isColorPickerDark_.has_value() || isColorPickerDark_.value() == isBackgroundDark_) {
+        return;
+    }
+    isBackgroundDark_ = isColorPickerDark_.value();
+    StartColorInvertAnimation();
+}
+
+void TitleBarPattern::UnregisterColorPicker()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (hasRegisterColorPicker_) {
+        hasRegisterColorPicker_ = false;
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto navMgr = context->GetNavigationManager();
+        CHECK_NULL_VOID(navMgr);
+        navMgr->UnregisterColorPicker(host);
+        isColorPickerDark_ = std::nullopt;
+        UpdateIsBackgroundDark();
+    }
+}
+
+void TitleBarPattern::StartColorInvertAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    AnimationOption option = AnimationOption();
+    option.SetDuration(INVERT_COLOR_ANIMATION_DURATION);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::StartAnimation(option,
+        [weakPattern = WeakClaim(this)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleColorInvert();
+        }, nullptr, nullptr, context);
+}
+
+void TitleBarPattern::HandleColorInvert()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto menuNode = AceType::DynamicCast<FrameNode>(host->GetMenu());
+    CHECK_NULL_VOID(menuNode);
+    UpdateMenuIconEffect(menuNode, true);
+    UpdateMenuBrightnessEffect(menuNode, true);
+    UpdateBackButtonIconEffect(true);
+    UpdateBackButtonBrightnessEffect(true);
+}
+
 void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
 {
     bool needUpdateBgOptions = options_.bgOptions != opt.bgOptions;
@@ -1429,6 +2214,23 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
     }
     if (options_.bgOptions.blurStyleOption->blurOption != opt.bgOptions.blurStyleOption->blurOption) {
         needUpdateBgOptions = true;
+    }
+    if (options_.bgOptions.scrollEffectOptions != opt.bgOptions.scrollEffectOptions) {
+        needUpdateBackButtonEffect_ = true;
+        needUpdateBackButtonMaterial_ = true;
+        needUpdateBackButtonBrightness_ = true;
+        needUpdateMenuEffect_ = true;
+        needUpdateMenuMaterial_ = true;
+        needUpdateMenuBrightness_ = true;
+    }
+    if (!MaterialUtils::IsMaterialDisabled()) {
+        // Default or Enable
+        if (options_.material || opt.material) {
+            needUpdateBackButtonMaterial_ = true;
+            needUpdateBackButtonBrightness_ = true;
+            needUpdateMenuMaterial_ = true;
+            needUpdateMenuBrightness_ = true;
+        }
     }
     options_ = opt;
     auto host = GetHost();

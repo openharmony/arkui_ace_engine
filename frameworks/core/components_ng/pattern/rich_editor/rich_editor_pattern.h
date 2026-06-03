@@ -730,8 +730,11 @@ public:
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTreeMultiThreadExtension() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnDetachFromMainTreeMultiThread();
     bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsAtTop() const override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;

@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_paint_property.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
@@ -489,6 +490,7 @@ void SecurityComponentPattern::ToJsonValueTextNode(std::unique_ptr<JsonValue>& j
     json->PutExtAttr("maxLines", std::to_string(textProp->GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
     json->PutExtAttr("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
         textProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str(), filter);
+    json->PutExtAttr("fallbackLineSpacing", textProp->GetFallbackLineSpacing().value_or(false), filter);
 }
 
 void SecurityComponentPattern::ToJsonValuePadding(const RefPtr<SecurityComponentTheme>& theme,
@@ -740,6 +742,9 @@ void SecurityComponentPattern::UpdateTextProperty(RefPtr<FrameNode>& scNode, Ref
     }
     if (scLayoutProp->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProp->UpdateHeightAdaptivePolicy(scLayoutProp->GetHeightAdaptivePolicy().value());
+    }
+    if (scLayoutProp->GetFallbackLineSpacing().has_value()) {
+        textLayoutProp->UpdateFallbackLineSpacing(scLayoutProp->GetFallbackLineSpacing().value());
     }
 }
 

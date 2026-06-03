@@ -497,17 +497,17 @@ HWTEST_F(GaugeModifierTestNg, GaugeModifierTest010, TestSize.Level1)
 HWTEST_F(GaugeModifierTestNg, GaugeModifierTest011, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create gauge.
-    */
+     * @tc.steps: step1. create gauge.
+     */
     Create(VALUE, MIN, MAX, [](GaugeModelNG model) {
         std::vector<Color> colors = {};
         std::vector<float> values = { 1.0f, 2.0f };
         model.SetColors(colors, values);
     });
     /**
-    * @tc.steps: step2. UpdateGauge
-    * @tc.expected: Expect functions to be call.
-    */
+     * @tc.steps: step2. UpdateGauge
+     * @tc.expected: Expect functions to be call.
+     */
     GaugePaintMethod gaugePaintMethod;
     GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
@@ -977,4 +977,4 @@ HWTEST_F(GaugeModifierTestNg, GaugeModifierTest024, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
-}
+} // namespace OHOS::Ace::NG

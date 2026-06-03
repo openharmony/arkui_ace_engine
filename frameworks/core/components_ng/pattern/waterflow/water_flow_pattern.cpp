@@ -99,10 +99,10 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
             delta *= friction;
         }
     } else {
-        if (layoutInfo_->itemStart_ && delta > 0) {
+        if (layoutInfo_->itemStart_ && Positive(delta)) {
             return false;
         }
-        if (layoutInfo_->offsetEnd_ && delta < 0) {
+        if (layoutInfo_->offsetEnd_ && Negative(delta)) {
             return false;
         }
         if (layoutInfo_->Mode() == LayoutMode::TOP_DOWN && GreatNotEqual(delta, 0.0f)) {
@@ -740,11 +740,25 @@ void WaterFlowPattern::OnScrollEndCallback()
     MarkDirtyNodeSelf();
 }
 
+// SLIDING_WINDOW backToTop may settle at the estimated endpoint without reaching the top; re-align via index jump.
+void WaterFlowPattern::CheckBackToTopFallback()
+{
+    if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
+        return;
+    }
+    // backToTop stopped (not aborted) but estimated totalOffset_ settled short of the top; re-align by index jump.
+    // SCROLL_FROM_STATUSBAR is the durable signal since IsBackToTopRunning() may be cleared before OnAnimateStop.
+    if (!GetScrollAbort() && (IsBackToTopRunning() || GetScrollSource() == SCROLL_FROM_STATUSBAR) && !IsAtTop()) {
+        ScrollToIndex(0, false, ScrollAlign::START);
+    }
+}
+
 void WaterFlowPattern::OnAnimateStop()
 {
     if (!GetIsDragging() || GetScrollAbort()) {
         scrollStop_ = true;
     }
+    CheckBackToTopFallback();
     CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }

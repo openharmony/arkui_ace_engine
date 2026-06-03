@@ -48,6 +48,11 @@ enum class LazyForEachCustomComponentFreezeMode {
     ENABLED = 2,
 };
 
+enum class LazyForEachMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+};
+
 typedef struct OperationInfo {
     OperationInfo():node(nullptr) {}
     int32_t changeCount = 0;
@@ -266,6 +271,11 @@ public:
         enablePreBuild_ = enable;
     }
 
+    void CleanCache(bool syncClean);
+    void RestoreCache();
+    int32_t ReduceCacheCount(int32_t count);
+    void ProcessNodesForCleanCache(const std::unordered_map<std::string, LazyForEachCacheChild>& cache);
+
     std::string DumpHashKey();
     void DumpInfo();
 
@@ -277,6 +287,11 @@ public:
     virtual LazyForEachReleaseStrategy GetLazyForEachReleaseStrategy() const
     {
         return LazyForEachReleaseStrategy::BATCH;
+    }
+
+    virtual LazyForEachMemOptStrategy GetLazyForEachMemOptStrategy() const
+    {
+        return LazyForEachMemOptStrategy::DEFAULT;
     }
 
     void UpdateThemeScopeUpdate(int32_t themeScopeId);
@@ -349,6 +364,7 @@ private:
     bool isLoop_ = false;
     bool useNewInterface_ = false;
     bool enablePreBuild_ = true;
+    bool reduceCache_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG

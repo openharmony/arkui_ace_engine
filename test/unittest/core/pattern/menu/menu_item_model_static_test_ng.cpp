@@ -985,4 +985,39 @@ HWTEST_F(MenuItemModelStaticTestNg, SetLabelFontSizeLpx002, TestSize.Level1)
     MenuItemModelStatic::SetLabelFontSize(node, std::nullopt);
     EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_LABEL_FONT_SIZE), 0);
 }
+
+/**
+ * @tc.name: SetSubBuilder001
+ * @tc.desc: Test MenuItemModelStatic::SetSubBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModelStaticTestNg, SetSubBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Verify default state - GetSubBuilder returns nullptr
+     */
+    EXPECT_EQ(pattern->GetSubBuilder(), nullptr);
+
+    /**
+     * @tc.steps: step3. Set subBuilder via static method
+     */
+    std::function<void()> buildFunc = []() {};
+    MenuItemModelStatic::SetSubBuilder(AceType::RawPtr(frameNode), std::move(buildFunc));
+    EXPECT_NE(pattern->GetSubBuilder(), nullptr);
+
+    /**
+     * @tc.steps: step4. Reset via nullptr
+     */
+    MenuItemModelStatic::SetSubBuilder(AceType::RawPtr(frameNode), nullptr);
+    EXPECT_EQ(pattern->GetSubBuilder(), nullptr);
+}
 } // namespace OHOS::Ace::NG

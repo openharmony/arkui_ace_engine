@@ -60,9 +60,6 @@ void ShapeModelStatic::SetStrokeDashOffset(FrameNode* frameNode, const std::opti
         ACE_CHECK_NODE_LPX_ATTRIBUTE(dashOffset.value(), LpxAttribute::LPX_SHAPE_STROKE_DASH_OFFSET, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset.value(), frameNode);
     } else {
-        if (frameNode) {
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SHAPE_STROKE_DASH_OFFSET);
-        }
         ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, frameNode);
     }
 }
@@ -121,9 +118,6 @@ void ShapeModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optional<
         ACE_CHECK_NODE_LPX_ATTRIBUTE(strokeWidth.value(), LpxAttribute::LPX_SHAPE_STROKE_WIDTH, frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, strokeWidth.value(), frameNode);
     } else {
-        if (frameNode) {
-            frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_SHAPE_STROKE_WIDTH);
-        }
         ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, frameNode);
     }
 }

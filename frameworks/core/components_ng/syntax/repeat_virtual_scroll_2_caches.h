@@ -136,7 +136,8 @@ public:
     using GetFrameChildResult = std::pair<uint32_t, CacheItem>;
 
 public:
-    RepeatVirtualScroll2Caches(const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index);
+    RepeatVirtualScroll2Caches(
+        const std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)>& onGetRid4Index);
 
     /**
      * Return a FrameNode child for give index
@@ -275,6 +276,12 @@ public:
      */
     OptCacheItem GetCacheItem4RID(RIDType rid) const;
 
+    // Restore L2 cache with time limit, return true if task complete or does not need restore
+    bool RestoreL2CacheByIndex(IndexType index, int64_t deadline);
+    bool BuildL2CacheByRid(RIDType rid, int64_t deadline);
+
+    int32_t GetL1Size();
+
 private:
     /**
      * TS make new node or update from L1
@@ -303,7 +310,8 @@ private:
     std::map<RIDType, CacheItem> cacheItem4Rid_;
 
     // TS callback function for given index, provides RID
-    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index_;
+    // Parameters: index, isImplicitAnimationOpen, isRestoreCache
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool, bool)> onGetRid4Index_;
 
     // TS function to inform new active range from ... to
     std::function<void(IndexType, IndexType)> onSetActiveRange_;
@@ -316,6 +324,9 @@ private:
 
     // for tracking reused/recycled nodes
     std::unordered_set<int32_t> recycledNodeIds_;
+
+    // the RID of L2 node that is restoring
+    RIDType restoringRid_ = 0;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

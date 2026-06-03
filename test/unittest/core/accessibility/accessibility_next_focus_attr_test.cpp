@@ -226,4 +226,225 @@ HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest009, Te
     ViewAbstractModelNG::SetAccessibilityDefaultFocus(nullptr, true);
     EXPECT_EQ(accessibilityProperty->GetAccessibilityNextFocusInspectorKey(), "focusId");
 }
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest011
+ * @tc.desc: Test SetAccessibilityNextFocusParams with descendantMode = false preserves the value
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest011, TestSize.Level1)
+{
+    ASSERT_NE(frameNode_, nullptr);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    // Set params with descendantMode = false
+    AccessibilityNextFocusParams params;
+    params.nextFocusInspectorKey = "directTarget";
+    params.descendantMode = false;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params);
+
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityNextFocusParams());
+    auto resultParams = accessibilityProperty->GetAccessibilityNextFocusParams();
+    EXPECT_EQ(resultParams.nextFocusInspectorKey, "directTarget");
+    EXPECT_FALSE(resultParams.descendantMode);
+}
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest012
+ * @tc.desc: Test ResetAccessibilityNextFocusParams clears the optional and restores defaults
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest012, TestSize.Level1)
+{
+    ASSERT_NE(frameNode_, nullptr);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    // Set params first
+    AccessibilityNextFocusParams params;
+    params.nextFocusInspectorKey = "toBeReset";
+    params.descendantMode = true;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params);
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityNextFocusParams());
+
+    // Reset params
+    accessibilityProperty->ResetAccessibilityNextFocusParams();
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityNextFocusParams());
+
+    // GetAccessibilityNextFocusParams should return default-constructed value
+    auto defaultParams = accessibilityProperty->GetAccessibilityNextFocusParams();
+    EXPECT_EQ(defaultParams.nextFocusInspectorKey, "");
+    EXPECT_FALSE(defaultParams.descendantMode);
+}
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest013
+ * @tc.desc: Test SetAccessibilityNextFocusParams with nullptr frameNode does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest013, TestSize.Level1)
+{
+    // Should not crash when frameNode is nullptr
+    AccessibilityNextFocusParams params;
+    params.nextFocusInspectorKey = "safeId";
+    params.descendantMode = true;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(nullptr, params);
+
+    // Verify frameNode_ is still valid and unaffected
+    ASSERT_NE(frameNode_, nullptr);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityNextFocusParams());
+}
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest014
+ * @tc.desc: Test SetAccessibilityNextFocusParams overwrites previous params completely
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest014, TestSize.Level1)
+{
+    ASSERT_NE(frameNode_, nullptr);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    // Set first params
+    AccessibilityNextFocusParams params1;
+    params1.nextFocusInspectorKey = "firstTarget";
+    params1.descendantMode = false;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params1);
+
+    // Overwrite with second params
+    AccessibilityNextFocusParams params2;
+    params2.nextFocusInspectorKey = "secondTarget";
+    params2.descendantMode = true;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params2);
+
+    auto resultParams = accessibilityProperty->GetAccessibilityNextFocusParams();
+    EXPECT_EQ(resultParams.nextFocusInspectorKey, "secondTarget");
+    EXPECT_TRUE(resultParams.descendantMode);
+}
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest015
+ * @tc.desc: Test SetAccessibilityNextFocusId then SetAccessibilityNextFocusParams interaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest015, TestSize.Level1)
+{
+    ASSERT_NE(frameNode_, nullptr);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    // Set next focus ID first via SetAccessibilityNextFocusId
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode_.GetRawPtr(), "initialId");
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityNextFocusInspectorKey(), "initialId");
+    // SetAccessibilityNextFocusId creates the optional internally
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityNextFocusParams());
+
+    // Now set full params with descendantMode - this should overwrite the entire params
+    AccessibilityNextFocusParams params;
+    params.nextFocusInspectorKey = "updatedId";
+    params.descendantMode = true;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params);
+
+    auto resultParams = accessibilityProperty->GetAccessibilityNextFocusParams();
+    EXPECT_EQ(resultParams.nextFocusInspectorKey, "updatedId");
+    EXPECT_TRUE(resultParams.descendantMode);
+}
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest016
+ * @tc.desc: Test SetAccessibilityNextFocusParams after reset restores ability to set new params
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest016, TestSize.Level1)
+{
+    ASSERT_NE(frameNode_, nullptr);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    // Set and reset
+    AccessibilityNextFocusParams params1;
+    params1.nextFocusInspectorKey = "oldId";
+    params1.descendantMode = true;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params1);
+    accessibilityProperty->ResetAccessibilityNextFocusParams();
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityNextFocusParams());
+
+    // Set new params after reset
+    AccessibilityNextFocusParams params2;
+    params2.nextFocusInspectorKey = "newId";
+    params2.descendantMode = false;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params2);
+
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityNextFocusParams());
+    auto resultParams = accessibilityProperty->GetAccessibilityNextFocusParams();
+    EXPECT_EQ(resultParams.nextFocusInspectorKey, "newId");
+    EXPECT_FALSE(resultParams.descendantMode);
+}
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest017
+ * @tc.desc: Test SetAccessibilityNextFocusParams with empty nextFocusInspectorKey and descendantMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest017, TestSize.Level1)
+{
+    ASSERT_NE(frameNode_, nullptr);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    // Set params with empty key but descendantMode enabled
+    AccessibilityNextFocusParams params;
+    params.nextFocusInspectorKey = "";
+    params.descendantMode = true;
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params);
+
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityNextFocusParams());
+    auto resultParams = accessibilityProperty->GetAccessibilityNextFocusParams();
+    EXPECT_EQ(resultParams.nextFocusInspectorKey, "");
+    EXPECT_TRUE(resultParams.descendantMode);
+}
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest018
+ * @tc.desc: Test SetAccessibilityNextFocusParams idempotency - setting same params multiple times
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest018, TestSize.Level1)
+{
+    ASSERT_NE(frameNode_, nullptr);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    const std::string focusKey = "stableKey";
+    AccessibilityNextFocusParams params;
+    params.nextFocusInspectorKey = focusKey;
+    params.descendantMode = true;
+
+    // Set same params three times
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params);
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params);
+    ViewAbstractModelNG::SetAccessibilityNextFocusParams(frameNode_.GetRawPtr(), params);
+
+    auto resultParams = accessibilityProperty->GetAccessibilityNextFocusParams();
+    EXPECT_EQ(resultParams.nextFocusInspectorKey, focusKey);
+    EXPECT_TRUE(resultParams.descendantMode);
+}
+
+/**
+ * @tc.name: AccessibilityNextFocusAttrTest020
+ * @tc.desc: Test AccessibilityNextFocusParams default field values
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNextFocusAttrTestNg, AccessibilityNextFocusAttrTest020, TestSize.Level1)
+{
+    // Verify default-constructed AccessibilityNextFocusParams has expected defaults
+    AccessibilityNextFocusParams defaultParams;
+    EXPECT_EQ(defaultParams.nextFocusInspectorKey, "");
+    EXPECT_FALSE(defaultParams.descendantMode);
+}
+
 } // namespace OHOS::Ace::NG

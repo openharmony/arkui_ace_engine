@@ -234,6 +234,15 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
     MenuView::RegisterAccessibilityChildActionNotify(host);
 }
 
+void CustomMenuItemPattern::OnModifyDone()
+{
+    MenuItemPattern::OnModifyDone();
+    if (GetSubBuilder() && !onClickEvent_) {
+        RegisterOnClick();
+        RegisterOnHover();
+    }
+}
+
 void MenuItemPattern::OnAttachToMainTree()
 {
     auto menuPattern = GetMenuPattern();
@@ -880,7 +889,9 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
         CHECK_NULL_VOID(pattern);
         props->UpdateExpandingMode(expandingMode_);
         if (expandingMode_ == SubMenuExpandingMode::STACK) {
-            AddStackSubMenuHeader(frameNode);
+            if (!IsCustomMenuItem()) {
+                AddStackSubMenuHeader(frameNode);
+            }
             pattern->SetIsStackSubmenu();
         } else if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
             pattern->SetIsEmbedded();
@@ -1550,7 +1561,10 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 HandleOnChange();
             }
-            CloseMenu();
+            // if subBuilder is set, OnClick will handle ShowSubMenu; otherwise close menu
+            if (GetSubBuilder() == nullptr) {
+                CloseMenu();
+            }
         }
         lastTouchOffset_.reset();
     }
@@ -1891,8 +1905,21 @@ bool CustomMenuItemPattern::OnKeyEvent(const KeyEvent& event)
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
-        focusHub->OnClick(event);
-        CloseMenu();
+        if (GetSubBuilder() != nullptr && expandingMode_ != SubMenuExpandingMode::EMBEDDED) {
+            OnClick();
+        } else {
+            focusHub->OnClick(event);
+            CloseMenu();
+        }
+        return true;
+    }
+    if (GetSubBuilder() != nullptr && event.code == KeyCode::KEY_DPAD_RIGHT && !IsSubMenuShowed()) {
+        auto theme = GetCurrentSelectTheme();
+        CHECK_NULL_RETURN(theme, false);
+        SetBgBlendColor(theme->GetHoverColor());
+        PlayBgColorAnimation();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        ShowSubMenu(ShowSubMenuType::KEY_DPAD_RIGHT);
         return true;
     }
     return false;
@@ -3740,7 +3767,7 @@ bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
         return false;
     }
     auto menuTheme = host->GetTheme<SelectTheme>(true);

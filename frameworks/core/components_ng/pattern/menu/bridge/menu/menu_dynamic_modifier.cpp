@@ -210,7 +210,7 @@ void ResetMenuFont(ArkUINodeHandle node)
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension fontSize;
-    FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
+    FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT, FontWeight::NORMAL);
     MenuModelNG::SetFontSize(frameNode, fontSize);
     MenuModelNG::SetFontWeight(frameNode, fontWeight);
     MenuModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);

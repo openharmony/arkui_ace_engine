@@ -19,10 +19,15 @@
 #include <optional>
 #include <string>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/size.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 
 namespace OHOS::Ace {
+
+class TextStyle;
+
 struct MeasureContext {
     std::string textContent;
     std::string fontWeight;

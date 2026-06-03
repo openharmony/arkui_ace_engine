@@ -1339,13 +1339,16 @@ void ParseShaderStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraph
     std::optional<NG::Gradient> gradientShaderStyle;
     std::optional<Color> colorShaderStyle;
     RefPtr<ResourceObject> resObj;
-    auto jsObject = JSRef<JSObject>::Cast(shaderStyleObj);
-    JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
+    if (shaderStyleObj->IsObject()) {
+        auto jsObject = JSRef<JSObject>::Cast(shaderStyleObj);
+        JSViewAbstract::ParseJsTextShaderStyle(gradientShaderStyle, colorShaderStyle, jsObject, resObj);
+    }
     style.colorShaderStyle = colorShaderStyle;
     if (gradientShaderStyle.has_value()) {
-        style.SetOptGradient(GradientConvert::ToGradient(gradientShaderStyle.value()));
+        style.SetOptGradient(gradientShaderStyle.value());
     }
-    if (style.colorShaderStyle.has_value()) {
+    if (style.colorShaderStyle.has_value() && shaderStyleObj->IsObject()) {
+        auto jsObject = JSRef<JSObject>::Cast(shaderStyleObj);
         auto colorObj = jsObject->GetProperty("color");
         if (colorObj->IsObject()) {
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);

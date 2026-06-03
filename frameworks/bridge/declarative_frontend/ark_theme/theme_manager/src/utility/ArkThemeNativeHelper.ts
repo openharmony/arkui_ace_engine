@@ -110,6 +110,9 @@ class ArkThemeNativeHelper {
             theme.colors.interactiveActive,
             theme.colors.interactiveSelect,
             theme.colors.interactiveClick,
+            theme.colors.primary,
+            theme.colors.onPrimary,
+            theme.colors.container,
         ];
     }
 
@@ -125,4 +128,3 @@ class ArkThemeNativeHelper {
         return colorArray;
     }
 }
-

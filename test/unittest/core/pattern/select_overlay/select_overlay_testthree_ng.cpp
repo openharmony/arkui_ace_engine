@@ -34,6 +34,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
@@ -69,6 +70,8 @@ public:
     static void TearDownTestCase();
     void VerifyMagnifierBottomRightResult(MagnifierController& controller, const SizeF& frameSize,
         float magnifierWidth, float magnifierHeight, const OffsetF& localOffset);
+    RefPtr<SelectOverlayNode> CreateSelectOverlayNodeForTest(const std::shared_ptr<SelectOverlayInfo>& info);
+    std::vector<OptionParam> CreateOptionParamsForTest(int32_t count);
 };
 
 void SelectOverlayPatternTestNg::SetUpTestCase()
@@ -123,6 +126,27 @@ void SelectOverlayPatternTestNg::VerifyMagnifierBottomRightResult(MagnifierContr
                           halfMagnifierInnerPaddingY / MAGNIFIER_FACTOR;
     EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
         std::clamp(targetZoomOffsetY, -maxZoomOffsetY, maxZoomOffsetY)));
+}
+
+RefPtr<SelectOverlayNode> SelectOverlayPatternTestNg::CreateSelectOverlayNodeForTest(
+    const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    CHECK_NULL_RETURN(info, nullptr);
+    auto node = AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(info));
+    CHECK_NULL_RETURN(node, nullptr);
+    if (!node->selectMenu_) {
+        node->CreateToolBar();
+    }
+    return node;
+}
+
+std::vector<OptionParam> SelectOverlayPatternTestNg::CreateOptionParamsForTest(int32_t count)
+{
+    std::vector<OptionParam> params;
+    for (int32_t index = 0; index < count; index++) {
+        params.emplace_back("item" + std::to_string(index), "", []() {});
+    }
+    return params;
 }
 
 class MockUINode : public UINode {
@@ -1229,4 +1253,52 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
         ASSERT_NE(pattern, nullptr);
     }
 }
+
+/**
+ * @tc.name: SelectOverlayNodeGetExtensionMenuOutterrMenu001
+ * @tc.desc: Test GetExtensionMenuOutterrMenu with empty params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeGetExtensionMenuOutterrMenu001, TestSize.Level1)
+{
+    auto info = std::make_shared<SelectOverlayInfo>();
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    MenuParam menuParam;
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    std::vector<OptionParam> params;
+
+    auto menu = selectOverlayNode->GetExtensionMenuOutterrMenu(params, menuParam, caller);
+    EXPECT_EQ(menu, nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeGetExtensionMenuOutterrMenu002
+ * @tc.desc: Test GetExtensionMenuOutterrMenu when selectMenu is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeGetExtensionMenuOutterrMenu002, TestSize.Level1)
+{
+    auto info = std::make_shared<SelectOverlayInfo>();
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->selectMenu_.Reset();
+
+    MenuParam menuParam;
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    auto params = CreateOptionParamsForTest(2);
+
+    auto menu = selectOverlayNode->GetExtensionMenuOutterrMenu(params, menuParam, caller);
+    EXPECT_EQ(menu, nullptr);
+}
+
 } // namespace OHOS::Ace::NG

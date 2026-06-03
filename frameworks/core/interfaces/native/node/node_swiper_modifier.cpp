@@ -2424,5 +2424,12 @@ void SetSwiperScrollStateChanged(ArkUINodeHandle node, void* extraParam)
     };
     SwiperModelNG::SetOnScrollStateChanged(frameNode, std::move(onEvent));
 }
+
+void ResetSwiperOnContentDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnContentDidScroll(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

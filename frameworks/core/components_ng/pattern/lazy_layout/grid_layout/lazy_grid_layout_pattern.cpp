@@ -18,9 +18,11 @@
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -52,12 +54,175 @@ RefPtr<LayoutAlgorithm> LazyGridLayoutPattern::CreateLayoutAlgorithm()
 {
     auto layoutAlgorithm = MakeRefPtr<LazyGridLayoutAlgorithm>(layoutInfo_);
     layoutAlgorithm->SetAxis(axis_);
+    layoutAlgorithm->SetHeader(GetHeaderNode());
+    layoutAlgorithm->SetFooter(GetFooterNode());
     // DynamicLayout support: set flag if DynamicLayout
     // Alignment is now obtained from common properties (PositionProperty), no need to pass separately
     if (isDynamicLayout_) {
         layoutAlgorithm->SetDynamicLayout(true);
     }
     return layoutAlgorithm;
+}
+
+StickyStyle LazyGridLayoutPattern::GetStickyStyle() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, StickyStyle::NONE);
+    auto layoutProperty = host->GetLayoutProperty<LazyGridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, StickyStyle::NONE);
+    return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
+}
+
+float LazyGridLayoutPattern::GetHeaderMainSize() const
+{
+    return layoutInfo_ ? layoutInfo_->headerMainSize_ : 0.0f;
+}
+
+float LazyGridLayoutPattern::GetFooterMainSize() const
+{
+    return layoutInfo_ ? layoutInfo_->footerMainSize_ : 0.0f;
+}
+
+void LazyGridLayoutPattern::OnActive()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+void LazyGridLayoutPattern::OnModifyDone()
+{
+    LazyLayoutPattern::OnModifyDone();
+    SyncHeaderFooter();
+}
+
+void LazyGridLayoutPattern::BeforeCreateLayoutWrapper()
+{
+    SyncHeaderFooter(false);
+}
+
+void LazyGridLayoutPattern::NotifyDataChange(int32_t /*index*/, int32_t /*count*/)
+{
+    // LazyGrid currently has no per-frame data-change diff in layoutInfo_; just request a remeasure so the
+    // algorithm re-derives index ranges, mirroring waterflow's downstream effect.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void LazyGridLayoutPattern::AddHeader(const RefPtr<UINode>& header)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!IsValidHeaderFooter(header, true)) {
+        return;
+    }
+    HeaderFooterUtils::ReplaceHeaderFooter(host, header_, header, 0);
+    SyncHeaderFooter();
+}
+
+void LazyGridLayoutPattern::AddFooter(const RefPtr<UINode>& footer)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!IsValidHeaderFooter(footer, false)) {
+        return;
+    }
+    // Footer is appended on first mount; SyncHeaderFooter keeps it behind data nodes after LazyForEach updates.
+    HeaderFooterUtils::ReplaceHeaderFooter(host, footer_, footer);
+    SyncHeaderFooter();
+}
+
+bool LazyGridLayoutPattern::IsValidHeaderFooter(const RefPtr<UINode>& edge, bool isHeader) const
+{
+    CHECK_NULL_RETURN(edge, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (edge == host) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_GRID, "LazyGridLayout rejects itself as header / footer");
+        return false;
+    }
+    auto peerEdge = isHeader ? footer_.Upgrade() : header_.Upgrade();
+    if (peerEdge && peerEdge == edge) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_GRID, "LazyGridLayout rejects duplicated header/footer edge");
+        return false;
+    }
+    auto currentEdge = isHeader ? header_.Upgrade() : footer_.Upgrade();
+    if (currentEdge == edge) {
+        return true;
+    }
+    auto parent = edge->GetParent();
+    if (parent && parent != host) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_GRID, "LazyGridLayout rejects header / footer with another parent");
+        return false;
+    }
+    if (parent == host && currentEdge != edge) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_GRID, "LazyGridLayout rejects existing child as header / footer");
+        return false;
+    }
+    if (!HeaderFooterUtils::GetHeaderFooterFrameNode(edge)) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_GRID, "LazyGridLayout rejects header / footer without frame content");
+        return false;
+    }
+    return true;
+}
+
+void LazyGridLayoutPattern::RemoveHeader()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    HeaderFooterUtils::RemoveHeaderFooter(host, header_);
+}
+
+void LazyGridLayoutPattern::RemoveFooter()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    HeaderFooterUtils::RemoveHeaderFooter(host, footer_);
+}
+
+RefPtr<FrameNode> LazyGridLayoutPattern::GetHeaderNode() const
+{
+    return HeaderFooterUtils::GetHeaderFooterFrameNode(header_);
+}
+
+RefPtr<FrameNode> LazyGridLayoutPattern::GetFooterNode() const
+{
+    return HeaderFooterUtils::GetHeaderFooterFrameNode(footer_);
+}
+
+void LazyGridLayoutPattern::SyncHeaderFooter(bool markDirty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool needMeasure = false;
+
+    // LazyForEach may append or remove data nodes after header/footer are mounted, so normalize edge positions before
+    // every wrapper creation instead of relying only on the first mount order.
+    auto header = header_.Upgrade();
+    if (header) {
+        auto headerIndex = host->GetChildIndex(header);
+        if (headerIndex > 0) {
+            header->MovePosition(0);
+            needMeasure = true;
+        }
+        HeaderFooterUtils::UpdateEdgeAccessibility(header);
+    }
+
+    auto footer = footer_.Upgrade();
+    if (footer) {
+        auto footerIndex = host->GetChildIndex(footer);
+        auto lastIndex = static_cast<int32_t>(host->GetChildren().size()) - 1;
+        if (footerIndex >= 0 && footerIndex != lastIndex) {
+            footer->MovePosition(lastIndex);
+            needMeasure = true;
+        }
+        HeaderFooterUtils::UpdateEdgeAccessibility(footer);
+    }
+
+    if (needMeasure && markDirty) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 FocusPattern LazyGridLayoutPattern::GetFocusPattern() const

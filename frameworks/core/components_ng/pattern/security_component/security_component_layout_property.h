@@ -20,6 +20,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/property/property.h"
 #include "core/components/common/properties/text_enums.h"
@@ -84,6 +85,7 @@ public:
         value->propIsMaxLineLimitExceeded_ = CloneIsMaxLineLimitExceeded();
         value->propIsIconExceeded_ = CloneIsIconExceeded();
         value->propHasCustomPermissionForSecComp_ = CloneHasCustomPermissionForSecComp();
+        value->propFallbackLineSpacing_ = CloneFallbackLineSpacing();
         return value;
     }
 
@@ -135,6 +137,7 @@ public:
         ResetIsMaxLineLimitExceeded();
         ResetIsIconExceeded();
         ResetHasCustomPermissionForSecComp();
+        ResetFallbackLineSpacing();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundLeftPadding, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -184,6 +187,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsMaxLineLimitExceeded, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsIconExceeded, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasCustomPermissionForSecComp, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FallbackLineSpacing, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

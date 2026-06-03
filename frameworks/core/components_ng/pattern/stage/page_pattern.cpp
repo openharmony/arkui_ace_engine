@@ -78,7 +78,10 @@ void PagePattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
-    pipelineContext->GetMemoryManager()->AddRecyclePageNode(host);
+    auto memoryManager = pipelineContext->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->AddRecyclePageNode(host);
+    }
 }
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& /* config */)
@@ -313,7 +316,10 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
-    pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
+    auto memoryManager = pipelineContext->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->RemoveRecyclePageNode(frameNode->GetId());
+    }
 }
 
 void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)

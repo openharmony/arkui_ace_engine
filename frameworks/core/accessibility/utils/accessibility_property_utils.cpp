@@ -58,6 +58,22 @@ bool IsNodeOfExtraType(const RefPtr<NG::FrameNode>& node)
     return IsNodeOfSupportControllerType(node, AccessibilityRoleType::TOGGLER);
 }
 
+bool IsNodeAndAllParentsVisible(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    if (!node->IsVisible()) {
+        return false;
+    }
+
+    for (auto parent = node->GetParent(); parent; parent = parent->GetParent()) {
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(parent);
+        if (frameNode && !frameNode->IsVisible()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool CheckAndGetController(const RefPtr<FrameNode>& node,
     RefPtr<FrameNode>& controllerNode,
     const AccessibilityRoleType& controllerByType,
@@ -67,8 +83,7 @@ bool CheckAndGetController(const RefPtr<FrameNode>& node,
         FindCondition condition = [controllerByInspector](const RefPtr<NG::FrameNode>& node) {
             CHECK_NULL_RETURN(node, false);
             CHECK_NE_RETURN(node->GetInspectorId(), controllerByInspector, false);
-            NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
-            return node->GetAccessibilityVisible();
+            return IsNodeAndAllParentsVisible(node);
         };
         controllerNode = AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
         CHECK_NE_RETURN(controllerNode, nullptr, true);
@@ -79,8 +94,7 @@ bool CheckAndGetController(const RefPtr<FrameNode>& node,
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, false);
         CHECK_NE_RETURN(IsNodeOfSupportControllerType(node, controllerByType), true, false);
-        NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
-        return node->GetAccessibilityVisible();
+        return IsNodeAndAllParentsVisible(node);
     };
     controllerNode = AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
     CHECK_NE_RETURN(controllerNode, nullptr, true);

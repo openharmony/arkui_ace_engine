@@ -24,12 +24,13 @@ import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, OnVisibleIndexesChangeCallback, ArkCommonMethodComponent } from './common'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit } from 'arkui.Graphics'
+import { CustomBuilder } from './builder'
+import { StickyStyle } from './list'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { initializers, AttributeModifier, hookLazyGridLayoutAttributeAttributeModifier, AttributeUpdater, hookLazyVGridLayoutAttributeModifier } from '#handwritten'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
-import { CustomBuilder } from './builder'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 // instructive change start
@@ -74,6 +75,42 @@ export class ArkLazyGridLayoutAttributePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LazyGridLayoutAttribute_setColumnsGap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setHeaderAttribute(builder: CustomBuilder | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (builder !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const builderTmpValue = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyGridLayoutAttribute_setHeader(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFooterAttribute(builder: CustomBuilder | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (builder !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const builderTmpValue = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyGridLayoutAttribute_setFooter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setStickyAttribute(sticky: StickyStyle | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (sticky !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const stickyTmpValue = (sticky as StickyStyle)
+            thisSerializer.writeInt32(stickyTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyGridLayoutAttribute_setSticky(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnVisibleIndexesChangeAttribute(callback_: OnVisibleIndexesChangeCallback | undefined): void {
@@ -125,6 +162,15 @@ export interface LazyGridLayoutAttribute extends CommonMethod {
     columnsGap(value: arkui_Graphics_LengthMetrics | undefined): this {
         throw new Error('Unimplemented method columnsGap')
     }
+    header(builder: CustomBuilder | undefined): this {
+        throw new Error('Unimplemented method header')
+    }
+    footer(builder: CustomBuilder | undefined): this {
+        throw new Error('Unimplemented method footer')
+    }
+    sticky(sticky: StickyStyle | undefined): this {
+        throw new Error('Unimplemented method sticky')
+    }
     onVisibleIndexesChange(callback_: OnVisibleIndexesChangeCallback | undefined): this {
         throw new Error('Unimplemented method onVisibleIndexesChange')
     }
@@ -156,6 +202,21 @@ export class ArkLazyGridLayoutAttributeComponent extends ArkCommonMethodComponen
     public columnsGap(value: arkui_Graphics_LengthMetrics | undefined): this {
         const value_casted = value as (arkui_Graphics_LengthMetrics | undefined)
         this.getPeer()?.setColumnsGapAttribute(value_casted)
+        return this
+    }
+    public header(builder: CustomBuilder | undefined): this {
+        const builder_casted = builder as (CustomBuilder | undefined)
+        this.getPeer()?.setHeaderAttribute(builder_casted)
+        return this
+    }
+    public footer(builder: CustomBuilder | undefined): this {
+        const builder_casted = builder as (CustomBuilder | undefined)
+        this.getPeer()?.setFooterAttribute(builder_casted)
+        return this
+    }
+    public sticky(sticky: StickyStyle | undefined): this {
+        const sticky_casted = sticky as (StickyStyle | undefined)
+        this.getPeer()?.setStickyAttribute(sticky_casted)
         return this
     }
     public onVisibleIndexesChange(callback_: OnVisibleIndexesChangeCallback | undefined): this {
@@ -208,32 +269,36 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutAttributeCompo
 
 @memo
 export function LazyVGridLayoutImpl(
-    @memo @memo_skip
+    @memo
     style: ((attributes: LazyVGridLayoutAttribute) => void) | undefined,
-    @memo @memo_skip
+    @memo
     content_?: () => void,
 ): void {
     const receiver = remember<ArkLazyVGridLayoutComponent>((): ArkLazyVGridLayoutComponent => {
         return new ArkLazyVGridLayoutComponent()
     })
-    NodeAttach<ArkLazyVGridLayoutPeer>((): ArkLazyVGridLayoutPeer => ArkLazyVGridLayoutPeer.create(receiver), (_: ArkLazyVGridLayoutPeer): void => {
+    NodeAttach<ArkLazyVGridLayoutPeer>((): ArkLazyVGridLayoutPeer => ArkLazyVGridLayoutPeer.create(receiver), (peer: ArkLazyVGridLayoutPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
 @memo
 export function LazyVGridLayout(
-    @memo @memo_skip
+    @memo
     style: ((attributes: LazyVGridLayoutAttribute) => void) | undefined,
-    @memo @memo_skip
+    @memo
     content_?: () => void,
 ): void {
     const receiver = remember<ArkLazyVGridLayoutComponent>((): ArkLazyVGridLayoutComponent => {
         return new ArkLazyVGridLayoutComponent()
     })
-    NodeAttach<ArkLazyVGridLayoutPeer>((): ArkLazyVGridLayoutPeer => ArkLazyVGridLayoutPeer.create(receiver), (_: ArkLazyVGridLayoutPeer): void => {
+    NodeAttach<ArkLazyVGridLayoutPeer>((): ArkLazyVGridLayoutPeer => ArkLazyVGridLayoutPeer.create(receiver), (peer: ArkLazyVGridLayoutPeer): void => {
+        receiver.setPeer(peer)
         style?.(receiver)
+        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -41,9 +41,11 @@ constexpr char LIBACE_MODULE[] = "libace_compatible.so";
 constexpr char LIBACE_MODULE[] = "libace_compatible.z.so";
 #endif
 constexpr char PARSE_RESOURCE_OBJECT[] = "OHOS_ACE_ParseResourceObject";
+constexpr char PARSE_DIMENSION_TO_PX[] = "OHOS_ACE_ParseDimensionToPx";
 
 using ParseObjectFunc = void* (*)(void* object);
 using GetArkUIDrawableDescriptorFunc = const ArkUIDrawableDescriptor* (*)();
+using ParseDimensionFunc = int32_t (*)(void* value);
 
 class LibraryHandle {
 public:
@@ -119,6 +121,12 @@ void* ParseResourceObject(void* value)
 {
     auto entry = GetAceFunction<ParseObjectFunc>(PARSE_RESOURCE_OBJECT);
     return entry ? entry(value) : nullptr;
+}
+
+int32_t ParseDimensionToPx(void* value)
+{
+    auto entry = GetAceFunction<ParseDimensionFunc>(PARSE_DIMENSION_TO_PX);
+    return entry ? entry(value) : 0;
 }
 
 std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager()

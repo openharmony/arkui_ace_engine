@@ -123,6 +123,27 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         }
     }
 
+    public resetOnReuse(newValue: T): void {
+        console.log(`GlobalReuse: Reset.PROBE @PropRef ${this.varName}`);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`PropRef resetOnReuse ${this.updateTraceInfo()}`);
+        const sourceValue = this.sourceValue;
+        let value: T = newValue;
+        if (isDynamicObject(newValue)) {
+            value = getObservedObject(newValue);
+        } else {
+            value = uiUtils.makeV1Observed(newValue);
+        }
+        this.unregisterWatchFromObservedObjectChanges(sourceValue);
+        this.registerWatchForObservedObjectChanges(value);
+        this.updateObservedObjectRegistration(sourceValue, value);
+        this.sourceValue = value;
+        this.unregisterCallbackForPropertyChange(sourceValue);
+        this.registerCallbackForPropertyChange(value);
+        this.localValue.set(value);
+        this.isForceRender = false;
+        // silent — no execWatchFuncs
+    }
+
     registerCallbackForPropertyChange(value: T): void {
         if (!(value && typeof value === 'object')) {
             return;

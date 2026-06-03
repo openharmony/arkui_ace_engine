@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 void SetXComponentControllerCallback(void* peer, const ArkUIXComponentParams& params)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    auto controllerPeerImpl = reinterpret_cast<GeneratedModifier::XComponentControllerPeerImpl*>(peer);
+    auto controllerPeerImpl = reinterpret_cast<GeneratedModifier::XComponentControllerNativePeerImpl*>(peer);
     CHECK_NULL_VOID(controllerPeerImpl);
     controllerPeerImpl->onSurfaceCreatedEvent = [onSurfaceCreated = params.onSurfaceCreated]
         (const std::string& surfaceId, const std::string xcomponentId) {

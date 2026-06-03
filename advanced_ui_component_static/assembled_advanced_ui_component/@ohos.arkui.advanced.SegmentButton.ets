@@ -559,6 +559,8 @@ export class SegmentButtonOptions {
   public localizedButtonPadding?: LocalizedPadding;
   public showText: boolean = false;
   public showIcon: boolean = false;
+  public hasFontSize: boolean = false;
+  public hasSelectedFontSize: boolean = false;
   public iconTextRadius?: double;
   public iconTextBackgroundRadius?: double;
   public backgroundBlurStyle: BlurStyle = BlurStyle.Thick;
@@ -587,6 +589,8 @@ export class SegmentButtonOptions {
     this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR;
     this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE;
     this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE;
+    this.hasFontSize = options.fontSize !== undefined ? true : false;
+    this.hasSelectedFontSize = options.selectedFontSize !== undefined ? true : false;
     this.fontWeight = options.fontWeight ?? FontWeight.Regular;
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium;
     this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
@@ -2137,8 +2141,7 @@ export struct SegmentButton {
               const startX = Math.min(alg.getButtonX(0), alg.getButtonX(buttonLength - 1))
               const endX = Math.max(alg.getButtonX(0), alg.getButtonX(buttonLength - 1))
 
-              const fingerOffset = this.isShouldMirror() ? this.panGestureStartPoint.x - fingerInfo.globalX :
-                fingerInfo.globalX - this.panGestureStartPoint.x
+              const fingerOffset = this.getUIContext().vp2px(fingerInfo.globalX - this.panGestureStartPoint.x)
               const currentButtonX = alg.getButtonX(this.selectedIndexes[0])
               let nowX = fingerOffset + currentButtonX
               nowX = Math.max(startX, nowX)
@@ -2372,13 +2375,16 @@ export struct SegmentButton {
     } else {
       setAnimatedPropertyFunc();
     }
+    this.updateButtonFont();
+  }
 
+  updateButtonFont(): void {
     this.buttonItemsSelected.forEach((selected, index) => {
-      const selectedFontSize = this.options.selectedFontSize ??
+      const selectedFontSize = this.options.hasSelectedFontSize ? this.options.selectedFontSize :
         (this.useAdaptiveLineHeight ?
           segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE :
           segmentButtonTheme.SELECTED_FONT_SIZE);
-      const normalFontSize = this.options.fontSize ??
+      const normalFontSize = this.options.hasFontSize ? this.options.fontSize :
         (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : segmentButtonTheme.FONT_SIZE);
       this.buttonItemProperty[index].fontSize = selected ? selectedFontSize : normalFontSize;
       this.buttonItemProperty[index].fontWeight =

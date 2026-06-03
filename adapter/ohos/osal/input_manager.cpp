@@ -99,4 +99,29 @@ bool InputManager::IsKeyboardConnected()
         [](int32_t id) { return GetKeyboardType(id) == KeyboardType::ALPHABETICKEYBOARD; });
 }
 
+size_t InputManager::GetApproximatePointerEventSize()
+{
+    // --- Empirical Estimates ---
+    constexpr size_t PRESSED_BUTTONS = 3;
+    constexpr size_t POINTER_ITEMS = 10;
+    constexpr size_t PRESSED_KEYS = 2;
+    constexpr size_t BUFFER_SIZE = 64;
+    constexpr size_t SIGNATURE_LEN = 36; // e.g., UUID
+
+    // --- Data Structure Overhead ---
+    constexpr size_t SHARED_PTR_OVERHEAD = sizeof(void*) * 2;
+    constexpr size_t RBTREE_NODE = (3 * sizeof(void*)) + sizeof(int);
+    constexpr size_t LIST_NODE = 2 * sizeof(void*);
+
+    // --- Compile-time Calculation ---
+    constexpr size_t baseSize = sizeof(MMI::PointerEvent) + SHARED_PTR_OVERHEAD;
+    constexpr size_t buttonsSize = PRESSED_BUTTONS * (sizeof(int32_t) + RBTREE_NODE);
+    constexpr size_t pointersSize = POINTER_ITEMS * (sizeof(MMI::PointerEvent::PointerItem) + LIST_NODE);
+    constexpr size_t keysSize = PRESSED_KEYS * sizeof(int32_t);
+    constexpr size_t bufferSize = BUFFER_SIZE * sizeof(uint8_t);
+    constexpr size_t signatureSize = SIGNATURE_LEN * sizeof(char);
+
+    return baseSize + buttonsSize + pointersSize + keysSize + bufferSize + signatureSize;
+}
+
 } // namespace OHOS::Ace

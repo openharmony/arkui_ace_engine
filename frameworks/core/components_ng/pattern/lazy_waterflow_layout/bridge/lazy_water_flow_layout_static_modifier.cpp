@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model_static.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -25,6 +26,20 @@
 #ifdef INCLUDE_GENERATED_SOURCES
 #include "arkoala_api_generated.h"
 #endif
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
+{
+    switch (src) {
+        case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;
+        case ARK_STICKY_STYLE_HEADER: dst = V2::StickyStyle::HEADER; break;
+        case ARK_STICKY_STYLE_FOOTER: dst = V2::StickyStyle::FOOTER; break;
+        case ARK_STICKY_STYLE_BOTH: dst = V2::StickyStyle::BOTH; break;
+        default: break;
+    }
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyWaterFlowLayoutExtenderAccessor {
@@ -78,6 +93,50 @@ void ColumnsTemplateImpl(Ark_NativePointer node, const Opt_Union_String_ItemFill
         [frameNode]() { LazyVWaterFlowLayoutModelStatic::SetColumnsTemplate(frameNode, ""); });
 }
 
+void HeaderImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        LazyWaterFlowLayoutModelStatic::RemoveHeader(frameNode);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto host = weakNode.Upgrade();
+            CHECK_NULL_VOID(host);
+            LazyWaterFlowLayoutModelStatic::SetHeader(AceType::RawPtr(host), uiNode);
+        }, node);
+}
+
+void FooterImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        LazyWaterFlowLayoutModelStatic::RemoveFooter(frameNode);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto host = weakNode.Upgrade();
+            CHECK_NULL_VOID(host);
+            LazyWaterFlowLayoutModelStatic::SetFooter(AceType::RawPtr(host), uiNode);
+        }, node);
+}
+
+void StickyImpl(Ark_NativePointer node, const Opt_StickyStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto style = Converter::OptConvertPtr<V2::StickyStyle>(value);
+    LazyWaterFlowLayoutModelStatic::SetSticky(frameNode, EnumToInt(style));
+}
+
 void OnVisibleIndexesChangeImpl(Ark_NativePointer node, const Opt_OnVisibleIndexesChangeCallback* callback_)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -105,6 +164,9 @@ const GENERATED_ArkUILazyWaterFlowLayoutExtenderAccessor* GetLazyWaterFlowLayout
         LazyWaterFlowLayoutExtenderAccessor::RowsGapImpl,
         LazyWaterFlowLayoutExtenderAccessor::ColumnsGapImpl,
         LazyWaterFlowLayoutExtenderAccessor::ColumnsTemplateImpl,
+        LazyWaterFlowLayoutExtenderAccessor::HeaderImpl,
+        LazyWaterFlowLayoutExtenderAccessor::FooterImpl,
+        LazyWaterFlowLayoutExtenderAccessor::StickyImpl,
         LazyWaterFlowLayoutExtenderAccessor::OnVisibleIndexesChangeImpl,
     };
     return &LazyWaterFlowLayoutExtenderAccessorImpl;

@@ -192,6 +192,7 @@ EdgesSpaces SmartLayoutNode::CalculateChildSpaces(const ChildLayoutInfo& info,
         }
     }
 
+    spaces.ClampToNonNegative();
     return spaces;
 }
 

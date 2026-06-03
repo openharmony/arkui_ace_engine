@@ -50,8 +50,9 @@ void JSWithTheme::RemoveThemeInNative(const JSCallbackInfo& info)
 std::vector<ResourceValue> GetResourceValue(const JSRef<JSArray>& colors)
 {
     std::vector<ResourceValue> color;
+    color.reserve(TokenColors::TOTAL_NUMBER);
 
-    for (int i = 0; i < COLORS_NUMBER; i++) {
+    for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         RefPtr<ResourceObject> resObj;
         Color value;
         JSViewAbstract::ParseJsColor(colors->GetValueAt(i), value, resObj);

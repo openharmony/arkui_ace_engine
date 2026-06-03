@@ -19,9 +19,13 @@
 #include "../utils/ani_utils.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#if defined(PREVIEW)
+#include "ani.h"
+#endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model_static.h"
 #endif //WINDOW_SCENE_SUPPORTED
+#include <array>
 
 namespace OHOS::Ace::Ani {
 ani_status NativeDynamicModule::BindNativeDynamicModule(ani_env *env)
@@ -83,7 +87,7 @@ ani_long NativeDynamicModule::DynamicConstruct(
     auto frameNodePtr = NG::DynamicModelStatic::CreateFrameNodeByIncRefCount(id);
     return reinterpret_cast<ani_long>(frameNodePtr);
 #else
-    return nullptr;
+    return {};
 #endif
 }
 
@@ -93,6 +97,7 @@ ani_status NativeDynamicModule::SetDynamicOption(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object obj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
     if (frameNode == nullptr) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
@@ -126,7 +131,6 @@ ani_status NativeDynamicModule::SetDynamicOption(
 
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
         "NativeDynamicModule SetDynamicParam %{public}s.", param.ToString().c_str());
-#ifdef WINDOW_SCENE_SUPPORTED
     NG::DynamicModelStatic::SetDynamicParam(frameNode, param);
 #endif
     return ANI_OK;
@@ -138,6 +142,7 @@ ani_status NativeDynamicModule::SetOnError(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_object callbackObj)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
     if (frameNode == nullptr) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT, "frameNode is null when SetOnError");
@@ -182,7 +187,6 @@ ani_status NativeDynamicModule::SetOnError(
         };
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
     };
-#ifdef WINDOW_SCENE_SUPPORTED
     NG::DynamicModelStatic::SetOnError(frameNode, std::move(onErrorCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
@@ -194,13 +198,13 @@ ani_status NativeDynamicModule::SetIsReportFrameEvent(
     [[maybe_unused]] ani_long pointer,
     [[maybe_unused]] ani_boolean value)
 {
+#ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
     if (frameNode == nullptr) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT, "frameNode is null when SetIsReportFrameEvent");
         return ANI_ERROR;
     }
     ACE_UINODE_TRACE(frameNode);
-#ifdef WINDOW_SCENE_SUPPORTED
     NG::DynamicModelStatic::SetIsReportFrameEvent(frameNode, value);
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;

@@ -1660,6 +1660,138 @@ HWTEST_F(MenuPattern2TwoTestNg, MenuItemModelNgCreateTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateMenuBackBlurStyle005
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle005, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+
+    auto uiMaterialState = AceApplicationInfo::GetInstance().GetUIMaterialState();
+    AceApplicationInfo::GetInstance().SetUIMaterialState("disable");
+
+    menuPattern->SetType(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    AceApplicationInfo::GetInstance().SetUIMaterialState(uiMaterialState);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackBlurStyle006
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle006, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+
+    auto uiMaterialState = AceApplicationInfo::GetInstance().GetUIMaterialState();
+    AceApplicationInfo::GetInstance().SetUIMaterialState("disable");
+
+    menuPattern->SetExtensionInnerMenu(true);
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    AceApplicationInfo::GetInstance().SetUIMaterialState(uiMaterialState);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackBlurStyle007
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle007, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+
+    auto uiMaterialState = AceApplicationInfo::GetInstance().GetUIMaterialState();
+    AceApplicationInfo::GetInstance().SetUIMaterialState("disable");
+
+    menuPattern->SetType(MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU);
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    AceApplicationInfo::GetInstance().SetUIMaterialState(uiMaterialState);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
  * @tc.name: MenuModelNgCreateTest001
  * @tc.desc: Verify MenuModelNG::Create when version is 26.
  * @tc.type: FUNC

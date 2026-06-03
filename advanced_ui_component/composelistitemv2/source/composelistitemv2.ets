@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -46,55 +46,222 @@ enum ItemHeight {
   FIFTH_HEIGHT = 96
 }
 
-@ObservedV2
-export declare class OperateItemV2 {
-  @Trace public icon?: OperateIconV2;
-  @Trace public subIcon?: OperateIconV2;
-  @Trace public button?: OperateButtonV2;
-  @Trace public switch?: OperateCheckV2;
-  @Trace public checkbox?: OperateCheckV2;
-  @Trace public radio?: OperateCheckV2;
-  @Trace public image?: ResourceStr;
-  @Trace public symbolStyle?: SymbolGlyphModifier;
-  @Trace public text?: ResourceStr;
-  @Trace public arrow?: OperateIconV2;
+type OnActionCallback = () => void;
+type OnChangeCallback = (value: boolean) => void;
+
+export interface OperateIconV2Options {
+  value?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  action?: OnActionCallback;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
+}
+
+export interface OperateCheckV2Options {
+  isCheck?: boolean;
+  onChange?: OnChangeCallback;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
+}
+
+export interface OperateButtonV2Options {
+  text?: ResourceStr;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
+}
+
+export interface ContentItemV2Options {
+  iconStyle?: IconTypeV2;
+  icon?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  primaryText?: ResourceStr;
+  secondaryText?: ResourceStr;
+  description?: ResourceStr;
+}
+
+export interface OperateItemV2Options {
+  icon?: OperateIconV2;
+  subIcon?: OperateIconV2;
+  button?: OperateButtonV2;
+  toggle?: OperateCheckV2;
+  checkbox?: OperateCheckV2;
+  radio?: OperateCheckV2;
+  image?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
+  text?: ResourceStr;
+  arrow?: OperateIconV2;
 }
 
 @ObservedV2
-export declare class ContentItemV2 {
+export class OperateIconV2 {
+  @Trace public value: ResourceStr = '';
+  @Trace public symbolStyle?: SymbolGlyphModifier;
+  @Trace public action?: OnActionCallback;
+  @Trace public accessibilityText?: ResourceStr;
+  @Trace public accessibilityDescription?: ResourceStr;
+  @Trace public accessibilityLevel?: string;
+
+  constructor(options?: OperateIconV2Options) {
+    if (options) {
+      if (options.value !== undefined) {
+        this.value = options.value;
+      }
+      if (options.symbolStyle !== undefined) {
+        this.symbolStyle = options.symbolStyle;
+      }
+      if (options.action !== undefined) {
+        this.action = options.action;
+      }
+      if (options.accessibilityText !== undefined) {
+        this.accessibilityText = options.accessibilityText;
+      }
+      if (options.accessibilityDescription !== undefined) {
+        this.accessibilityDescription = options.accessibilityDescription;
+      }
+      if (options.accessibilityLevel !== undefined) {
+        this.accessibilityLevel = options.accessibilityLevel;
+      }
+    }
+  }
+}
+
+@ObservedV2
+export class OperateCheckV2 {
+  @Trace public isCheck?: boolean;
+  @Trace public onChange?: OnChangeCallback;
+  @Trace public accessibilityText?: ResourceStr;
+  @Trace public accessibilityDescription?: ResourceStr;
+  @Trace public accessibilityLevel?: string;
+
+  constructor(options?: OperateCheckV2Options) {
+    if (options) {
+      if (options.isCheck !== undefined) {
+        this.isCheck = options.isCheck;
+      }
+      if (options.onChange !== undefined) {
+        this.onChange = options.onChange;
+      }
+      if (options.accessibilityText !== undefined) {
+        this.accessibilityText = options.accessibilityText;
+      }
+      if (options.accessibilityDescription !== undefined) {
+        this.accessibilityDescription = options.accessibilityDescription;
+      }
+      if (options.accessibilityLevel !== undefined) {
+        this.accessibilityLevel = options.accessibilityLevel;
+      }
+    }
+  }
+}
+
+@ObservedV2
+export class OperateButtonV2 {
+  @Trace public text?: ResourceStr;
+  @Trace public accessibilityText?: ResourceStr;
+  @Trace public accessibilityDescription?: ResourceStr;
+  @Trace public accessibilityLevel?: string;
+
+  constructor(options?: OperateButtonV2Options) {
+    if (options) {
+      if (options.text !== undefined) {
+        this.text = options.text;
+      }
+      if (options.accessibilityText !== undefined) {
+        this.accessibilityText = options.accessibilityText;
+      }
+      if (options.accessibilityDescription !== undefined) {
+        this.accessibilityDescription = options.accessibilityDescription;
+      }
+      if (options.accessibilityLevel !== undefined) {
+        this.accessibilityLevel = options.accessibilityLevel;
+      }
+    }
+  }
+}
+
+@ObservedV2
+export class ContentItemV2 {
   @Trace public iconStyle?: IconTypeV2;
   @Trace public icon?: ResourceStr;
   @Trace public symbolStyle?: SymbolGlyphModifier;
   @Trace public primaryText?: ResourceStr;
   @Trace public secondaryText?: ResourceStr;
   @Trace public description?: ResourceStr;
+
+  constructor(options?: ContentItemV2Options) {
+    if (options) {
+      if (options.iconStyle !== undefined) {
+        this.iconStyle = options.iconStyle;
+      }
+      if (options.icon !== undefined) {
+        this.icon = options.icon;
+      }
+      if (options.symbolStyle !== undefined) {
+        this.symbolStyle = options.symbolStyle;
+      }
+      if (options.primaryText !== undefined) {
+        this.primaryText = options.primaryText;
+      }
+      if (options.secondaryText !== undefined) {
+        this.secondaryText = options.secondaryText;
+      }
+      if (options.description !== undefined) {
+        this.description = options.description;
+      }
+    }
+  }
 }
 
 @ObservedV2
-export declare class OperateIconV2 {
-  @Trace public value: ResourceStr;
+export class OperateItemV2 {
+  @Trace public icon?: OperateIconV2;
+  @Trace public subIcon?: OperateIconV2;
+  @Trace public button?: OperateButtonV2;
+  @Trace public toggle?: OperateCheckV2;
+  @Trace public checkbox?: OperateCheckV2;
+  @Trace public radio?: OperateCheckV2;
+  @Trace public image?: ResourceStr;
   @Trace public symbolStyle?: SymbolGlyphModifier;
-  @Trace public action?: () => void;
-  @Trace public accessibilityText?: ResourceStr;
-  @Trace public accessibilityDescription?: ResourceStr;
-  @Trace public accessibilityLevel?: string;
-}
-
-@ObservedV2
-export declare class OperateButtonV2 {
   @Trace public text?: ResourceStr;
-  @Trace public accessibilityText?: ResourceStr;
-  @Trace public accessibilityDescription?: ResourceStr;
-  @Trace public accessibilityLevel?: string;
-}
+  @Trace public arrow?: OperateIconV2;
 
-@ObservedV2
-export declare class OperateCheckV2 {
-  @Trace public isCheck?: boolean;
-  @Trace public onChange?: (value: boolean) => void;
-  @Trace public accessibilityText?: ResourceStr;
-  @Trace public accessibilityDescription?: ResourceStr;
-  @Trace public accessibilityLevel?: string;
+  constructor(options?: OperateItemV2Options) {
+    if (options) {
+      if (options.icon !== undefined) {
+        this.icon = options.icon;
+      }
+      if (options.subIcon !== undefined) {
+        this.subIcon = options.subIcon;
+      }
+      if (options.button !== undefined) {
+        this.button = options.button;
+      }
+      if (options.toggle !== undefined) {
+        this.toggle = options.toggle;
+      }
+      if (options.checkbox !== undefined) {
+        this.checkbox = options.checkbox;
+      }
+      if (options.radio !== undefined) {
+        this.radio = options.radio;
+      }
+      if (options.image !== undefined) {
+        this.image = options.image;
+      }
+      if (options.symbolStyle !== undefined) {
+        this.symbolStyle = options.symbolStyle;
+      }
+      if (options.text !== undefined) {
+        this.text = options.text;
+      }
+      if (options.arrow !== undefined) {
+        this.arrow = options.arrow;
+      }
+    }
+  }
 }
 
 const TEXT_MAX_LINE = 1;
@@ -122,7 +289,7 @@ const DEFAULT_ROW_SPACE = 0;
 const SPECICAL_ROW_SPACE = 4;
 const OPERATEITEM_ICONLIKE_SIZE = 24;
 const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
-const OPERATEITEM_ARROW_WIDTH = 12
+const OPERATEITEM_ARROW_WIDTH = 12;
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
@@ -154,7 +321,7 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconTypeV2.PREVIEW, PREVIEW_SIZE],
   [IconTypeV2.LONGITUDINAL, LONGITUDINAL_SIZE],
   [IconTypeV2.VERTICAL, VERTICAL_SIZE]
-])
+]);
 
 const IS_SUPPORT_SUBCOMPONENT_EVENT: boolean =
   LengthMetrics.resource($r('sys.float.composeListItem_focus_dynamic_effect')).value !== 1;
@@ -249,7 +416,6 @@ struct ContentItemStruct {
   @Monitor('isWrapFirstText', 'isWrapSecondText', 'isWrapThirdText')
   onWrapChange(): void {
     this.isWrapText = this.isWrapFirstText || this.isWrapSecondText || this.isWrapThirdText;
-    // 使用事件机制通知父组件
     let eventData: emitter.EventData = {
       data: { isWrapText: this.isWrapText }
     };
@@ -458,12 +624,9 @@ class CreateIconParam {
 }
 
 class OperateItemStructController {
-  public changeRadioState = () => {
-  };
-  public changeCheckboxState = () => {
-  };
-  public changeSwitchState = () => {
-  };
+  public changeRadioState = () => {};
+  public changeCheckboxState = () => {};
+  public changeToggleState = () => {};
 }
 
 @ComponentV2
@@ -472,13 +635,13 @@ struct OperateItemStruct {
   @Param icon: OperateIconV2 | null = null;
   @Param subIcon: OperateIconV2 | null = null;
   @Param button: OperateButtonV2 | null = null;
-  @Param switch: OperateCheckV2 | null = null;
+  @Param toggle: OperateCheckV2 | null = null;
   @Param checkBox: OperateCheckV2 | null = null;
   @Param radio: OperateCheckV2 | null = null;
   @Param image: ResourceStr | null = null;
   @Param symbolStyle: SymbolGlyphModifier | null = null;
   @Param text: ResourceStr | null = null;
-  @Local switchState: boolean = false;
+  @Local toggleState: boolean = false;
   @Local radioState: boolean = false;
   @Local checkBoxState: boolean = false;
   @Param rightWidth: string = RIGHT_PART_WIDTH;
@@ -499,10 +662,10 @@ struct OperateItemStruct {
   @Local iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
   private controller: OperateItemStructController = new OperateItemStructController();
 
-  @Monitor('arrow', 'icon', 'subIcon', 'button', 'switch', 'checkBox', 'radio', 'image', 'symbolStyle', 'text')
+  @Monitor('arrow', 'icon', 'subIcon', 'button', 'toggle', 'checkBox', 'radio', 'image', 'symbolStyle', 'text')
   onPropChange(): void {
-    if (this.switch != null) {
-      this.switchState = this.switch.isCheck as boolean;
+    if (this.toggle != null) {
+      this.toggleState = this.toggle.isCheck as boolean;
     }
     if (this.radio != null) {
       this.radioState = this.radio.isCheck as boolean;
@@ -542,7 +705,7 @@ struct OperateItemStruct {
     if (this.controller) {
       this.controller.changeRadioState = this.changeRadioState;
       this.controller.changeCheckboxState = this.changeCheckboxState;
-      this.controller.changeSwitchState = this.changeSwitchState;
+      this.controller.changeToggleState = this.changeToggleState;
     }
   }
 
@@ -552,8 +715,8 @@ struct OperateItemStruct {
   changeCheckboxState = () => {
     this.checkBoxState = !this.checkBoxState;
   };
-  changeSwitchState = () => {
-    this.switchState = !this.switchState;
+  changeToggleState = () => {
+    this.toggleState = !this.toggleState;
   };
 
   @Builder
@@ -856,24 +1019,24 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createSwitch() {
+  createToggle() {
     Row() {
-      Toggle({ type: ToggleType.Switch, isOn: this.switchState })
+      Toggle({ type: ToggleType.Switch, isOn: this.toggleState })
         .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
         .backgroundColor(Color.Transparent)
         .onChange((isCheck: boolean) => {
-          this.switchState = isCheck;
-          if (this.switch?.onChange) {
-            this.switch?.onChange(isCheck);
+          this.toggleState = isCheck;
+          if (this.toggle?.onChange) {
+            this.toggle?.onChange(isCheck);
           }
         })
         .onClick(() => {
-          this.switchState = !this.switchState;
+          this.toggleState = !this.toggleState;
         })
         .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
-        .accessibilityLevel(getAccessibilityLevelOnChange(this.switch?.accessibilityLevel, this.switch?.onChange))
-        .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''))
-        .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''))
+        .accessibilityLevel(getAccessibilityLevelOnChange(this.toggle?.accessibilityLevel, this.toggle?.onChange))
+        .accessibilityText(getAccessibilityText(this.toggle?.accessibilityText ?? ''))
+        .accessibilityDescription(getAccessibilityText(this.toggle?.accessibilityDescription ?? ''))
     }
     .margin({ end: LengthMetrics.vp(SWITCH_PADDING) })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -1080,8 +1243,8 @@ struct OperateItemStruct {
         this.createRadio();
       } else if (this.checkBox != null) {
         this.createCheckBox();
-      } else if (this.switch != null) {
-        this.createSwitch();
+      } else if (this.toggle != null) {
+        this.createToggle();
       } else if (this.icon != null) {
         this.createIcon({ icon: this.icon });
         if (this.subIcon != null) {
@@ -1110,7 +1273,7 @@ function getAccessibilityText(resource: ResourceStr): string {
   }
 }
 
-function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (value: boolean) => void): string {
+function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: OnChangeCallback): string {
   if (accessibilityLevel) {
     return accessibilityLevel;
   }
@@ -1120,7 +1283,7 @@ function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (
   return ACCESSIBILITY_LEVEL_NO;
 }
 
-function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: () => void): string {
+function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: OnActionCallback): string {
   if (accessibilityLevel) {
     return accessibilityLevel;
   }
@@ -1265,7 +1428,6 @@ export struct ComposeListItemV2 {
     if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
       this.onFontSizeScaleChange();
     }
-    // 注册事件监听器
     emitter.on({ eventId: EVENT_IS_WRAP_TEXT_CHANGE }, (eventData: emitter.EventData) => {
       if (eventData.data && eventData.data.isWrapText !== undefined) {
         this.isWrapText = eventData.data.isWrapText;
@@ -1306,7 +1468,7 @@ export struct ComposeListItemV2 {
     },
     onMemoryLevel: (level) => {
     }
-  }
+  };
 
   aboutToDisappear(): void {
     if (this.callbackId) {
@@ -1316,7 +1478,6 @@ export struct ComposeListItemV2 {
       ?.off('environment', this.callbackId);
       this.callbackId = void (0);
     }
-    // 注销所有事件监听器
     emitter.off(EVENT_IS_WRAP_TEXT_CHANGE);
     emitter.off(EVENT_PARENT_CAN_FOCUS_CHANGE);
     emitter.off(EVENT_PARENT_CAN_HOVER_CHANGE);
@@ -1327,7 +1488,7 @@ export struct ComposeListItemV2 {
     if (this.operateItemV2?.text || this.operateItemV2?.button) {
       return RIGHT_PART_WIDTH;
     }
-    if (this.operateItemV2?.switch) {
+    if (this.operateItemV2?.toggle) {
       return RIGHT_ONLY_SWITCH_WIDTH;
     } else if (this.operateItemV2?.checkbox) {
       return RIGHT_ONLY_CHECKBOX_WIDTH;
@@ -1428,7 +1589,7 @@ export struct ComposeListItemV2 {
     return Math.min(
       this.maxFontScale,
       (this.getUIContext().getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1
-    )
+    );
   }
 
   getPadding(): Padding | undefined {
@@ -1451,7 +1612,7 @@ export struct ComposeListItemV2 {
     Stack() {
       Flex(this.getFlexOptions()) {
         if (this.contentItemV2 === null) {
-          ContentItemStruct()
+          ContentItemStruct();
         }
         if (this.contentItemV2 !== null) {
           ContentItemStruct({
@@ -1473,7 +1634,7 @@ export struct ComposeListItemV2 {
             icon: this.operateItemV2?.icon,
             subIcon: this.operateItemV2?.subIcon,
             button: this.operateItemV2?.button,
-            switch: this.operateItemV2?.switch,
+            toggle: this.operateItemV2?.toggle,
             checkBox: this.operateItemV2?.checkbox,
             radio: this.operateItemV2?.radio,
             image: this.operateItemV2?.image,
@@ -1547,7 +1708,7 @@ export struct ComposeListItemV2 {
           .backgroundColor(this.touchDownColor)
         }
       })
-      .padding(this.containerPadding)
+      .padding(this.containerPadding);
     }
     .width('100%')
     .accessibilityGroup(true)
@@ -1579,8 +1740,8 @@ export struct ComposeListItemV2 {
       if (this.operateItemV2?.checkbox) {
         this.operateItemStructRef.changeCheckboxState();
       }
-      if (this.operateItemV2?.switch) {
-        this.operateItemStructRef.changeSwitchState();
+      if (this.operateItemV2?.toggle) {
+        this.operateItemStructRef.changeToggleState();
       }
     })
     .scale(this.listScale)
@@ -1592,7 +1753,7 @@ export struct ComposeListItemV2 {
     .padding({
       left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
       right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
-    })
+    });
   }
 
   private zoomIn(): void {

@@ -244,6 +244,10 @@ declare class ArkMarqueeComponent extends ArkComponent implements CommonMethod<M
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
+declare class ArkSelectionContainerComponent extends ArkComponent implements CommonMethod<SelectionContainerAttribute> {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+}
+
 declare class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     sideLength(value: Length): PatternLockAttribute;

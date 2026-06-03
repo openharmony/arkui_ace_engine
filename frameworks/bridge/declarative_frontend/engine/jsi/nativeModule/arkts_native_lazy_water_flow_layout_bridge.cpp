@@ -21,6 +21,7 @@
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
 
 namespace OHOS::Ace::NG {
@@ -29,8 +30,12 @@ class FrameNode;
 void SetLazyWaterFlowCallbackNode(FrameNode* frameNode);
 
 namespace {
+constexpr int32_t NODE_ARG_INDEX = 0;
+constexpr int32_t VALUE_ARG_INDEX = 1;
 constexpr int32_t BREAKPOINT_DEFAULT = 0;
 constexpr int32_t BREAKPOINT_SM2MD3LG5 = 2;
+constexpr int32_t STICKY_STYLE_NONE = 0;
+constexpr int32_t STICKY_STYLE_BOTH = 3;
 constexpr int32_t VISIBLE_INDEX_PARAM_COUNT = 2;
 const std::string DEFAULT_COLUMNS_TEMPLATE = "1fr";
 constexpr Dimension DEFAULT_COLUMNS_GAP = 0.0_fp;
@@ -75,6 +80,83 @@ const ArkUILazyWaterFlowLayoutModifier* GetLazyWaterFlowLayoutModifier()
     return nodeModifiers->getLazyWaterFlowLayoutModifier();
 }
 
+Local<JSValueRef> GetProperty(EcmaVM* vm, const Local<JSValueRef>& object, const char* key)
+{
+    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
+    CHECK_NULL_RETURN(key, panda::JSValueRef::Undefined(vm));
+    if (object.IsEmpty() || !object->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto objectRef = object->ToObject(vm);
+    if (objectRef.IsEmpty()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    return objectRef->Get(vm, panda::StringRef::NewFromUtf8(vm, key));
+}
+
+void CallJsFunction(EcmaVM* vm, const panda::CopyableGlobal<panda::FunctionRef>& func)
+{
+    CHECK_NULL_VOID(vm);
+    panda::LocalScope pandaScope(vm);
+    panda::TryCatch trycatch(vm);
+    func->Call(vm, func.ToLocal(), nullptr, 0);
+}
+
+RefPtr<UINode> BuildHeaderFooterNodeFromFunction(EcmaVM* vm, const Local<JSValueRef>& value)
+{
+    CHECK_NULL_RETURN(vm, nullptr);
+    if (value.IsEmpty() || !value->IsFunction(vm)) {
+        return nullptr;
+    }
+    panda::Local<panda::FunctionRef> func = value->ToObject(vm);
+    if (func.IsEmpty()) {
+        return nullptr;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, nullptr);
+    auto isBuilderNode = stack->IsBuilderNode();
+    auto isExportTexture = stack->IsExportTexture();
+    // Builder modifiers run outside the component creation stack. Use an isolated stack so edge builders
+    // cannot leak nodes into the current component tree.
+    ScopedViewStackProcessor builderViewStackProcessor;
+    stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, nullptr);
+    stack->SetIsBuilderNode(isBuilderNode);
+    stack->SetIsExportTexture(isExportTexture);
+    panda::CopyableGlobal<panda::FunctionRef> globalFunc(vm, func);
+    CallJsFunction(vm, globalFunc);
+    auto builtNode = stack->Finish();
+    if (!builtNode) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "LazyWaterFlowLayout header/footer builder produced no node");
+    }
+    return builtNode;
+}
+
+bool TryParseComponentContentNode(EcmaVM* vm, const Local<JSValueRef>& value, ArkUINodeHandle& contentNode)
+{
+    contentNode = nullptr;
+    CHECK_NULL_RETURN(vm, false);
+    if (value.IsEmpty() || value->IsUndefined() || value->IsNull() || !value->IsObject(vm)) {
+        return false;
+    }
+    auto builderNode = GetProperty(vm, value, "builderNode_");
+    if (builderNode.IsEmpty() || builderNode->IsUndefined() || builderNode->IsNull() || !builderNode->IsObject(vm)) {
+        return false;
+    }
+    auto nodePtrValue = GetProperty(vm, builderNode, "nodePtr_");
+    if (nodePtrValue.IsEmpty() || nodePtrValue->IsUndefined() || nodePtrValue->IsNull() ||
+        !nodePtrValue->IsNativePointer(vm)) {
+        return false;
+    }
+    auto nativePointer = nodePtrValue->ToNativePointer(vm);
+    if (nativePointer.IsEmpty()) {
+        return false;
+    }
+    // ComponentContent owns a BuilderNode internally; the native side only needs the built root node.
+    contentNode = nodePtr(nativePointer->Value());
+    return contentNode != nullptr;
+}
+
 void CallVisibleIndexesChange(EcmaVM* vm, const panda::CopyableGlobal<panda::FunctionRef>& func,
     int32_t start, int32_t end)
 {
@@ -95,20 +177,6 @@ CalcDimension ParseLengthMetricsOrDefault(EcmaVM* vm, const Local<JSValueRef>& v
         return CalcDimension(defaultValue.Value(), defaultValue.Unit());
     }
     return size;
-}
-
-Local<JSValueRef> GetProperty(EcmaVM* vm, const Local<JSValueRef>& object, const char* key)
-{
-    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
-    CHECK_NULL_RETURN(key, panda::JSValueRef::Undefined(vm));
-    if (object.IsEmpty() || !object->IsObject(vm)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto objectRef = object->ToObject(vm);
-    if (objectRef.IsEmpty()) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    return objectRef->Get(vm, panda::StringRef::NewFromUtf8(vm, key));
 }
 
 bool TryParseItemFillPolicy(EcmaVM* vm, const Local<JSValueRef>& value, PresetFillType& policy)
@@ -240,6 +308,18 @@ void LazyWaterFlowLayoutBridge::RegisterLazyWaterFlowLayoutAttributes(Local<pand
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::SetRowsGap));
     lazyWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRowsGap"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::ResetRowsGap));
+    lazyWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::SetSticky));
+    lazyWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::ResetSticky));
+    lazyWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::SetHeader));
+    lazyWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::ResetHeader));
+    lazyWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::SetFooter));
+    lazyWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::ResetFooter));
     lazyWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnVisibleIndexesChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm),
             LazyWaterFlowLayoutBridge::SetOnVisibleIndexesChange));
@@ -353,6 +433,168 @@ ArkUINativeModuleValue LazyWaterFlowLayoutBridge::ResetRowsGap(ArkUIRuntimeCallI
     return Undefined(vm);
 }
 
+ArkUINativeModuleValue LazyWaterFlowLayoutBridge::SetSticky(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto* vm = GetEcmaVm(runtimeCallInfo);
+    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> argSticky = runtimeCallInfo->GetCallArgRef(1);
+    if (IsStackNodeArg(vm, node)) {
+        auto stickyStyle = STICKY_STYLE_NONE;
+        if (!argSticky.IsEmpty() && !argSticky->IsUndefined() && !argSticky->IsNull() && argSticky->IsNumber()) {
+            stickyStyle = argSticky->Int32Value(vm);
+        }
+        if (stickyStyle < STICKY_STYLE_NONE || stickyStyle > STICKY_STYLE_BOTH) {
+            stickyStyle = STICKY_STYLE_NONE;
+        }
+        LazyWaterFlowLayoutModel::SetSticky(static_cast<StickyStyle>(stickyStyle));
+        return Undefined(vm);
+    }
+    auto nativeNode = ParseNativeNode(vm, node);
+    CHECK_NULL_RETURN(nativeNode, Undefined(vm));
+    auto* modifier = GetLazyWaterFlowLayoutModifier();
+    CHECK_NULL_RETURN(modifier, Undefined(vm));
+    if (argSticky.IsEmpty() || argSticky->IsUndefined() || argSticky->IsNull() || !argSticky->IsNumber()) {
+        modifier->resetSticky(nativeNode);
+    } else {
+        modifier->setSticky(nativeNode, argSticky->Int32Value(vm));
+    }
+    return Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyWaterFlowLayoutBridge::ResetSticky(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto* vm = GetEcmaVm(runtimeCallInfo);
+    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
+    if (IsStackNodeArg(vm, node)) {
+        LazyWaterFlowLayoutModel::SetSticky(static_cast<StickyStyle>(STICKY_STYLE_NONE));
+        return Undefined(vm);
+    }
+    auto nativeNode = ParseNativeNode(vm, node);
+    CHECK_NULL_RETURN(nativeNode, Undefined(vm));
+    auto* modifier = GetLazyWaterFlowLayoutModifier();
+    CHECK_NULL_RETURN(modifier, Undefined(vm));
+    modifier->resetSticky(nativeNode);
+    return Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyWaterFlowLayoutBridge::SetHeader(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto* vm = GetEcmaVm(runtimeCallInfo);
+    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    Local<JSValueRef> headerArg = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        if (!headerArg.IsEmpty() && headerArg->IsFunction(vm)) {
+            panda::Local<panda::FunctionRef> func = headerArg->ToObject(vm);
+            if (func.IsEmpty()) {
+                return Undefined(vm);
+            }
+            std::function<void()> headerAction = [vm, func = panda::CopyableGlobal(vm, func)]() {
+                CallJsFunction(vm, func);
+            };
+            LazyWaterFlowLayoutModel::SetHeader(std::move(headerAction));
+        } else {
+            LazyWaterFlowLayoutModel::RemoveHeader();
+        }
+        return Undefined(vm);
+    }
+    auto nativeNode = ParseNativeNode(vm, nodeArg);
+    CHECK_NULL_RETURN(nativeNode, Undefined(vm));
+    if (!headerArg.IsEmpty() && headerArg->IsFunction(vm)) {
+        auto headerNode = BuildHeaderFooterNodeFromFunction(vm, headerArg);
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, Undefined(vm));
+        LazyWaterFlowLayoutModel::SetHeader(frameNode, headerNode);
+        return Undefined(vm);
+    }
+    auto* modifier = GetLazyWaterFlowLayoutModifier();
+    CHECK_NULL_RETURN(modifier, Undefined(vm));
+    ArkUINodeHandle headerNode = nullptr;
+    if (TryParseComponentContentNode(vm, headerArg, headerNode)) {
+        modifier->setHeader(nativeNode, headerNode);
+    } else {
+        modifier->resetHeader(nativeNode);
+    }
+    return Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyWaterFlowLayoutBridge::ResetHeader(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto* vm = GetEcmaVm(runtimeCallInfo);
+    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        LazyWaterFlowLayoutModel::RemoveHeader();
+        return Undefined(vm);
+    }
+    auto nativeNode = ParseNativeNode(vm, nodeArg);
+    CHECK_NULL_RETURN(nativeNode, Undefined(vm));
+    auto* modifier = GetLazyWaterFlowLayoutModifier();
+    CHECK_NULL_RETURN(modifier, Undefined(vm));
+    modifier->resetHeader(nativeNode);
+    return Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyWaterFlowLayoutBridge::SetFooter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto* vm = GetEcmaVm(runtimeCallInfo);
+    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    Local<JSValueRef> footerArg = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        if (!footerArg.IsEmpty() && footerArg->IsFunction(vm)) {
+            panda::Local<panda::FunctionRef> func = footerArg->ToObject(vm);
+            if (func.IsEmpty()) {
+                return Undefined(vm);
+            }
+            std::function<void()> footerAction = [vm, func = panda::CopyableGlobal(vm, func)]() {
+                CallJsFunction(vm, func);
+            };
+            LazyWaterFlowLayoutModel::SetFooter(std::move(footerAction));
+        } else {
+            LazyWaterFlowLayoutModel::RemoveFooter();
+        }
+        return Undefined(vm);
+    }
+    auto nativeNode = ParseNativeNode(vm, nodeArg);
+    CHECK_NULL_RETURN(nativeNode, Undefined(vm));
+    if (!footerArg.IsEmpty() && footerArg->IsFunction(vm)) {
+        auto footerNode = BuildHeaderFooterNodeFromFunction(vm, footerArg);
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, Undefined(vm));
+        LazyWaterFlowLayoutModel::SetFooter(frameNode, footerNode);
+        return Undefined(vm);
+    }
+    auto* modifier = GetLazyWaterFlowLayoutModifier();
+    CHECK_NULL_RETURN(modifier, Undefined(vm));
+    ArkUINodeHandle footerNode = nullptr;
+    if (TryParseComponentContentNode(vm, footerArg, footerNode)) {
+        modifier->setFooter(nativeNode, footerNode);
+    } else {
+        modifier->resetFooter(nativeNode);
+    }
+    return Undefined(vm);
+}
+
+ArkUINativeModuleValue LazyWaterFlowLayoutBridge::ResetFooter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto* vm = GetEcmaVm(runtimeCallInfo);
+    CHECK_NULL_RETURN(vm, panda::Local<panda::JSValueRef>());
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_ARG_INDEX);
+    if (IsStackNodeArg(vm, nodeArg)) {
+        LazyWaterFlowLayoutModel::RemoveFooter();
+        return Undefined(vm);
+    }
+    auto nativeNode = ParseNativeNode(vm, nodeArg);
+    CHECK_NULL_RETURN(nativeNode, Undefined(vm));
+    auto* modifier = GetLazyWaterFlowLayoutModifier();
+    CHECK_NULL_RETURN(modifier, Undefined(vm));
+    modifier->resetFooter(nativeNode);
+    return Undefined(vm);
+}
+
 ArkUINativeModuleValue LazyWaterFlowLayoutBridge::SetOnVisibleIndexesChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     auto* vm = GetEcmaVm(runtimeCallInfo);
@@ -448,6 +690,18 @@ void LazyVWaterFlowLayoutBridge::RegisterLazyVWaterFlowLayoutAttributes(Local<pa
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVWaterFlowLayoutBridge::SetColumnsTemplate));
     lazyVWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsTemplate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVWaterFlowLayoutBridge::ResetColumnsTemplate));
+    lazyVWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::SetSticky));
+    lazyVWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::ResetSticky));
+    lazyVWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::SetHeader));
+    lazyVWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::ResetHeader));
+    lazyVWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::SetFooter));
+    lazyVWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyWaterFlowLayoutBridge::ResetFooter));
     lazyVWaterFlowLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnVisibleIndexesChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm),
             LazyWaterFlowLayoutBridge::SetOnVisibleIndexesChange));

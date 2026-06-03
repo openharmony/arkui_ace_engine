@@ -1531,4 +1531,6 @@ std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> WebDelegate::GetNWebComman
 {
     return nullptr;
 }
+
+void WebDelegate::UpdateTouchEventFeatureDetectionEnabled() {}
 } // namespace OHOS::Ace

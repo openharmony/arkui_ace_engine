@@ -17,6 +17,7 @@
 
 #include "scope_manager/native_scope_manager.h"
 
+#include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 
 #if !defined(PREVIEW)
@@ -53,9 +54,6 @@ constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 
 #if !defined(PREVIEW)
 namespace {
-constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
-constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
-constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
 } // namespace
 
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine)

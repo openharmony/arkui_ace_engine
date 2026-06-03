@@ -288,12 +288,6 @@ void JSList::Create(const JSCallbackInfo& args)
         JSRef<JSVal> spaceWidthValue = obj->GetProperty("spaceWidth");
         CalcDimension space;
         RefPtr<ResourceObject> resObj;
-        if (spaceValue->IsNull() || spaceValue->IsUndefined()) {
-            ListModel::GetInstance()->ResetListSpace();
-        }
-        if (spaceWidthValue->IsNull() || spaceWidthValue->IsUndefined()) {
-            ListModel::GetInstance()->ResetListSpaceWidth();
-        }
         if (!spaceWidthValue->IsNull() && !spaceWidthValue->IsUndefined()) {
             ConvertFromJSValue(spaceWidthValue, space, resObj);
             ListModel::GetInstance()->SetSpaceWidth(space);
@@ -301,6 +295,8 @@ void JSList::Create(const JSCallbackInfo& args)
             ListModel::GetInstance()->ResetListSpaceWidth();
             ConvertFromJSValue(spaceValue, space);
             ListModel::GetInstance()->SetSpace(space);
+        } else {
+            ListModel::GetInstance()->ResetListSpaceWidth();
         }
         ListModel::GetInstance()->CreateWithResourceObjSpace(resObj);
         int32_t initialIndex = 0;
