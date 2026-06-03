@@ -119,6 +119,8 @@ private:
         const LayoutConstraintF& layoutConstraint, IgnoreLayoutSafeAreaBundle& bundle);
     void UpdateConstraintOfIgnoreLayoutSafeAreaBundle(
         IgnoreLayoutSafeAreaBundle& bundle, const LayoutConstraintF &dst);
+    void MeasureContainerReaderCrossAxisMatchParent(
+        const std::list<RefPtr<LayoutWrapper>>& containerReaderChildren, const LayoutConstraintF& layoutConstraint);
     bool MeasureCrossAxisMatchChildrenAndCorrect(const LayoutConstraintF& layoutConstraint);
     void MeasureMainAxisMatchChildren(LayoutConstraintF layoutConstraint);
     void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos, const float& crossAxisSize);
