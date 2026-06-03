@@ -20,6 +20,7 @@
 #include "native_interface.h"
 #include "native_node.h"
 #include "node_transition.h"
+#include "node_model.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1277,4 +1278,48 @@ HWTEST_F(NodeTransitionTest, NodeTransitionTest049, TestSize.Level1)
     option = nullptr;
     OH_ArkUI_TransitionEffect_Dispose(disappear);
     disappear = nullptr;
+}
+
+/**
+ * @tc.name: TransitionEffect_Combine_NullOption_001
+ * @tc.desc: Test OH_ArkUI_TransitionEffect_Combine with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, TransitionEffect_Combine_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_TransitionEffect* combine = OH_ArkUI_CreateOpacityTransitionEffect(0.5f);
+    ASSERT_NE(combine, nullptr);
+    auto result = OH_ArkUI_TransitionEffect_Combine(nullptr, combine);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_TransitionEffect_Combine"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+    OH_ArkUI_TransitionEffect_Dispose(combine);
+}
+
+/**
+ * @tc.name: TransitionEffect_SetAnimation_NullOption_001
+ * @tc.desc: Test OH_ArkUI_TransitionEffect_SetAnimation with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, TransitionEffect_SetAnimation_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimateOption* animation = OH_ArkUI_AnimateOption_Create();
+    ASSERT_NE(animation, nullptr);
+    auto result = OH_ArkUI_TransitionEffect_SetAnimation(nullptr, animation);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_TransitionEffect_SetAnimation"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+    OH_ArkUI_AnimateOption_Dispose(animation);
 }

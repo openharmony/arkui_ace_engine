@@ -18,6 +18,7 @@
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 namespace OHOS::Ace::AnimateModel {
 
@@ -193,7 +194,12 @@ void DisposeAnimator(ArkUI_AnimatorHandle animatorHandle)
 int32_t AnimatorReset(ArkUI_AnimatorHandle animatorHandle, ArkUI_AnimatorOption* option)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !animatorHandle || !animatorHandle->animator || !option) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle || !animatorHandle->animator || !option) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animatorHandle or option is null");
         return ERROR_CODE_PARAM_INVALID;
     }
 
@@ -215,7 +221,12 @@ int32_t AnimatorReset(ArkUI_AnimatorHandle animatorHandle, ArkUI_AnimatorOption*
 int32_t AnimatorPlay(ArkUI_AnimatorHandle animatorHandle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !animatorHandle || !animatorHandle->animator) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle || !animatorHandle->animator) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animatorHandle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     impl->getAnimation()->animatorPlay(animatorHandle->animator);
@@ -225,7 +236,12 @@ int32_t AnimatorPlay(ArkUI_AnimatorHandle animatorHandle)
 int32_t AnimatorFinish(ArkUI_AnimatorHandle animatorHandle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !animatorHandle || !animatorHandle->animator) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle || !animatorHandle->animator) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animatorHandle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     impl->getAnimation()->animatorFinish(animatorHandle->animator);
@@ -235,7 +251,12 @@ int32_t AnimatorFinish(ArkUI_AnimatorHandle animatorHandle)
 int32_t AnimatorPause(ArkUI_AnimatorHandle animatorHandle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !animatorHandle || !animatorHandle->animator) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle || !animatorHandle->animator) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animatorHandle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     impl->getAnimation()->animatorPause(animatorHandle->animator);
@@ -245,7 +266,12 @@ int32_t AnimatorPause(ArkUI_AnimatorHandle animatorHandle)
 int32_t AnimatorCancel(ArkUI_AnimatorHandle animatorHandle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !animatorHandle || !animatorHandle->animator) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle || !animatorHandle->animator) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animatorHandle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     impl->getAnimation()->animatorCancel(animatorHandle->animator);
@@ -255,7 +281,12 @@ int32_t AnimatorCancel(ArkUI_AnimatorHandle animatorHandle)
 int32_t AnimatorReverse(ArkUI_AnimatorHandle animatorHandle)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !animatorHandle || !animatorHandle->animator) {
+    if (!impl) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node model not initialized");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle || !animatorHandle->animator) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animatorHandle is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     impl->getAnimation()->animatorReverse(animatorHandle->animator);
