@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <list>
+#include <optional>
 #include <string>
 #include <tuple>
 
@@ -484,8 +485,8 @@ private:
     // Save two independent instance update callbacks
     std::function<void(int32_t)> updateInstanceForEnvCallback_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
-    std::function<void(int32_t)> updateCustomEnvCallback_;
-    std::function<void(const std::string&)> updateEnvCallback_;
+    std::function<void(int32_t, const std::optional<JSRef<JSVal>>&)> updateCustomEnvCallback_;
+    std::function<void(const std::string&, const std::optional<JSRef<JSVal>>&)> updateEnvCallback_;
 
     int32_t latestInstanceId_ = -1;
 };

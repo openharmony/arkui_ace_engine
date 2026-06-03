@@ -18,12 +18,54 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/syntax/with_env_model.h"
 
 namespace OHOS::Ace::Framework {
 
 constexpr int NUM_SECOND = 2;
+constexpr int32_t FRONTEND_DIRECTION_LTR = 0;
+constexpr int32_t FRONTEND_DIRECTION_RTL = 1;
+constexpr int32_t FRONTEND_DIRECTION_AUTO = 2;
+
+bool ParseDirectionValue(const JSRef<JSVal>& value, TextDirection& direction)
+{
+    if (value->IsNumber()) {
+        auto index = value->ToNumber<int32_t>();
+        switch (index) {
+            case FRONTEND_DIRECTION_LTR:
+                direction = TextDirection::LTR;
+                return true;
+            case FRONTEND_DIRECTION_RTL:
+                direction = TextDirection::RTL;
+                return true;
+            case FRONTEND_DIRECTION_AUTO:
+                direction = TextDirection::AUTO;
+                return true;
+            default:
+                return false;
+        }
+    }
+    if (!value->IsString()) {
+        return false;
+    }
+    auto directionValue = value->ToString();
+    if (directionValue == "Ltr") {
+        direction = TextDirection::LTR;
+        return true;
+    }
+    if (directionValue == "Rtl") {
+        direction = TextDirection::RTL;
+        return true;
+    }
+    if (directionValue == "Auto") {
+        direction = TextDirection::AUTO;
+        return true;
+    }
+    return false;
+}
 
 void JSWithEnv::Create(const JSCallbackInfo& info)
 {
@@ -59,16 +101,26 @@ void JSWithEnv::SetEnvProperty(const JSCallbackInfo& info)
     }
 
     if (info[1]->IsUndefined()) {
-        WithEnvModel::GetInstance()->RemoveEnvProperty(key);
-    } else if (info[1]->IsBoolean()) {
-        auto value = info[1]->ToBoolean();
-        WithEnvModel::GetInstance()->SetEnvProperty(key, value);
-    } else if (info[1]->IsNumber()) {
+        if (key == NG::ENV_KEY_DIRECTION || key == NG::ENV_KEY_FONT_SCALE) {
+            WithEnvModel::GetInstance()->RemoveSystemEnvProperty(key);
+            return;
+        }
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetEnvProperty: value type does not exist.");
+        return;
+    } else if (key == NG::ENV_KEY_DIRECTION) {
+        TextDirection direction = TextDirection::AUTO;
+        if (!ParseDirectionValue(info[1], direction)) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetEnvProperty invalid direction value");
+            return;
+        }
+        WithEnvModel::GetInstance()->SetSystemEnvProperty(key, direction);
+    } else if (key == NG::ENV_KEY_FONT_SCALE) {
+        if (!info[1]->IsNumber()) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetEnvProperty invalid fontScale value");
+            return;
+        }
         auto value = info[1]->ToNumber<double>();
-        WithEnvModel::GetInstance()->SetEnvProperty(key, value);
-    } else if (info[1]->IsString()) {
-        auto value = info[1]->ToString();
-        WithEnvModel::GetInstance()->SetEnvProperty(key, value);
+        WithEnvModel::GetInstance()->SetSystemEnvProperty(key, value);
     } else {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetEnvProperty: value type does not exist.");
     }
@@ -86,10 +138,17 @@ void JSWithEnv::SetCustomEnvProperty(const JSCallbackInfo& info)
     if (keyIdVal->IsNumber()) {
         key = std::to_string(keyIdVal->ToNumber<int32_t>());
     }
+    if (key.empty()) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetCustomEnvProperty invalid key");
+        return;
+    }
+    if (info[1]->IsUndefined()) {
+        WithEnvModel::GetInstance()->RemoveCustomEnvProperty(key);
+        return;
+    }
     WithEnvModel::GetInstance()->SetCustomEnvProperty(key, std::any(info[1]));
 }
 
-    
 void JSWithEnv::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWithEnv>::Declare("WithEnv");

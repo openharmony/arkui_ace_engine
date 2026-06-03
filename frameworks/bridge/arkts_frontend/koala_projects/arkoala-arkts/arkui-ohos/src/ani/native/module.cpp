@@ -61,6 +61,7 @@
 #include "security_component/paste_button_module.h"
 #include "security_component/save_button_module.h"
 #include "dynamiclayout/dynamiclayout_module.h"
+#include "with_env/with_env_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -105,6 +106,51 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetDynamicLayoutGridLayoutAlgorithm",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutGridLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_WithEnv_construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvConstruct)
+        },
+        ani_native_function {
+            "_WithEnv_removeSystemEnvProperty",
+            "lC{std.core.String}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvRemoveSystemEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_setSystemEnvProperty",
+            "lC{std.core.String}d:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetSystemEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_setCustomEnvProperty",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetCustomEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_removeCustomEnvProperty",
+            "li:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvRemoveCustomEnvProperty)
+        },
+        ani_native_function {
+            "_CustomNode_findCustomValueByKey",
+            "li:Y",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeFindCustomEnvValueByKey)
+        },
+        ani_native_function {
+            "_CustomNode_findSystemEnvValueByKey",
+            "lC{std.core.String}:Y",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeFindSystemEnvValueByKey)
+        },
+        ani_native_function {
+            "_CustomNode_registerOnCustomEnvUpdateCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnCustomEnvUpdate)
+        },
+        ani_native_function {
+            "_CustomNode_registerOnSystemEnvUpdateCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnSystemEnvUpdate)
         },
         ani_native_function {
             "_Extractors_ToDrawableDescriptorPtr",

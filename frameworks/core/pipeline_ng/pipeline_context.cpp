@@ -8155,22 +8155,13 @@ std::optional<TextDirection> PipelineContext::ResolveDirectionFromEnv(const RefP
     auto envManager = GetEnvironmentManager();
     CHECK_NULL_RETURN(envManager, std::nullopt);
 
-    EnvironmentQueryResult result;
-    if (!envManager->FindValueByKey(
-        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_DIRECTION, result)) {
+    SystemEnvValue envValue;
+    if (!envManager->ResolveSystemEnvValueForImplicitReader(host, ENV_KEY_DIRECTION, envValue)) {
         return std::nullopt;
     }
 
-    if (result.type == EnvironmentValueType::STRING) {
-        if (result.stringValue == "Ltr") {
-            return TextDirection::LTR;
-        }
-        if (result.stringValue == "Rtl") {
-            return TextDirection::RTL;
-        }
-        if (result.stringValue == "Auto") {
-            return TextDirection::AUTO;
-        }
+    if (auto direction = envValue.GetDirection()) {
+        return *direction;
     }
     return std::nullopt;
 }
@@ -8181,14 +8172,13 @@ std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<Frame
     auto envManager = GetEnvironmentManager();
     CHECK_NULL_RETURN(envManager, std::nullopt);
 
-    EnvironmentQueryResult result;
-    if (!envManager->FindValueByKey(
-        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_FONT_SCALE, result)) {
+    SystemEnvValue envValue;
+    if (!envManager->ResolveSystemEnvValueForImplicitReader(host, ENV_KEY_FONT_SCALE, envValue)) {
         return std::nullopt;
     }
 
-    if (result.type == EnvironmentValueType::NUMBER) {
-        return static_cast<float>(result.numberValue);
+    if (auto fontScale = envValue.GetDouble()) {
+        return static_cast<float>(*fontScale);
     }
     return std::nullopt;
 }

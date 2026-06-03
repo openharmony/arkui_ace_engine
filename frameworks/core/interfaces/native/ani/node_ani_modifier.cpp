@@ -50,6 +50,7 @@
 #include "visual_effect_ani_modifier.h"
 #include "waterflow_ani_modifier.h"
 #include "web_ani_modifier.h"
+#include "with_env_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
 #include "syntax_item_ani_modifier.h"
 #include "for_each_node_ani_modifier.h"
@@ -106,6 +107,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getPasteButtonAniModifier = OHOS::Ace::NG::GetPasteButtonAniModifier,
         .getArkUIAniDetachedFreeRootModifier = OHOS::Ace::NG::GetDetachedFreeRootModifier,
         .getArkUIAniGestureEventUIObserverModifier = OHOS::Ace::NG::GetArkUIAniGestureEventUIObserverModifier,
+        .getArkUIAniWithEnvModifier = OHOS::Ace::NG::GetArkUIAniWithEnvModifier,
     };
     return &impl;
 }

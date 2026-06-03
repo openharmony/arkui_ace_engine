@@ -20,12 +20,14 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,22 +59,6 @@ enum class EnvironmentPropertyKind : uint8_t {
     CUSTOM,
 };
 
-enum class EnvironmentValueType : uint8_t {
-    NONE = 0,
-    BOOLEAN,
-    NUMBER,
-    STRING,
-    CUSTOM,
-};
-
-struct EnvironmentQueryResult {
-    EnvironmentValueType type = EnvironmentValueType::NONE;
-    bool boolValue = false;
-    double numberValue = 0.0;
-    std::string stringValue;
-    const std::any* value = nullptr;
-};
-
 using EnvironmentValueChangedCallback =
     void (*)(const RefPtr<UINode>& node, EnvironmentPropertyKind kind, const std::string& key);
 
@@ -87,16 +73,15 @@ public:
     static void RegisterValueChangedCallback(
         EnvironmentPropertyKind kind, const std::string& key, EnvironmentValueChangedCallback callback);
 
-    RefPtr<UINode> FindWithEnvNode(const RefPtr<UINode>& startNode) const;
+    bool RemoveSystemEnvValue(const RefPtr<UINode>& scope, const std::string& key);
+    bool SetSystemEnvValue(const RefPtr<UINode>& scope, const std::string& key, SystemEnvValue value);
+    bool FindSystemEnvValueByKey(const RefPtr<UINode>& consumer, const std::string& key, SystemEnvValue& outValue);
 
-    bool RemoveValue(
-        const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key);
-    bool SetValue(
-        const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key, std::any value);
-    bool FindValueByKey(const RefPtr<UINode>& startScope, EnvironmentPropertyKind kind, const std::string& key,
-        EnvironmentQueryResult& outResult);
-    bool FindValueByKey(const RefPtr<UINode>& startScope, const RefPtr<UINode>& dependentNode,
-        EnvironmentPropertyKind kind, const std::string& key, EnvironmentQueryResult& outResult);
+    bool RemoveCustomEnvValue(const RefPtr<UINode>& scope, const std::string& key);
+    bool SetCustomEnvValue(const RefPtr<UINode>& scope, const std::string& key, std::any value);
+    bool FindCustomEnvValueByKey(const RefPtr<UINode>& consumer, const std::string& key, std::any& outValue);
+    bool ResolveSystemEnvValueForImplicitReader(
+        const RefPtr<UINode>& reader, const std::string& key, SystemEnvValue& outValue) const;
 
     void OnNodeAttached(const RefPtr<UINode>& node);
     void OnNodeDetached(const RefPtr<UINode>& node);
@@ -110,17 +95,24 @@ private:
         std::unordered_set<std::string> keys;
     };
 
+    struct ChangedEnvValue {
+        std::optional<SystemEnvValue> systemValue;
+        std::optional<std::any> customValue;
+    };
+
     using DependentRegistry = std::unordered_map<int32_t, DependentEntry>;
 
-    bool ResolveOwnerScopeAndValue(const RefPtr<UINode>& startScope, EnvironmentPropertyKind kind,
-        const std::string& key, EnvironmentQueryResult& outResult) const;
+    bool ResolveSystemEnvValue(const RefPtr<UINode>& startScope, const std::string& key,
+        SystemEnvValue& outValue) const;
+    bool ResolveCustomEnvValue(const RefPtr<UINode>& startScope, const std::string& key, std::any& outValue) const;
 
     void RegisterDependency(EnvironmentPropertyKind kind, const RefPtr<UINode>& dependentNode, const std::string& key);
     void EraseDependency(EnvironmentPropertyKind kind, int32_t nodeId, const std::string& key);
 
-    void NotifyValueChanged(const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key);
-    void DispatchValueChangedToAffectedNode(
-        const RefPtr<UINode>& node, EnvironmentPropertyKind kind, const std::string& key);
+    void NotifyValueChanged(const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key,
+        const std::optional<ChangedEnvValue>& changedValue = std::nullopt);
+    void DispatchValueChangedToAffectedNode(const RefPtr<UINode>& node, EnvironmentPropertyKind kind,
+        const std::string& key, const std::optional<ChangedEnvValue>& changedValue = std::nullopt);
 
     void FireAllRegisteredCallbacksOf(const RefPtr<UINode>& liveNode);
 

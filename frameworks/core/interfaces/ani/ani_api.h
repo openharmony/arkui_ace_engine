@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 
+#include <any>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -762,6 +763,35 @@ struct ArkUIAniDynamicLayoutModifier {
     bool (*setDynamicLayoutGridOptions)(ArkUINodeHandle node, ArkUIGridLayoutAlgorithm algorithm);
 };
 
+enum ArkUIAniEnvironmentValueType {
+    ARKUI_ANI_ENV_VALUE_TYPE_NONE = 0,
+    ARKUI_ANI_ENV_VALUE_TYPE_NUMBER,
+    ARKUI_ANI_ENV_VALUE_TYPE_CUSTOM,
+};
+
+struct ArkUIAniEnvironmentQueryResult {
+    ArkUI_Int32 type = ARKUI_ANI_ENV_VALUE_TYPE_NONE;
+    double numberValue = 0.0;
+    std::any customValue;
+};
+
+using ArkUIAniEnvironmentUpdateCallback =
+    std::function<void(const std::string&, const std::optional<ArkUIAniEnvironmentQueryResult>&)>;
+
+struct ArkUIAniWithEnvModifier {
+    ArkUINodeHandle (*construct)(ArkUI_Int32 id);
+    void (*removeSystemEnvProperty)(ArkUINodeHandle node, const std::string& key);
+    void (*setSystemEnvProperty)(ArkUINodeHandle node, const std::string& key, double value);
+    void (*removeCustomEnvProperty)(ArkUINodeHandle node, const std::string& key);
+    void (*setCustomEnvProperty)(ArkUINodeHandle node, const std::string& key, std::any value);
+    bool (*findCustomEnvValueByKey)(
+        ArkUINodeHandle node, const std::string& key, ArkUIAniEnvironmentQueryResult& outResult);
+    bool (*findSystemEnvValueByKey)(
+        ArkUINodeHandle node, const std::string& key, ArkUIAniEnvironmentQueryResult& outResult);
+    void (*setOnCustomEnvUpdate)(ArkUINodeHandle node, ArkUIAniEnvironmentUpdateCallback&& callback);
+    void (*setOnSystemEnvUpdate)(ArkUINodeHandle node, ArkUIAniEnvironmentUpdateCallback&& callback);
+};
+
 struct ArkUIAniListItemGroupModifier {
     void (*setListItemGroupHeader)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
     void (*setListItemGroupHeaderContent)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
@@ -1022,6 +1052,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
     const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
     const ArkUIAniGestureEventUIObserverModifier* (*getArkUIAniGestureEventUIObserverModifier)();
+    const ArkUIAniWithEnvModifier* (*getArkUIAniWithEnvModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
