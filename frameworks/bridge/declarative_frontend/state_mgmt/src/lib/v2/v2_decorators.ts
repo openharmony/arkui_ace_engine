@@ -267,13 +267,15 @@ function Monitor(optionsOrFirstPath : MonitorDecoratorOptions | string, path?: s
       pathN.unshift(optionsOrFirstPath);
     }
   } else {
-    // @Monitor with options
-    monitorWithOptionsMode = true;
     if (path != null) {
       pathN.unshift(path);
     }
-    // enableWildcard - default value is true
-    enableWildcard = (optionsOrFirstPath as MonitorDecoratorOptions).enableWildcard ?? true;
+    if (optionsOrFirstPath && typeof optionsOrFirstPath === 'object') {
+      // @Monitor with options
+      monitorWithOptionsMode = true;
+      // enableWildcard - default value is true
+      enableWildcard = (optionsOrFirstPath as MonitorDecoratorOptions).enableWildcard ?? true;
+    }
   }
 
   const pathsUniqueString = pathN.join(' ');
