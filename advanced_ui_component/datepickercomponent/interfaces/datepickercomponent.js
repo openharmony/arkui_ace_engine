@@ -18,6 +18,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const intl = requireNapi('intl');
 const i18n = requireNapi('i18n');
+const commonEventManager = requireNapi('commonEventManager');
 export var DateMode;
 (function (DateMode) {
     DateMode[DateMode["DATE"] = 0] = "DATE";
@@ -114,6 +115,9 @@ export class DatePickerComponent extends ViewPU {
         this.locale = new intl.Locale();
         this.initFlag = true;
         this.lunarCalendar = null;
+        this.subscriber = null;
+        this.formatter = new intl.NumberFormat();
+        this.yearFormatter = new intl.NumberFormat('', { useGrouping: false });
         this.setInitiallyProvidedValue(params);
         this.declareWatch("options", this.onOptionsChange);
         this.declareWatch("currentLocale", this.onLocaleChange);
@@ -248,6 +252,15 @@ export class DatePickerComponent extends ViewPU {
         }
         if (params.lunarCalendar !== undefined) {
             this.lunarCalendar = params.lunarCalendar;
+        }
+        if (params.subscriber !== undefined) {
+            this.subscriber = params.subscriber;
+        }
+        if (params.formatter !== undefined) {
+            this.formatter = params.formatter;
+        }
+        if (params.yearFormatter !== undefined) {
+            this.yearFormatter = params.yearFormatter;
         }
     }
     updateStateVars(params) {
@@ -558,6 +571,8 @@ export class DatePickerComponent extends ViewPU {
     aboutToAppear() {
         this.currentLocale = i18n.System.getSystemLanguage();
         this.locale = new intl.Locale(this.currentLocale);
+        this.formatter = new intl.NumberFormat();
+        this.yearFormatter = new intl.NumberFormat(this.locale.toString(), { useGrouping: false });
         if (this.selectedYear === 0 || this.selectedMonth === 0 || this.selectedDay === 0) {
             const now = new Date();
             this.selectedYear = now.getFullYear();
@@ -566,6 +581,8 @@ export class DatePickerComponent extends ViewPU {
             this.selectedHour = now.getHours();
             this.selectedMinute = now.getMinutes();
             this.selectedSecond = now.getSeconds();
+            // Note: selectedPeriod will be set in initTimeArrays or updateTimeOptions
+            // based on the correct useMilitaryTime value
         }
         if (this.lunar) {
             this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
@@ -576,12 +593,45 @@ export class DatePickerComponent extends ViewPU {
         else {
             this.initArrays();
         }
+        // Create subscriber to listen for system language changes
+        this.createLocaleChangeSubscriber();
     }
     aboutToDisappear() {
         this.lunarCalendar = null;
+        // Unsubscribe from locale change events
+        if (this.subscriber !== null) {
+            commonEventManager.unsubscribe(this.subscriber, (err) => {
+                if (err) {
+                    console.error(`Failed to unsubscribe common event. error code: ${err.code}, message: ${err.message}.`);
+                }
+            });
+            this.subscriber = null;
+        }
+    }
+    createLocaleChangeSubscriber() {
+        const subscribeInfo = {
+            events: [commonEventManager.Support.COMMON_EVENT_LOCALE_CHANGED]
+        };
+        commonEventManager.createSubscriber(subscribeInfo)
+            .then((commonEventSubscriber) => {
+            this.subscriber = commonEventSubscriber;
+            commonEventManager.subscribe(this.subscriber, (err, data) => {
+                if (err) {
+                    console.error(`Failed to subscribe common event. error code: ${err.code}, message: ${err.message}.`);
+                    return;
+                }
+                // Update locale when system language changes
+                this.currentLocale = i18n.System.getSystemLanguage();
+            });
+        })
+            .catch((err) => {
+            console.error(`CreateSubscriber failed, code is ${err.message}`);
+        });
     }
     onLocaleChange() {
         this.locale = new intl.Locale(this.currentLocale);
+        this.formatter = new intl.NumberFormat();
+        this.yearFormatter = new intl.NumberFormat(this.locale.toString(), { useGrouping: false });
         if (this.lunar) {
             this.lunarCalendar = i18n.getCalendar(this.locale.toString(), 'chinese');
         }
@@ -658,7 +708,7 @@ export class DatePickerComponent extends ViewPU {
         }
     }
     formatLunarYear(gregorianYear) {
-        return `${gregorianYear}年`;
+        return `${this.yearFormatter.format(gregorianYear)}年`;
     }
     formatLunarMonth(month, isLeap) {
         const lunarMonthNames = ['正月', '二月', '三月', '四月', '五月', '六月',
@@ -713,14 +763,17 @@ export class DatePickerComponent extends ViewPU {
         }
     }
     initTimeArrays() {
-        if (this.useMilitaryTime) {
+        this.periodArray = [];
+        if (!this.useMilitaryTime) {
+            this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
+            this.updatePeriodArray();
+            this.updateHourArrayFor12Hour();
+        }
+        else {
             this.hourArray = [];
             for (let i = this.startHour; i <= this.endHour; i++) {
                 this.hourArray.push(i.toString().padStart(2, '0'));
             }
-        }
-        else {
-            this.updateHourArrayFor12Hour();
         }
         this.minuteArray = [];
         let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
@@ -734,6 +787,12 @@ export class DatePickerComponent extends ViewPU {
         for (let i = startMinuteIndex; i <= endMinuteIndex; i++) {
             this.minuteArray.push(this.formatMinute(i));
         }
+        if (this.selectedMinute < startMinuteIndex) {
+            this.selectedMinute = startMinuteIndex;
+        }
+        if (this.selectedMinute > endMinuteIndex) {
+            this.selectedMinute = endMinuteIndex;
+        }
         this.secondArray = [];
         let startSecondIndex = DatePickerConstant.MIN_SECOND;
         let endSecondIndex = DatePickerConstant.MAX_SECOND;
@@ -746,45 +805,49 @@ export class DatePickerComponent extends ViewPU {
         for (let i = startSecondIndex; i <= endSecondIndex; i++) {
             this.secondArray.push(this.formatSecond(i));
         }
-        this.periodArray = [];
-        if (!this.useMilitaryTime) {
-            this.updatePeriodArray();
-            this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
+        if (this.selectedSecond < startSecondIndex) {
+            this.selectedSecond = startSecondIndex;
+        }
+        if (this.selectedSecond > endSecondIndex) {
+            this.selectedSecond = endSecondIndex;
         }
     }
     updateHourArrayFor12Hour() {
         this.hourArray = [];
         const isAM = this.selectedPeriod === 0;
-        const startHourForPeriod = isAM ? (this.startHour < 12 ? this.startHour : 12) : (this.startHour >= 12 ? this.startHour : 12);
-        const endHourForPeriod = isAM ? (this.endHour < 12 ? this.endHour : 11) : (this.endHour >= 12 ? this.endHour : 11);
+        // For 12-hour format, build hour array based on current period and time range
+        // AM period: 12 (midnight 0:00) and 1-11 (1:00-11:00)
+        // PM period: 12 (noon 12:00) and 1-11 (13:00-23:00)
         if (isAM) {
-            if (this.startHour < 12 && this.endHour >= 0) {
-                const minHour = Math.max(0, this.startHour);
-                const maxHour = Math.min(11, this.endHour < 12 ? this.endHour : 11);
-                for (let i = minHour; i <= maxHour; i++) {
-                    const hour12 = i === 0 ? 12 : i;
-                    this.hourArray.push(hour12.toString().padStart(2, '0'));
-                }
+            // Check if 12 AM (hour24=0) is within range
+            const hour24ForAm12 = 0;
+            if (hour24ForAm12 >= this.startHour && hour24ForAm12 <= this.endHour) {
+                this.hourArray.push('12');
             }
-            else if (this.startHour >= 12) {
-                // AM时段不可选
+            // Check if 1-11 AM (hour24=1-11) are within range
+            for (let displayHour = 1; displayHour <= 11; displayHour++) {
+                const hour24 = displayHour;
+                if (hour24 >= this.startHour && hour24 <= this.endHour) {
+                    this.hourArray.push(displayHour.toString().padStart(2, '0'));
+                }
             }
         }
         else {
-            if (this.endHour >= 12) {
-                const minHour = Math.max(12, this.startHour >= 12 ? this.startHour : 12);
-                const maxHour = Math.min(23, this.endHour);
-                for (let i = minHour; i <= maxHour; i++) {
-                    const hour12 = i === 12 ? 12 : i - 12;
-                    this.hourArray.push(hour12.toString().padStart(2, '0'));
+            // Check if 12 PM (hour24=12) is within range
+            const hour24ForPm12 = 12;
+            if (hour24ForPm12 >= this.startHour && hour24ForPm12 <= this.endHour) {
+                this.hourArray.push('12');
+            }
+            // Check if 1-11 PM (hour24=13-23) are within range
+            for (let displayHour = 1; displayHour <= 11; displayHour++) {
+                const hour24 = displayHour + 12;
+                if (hour24 >= this.startHour && hour24 <= this.endHour) {
+                    this.hourArray.push(displayHour.toString().padStart(2, '0'));
                 }
             }
-            else if (this.endHour < 12) {
-                // PM时段不可选
-            }
         }
+        // Fallback: if no hours available for current period, show all 12 hours
         if (this.hourArray.length === 0) {
-            // 如果范围限制导致没有可选小时，显示默认范围
             for (let i = 1; i <= 12; i++) {
                 this.hourArray.push(i.toString().padStart(2, '0'));
             }
@@ -792,8 +855,22 @@ export class DatePickerComponent extends ViewPU {
     }
     updatePeriodArray() {
         this.periodArray = [];
-        const canSelectAM = this.startHour < 12 || this.endHour >= 0;
-        const canSelectPM = this.endHour >= 12;
+        // Check if AM period (hour24=0-11) has any available hours
+        let canSelectAM = false;
+        for (let hour = 0; hour <= 11; hour++) {
+            if (hour >= this.startHour && hour <= this.endHour) {
+                canSelectAM = true;
+                break;
+            }
+        }
+        // Check if PM period (hour24=12-23) has any available hours
+        let canSelectPM = false;
+        for (let hour = 12; hour <= 23; hour++) {
+            if (hour >= this.startHour && hour <= this.endHour) {
+                canSelectPM = true;
+                break;
+            }
+        }
         if (canSelectAM && canSelectPM) {
             this.periodArray.push(this.formatPeriod(true));
             this.periodArray.push(this.formatPeriod(false));
@@ -802,16 +879,36 @@ export class DatePickerComponent extends ViewPU {
             this.periodArray.push(this.formatPeriod(true));
             if (this.selectedPeriod === 1) {
                 this.selectedPeriod = 0;
+                // Adjust selectedHour to AM range when forced to switch to AM
+                if (this.selectedHour >= 12) {
+                    const minAMHour = Math.max(0, this.startHour);
+                    const maxAMHour = Math.min(11, this.endHour);
+                    if (this.selectedHour === 12) {
+                        this.selectedHour = 0; // 12 PM -> 12 AM (0:00)
+                    }
+                    else {
+                        this.selectedHour = Math.max(minAMHour, Math.min(maxAMHour, this.selectedHour - 12));
+                    }
+                }
             }
         }
         else if (!canSelectAM && canSelectPM) {
             this.periodArray.push(this.formatPeriod(false));
             if (this.selectedPeriod === 0) {
                 this.selectedPeriod = 1;
+                // Adjust selectedHour to PM range when forced to switch to PM
+                if (this.selectedHour < 12) {
+                    const minPMHour = Math.max(12, this.startHour);
+                    const maxPMHour = Math.min(23, this.endHour);
+                    // 计算目标小时（24小时制）：12 AM->12, 1-11 AM->13-23
+                    let targetHour24 = this.selectedHour === 0 ? 12 : this.selectedHour + 12;
+                    // 确保目标小时在有效范围内
+                    this.selectedHour = Math.max(minPMHour, Math.min(maxPMHour, targetHour24));
+                }
             }
         }
         else {
-            // 默认显示两个时段
+            // Fallback: show both periods if no hours available (shouldn't happen with valid ranges)
             this.periodArray.push(this.formatPeriod(true));
             this.periodArray.push(this.formatPeriod(false));
         }
@@ -822,9 +919,9 @@ export class DatePickerComponent extends ViewPU {
     }
     formatYear(year) {
         if (this.isChineseLocale()) {
-            return `${year}年`;
+            return `${this.yearFormatter.format(year)}年`;
         }
-        return year.toString();
+        return this.yearFormatter.format(year);
     }
     formatMonth(month) {
         if (this.isChineseLocale()) {
@@ -855,12 +952,12 @@ export class DatePickerComponent extends ViewPU {
     }
     formatDay(day) {
         if (this.isChineseLocale()) {
-            return `${day}日`;
+            return `${this.formatter.format(day)}日`;
         }
         try {
             const localeStr = this.locale.toString();
             if (!localeStr || localeStr.length === 0) {
-                return `${day}`;
+                return this.formatter.format(day);
             }
             const dateFormat = new Intl.DateTimeFormat(localeStr, {
                 day: 'numeric'
@@ -870,7 +967,7 @@ export class DatePickerComponent extends ViewPU {
             return dateFormat.format(date);
         }
         catch (error) {
-            return `${day}`;
+            return this.formatter.format(day);
         }
     }
     formatMinute(minute) {
@@ -933,6 +1030,11 @@ export class DatePickerComponent extends ViewPU {
             const year = date.getFullYear();
             const month = date.getMonth();
             const day = date.getDate();
+            // Check for Invalid Date (NaN values)
+            if (isNaN(year) || isNaN(month) || isNaN(day)) {
+                return undefined;
+            }
+            // Check if year, month, day are in valid ranges
             if (year < DatePickerConstant.MIN_YEAR || year > DatePickerConstant.MAX_YEAR) {
                 return undefined;
             }
@@ -946,7 +1048,19 @@ export class DatePickerComponent extends ViewPU {
             if (day > daysInMonth) {
                 return undefined;
             }
-            return new Date(year, month, day);
+            // Detect JavaScript auto-correction by checking year jump
+            // If year jumped significantly (> 1 year), it indicates异常input
+            // Create expected Date without correction
+            const originalTime = date.getTime();
+            const correctedDate = new Date(year, month, day);
+            const correctedTime = correctedDate.getTime();
+            // If time difference > 365 days, indicates year jump due to异常month/day
+            const timeDiff = Math.abs(originalTime - correctedTime);
+            const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+            if (timeDiff > oneYearInMs) {
+                return undefined;
+            }
+            return correctedDate;
         }
         catch (e) {
             return undefined;
@@ -957,6 +1071,10 @@ export class DatePickerComponent extends ViewPU {
             const hour = date.getHours();
             const minute = date.getMinutes();
             const second = date.getSeconds();
+            // Check for Invalid Date (NaN values)
+            if (isNaN(hour) || isNaN(minute) || isNaN(second)) {
+                return undefined;
+            }
             if (hour < DatePickerConstant.MIN_HOUR || hour > DatePickerConstant.MAX_HOUR) {
                 return undefined;
             }
@@ -966,6 +1084,21 @@ export class DatePickerComponent extends ViewPU {
             if (second < DatePickerConstant.MIN_SECOND || second > DatePickerConstant.MAX_SECOND) {
                 return undefined;
             }
+            // Detect JavaScript auto-correction by checking time jump
+            // Use original year/month/day to construct comparison time
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const day = date.getDate();
+            const originalTime = date.getTime();
+            const correctedTime = new Date(year, month, day, hour, minute, second).getTime();
+            // If time difference > 1 hour, indicates异常minute/second overflow
+            const timeDiff = Math.abs(originalTime - correctedTime);
+            const oneHourInMs = 60 * 60 * 1000;
+            if (timeDiff > oneHourInMs) {
+                return undefined;
+            }
+            // Return Date with fixed base date (2026-01-01) + validated time
+            // This ensures timeOptions only considers time part, ignoring date part
             return new Date(2026, 0, 1, hour, minute, second);
         }
         catch (e) {
@@ -1285,6 +1418,10 @@ export class DatePickerComponent extends ViewPU {
         this.selectedHour = targetTimeObj.getHours();
         this.selectedMinute = targetTimeObj.getMinutes();
         this.selectedSecond = targetTimeObj.getSeconds();
+        // Set selectedPeriod based on selectedHour for 12-hour format
+        if (!this.useMilitaryTime) {
+            this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
+        }
         if (timeOptions.onChange !== undefined) {
             this.timeOnChange = timeOptions.onChange;
         }
@@ -1297,29 +1434,32 @@ export class DatePickerComponent extends ViewPU {
         result.year = this.selectedYear;
         result.month = this.selectedMonth;
         result.day = this.selectedDay;
-        if (!this.useMilitaryTime) {
-            if (this.selectedHour === 0) {
-                result.hour = 12;
-            }
-            else if (this.selectedHour === 12) {
-                result.hour = 12;
-            }
-            else if (this.selectedHour > 12) {
-                result.hour = this.selectedHour - 12;
-            }
-            else {
-                result.hour = this.selectedHour;
-            }
-        }
-        else {
-            result.hour = this.selectedHour;
-        }
+        // Always return 24-hour format (selectedHour is always 0-23)
+        result.hour = this.selectedHour;
         result.minute = this.selectedMinute;
         result.second = this.selectedSecond;
         return result;
     }
     onYearChange(selectedIndex) {
         this.selectedYear = this.startYear + selectedIndex;
+        // Update month array based on new year
+        this.initMonthArray();
+        // Adjust selectedMonth to be within new month range
+        let startMonthIndex = DatePickerConstant.MIN_MONTH;
+        let endMonthIndex = DatePickerConstant.MAX_MONTH;
+        if (this.selectedYear === this.startYear) {
+            startMonthIndex = this.startMonth;
+        }
+        if (this.selectedYear === this.endYear) {
+            endMonthIndex = this.endMonth;
+        }
+        if (this.selectedMonth < startMonthIndex) {
+            this.selectedMonth = startMonthIndex;
+        }
+        if (this.selectedMonth > endMonthIndex) {
+            this.selectedMonth = endMonthIndex;
+        }
+        // Update day array based on new year and adjusted month
         this.updateDaysArray();
         this.dateOnChange?.(this.getResult());
     }
@@ -1345,27 +1485,32 @@ export class DatePickerComponent extends ViewPU {
             this.selectedHour = this.startHour + selectedIndex;
         }
         else {
-            const oldDisplayIndex = this.getHourSelectedIndex();
-            const crossingBoundary = (oldDisplayIndex === 11 && selectedIndex === 0) ||
-                (oldDisplayIndex === 0 && selectedIndex === 11);
+            const oldDisplayHour = this.selectedHour === 0 || this.selectedHour === 12 ? 12 :
+                (this.selectedHour > 12 ? this.selectedHour - 12 : this.selectedHour);
+            // Get the actual display hour from hourArray
+            const newDisplayHour = parseInt(this.hourArray[selectedIndex]);
+            // Crossing 11↔12 always triggers period toggle
+            const crossingBoundary = (oldDisplayHour === 11 && newDisplayHour === 12) ||
+                (oldDisplayHour === 12 && newDisplayHour === 11);
             if (crossingBoundary) {
+                // Toggle period
                 this.selectedPeriod = this.selectedPeriod === 0 ? 1 : 0;
             }
-            const displayHour = selectedIndex + 1;
-            if (displayHour === 12) {
+            // Convert display hour to 24-hour format based on CURRENT period (after toggle)
+            if (newDisplayHour === 12) {
                 if (this.selectedPeriod === 0) {
-                    this.selectedHour = 0;
+                    this.selectedHour = 0; // 12 AM = 0:00 (24-hour)
                 }
                 else {
-                    this.selectedHour = 12;
+                    this.selectedHour = 12; // 12 PM = 12:00 (24-hour)
                 }
             }
             else {
                 if (this.selectedPeriod === 0) {
-                    this.selectedHour = displayHour;
+                    this.selectedHour = newDisplayHour; // 1-11 AM
                 }
                 else {
-                    this.selectedHour = displayHour + 12;
+                    this.selectedHour = newDisplayHour + 12; // 1-11 PM = 13-23
                 }
             }
         }
@@ -1373,7 +1518,10 @@ export class DatePickerComponent extends ViewPU {
         this.timeOnChange?.(this.getResult());
     }
     onPeriodChange(selectedIndex) {
-        this.selectedPeriod = selectedIndex;
+        // 根据periodArray内容确定selectedPeriod，而不是直接使用selectedIndex
+        // 这样即使periodArray只有一个选项也能正确映射
+        const selectedPeriodStr = this.periodArray[selectedIndex];
+        this.selectedPeriod = selectedPeriodStr === this.formatPeriod(true) ? 0 : 1;
         if (!this.useMilitaryTime) {
             // 更新hourArray
             this.updateHourArrayFor12Hour();
@@ -1476,8 +1624,21 @@ export class DatePickerComponent extends ViewPU {
         }
         else {
             const daysInMonth = this.getDaysInMonth(this.selectedYear, this.selectedMonth);
-            if (this.selectedDay > daysInMonth) {
-                this.selectedDay = daysInMonth;
+            // Determine the valid day range based on selected year and month
+            let startDayIndex = DatePickerConstant.MIN_DAY;
+            let endDayIndex = daysInMonth;
+            if (this.selectedYear === this.startYear && this.selectedMonth === this.startMonth) {
+                startDayIndex = this.startDay;
+            }
+            if (this.selectedYear === this.endYear && this.selectedMonth === this.endMonth) {
+                endDayIndex = Math.min(this.endDay, daysInMonth);
+            }
+            // Adjust selectedDay to be within valid range
+            if (this.selectedDay < startDayIndex) {
+                this.selectedDay = startDayIndex;
+            }
+            if (this.selectedDay > endDayIndex) {
+                this.selectedDay = endDayIndex;
             }
             this.initDayArray();
         }
@@ -1504,27 +1665,14 @@ export class DatePickerComponent extends ViewPU {
             return this.selectedHour - this.startHour;
         }
         else {
-            const isAM = this.selectedPeriod === 0;
-            if (isAM) {
-                const minHour = Math.max(0, this.startHour);
-                if (this.selectedHour === 0) {
-                    return 0 - minHour;
-                }
-                else if (this.selectedHour >= 1 && this.selectedHour <= 11) {
-                    return this.selectedHour - minHour;
-                }
-                return 0;
-            }
-            else {
-                const minHour = Math.max(12, this.startHour >= 12 ? this.startHour : 12);
-                if (this.selectedHour === 12) {
-                    return 0;
-                }
-                else if (this.selectedHour >= 13 && this.selectedHour <= 23) {
-                    return this.selectedHour - minHour;
-                }
-                return 0;
-            }
+            // Convert selectedHour to display hour (1-12)
+            const displayHour = this.selectedHour === 0 || this.selectedHour === 12 ? 12 :
+                (this.selectedHour > 12 ? this.selectedHour - 12 : this.selectedHour);
+            // Find the index of displayHour in hourArray
+            const displayHourStr = displayHour.toString().padStart(2, '0');
+            const index = this.hourArray.indexOf(displayHourStr);
+            // Fallback to first element if not found (shouldn't happen with correct logic)
+            return index >= 0 ? index : 0;
         }
     }
     getMinuteSelectedIndex() {
