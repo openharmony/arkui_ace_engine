@@ -239,6 +239,13 @@ HWTEST_F(WebDataDetectorAdapterTest, ProcessRequest_001, TestSize.Level0)
     adapter->ProcessRequest(R"({"requestId": "1", "nodes": [1]})");
     EXPECT_EQ(adapter->contextMap_.empty(), true);
     
+    auto originTaskExecutor = MockContainer::Current()->taskExecutor_;
+    auto originPipelineTaskExecutor = MockContainer::Current()->pipelineContext_->taskExecutor_;
+    auto delayTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
+
+    MockContainer::Current()->taskExecutor_ = delayTaskExecutor;
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = delayTaskExecutor;
+
     adapter->ProcessRequest(R"({"requestId": "1", "nodes": [{"path": "1", "text": "12345678901"}]})");
     EXPECT_EQ(adapter->contextMap_.empty(), false);
     auto it = adapter->contextMap_.find("1");
@@ -250,6 +257,9 @@ HWTEST_F(WebDataDetectorAdapterTest, ProcessRequest_001, TestSize.Level0)
 
     adapter->ProcessRequest(R"({"requestId": "1", "nodes": [{"path": "1", "text": "12345678901"}]})");
     EXPECT_EQ(adapter->contextMap_.size(), 1);
+
+    MockContainer::Current()->taskExecutor_ = originTaskExecutor;
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = originPipelineTaskExecutor;
 #endif
 }
 
@@ -337,6 +347,12 @@ HWTEST_F(WebDataDetectorAdapterTest, SendRequestToAI_001, TestSize.Level0)
     DataDetectorRequestData req { requestId, { data1 } };
     adapter->SetRequestContext(requestId, std::move(req));
 
+    auto originTaskExecutor = MockContainer::Current()->taskExecutor_;
+    auto originPipelineTaskExecutor = MockContainer::Current()->pipelineContext_->taskExecutor_;
+    auto delayTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
+    MockContainer::Current()->taskExecutor_ = delayTaskExecutor;
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = delayTaskExecutor;
+
     adapter->SendRequestToAI(requestId);
     auto requestContext = adapter->GetRequestContext(requestId);
     EXPECT_NE(requestContext, nullptr);
@@ -347,6 +363,9 @@ HWTEST_F(WebDataDetectorAdapterTest, SendRequestToAI_001, TestSize.Level0)
 
     EXPECT_EQ(requestContext->detectIds, (std::vector<size_t> { 0 }));
     EXPECT_EQ(requestContext->detectOffsets, (std::vector<std::pair<size_t, size_t>> { { 0, 14 } }));
+
+    MockContainer::Current()->taskExecutor_ = originTaskExecutor;
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = originPipelineTaskExecutor;
 #endif
 }
 
