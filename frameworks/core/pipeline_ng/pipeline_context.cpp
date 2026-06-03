@@ -1643,9 +1643,14 @@ void PipelineContext::FlushFocusView()
     ACE_EVENT_SCOPED_TRACE("FlushFocusView:[%s][%d][enable:%d][show:%d]", lastFocusViewHub->GetFrameName().c_str(),
         lastFocusViewHub->GetFrameId(), lastFocusViewHub->IsEnabled(), lastFocusViewHub->IsShow());
     auto container = Container::Current();
-    if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender()) &&
-        (!lastFocusView->IsRootScopeCurrentFocus())) {
+    if (container && container->IsDynamicRender() && (!lastFocusView->IsRootScopeCurrentFocus())) {
         lastFocusView->SetIsViewRootScopeFocused(false);
+    }
+    if (container && container->IsUIExtensionWindow() && (!lastFocusView->IsRootScopeCurrentFocus())) {
+        if (focusManager_->GetIsFocusActive() ||
+            !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            lastFocusView->SetIsViewRootScopeFocused(false);
+        }
     }
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
