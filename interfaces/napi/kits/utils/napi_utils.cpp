@@ -1359,8 +1359,12 @@ bool HasGetter(napi_env env, napi_value value, const std::string& key)
     auto vm = nativeEngine->GetEcmaVm();
     CHECK_NULL_RETURN(vm, false);
 
-    auto localObject = NapiValueToLocalValue(value)->ToObject(vm);
-    if (localObject->IsUndefined()) {
+    auto localValue = NapiValueToLocalValue(value);
+    if (localValue.IsEmpty() || localValue->IsNull() || localValue->IsUndefined()) {
+        return false;
+    }
+    auto localObject = localValue->ToObject(vm);
+    if (localObject.IsEmpty() || localObject->IsUndefined()) {
         return false;
     }
     auto stringRef = panda::StringRef::NewFromUtf8(vm, key.c_str());

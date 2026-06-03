@@ -339,7 +339,7 @@ void SetPopupSystemMaterial(const JSRef<JSObject>& popupObj, const RefPtr<PopupP
     auto systemMaterialValue = popupObj->GetProperty("systemMaterial");
     if (systemMaterialValue->IsObject()) {
         auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
-        popupParam->SetSystemMaterial(systemUiMaterial->Copy());
+        popupParam->SetSystemMaterial(systemUiMaterial ? systemUiMaterial->Copy() : nullptr);
     }
 }
 
@@ -2546,7 +2546,7 @@ void JSViewAbstract::ParseSheetStyle(
     auto edgeLightMode = paramObj->GetProperty("edgeLightMode");
     if (systemMaterialObj->IsObject()) {
         const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
-        sheetStyle.systemMaterial = material->Copy();
+        sheetStyle.systemMaterial = material ? material->Copy() : nullptr;
     }
 
     JSViewPopups::ParseSheetEdgeLightMode(edgeLightMode, sheetStyle);
