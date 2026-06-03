@@ -32,6 +32,7 @@ constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
 constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
 constexpr uint32_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
+constexpr uint32_t RES_TYPE_FLOAT_START_FROM_SIDEBAR = 216;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 constexpr uint32_t SYNC_RES_TYPE_APP_IS_IN_TAIHANG_LIST = 511;
 #ifdef FFRT_EXISTS
@@ -101,6 +102,8 @@ constexpr char FROM_COMPONENT_NAME[] = "from_component_name";
 constexpr char TO_COMPONENT_NAME[] = "to_component_name";
 constexpr char ABILITY_OR_PAGE_SWITCH_START[] = "ability_or_page_switch_start";
 constexpr char ABILITY_OR_PAGE_SWITCH_END[] = "ability_or_page_switch_end";
+constexpr char FLOAT_START_FROM_SIDEBAR_START[] = "float_start_from_sidebar_start";
+constexpr char FLOAT_START_FROM_SIDEBAR_END[] = "float_start_from_sidebar_end";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -289,6 +292,18 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
                     reportDataFunc_(RES_TYPE_BACKPRESSED_EVENT, 0, payload);
+                }
+            },
+            { FLOAT_START_FROM_SIDEBAR_START,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_FLOAT_START_FROM_SIDEBAR, 0, payload);
+                }
+            },
+            { FLOAT_START_FROM_SIDEBAR_END,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_FLOAT_START_FROM_SIDEBAR, 1, payload);
                 }
             },
         };
