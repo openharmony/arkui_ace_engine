@@ -5679,7 +5679,8 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
             if (value->selection.IsValid() && value->selection.GetStart() == value->selection.GetEnd() &&
                 !value->text.empty()) {
                 TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateEditingValue set caret to %{public}d", value->selection.GetEnd());
-                SetCaretOffset(value->selection.GetEnd());
+                SetCaretPosition(value->selection.GetEnd());
+                StartTwinkling();
             }
             return;
         }
