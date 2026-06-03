@@ -17,10 +17,7 @@
 
 #include "base/geometry/shape.h"
 #include "base/log/log_wrapper.h"
-
-#ifndef ACE_FORCE_EXPORT
-#define ACE_FORCE_EXPORT __attribute__((visibility("default")))
-#endif
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 

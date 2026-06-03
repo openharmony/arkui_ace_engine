@@ -19,7 +19,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "core/animation/animator.h"
 #include "core/animation/spring_motion.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/list/list_item_theme.h"
@@ -31,6 +30,10 @@
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+
+namespace OHOS::Ace {
+class Animator;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 class ForEachBaseNode;

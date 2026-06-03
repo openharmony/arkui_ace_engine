@@ -20,11 +20,19 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
-#include "base/geometry/shape.h"
+#include "base/geometry/dimension_offset.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
+
+enum class BasicShapeType : int;
+class BasicShape;
+class Circle;
+class Ellipse;
+class Inset;
+class Polygon;
+class Path;
 
 enum class GeometryBoxType {
     NONE,
@@ -94,10 +102,6 @@ public:
     explicit MaskPath(const RefPtr<BasicShape>& basicShape);
     MaskPath(GeometryBoxType geometryBoxType, const RefPtr<BasicShape>& basicShape);
     ~MaskPath() override;
-
-    static GeometryBoxType GetGeometryBoxType(const std::string& value);
-    static void GetBasicShapeInfo(const std::string& value, BasicShapeType& basicShapeType, std::string& data);
-    static RefPtr<MaskPath> CreateShape(const std::string& value);
 
     void SetGeometryBoxType(GeometryBoxType geometryBoxType)
     {
