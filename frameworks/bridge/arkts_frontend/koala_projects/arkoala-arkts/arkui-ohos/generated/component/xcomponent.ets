@@ -174,7 +174,6 @@ export interface SurfaceConfig {
 export enum HdrType {
     DEFAULT = 0,
     AIHDR = 1,
-    EDR = 2
 }
 export interface XComponentOptions {
     type: XComponentType;
