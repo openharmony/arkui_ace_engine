@@ -2841,13 +2841,22 @@ void DragDropManager::StartDragDefaultAnimation(AnimationOption option, const Of
     CHECK_NULL_VOID(renderContext);
     auto context = info_.imageNode->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto animateCallback = [renderContext, info = info_, newOffset, overlayManager, animateProperty, point]() {
+    auto animateCallback = [imageNode = info_.imageNode, renderContext, info = info_, newOffset, overlayManager,
+        animateProperty, point ]() {
         CHECK_NULL_VOID(renderContext);
         DragAnimationHelper::UpdateStartAnimation(overlayManager, animateProperty, point, info, newOffset);
         if (!info.textNode) {
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformScale({ info.scale, info.scale });
             renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
+
+            // Update material with scale-adjusted parameters to ensure visual consistency
+            CHECK_NULL_VOID(imageNode);
+            auto dragPreviewOption = imageNode->GetDragPreviewOption();
+            if (dragPreviewOption.options.material && info.scale > 0.0f && !NearZero(info.scale)) {
+                ViewAbstract::SetSystemMaterialWithScale(AceType::RawPtr(imageNode),
+                    AceType::RawPtr(dragPreviewOption.options.material), info.scale);
+            }
             return;
         }
         CHECK_NULL_VOID(info.imageNode);

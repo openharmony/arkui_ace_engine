@@ -1176,6 +1176,8 @@ public:
     static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
     // set systemMaterial for inner use, use SetSystemMaterial normally.
     static void SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material);
+    // Set systemMaterial with component scale adjustment (for drag scenario)
+    static void SetSystemMaterialWithScale(FrameNode* frameNode, const UiMaterial* material, float componentScale);
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();
 

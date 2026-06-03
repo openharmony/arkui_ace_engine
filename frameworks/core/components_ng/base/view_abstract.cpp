@@ -6294,6 +6294,69 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
     // This function cannot save uiMaterial to renderContext.
 }
 
+void ViewAbstract::SetSystemMaterialWithScale(FrameNode* frameNode, const UiMaterial* material, float componentScale)
+{
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(material);
+
+    // Process material with scale-adjusted dipScale
+    auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+    auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
+    auto immersiveOptionsPtr = nativeMaterial ? nativeMaterial->CopyImmersiveOptions() : nullptr;
+
+    auto updateFunc = [materialType, immersiveOptionsPtr = std::move(immersiveOptionsPtr),
+                    componentScale, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto pipeline = frameNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+
+        // Guard clause: only process IMMERSIVE material type
+        if (materialType != MaterialType::IMMERSIVE || !immersiveOptionsPtr) {
+            return;
+        }
+
+        // Use scale-adjusted dipScale for IMMERSIVE material
+        auto config = MaterialUtils::GetImmersiveMaterialConfigWithScale(immersiveOptionsPtr, frameNode, componentScale);
+        CHECK_NULL_VOID(config);
+        SetImmersiveConfigs(frameNode, config);
+
+        // Directly update shadow with scale-adjusted dipScale to ensure visual consistency
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (config->applyShadow && !NearZero(componentScale)) {
+            Shadow shadow = MaterialUtils::GetImmersiveShadow(config->dipScale / componentScale);
+            renderContext->UpdateBackShadow(shadow);
+        }
+    };
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (material != nullptr) {
+            updateFunc(nullptr);
+            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            pattern->AddResObj("viewAbstract.uiMaterialWithScale", resObj, std::move(updateFunc));
+        } else {
+            ResetSystemMaterialEffect(frameNode);
+        }
+        return;
+    }
+
+    if (nativeMaterial != nullptr) {
+        updateFunc(nullptr);
+    } else {
+        ResetSystemMaterialEffect(frameNode);
+    }
+}
+
 void ViewAbstract::RegisterMaterialInteractionEvent(
     const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
 {
