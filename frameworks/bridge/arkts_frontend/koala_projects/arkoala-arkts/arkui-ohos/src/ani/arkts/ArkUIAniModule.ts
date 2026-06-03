@@ -69,7 +69,7 @@ export class ArkUIAniModule {
     native static _SetDynamicLayoutGridLayoutAlgorithm(ptr: KPointer, value: GridLayoutAlgorithm): void;
     native static _WithEnv_construct(id: KInt): KPointer;
     native static _WithEnv_removeSystemEnvProperty(ptr: KPointer, key: string): void;
-    native static _WithEnv_setSystemEnvProperty(ptr: KPointer, key: string, value: KDouble): void;
+    native static _WithEnv_setSystemEnvProperty(ptr: KPointer, key: string, value: Any): void;
     native static _WithEnv_setCustomEnvProperty(ptr: KPointer, key: KInt, value: Any): void;
     native static _WithEnv_removeCustomEnvProperty(ptr: KPointer, key: KInt): void;
     native static _CustomNode_findCustomValueByKey(ptr: KPointer, key: KInt): Any | undefined;

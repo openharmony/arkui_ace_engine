@@ -119,12 +119,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_WithEnv_setSystemEnvProperty",
-            "lC{std.core.String}d:",
+            "lC{std.core.String}Y:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetSystemEnvProperty)
         },
         ani_native_function {
             "_WithEnv_setCustomEnvProperty",
-            nullptr,
+            "liY:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetCustomEnvProperty)
         },
         ani_native_function {
@@ -144,12 +144,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_CustomNode_registerOnCustomEnvUpdateCallback",
-            nullptr,
+            "lC{std.core.Function2}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnCustomEnvUpdate)
         },
         ani_native_function {
             "_CustomNode_registerOnSystemEnvUpdateCallback",
-            nullptr,
+            "lC{std.core.Function2}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnSystemEnvUpdate)
         },
         ani_native_function {
