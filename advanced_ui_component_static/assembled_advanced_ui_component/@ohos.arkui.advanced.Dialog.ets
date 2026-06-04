@@ -26,7 +26,7 @@ import {
   ScrollOnScrollCallback, SizeChangeCallback, applyStyles, CustomDialog, ButtonOptions as ButtonParam, CustomLayout,
   WithTheme, RelativeContainer, BaseGestureEvent, GestureRecognizer, ScrollBar, GestureControl, VerticalAlign,
   GestureJudgeResult, LocalizedAlignRuleOptions, HorizontalAlign, Visibility, ButtonLabelStyle,
-  WordBreak, TextAttribute
+  WordBreak, TextAttribute, AccessibilityRoleType
 } from '@ohos.arkui.component';
 import { State, Link, Observed, PropRef } from '@ohos.arkui.stateManagement';
 import { BusinessError, Callback } from '@ohos.base';
@@ -224,7 +224,7 @@ export struct TipsDialog {
   checkBoxIndex: number = 2;
   appMaxFontScale: number = 3.2;
 
-  build() {
+  build(): void {
     CustomDialogContentComponent({
       controller: this.controller,
       contentBuilder: () => {
@@ -386,7 +386,7 @@ export struct TipsDialog {
     .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) } as LocalizedMargin)
   }
 
-  aboutToAppear() {
+  aboutToAppear(): void {
     this.fontColorWithTheme = (this.theme as CustomTheme)?.colors?.fontPrimary ?? $r('sys.color.font_primary');
     let uiContext: UIContext = this.getUIContext();
     this.appMaxFontScale = uiContext.getMaxFontScale();
@@ -420,7 +420,7 @@ export struct TipsDialog {
 @Component
 struct TipsDialogContentLayout {
   @Builder
-  doNothingBuilder() {
+  doNothingBuilder(): void {
   };
 
   title?: ResourceStr | null = null;
@@ -500,7 +500,7 @@ struct TipsDialogContentLayout {
     return sizeResult;
   }
 
-  build() {
+  build(): void {
     this.dialogBuilder();
   }
 }
@@ -576,7 +576,6 @@ export struct SelectDialog {
                       .id(index.toString())
                       .focusable(false)
                       .accessibilityLevel('no')
-                      .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
                       .radioStyle({ uncheckedBorderColor: Color.Transparent })
                       .onFocus(() => {
                         this.isFocus = true;
@@ -610,7 +609,9 @@ export struct SelectDialog {
               .focusBox({
                 margin: new LengthMetrics(-2, LengthUnit.VP)
               })
+              .accessibilityChecked(this.selectedIndex === index)
               .accessibilityText(getAccessibilityText(item.title, this.selectedIndex === index))
+              .accessibilityRole(AccessibilityRoleType.RADIO)
               .onClick((event: ClickEvent) => {
                 this.selectedIndex = index as Int;
                 this.controller?.close();
@@ -656,7 +657,7 @@ export struct SelectDialog {
     .margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) } as LocalizedMargin)
   }
 
-  build() {
+  build(): void {
     Column() {
       CustomDialogContentComponent({
         controller: this.controller,
@@ -722,7 +723,7 @@ struct ConfirmDialogContentLayout {
   @Link minContentHeight: number;
 
   @Builder
-  doNothingBuilder() {
+  doNothingBuilder(): void {
   };
 
   @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
@@ -771,7 +772,7 @@ struct ConfirmDialogContentLayout {
     return sizeResult;
   }
 
-  build() {
+  build(): void {
     this.dialogBuilder();
   }
 }
@@ -902,7 +903,7 @@ export struct ConfirmDialog {
     }
   }
 
-  build() {
+  build(): void {
     Column() {
       CustomDialogContentComponent({
         primaryTitle: this.title,
@@ -961,7 +962,7 @@ export struct AlertDialog {
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = MIN_CONTENT_HEIGHT;
 
-  build() {
+  build(): void {
     Column() {
       CustomDialogContentComponent({
         primaryTitle: this.primaryTitle,
@@ -1044,7 +1045,7 @@ export struct CustomContentDialog {
   secondaryTitle?: ResourceStr;
 
   @Builder
-  doNothingBuilder() {
+  doNothingBuilder(): void {
   };
 
   @BuilderParam contentBuilder: () => void = this.doNothingBuilder;
@@ -1056,7 +1057,7 @@ export struct CustomContentDialog {
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = MIN_CONTENT_HEIGHT;
 
-  build() {
+  build(): void {
     Column() {
       CustomDialogContentComponent({
         controller: this.controller,
@@ -1154,7 +1155,7 @@ struct CustomDialogLayout {
     return sizeResult;
   }
 
-  build() {
+  build(): void {
     this.dialogBuilder();
   }
 }
@@ -1203,7 +1204,7 @@ struct CustomDialogContentComponent {
   isAllFocusFalse: boolean = false;
   scroller: Scroller = new Scroller();
 
-  build() {
+  build(): void {
     WithTheme({ theme: this.theme as CustomTheme, colorMode: this.themeColorMode }) {
       RelativeContainer() {
         Scroll(this.scroller) {
@@ -1918,7 +1919,7 @@ function getAccessibilityText(resource: ResourceStr, selected: boolean): string 
     } else {
       resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id);
     }
-    return selected ? `${selectText},${resourceString}` : resourceString;
+    return resourceString;
   } catch (error) {
     let code: number = (error as ClassCastError).code;
     let message: string = (error as ClassCastError).message;
@@ -1994,7 +1995,7 @@ export struct LoadingDialog {
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = MIN_CONTENT_HEIGHT;
 
-  build() {
+  build(): void {
     Column() {
       CustomDialogContentComponent({
         controller: this.controller,
@@ -2051,7 +2052,7 @@ export struct PopoverDialog {
   @State dialogWidth: Dimension | undefined = this.popover?.width;
 
   @Builder
-  emptyBuilder() {
+  emptyBuilder(): void {
   }
 
   aboutToAppear(): void {
@@ -2060,7 +2061,7 @@ export struct PopoverDialog {
     }
   }
 
-  build() {
+  build(): void {
     Column() {
       this.targetBuilder();
     }
