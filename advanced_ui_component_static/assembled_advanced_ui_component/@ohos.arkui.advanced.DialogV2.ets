@@ -666,7 +666,7 @@ import {
                 .onClick((event: ClickEvent) => {
                   this.selectedIndexInner = index;
                   item?.action();
-                  closeDialog(this.getDialogController(), 'onClick')
+                  closeDialog(this.getDialogController(), 'onClick');
                 })
               }
               .applyStyles(this.paddingStyle)
@@ -1772,7 +1772,7 @@ import {
   function closeDialog(controller: PromptActionDialogController | undefined, funcName: string) {
     if (controller) {
       hilog.info(0x3900, 'AdvancedDialog', `button ${funcName} controller true`);
-      controller?.close();
+      controller.close();
     } else {
       hilog.info(0x3900, 'AdvancedDialog', `button ${funcName} controller false`);
     }

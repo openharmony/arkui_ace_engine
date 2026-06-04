@@ -947,9 +947,9 @@ export class SelectDialogV2 extends ViewV2 {
               Column.focusBox({
                 margin: { value: -2, unit: LengthUnit.VP }
               });
-              Column.accessibilityChecked(this.selectedIndexInner === index)
+              Column.accessibilityChecked(this.selectedIndexInner === index);
               Column.accessibilityText(getAccessibilityText(this.getUIContext(), item.title, this.selectedIndexInner === index));
-              Column.accessibilityRole(AccessibilityRoleType.RADIO)
+              Column.accessibilityRole(AccessibilityRoleType.RADIO);
               Column.onClick(() => {
                 this.selectedIndexInner = index;
                 item.action && item.action();
