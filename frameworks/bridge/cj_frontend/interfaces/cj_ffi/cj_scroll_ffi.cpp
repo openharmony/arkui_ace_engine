@@ -67,7 +67,6 @@ void NativeNGScroller::ScrollTo(
     const Dimension& xOffset, const Dimension& yOffset, double duration, const RefPtr<Curve>& curve)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     auto direction = controller_->GetScrollDirection();
@@ -80,7 +79,6 @@ void NativeNGScroller::ScrollToWithAnimationOptions(const Dimension& xOffset, co
     const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     auto direction = controller_->GetScrollDirection();
@@ -119,7 +117,6 @@ void NativeNGScroller::ScrollBy(const Dimension& xOffset, const Dimension& yOffs
 void NativeNGScroller::ScrollEdge(ScrollEdgeType edge)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     controller_->ScrollToEdge(edge, true);
@@ -128,7 +125,6 @@ void NativeNGScroller::ScrollEdge(ScrollEdgeType edge)
 void NativeNGScroller::ScrollEdgeWithVelocity(ScrollEdgeType edge, float velocity)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     if (velocity > 0) {
@@ -145,7 +141,6 @@ void NativeNGScroller::ScrollFling(double velocity)
         return;
     }
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     velocity = Dimension(velocity, DimensionUnit::VP).ConvertToPx();
@@ -155,7 +150,6 @@ void NativeNGScroller::ScrollFling(double velocity)
 void NativeNGScroller::ScrollPage(bool next)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     controller_->ScrollPage(!next, true);
@@ -164,7 +158,6 @@ void NativeNGScroller::ScrollPage(bool next)
 void NativeNGScroller::ScrollPageWithAniamtion(bool next, bool animation)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     controller_->ScrollPage(!next, animation);
@@ -173,7 +166,6 @@ void NativeNGScroller::ScrollPageWithAniamtion(bool next, bool animation)
 void NativeNGScroller::ScrollToIndex(int32_t index, bool smooth, int32_t align)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     controller_->ScrollToIndex(index, smooth, SCROLL_ALIGN_LIST[align]);
@@ -182,7 +174,6 @@ void NativeNGScroller::ScrollToIndex(int32_t index, bool smooth, int32_t align)
 void NativeNGScroller::ScrollToIndexWithUnit(int32_t index, bool smooth, int32_t align, double offset, int32_t unit)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return;
     }
     auto extraOffset = Dimension(offset, static_cast<DimensionUnit>(unit)).ConvertToPx();
@@ -196,7 +187,6 @@ void NativeNGScroller::ScrollToIndexWithUnit(int32_t index, bool smooth, int32_t
 Offset NativeNGScroller::CurrentOffset()
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return Offset(0.0, 0.0);
     }
     return controller_->GetCurrentOffset();
@@ -205,7 +195,6 @@ Offset NativeNGScroller::CurrentOffset()
 bool NativeNGScroller::IsAtEnd()
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return false;
     }
     return controller_->IsAtEnd();
@@ -214,7 +203,6 @@ bool NativeNGScroller::IsAtEnd()
 Rect NativeNGScroller::GetItemRect(int32_t index)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return Rect();
     }
     return controller_->GetItemRect(index);
@@ -223,7 +211,6 @@ Rect NativeNGScroller::GetItemRect(int32_t index)
 int32_t NativeNGScroller::GetItemIndex(const Dimension& xOffset, const Dimension& yOffset)
 {
     if (!controller_) {
-        LOGE("controller_ is nullptr");
         return -1;
     }
 
