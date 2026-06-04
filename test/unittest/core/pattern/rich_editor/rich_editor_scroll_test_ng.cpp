@@ -620,4 +620,53 @@ HWTEST_F(RichEditorScrollTestOneNg, SetScrollBarColor001, TestSize.Level0)
     EXPECT_EQ(scrollBarColor, Color::BLACK);
 }
 
+/**
+ * @tc.name: MoveTextRectOnLayoutSwap001
+ * @tc.desc: test MoveTextRectOnLayoutSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollTestOneNg, MoveTextRectOnLayoutSwap001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+
+    // neither mode enabled, CHECK_NULL_VOID returns early
+    richEditorPattern->isSingleLineMode_ = false;
+    richEditorPattern->isHorizontalScrolling_ = false;
+    richEditorPattern->richTextRect_ = RectF(-10.0f, 0.0f, 50.0f, 100.0f);
+    richEditorPattern->MoveTextRectOnLayoutSwap();
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetX(), -10.0f);
+
+    // case1: text narrower, diff != 0, align left
+    richEditorPattern->isSingleLineMode_ = true;
+    richEditorPattern->richTextRect_ = RectF(-10.0f, 0.0f, 50.0f, 100.0f);
+    richEditorPattern->MoveTextRectOnLayoutSwap();
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetX(), 0.0f);
+
+    // case1: text narrower, diff == 0, no action
+    richEditorPattern->isHorizontalScrolling_ = true;
+    richEditorPattern->richTextRect_ = RectF(0.0f, 0.0f, 50.0f, 100.0f);
+    richEditorPattern->MoveTextRectOnLayoutSwap();
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetX(), 0.0f);
+
+    // case2: text wider, leftDiff==0 && rightDiff==0, no action
+    richEditorPattern->isSingleLineMode_ = true;
+    richEditorPattern->richTextRect_ = RectF(-30.0f, 0.0f, 200.0f, 100.0f);
+    richEditorPattern->MoveTextRectOnLayoutSwap();
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetX(), -30.0f);
+
+    // case2: leftDiff != 0, correct left boundary
+    richEditorPattern->richTextRect_ = RectF(50.0f, 0.0f, 200.0f, 100.0f);
+    richEditorPattern->MoveTextRectOnLayoutSwap();
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetX(), 0.0f);
+
+    // case2: rightDiff != 0, correct right boundary
+    richEditorPattern->isHorizontalScrolling_ = true;
+    richEditorPattern->isSingleLineMode_ = false;
+    richEditorPattern->richTextRect_ = RectF(-110.0f, 0.0f, 200.0f, 100.0f);
+    richEditorPattern->MoveTextRectOnLayoutSwap();
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetX(), -100.0f);
+}
 }

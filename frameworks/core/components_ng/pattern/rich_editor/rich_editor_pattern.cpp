@@ -926,14 +926,14 @@ void RichEditorPattern::FireOnReady()
 
 void RichEditorPattern::MoveTextRectOnLayoutSwap()
 {
-    CHECK_NULL_VOID(isSingleLineMode_);
+    CHECK_NULL_VOID(isSingleLineMode_ || isHorizontalScrolling_);
 
     // case1: text narrower than content, align rect left
     if (richTextRect_.Width() <= contentRect_.Width()) {
         auto diff = contentRect_.Left() - richTextRect_.Left();
         CHECK_NULL_VOID(diff != 0.0f);
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "MoveTextRectOnLayoutSwap, diff=%{public}f", diff);
-        MoveTextRect(diff);
+        scrollController_->MoveTextRectWithAxis(diff, Axis::HORIZONTAL);
         return;
     }
 
@@ -942,8 +942,8 @@ void RichEditorPattern::MoveTextRectOnLayoutSwap()
     float rightDiff = std::max(0.0f, contentRect_.Right() - richTextRect_.Right());
     CHECK_NULL_VOID(leftDiff != 0.0f || rightDiff != 0.0f);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "MoveTextRectOnLayoutSwap, diff=[%{public}f, %{public}f]", leftDiff, rightDiff);
-    IF_TRUE(leftDiff != 0.0f, MoveTextRect(leftDiff));
-    IF_TRUE(rightDiff != 0.0f, MoveTextRect(rightDiff));
+    IF_TRUE(leftDiff != 0.0f, scrollController_->MoveTextRectWithAxis(leftDiff, Axis::HORIZONTAL));
+    IF_TRUE(rightDiff != 0.0f, scrollController_->MoveTextRectWithAxis(rightDiff, Axis::HORIZONTAL));
 }
 
 void RichEditorPattern::MoveCaretOnLayoutSwap()
