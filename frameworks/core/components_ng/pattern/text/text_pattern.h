@@ -784,6 +784,8 @@ private:
     void UpdateSpanStyleHash(const std::list<RefPtr<SpanItem>>& spans);
 
     void GetPaintOffsetWithoutTransform(OffsetF& paintOffset);
+    bool IsTriggerParentToScroll();
+    bool HasScrollableParent();
     void ContentChangeByDetaching(PipelineContext*) override;
     void HighlightDisappearAnimation();
     void HighlightAppearAnimation();

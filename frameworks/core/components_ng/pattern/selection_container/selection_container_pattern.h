@@ -37,9 +37,10 @@ class MutableSpanString;
 
 namespace OHOS::Ace::NG {
 enum class SelectionMenuCalblackId { MENU_APPEAR, MENU_SHOW, MENU_HIDE };
+class ScrollablePattern;
 
-class ACE_FORCE_EXPORT SelectionContainerPattern : public StackPattern, public SelectionContainer {
-    DECLARE_ACE_TYPE(SelectionContainerPattern, StackPattern, SelectionContainer);
+class ACE_FORCE_EXPORT SelectionContainerPattern : public StackPattern, public SelectionContainer, public TextBase {
+    DECLARE_ACE_TYPE(SelectionContainerPattern, StackPattern, SelectionContainer, TextBase);
 
 public:
     SelectionContainerPattern() = default;
@@ -102,7 +103,8 @@ public:
     }
     bool FireOnWillCopy(const std::u16string& text);
     void FireOnCopy(const std::u16string& text);
-    void OnSelectionRangeChanged(const std::vector<std::u16string>& selectedTexts) override;
+    void OnSelectionRangeChanged(const std::vector<std::u16string>& selectedTexts,
+        const std::vector<ChildSelectionInfo>& selectionState) override;
     void OnChildResponseTypeChanged(TextResponseType responseType) override
     {
         textResponseType_ = responseType;
@@ -116,6 +118,14 @@ public:
     void SaveOldSelectedType() override;
     void SetSelectionHoldCallback() override;
     bool IsSelectedBindSelectionMenu() const override;
+    bool IsTriggerParentToScroll() override;
+    bool HasScrollableParent() override;
+    void TriggerScrollableParentToScroll(const OffsetF& globalPoint, bool isStopAutoScroll) override;
+    void EnableMouseLeftSelectionTracking(const OffsetF& globalPoint) override;
+    void StopMouseLeftSelectionTracking() override;
+    void UpdateMovingChildForHandle(bool isFirstHandle);
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    FrameNodeChangeInfoFlag CollectDescendantChangeFlags() override;
     void BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,
         std::function<void()>& menuBuilder, const SelectMenuParam& menuParam);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo);
@@ -127,6 +137,15 @@ public:
         const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     void SetSelectionMenuItemClickWithTextCallback(
         std::function<bool(const MenuItemParam&, const std::u16string&)>&& onMenuItemClickWithText);
+    OffsetF GetContainerPaintOffsetWithTransform() const;
+    bool BetweenSelectedPosition(const Offset& globalOffset) override
+    {
+        return SelectionContainer::BetweenSelectedPosition(globalOffset);
+    }
+    RefPtr<FrameNode> GetClientHost() const override
+    {
+        return GetHost();
+    }
 
 private:
     void ApplySelectionSummaryDelta(const ChildSelectionSummary& summary, int32_t delta);
@@ -144,8 +163,21 @@ private:
     void HandleOnCopySpanString(const RefPtr<SpanString>& spanString, CopyOptions copyOption);
     void AsyncHandleOnCopySpanStringHtml(const RefPtr<SpanString>& spanString, CopyOptions copyOption);
     void HandleOnCopyWithoutSpanString(const std::string& pasteData, CopyOptions copyOption);
-    RefPtr<TextBase> selectionOverlayTextHost_;
+    void OnSelectionMovingChildChange(const RefPtr<SelectionContainerChild>& child) override;
+    void ResetScrollableParentOnScrollStop(bool isStopAutoScroll);
+    void UpdateScrollableParentByChild(const RefPtr<SelectionContainerChild>& child);
+    bool IsPointInScrollableViewport(const RefPtr<ScrollablePattern>& scrollablePattern, const OffsetF& globalPoint);
+    bool CheckScrollableParentSize(const RefPtr<ScrollablePattern>& scrollablePattern);
+    void RegisterMouseLeftSelectionNodeChangeListener();
+    void UnregisterMouseLeftSelectionNodeChangeListener();
+    void RefreshMouseLeftSelectionOnFrameNodeChanged();
+    FrameNodeChangeInfoFlag CollectFlagsFromChildToHost(const RefPtr<FrameNode>& childHost, int32_t containerId);
     RefPtr<SelectionSelectOverlay> selectionSelectOverlay_;
+    WeakPtr<ScrollablePattern> scrollableParent_;
+    bool scrollableParentIsInsideContainer_ = false;
+    bool isTriggerParentToScroll_ = false;
+    bool mouseLeftSelectionNodeChangeListenerRegistered_ = false;
+    std::optional<OffsetF> lastMouseLeftGlobalPoint_;
     std::unordered_map<int32_t, ChildSelectionSummary> childSelectionSummaryMap_;
     RefPtr<Clipboard> clipboard_;
     std::optional<TextSpanType> selectedType_;
@@ -160,6 +192,7 @@ private:
     bool keyEventInitialized_ = false;
     uint32_t pendingContainerPropertyUpdateFlags_ = 0;
     SelectionContainerTextJoinStyle textJoinStyle_ = SelectionContainerTextJoinStyle::NEWLINE;
+    std::vector<ChildSelectionInfo> lastSelectionState_;
 };
 
 } // namespace OHOS::Ace::NG

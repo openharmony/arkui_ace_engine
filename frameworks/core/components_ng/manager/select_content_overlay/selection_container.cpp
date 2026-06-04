@@ -20,6 +20,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
@@ -191,6 +192,9 @@ void SelectionContainer::UnregisterChild(int32_t childId)
                 selectionFixedChild_.Reset();
                 selectionFixedIndex_ = -1;
             }
+            if (IsChildNodeMatchId(selectionMovingChild_, childId)) {
+                selectionMovingChild_.Reset();
+            }
         }
         childIter = childList.erase(childIter);
     }
@@ -205,9 +209,9 @@ bool SelectionContainer::HandleSelectionStart(const SelectionStartEventInfo& eve
     CHECK_NULL_RETURN(sourceNode, false);
     auto containerNode = GetHostNode();
     CHECK_NULL_RETURN(containerNode, false);
-
-    auto fixedPointInContainer = sourceNode->ConvertPoint(eventInfo.localPoint, containerNode);
-    return HandleSelectionStart(fixedPointInContainer, sourceChild, eventInfo.startIndex, eventInfo.endIndex);
+    fixedPointInContainer_ = sourceNode->ConvertPoint(eventInfo.localPoint, containerNode);
+    fixedPointInChildLocal_ = eventInfo.localPoint;
+    return HandleSelectionStartCommon(sourceChild, eventInfo.startIndex, eventInfo.endIndex);
 }
 
 bool SelectionContainer::HandleSelectionStart(const OffsetF& fixedPointInContainer,
@@ -216,12 +220,26 @@ bool SelectionContainer::HandleSelectionStart(const OffsetF& fixedPointInContain
 {
     CHECK_NULL_RETURN(startChild, false);
     fixedPointInContainer_ = fixedPointInContainer;
+    auto childNode = startChild->GetHostNode();
+    auto containerNode = GetHostNode();
+    if (childNode && containerNode) {
+        fixedPointInChildLocal_ = containerNode->ConvertPoint(fixedPointInContainer, childNode);
+    }
+    return HandleSelectionStartCommon(startChild, startIndex, endIndex, fixedHandleIsTopOnStart);
+}
+
+bool SelectionContainer::HandleSelectionStartCommon(
+    const RefPtr<SelectionContainerChild>& startChild, int32_t startIndex, int32_t endIndex,
+    bool fixedHandleIsTopOnStart)
+{
+    CHECK_NULL_RETURN(startChild, false);
     selectionFixedChild_ = startChild;
     selectionFixedIndex_ = startIndex >= 0 ? startIndex : endIndex;
     selectionStartIndex_ = startIndex;
     selectionEndIndex_ = endIndex;
     fixedHandleIsTopOnStart_ = fixedHandleIsTopOnStart;
     hasSelectionStartEvent_ = true;
+    UpdateSelectionMovingChild(startChild);
     return true;
 }
 
@@ -251,6 +269,13 @@ bool SelectionContainer::HandleSelectionUpdate(const OffsetF& movingPointInConta
 
     auto containerNode = GetHostNode();
     CHECK_NULL_RETURN(containerNode, false);
+    auto fixedChild = selectionFixedChild_.Upgrade();
+    if (fixedChild) {
+        auto childNode = fixedChild->GetHostNode();
+        if (childNode) {
+            fixedPointInContainer_ = childNode->ConvertPoint(fixedPointInChildLocal_, containerNode);
+        }
+    }
     auto topPointInContainer = fixedPointInContainer_;
     auto bottomPointInContainer = movingPointInContainer;
     bool topPointIsFixed = true;
@@ -264,9 +289,9 @@ bool SelectionContainer::HandleSelectionUpdate(const OffsetF& movingPointInConta
 
     RefPtr<SelectionContainerChild> firstSelectedChild;
     RefPtr<SelectionContainerChild> lastSelectedChild;
-    auto fixedChild = selectionFixedChild_.Upgrade();
     auto fixedIndex = selectionFixedIndex_;
     std::vector<std::u16string> selectedTexts;
+    std::vector<ChildSelectionInfo> selectionState;
     for (const auto& weakChild : childList) {
         auto child = weakChild.Upgrade();
         CHECK_NULL_CONTINUE(child);
@@ -281,14 +306,21 @@ bool SelectionContainer::HandleSelectionUpdate(const OffsetF& movingPointInConta
             continue;
         }
         selectedTexts.push_back(std::move(childSelectionText));
+        auto childHostNode = child->GetHostNode();
+        if (childHostNode) {
+            auto indexes = child->GetSelectionIndexes();
+            selectionState.push_back({ childHostNode->GetId(), indexes.startIndex, indexes.endIndex });
+        }
         if (!firstSelectedChild) {
             firstSelectedChild = child;
         }
         lastSelectedChild = child;
     }
-    OnSelectionRangeChanged(selectedTexts);
+    OnSelectionRangeChanged(selectedTexts, selectionState);
     selectionStartChild_ = firstSelectedChild;
     selectionEndChild_ = lastSelectedChild;
+    auto movingChild = topPointIsFixed ? lastSelectedChild : firstSelectedChild;
+    UpdateSelectionMovingChild(movingChild);
     if (firstSelectedChild) {
         firstSelectedChild->UpdateSelectionHandleInfo();
     }
@@ -296,6 +328,20 @@ bool SelectionContainer::HandleSelectionUpdate(const OffsetF& movingPointInConta
         lastSelectedChild->UpdateSelectionHandleInfo();
     }
     return firstSelectedChild && lastSelectedChild;
+}
+
+bool SelectionContainer::ProcessGestureSelectionUpdate(
+    const SelectionEndEventInfo& eventInfo, const OffsetF& globalPoint)
+{
+    auto containerNode = GetHostNode();
+    CHECK_NULL_RETURN(containerNode, false);
+    NG::PointF localPoint(globalPoint.GetX(), globalPoint.GetY());
+    NG::NGGestureRecognizer::Transform(localPoint,
+        WeakClaim(Referenced::RawPtr(containerNode)), true);
+    auto movingPointInContainer = OffsetF(localPoint.GetX(), localPoint.GetY());
+    auto handled = HandleSelectionUpdate(movingPointInContainer);
+    TriggerScrollableParentToScroll(globalPoint, false);
+    return handled;
 }
 
 bool SelectionContainer::ExtendSelectionFromFixedAnchor(const SelectionEndEventInfo& eventInfo)
@@ -356,9 +402,36 @@ bool SelectionContainer::ProcessGestureSelectionEnd(const SelectionEndEventInfo&
     return ProcessSelectionEndCommon(true);
 }
 
+bool SelectionContainer::ProcessGestureSelectionEnd(const SelectionEndEventInfo& eventInfo, const OffsetF& globalPoint)
+{
+    TriggerScrollableParentToScroll(globalPoint, true);
+    return ProcessGestureSelectionEnd(eventInfo);
+}
+
 bool SelectionContainer::ProcessMouseLeftRelease(const SelectionEndEventInfo& eventInfo)
 {
     return ProcessSelectionEndCommon(false);
+}
+
+bool SelectionContainer::ProcessMouseLeftSelectionUpdate(
+    const SelectionEndEventInfo& eventInfo, const OffsetF& globalPoint)
+{
+    auto containerNode = GetHostNode();
+    CHECK_NULL_RETURN(containerNode, false);
+    NG::PointF localPoint(globalPoint.GetX(), globalPoint.GetY());
+    NG::NGGestureRecognizer::Transform(localPoint,
+        WeakClaim(Referenced::RawPtr(containerNode)), true);
+    auto movingPointInContainer = OffsetF(localPoint.GetX(), localPoint.GetY());
+    auto handled = HandleSelectionUpdate(movingPointInContainer);
+    EnableMouseLeftSelectionTracking(globalPoint);
+    TriggerScrollableParentToScroll(globalPoint, false);
+    return handled;
+}
+
+void SelectionContainer::StopMouseSelectionTracking(const OffsetF& globalPoint)
+{
+    TriggerScrollableParentToScroll(globalPoint, true);
+    StopMouseLeftSelectionTracking();
 }
 
 bool SelectionContainer::ProcessHandleMoveSelectionEnd(const OffsetF& movingPointInContainer)
@@ -379,7 +452,7 @@ bool SelectionContainer::ProcessHandleMoveSelectionEnd(const OffsetF& movingPoin
     return selectionStartChild && selectionEndChild;
 }
 
-bool SelectionContainer::BetweenSelectedPosition(const Offset& globalOffset) const
+bool SelectionContainer::BetweenSelectedPosition(const Offset& globalOffset)
 {
     for (const auto& weakChild : registeredChildList_) {
         auto child = weakChild.Upgrade();
@@ -399,12 +472,27 @@ void SelectionContainer::ResetSelectionSessionState()
     fixedHandleIsTopOnStart_ = true;
 }
 
+void SelectionContainer::UpdateSelectionMovingChild(const RefPtr<SelectionContainerChild>& child)
+{
+    CHECK_NULL_VOID(child);
+    auto oldChild = selectionMovingChild_.Upgrade();
+    if (oldChild == child) {
+        return;
+    }
+    selectionMovingChild_ = child;
+    OnSelectionMovingChildChange(child);
+}
+
 void SelectionContainer::ResetAllSelection()
 {
     auto childList = GetChildList();
+    bool hadSelection = false;
     for (const auto& weakChild : childList) {
         auto child = weakChild.Upgrade();
         CHECK_NULL_CONTINUE(child);
+        if (!child->GetSelectionText().empty()) {
+            hadSelection = true;
+        }
         child->SelectTextByIndex(-1, -1);
         child->ReportSelectionText();
     }
@@ -413,21 +501,29 @@ void SelectionContainer::ResetAllSelection()
     selectionStartIndex_ = -1;
     selectionEndIndex_ = -1;
     hasSelectionStartEvent_ = false;
-    OnSelectionRangeChanged({});
+    if (hadSelection) {
+        OnSelectionRangeChanged({});
+    }
 }
 
 void SelectionContainer::CollectAndNotifySelectionChange()
 {
     std::vector<std::u16string> selectedTexts;
+    std::vector<ChildSelectionInfo> selectionState;
     for (const auto& weakChild : GetChildList()) {
         auto child = weakChild.Upgrade();
         CHECK_NULL_CONTINUE(child);
         auto text = child->GetSelectionText();
         if (!text.empty()) {
             selectedTexts.push_back(std::move(text));
+            auto childHostNode = child->GetHostNode();
+            if (childHostNode) {
+                auto indexes = child->GetSelectionIndexes();
+                selectionState.push_back({ childHostNode->GetId(), indexes.startIndex, indexes.endIndex });
+            }
         }
     }
-    OnSelectionRangeChanged(selectedTexts);
+    OnSelectionRangeChanged(selectedTexts, selectionState);
 }
 
 void SelectionContainer::ReportSelectionText()

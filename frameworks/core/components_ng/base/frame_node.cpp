@@ -7990,6 +7990,12 @@ void FrameNode::ProcessFrameNodeChangeFlag()
             break;
         }
     }
+    if (changeFlag != FRAME_NODE_CHANGE_ALL) {
+        auto pattern = GetPattern();
+        if (pattern) {
+            changeFlag |= pattern->CollectDescendantChangeFlags();
+        }
+    }
     if (changeFlag == FRAME_NODE_CHANGE_INFO_NONE) {
         return;
     }

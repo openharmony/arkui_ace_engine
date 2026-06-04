@@ -77,12 +77,12 @@ public:
         selectionText_ = text;
     }
 
-    std::optional<SelectHandleInfo> GetFirstHandleInfo() override
+    std::optional<RectF> GetFirstHandleRect() override
     {
         return std::nullopt;
     }
 
-    std::optional<SelectHandleInfo> GetSecondHandleInfo() override
+    std::optional<RectF> GetSecondHandleRect() override
     {
         return std::nullopt;
     }
@@ -254,7 +254,8 @@ public:
         sortDirtyMarked_ = true;
     }
 
-    void OnSelectionRangeChanged(const std::vector<std::u16string>& selectedTexts) override
+    void OnSelectionRangeChanged(const std::vector<std::u16string>& selectedTexts,
+        const std::vector<ChildSelectionInfo>& selectionState = {}) override
     {
         selectionChanged_ = true;
     }
@@ -274,7 +275,7 @@ public:
         mouseMenuOffsetSet_ = true;
     }
 
-    bool BetweenSelectedPosition(const Offset& globalOffset) const override
+    bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
         return betweenSelectedPosition_;
     }

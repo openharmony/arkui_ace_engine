@@ -37,6 +37,16 @@ struct SelectionStartEventInfo {
     int32_t endIndex = -1;
 };
 
+struct ChildSelectionInfo {
+    int32_t childId = -1;
+    int32_t startIndex = -1;
+    int32_t endIndex = -1;
+    bool operator==(const ChildSelectionInfo& other) const
+    {
+        return childId == other.childId && startIndex == other.startIndex && endIndex == other.endIndex;
+    }
+};
+
 struct SelectionEndEventInfo {
     RefPtr<SelectionContainerChild> child;
     OffsetF localPoint;
@@ -67,7 +77,8 @@ public:
     virtual bool GetEnableHapticFeedback() const = 0;
     virtual CopyOptions GetCopyOption() const = 0;
     virtual std::optional<Color> GetSelectedBackgroundColor() const = 0;
-    virtual void OnSelectionRangeChanged(const std::vector<std::u16string>& selectedTexts) {}
+    virtual void OnSelectionRangeChanged(const std::vector<std::u16string>& selectedTexts,
+        const std::vector<ChildSelectionInfo>& selectionState = {}) {}
     virtual void OnChildResponseTypeChanged(TextResponseType responseType) {}
     virtual void OnChildSelectedTypeSave() {}
     virtual void OnChildSelectionSpanTypeChanged(
@@ -76,7 +87,18 @@ public:
     virtual void SaveOldSelectedType() = 0;
     virtual void SetSelectionHoldCallback() {}
     virtual bool IsSelectedBindSelectionMenu() const { return false; }
-    virtual bool BetweenSelectedPosition(const Offset& globalOffset) const;
+    virtual bool BetweenSelectedPosition(const Offset& globalOffset);
+    virtual bool IsTriggerParentToScroll()
+    {
+        return false;
+    }
+    virtual bool HasScrollableParent()
+    {
+        return false;
+    }
+    virtual void TriggerScrollableParentToScroll(const OffsetF& globalPoint, bool isStopAutoScroll) {}
+    virtual void EnableMouseLeftSelectionTracking(const OffsetF& globalPoint) {}
+    virtual void StopMouseLeftSelectionTracking() {}
     bool IsSelectionSessionOwner(const RefPtr<SelectionContainerChild>& child) const;
     bool HandleSelectionStart(const SelectionStartEventInfo& eventInfo);
     bool HandleSelectionStart(const OffsetF& fixedPointInContainer,
@@ -84,10 +106,14 @@ public:
         bool fixedHandleIsTopOnStart = true);
     bool HandleSelectionUpdate(const SelectionEndEventInfo& eventInfo);
     bool HandleSelectionUpdate(const OffsetF& movingPointInContainer);
+    bool ProcessGestureSelectionUpdate(const SelectionEndEventInfo& eventInfo, const OffsetF& globalPoint);
     bool ExtendSelectionFromFixedAnchor(const SelectionEndEventInfo& eventInfo);
     bool ProcessSelectionEndCommon(bool showOverlay);
     bool ProcessGestureSelectionEnd(const SelectionEndEventInfo& eventInfo);
+    bool ProcessGestureSelectionEnd(const SelectionEndEventInfo& eventInfo, const OffsetF& globalPoint);
     bool ProcessMouseLeftRelease(const SelectionEndEventInfo& eventInfo);
+    bool ProcessMouseLeftSelectionUpdate(const SelectionEndEventInfo& eventInfo, const OffsetF& globalPoint);
+    void StopMouseSelectionTracking(const OffsetF& globalPoint);
     bool ProcessHandleMoveSelectionEnd(const OffsetF& movingPointInContainer);
     void ResetAllSelection();
     void ReportSelectionText();
@@ -105,6 +131,10 @@ public:
     {
         return selectionEndChild_.Upgrade();
     }
+    RefPtr<SelectionContainerChild> GetSelectionMovingChild() const
+    {
+        return selectionMovingChild_.Upgrade();
+    }
 
 protected:
     struct SelectionChildSortInfo {
@@ -113,16 +143,22 @@ protected:
     };
 
     void SortChildList();
+    bool HandleSelectionStartCommon(const RefPtr<SelectionContainerChild>& startChild,
+        int32_t startIndex, int32_t endIndex, bool fixedHandleIsTopOnStart = true);
     void CollectAndNotifySelectionChange();
     void SortSelectionBoundaryChildren(const RefPtr<FrameNode>& containerNode);
     void NotifyRegisteredChildrenPropertyUpdate(uint32_t flags);
     void ResetSelectionSessionState();
+    void UpdateSelectionMovingChild(const RefPtr<SelectionContainerChild>& child);
+    virtual void OnSelectionMovingChildChange(const RefPtr<SelectionContainerChild>& child) {}
 
     std::list<WeakPtr<SelectionContainerChild>> registeredChildList_;
     OffsetF fixedPointInContainer_;
+    OffsetF fixedPointInChildLocal_;
     WeakPtr<SelectionContainerChild> selectionStartChild_;
     WeakPtr<SelectionContainerChild> selectionEndChild_;
     WeakPtr<SelectionContainerChild> selectionFixedChild_;
+    WeakPtr<SelectionContainerChild> selectionMovingChild_;
     int32_t selectionFixedIndex_ = -1;
     int32_t selectionStartIndex_ = -1;
     int32_t selectionEndIndex_ = -1;

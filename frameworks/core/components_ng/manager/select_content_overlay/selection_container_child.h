@@ -34,8 +34,14 @@ class SpanString;
 
 namespace OHOS::Ace::NG {
 class SelectionContainer;
+class ScrollablePattern;
 enum class SelectRectsType;
 struct OverlayRequest;
+
+struct ScrollableParentResult {
+    WeakPtr<ScrollablePattern> scrollable;
+    bool isInsideContainer = false;
+};
 
 struct SelectionIndexRange {
     int32_t startIndex = -1;
@@ -86,7 +92,8 @@ public:
     void UnregisterChild();
     bool HandleSelectionStart(const Offset& localPoint, int32_t startIndex, int32_t endIndex);
     bool HandleSelectionUpdate(const Offset& localPoint);
-    bool HandleSelectionEnd(const Offset& localPoint);
+    bool ProcessGestureSelectionUpdate(const Offset& localPoint, const OffsetF& globalPoint);
+    bool ProcessGestureSelectionEnd(const Offset& localPoint, const OffsetF& globalPoint);
     bool ProcessMouseLeftRelease(const Offset& localPoint);
     bool IsSelectionSessionOwner() const;
     void SetSelectionHoldCallback();
@@ -97,7 +104,14 @@ public:
     void ToggleMenu();
     void HideMenu(bool noAnimation = false, bool showSubMenu = false);
     bool IsUsingMouse();
+    bool IsTriggerParentToScroll();
+    bool HasScrollableParent();
+    void TriggerScrollableParentToScroll(const OffsetF& globalPoint, bool isStopAutoScroll);
+    bool ProcessMouseLeftSelectionUpdate(const Offset& localPoint, const OffsetF& globalPoint);
+    void StopMouseSelectionTracking(const OffsetF& globalPoint);
     void UpdateHandleColor();
+    virtual void UpdateChildHandleGlobalOffset() {}
+    virtual OffsetF GetChildHandleGlobalOffset() const { return {}; }
     bool SelectOverlayIsOn();
     void MarkChildSortDirty();
     void ResetAllSelection();
@@ -132,8 +146,8 @@ public:
     std::optional<bool> GetContainerEnableHapticFeedback() const;
     std::optional<Color> GetContainerSelectedBackgroundColor() const;
 
-    virtual std::optional<SelectHandleInfo> GetFirstHandleInfo() = 0;
-    virtual std::optional<SelectHandleInfo> GetSecondHandleInfo() = 0;
+    virtual std::optional<RectF> GetFirstHandleRect() = 0;
+    virtual std::optional<RectF> GetSecondHandleRect() = 0;
     virtual RectF GetSelectionArea(const RefPtr<FrameNode>& targetNode, SelectRectsType pos)
     {
         return {};
@@ -150,7 +164,7 @@ public:
     virtual void SelectTextByIndex(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SelectAll() {}
     virtual void UpdateSelectionHandleInfo() {}
-    virtual bool BetweenSelectedPosition(const Offset& globalOffset) const
+    virtual bool BetweenSelectedPosition(const Offset& globalOffset)
     {
         return false;
     }
@@ -185,6 +199,8 @@ public:
     {
         return TextSpanType::NONE;
     }
+
+    ScrollableParentResult FindNearestScrollable() const;
 
 protected:
     WeakPtr<SelectionContainer> selectionContainer_;

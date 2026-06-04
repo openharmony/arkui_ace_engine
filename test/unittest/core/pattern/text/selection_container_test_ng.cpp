@@ -148,14 +148,14 @@ public:
         canSelect_ = can;
     }
 
-    std::optional<SelectHandleInfo> GetFirstHandleInfo() override
+    std::optional<RectF> GetFirstHandleRect() override
     {
-        return {};
+        return std::nullopt;
     }
 
-    std::optional<SelectHandleInfo> GetSecondHandleInfo() override
+    std::optional<RectF> GetSecondHandleRect() override
     {
-        return {};
+        return std::nullopt;
     }
 
     void UpdateSelectionHandleInfo() override
@@ -181,7 +181,7 @@ public:
         endIndex_ = TEST_SELECT_ALL_END_INDEX;
     }
 
-    bool BetweenSelectedPosition(const Offset& globalOffset) const override
+    bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
         return betweenSelectedPosition_;
     }

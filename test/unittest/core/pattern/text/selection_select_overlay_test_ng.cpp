@@ -130,12 +130,10 @@ public:
         endIndex_ = end;
     }
 
-    std::optional<SelectHandleInfo> GetFirstHandleInfo() override
+    std::optional<RectF> GetFirstHandleRect() override
     {
         if (hasFirstHandle_) {
-            SelectHandleInfo info;
-            info.paintRect = RectF(TEST_RECT_X, TEST_RECT_Y, TEST_RECT_WIDTH, TEST_RECT_HEIGHT);
-            return info;
+            return RectF(TEST_RECT_X, TEST_RECT_Y, TEST_RECT_WIDTH, TEST_RECT_HEIGHT);
         }
         return std::nullopt;
     }
@@ -145,12 +143,10 @@ public:
         hasFirstHandle_ = has;
     }
 
-    std::optional<SelectHandleInfo> GetSecondHandleInfo() override
+    std::optional<RectF> GetSecondHandleRect() override
     {
         if (hasSecondHandle_) {
-            SelectHandleInfo info;
-            info.paintRect = RectF(TEST_RECT_X + 100.0f, TEST_RECT_Y, TEST_RECT_WIDTH, TEST_RECT_HEIGHT);
-            return info;
+            return RectF(TEST_RECT_X + 100.0f, TEST_RECT_Y, TEST_RECT_WIDTH, TEST_RECT_HEIGHT);
         }
         return std::nullopt;
     }

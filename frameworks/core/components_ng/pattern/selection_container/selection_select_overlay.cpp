@@ -29,6 +29,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float BOX_EPSILON = 0.5f;
+
 OffsetF GetHandleAnchorPoint(const RectF& rect)
 {
     auto point = rect.GetOffset();
@@ -39,6 +41,31 @@ OffsetF GetHandleAnchorPoint(const RectF& rect)
 CopyOptions MergeCopyOption(CopyOptions current, CopyOptions next)
 {
     return static_cast<int32_t>(current) <= static_cast<int32_t>(next) ? current : next;
+}
+std::optional<RectF> GetVisualStartHandleRect(const RefPtr<SelectionContainerChild>& child)
+{
+    auto indexes = child->GetSelectionIndexes();
+    return indexes.startIndex > indexes.endIndex
+        ? child->GetSecondHandleRect() : child->GetFirstHandleRect();
+}
+
+std::optional<RectF> GetVisualEndHandleRect(const RefPtr<SelectionContainerChild>& child)
+{
+    auto indexes = child->GetSelectionIndexes();
+    return indexes.startIndex > indexes.endIndex
+        ? child->GetFirstHandleRect() : child->GetSecondHandleRect();
+}
+
+int32_t GetVisualStartHandleIndex(const RefPtr<SelectionContainerChild>& child)
+{
+    auto indexes = child->GetSelectionIndexes();
+    return std::min(indexes.startIndex, indexes.endIndex);
+}
+
+int32_t GetVisualEndHandleIndex(const RefPtr<SelectionContainerChild>& child)
+{
+    auto indexes = child->GetSelectionIndexes();
+    return std::max(indexes.startIndex, indexes.endIndex);
 }
 } // namespace
 
@@ -57,6 +84,47 @@ RefPtr<FrameNode> SelectionSelectOverlay::GetOwner()
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetHost();
+}
+
+bool SelectionSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
+{
+    if (!BaseTextSelectOverlay::CheckTouchInHostNode(touchPoint)) {
+        return false;
+    }
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto containerNode = pattern->GetHost();
+    CHECK_NULL_RETURN(containerNode, false);
+    for (const auto& weakChild : pattern->GetChildList()) {
+        auto child = weakChild.Upgrade();
+        CHECK_NULL_CONTINUE(child);
+        auto childNode = child->GetHostNode();
+        CHECK_NULL_CONTINUE(childNode);
+        auto geo = childNode->GetGeometryNode();
+        CHECK_NULL_CONTINUE(geo);
+        auto childOrigin = childNode->ConvertPoint(OffsetF(0.0f, 0.0f), containerNode);
+        auto childRect = RectF(childOrigin, geo->GetFrameSize());
+        if (childRect.IsInRegion(touchPoint)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void SelectionSelectOverlay::OnHandleGlobalTouchEvent(
+    SourceType sourceType, TouchType touchType, bool touchInside)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    if (IsMouseClickDown(sourceType, touchType) && !touchInside) {
+        pattern->ResetAllSelection();
+    }
+    BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
+    if (IsTouchUp(sourceType, touchType) &&
+        GetClearPolicy() == TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH) {
+        pattern->ResetAllSelection();
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    }
 }
 
 bool SelectionSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -78,7 +146,119 @@ std::optional<SelectHandleInfo> SelectionSelectOverlay::GetFirstHandleInfo()
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto startChild = pattern->GetSelectionStartChild();
     CHECK_NULL_RETURN(startChild, std::nullopt);
-    return startChild->GetFirstHandleInfo();
+    auto handleRect = GetVisualStartHandleRect(startChild);
+    CHECK_NULL_RETURN(handleRect.has_value(), std::nullopt);
+
+    SelectHandleInfo handleInfo;
+    handleInfo.paintRect = handleRect.value();
+    handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
+    auto localPaintRect = handleRect.value();
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    handleInfo.localPaintRect = localPaintRect;
+    SetTransformPaintInfo(handleInfo, localPaintRect);
+    handleInfo.forceDraw = !CheckSwitchToMode(HandleLevelMode::OVERLAY);
+    return handleInfo;
+}
+
+void SelectionSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
+{
+    if (handleLevelMode_ != mode && mode == HandleLevelMode::OVERLAY) {
+        auto pattern = pattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto startChild = pattern->GetSelectionStartChild();
+        auto endChild = pattern->GetSelectionEndChild();
+        if (startChild) {
+            startChild->UpdateSelectionHandleInfo();
+        }
+        if (endChild) {
+            endChild->UpdateSelectionHandleInfo();
+        }
+        UpdateAllHandlesOffset();
+    }
+    if (mode == HandleLevelMode::OVERLAY) {
+        BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+    } else {
+        BaseTextSelectOverlay::SetHandleLevelMode(mode);
+        BaseTextSelectOverlay::UpdateViewPort();
+    }
+}
+
+void SelectionSelectOverlay::UpdateTransformFlag()
+{
+    hasTransform_ = CheckHasTransformAttr();
+}
+
+bool SelectionSelectOverlay::IsClipHandleWithViewPort()
+{
+    return !HasRenderTransform();
+}
+
+bool SelectionSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!GetRenderClipValue()) {
+        if (handleLevelMode_ == HandleLevelMode::EMBED) {
+            return true;
+        }
+        auto geoNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geoNode, false);
+        auto frameRect = geoNode->GetFrameRect();
+        RectF containerLocalRect(0.0f, 0.0f, frameRect.Width(), frameRect.Height());
+        auto localPaintRect = paintRect;
+        localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+        localPaintRect.SetOffset(
+            OffsetF(localPaintRect.GetX() + localPaintRect.Width() / 2.0f, localPaintRect.GetY()));
+        auto visibleContentRect = containerLocalRect.CombineRectT(localPaintRect);
+        visibleContentRect.SetOffset(visibleContentRect.GetOffset() + pattern->GetContainerPaintOffsetWithTransform());
+        visibleContentRect = GetVisibleRect(host, visibleContentRect);
+        return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
+    }
+    auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geoNode, false);
+    auto frameRect = geoNode->GetFrameRect();
+    RectF visibleContentRect(pattern->GetContainerPaintOffsetWithTransform(), frameRect.GetSize());
+    if (handleLevelMode_ == HandleLevelMode::OVERLAY) {
+        visibleContentRect = GetVisibleRect(host, visibleContentRect);
+    }
+    return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
+}
+
+bool SelectionSelectOverlay::GetRenderClipValue() const
+{
+    auto defaultClipValue = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, defaultClipValue);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, defaultClipValue);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultClipValue);
+    return renderContext->GetClipEdge().value_or(defaultClipValue);
+}
+
+bool SelectionSelectOverlay::CheckAndAdjustHandleWithContent(
+    const RectF& visibleContentRect, RectF& paintRect)
+{
+    if (visibleContentRect.IsEmpty()) {
+        return false;
+    }
+    auto paintLeft = paintRect.GetX() + paintRect.Width() / 2.0f;
+    PointF bottomPoint = { paintLeft, paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
+    bool bottomInRegion = visibleContentRect.IsInRegion(bottomPoint);
+    bool topInRegion = visibleContentRect.IsInRegion(topPoint);
+    if (IsClipHandleWithViewPort()) {
+        return bottomInRegion || topInRegion;
+    }
+    if (!bottomInRegion && topInRegion) {
+        paintRect.SetHeight(visibleContentRect.Bottom() - paintRect.Top());
+    } else if (bottomInRegion && !topInRegion) {
+        paintRect.SetHeight(paintRect.Bottom() - visibleContentRect.Top());
+        paintRect.SetTop(visibleContentRect.Top());
+    }
+    return bottomInRegion || topInRegion;
 }
 
 std::optional<SelectHandleInfo> SelectionSelectOverlay::GetSecondHandleInfo()
@@ -87,7 +267,18 @@ std::optional<SelectHandleInfo> SelectionSelectOverlay::GetSecondHandleInfo()
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto endChild = pattern->GetSelectionEndChild();
     CHECK_NULL_RETURN(endChild, std::nullopt);
-    return endChild->GetSecondHandleInfo();
+    auto handleRect = GetVisualEndHandleRect(endChild);
+    CHECK_NULL_RETURN(handleRect.has_value(), std::nullopt);
+
+    SelectHandleInfo handleInfo;
+    handleInfo.paintRect = handleRect.value();
+    handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
+    auto localPaintRect = handleRect.value();
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    handleInfo.localPaintRect = localPaintRect;
+    SetTransformPaintInfo(handleInfo, localPaintRect);
+    handleInfo.forceDraw = !CheckSwitchToMode(HandleLevelMode::OVERLAY);
+    return handleInfo;
 }
 
 RectF SelectionSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
@@ -170,6 +361,35 @@ void SelectionSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
         overlayInfo.handlerColor = handleColor;
     }
     OnUpdateOnCreateMenuCallback(overlayInfo);
+    overlayInfo.onHandlePanMove = [weak = WeakClaim(this)](const GestureEvent& event, bool isFirst) {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        auto pattern = (overlay->pattern_).Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->TriggerScrollableParentToScroll(
+            OffsetF(event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY()), false);
+    };
+    overlayInfo.onHandlePanEnd = [weak = WeakClaim(this)](const GestureEvent& event, bool isFirst) {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        auto pattern = (overlay->pattern_).Upgrade();
+        CHECK_NULL_VOID(pattern && pattern->IsTriggerParentToScroll());
+        pattern->TriggerScrollableParentToScroll(
+            OffsetF(event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY()), true);
+    };
+    overlayInfo.getDeltaHandleOffset = [weak = WeakClaim(this)]() {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_RETURN(overlay, OffsetF());
+        auto hostPaintOffset = overlay->GetHotPaintOffset();
+        auto pattern = (overlay->pattern_).Upgrade();
+        if (!pattern || !pattern->IsTriggerParentToScroll()) {
+            overlay->hostPaintOffset_ = hostPaintOffset;
+            return OffsetF();
+        }
+        auto deltaOffset = overlay->hostPaintOffset_ - hostPaintOffset;
+        overlay->hostPaintOffset_ = hostPaintOffset;
+        return deltaOffset;
+    };
     overlayInfo.menuCallback.showMenuOnMoveDone = [weak = WeakClaim(this)]() {
         auto overlay = weak.Upgrade();
         CHECK_NULL_RETURN(overlay, true);
@@ -235,6 +455,69 @@ void SelectionSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
     OnMenuItemAction(id, type);
 }
 
+void SelectionSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    auto isDragging = GetIsHandleDragging();
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    if (IsAncestorNodeGeometryChange(flag)) {
+        auto startChild = pattern->GetSelectionStartChild();
+        auto endChild = pattern->GetSelectionEndChild();
+        if (startChild) {
+            startChild->UpdateSelectionHandleInfo();
+        }
+        if (endChild) {
+            endChild->UpdateSelectionHandleInfo();
+        }
+        UpdateViewPort();
+        if (isDragging && isDraggingFirstHandle_) {
+            UpdateSecondHandleOffset();
+            return;
+        }
+        if (isDragging && !isDraggingFirstHandle_) {
+            UpdateFirstHandleOffset();
+            return;
+        }
+        UpdateAllHandlesOffset();
+        FlushHandleNodeIfNeeded();
+    }
+    if (!isDragging) {
+        BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+    }
+}
+
+SelectionSelectOverlay::FlushHandleNodeGuard::FlushHandleNodeGuard(const RefPtr<SelectionSelectOverlay>& overlay)
+    : overlay_(overlay)
+{
+    CHECK_NULL_VOID(overlay_);
+    overlay_->isFlushingHandleNode_ = true;
+}
+
+SelectionSelectOverlay::FlushHandleNodeGuard::~FlushHandleNodeGuard()
+{
+    CHECK_NULL_VOID(overlay_);
+    overlay_->isFlushingHandleNode_ = false;
+}
+
+void SelectionSelectOverlay::FlushHandleNodeIfNeeded()
+{
+    if (isFlushingHandleNode_) {
+        return;
+    }
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    auto handleNode = manager->GetHandleOverlayNode();
+    CHECK_NULL_VOID(handleNode);
+    auto pipeline = handleNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    FlushHandleNodeGuard flushGuard(Claim(this));
+    pipeline->FlushUITaskWithSingleDirtyNode(handleNode);
+    auto renderTask = handleNode->CreateRenderTask(true);
+    if (renderTask) {
+        (*renderTask)();
+    }
+}
+
 void SelectionSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
     BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
@@ -247,17 +530,19 @@ void SelectionSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
 
     auto fixedChild = isFirst ? pattern->GetSelectionEndChild() : pattern->GetSelectionStartChild();
     CHECK_NULL_VOID(fixedChild);
-    auto fixedHandle = isFirst ? fixedChild->GetSecondHandleInfo() : fixedChild->GetFirstHandleInfo();
+    auto fixedHandle = isFirst ? GetVisualEndHandleRect(fixedChild) : GetVisualStartHandleRect(fixedChild);
     CHECK_NULL_VOID(fixedHandle);
     auto containerNode = pattern->GetHostNode();
     CHECK_NULL_VOID(containerNode);
-    auto fixedPointInContainer = overlayRoot->ConvertPoint(GetHandleAnchorPoint(fixedHandle->paintRect), containerNode);
-    auto fixedIndexes = fixedChild->GetSelectionIndexes();
-    auto fixedIndex = isFirst ? fixedIndexes.endIndex : fixedIndexes.startIndex;
+    auto fixedPointInContainer = overlayRoot->ConvertPoint(GetHandleAnchorPoint(fixedHandle.value()), containerNode);
+    auto fixedIndex = isFirst ? GetVisualEndHandleIndex(fixedChild) : GetVisualStartHandleIndex(fixedChild);
     auto fixedHandleIsTopOnStart = !isFirst;
     pattern->HandleSelectionStart(fixedPointInContainer, fixedChild, fixedIndex, fixedIndex, fixedHandleIsTopOnStart);
+    pattern->UpdateMovingChildForHandle(isFirst);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
     manager->SetHandleCircleIsShow(isFirst, false);
+    hostPaintOffset_ = GetHotPaintOffset();
+    isDraggingFirstHandle_ = isFirst;
 }
 
 void SelectionSelectOverlay::OnHandleMove(const RectF& rect, bool isFirst)
@@ -291,7 +576,7 @@ void SelectionSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     if (!pattern->IsSelectedTypeChange()) {
         manager->ShowOptionMenu();
     }
-    manager->MarkInfoChange((isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
+    manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE | DIRTY_SELECT_AREA |
                             DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_ASK_CELIA);
     if (pattern->CheckSelectedTypeChange()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
@@ -302,6 +587,25 @@ void SelectionSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
     containerNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SelectionSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
+{
+    auto isDragging = GetIsHandleDragging();
+    if (isDragging) {
+        auto pattern = pattern_.Upgrade();
+        if (pattern) {
+            pattern->TriggerScrollableParentToScroll(OffsetF(), true);
+        }
+    }
+    BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
+    if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR ||
+        reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
+        auto pattern = pattern_.Upgrade();
+        if (pattern) {
+            pattern->ResetAllSelection();
+        }
+    }
 }
 
 std::string SelectionSelectOverlay::GetSelectedText()
@@ -354,6 +658,15 @@ bool SelectionSelectOverlay::IsShowSearch() const
     auto textTheme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, false);
     return textTheme->IsShowSearch();
+}
+
+OffsetF SelectionSelectOverlay::GetHotPaintOffset()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, hostPaintOffset_);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, hostPaintOffset_);
+    return renderContext->GetPaintRectWithTransform().GetOffset();
 }
 
 bool SelectionSelectOverlay::HasValidSelectedText() const
