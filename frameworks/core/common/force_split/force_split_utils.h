@@ -65,7 +65,7 @@ private:
     static bool ParseBehaviorModeConfig(const std::unique_ptr<JsonValue>& configJson, ForceSplitParam& config);
     static bool ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitParam& config);
     static bool ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor, ForceSplitParam& config);
-    static bool ParseSplitParam(const std::unique_ptr<JsonValue>& split, const std::string& splitType, 
+    static bool ParseSplitParam(const std::unique_ptr<JsonValue>& split, const std::string& splitType,
                                 std::optional<float>& splitRatio, bool& isDraggable);
     static bool ParseNavigationOptions(const std::unique_ptr<JsonValue>& configJson, ForceSplitParam& config);
     static bool ParsePagePairs(const std::unique_ptr<JsonValue>& pagePairs, ForceSplitParam& config);
