@@ -321,7 +321,7 @@ export class FrameNode implements MaterializedBase {
     static getFinalizer(): KPointer {
         return FrameNodeExtender.getDestroy();
     }
-    public isWeakNode(): boolean {
+    public isMinimized(): boolean {
         return false;
     }
     public isModifiable(): boolean {
@@ -1169,7 +1169,7 @@ export class BuilderRootWeakFrameNode<T> extends BuilderRootFrameNode<T> {
     getType(): string {
         return 'BuilderRootWeakFrameNode';
     }
-    public isWeakNode(): boolean {
+    public isMinimized(): boolean {
         return true;
     }
     public getRenderNode(): RenderNode | null {
