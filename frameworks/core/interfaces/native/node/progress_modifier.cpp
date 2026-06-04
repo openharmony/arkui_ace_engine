@@ -489,6 +489,28 @@ void SetProgressBackgroundColorWithColorSpace(
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
+void SetBackgroundColorForHDR(
+    ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32* hdrValues, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(hdrValues);
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else if (ColorSpace::BT2020 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::BT2020);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateWithResourceObjIfNeeded(frameNode, JsProgressResourceType::BackgroundColor, colorRawPtr, false);
+    }
+
+    ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 void ResetProgressBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -604,6 +626,7 @@ const ArkUIProgressModifier* GetProgressModifier()
         .resetProgressStyle = ResetProgressStyle,
         .setProgressBackgroundColor = SetProgressBackgroundColor,
         .setProgressBackgroundColorWithColorSpace = SetProgressBackgroundColorWithColorSpace,
+        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
         .resetProgressBackgroundColor = ResetProgressBackgroundColor,
         .setProgressTotal = SetProgressTotal,
         .setProgressType = SetProgressType,
@@ -634,6 +657,7 @@ const CJUIProgressModifier* GetCJUIProgressModifier()
         .resetProgressStyle = ResetProgressStyle,
         .setProgressBackgroundColor = SetProgressBackgroundColor,
         .setProgressBackgroundColorWithColorSpace = SetProgressBackgroundColorWithColorSpace,
+        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
         .resetProgressBackgroundColor = ResetProgressBackgroundColor,
         .setProgressTotal = SetProgressTotal,
         .setProgressType = SetProgressType,

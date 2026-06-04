@@ -627,7 +627,13 @@ void ProgressModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& valu
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetUserInitiatedBgColor(true);
+
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value, frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto headRoomcolor = value.GetHeadRoomColor();
+    renderContext->SetHDRColorHeadRoom(
+        headRoomcolor.has_value()? headRoomcolor.value().headRoom : 1.0f);
 }
 
 double ProgressModelNG::GetValue(FrameNode* frameNode)

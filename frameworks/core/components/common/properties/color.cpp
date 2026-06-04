@@ -310,13 +310,34 @@ Color Color::FromFloat(double red, double green, double blue, double opacity, do
 
 Color Color::BlendColor(const Color& overlayColor) const
 {
+    auto alphaRate = static_cast<float>(overlayColor.GetAlpha()) / MAX_ALPHA;
+    auto colorWithHeadRoomOptional = GetHeadRoomColor();
+    if (colorWithHeadRoomOptional.has_value()) {
+        auto colorWithHeadRoom = colorWithHeadRoomOptional.value();
+        float hdrValues[5] = {
+            static_cast<float>(colorWithHeadRoom.red) * (1.0f - alphaRate) + overlayColor.GetRed() * alphaRate,
+            static_cast<float>(colorWithHeadRoom.green) * (1.0f - alphaRate) + overlayColor.GetGreen() * alphaRate,
+            static_cast<float>(colorWithHeadRoom.blue) * (1.0f - alphaRate) + overlayColor.GetBlue() * alphaRate,
+            static_cast<float>(colorWithHeadRoom.alpha),
+            static_cast<float>(colorWithHeadRoom.headRoom)
+        };
+        auto newColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+        if (ColorSpace::DISPLAY_P3 == colorSpace_) {
+            newColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+        } else if (ColorSpace::BT2020 == colorSpace_) {
+            newColor.SetColorSpace(ColorSpace::BT2020);
+        } else {
+            newColor.SetColorSpace(ColorSpace::SRGB);
+        }
+        return newColor;
+    }
+
     if (GetValue() == Color::TRANSPARENT.GetValue()) {
         return overlayColor;
     }
     if (GetAlpha() < static_cast<uint8_t>(MAX_ALPHA)) {
         return BlendColorWithAlpha(overlayColor);
     }
-    auto alphaRate = static_cast<float>(overlayColor.GetAlpha()) / MAX_ALPHA;
     auto newRed = static_cast<uint8_t>(GetRed() * (1.0f - alphaRate) + overlayColor.GetRed() * alphaRate);
     auto newGreen = static_cast<uint8_t>(GetGreen() * (1.0f - alphaRate) + overlayColor.GetGreen() * alphaRate);
     auto newBlue = static_cast<uint8_t>(GetBlue() * (1.0f - alphaRate) + overlayColor.GetBlue() * alphaRate);
