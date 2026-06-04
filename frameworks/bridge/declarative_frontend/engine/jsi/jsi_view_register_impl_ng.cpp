@@ -118,7 +118,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
@@ -448,12 +447,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPolygon::JSBind(globalObj);
     JSPolyline::JSBind(globalObj);
     JSEllipse::JSBind(globalObj);
-    JSTextPicker::JSBind(globalObj);
     JSContainerPicker::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
-    JSTextPickerDialog::JSBind(globalObj);
-#endif
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
     JSTextArea::JSBind(globalObj);

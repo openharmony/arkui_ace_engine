@@ -201,6 +201,10 @@ interface WaterFlowComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface TextPickerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 declare class TextForegroundColorModifier extends ModifierWithKey<object> {
     constructor(value: object);
 }

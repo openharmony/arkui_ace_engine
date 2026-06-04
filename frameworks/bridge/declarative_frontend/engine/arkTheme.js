@@ -1208,6 +1208,7 @@ ArkThemeWhiteList.whiteList = [
     'JSQRCode',
     'JSRadio',
     'JSTextClock',
+    'JSTextPicker',
     'JSTimePicker',
     'LoadingProgress',
     'Progress',
@@ -1215,7 +1216,6 @@ ArkThemeWhiteList.whiteList = [
     'JSSearch',
     'Swiper',
     'Text',
-    'TextPicker',
 ];
 
 export default { ArkThemeScopeManager };

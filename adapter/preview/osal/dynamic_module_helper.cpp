@@ -123,6 +123,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "DatePicker", "datepicker" },
         { "DatePickerDialog", "datepicker" },
         { "LazyVGridLayout", "lazygridlayout" },
+        { "TextPicker", "textpicker" },
+        { "TextPickerDialog", "textpicker" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

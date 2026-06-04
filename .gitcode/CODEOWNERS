@@ -603,6 +603,7 @@ frameworks/bridge/declarative_frontend/ark_direct_component/src/arktextclock.ts 
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkimageanimator.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktoggle.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arksymbolspan.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arktextpicker.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
@@ -699,7 +700,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkTabContent.ts @arkui
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTabs.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextArea.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextInput.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkTextPicker.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextTimer.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkText.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTimePicker.ts @arkui001

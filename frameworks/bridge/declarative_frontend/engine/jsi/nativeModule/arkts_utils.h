@@ -584,6 +584,13 @@ public:
         const EcmaVM* vm, ArkUINodeHandle& nativeNode, const Local<JSValueRef>& value);
     static void SetRenderStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length);
 
+    static bool ParseLengthMetricsToDimension(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj, DimensionUnit defaultUnit = DimensionUnit::FP);
+    static void ParseJsLengthMetricsToDimension(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, Dimension& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsBool(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool& result);
+    static RefPtr<ResourceWrapper> CreateJsResourceWrapper(
+        const EcmaVM* vm, const Local<JSValueRef>& jsObj, RefPtr<ResourceObject>& resourceObject);
     template<typename T>
     static T GetPropertyValue(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue);

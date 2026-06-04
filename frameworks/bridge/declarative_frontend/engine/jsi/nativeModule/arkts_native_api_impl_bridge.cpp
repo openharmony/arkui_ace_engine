@@ -62,7 +62,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h"
@@ -570,6 +569,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "DatePicker" },
         { "DatePickerDialog" },
         { "LazyVGridLayout" },
+        { "TextPicker" },
+        { "TextPickerDialog" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -1629,7 +1630,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTabContentAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSelectAttributes(object, vm);
-    RegisterTextpickerAttributes(object, vm);
     RegisterThemeAttributes(object, vm);
     RegisterScrollAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);
@@ -1671,78 +1671,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #endif
     RegisterContainerPickerAttributes(object, vm);
     return object;
-}
-
-void ArkUINativeModule::RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto textpicker = panda::ObjectRef::New(vm);
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCanLoop"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetCanLoop));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedIndex"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetSelectedIndex));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetTextStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetSelectedTextStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDisappearTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDisappearTextStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDefaultPickerItemHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDefaultPickerItemHeight));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetBackgroundColor));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCanLoop"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetCanLoop));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedIndex"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetSelectedIndex));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetTextStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetSelectedTextStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisappearTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDisappearTextStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDefaultPickerItemHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDefaultPickerItemHeight));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetBackgroundColor));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDivider));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDivider));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGradientHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetGradientHeight));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGradientHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetGradientHeight));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDisableTextStyleAnimation"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDisableTextStyleAnimation));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisableTextStyleAnimation"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDisableTextStyleAnimation));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDefaultTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDefaultTextStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDefaultTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDefaultTextStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextpickerEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetTextPickerEnableHapticFeedback));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextpickerEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetTextPickerEnableHapticFeedback));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetOnChange));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetOnChange));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnScrollStop"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetOnScrollStop));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnScrollStop"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetOnScrollStop));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextpickerSelectedBackgroundStyle"),
-        panda::FunctionRef::New(
-            const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetTextPickerSelectedBackgroundStyle));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextpickerSelectedBackgroundStyle"),
-        panda::FunctionRef::New(
-            const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetTextPickerSelectedBackgroundStyle));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textpicker"), textpicker);
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDigitalCrownSensitivity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDigitalCrownSensitivity));
-    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDigitalCrownSensitivity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDigitalCrownSensitivity));
 }
 
 void ArkUINativeModule::RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)

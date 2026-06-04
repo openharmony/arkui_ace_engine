@@ -214,6 +214,7 @@ if (is_ohos_standard_system) {
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkimageanimator",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkdatepicker",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arklazygridlayout",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktextpicker",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
@@ -259,6 +260,7 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkimagespan.abc",
       "${out_path}/arkui/ace_engine/arksymbolglyph.abc",
       "${out_path}/arkui/ace_engine/arkricheditor.abc",
+      "${out_path}/arkui/ace_engine/arktextpicker.abc",
       "${out_path}/arkui/ace_engine/arklazycolumnlayout.abc",
       "${out_path}/arkui/ace_engine/arktoggle.abc",
       "${out_path}/arkui/ace_engine/arkimageanimator.abc",

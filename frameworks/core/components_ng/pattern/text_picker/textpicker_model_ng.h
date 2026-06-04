@@ -166,6 +166,11 @@ public:
     static void ParseGradientHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ParseDividerResObj(FrameNode* frameNode, const NG::ItemDivider& divider);
     static void TextPickerRemoveResObj(FrameNode* frameNode, const std::string& key);
+    static void SetOnEnterSelectedArea(FrameNode* frameNode, TextChangeEvent&& onEnterSelectedArea);
+    static void HasUserDefinedDisappearFontFamily(FrameNode* frameNode, bool isUserDefined);
+    static void HasUserDefinedNormalFontFamily(FrameNode* frameNode, bool isUserDefined);
+    static void HasUserDefinedSelectedFontFamily(FrameNode* frameNode, bool isUserDefined);
+    static void HasUserDefinedOpacity(FrameNode* frameNode);
 
 private:
     void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
