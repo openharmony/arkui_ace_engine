@@ -557,8 +557,8 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogPr
         .levelOrder = dialogProps.levelOrder,
         .dialogLevelMode = dialogProps.dialogLevelMode,
         .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
         .displayModeInSubWindow = dialogProps.displayModeInSubWindow,
+        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
         .customCNode = dialogProps.customCNode,
         .systemMaterial = dialogProps.systemMaterial };
     ParsePartialDialogPropertiesFromProps(dialogProps, dialogAttr);
