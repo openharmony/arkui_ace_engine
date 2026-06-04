@@ -173,6 +173,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/interfaces/mock_uicontent_getter.cpp",
     "environment_manager_test_ng.cpp",
     "pipeline_context_test_ng.cpp",
+    "pipeline_context_test_ng_eight.cpp",
     "pipeline_context_test_ng_five.cpp",
     "pipeline_context_test_ng_four.cpp",
     "pipeline_context_test_ng_new.cpp",
