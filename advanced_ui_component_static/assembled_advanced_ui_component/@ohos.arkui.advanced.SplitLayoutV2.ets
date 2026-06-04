@@ -22,6 +22,9 @@ import {
 import { Param, Require, Local } from '@ohos.arkui.stateManagement';
 import { LengthMetrics } from '@ohos.arkui.node';
 
+@Builder
+type ContainerCallback = () => void;
+
 const TEXT_MARGIN_TOP_4: number = 4;
 const TEXT_MARGIN_BOTTOM_8: number = 8;
 const TEXT_MARGIN_BOTTOM_24: number = 24;
@@ -30,13 +33,13 @@ const TEXT_MARGIN_RIGHT_48: number = 48;
 
 @ComponentV2
 export struct SplitLayoutV2 {
-  @BuilderParam container: () => void = this.doNothingBuilder;
+  @BuilderParam container: ContainerCallback = this.doNothingBuilder;
   @Local areaWidth: number = 0;
   @Local imageBackgroundColor: string = '#19000000';
   @Local sizeValue: string = '';
 
-  @Require @Param mainImage: ResourceStr = '';
-  @Require @Param primaryText: ResourceStr = '';
+  @Param mainImage: ResourceStr = '';
+  @Param primaryText: ResourceStr = '';
   @Param secondaryText?: ResourceStr = '';
   @Param tertiaryText?: ResourceStr = '';
 

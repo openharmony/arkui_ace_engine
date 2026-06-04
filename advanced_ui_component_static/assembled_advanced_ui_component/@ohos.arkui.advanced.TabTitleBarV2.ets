@@ -28,7 +28,7 @@ import {
 } from "@ohos.arkui.component";
 import { BusinessError } from '@ohos.base';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
-import { Param, Local, Once } from '@ohos.arkui.stateManagement';
+import { Param, Local, Once, ObservedV2, Trace } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from "@ohos.arkui.UIContext";
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
@@ -39,22 +39,92 @@ import hilog from '@ohos.hilog';
 import promptAction from '@ohos.promptAction';
 import i18n from '@ohos.i18n';
 
-export class TabTitleBarV2MenuItem {
-  value: ResourceStr = '';
+/**
+ * Callback function when click on this menu item.
+ */
+type OnActionCallback = () => void;
+
+/**
+ * Options for creating a menu item instance.
+ */
+export interface TabTitleBarV2MenuItemParams {
+  value: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
-  isEnabled?: boolean;
-  action?: () => void;
   label?: ResourceStr;
+  isEnabled?: boolean;
+  action?: OnActionCallback;
   accessibilityText?: ResourceStr;
-  accessibilityLevel?: string;
   accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
 }
 
-export class TabTitleBarV2TabItem {
-  title: ResourceStr = '';
+/**
+ * Declaration of the menu item on the right side.
+ */
+@ObservedV2
+export class TabTitleBarV2MenuItem {
+  @Trace
+  value: ResourceStr = '';
+  @Trace
+  symbolStyle?: SymbolGlyphModifier;
+  @Trace
+  label?: ResourceStr;
+  @Trace
+  isEnabled?: boolean;
+  @Trace
+  action?: OnActionCallback;
+  @Trace
+  accessibilityText?: ResourceStr;
+  @Trace
+  accessibilityDescription?: ResourceStr;
+  @Trace
+  accessibilityLevel?: string;
+
+  constructor(params?: TabTitleBarV2MenuItemParams) {
+    this.value = params?.value ?? '';
+    this.symbolStyle = params?.symbolStyle;
+    this.label = params?.label;
+    this.isEnabled = params?.isEnabled;
+    this.action = params?.action;
+    this.accessibilityText = params?.accessibilityText;
+    this.accessibilityDescription = params?.accessibilityDescription;
+    this.accessibilityLevel = params?.accessibilityLevel;
+  }
+}
+
+/**
+ * Options for creating a tab item instance.
+ */
+export interface TabTitleBarV2TabItemParams {
+  title: ResourceStr;
   icon?: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
 }
+
+/**
+ * Declaration of the tab item.
+ */
+@ObservedV2
+export class TabTitleBarV2TabItem {
+  @Trace
+  title: ResourceStr = '';
+  @Trace
+  icon?: ResourceStr;
+  @Trace
+  symbolStyle?: SymbolGlyphModifier;
+
+  constructor(params?: TabTitleBarV2TabItemParams) {
+    this.title = params?.title ?? '';
+    this.icon = params?.icon;
+    this.symbolStyle = params?.symbolStyle;
+  }
+}
+
+/**
+ * Content builder. Each component corresponds to a tab item.
+ */
+@Builder
+type OnSwiperContentCallback = () => void;
 
 const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
 const TEXT_EDITABLE_DIALOG = '18.3fp';
@@ -79,10 +149,10 @@ export struct TabTitleBarV2 {
   public static readonly correctionOffset: number = -40.0;
   public static readonly gradientMaskWidth: number = 24;
   private static instanceCount: number = 0;
-  
+
   @Param tabItems: Array<TabTitleBarV2TabItem> = new Array<TabTitleBarV2TabItem>();
-  @Param menuItems: Array<TabTitleBarV2MenuItem> = new Array<TabTitleBarV2MenuItem>();
-  @BuilderParam swiperContent: () => void = this.emptyBuilder;
+  @Param menuItems?: Array<TabTitleBarV2MenuItem> = new Array<TabTitleBarV2MenuItem>();
+  @BuilderParam swiperContent: OnSwiperContentCallback = this.emptyBuilder;
 
   @Local tabWidth: number = 0;
   @Local currentIndex: number = 0;
@@ -225,7 +295,7 @@ export struct TabTitleBarV2 {
         }
         .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
 
-        if (this.menuItems !== undefined && this.menuItems.length > 0) {
+        if (this.menuItems !== undefined && this.menuItems!.length > 0) {
           CollapsibleMenuSectionV2({
             menuItems: this.menuItems,
             index: 1 + TabTitleBarV2.instanceCount++,
@@ -281,11 +351,11 @@ export struct TabTitleBarV2 {
 struct CollapsibleMenuSectionV2 {
   @Param menuItems: Array<TabTitleBarV2MenuItem> = new Array<TabTitleBarV2MenuItem>();
   @Param index: number = 0;
-  @Param item: TabTitleBarV2MenuItem = {
+  @Param item: TabTitleBarV2MenuItem = new TabTitleBarV2MenuItem({
     value: PUBLIC_MORE,
     symbolStyle: new SymbolGlyphModifier(PUBLIC_MORE) as SymbolGlyphModifier,
     label: $r('sys.string.ohos_toolbar_more'),
-  } as TabTitleBarV2MenuItem;
+  });
   @Param @Once fontSize: number = 1;
 
   minFontSize: number = 1.75;
@@ -309,7 +379,7 @@ struct CollapsibleMenuSectionV2 {
   @Local buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier();
   @Local maxLines: int = 1;
 
-  @Local tabTitleDialogItem: TabTitleBarV2MenuItem = { value: '' } as TabTitleBarV2MenuItem;
+  @Local tabTitleDialogItem: TabTitleBarV2MenuItem = new TabTitleBarV2MenuItem({ value: '' });
   @Local tabTitleBarDialogText?: ResourceStr = '';
 
   getMoreIconFgColor(): ResourceColor {
@@ -603,7 +673,7 @@ struct CollapsibleMenuSectionV2 {
           return JSON.stringify(item.value + '' + index)
         })
     }
-    .width(ImageMenuItemV2.imageHotZoneWidth 
+    .width(ImageMenuItemV2.imageHotZoneWidth
       + CollapsibleMenuSectionV2.focusPadding * CollapsibleMenuSectionV2.marginsNum)
     .margin({ top: CollapsibleMenuSectionV2.focusPadding, bottom: CollapsibleMenuSectionV2.focusPadding } as Margin)
     .onAppear(() => {
@@ -614,7 +684,7 @@ struct CollapsibleMenuSectionV2 {
 
 @ComponentV2
 struct TabContentItemV2 {
-  @Param item: TabTitleBarV2TabItem = { title: '' } as TabTitleBarV2TabItem;
+  @Param item: TabTitleBarV2TabItem = new TabTitleBarV2TabItem({ title: '' });
   @Param index: number = 0;
   @Param maxIndex: number = 0;
   @Param onCustomClick?: (index: number) => void = undefined;
@@ -671,7 +741,7 @@ struct TabContentItemV2 {
 
   private completeCallback: ImageOnCompleteCallback | undefined = (info?: ImageCompleteEvent) => {
     let onImageCompleteValue: number =
-      this.getUIContext().px2vp(info?.componentWidth as int) 
+      this.getUIContext().px2vp(info?.componentWidth as int)
         + TabContentItemV2.paddingLeft + TabContentItemV2.paddingRight;
     this.onImageComplete?.(onImageCompleteValue);
   }
@@ -680,7 +750,7 @@ struct TabContentItemV2 {
       return;
     }
     let onImageComplete: number =
-      this.getUIContext().px2vp(event.componentWidth as int) 
+      this.getUIContext().px2vp(event.componentWidth as int)
         + TabContentItemV2.paddingLeft + TabContentItemV2.paddingRight
     this.onImageComplete?.(onImageComplete);
   }
@@ -880,7 +950,7 @@ struct TabContentItemV2 {
 
 @ComponentV2
 struct ImageMenuItemV2 {
-  @Param item: TabTitleBarV2MenuItem = { value: '' } as TabTitleBarV2MenuItem;
+  @Param item: TabTitleBarV2MenuItem = new TabTitleBarV2MenuItem({ value: '' });
   @Param index: number = 0;
 
   static readonly imageSize: number = 24;
@@ -970,7 +1040,7 @@ struct ImageMenuItemV2 {
           let code: int | undefined = (exception as ClassCastError)?.code;
           let message: string | undefined = (exception as ClassCastError)?.message;
           hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${
-            code},message:${message}`);
+          code},message:${message}`);
         }
         return label as string;
       }

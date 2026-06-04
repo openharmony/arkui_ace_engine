@@ -76,15 +76,48 @@ export enum FilterAccessibilityType {
   SEND_ACCESSIBILITY,
 }
 
-export interface FilterV2Params {
+export interface FilterV2DimensionParams {
   name: ResourceStr;
   options: Array<ResourceStr>;
 }
 
-export interface FilterV2Result {
+export interface FilterV2ResultParams {
   name: ResourceStr;
   index: int;
   value: ResourceStr;
+}
+
+@ObservedV2
+export class FilterV2Dimension {
+  @Trace
+  name: ResourceStr = '';
+  @Trace
+  options: Array<ResourceStr> = [];
+
+  constructor(params?: FilterV2DimensionParams) {
+    if (params) {
+      this.name = params.name;
+      this.options = params.options;
+    }
+  }
+}
+
+@ObservedV2
+export class FilterV2Result {
+  @Trace
+  name: ResourceStr = '';
+  @Trace
+  index: int = 0;
+  @Trace
+  value: ResourceStr = '';
+
+  constructor(params?: FilterV2ResultParams) {
+    if (params) {
+      this.name = params.name;
+      this.index = params.index;
+      this.value = params.value;
+    }
+  }
 }
 
 type FontWeightArray = Array<FontWeight>;
@@ -157,7 +190,7 @@ struct ListFilterRow {
   @Param isBackgroundHoverRow: BooleanArray = new BooleanArray();
   @Param isSelectedRow: BooleanArray = new BooleanArray();
   @Param filterAccessibilityText: FilterAccessibilityText = new FilterAccessibilityText();
-  @Param filterRow: FilterV2Params = { name: '', options: [] } as FilterV2Params;
+  @Param filterRow: FilterV2Dimension = new FilterV2Dimension({ name: '', options: [] });
   @Param onItemClick: (colIndex: number) => void = () => {};
   @Param rowIndex: number = 0;
   @Local maxAppFontScale: number = 1;
@@ -364,7 +397,7 @@ struct MultiFilterRow {
   @Param isArrowIconDown: ObservedBoolean = new ObservedBoolean(true);
   @Param isSelectedRow: BooleanArray = new BooleanArray();
   @Param filterAccessibilityText: FilterAccessibilityText = new FilterAccessibilityText();
-  @Param filterRow: FilterV2Params | null = null;
+  @Param filterRow: FilterV2Dimension | null = null;
   @Param onItemClick: (colIndex: number) => void = () => {};
   @Param fontSizeScale: number | undefined = undefined;
   @Local arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover');
@@ -857,11 +890,16 @@ export struct FilterV2 {
   @Builder
   doNothingBuilder() {
   };
-  @BuilderParam container: () => void = this.doNothingBuilder;
-  @Param multiFilters: Array<FilterV2Params> = [] as Array<FilterV2Params>;
-  @Param additionFilters: FilterV2Params | undefined = undefined;
-  @Param onFilterChanged: (filterV2Results: Array<FilterV2Result>) => void = () => {};
-  @Param filterV2Type: FilterV2Type = FilterV2Type.LIST_FILTER;
+  @BuilderParam
+  container: () => void = this.doNothingBuilder;
+  @Param
+  multiFilters: Array<FilterV2Dimension> = [] as Array<FilterV2Dimension>;
+  @Param
+  additionFilters?: FilterV2Dimension = undefined;
+  @Param
+  onFilterChanged: (filterV2Results: Array<FilterV2Result>) => void = () => {};
+  @Param
+  filterV2Type?: FilterV2Type = FilterV2Type.LIST_FILTER;
   @Local private colorArr: Array<ResourceArray> | undefined = undefined;
   @Local private fontWeightArr: Array<FontWeightArray> | undefined = undefined;
   @Local private backgroundColorArr: Array<ResourceArray> | undefined = undefined;
@@ -909,7 +947,7 @@ export struct FilterV2 {
   private callbacks: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
   private filterId: number = this.getUniqueId().toDouble();
   applicationContext: ApplicationContext = new ApplicationContext();
-  
+
   textColor(rowIndex: number, colIndex: number) {
     if (this.selectedFilters && (this.selectedFilters as Array<FilterV2Result>).length > rowIndex &&
       ((this.selectedFilters as Array<FilterV2Result>)[rowIndex.toInt()].index.toDouble()) === colIndex) {
@@ -984,7 +1022,7 @@ export struct FilterV2 {
       hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${code}, message: ${message}`);
     }
   }
-  
+
   @Monitor(['isFloatBarShow'])
   updateFocusForAccessibility(monitor: IMonitor): void {
     if (monitor.value<boolean>('isFloatBarShow')?.now) {
@@ -1055,7 +1093,7 @@ export struct FilterV2 {
   }
 
   private filterItemClick(rowIndex: number, colIndex: number): void {
-    let selectedFilterValue = (this.multiFilters as Array<FilterV2Params>)[rowIndex.toInt()].options[colIndex.toInt()];
+    let selectedFilterValue = (this.multiFilters as Array<FilterV2Dimension>)[rowIndex.toInt()].options[colIndex.toInt()];
     if (this.selectedFilters && colIndex !== (this.selectedFilters as Array<FilterV2Result>)[rowIndex.toInt()].index) {
       if (this.colorArr) {
         ((this.colorArr as Array<ResourceArray>)[rowIndex.toInt()] as ResourceArray)[colIndex.toInt()] =
@@ -1145,7 +1183,7 @@ export struct FilterV2 {
     eventInfo.textAnnouncedForAccessibility =
       this.getFloatAccessibilityText(resource, FilterAccessibilityType.SEND_ACCESSIBILITY);
     accessibility.sendAccessibilityEvent(eventInfo);
-    if (this.multiFilters && (this.multiFilters as Array<FilterV2Params>).length > 0) {
+    if (this.multiFilters && (this.multiFilters as Array<FilterV2Dimension>).length > 0) {
       if (this.filterV2Type === FilterV2Type.LIST_FILTER) {
         let requestFocusEventInfo: accessibility.EventInfo =
           new accessibility.EventInfo('requestFocusForAccessibility', this.bundleName, 'common');
@@ -1168,8 +1206,8 @@ export struct FilterV2 {
   private initParams(): void {
     if (!this.selectedFilters) {
       this.selectedFilters = [];
-      for (let filter of (this.multiFilters as Array<FilterV2Params>)) {
-        let result: FilterV2Result = { name: filter.name, index: -1, value: '' } as FilterV2Result;
+      for (let filter of (this.multiFilters as Array<FilterV2Dimension>)) {
+        let result: FilterV2Result = new FilterV2Result({ name: filter.name, index: -1, value: '' });
         if (filter.options.length > 0) {
           result.index = 0;
           result.value = filter.options[0];
@@ -1178,7 +1216,7 @@ export struct FilterV2 {
       }
       if (this.additionFilters && this.additionFilters?.name) {
         let result: FilterV2Result =
-          { name: this.additionFilters?.name as ResourceStr, index: -1, value: '' } as FilterV2Result;
+          new FilterV2Result({ name: this.additionFilters?.name as ResourceStr, index: -1, value: '' });
         this.selectedFilters?.push(result);
       }
       this.refreshFloatFilterBarText();
@@ -1191,7 +1229,7 @@ export struct FilterV2 {
       this.isArrowIconDownArr = [];
       this.isSelectedArr = [];
       this.floatArrowBgColor = $r('sys.color.ohos_id_color_background');
-      for (let filter of (this.multiFilters as Array<FilterV2Params>)) {
+      for (let filter of (this.multiFilters as Array<FilterV2Dimension>)) {
         let colorRow = new ResourceArray();
         let fontWeightRow = new FontWeightArray();
         let backgroundColorRow = new ResourceArray();
@@ -1234,7 +1272,7 @@ export struct FilterV2 {
       this.twoLineModeItemNum = [];
       this.twoLineModeItemNumRecord = [];
       this.downArrowShowState = [];
-      for (let filter of (this.multiFilters as Array<FilterV2Params>)) {
+      for (let filter of (this.multiFilters as Array<FilterV2Dimension>)) {
         let optionsLength: number = filter.options.length;
         this.twoLineModeItemNum?.push(new ObservedNumber(optionsLength));
         this.twoLineModeItemNumRecord?.push(new ObservedNumber(optionsLength));
@@ -1246,7 +1284,7 @@ export struct FilterV2 {
   @Builder
   ListFilter() {
     Column() {
-      ForEach((this.multiFilters as Array<FilterV2Params>), (filter: FilterV2Params, rowIndex: int) => {
+      ForEach((this.multiFilters as Array<FilterV2Dimension>), (filter: FilterV2Dimension, rowIndex: int) => {
         ListFilterRow({
           colorRow: this.colorArr ? (this.colorArr as Array<ResourceArray>)[rowIndex.toInt()] : this.colorArrNew,
           fontWeightRow: this.fontWeightArr ?
@@ -1264,7 +1302,7 @@ export struct FilterV2 {
           rowIndex: rowIndex.toDouble(),
           filterAccessibilityText: this.filterAccessibilityText,
         })
-      }, (filter: FilterV2Params): string => {
+      }, (filter: FilterV2Dimension): string => {
         return filter.name.toString();
       })
     }.width(PERCENT_100)
@@ -1285,7 +1323,7 @@ export struct FilterV2 {
   @Builder
   MultiLineFilter() {
     Column() {
-      ForEach((this.multiFilters as Array<FilterV2Params>), (filterItem: FilterV2Params, rowIndex: int) => {
+      ForEach((this.multiFilters as Array<FilterV2Dimension>), (filterItem: FilterV2Dimension, rowIndex: int) => {
         MultiFilterRow({
           colorRow: this.colorArr ?
             (this.colorArr as Array<ResourceArray>)[rowIndex.toInt()] : this.colorArrNew,
@@ -1314,7 +1352,7 @@ export struct FilterV2 {
           fontSizeScale: this.fontSizeScale,
           filterAccessibilityText: this.filterAccessibilityText,
         })
-      }, (filterItem: FilterV2Params): string => {
+      }, (filterItem: FilterV2Dimension): string => {
         return filterItem.name.toString();
       })
     }.width(PERCENT_100)
@@ -1332,7 +1370,7 @@ export struct FilterV2 {
   }
 
   private additionItemClick(index: number): void {
-    let additionRowIndex: number = (this.multiFilters as Array<FilterV2Params>).length;
+    let additionRowIndex: number = (this.multiFilters as Array<FilterV2Dimension>).length;
     if (this.selectedFilters &&
       (this.selectedFilters as Array<FilterV2Result>)[additionRowIndex.toInt()].index !== index) {
       this.additionColorArr &&
@@ -1376,7 +1414,7 @@ export struct FilterV2 {
   }
 
   private getSelected(index: number): boolean {
-    let additionRowIndex: number = (this.multiFilters as Array<FilterV2Params>).length;
+    let additionRowIndex: number = (this.multiFilters as Array<FilterV2Dimension>).length;
     if (this.selectedFilters &&
       (this.selectedFilters as Array<FilterV2Result>)[additionRowIndex.toInt()].index !== index) {
       return false;
@@ -1718,7 +1756,7 @@ export struct FilterV2 {
     .position({ x: 0, y: this.floatFilterBarPosition } as Position)
     .zIndex(1)
   }
-  
+
   build() {
     Stack({ alignContent: Alignment.Top }) {
       this.FloatFilterBar();
