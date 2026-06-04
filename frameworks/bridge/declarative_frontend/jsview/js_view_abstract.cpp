@@ -33,6 +33,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_scoring_log.h"
@@ -9553,6 +9554,7 @@ void JSViewAbstract::JsNextFocus(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.FocusBox", 1);
     if (!info[0]->IsObject() || info.Length() != 1) {
         return;
     }

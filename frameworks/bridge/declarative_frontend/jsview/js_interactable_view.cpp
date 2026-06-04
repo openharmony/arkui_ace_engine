@@ -18,6 +18,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utf_helper.h"
@@ -411,6 +412,7 @@ void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnAttach(const JSCallbackInfo& info)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.OnAttach", 1);
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
         ViewAbstractModel::GetInstance()->DisableOnAttach();
         return;
@@ -427,6 +429,7 @@ void JSInteractableView::JsOnAttach(const JSCallbackInfo& info)
 
 void JSInteractableView::JsOnDetach(const JSCallbackInfo& info)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.OnDetach", 1);
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
         ViewAbstractModel::GetInstance()->DisableOnDetach();
         return;
