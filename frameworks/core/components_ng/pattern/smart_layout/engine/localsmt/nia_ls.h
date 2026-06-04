@@ -360,7 +360,7 @@ public:
     bool litsBeenModified = true;              // whether these lits have modified since last removing duplicated lits
     void GcdForLit(Lit& l) const;
     bool CompareLitByCoffVars(const Lit& x, const Lit& y) const;
-    bool CompareLit(const Lit& x, const Lit& y, bool isQuick);
+    bool CompareLit(const Lit& x, const Lit& y, bool isQuick) const;
     void ReduceClause(bool& modified);
     bool IsClauseTautology(const Clause& c);
     void ReduceDuplicatedLitsInClause(Clause& c, bool& modified);
