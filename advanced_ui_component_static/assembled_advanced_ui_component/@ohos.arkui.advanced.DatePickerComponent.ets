@@ -29,6 +29,7 @@ import { State, PropRef, Watch } from '@ohos.arkui.stateManagement';
 import { LengthMetrics } from '@ohos.arkui.node';
 import { intl } from '@kit.LocalizationKit';
 import i18n from '@ohos.i18n';
+import { commonEventManager } from '@kit.BasicServicesKit';
 
 export enum DateMode {
   DATE = 0,
@@ -149,11 +150,16 @@ export struct DatePickerComponent {
   private timeOnScrollStop: Callback<DatePickerComponentResult> = noop;
   private localeID: string = '';
   private lunarCalendar: i18n.Calendar | null = null;
+  private subscriber: commonEventManager.CommonEventSubscriber | null = null;
+  private formatter: intl.NumberFormat = new intl.NumberFormat();
+  private yearFormatter: intl.NumberFormat = new intl.NumberFormat('', { useGrouping: false });
   
   aboutToAppear(): void {
     const locale = i18n.System.getSystemLocaleInstance();
     this.localeID = locale.toString();
     this.currentLocale = i18n.System.getSystemLanguage();
+    this.formatter = new intl.NumberFormat();
+    this.yearFormatter = new intl.NumberFormat(this.localeID, { useGrouping: false });
   
     if (this.selectedYear === 0 || this.selectedMonth === 0 || this.selectedDay === 0) {
       const now = new Date();
@@ -176,15 +182,54 @@ export struct DatePickerComponent {
     } else {
       this.initArrays();
     }
+    
+    // Create subscriber to listen for system language changes
+    this.createLocaleChangeSubscriber();
   }
   
   aboutToDisappear(): void {
     this.lunarCalendar = null;
+    
+    // Unsubscribe from locale change events
+    if (this.subscriber !== null) {
+      const subscriber: commonEventManager.CommonEventSubscriber = this.subscriber!;
+      commonEventManager.unsubscribe(subscriber, (err) => {
+        if (err) {
+          console.error(`Failed to unsubscribe common event. error code: ${err.code}, message: ${err.message}.`);
+        }
+      });
+      this.subscriber = null;
+    }
+  }
+  
+  private createLocaleChangeSubscriber(): void {
+    const subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
+      events: [commonEventManager.Support.COMMON_EVENT_LOCALE_CHANGED]
+    };
+    
+    commonEventManager.createSubscriber(subscribeInfo)
+      .then((commonEventSubscriber: commonEventManager.CommonEventSubscriber) => {
+        this.subscriber = commonEventSubscriber;
+        commonEventManager.subscribe(commonEventSubscriber, (err, data) => {
+          if (err) {
+            console.error(`Failed to subscribe common event. error code: ${err.code}, message: ${err.message}.`);
+            return;
+          }
+          // Update locale when system language changes
+          this.currentLocale = i18n.System.getSystemLanguage();
+          this.onLocaleChange();
+        });
+      })
+      .catch((err: Error) => {
+        console.error(`CreateSubscriber failed, code is ${err.message}`);
+      });
   }
   
   private onLocaleChange(): void {
     const locale = i18n.System.getSystemLocaleInstance();
     this.localeID = locale.toString();
+    this.formatter = new intl.NumberFormat();
+    this.yearFormatter = new intl.NumberFormat(this.localeID, { useGrouping: false });
     if (this.lunar) {
       this.lunarCalendar = i18n.getCalendar(this.localeID, 'chinese');
     }
@@ -276,7 +321,7 @@ export struct DatePickerComponent {
   }
   
   private formatLunarYear(gregorianYear: int): string {
-    return gregorianYear + '年';
+    return this.yearFormatter.format(gregorianYear) + '年';
   }
   
   private formatLunarMonth(month: int, isLeap: boolean): string {
@@ -344,13 +389,16 @@ export struct DatePickerComponent {
   }
   
   private initTimeArrays(): void {
-    if (this.useMilitaryTime) {
+    this.periodArray = [];
+    if (!this.useMilitaryTime) {
+      this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
+      this.updatePeriodArray();
+      this.updateHourArrayFor12Hour();
+    } else {
       this.hourArray = [];
       for (let i: int = this.startHour; i <= this.endHour; i++) {
         this.hourArray.push(this.formatNumber(i));
       }
-    } else {
-      this.updateHourArrayFor12Hour();
     }
   
     this.minuteArray = [];
@@ -367,6 +415,13 @@ export struct DatePickerComponent {
     for (let i: int = startMinuteIndex; i <= endMinuteIndex; i++) {
       this.minuteArray.push(this.formatMinute(i));
     }
+    
+    if (this.selectedMinute < startMinuteIndex) {
+      this.selectedMinute = startMinuteIndex;
+    }
+    if (this.selectedMinute > endMinuteIndex) {
+      this.selectedMinute = endMinuteIndex;
+    }
   
     this.secondArray = [];
     let startSecondIndex: int = DatePickerConstant.MIN_SECOND;
@@ -382,11 +437,12 @@ export struct DatePickerComponent {
     for (let i: int = startSecondIndex; i <= endSecondIndex; i++) {
       this.secondArray.push(this.formatSecond(i));
     }
-  
-    this.periodArray = [];
-    if (!this.useMilitaryTime) {
-      this.updatePeriodArray();
-      this.selectedPeriod = this.selectedHour < 12 ? 0 : 1;
+    
+    if (this.selectedSecond < startSecondIndex) {
+      this.selectedSecond = startSecondIndex;
+    }
+    if (this.selectedSecond > endSecondIndex) {
+      this.selectedSecond = endSecondIndex;
     }
   }
   
@@ -440,8 +496,23 @@ export struct DatePickerComponent {
   private updatePeriodArray(): void {
     this.periodArray = [];
     
-    const canSelectAM: boolean = this.startHour < 12 || this.endHour >= 0;
-    const canSelectPM: boolean = this.endHour >= 12;
+    // Check if AM period (hour24=0-11) has any available hours
+    let canSelectAM: boolean = false;
+    for (let hour: int = 0; hour <= 11; hour++) {
+      if (hour >= this.startHour && hour <= this.endHour) {
+        canSelectAM = true;
+        break;
+      }
+    }
+    
+    // Check if PM period (hour24=12-23) has any available hours
+    let canSelectPM: boolean = false;
+    for (let hour: int = 12; hour <= 23; hour++) {
+      if (hour >= this.startHour && hour <= this.endHour) {
+        canSelectPM = true;
+        break;
+      }
+    }
     
     if (canSelectAM && canSelectPM) {
       this.periodArray.push(this.formatPeriod(true));
@@ -450,14 +521,33 @@ export struct DatePickerComponent {
       this.periodArray.push(this.formatPeriod(true));
       if (this.selectedPeriod === 1) {
         this.selectedPeriod = 0;
+        // Adjust selectedHour to AM range when forced to switch to AM
+        if (this.selectedHour >= 12) {
+          const minAMHour: int = Math.max(0, this.startHour).toInt();
+          const maxAMHour: int = Math.min(11, this.endHour).toInt();
+          if (this.selectedHour === 12) {
+            this.selectedHour = 0; // 12 PM -> 12 AM (0:00)
+          } else {
+            this.selectedHour = Math.max(minAMHour, Math.min(maxAMHour, this.selectedHour - 12)).toInt();
+          }
+        }
       }
     } else if (!canSelectAM && canSelectPM) {
       this.periodArray.push(this.formatPeriod(false));
       if (this.selectedPeriod === 0) {
         this.selectedPeriod = 1;
+        // Adjust selectedHour to PM range when forced to switch to PM
+        if (this.selectedHour < 12) {
+          const minPMHour = Math.max(12, this.startHour).toInt();
+          const maxPMHour = Math.min(23, this.endHour).toInt();
+          // 计算目标小时（24小时制）：12 AM->12, 1-11 AM->13-23
+          let targetHour24 = this.selectedHour === 0 ? 12 : this.selectedHour + 12;
+          // 确保目标小时在有效范围内
+          this.selectedHour = Math.max(minPMHour, Math.min(maxPMHour, targetHour24)).toInt();
+        }
       }
     } else {
-      // Default show both periods
+      // Fallback: show both periods if no hours available (shouldn't happen with valid ranges)
       this.periodArray.push(this.formatPeriod(true));
       this.periodArray.push(this.formatPeriod(false));
     }
@@ -477,9 +567,9 @@ export struct DatePickerComponent {
   
   private formatYear(year: int): string {
     if (this.isChineseLocale()) {
-      return year + '年';
+      return this.yearFormatter.format(year) + '年';
     }
-    return String(year);
+    return this.yearFormatter.format(year);
   }
   
   private formatMonth(month: int): string {
@@ -515,13 +605,13 @@ export struct DatePickerComponent {
   
   private formatDay(day: int): string {
     if (this.isChineseLocale()) {
-      return day + '日';
+      return this.formatter.format(day) + '日';
     }
   
     try {
       const localeStr: string = this.localeID;
       if (!localeStr || localeStr.length === 0) {
-        return String(day);
+        return this.formatter.format(day);
       }
     
       const dateFormat = new intl.DateTimeFormat(localeStr, {
@@ -531,7 +621,7 @@ export struct DatePickerComponent {
       const date = new Date(2026, 0, safeDay);
       return dateFormat.format(date);
     } catch (error) {
-      return String(day);
+      return this.formatter.format(day);
     }
   }
   
@@ -608,6 +698,11 @@ export struct DatePickerComponent {
       const month: int = date.getMonth().toInt();
       const day: int = date.getDate().toInt();
     
+      // Check for Invalid Date (NaN values)
+      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        return undefined;
+      }
+    
       // Check if year, month, day are in valid ranges
       if (year < DatePickerConstant.MIN_YEAR || year > DatePickerConstant.MAX_YEAR) {
         return undefined;
@@ -648,6 +743,11 @@ export struct DatePickerComponent {
       const hour: int = date.getHours().toInt();
       const minute: int = date.getMinutes().toInt();
       const second: int = date.getSeconds().toInt();
+    
+      // Check for Invalid Date (NaN values)
+      if (isNaN(hour) || isNaN(minute) || isNaN(second)) {
+        return undefined;
+      }
     
       if (hour < DatePickerConstant.MIN_HOUR || hour > DatePickerConstant.MAX_HOUR) {
         return undefined;
@@ -1137,24 +1237,47 @@ private onHourChange(selectedIndex: int): void {
     }
   
   private onPeriodChange(selectedIndex: int): void {
-    this.selectedPeriod = selectedIndex;
+    // 根据periodArray内容确定selectedPeriod，而不是直接使用selectedIndex
+    // 这样即使periodArray只有一个选项也能正确映射
+    const selectedPeriodStr = this.periodArray[selectedIndex];
+    this.selectedPeriod = selectedPeriodStr === this.formatPeriod(true) ? 0 : 1;
+    
     if (!this.useMilitaryTime) {
-      const displayHourIndex: int = this.getHourSelectedIndex();
-      const displayHour: int = displayHourIndex + 1;
-      if (displayHour === 12) {
-        if (this.selectedPeriod === 0) {
-      this.selectedHour = 0;
-        } else {
-      this.selectedHour = 12;
+      // 更新hourArray
+      this.updateHourArrayFor12Hour();
+      
+      // 根据新的period调整selectedHour
+      const isAM = this.selectedPeriod === 0;
+      if (isAM) {
+        // 切换到AM时段
+        const minHour = Math.max(0, this.startHour).toInt();
+        const maxHour = Math.min(11, this.endHour < 12 ? this.endHour : 11).toInt();
+        
+        // 如果当前hour不在AM范围内，调整到范围内
+        if (this.selectedHour >= 12 || this.selectedHour < minHour) {
+          this.selectedHour = minHour;
+        }
+        if (this.selectedHour > maxHour) {
+          this.selectedHour = maxHour;
         }
       } else {
-        if (this.selectedPeriod === 0) {
-      this.selectedHour = displayHour;
-        } else {
-      this.selectedHour = displayHour + 12;
+        // 切换到PM时段
+        const minHour = Math.max(12, this.startHour >= 12 ? this.startHour : 12).toInt();
+        const maxHour = Math.min(23, this.endHour).toInt();
+        
+        // 如果当前hour不在PM范围内，调整到范围内
+        if (this.selectedHour < 12 || this.selectedHour < minHour) {
+          this.selectedHour = minHour;
+        }
+        if (this.selectedHour > maxHour) {
+          this.selectedHour = maxHour;
         }
       }
+      
+      // 更新minute和second数组
+      this.updateTimeArrays();
     }
+    
     this.timeOnChange(this.getResult());
   }
   
