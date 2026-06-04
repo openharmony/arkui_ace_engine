@@ -375,8 +375,6 @@ public:
 
     virtual void DragResize(uint32_t width, uint32_t height, uint32_t pre_height, uint32_t pre_width) {}
 
-    virtual void OnTouchCancelById(int32_t id, double x, double y, bool from_overlay) {}
-
     virtual int ScaleGestureChange(double scale, double centerX, double centerY)
     {
         return 0;
