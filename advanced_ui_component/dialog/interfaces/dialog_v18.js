@@ -1276,7 +1276,9 @@ export class SelectDialog extends ViewPU {
                             Column.focusBox({
                                 margin: { value: -2, unit: LengthUnit.VP }
                             });
+                            Column.accessibilityChecked(this.selectedIndex === index);
                             Column.accessibilityText(getAccessibilityText(this.getUIContext(), item.title, this.selectedIndex === index));
+                            Column.accessibilityRole(AccessibilityRoleType.RADIO);
                             Column.onClick(() => {
                                 this.selectedIndex = index;
                                 item.action && item.action();
@@ -1352,7 +1354,6 @@ export class SelectDialog extends ViewPU {
                             Radio.id(String(index));
                             Radio.focusable(false);
                             Radio.accessibilityLevel('no');
-                            Radio.visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden);
                             Radio.radioStyle({ uncheckedBorderColor: Color.Transparent });
                             Radio.onFocus(() => {
                                 this.isFocus = true;
@@ -3953,7 +3954,7 @@ function getAccessibilityText(context, resource, selected) {
         } else {
             resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource?.id) ?? '' : '';
         }
-        return selected ? `${selectText},${resourceString}` : resourceString;
+        return resourceString;
     } catch (error) {
         let code = error.code;
         let message = error.message;
