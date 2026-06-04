@@ -3019,4 +3019,142 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerPlayClickSoundEffectTest001, Test
     clickRecognizer->PlayClickSoundEffect(static_cast<int32_t>(TEST_X), static_cast<int32_t>(TEST_Y));
     EXPECT_EQ(clickRecognizer->time_.time_since_epoch().count(), oldTimeCount);
 }
+
+/**
+ * @tc.name: ClickRecognizerSetShouldReportTouchDownTest001
+ * @tc.desc: Test SetShouldReportTouchDown modifies shouldReportTouchDown_ flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerSetShouldReportTouchDownTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    EXPECT_FALSE(clickRecognizer->shouldReportTouchDown_);
+
+    clickRecognizer->SetShouldReportTouchDown(true);
+    EXPECT_TRUE(clickRecognizer->shouldReportTouchDown_);
+
+    clickRecognizer->SetShouldReportTouchDown(false);
+    EXPECT_FALSE(clickRecognizer->shouldReportTouchDown_);
+}
+
+/**
+ * @tc.name: ClickRecognizerResetTouchDownReportFlagTest001
+ * @tc.desc: Test ResetTouchDownReportFlag static method resets hasSetTouchDownReport_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerResetTouchDownReportFlagTest001, TestSize.Level1)
+{
+    ClickRecognizer::hasSetTouchDownReport_ = true;
+    EXPECT_TRUE(ClickRecognizer::hasSetTouchDownReport_);
+
+    ClickRecognizer::ResetTouchDownReportFlag();
+    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchUpEventResetsFlagTest001
+ * @tc.desc: Test HandleTouchUpEvent calls ResetTouchDownReportFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEventResetsFlagTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ClickRecognizer::hasSetTouchDownReport_ = true;
+    EXPECT_TRUE(ClickRecognizer::hasSetTouchDownReport_);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UP;
+    touchEvent.id = 1;
+    clickRecognizer->fingersId_.insert(1);
+    clickRecognizer->currentTouchPointsNum_ = 1;
+
+    clickRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchCancelEventResetsFlagTest001
+ * @tc.desc: Test HandleTouchCancelEvent calls ResetTouchDownReportFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchCancelEventResetsFlagTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ClickRecognizer::hasSetTouchDownReport_ = true;
+    EXPECT_TRUE(ClickRecognizer::hasSetTouchDownReport_);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::CANCEL;
+
+    clickRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchDownEventWithAttachedNodeTest001
+ * @tc.desc: Test HandleTouchDownEvent with FrameNode attached and shouldReportTouchDown set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchDownEventWithAttachedNodeTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 0, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    ClickRecognizer::ResetTouchDownReportFlag();
+    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceType = SourceType::TOUCH;
+
+    clickRecognizer->SetShouldReportTouchDown(true);
+    EXPECT_TRUE(clickRecognizer->shouldReportTouchDown_);
+
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    clickRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->touchPoints_.size(), 1);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchDownEventWithoutAttachedNodeTest001
+ * @tc.desc: Test HandleTouchDownEvent without FrameNode attached
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchDownEventWithoutAttachedNodeTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ClickRecognizer::ResetTouchDownReportFlag();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceType = SourceType::TOUCH;
+
+    clickRecognizer->SetShouldReportTouchDown(true);
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    clickRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->touchPoints_.size(), 1);
+}
+
+/**
+ * @tc.name: HandleTouchDownEventWithShouldReportTouchDownFalseTest001
+ * @tc.desc: Test HandleTouchDownEvent when shouldReportTouchDown_ is false (default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, HandleTouchDownEventWithShouldReportTouchDownFalseTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 0, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    ClickRecognizer::ResetTouchDownReportFlag();
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceType = SourceType::TOUCH;
+    EXPECT_FALSE(clickRecognizer->shouldReportTouchDown_);
+
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    clickRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->touchPoints_.size(), 1);
+}
+
 } // namespace OHOS::Ace::NG

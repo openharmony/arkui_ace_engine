@@ -3627,7 +3627,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         config.tid = static_cast<uint64_t>(pthread_self());
     }
 #endif
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+    if (scalePoint.type != TouchType::DOWN) {
+        ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+    }
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
@@ -3687,6 +3689,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
         eventManager_->ClearHitTestInfoRecord(scalePoint);
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
+        if (!ClickRecognizer::hasSetTouchDownReport_) {
+            ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+        }
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
         }

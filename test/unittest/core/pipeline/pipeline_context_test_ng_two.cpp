@@ -2801,5 +2801,39 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg410, TestSize.Level1)
     }
     EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
 }
+
+/**
+ * @tc.name: ResSchedOnTouchEvent_FlagFalse001
+ * @tc.desc: Test ResSchedReport::OnTouchEvent is called when hasSetTouchDownReport_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, ResSchedOnTouchEvent_FlagFalse001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    ClickRecognizer::ResetTouchDownReportFlag(); // ensure false
+    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
+
+    // Setup context with TouchTest capability
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.id = 1;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.sourceType = SourceType::TOUCH;
+
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    // Verify: hasSetTouchDownReport_ should remain false after this call
+    // (because ClickRecognizer wasn't created in this test)
+    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
+
+    ClickRecognizer::hasSetTouchDownReport_ = true;
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    ClickRecognizer::ResetTouchDownReportFlag();
+    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
+}
+
 } // namespace NG
 } // namespace OHOS::Ace

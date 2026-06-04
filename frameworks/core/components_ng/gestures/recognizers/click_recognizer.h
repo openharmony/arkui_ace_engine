@@ -103,6 +103,19 @@ public:
     void CleanRecognizerState() override;
     GestureEvent GetGestureEventInfo();
     ClickInfo GetClickInfo();
+
+    static void ResetTouchDownReportFlag()
+    {
+        hasSetTouchDownReport_ = false;
+    }
+
+    void SetShouldReportTouchDown(bool shouldReport)
+    {
+        shouldReportTouchDown_ = shouldReport;
+    }
+
+    static bool hasSetTouchDownReport_;
+
 protected:
     std::string GetGestureInfoString() const override;
 
@@ -175,6 +188,8 @@ private:
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 
     InteractiveSoundEffectsFunc interactiveSoundEffectsFunc_ = nullptr;
+
+    bool shouldReportTouchDown_ {false};
 };
 
 } // namespace OHOS::Ace::NG

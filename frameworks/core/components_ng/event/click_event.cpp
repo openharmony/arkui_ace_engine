@@ -54,6 +54,11 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     }
     result.emplace_back(clickRecognizer_);
     responseLinkResult.emplace_back(clickRecognizer_);
+
+    if (!ClickRecognizer::hasSetTouchDownReport_) {
+        clickRecognizer_->SetShouldReportTouchDown(true);
+        ClickRecognizer::hasSetTouchDownReport_ = true;
+    }
 }
 
 std::optional<GestureJudgeFunc> ClickEventActuator::GetSysJudgeFunc() const
