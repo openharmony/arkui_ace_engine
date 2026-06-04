@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
@@ -477,7 +476,7 @@ static void HandleNodeParams(
     } else if (nodeType == ARKUI_TOGGLE) {
         ArkUI_Toggle_Params params;
         params.nodeType = ARKUI_TOGGLE;
-        ToggleBridge::ParseParams(runtimeCallInfo, params);
+        ArkTSUtils::ParseToggleParams(runtimeCallInfo, params);
         nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
     } else {
         nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);

@@ -546,8 +546,6 @@ frameworks/bridge/common/dom/dom_textarea.cpp @huawei_g_five
 frameworks/bridge/common/dom/dom_textarea.h @huawei_g_five
 frameworks/bridge/common/dom/dom_text.cpp @huawei_g_five
 frameworks/bridge/common/dom/dom_text.h @huawei_g_five
-frameworks/bridge/common/dom/dom_toggle.cpp @arkuipopupwindow_all
-frameworks/bridge/common/dom/dom_toggle.h @arkuipopupwindow_all
 frameworks/bridge/common/dom/dom_tool_bar.cpp
 frameworks/bridge/common/dom/dom_tool_bar.h
 frameworks/bridge/common/dom/dom_tool_bar_item.cpp
@@ -601,6 +599,7 @@ frameworks/bridge/declarative_frontend/ark_direct_component/src/arkdatapanel.ts 
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkpatternlock.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkqrcode.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktextclock.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arktoggle.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkradio.js @arkuipopupwindow_all
@@ -704,7 +703,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkTextPicker.ts @arkui
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextTimer.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkText.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTimePicker.ts @arkui001
-frameworks/bridge/declarative_frontend/ark_component/src/ArkToggle.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkUIExtensionComponent.ts @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/ark_component/src/ArkVideo.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts @arkuiscroll
@@ -1083,8 +1081,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_them
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.cpp @arkui001
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h @arkui001
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.cpp @arkuilayout1
@@ -1410,8 +1406,6 @@ frameworks/bridge/declarative_frontend/jsview/js_textpicker.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_textpicker.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_texttimer.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_texttimer.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_toggle.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_toggle.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.h @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.cpp @ArkUI_Event
@@ -1614,8 +1608,6 @@ frameworks/bridge/declarative_frontend/jsview/models/text_timer_model_impl.cpp @
 frameworks/bridge/declarative_frontend/jsview/models/text_timer_model_impl.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/models/timepicker_model_impl.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/models/timepicker_model_impl.h @arkui001
-frameworks/bridge/declarative_frontend/jsview/models/toggle_model_impl.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/models/toggle_model_impl.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/models/video_model_impl.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/models/video_model_impl.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/models/view_abstract_model_impl.cpp @ArkUI_Event
@@ -2383,8 +2375,6 @@ frameworks/core/components_v2/inspector/time_picker_composed_element.cpp @arkui0
 frameworks/core/components_v2/inspector/time_picker_composed_element.h @arkui001
 frameworks/core/components_v2/inspector/time_picker_dialog_composed_element.cpp @arkui001
 frameworks/core/components_v2/inspector/time_picker_dialog_composed_element.h @arkui001
-frameworks/core/components_v2/inspector/toggle_composed_element.cpp @arkuipopupwindow_all
-frameworks/core/components_v2/inspector/toggle_composed_element.h @arkuipopupwindow_all
 frameworks/core/components_v2/inspector/utils.cpp @ArkUI_ability_group
 frameworks/core/components_v2/inspector/utils.h @ArkUI_ability_group
 frameworks/core/components_v2/inspector/water_flow_composed_element.cpp @arkuiscroll

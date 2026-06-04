@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -24,6 +25,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DEFAULT_COLOR = 0xffffffff;
+constexpr char TOGGLE_ETS_TAG[] = "Toggle";
 bool IsToggleCheckboxPattern(FrameNode* frameNode)
 {
     auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
@@ -37,8 +39,8 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOGGLE_ETS_TAG, nodeId);
-    auto childFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", TOGGLE_ETS_TAG, nodeId);
+    auto childFrameNode = FrameNode::GetFrameNode(TOGGLE_ETS_TAG, nodeId);
     if (!childFrameNode) {
         auto frameNode = CreateFrameNode(nodeId, toggleType, isOn);
         stack->Push(frameNode);
@@ -286,10 +288,9 @@ RefPtr<FrameNode> ToggleModelNG::CreateCheckboxFrameNode(int32_t nodeId, bool is
 
 RefPtr<FrameNode> ToggleModelNG::CreateSwitchFrameNode(int32_t nodeId, bool isOn)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
     UpdateSwitchIsOn(frameNode, isOn);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
-        && MaterialUtils::IsMaterialEnabled()) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) && MaterialUtils::IsMaterialEnabled()) {
         auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THIN);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(frameNode), AceType::RawPtr(material));
     }
@@ -298,7 +299,7 @@ RefPtr<FrameNode> ToggleModelNG::CreateSwitchFrameNode(int32_t nodeId, bool isOn
 
 RefPtr<FrameNode> ToggleModelNG::CreateButtonFrameNode(int32_t nodeId, bool isOn)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
     UpdateToggleButtonIsOn(frameNode, isOn);
     return frameNode;
 }
@@ -346,7 +347,7 @@ void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
 
 void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index, ToggleType toggleType)
 {
-    auto newFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
+    auto newFrameNode = FrameNode::GetFrameNode(TOGGLE_ETS_TAG, nodeId);
     parentFrame->AddChild(newFrameNode, index);
     CHECK_NULL_VOID(newFrameNode);
     const auto& children = newFrameNode->GetChildren();
@@ -389,6 +390,28 @@ void ToggleModelNG::OnChangeEvent(ChangeEvent&& onChangeEvent)
         return;
     }
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    if (buttonPattern) {
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void ToggleModelNG::OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setCheckboxChangeEvent(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(&onChangeEvent));
+        return;
+    }
+    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
     if (buttonPattern) {
         auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -617,6 +640,14 @@ void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const std::optiona
     }
 }
 
+void ToggleModelNG::ResetToggleSwitchPointColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->ResetSwitchPointColor();
+}
+
 void ToggleModelNG::SetSwitchPointColorSetByUser(FrameNode* frameNode, const bool flag)
 {
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
@@ -629,9 +660,19 @@ void ToggleModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
     ToggleButtonModelNG::SetBackgroundColor(frameNode, color);
 }
 
+void ToggleModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
+{
+    NG::ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
+}
+
 void ToggleModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
 {
     NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void ToggleModelNG::SetBackgroundColorByJs(const Color& color, bool flag)
+{
+    ToggleButtonModelNG::SetBackgroundColor(color, flag);
 }
 
 void ToggleModelNG::SetPadding(

@@ -57,7 +57,6 @@ public:
 private:
     static void RegisterScrollableAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

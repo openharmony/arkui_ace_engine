@@ -216,6 +216,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/text_clock/text_clock_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/bridge/timepicker_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_model_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/toggle/bridge/toggle_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toolbaritem/toolbaritem_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/union_effect_container/union_effect_container_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/bridge/flowitem/water_flow_item_static_modifier.cpp",

@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr char TOGGLE_ETS_TAG[] = "Toggle";
 bool IsToggleCheckboxPattern(FrameNode* frameNode)
 {
     auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
@@ -34,7 +35,7 @@ bool IsToggleCheckboxPattern(FrameNode* frameNode)
 } // namespace
 RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType toggleType)
 {
-    auto childFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
+    auto childFrameNode = FrameNode::GetFrameNode(TOGGLE_ETS_TAG, nodeId);
     if (childFrameNode) {
         auto pattern = childFrameNode->GetPattern();
         auto toggleTypeNotChange =
@@ -47,7 +48,7 @@ RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType 
     }
     switch (toggleType) {
         case ToggleType::SWITCH: {
-            return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
+            return FrameNode::CreateFrameNode(TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
         }
         case ToggleType::CHECKBOX: {
             auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
@@ -56,10 +57,10 @@ RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType 
                 reinterpret_cast<FrameNode*>(checkboxModifier->createToggleCheckboxFrameNode(nodeId)));
         }
         case ToggleType::BUTTON: {
-            return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
+            return FrameNode::CreateFrameNode(TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
         }
         default: {
-            return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
+            return FrameNode::CreateFrameNode(TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
         }
     }
 }

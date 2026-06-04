@@ -106,6 +106,7 @@ special_components = [
   "arktextclock",
   "arkpatternlock",
   "arkcounter",
+  "arktoggle",
 ]
 
 if (qrcodegen_support) {

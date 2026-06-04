@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,7 @@ public:
     void SetSwitchPointColorSetByUser(const bool flag) override;
     void SetUnselectedColorSetByUser(const bool flag) override;
 
+    static void OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent);
     static void SetUnselectedColorSetByUser(FrameNode* frameNode, const bool flag);
     static void SetSwitchPointColorSetByUser(FrameNode* frameNode, const bool flag);
     static void SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius);
@@ -65,9 +66,12 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const std::optional<Color>& switchPointColor);
+    static void ResetToggleSwitchPointColor(FrameNode* frameNode);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void OnChange(FrameNode* frameNode, ChangeEvent&& onChange);
+    static void SetWidth(FrameNode* frameNode, const Dimension& width);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
+    static void SetBackgroundColorByJs(const Color& color, bool flag);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
     static void SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet);

@@ -173,6 +173,10 @@ interface TimePickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ToggleComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface WaterFlowComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

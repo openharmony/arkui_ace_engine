@@ -478,6 +478,20 @@ if (globalThis.TextClock === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Toggle === undefined) {
+  globalThis.Toggle = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule('Toggle');
+      let module = globalThis.requireNapi('arkui.components.arktoggle');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().toggle.create(params);
+    },
+    name: 'JSToggle'
+  };
+}
+
+// @ts-ignore
 if (globalThis.LazyColumnLayout === undefined) {
   globalThis.LazyColumnLayout = {
     create: function () {

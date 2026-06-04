@@ -20,6 +20,7 @@
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
@@ -90,6 +91,11 @@ const std::vector<FontWeight> BUTTON_FONT_WEIGHTS = {
     FontWeight::NORMAL,
     FontWeight::REGULAR,
 };
+
+FrameNode* GetFrameNode(ArkUINodeHandle node)
+{
+    return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
+}
 } // namespace
 
 void SetOptionalBorderRadius(
@@ -566,6 +572,14 @@ void ResetButtonBackgroundColor(ArkUINodeHandle node)
     }
 }
 
+void SetButtonBorderRadiusWithOne(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension dimensionValue = CalcDimension(value, static_cast<DimensionUnit>(unit));
+    ButtonModelNG::SetBorderRadius(frameNode, dimensionValue);
+}
+
 /**
  * @param src source borderRadius
  * @param options option value
@@ -580,7 +594,7 @@ void SetButtonBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, in
     if ((values == nullptr) || (valuesSize != BORDER_RADIUS_SIZE)) {
         return;
     }
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     int32_t offset = 0;
     std::optional<Dimension> radiusTopLeft;
@@ -595,12 +609,39 @@ void SetButtonBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, in
     ButtonModelNG::SetBorderRadius(frameNode, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
 }
 
+void SetButtonLocalizedBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize)
+{
+    if ((values == nullptr) || (valuesSize != BORDER_RADIUS_SIZE)) {
+        return;
+    }
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t offset = 0;
+    std::optional<Dimension> radiusTopLeft;
+    std::optional<Dimension> radiusTopRight;
+    std::optional<Dimension> radiusBottomLeft;
+    std::optional<Dimension> radiusBottomRight;
+    SetOptionalBorderRadius(radiusTopLeft, values, valuesSize, offset);
+    SetOptionalBorderRadius(radiusTopRight, values, valuesSize, offset);
+    SetOptionalBorderRadius(radiusBottomLeft, values, valuesSize, offset);
+    SetOptionalBorderRadius(radiusBottomRight, values, valuesSize, offset);
+    ButtonModelNG::SetLocalizedBorderRadius(
+        frameNode, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+}
+
 void ResetButtonBorderRadius(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::Dimension reset;
     ButtonModelNG::SetBorderRadius(frameNode, reset);
+}
+
+void ResetButtonBorderRadiusJS(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::ResetBorderRadius(frameNode);
 }
 
 void SetButtonSize(
@@ -888,8 +929,11 @@ const ArkUIButtonModifier* GetButtonModifier()
         .setButtonBackgroundColor = SetButtonBackgroundColor,
         .setButtonBackgroundColorWithColorSpace = SetButtonBackgroundColorWithColorSpace,
         .resetButtonBackgroundColor = ResetButtonBackgroundColor,
+        .setButtonBorderRadiusWithOne = SetButtonBorderRadiusWithOne,
         .setButtonBorderRadius = SetButtonBorderRadius,
+        .setButtonLocalizedBorderRadius = SetButtonLocalizedBorderRadius,
         .resetButtonBorderRadius = ResetButtonBorderRadius,
+        .resetButtonBorderRadiusJS = ResetButtonBorderRadiusJS,
         .setButtonFontWeightEnum = SetButtonFontWeightEnum,
         .setButtonSize = SetButtonSize,
         .resetButtonSize = ResetButtonSize,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,16 @@
 #include "base/log/log_wrapper.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/checkbox/bridge/checkbox_content_modifier_helper.h"
+#include "core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_content_modifier_helper.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
+#include "core/components_ng/pattern/data_panel/bridge/data_panel_content_modifier_helper.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/gauge/bridge/content_modifier_helper.h"
-#include "core/components_ng/pattern/data_panel/bridge/data_panel_content_modifier_helper.h"
 #include "core/components_ng/pattern/gauge/bridge/gauge_dynamic_module.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/radio/bridge/radio_content_modifier_helper.h"
@@ -32,15 +35,15 @@
 #include "core/components_ng/pattern/rating/bridge/rating_content_modifier_helper.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_static.h"
-#include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/slider/bridge/slider_content_modifier_helper.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/text_clock/bridge/text_clock_content_modifier_helper.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
+#include "core/components_ng/pattern/toggle/bridge/toggle_content_modifier_helper.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_static.h"
-#include "core/components_ng/pattern/checkbox/bridge/checkbox_content_modifier_helper.h"
-#include "core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_content_modifier_helper.h"
-#include "core/components_ng/pattern/text_clock/bridge/text_clock_content_modifier_helper.h"
 #include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
@@ -48,9 +51,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/object_keeper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxStaticContentModifier();
@@ -132,6 +132,20 @@ const GENERATED_ArkUITextClockContentModifier* GetTextClockContentModifier()
         }
         cachedModifier = reinterpret_cast<const GENERATED_ArkUITextClockContentModifier*>(
             module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+
+const ArkUIToggleStaticContentModifier* GetToggleContentModifier()
+{
+    static const ArkUIToggleStaticContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Toggle");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find toggle dynamic module");
+        }
+        cachedModifier =
+            reinterpret_cast<const ArkUIToggleStaticContentModifier*>(module->GetCustomModifier("contentModifier"));
     }
     return cachedModifier;
 }
@@ -494,40 +508,20 @@ void ResetContentModifierTextTimerImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetBuilderFunc(frameNode, nullptr);
 }
-void ContentModifierToggleImpl(Ark_NativePointer node,
-                               const Ark_Object* contentModifier,
-                               const ToggleModifierBuilder* builder)
+void ContentModifierToggleImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const ToggleModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(contentModifier);
-    CHECK_NULL_VOID(builder);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        ToggleConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_ToggleConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.isOn = Converter::ArkValue<Ark_Boolean>(config.isOn_);
-        auto handler = [frameNode](Ark_Boolean retValue) {
-            ToggleModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
-        };
-        auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(handler);
-        arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto boxNode = GetOrCreateContentBoxNode(node);
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            ReplaceContentBoxNodeChild(boxNode, uiNode);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    ToggleModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto modifier = GetToggleContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierToggleImpl(node, contentModifier, builder);
 }
 void ResetContentModifierToggleImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ToggleModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto modifier = GetToggleContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierToggleImpl(node);
 }
 void ContentModifierCheckBoxGroupImpl(Ark_NativePointer node,
                                     const Ark_Object* contentModifier,

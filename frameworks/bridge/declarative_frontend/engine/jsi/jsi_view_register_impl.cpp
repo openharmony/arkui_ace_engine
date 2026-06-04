@@ -144,7 +144,6 @@
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
-#include "bridge/declarative_frontend/jsview/js_toggle.h"
 #include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
 #include "bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
@@ -467,7 +466,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Scroll", JSScroll::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
-    { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
     { "Rect", JSRect::JSBind },
@@ -569,7 +567,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
-    { "Toggle", JSToggle::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },

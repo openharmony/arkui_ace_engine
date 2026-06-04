@@ -60,7 +60,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
@@ -569,6 +568,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "MenuItem" },
         { "MenuItemGroup" },
         { "LazyColumnLayout" },
+        { "Toggle" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -1651,7 +1651,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterRelativeContainerAttributes(object, vm);
 
     RegisterButtonAttributes(object, vm);
-    RegisterToggleAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
     RegisterNavigationAttributes(object, vm);
     RegisterImageAttributes(object, vm);
@@ -2082,56 +2081,6 @@ void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object,
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontScale"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetMaxFontScale));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "button"), button);
-}
-
-void ArkUINativeModule::RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto toggle = panda::ObjectRef::New(vm);
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetSelectedColor));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetSelectedColor));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetOnChange));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetOnChange));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwitchPointColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetSwitchPointColor));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwitchPointColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetSwitchPointColor));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetHeight));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetHeight));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetResponseRegion));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetResponseRegion));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPadding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetPadding));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPadding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetPadding));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetBackgroundColor));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetBackgroundColor));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHoverEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetHoverEffect));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHoverEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetHoverEffect));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwitchStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetSwitchStyle));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwitchStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetSwitchStyle));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetContentModifierBuilder));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setToggleOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetToggleOptions));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMargin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetMargin));
-    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMargin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetMargin));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "toggle"), toggle);
 }
 
 void ArkUINativeModule::RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
@@ -5250,7 +5199,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterSwiperAttributes(object, vm);
     RegisterSymbolSpanAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
-    RegisterToggleAttributes(object, vm);
     auto frameNodeValue = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"));
     if (frameNodeValue.IsNull() || frameNodeValue->IsUndefined() || !frameNodeValue->IsObject(vm)) {
         return;

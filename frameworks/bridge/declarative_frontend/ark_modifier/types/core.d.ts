@@ -360,6 +360,8 @@ type SliderPrefixOptions = object;
 type SliderSuffixOptions = object;
 
 type ToggleType = 'checkbox' | 'switch' | 'button';
+type SwitchStyle = object;
+type ToggleConfiguration = object;
 
 type ArrowPosition = 'end' | 'start' | 'center';
 type OptionWidthMode = 'default' | 'fit_content' | 'fit_trigger';

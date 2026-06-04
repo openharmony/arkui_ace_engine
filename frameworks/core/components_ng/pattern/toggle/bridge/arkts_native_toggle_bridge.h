@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_TOGGLE_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_TOGGLE_BRIDGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TOGGLE_BRIDGE_ARKTS_NATIVE_TOGGLE_BRIDGE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TOGGLE_BRIDGE_ARKTS_NATIVE_TOGGLE_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
@@ -22,13 +22,16 @@ namespace OHOS::Ace::NG {
 class ArkUI_Toggle_Params;
 class ToggleBridge {
 public:
-    static ArkUINativeModuleValue ParseParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Params& params);
+    static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static ArkUINativeModuleValue SetSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSwitchPointColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSwitchPointColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -45,11 +48,14 @@ public:
     static ArkUINativeModuleValue ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static void SetPointRadius(const EcmaVM* vm,  ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg);
-    static void SetPointColor(const EcmaVM* vm,  ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg);
-    static void SetUnselectedColor(const EcmaVM* vm,  ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg);
-    static void SetTrackRadius(const EcmaVM* vm,  ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg);
+    static ArkUINativeModuleValue Pop(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBorder(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+private:
+    static void PopNew();
+    static int32_t toggleType_;
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_TOGGLE_BRIDGE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TOGGLE_BRIDGE_ARKTS_NATIVE_TOGGLE_BRIDGE_H
