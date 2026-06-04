@@ -330,6 +330,8 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     }
     auto index = host->GetChildren().size();
     imageNode->MountToParent(host, index);
+    auto renderContext = imageNode->GetRenderContext();
+    IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
     bool isPlaceholder = spans_.empty() && styledPlaceholder_;
     if (isPlaceholder) {
         placeholderImageNodes_.push_back(imageNode);
