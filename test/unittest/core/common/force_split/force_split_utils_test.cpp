@@ -709,18 +709,18 @@ HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable008, TestSize.Level1)
 }
 
 /**
- * @tc.name: ParseCommonConfig_IsDraggable001
+ * @tc.name: ParseCommonParam_IsDraggable001
  * @tc.desc: Branch: wideSplit has isDraggable=true, squareSplit has isDraggable=false
  *           ParseCommonConfig correctly sets both isDraggable flags
  * @tc.type: FUNC
  */
-HWTEST_F(ForceSplitUtilsTest, ParseCommonConfig_IsDraggable001, TestSize.Level1)
+HWTEST_F(ForceSplitUtilsTest, ParseCommonParam_IsDraggable001, TestSize.Level1)
 {
     std::string configStr =
         "{ \"wideSplit\": { \"isDraggable\": true }, \"squareSplit\": { \"ratio\": \"1 | 1\" } }";
     bool isRouterSplit = NAVIGATION_SPLIT;
-    NG::ForceSplitConfig config;
-    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
+    NG::ForceSplitParam config;
+    auto ret = NG::ForceSplitUtils::ParseForceSplitParam(isRouterSplit, configStr, config);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.wideSplitIsDraggable);
     EXPECT_FALSE(config.squareSplitIsDraggable);
