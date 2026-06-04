@@ -655,3 +655,24 @@ HWTEST_F(NodeExtenedTest, NodeExtenedTest035, TestSize.Level1)
     DisposeNode(nodeHandle);
     nodeHandle = nullptr;
 }
+
+/**
+ * @tc.name: NodeExtenedTest036
+ * @tc.desc: Test GetTotalChildCount with non-FrameNode (SpanNode) input.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeExtenedTest, NodeExtenedTest036, TestSize.Level1)
+{
+    // Create a SpanNode (non-FrameNode type, inherits UINode+BaseSpan)
+    ArkUI_NodeHandle spanHandle = CreateNode(ArkUI_NodeType::ARKUI_NODE_SPAN);
+    ASSERT_NE(spanHandle, nullptr);
+
+    // GetTotalChildCount on SpanNode returns 0 because
+    // GetChildrenCount() does DynamicCast<FrameNode> which returns nullptr
+    // for SpanNode, then CHECK_NULL_RETURN(frameNode, 0) silently returns 0
+    int32_t ret = GetTotalChildCount(spanHandle);
+    ASSERT_EQ(ret, 0);
+
+    DisposeNode(spanHandle);
+    spanHandle = nullptr;
+}
