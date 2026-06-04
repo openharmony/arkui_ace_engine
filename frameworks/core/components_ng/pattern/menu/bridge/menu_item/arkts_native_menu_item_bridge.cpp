@@ -556,6 +556,57 @@ ArkUINativeModuleValue MenuItemBridge::ResetOnChange(ArkUIRuntimeCallInfo* runti
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue MenuItemBridge::SetSubMenuBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    auto menuItemModifier = nodeModifiers->getMenuItemModifier();
+    CHECK_NULL_RETURN(menuItemModifier, panda::JSValueRef::Undefined(vm));
+    bool isJsView = IsJsView(firstArg, vm);
+    NG::FrameNode* frameNode = nullptr;
+    if (isJsView) {
+        frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    } else {
+        frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    }
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        menuItemModifier->resetSubMenuBuilder(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void()> callback = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(node);
+        auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
+        ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+    };
+    menuItemModifier->setSubMenuBuilder(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MenuItemBridge::ResetSubMenuBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    auto menuItemModifier = nodeModifiers->getMenuItemModifier();
+    CHECK_NULL_RETURN(menuItemModifier, panda::JSValueRef::Undefined(vm));
+    menuItemModifier->resetSubMenuBuilder(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue MenuItemBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -630,6 +681,8 @@ void MenuItemBridge::RegisterMenuItemAttributes(Local<panda::ObjectRef> object, 
         "resetSelectIcon",
         "setOnChange",
         "resetOnChange",
+        "setSubMenuBuilder",
+        "resetSubMenuBuilder",
     };
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::Create),
@@ -647,6 +700,8 @@ void MenuItemBridge::RegisterMenuItemAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetSelectIcon),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetOnChange),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetOnChange),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetSubMenuBuilder),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetSubMenuBuilder),
     };
     auto menuItem = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menuitem"), menuItem);

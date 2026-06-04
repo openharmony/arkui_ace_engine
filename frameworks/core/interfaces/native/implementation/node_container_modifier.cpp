@@ -73,10 +73,7 @@ void SetAboutToAppearImpl(Ark_NativePointer self, const Callback_Void* value)
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
     CHECK_NULL_VOID(context);
-    auto aboutToAppearFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    auto aboutToAppearFunc = GetContainerScopedSyncInvoker(*value, context->GetInstanceId());
     eventHub->SetControllerAboutToAppear(std::move(aboutToAppearFunc));
 }
 
@@ -88,10 +85,7 @@ void SetAboutToDisappearImpl(Ark_NativePointer self, const Callback_Void* value)
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
     CHECK_NULL_VOID(context);
-    auto aboutToDisappearFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    auto aboutToDisappearFunc = GetContainerScopedSyncInvoker(*value, context->GetInstanceId());
     eventHub->SetControllerAboutToDisappear(std::move(aboutToDisappearFunc));
 }
 
@@ -102,10 +96,7 @@ void SetOnAttachImpl(Ark_NativePointer self, const Callback_Void* value)
     auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
-    auto onAttachFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    auto onAttachFunc = GetContainerScopedSyncInvoker(*value, context->GetInstanceId());
     eventHub->SetControllerOnAttach(std::move(onAttachFunc));
 }
 
@@ -116,10 +107,7 @@ void SetOnDetachImpl(Ark_NativePointer self, const Callback_Void* value)
     auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto* context = nodeContainer->GetContext();
-    auto onDetachFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()]() -> void {
-        ContainerScope scope(instanceId);
-        callback.InvokeSync();
-    };
+    auto onDetachFunc = GetContainerScopedSyncInvoker(*value, context->GetInstanceId());
     eventHub->SetControllerOnDetach(std::move(onDetachFunc));
 }
 

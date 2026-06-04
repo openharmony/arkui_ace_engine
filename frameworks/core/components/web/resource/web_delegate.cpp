@@ -39,6 +39,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -10414,4 +10415,27 @@ void WebDelegate::FetchCloudControlWebAutoLayoutConfig()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebFetchCloudControlWebAutoLayoutConfig");
 }
 
+void WebDelegate::UpdateTouchEventFeatureDetectionEnabled()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                bool touchFeatureDetection = InputCompatibleManager::GetInstance().IsCompatibleConvertingEnabledFor(
+                                                 Kit::InputCompatibleSource::LEFT_PRESS) ||
+                                             InputCompatibleManager::GetInstance().IsCompatibleConvertingEnabledFor(
+                                                 Kit::InputCompatibleSource::SCROLL_AXIS_EVENT);
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting && touchFeatureDetection) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "TouchFeatureDetection is enabled");
+                    setting->PutTouchEventFeatureDetectionEnabled(touchFeatureDetection);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateTouchEventFeatureDetectionEnabled");
+}
 } // namespace OHOS::Ace

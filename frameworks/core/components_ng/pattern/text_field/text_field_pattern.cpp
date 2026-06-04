@@ -7403,7 +7403,11 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
     if (value->isDelete) {
 #endif
         if (value->compose.IsValid()) {
-            DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+            if (value->compose.GetStart() == 0 && value->text.empty()) {
+                DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
+            } else {
+                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+            }
             value->compose.Update(-1);
         } else {
             HandleOnDelete(true);
@@ -8298,7 +8302,8 @@ void TextFieldPattern::SetSelectionFlag(
         NotifyOnEditChanged(true);
     }
     SetIsSingleHandle(!IsSelected());
-    if (!IsShowHandle()) {
+    bool forceShowHandle = options.has_value() ? options.value().forceShowHandle : false;
+    if (!IsShowHandle() && !forceShowHandle) {
         CloseSelectOverlay(true);
     } else {
         isShowMenu = IsShowMenu(options, isShowMenu);

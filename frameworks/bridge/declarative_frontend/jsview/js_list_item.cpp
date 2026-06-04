@@ -64,6 +64,36 @@ ListItemModel* ListItemModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+namespace {
+
+class JsListItemVoidCallback {
+public:
+    explicit JsListItemVoidCallback(JSRef<JSFunc> func) : func_(std::move(func)) {}
+
+    void operator()() const
+    {
+        func_->Call(JSRef<JSObject>());
+    }
+
+private:
+    JSRef<JSFunc> func_;
+};
+
+class JsListItemBuilderCallback {
+public:
+    explicit JsListItemBuilderCallback(RefPtr<JsFunction> func) : func_(std::move(func)) {}
+
+    void operator()() const
+    {
+        func_->Execute();
+    }
+
+private:
+    RefPtr<JsFunction> func_;
+};
+
+} // namespace
+
 void JSListItem::Create(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUsePartialUpdate()) {
@@ -222,28 +252,17 @@ void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSR
     auto onAction = deleteAreaObj->GetProperty("onAction");
     std::function<void()> onActionCallback;
     if (onAction->IsFunction()) {
-        onActionCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onAction)]() {
-            func->Call(JSRef<JSObject>());
-            return;
-        };
+        onActionCallback = JsListItemVoidCallback(JSRef<JSFunc>::Cast(onAction));
     }
     auto onEnterActionArea = deleteAreaObj->GetProperty("onEnterActionArea");
     std::function<void()> onEnterActionAreaCallback;
     if (onEnterActionArea->IsFunction()) {
-        onEnterActionAreaCallback = [execCtx = context,
-                                        func = JSRef<JSFunc>::Cast(onEnterActionArea)]() {
-            func->Call(JSRef<JSObject>());
-            return;
-        };
+        onEnterActionAreaCallback = JsListItemVoidCallback(JSRef<JSFunc>::Cast(onEnterActionArea));
     }
     auto onExitActionArea = deleteAreaObj->GetProperty("onExitActionArea");
     std::function<void()> onExitActionAreaCallback;
     if (onExitActionArea->IsFunction()) {
-        onExitActionAreaCallback = [execCtx = context,
-                                       func = JSRef<JSFunc>::Cast(onExitActionArea)]() {
-            func->Call(JSRef<JSObject>());
-            return;
-        };
+        onExitActionAreaCallback = JsListItemVoidCallback(JSRef<JSFunc>::Cast(onExitActionArea));
     }
     auto actionAreaDistance = deleteAreaObj->GetProperty("actionAreaDistance");
     CalcDimension length;
@@ -295,8 +314,8 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
     auto startObject = obj->GetProperty("start");
     if (startObject->IsObject()) {
         if (startObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(startObject));
-            startAction = [builderFunc]() { builderFunc->Execute(); };
+            startAction = JsListItemBuilderCallback(
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(startObject)));
             ListItemModel::GetInstance()->SetDeleteArea(
                 std::move(startAction), nullptr, nullptr, nullptr, nullptr,
                 Dimension(0, DimensionUnit::VP), true, node);
@@ -312,8 +331,8 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
     auto endObject = obj->GetProperty("end");
     if (endObject->IsObject()) {
         if (endObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(endObject));
-            endAction = [builderFunc]() { builderFunc->Execute(); };
+            endAction = JsListItemBuilderCallback(
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(endObject)));
             ListItemModel::GetInstance()->SetDeleteArea(
                 std::move(endAction), nullptr, nullptr, nullptr, nullptr,
                 Dimension(0, DimensionUnit::VP), false, node);
@@ -363,8 +382,8 @@ void JSListItem::ParseBuilder(const JSRef<JSObject>& obj, OnDeleteEvent&& onDele
         std::function<void()> builderAction;
         auto builderObject = obj->GetProperty("builder");
         if (builderObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builderObject));
-            builderAction = [builderFunc]() { builderFunc->Execute(); };
+            builderAction = JsListItemBuilderCallback(
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builderObject)));
         }
     ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), std::move(onDelete),
         std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange),

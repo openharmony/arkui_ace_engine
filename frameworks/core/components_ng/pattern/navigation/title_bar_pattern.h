@@ -393,6 +393,13 @@ public:
         return currentBgStyle_;
     }
 
+    void UpdateMenuUIEffect(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
+    void UpdateMenuIconEffect(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
+    void UpdateMenuMaterial(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
+    void UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
+    void MarkMenuUIEffectNeedUpdate();
+    RefPtr<UiMaterial> GetCurrentMaterial();
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
     bool CustomizeExpandSafeArea() override;
@@ -470,6 +477,44 @@ private:
     void HandleMenuLongPress(
         const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
     void HandleMenuLongPressActionEnd();
+    void UpdateBackButtonColor();
+
+    struct IconColorParam {
+        // color invert is supported in new material
+        Color iconColor;
+        Color hoverColor;
+        Color focusColor;
+        // color invert is not supported in new material
+        Color pressedColor;
+        double disableOpacity;
+    };
+    std::optional<IconColorParam> GetCurrentIconColorParam();
+    bool GetColorParamWithColorInvertSupported(IconColorParam& param);
+    void UpdateBackButtonUIEffect();
+    void UpdateBackButtonIconEffect(bool forceUpdate = false);
+    void UpdateBackButtonMaterial();
+    void UpdateBackButtonMaterialInner(const RefPtr<UiMaterial>& material);
+    void UpdateBackButtonBrightnessEffect(bool forceUpdate = false);
+    void UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, const RefPtr<UiMaterial>& material);
+    RefPtr<UiMaterial> GetOrCreateGradualBlurMaterial();
+    void CreateBrightnessEffectIfNeeded();
+    void UpdateTitleBarUIEffectForColorModeChange();
+
+    void UpdateIsBackgroundDark();
+    void OnLuminanceUpdate(uint32_t luminance);
+    ColorMode GetCurrentColorMode(bool enableColorInvert = false);
+    bool IsColorInvertEnabled();
+    static bool IsApplyShadowEnabled(const RefPtr<UiMaterial>& material);
+    void InitColorPickerIfNeeded();
+    void UnregisterColorPicker();
+    bool IsTransparencyListenerNeeded();
+    void InitTransparencyListenerIfNeeded();
+    void UnregisterTransparencyListener();
+    void StartColorInvertAnimation();
+    void HandleColorInvert();
+    static void UpdateSymbolIconColor(const RefPtr<FrameNode>& iconNode, const Color& color);
+    static void UpdateSvgImageColor(const RefPtr<FrameNode>& iconNode, const Color& color);
+    static bool IsSymbolOrSVGIcon(const RefPtr<FrameNode>& node);
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -544,6 +589,18 @@ private:
     NavigationTitleBarStyle originalBgStyle_;
     NavigationTitleBarStyle scrollEffectBgStyle_;
     NavigationTitleBarStyle currentBgStyle_;
+
+    RefPtr<UiMaterial> gradualBlurMaterial_ = nullptr;
+    std::optional<bool> isColorPickerDark_;
+    bool isBackgroundDark_ = false;
+    bool hasRegisterColorPicker_ = false;
+    bool needUpdateBackButtonEffect_ = false;
+    bool needUpdateBackButtonMaterial_ = false;
+    bool needUpdateBackButtonBrightness_ = false;
+    bool needUpdateMenuEffect_ = false;
+    bool needUpdateMenuMaterial_ = false;
+    bool needUpdateMenuBrightness_ = false;
+    std::optional<int32_t> transparencyListenerId_;
 };
 
 } // namespace OHOS::Ace::NG

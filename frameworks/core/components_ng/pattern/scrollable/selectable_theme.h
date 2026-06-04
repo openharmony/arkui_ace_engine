@@ -51,19 +51,12 @@ public:
             if (!pattern) {
                 return;
             }
-            theme->editModeCheckBoxShape_ =
-                pattern->GetAttr<int32_t>("edit_mode_check_box_shape", 0);
             theme->editModeCheckBoxHotZoneWidth_ =
                 pattern->GetAttr<Dimension>("edit_mode_check_box_hot_zone_width", 36.0_vp);
         }
     };
 
     ~SelectableTheme() override = default;
-
-    int32_t GetEditModeCheckBoxShape() const
-    {
-        return editModeCheckBoxShape_;
-    }
 
     Dimension GetEditModeCheckBoxHotZoneWidth() const
     {
@@ -73,7 +66,6 @@ public:
 protected:
     SelectableTheme() = default;
 
-    int32_t editModeCheckBoxShape_ = 0;
     Dimension editModeCheckBoxHotZoneWidth_ = 36.0_vp;
 };
 } // namespace OHOS::Ace::NG

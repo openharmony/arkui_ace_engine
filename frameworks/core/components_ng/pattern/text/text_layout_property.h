@@ -101,6 +101,8 @@ public:
         ResetTextMarqueeOptions();
         ResetCursorColor();
         ResetSelectedBackgroundColor();
+        ResetSelectedBackgroundColorFlagByUser();
+        ResetCopyOptionFlagByUser();
         ResetTextColorFlagByUser();
         ResetClipEdge();
         ResetIncrementalUpdatePolicy();
@@ -203,9 +205,11 @@ public:
         UpdateContent(UtfUtils::Str8DebugToStr16(value));
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptionFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextSelectableMode, TextSelectableMode, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimationNeeded, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlDefualtColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
@@ -234,6 +238,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MaxFontScale, float, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextDirection, TextDirection, PROPERTY_UPDATE_MEASURE_SELF);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TailIndents, TailIndents, PROPERTY_UPDATE_MEASURE);
 
     TextDecoration GetTextDecorationFirst() const
     {

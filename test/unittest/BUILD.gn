@@ -218,7 +218,7 @@ ohos_source_set("ace_unittest_trace") {
 }
 
 # ace components base
-ohos_source_set("ace_components_base") {
+ohos_static_library("ace_components_base") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -283,7 +283,7 @@ ohos_source_set("ace_components_base") {
 }
 
 # ace components event
-ohos_source_set("ace_components_event") {
+ohos_static_library("ace_components_event") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -326,7 +326,7 @@ ohos_source_set("ace_components_event") {
 }
 
 # ace components gestures
-ohos_source_set("ace_components_gestures") {
+ohos_static_library("ace_components_gestures") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -362,7 +362,7 @@ ohos_source_set("ace_components_gestures") {
 }
 
 # ace components layout
-ohos_source_set("ace_components_layout") {
+ohos_static_library("ace_components_layout") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -384,7 +384,7 @@ ohos_source_set("ace_components_layout") {
 }
 
 # ace components property
-ohos_source_set("ace_components_property") {
+ohos_static_library("ace_components_property") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -412,7 +412,7 @@ ohos_source_set("ace_components_property") {
   }
 }
 
-ohos_source_set("ace_components_manager") {
+ohos_static_library("ace_components_manager") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -457,6 +457,9 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/post_event/post_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_content_overlay/select_content_overlay_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/select_content_overlay/selection_container.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/select_content_overlay/selection_container_child.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/select_content_overlay/selection_container_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_client.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
@@ -479,7 +482,7 @@ ohos_source_set("ace_components_manager") {
 }
 
 # ace components syntax
-ohos_source_set("ace_components_syntax") {
+ohos_static_library("ace_components_syntax") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -514,7 +517,7 @@ ohos_source_set("ace_components_syntax") {
 }
 
 # ace components token theme
-ohos_source_set("ace_components_token_theme") {
+ohos_static_library("ace_components_token_theme") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -526,7 +529,7 @@ ohos_source_set("ace_components_token_theme") {
 }
 
 # ace components render
-ohos_source_set("ace_components_render") {
+ohos_static_library("ace_components_render") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -558,7 +561,7 @@ ohos_source_set("ace_components_render") {
 }
 
 # ace base
-ohos_source_set("ace_base") {
+ohos_static_library("ace_base") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -617,7 +620,7 @@ ohos_source_set("ace_base") {
 }
 
 # ace core animation
-ohos_source_set("ace_core_animation") {
+ohos_static_library("ace_core_animation") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -646,7 +649,7 @@ ohos_source_set("ace_core_animation") {
 }
 
 # ace components extra - special
-ohos_source_set("ace_core_extra") {
+ohos_static_library("ace_core_extra") {
   testonly = true
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -718,6 +721,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/drawable/drawable_descriptor_info.cpp",
     "$ace_root/frameworks/core/drawable/drawable_descriptor_loader.cpp",
     "$ace_root/frameworks/core/drawable/layered_drawable_descriptor.cpp",
+    "$ace_root/frameworks/core/drawable/picture_drawable_descriptor.cpp",
     "$ace_root/frameworks/core/drawable/pixel_map_drawable_descriptor.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/event/key_event.cpp",
@@ -758,13 +762,13 @@ ohos_source_set("ace_core_extra") {
   }
 }
 
-ohos_source_set("ace_engine_unittest_flutter_deps") {
+ohos_static_library("ace_engine_unittest_flutter_deps") {
   testonly = true
   cflags_cc = [ "-Wno-thread-safety-attributes" ]
   external_deps = [ "eventhandler:libeventhandler" ]
 }
 
-ohos_source_set("ace_components_mock") {
+ohos_static_library("ace_components_mock") {
   testonly = true
   defines = [ "ENHANCED_ANIMATION" ]
   sources = [
@@ -862,6 +866,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_context_part_mock.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_texteffect.cpp",
+    "$ace_root/test/mock/frameworks/core/event/mock_point_event.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_statusbar_event_proxy.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_time_event_proxy.cpp",
     "$ace_root/test/mock/frameworks/core/event/mock_touch_event.cpp",
@@ -895,7 +900,7 @@ ohos_source_set("ace_components_mock") {
   }
 }
 
-ohos_source_set("ace_components_pattern") {
+ohos_static_library("ace_components_pattern") {
   testonly = true
   sources = [
     "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
@@ -1373,6 +1378,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
@@ -1479,6 +1485,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/sheet/side/sheet_side_object.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern_multi_thread.cpp",
@@ -1557,6 +1564,9 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tabs_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tabs_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tabs_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/selection_container/selection_container_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/selection_container/selection_container_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/selection_container/selection_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/base_text_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view_static.cpp",
@@ -1587,6 +1597,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern_multi_thread.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_selection_child.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_scroll_bar_2d.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
@@ -1670,6 +1681,11 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/toggle/toggle_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toolbaritem/toolbar_row_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/toolbaritem/toolbaritem_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/video/resource/resource.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/video/resource/texture.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/video/resource/ext_surface.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/video/resource/ext_texture.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/video/resource/player.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_controller_async.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_full_screen_node.cpp",
@@ -1719,6 +1735,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_utils.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/calendar_picker_modifier.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/node_timepicker_modifier.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/selection_container_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/checkbox/bridge/mock_node_checkbox_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/checkboxgroup/bridge/mock_checkboxgroup_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/mock_indexer_vibrator.cpp",

@@ -43,6 +43,8 @@ constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 6;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
 constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
 constexpr int32_t GET_STATE_MGMT_INFO_PARAMS = 4;
+constexpr int32_t GET_SPECIFIED_CONTENT_OFFSETS_PARAMS = 3;
+constexpr int32_t HIGHLIGHT_SPECIFIED_CONTENT_PARAMS = 3;
 
 std::string GetCurrentTimestampStr()
 {
@@ -105,6 +107,21 @@ ContentChangeConfig ParseContentChangeConfig(const std::vector<std::string>& par
 
     return config;
 }
+
+std::string UnescapeContent(const std::string& param)
+{
+    std::string result;
+    result.reserve(param.size());
+    for (size_t i = 0; i < param.size(); i++) {
+        if (param[i] == '\\' && i + 1 < param.size() && param[i + 1] == 'w') {
+            result += ' ';
+            i++;
+        } else {
+            result += param[i];
+        }
+    }
+    return result;
+}
 } // namespace
 
 const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
@@ -126,6 +143,10 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "GetStateMgmtInfo", &UiSaService::HandleGetStateMgmtInfo },
     { "RegisterTextChangeEventCallback", &UiSaService::HandleRegisterTextChangeEventCallback },
     { "UnregisterTextChangeEventCallback", &UiSaService::HandleUnregisterTextChangeEventCallback },
+    { "RegisterSelectTextEventCallback", &UiSaService::HandleRegisterSelectTextEventCallback },
+    { "UnregisterSelectTextEventCallback", &UiSaService::HandleUnregisterSelectTextEventCallback },
+    { "GetSpecifiedContentOffsets", &UiSaService::HandleGetSpecifiedContentOffsets },
+    { "HighlightSpecifiedContent", &UiSaService::HandleHighlightSpecifiedContent },
 };
 
 UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
@@ -432,6 +453,22 @@ void UiSaService::HandleUnregisterTextChangeEventCallback(
     LOGI("[TextChangeEvent] call UnregisterTextChangeEventCallback");
 }
 
+void UiSaService::HandleRegisterSelectTextEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    auto eventCallback = [](std::string data) {
+        LOGI("[SelectTextEventCallback] data = %{public}s", data.c_str());
+    };
+    service->RegisterSelectTextEventCallback(eventCallback);
+}
+
+void UiSaService::HandleUnregisterSelectTextEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    service->UnregisterSelectTextEventCallback();
+    LOGI("[SelectTextEvent] call UnregisterSelectTextEventCallback");
+}
+
 void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params)
 {
     if (params.size() >= EXE_APP_AI_FUNCTION_PARAMS) {
@@ -492,6 +529,37 @@ void UiSaService::HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::v
         LOGI("[GetStateMgmtInfo] call GetStateMgmtInfo componentName=%{public}s, propertyName=%{public}s, "
              "jsonPath=%{public}s, onlyVisible=%{public}d",
             componentName.c_str(), propertyName.c_str(), jsonPath.c_str(), onlyVisible);
+    }
+}
+void UiSaService::HandleGetSpecifiedContentOffsets(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= GET_SPECIFIED_CONTENT_OFFSETS_PARAMS) {
+        int32_t id = std::atoi(params[1].c_str());
+        std::string content = UnescapeContent(params[2]);
+        auto finishCallback = [](std::vector<std::pair<float, float>> offsets) {
+            LOGI("[GetSpecifiedContentOffsets] offsets.size=%{public}zu", offsets.size());
+            for (const auto& offset : offsets) {
+                LOGI("[GetSpecifiedContentOffsets] offset=(%{public}f, %{public}f)", offset.first, offset.second);
+            }
+        };
+        service->GetSpecifiedContentOffsets(id, content, finishCallback);
+        LOGI("[GetSpecifiedContentOffsets] call GetSpecifiedContentOffsets id=%{public}d, content=%{public}s",
+            id, content.c_str());
+    }
+}
+
+void UiSaService::HandleHighlightSpecifiedContent(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= HIGHLIGHT_SPECIFIED_CONTENT_PARAMS) {
+        int32_t id = std::atoi(params[1].c_str());
+        std::string content = UnescapeContent(params[2]);
+        std::vector<std::string> nodeIds;
+        std::string configs;
+        service->HighlightSpecifiedContent(id, content, nodeIds, configs);
+        LOGI("[HighlightSpecifiedContent] call HighlightSpecifiedContent id=%{public}d, content=%{public}s",
+            id, content.c_str());
     }
 }
 } // namespace OHOS::Ace

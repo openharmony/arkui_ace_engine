@@ -176,6 +176,36 @@ TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
+const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,
+    DistortionMode::DISTORTION_ENABLED, DistortionMode::DISTORTION_DISABLED };
+const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
+    EdgeLightMode::EDGELIGHT_ENABLED, EdgeLightMode::EDGELIGHT_DISABLED };
+
+void ParsePickerDialogMaterial(PickerDialogInfo& pickerDialog, const JSRef<JSObject>& paramObject)
+{
+    auto systemMaterialValue = paramObject->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        pickerDialog.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
+    }
+    
+    auto distortionModeValue = paramObject->GetProperty("distortionMode");
+    if (distortionModeValue->IsNumber()) {
+        auto distortionModeVal = distortionModeValue->ToNumber<int32_t>();
+        if (distortionModeVal >= 0 && distortionModeVal < static_cast<int32_t>(DIALOG_DISTORTION_MODE.size())) {
+            pickerDialog.distortionMode = DIALOG_DISTORTION_MODE[distortionModeVal];
+        }
+    }
+    
+    auto edgeLightModeValue = paramObject->GetProperty("edgeLightMode");
+    if (edgeLightModeValue->IsNumber()) {
+        auto edgeLightModeVal = edgeLightModeValue->ToNumber<int32_t>();
+        if (edgeLightModeVal >= 0 && edgeLightModeVal < static_cast<int32_t>(DIALOG_EDGELIGHT_MODE.size())) {
+            pickerDialog.edgeLightMode = DIALOG_EDGELIGHT_MODE[edgeLightModeVal];
+        }
+    }
+}
+
 JSRef<JSVal> DatePickerChangeEventToJSValue(const NG::DatePickerChangeEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -205,6 +235,105 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const NG::DatePickerChangeEvent&
     auto dateObj = JSDatePickerDialog::GetDateObj(argsPtr);
     return JSRef<JSVal>::Cast(dateObj);
 }
+
+template<typename FuncT>
+class JsDatePickerDialogVoidCallback {
+public:
+    JsDatePickerDialogVoidCallback(const JSExecutionContext& execCtx, RefPtr<FuncT> func, WeakPtr<NG::FrameNode> node,
+        const char* scoringEvent)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), scoringEvent_(scoringEvent)
+    {}
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(scoringEvent_);
+        PipelineContext::SetCallBackNode(node_);
+        func_->Execute();
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<FuncT> func_;
+    WeakPtr<NG::FrameNode> node_;
+    const char* scoringEvent_ = nullptr;
+};
+
+template<typename FuncT>
+class JsDatePickerDialogStringCallback {
+public:
+    JsDatePickerDialogStringCallback(const JSExecutionContext& execCtx, RefPtr<FuncT> func,
+        WeakPtr<NG::FrameNode> node, const char* scoringEvent)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), scoringEvent_(scoringEvent)
+    {}
+
+    void operator()(const std::string& info) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        std::vector<std::string> keys = { "year", "month", "day" };
+        ACE_SCORING_EVENT(scoringEvent_);
+        PipelineContext::SetCallBackNode(node_);
+        func_->Execute(keys, info);
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<FuncT> func_;
+    WeakPtr<NG::FrameNode> node_;
+    const char* scoringEvent_ = nullptr;
+};
+
+template<typename FuncT>
+class JsDatePickerDialogJsonCallback {
+public:
+    JsDatePickerDialogJsonCallback(const JSExecutionContext& execCtx, RefPtr<FuncT> func,
+        WeakPtr<NG::FrameNode> node, const char* scoringEvent)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), scoringEvent_(scoringEvent)
+    {}
+
+    void operator()(const std::string& info) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(scoringEvent_);
+        auto selectedJson = JsonUtil::ParseJsonString(info);
+        if (!selectedJson || selectedJson->IsNull()) {
+            return;
+        }
+        auto dateObj = JSDatePickerDialog::GetDateObj(selectedJson);
+        PipelineContext::SetCallBackNode(node_);
+        func_->ExecuteJS(1, &dateObj);
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<FuncT> func_;
+    WeakPtr<NG::FrameNode> node_;
+    const char* scoringEvent_ = nullptr;
+};
+
+template<typename FuncT>
+class JsDatePickerDialogAcceptCallback {
+public:
+    JsDatePickerDialogAcceptCallback(const JSExecutionContext& execCtx, RefPtr<FuncT> func,
+        WeakPtr<NG::FrameNode> node, const char* scoringEvent)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), scoringEvent_(scoringEvent)
+    {}
+
+    void operator()(const std::string& info) const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+        ACE_SCORING_EVENT(scoringEvent_);
+        PipelineContext::SetCallBackNode(node_);
+        func_->Execute(keys, info);
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<FuncT> func_;
+    WeakPtr<NG::FrameNode> node_;
+    const char* scoringEvent_ = nullptr;
+};
 
 void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, ButtonInfo& buttonInfo)
 {
@@ -872,22 +1001,14 @@ void DatePickerDialogAppearEvent(const JSCallbackInfo& info, PickerDialogEvent& 
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
     if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
-        didAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onDidAppear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
+        didAppearEvent = JsDatePickerDialogVoidCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onDidAppear");
     }
     auto onWillAppear = paramObject->GetProperty("onWillAppear");
     if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
-        willAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onWillAppear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
+        willAppearEvent = JsDatePickerDialogVoidCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onWillAppear");
     }
     pickerDialogEvent.onDidAppear = std::move(didAppearEvent);
     pickerDialogEvent.onWillAppear = std::move(willAppearEvent);
@@ -905,22 +1026,14 @@ void DatePickerDialogDisappearEvent(const JSCallbackInfo& info, PickerDialogEven
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
     if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
-        didDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onDidDisappear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
+        didDisappearEvent = JsDatePickerDialogVoidCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onDidDisappear");
     }
     auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
     if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
-        willDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onWillDisappear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
+        willDisappearEvent = JsDatePickerDialogVoidCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onWillDisappear");
     }
     pickerDialogEvent.onDidDisappear = std::move(didDisappearEvent);
     pickerDialogEvent.onWillDisappear = std::move(willDisappearEvent);
@@ -929,22 +1042,13 @@ void DatePickerDialogDisappearEvent(const JSCallbackInfo& info, PickerDialogEven
 std::function<void(const std::string&)> JSDatePickerDialog::GetDateChangeEvent(const JSRef<JSObject>& paramObject,
     const JSCallbackInfo& info, const DatePickerType& pickerType, const WeakPtr<NG::FrameNode>& frameNode)
 {
+    (void)pickerType;
     std::function<void(const std::string&)> dateChangeEvent;
     auto onDateChange = paramObject->GetProperty("onDateChange");
     if (!onDateChange->IsUndefined() && onDateChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDateChange));
-        dateChangeEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc),
-                              node = frameNode](const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onDateChange");
-            auto selectedJson = JsonUtil::ParseJsonString(info);
-            if (!selectedJson || selectedJson->IsNull()) {
-                return;
-            }
-            auto dateObj = GetDateObj(selectedJson);
-            PipelineContext::SetCallBackNode(node);
-            func->ExecuteJS(1, &dateObj);
-        };
+        dateChangeEvent = JsDatePickerDialogJsonCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onDateChange");
     }
     return dateChangeEvent;
 }
@@ -952,22 +1056,13 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateChangeEvent(c
 std::function<void(const std::string&)> JSDatePickerDialog::GetDateAcceptEvent(const JSRef<JSObject>& paramObject,
     const JSCallbackInfo& info, const DatePickerType& pickerType, const WeakPtr<NG::FrameNode>& frameNode)
 {
+    (void)pickerType;
     std::function<void(const std::string&)> dateAcceptEvent;
     auto onDateAccept = paramObject->GetProperty("onDateAccept");
     if (!onDateAccept->IsUndefined() && onDateAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDateAccept));
-        dateAcceptEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc),
-                              node = frameNode](const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onDateAccept");
-            auto selectedJson = JsonUtil::ParseJsonString(info);
-            if (!selectedJson || selectedJson->IsNull()) {
-                return;
-            }
-            auto dateObj = GetDateObj(selectedJson);
-            PipelineContext::SetCallBackNode(node);
-            func->ExecuteJS(1, &dateObj);
-        };
+        dateAcceptEvent = JsDatePickerDialogJsonCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onDateAccept");
     }
     return dateAcceptEvent;
 }
@@ -1017,19 +1112,13 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
 std::function<void(const std::string&)> JSDatePickerDialog::GetChangeEvent(const JSRef<JSObject>& paramObject,
     const JSCallbackInfo& info, const DatePickerType& pickerType, const WeakPtr<NG::FrameNode>& frameNode)
 {
+    (void)pickerType;
     std::function<void(const std::string&)> changeEvent;
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        changeEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc),
-                          node = frameNode](const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys;
-            keys = { "year", "month", "day" };
-            ACE_SCORING_EVENT("DatePickerDialog.onChange");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute(keys, info);
-        };
+        changeEvent = JsDatePickerDialogStringCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onChange");
     }
     return changeEvent;
 }
@@ -1041,14 +1130,8 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetAcceptEvent(
     auto onAccept = paramObject->GetProperty("onAccept");
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
-                          const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
-            ACE_SCORING_EVENT("DatePickerDialog.onAccept");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute(keys, info);
-        };
+        acceptEvent = JsDatePickerDialogAcceptCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onAccept");
     }
     return acceptEvent;
 }
@@ -1060,12 +1143,8 @@ std::function<void()> JSDatePickerDialog::GetCancelEvent(
     auto onCancel = paramObject->GetProperty("onCancel");
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onCancel");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
+        cancelEvent = JsDatePickerDialogVoidCallback<JsFunction>(info.GetExecutionContext(), std::move(jsFunc),
+            frameNode, "DatePickerDialog.onCancel");
     }
     return cancelEvent;
 }
@@ -1243,6 +1322,7 @@ void JSDatePickerDialog::UpdatePickerDialogInfo(const JSRef<JSObject>& paramObje
     ParseDatePickerHoverMode(pickerDialog, paramObject);
     ParseDatePickerBlurStyleOption(pickerDialog, paramObject);
     ParseDatePickerEffectOption(pickerDialog, paramObject);
+    ParsePickerDialogMaterial(pickerDialog, paramObject);
 }
 
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)

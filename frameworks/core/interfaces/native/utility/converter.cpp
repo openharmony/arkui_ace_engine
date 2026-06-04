@@ -2068,9 +2068,7 @@ OptionParam Convert(const Ark_MenuElement& src)
 {
     OptionParam param;
     param.value = Converter::OptConvert<std::string>(src.value).value_or(param.value);
-    param.action = [arkCallback = CallbackHelper(src.action)]() {
-        arkCallback.Invoke();
-    };
+    param.action = GetAsyncInvoker(src.action);
     param.icon = Converter::OptConvert<std::string>(src.icon).value_or(param.icon);
     param.enabled = Converter::OptConvert<bool>(src.enabled).value_or(param.enabled);
     auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(src.symbolIcon);
@@ -3753,10 +3751,7 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
     }
     auto optOnDisappear = Converter::GetOpt(src.onDisappear);
     if (optOnDisappear.has_value()) {
-        selectMenuParam.onDisappear =
-            [arkCallback = CallbackHelper(optOnDisappear.value())]() {
-                arkCallback.InvokeSync();
-        };
+        selectMenuParam.onDisappear = GetSyncInvoker(optOnDisappear.value());
     }
     auto optOnMenuShow = Converter::OptConvert<MenuCallback>(src.onMenuShow);
     if (optOnMenuShow.has_value()) {
@@ -4109,14 +4104,10 @@ template<>
 NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src)
 {
     NG::NavDestinationTransition dst{};
-    dst.event = [callback = CallbackHelper(src.event)]() {
-        callback.Invoke();
-    };
+    dst.event = GetAsyncInvoker(src.event);
     auto optCallback = GetOpt(src.onTransitionEnd);
     if (optCallback) {
-        dst.onTransitionEnd = [callback = CallbackHelper(*optCallback)]() {
-            callback.Invoke();
-        };
+        dst.onTransitionEnd = GetAsyncInvoker(*optCallback);
     }
     dst.duration = Converter::OptConvert<int32_t>(src.duration).value_or(DEFAULT_NAVDESTINATION_TRANSITION_DURATION);
     dst.delay = Converter::OptConvert<int32_t>(src.delay).value_or(0);

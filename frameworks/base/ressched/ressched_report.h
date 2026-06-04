@@ -64,7 +64,9 @@ class ACE_EXPORT ResSchedReport final {
 public:
     ACE_FORCE_EXPORT static ResSchedReport& GetInstance();
     ACE_FORCE_EXPORT void ResSchedDataReport(const char* name,
-        const std::unordered_map<std::string, std::string>& param = {}, int64_t tid = ResDefine::INVALID_DATA);
+        const std::unordered_map<std::string, std::string>& param = {},
+        int64_t tid = ResDefine::INVALID_DATA,
+        int64_t longTid = ResDefine::INVALID_DATA);
     void TriggerModuleSerializer();
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});

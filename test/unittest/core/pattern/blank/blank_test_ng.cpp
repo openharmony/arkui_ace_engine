@@ -732,4 +732,50 @@ HWTEST_F(BlankTestNg, SetColorTest1, TestSize.Level0)
     std::string blank = pattern->GetResCacheMapByKey("blank.Color");
     EXPECT_EQ(blank, "");
 }
+
+/**
+ * @tc.name: BlankLpxAttribute001
+ * @tc.desc: Test SetHeight with LPX unit registers/unregisters LPX_BLANK_HEIGHT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BlankTestNg, BlankLpxAttribute001, TestSize.Level1)
+{
+    BlankModelNG blankModelNG;
+    blankModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    blankModelNG.SetHeight(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    blankModelNG.SetHeight(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: BlankLpxAttribute002
+ * @tc.desc: Test SetBlankMin with LPX unit registers/unregisters LPX_BLANK_MIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BlankTestNg, BlankLpxAttribute002, TestSize.Level1)
+{
+    BlankModelNG blankModelNG;
+    blankModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    blankModelNG.SetBlankMin(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    blankModelNG.SetBlankMin(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

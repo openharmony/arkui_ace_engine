@@ -1352,6 +1352,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _MenuItemAttribute_setLabelFontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _MenuItemAttribute_setSubMenuBuilder(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _MenuItemGroup_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _MenuItemGroupInterface_setMenuItemGroupOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2050,6 +2052,16 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SecurityComponentMethod_setFocusBox(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setFallbackLineSpacing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setAccessibilityNextFocusId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setAccessibilityDefaultFocus(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setAccessibilityRole(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setAccessibilityDescription(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _Select_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _SelectInterface_setSelectOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2614,6 +2626,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextAttribute_setIncrementalUpdatePolicy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _TextAttribute_setPunctuationOverflow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _TextAttribute_setFont(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextAttribute_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -2775,6 +2789,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextAreaAttribute_setStrokeJoinStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextAreaAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setPunctuationOverflow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextAreaAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -2985,6 +3001,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextInputAttribute_setStrokeJoinStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setPunctuationOverflow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

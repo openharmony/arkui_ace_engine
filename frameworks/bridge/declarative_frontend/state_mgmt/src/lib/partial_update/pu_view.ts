@@ -820,6 +820,13 @@ abstract class ViewPU extends PUV2ViewBase
     this.watchedProps.set(propStr, callback);
   }
 
+  protected override __notifyDecoratedWatch__Internal(varName: string): void {
+    const cb = this.watchedProps.get(varName);
+    if (cb && typeof cb === 'function') {
+      cb.call(this, varName);
+    }
+  }
+
   /**
    * This View @Provide's a variable under given name
    * Call this function from the constructor of the sub class

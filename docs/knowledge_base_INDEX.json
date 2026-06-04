@@ -25,16 +25,19 @@
       ],
       "file_path": "pattern/text/Text_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_model_ng.cpp",
-        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_layout_algorithm.h",
-        "property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_property.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_model_ng.cpp",
+        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_layout_algorithm.h",
+        "property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_layout_property.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/text.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextModifier.static.d.ets",
+        "capi": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/native/node/text_native_impl.h"
       },
-      "last_updated": "2026-02-03"
+      "last_updated": "2026-06-01"
     },
     {
       "name": "Menu",
@@ -61,13 +64,15 @@
       ],
       "file_path": "pattern/menu/Menu_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_model_ng.cpp",
-        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_layout_algorithm.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_model_ng.cpp",
+        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_layout_algorithm.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/menu.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/MenuModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/menu.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/menu.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/MenuModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/MenuModifier.static.d.ets"
       },
       "last_updated": "2026-01-26"
     },
@@ -96,13 +101,15 @@
       ],
       "file_path": "pattern/refresh/Refresh_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
-        "property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_property.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
+        "property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_property.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/refresh.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/RefreshModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/refresh.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/refresh.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -140,13 +147,13 @@
       ],
       "file_path": "pattern/sheet/Sheet_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp",
-        "manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
-        "object": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
-        "style": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_style.h"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp",
+        "manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
+        "object": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
+        "style": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_style.h"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/@ohos.arkui.advanced.SheetPanel.d.ts"
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/@ohos.arkui.advanced.SheetPanel.d.ts"
       },
       "last_updated": "2026-02-05"
     },
@@ -178,13 +185,15 @@
       ],
       "file_path": "pattern/scroll/Scroll_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
-        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
+        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/scroll.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/ScrollModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scroll.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.static.d.ets"
       },
       "last_updated": "2026-01-30"
     },
@@ -213,13 +222,13 @@
       ],
       "file_path": "pattern/lazy_layout/LazyGrid_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_model_ng.cpp",
-        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_layout_algorithm.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_model_ng.cpp",
+        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_layout_algorithm.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/lazyGrid.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/LazyGridModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/lazy_grid_layout.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/lazyGridLayout.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -250,14 +259,16 @@
       ],
       "file_path": "pattern/grid/Grid_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_model_ng.cpp",
-        "layout_info": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_info.cpp",
-        "property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_property.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_model_ng.cpp",
+        "layout_info": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_info.cpp",
+        "property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_property.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/grid.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/GridModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/grid.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/grid.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GridModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GridModifier.static.d.ets"
       },
       "last_updated": "2026-02-07"
     },
@@ -283,12 +294,12 @@
       ],
       "file_path": "pattern/badge/Badge_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/badge.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/BadgeModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/badge.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/badge.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -315,12 +326,14 @@
       ],
       "file_path": "pattern/image/Image_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/image.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/ImageModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/image.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -344,12 +357,14 @@
       ],
       "file_path": "pattern/image_animator/Image_Animator_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/imageAnimator.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/ImageAnimatorModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image_animator.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/imageAnimator.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageAnimatorModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageAnimatorModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -373,12 +388,14 @@
       ],
       "file_path": "pattern/marquee/Marquee_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/marquee.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/MarqueeModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/marquee.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/marquee.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/MarqueeModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/MarqueeModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -404,12 +421,14 @@
       ],
       "file_path": "pattern/search/Search_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/search.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/SearchModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/search.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/search.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SearchModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SearchModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -434,12 +453,14 @@
       ],
       "file_path": "pattern/text_clock/TextClock_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/textClock.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TextClockModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_clock.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textClock.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextClockModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextClockModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -464,12 +485,14 @@
       ],
       "file_path": "pattern/texttimer/TextTimer_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/textTimer.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TextTimerModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_timer.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textTimer.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -494,13 +517,15 @@
       ],
       "file_path": "pattern/waterflow/WaterFlow_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp",
-        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_layout_algorithm.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp",
+        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_layout_algorithm.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/waterFlow.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/WaterFlowModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/water_flow.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/waterFlow.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/WaterFlowModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/WaterFlowModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -533,18 +558,25 @@
       ],
       "file_path": "pattern/flex/Flex_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_layout_pattern.h",
-        "algorithm": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_model_ng.cpp",
-        "property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_layout_property.h"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_layout_pattern.h",
+        "algorithm": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_model_ng.cpp",
+        "property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/flex/flex_layout_property.h"
       },
       "api_paths": {
-        "static_row": "OpenHarmony/interface/sdk-js/api/arkui/component/row.static.d.ets",
-        "static_column": "OpenHarmony/interface/sdk-js/api/arkui/component/column.static.d.ets",
-        "static_wrap": "OpenHarmony/interface/sdk-js/api/arkui/component/wrap.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/RowModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/flex.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/flex.static.d.ets",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/FlexModifier.static.d.ets",
+        "static_row": "<OH_ROOT>/interface/sdk-js/api/arkui/component/row.static.d.ets",
+        "static_column": "<OH_ROOT>/interface/sdk-js/api/arkui/component/column.static.d.ets",
+        "modifier_row": "<OH_ROOT>/interface/sdk-js/api/arkui/RowModifier.d.ts",
+        "modifier_column": "<OH_ROOT>/interface/sdk-js/api/arkui/ColumnModifier.d.ts",
+        "dynamic_row": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/row.d.ts",
+        "dynamic_column": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/column.d.ts",
+        "modifier_row_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RowModifier.static.d.ets",
+        "modifier_column_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ColumnModifier.static.d.ets"
       },
-      "last_updated": "2026-02-05"
+      "last_updated": "2026-05-31"
     },
     {
       "name": "CalendarPicker",
@@ -566,12 +598,14 @@
       ],
       "file_path": "pattern/calendar_picker/Calendar_Picker_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/calendarPicker.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/CalendarPickerModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/calendar_picker.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/calendarPicker.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CalendarPickerModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CalendarPickerModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -592,13 +626,10 @@
       ],
       "file_path": "pattern/container_picker/Container_Picker_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_model_ng.cpp"
       },
-      "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/containerPicker.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/ContainerPickerModifier.d.ts"
-      },
+      "api_paths": {},
       "last_updated": "2026-02-03"
     },
     {
@@ -621,12 +652,14 @@
       ],
       "file_path": "pattern/counter/Counter_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/counter.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/CounterModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/counter.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/counter.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CounterModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CounterModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -651,12 +684,14 @@
       ],
       "file_path": "pattern/gauge/Gauge_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/gauge.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/GaugeModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/gauge.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gauge.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GaugeModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GaugeModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -678,12 +713,14 @@
       ],
       "file_path": "pattern/picker/Date_Picker_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/datePicker.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/DatePickerModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/date_picker.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/datePicker.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/DatePickerModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/DatePickerModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -705,12 +742,14 @@
       ],
       "file_path": "pattern/time_picker/Time_Picker_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/timePicker.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TimePickerModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/time_picker.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/timePicker.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TimePickerModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TimePickerModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -732,12 +771,14 @@
       ],
       "file_path": "pattern/text_picker/Text_Picker_Knowledge_Base.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_model_ng.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_model_ng.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/textPicker.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TextPickerModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_picker.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textPicker.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextPickerModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextPickerModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -775,10 +816,10 @@
       ],
       "file_path": "sdk/ArkUI_SDK_API_Knowledge_Base.md",
       "source_paths": {
-        "sdk": "OpenHarmony/interface/sdk-js/api/arkui/"
+        "sdk": "<OH_ROOT>/interface/sdk-js/api/arkui/"
       },
       "api_paths": {
-        "all": "OpenHarmony/interface/sdk-js/api/arkui/"
+        "all": "<OH_ROOT>/interface/sdk-js/api/arkui/"
       },
       "last_updated": "2026-05-12"
     },
@@ -817,10 +858,10 @@
       ],
       "file_path": "sdk/Component_API_Knowledge_Base_CN.md",
       "source_paths": {
-        "internal": "OpenHarmony/interface/sdk-js/api/@internal/component/ets/"
+        "internal": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/"
       },
       "api_paths": {
-        "all": "OpenHarmony/interface/sdk-js/api/@internal/component/ets/"
+        "all": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/"
       },
       "last_updated": "2026-02-09"
     },
@@ -854,10 +895,10 @@
       ],
       "file_path": "architecture/ThemeManager_Architecture_CN.md",
       "source_paths": {
-        "manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components/theme/theme_manager_impl.cpp",
-        "constants": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components/theme/theme_constants.h",
-        "storage": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
-        "wrapper": "OpenHarmony/interfaces/inner_api/ace_kit/include/ui/view/theme/token_theme_wrapper.h"
+        "manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components/theme/theme_manager_impl.cpp",
+        "constants": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components/theme/theme_constants.h",
+        "storage": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
+        "wrapper": "<OH_ROOT>/interfaces/inner_api/ace_kit/include/ui/view/theme/token_theme_wrapper.h"
       },
       "api_paths": {},
       "last_updated": "2026-02-07"
@@ -886,10 +927,10 @@
       ],
       "file_path": "layout/Layout_Framework_Knowledge_Base.md",
       "source_paths": {
-        "scheduler": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
-        "frame_node": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp",
-        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
-        "layout_algorithm": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_algorithm.cpp"
+        "scheduler": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "frame_node": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp",
+        "layout_wrapper": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_algorithm": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_algorithm.cpp"
       },
       "api_paths": {},
       "last_updated": "2026-02-26"
@@ -918,10 +959,10 @@
       ],
       "file_path": "layout/Safe_Area_Mechanism_Knowledge_Base.md",
       "source_paths": {
-        "safe_area_manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
-        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
-        "layout_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_property.cpp",
-        "js_api": "OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp"
+        "safe_area_manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+        "layout_wrapper": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_property.cpp",
+        "js_api": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp"
       },
       "api_paths": {},
       "last_updated": "2026-02-26"
@@ -950,10 +991,10 @@
       ],
       "file_path": "layout/Ignore_Layout_Safe_Area_Knowledge_Base.md",
       "source_paths": {
-        "frame_node": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp",
-        "ui_task_scheduler": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
-        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
-        "layout_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_property.cpp"
+        "frame_node": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp",
+        "ui_task_scheduler": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "layout_wrapper": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_property.cpp"
       },
       "api_paths": {},
       "last_updated": "2026-02-26"
@@ -1006,17 +1047,17 @@
       ],
       "file_path": "common/interaction/Gesture_Knowledge_Base_CN.md",
       "source_paths": {
-        "gesture_base": "frameworks/core/components_ng/gestures/gesture_info.h",
-        "recognizer": "frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.h",
-        "referee": "frameworks/core/components_ng/gestures/gesture_referee.h",
-        "click_recognizer": "frameworks/core/components_ng/gestures/recognizers/click_recognizer.h",
-        "pan_recognizer": "frameworks/core/components_ng/gestures/recognizers/pan_recognizer.h",
-        "pinch_recognizer": "frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.h",
-        "long_press_recognizer": "frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.h",
-        "swipe_recognizer": "frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.h",
-        "rotation_recognizer": "frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.h",
-        "velocity_tracker": "frameworks/core/gestures/velocity_tracker.h",
-        "gesture_model": "frameworks/core/components_ng/pattern/gesture/gesture_model_ng.cpp"
+        "gesture_base": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/gesture_info.h",
+        "recognizer": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.h",
+        "referee": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/gesture_referee.h",
+        "click_recognizer": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/recognizers/click_recognizer.h",
+        "pan_recognizer": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/recognizers/pan_recognizer.h",
+        "pinch_recognizer": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.h",
+        "long_press_recognizer": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.h",
+        "swipe_recognizer": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.h",
+        "rotation_recognizer": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.h",
+        "velocity_tracker": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/gestures/velocity_tracker.h",
+        "gesture_model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gesture/gesture_model_ng.cpp"
       },
       "api_paths": {},
       "last_updated": "2026-02-11",
@@ -1074,12 +1115,12 @@
       ],
       "file_path": "common/interaction/Drag_Drop_Knowledge_Base_CN.md",
       "source_paths": {
-        "drag_drop_manager": "frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.h",
-        "drag_drop_proxy": "frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.h",
-        "drag_drop_state_machine": "frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h",
-        "drag_drop_spring_loading": "frameworks/core/components_ng/manager/drag_drop/drag_drop_spring_loading/",
-        "text_drag": "frameworks/core/components_ng/pattern/text_drag/",
-        "udmf_client": "frameworks/core/common/udmf/udmf_client.h"
+        "drag_drop_manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.h",
+        "drag_drop_proxy": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.h",
+        "drag_drop_state_machine": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h",
+        "drag_drop_spring_loading": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/drag_drop/drag_drop_spring_loading/",
+        "text_drag": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_drag/",
+        "udmf_client": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/common/udmf/udmf_client.h"
       },
       "api_paths": {},
       "last_updated": "2026-02-11",
@@ -1124,16 +1165,19 @@
       ],
       "file_path": "pattern/rich_editor/RichEditor_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
-        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_ng.cpp",
-        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.cpp",
-        "controller": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_controller.cpp",
-        "undo_manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
-        "styled_string_controller": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp"
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_ng.cpp",
+        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.cpp",
+        "controller": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_controller.cpp",
+        "undo_manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
+        "styled_string_controller": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp"
       },
       "api_paths": {
-        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/richEditor.static.d.ets",
-        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/RichEditorModifier.d.ts"
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/rich_editor.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/richEditor.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RichEditorModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RichEditorModifier.static.d.ets",
+        "capi": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/native/node/rich_editor_native_impl.h"
       },
       "last_updated": "2026-04-18"
     },
@@ -1295,7 +1339,13 @@
         "超链接"
       ],
       "file_path": "pattern/hyperlink/Hyperlink_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/hyperlink.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/hyperlink.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/HyperlinkModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/HyperlinkModifier.static.d.ets"
+      }
     },
     {
       "name": "List",
@@ -1315,7 +1365,13 @@
         "长列表"
       ],
       "file_path": "pattern/list/List_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/list.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/list.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.static.d.ets"
+      }
     },
     {
       "name": "LoadingProgress",
@@ -1335,7 +1391,13 @@
         "加载进度"
       ],
       "file_path": "pattern/loading_progress/LoadingProgress_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/loading_progress.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/loadingProgress.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/LoadingProgressModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/LoadingProgressModifier.static.d.ets"
+      }
     },
     {
       "name": "PatternLock",
@@ -1355,7 +1417,13 @@
         "手势锁"
       ],
       "file_path": "pattern/patternlock/PatternLock_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/pattern_lock.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/patternLock.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/PatternLockModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/PatternLockModifier.static.d.ets"
+      }
     },
     {
       "name": "Pipeline",
@@ -1395,7 +1463,13 @@
         "进度条"
       ],
       "file_path": "pattern/progress/Progress_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/progress.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/progress.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ProgressModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ProgressModifier.static.d.ets"
+      }
     },
     {
       "name": "QRCode",
@@ -1415,7 +1489,13 @@
         "扫码码"
       ],
       "file_path": "pattern/qrcode/QRCode_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/qrcode.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/qrcode.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.static.d.ets"
+      }
     },
     {
       "name": "ScrollBar",
@@ -1435,7 +1515,11 @@
         "Scrollbar"
       ],
       "file_path": "pattern/scrollBar/ScrollBar_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll_bar.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scrollBar.static.d.ets"
+      }
     },
     {
       "name": "TextArea",
@@ -1455,7 +1539,13 @@
         "多行文本"
       ],
       "file_path": "pattern/text_area/TextArea_Knowledge_Base_CN.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_area.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textArea.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextAreaModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextAreaModifier.static.d.ets"
+      }
     },
     {
       "name": "TextDrag",
@@ -1515,7 +1605,13 @@
         "输入控件"
       ],
       "file_path": "pattern/text_input/TextInput_Knowledge_Base_CN.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_input.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textInput.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextInputModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextInputModifier.static.d.ets"
+      }
     },
     {
       "name": "IDL",
@@ -1664,15 +1760,15 @@
       ],
       "file_path": "accessibility/Accessibility_Knowledge_Base_CN.md",
       "source_paths": {
-        "provider": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_provider.h",
-        "session_adapter": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_session_adapter.h",
-        "manager_ng": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_manager_ng.h",
-        "ng_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/accessibility_property.h",
-        "js_manager": "OpenHarmony/foundation/arkui/ace_engine/adapter/ohos/osal/js_accessibility_manager.h",
-        "focus_strategy": "OpenHarmony/foundation/arkui/ace_engine/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
+        "provider": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_provider.h",
+        "session_adapter": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_session_adapter.h",
+        "manager_ng": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_manager_ng.h",
+        "ng_property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/property/accessibility_property.h",
+        "js_manager": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/osal/js_accessibility_manager.h",
+        "focus_strategy": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
       },
       "api_paths": {
-        "ndk": "OpenHarmony/foundation/arkui/ace_engine/interfaces/native/native_interface_accessibility.h"
+        "ndk": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/native/native_interface_accessibility.h"
       },
       "last_updated": "2026-05-25"
     },
@@ -1705,14 +1801,56 @@
       ],
       "file_path": "api/ArkUI_API_Paradigm_Knowledge_Base_CN.md",
       "source_paths": {
-        "arkts_static_components": "OpenHarmony/interface/sdk-js/api/arkui/component",
-        "featureability_full": "OpenHarmony/interface/sdk-js/api/common/full/featureability.d.ts",
-        "featureability_lite": "OpenHarmony/interface/sdk-js/api/common/lite/featureability.d.ts"
+        "arkts_static_components": "<OH_ROOT>/interface/sdk-js/api/arkui/component",
+        "featureability_full": "<OH_ROOT>/interface/sdk-js/api/common/full/featureability.d.ts",
+        "featureability_lite": "<OH_ROOT>/interface/sdk-js/api/common/lite/featureability.d.ts"
       },
       "api_paths": {
-        "arkui_root": "OpenHarmony/interface/sdk-js/api/arkui"
+        "arkui_root": "<OH_ROOT>/interface/sdk-js/api/arkui"
       },
       "last_updated": "2026-05-25"
+    },
+    {
+      "name": "Toggle",
+      "name_cn": "开关组件",
+      "category": "selector",
+      "type": "component",
+      "keywords": [
+        "开关",
+        "切换",
+        "switch",
+        "toggle",
+        "checkbox",
+        "button",
+        "isOn",
+        "selectedColor",
+        "switchPointColor",
+        "switchStyle",
+        "ToggleType",
+        "选中",
+        "状态切换"
+      ],
+      "aliases": [
+        "Toggle组件",
+        "开关",
+        "切换按钮",
+        "Switch开关"
+      ],
+      "file_path": "pattern/toggle/Toggle_Knowledge_Base_CN.md",
+      "source_paths": {
+        "pattern_switch": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/toggle/switch_pattern.cpp",
+        "pattern_button": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
+        "pattern_checkbox": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h",
+        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/toggle/toggle_model_ng.cpp",
+        "base_pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/toggle/toggle_base_pattern.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/toggle.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/toggle.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ToggleModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ToggleModifier.static.d.ets"
+      },
+      "last_updated": "2026-05-31"
     }
   ],
   "categories": {
@@ -1744,7 +1882,8 @@
         "Counter",
         "DatePicker",
         "TimePicker",
-        "TextPicker"
+        "TextPicker",
+        "Toggle"
       ]
     },
     "shape": {

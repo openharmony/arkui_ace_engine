@@ -34,6 +34,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"
@@ -100,9 +101,6 @@ class DragDropManager;
 class DynamicComponentSafeManager;
 class EnvironmentManager;
 enum class FocusActiveReason : int32_t;
-
-constexpr char ENV_KEY_DIRECTION[] = "system.arkui.layout.direction";
-constexpr char ENV_KEY_FONT_SCALE[] = "system.arkui.fontScale";
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1276,6 +1274,14 @@ public:
     {
         return isUseEnvManager_;
     }
+    void SetEnvManagerActive(bool isActive)
+    {
+        isUseEnvManager_ = isActive;
+    }
+    bool IsEnvManagerActive() const
+    {
+        return isUseEnvManager_;
+    }
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
     void NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void NotifyDragMouseEvent(const MouseEvent& event);
@@ -1359,6 +1365,7 @@ public:
 
     void RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
+    void FireLpxUpdateCallbacks();
     void MarkLpxDirtyNodes();
     void SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager);
     RefPtr<DynamicComponentSafeManager> GetDynamicComponentSafeManager();

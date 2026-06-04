@@ -678,6 +678,13 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             return;
         }
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
+        const frameNodePtr = this.__frameNode?.nodePtr_;
+        if (frameNodePtr) {
+            const weakRef: WeakRef<JSBuilderNode<T>> = new WeakRef<JSBuilderNode<T>>(this)
+            ArkUIAniModule._FireArkUIObjectLifecycleCallback(
+                weakRef as object,
+                'BuilderNode', 'BuilderNode', frameNodePtr!);
+        }
         this.disposeAll();
         this.__frameNode?.disposeNode();
         this.__frameNode = null;

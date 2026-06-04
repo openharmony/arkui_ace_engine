@@ -106,6 +106,7 @@ void EraseSpace(std::string& data)
         }
     }
 }
+
 }
 
 std::unique_ptr<WebModel> WebModel::instance_ = nullptr;
@@ -133,6 +134,31 @@ WebModel* WebModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
+
+namespace {
+class JsWebNoArgNodeCallback {
+public:
+    JsWebNoArgNodeCallback(const JSExecutionContext& execCtx, RefPtr<JsFunction> func, WeakPtr<NG::FrameNode> node,
+        std::string eventName)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), eventName_(std::move(eventName))
+    {}
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(eventName_);
+        PipelineContext::SetCallBackNode(node_);
+        func_->Execute();
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<JsFunction> func_;
+    WeakPtr<NG::FrameNode> node_;
+    std::string eventName_;
+};
+} // namespace
+
 bool JSWeb::webDebuggingAccess_ = false;
 int32_t JSWeb::webDebuggingPort_ = 0;
 
@@ -4511,14 +4537,7 @@ std::function<void()> ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
     if (onMenuCallbackValue->IsFunction()) {
         RefPtr<JsFunction> jsOnMenuCallbackFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onMenuCallbackValue));
-        auto onMenuCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMenuCallbackFunc),
-                                  node = frameNode, eventName = name]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT(eventName);
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        return onMenuCallback;
+        return JsWebNoArgNodeCallback(info.GetExecutionContext(), std::move(jsOnMenuCallbackFunc), frameNode, name);
     }
     return nullptr;
 }
@@ -4553,13 +4572,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         }
         RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
-        selectMenuParam->previewBuilder = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
-                                              node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("BindSelectionMenuPreviwer");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
+        selectMenuParam->previewBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(),
+            std::move(previewBuilderFunc), frameNode, "BindSelectionMenuPreviwer");
     }
 }
 
@@ -4655,13 +4669,8 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    selectMenuParam->menuBuilder = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
-                                         node = frameNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("BindSelectionMenu");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute();
-    };
+    selectMenuParam->menuBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(), std::move(builderFunc),
+        frameNode, "BindSelectionMenu");
 
     GetSelectionMenuParam(info, selectMenuParam);
     WebModel::GetInstance()->SetNewDragStyle(true);
@@ -7358,13 +7367,8 @@ void JSWeb::ParseJsCustomKeyboardOption(const JsiExecutionContext& context, cons
         CHECK_NULL_VOID(builderFunc);
         WeakPtr<NG::FrameNode> targetNode =
             AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto buildFunc = [execCtx = context, func = std::move(builderFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("WebCustomKeyboard");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        keyboardOption.customKeyboardBuilder_ = buildFunc;
+        keyboardOption.customKeyboardBuilder_ = JsWebNoArgNodeCallback(context, std::move(builderFunc), targetNode,
+            "WebCustomKeyboard");
         TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard ParseJsCustomKeyboardOption" \
             ", isSystemKeyboard is %{public}d, parseCustomBuilder end", isSystemKeyboard);
     }

@@ -45,7 +45,8 @@ import {
     IEnvDecoratedVariable,
     IGlobalReusePoolVariable,
     ReusePoolOwnership,
-    EnvOptions
+    EnvOptions,
+    SystemEnvKey
 } from '../decorator';
 import { IMutableStateMeta } from '../decorator';
 import { MutableStateMeta } from './mutableStateMeta';
@@ -637,7 +638,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
 
     makeEnv<T>(
         owningView: IVariableOwner,
-        envValue: string,
+        envValue: string | SystemEnvKey<T>,
         varName: string,
         envOptions?: EnvOptions<T>
     ): IEnvDecoratedVariable<T> {

@@ -33,7 +33,7 @@ ResSchedReport::ResSchedReport()
 
 void ResSchedReport::ResSchedDataReport(
     const char* name, const std::unordered_map<std::string, std::string>& param,
-    int64_t tid)
+    int64_t tid, int64_t longTid)
 {
     reportDataFunc_ = nullptr;
     if (std::strcmp(ABILITY_OR_PAGE_SWITCH_START, name) == 0 || std::strcmp(ABILITY_OR_PAGE_SWITCH_END, name) == 0) {

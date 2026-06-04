@@ -16,6 +16,12 @@
 #include "event_info_convertor.h"
 
 namespace OHOS::Ace::NG {
+EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::IsCompatibleFromFeatureManager(
+    const std::string& matchedMode)
+{
+    return Mouse2TouchEventModeResult::INIT_FAILED;
+}
+
 bool EventInfoConvertor::ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo, TouchEventInfo& touchEventInfo)
 {
     return false;
@@ -32,6 +38,11 @@ bool EventInfoConvertor::MatchCompatibleCondition()
 }
 
 bool EventInfoConvertor::IfNeedMouseTransform()
+{
+    return false;
+}
+
+bool EventInfoConvertor::IsAppDevelopedForPC()
 {
     return false;
 }

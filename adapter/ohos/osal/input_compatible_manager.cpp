@@ -32,6 +32,7 @@ const std::string TRANSFORM_SO_PATH = "/system/lib/libtransform_interaction_ext.
 #endif
 constexpr int64_t LOG_DURATION = 5000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
+constexpr char MOUSE_2_TOUCH_EVENT_MODE_ALL[] = "all";
 } // namespace
 
 InputCompatibleManager& InputCompatibleManager::GetInstance()
@@ -84,6 +85,16 @@ void InputCompatibleManager::Close()
 
 bool InputCompatibleManager::IsCompatibleConvertingEnabledFor(Kit::InputCompatibleSource source)
 {
+    auto convertControllByFeatureManager =
+        NG::EventInfoConvertor::IsCompatibleFromFeatureManager(MOUSE_2_TOUCH_EVENT_MODE_ALL);
+    if (convertControllByFeatureManager == NG::EventInfoConvertor::Mouse2TouchEventModeResult::MATCHED) {
+        AceApplicationInfo::GetInstance().SetMouseTransformEnable(true);
+        return true;
+    }
+    if (convertControllByFeatureManager == NG::EventInfoConvertor::Mouse2TouchEventModeResult::UNMATCHED) {
+        AceApplicationInfo::GetInstance().SetMouseTransformEnable(false);
+        return false;
+    }
     static std::unordered_map<Kit::InputCompatibleSource, bool> convertingEnabledResult;
     static bool transformEnable = SystemProperties::GetTransformEnabled();
     static bool mouseTransEnabled = SystemProperties::GetCompatibleInputTransEnabled();
@@ -114,8 +125,14 @@ bool InputCompatibleManager::IsCompatibleConvertingEnabledFor(Kit::InputCompatib
         return convertingEnabledResult[source];
     }
 
-    convertingEnabledResult[source] = NG::EventInfoConvertor::IfNeedMouseTransform();
-    AceApplicationInfo::GetInstance().SetMouseTransformEnable(convertingEnabledResult[source]);
-    return convertingEnabledResult[source];
+    if (convertControllByFeatureManager == NG::EventInfoConvertor::Mouse2TouchEventModeResult::INIT_FAILED) {
+        convertingEnabledResult[source] = NG::EventInfoConvertor::IfNeedMouseTransform();
+        AceApplicationInfo::GetInstance().SetMouseTransformEnable(convertingEnabledResult[source]);
+        return convertingEnabledResult[source];
+    } else {
+        convertingEnabledResult[source] = !NG::EventInfoConvertor::IsAppDevelopedForPC();
+        AceApplicationInfo::GetInstance().SetMouseTransformEnable(convertingEnabledResult[source]);
+        return convertingEnabledResult[source];
+    }
 }
 } // namespace OHOS::Ace

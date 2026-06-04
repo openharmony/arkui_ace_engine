@@ -63,11 +63,15 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         if (hub) {
             isButtonEnabled = hub->IsEnabled();
         }
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
         if (navDestinationPattern->HasMenuNodeId()) {
             auto menuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetMenuNodeId(),
                 titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD,
                 titleBarNode->GetInnerParentId(), false);
             CHECK_NULL_VOID(menuNode);
+            if (menuNode == titleBarNode->GetMenu() && titleBarPattern) {
+                titleBarPattern->MarkMenuUIEffectNeedUpdate();
+            }
             navDestinationGroupNode->SetMenu(menuNode);
         }
 
@@ -76,6 +80,9 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
             titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId(),
             true);
         CHECK_NULL_VOID(landscapeMenuNode);
+        if (landscapeMenuNode == titleBarNode->GetMenu() && titleBarPattern) {
+            titleBarPattern->MarkMenuUIEffectNeedUpdate();
+        }
         navDestinationGroupNode->SetLandscapeMenu(landscapeMenuNode);
     }
 }
@@ -386,7 +393,7 @@ bool NavDestinationPattern::GetBackButtonState()
     if (navDestinationLayoutProperty->GetHideBackButtonValue(false)) {
         showBackButton = false;
     }
-    if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
+    if (index == 0 && ((pattern->GetNavigationMode() == NavigationMode::SPLIT && !hostNode->IsFullScreenOverlay()) ||
         navigationLayoutProperty->GetHideNavBarValue(false))) {
         showBackButton = false;
     }
@@ -439,7 +446,10 @@ void NavDestinationPattern::OnAttachToFrameNode()
 
     pipeline->AddWindowStateChangedCallback(id);
     pipeline->AddWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->AddRecyclePageNode(host);
+    auto memoryManager = pipeline->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->AddRecyclePageNode(host);
+    }
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -451,7 +461,10 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
+    auto memoryManager = pipeline->GetMemoryManager();
+    if (memoryManager) {
+        memoryManager->RemoveRecyclePageNode(id);
+    }
     NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
@@ -573,6 +586,9 @@ void NavDestinationPattern::OnDetachFromMainTree()
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->NotifyDestinationLifecycle(host, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
+    if (pendingToClean_) {
+        SetPendingToClean(false);
+    }
 }
 
 void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1111,5 +1127,37 @@ void NavDestinationPattern::BeforeCreateLayoutWrapper()
     auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireBeforeCreateLayoutWrapperCallBack();
+}
+
+void NavDestinationPattern::SetPendingToClean(bool pendingToClean)
+{
+    if (pendingToClean_ == pendingToClean) {
+        return;
+    }
+    pendingToClean_ = pendingToClean;
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    if (pendingToClean_) {
+        navigationPattern->IncreasePendingToCleanCount();
+    } else {
+        navigationPattern->DecreasePendingToCleanCount();
+        auto navigationStack = navigationPattern->GetNavigationStack();
+        if (navigationStack) {
+            navigationStack->MarkAutoCleanedFlag(GetNavDestinationId());
+        }
+    }
+}
+
+void NavDestinationPattern::CallSavedStateToJS(const std::string& savedState)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+    CHECK_NULL_VOID(navigation);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto stack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_VOID(stack);
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    stack->SaveStateToJsCallback(hostNode->GetIndex(), GetName(), GetNavDestinationId(), savedState);
 }
 } // namespace OHOS::Ace::NG

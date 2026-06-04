@@ -17,6 +17,7 @@
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -185,7 +186,7 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
      * @tc.step: step3. create a scene where the text menu has popped up
      */
 
-    pattern->textSelector_.Update(0, 2);
+     pattern->textSelector_.Update(0, 2);
     pattern->CalculateHandleOffsetAndShowOverlay();
     OverlayRequest request;
     request.menuIsShow = true;
@@ -199,19 +200,24 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
      * @tc.step: step4. test OnMenuItemAction
      */
     pattern->isMousePressed_ = true;
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
-    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::MOUSE_MENU);
-    EXPECT_FALSE(pattern->SelectOverlayIsOn());
-    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::MOUSE_MENU);
-    EXPECT_FALSE(pattern->SelectOverlayIsOn());
-    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::TRANSLATE, OptionMenuType::MOUSE_MENU);
-    EXPECT_FALSE(pattern->SelectOverlayIsOn());
-    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::SEARCH, OptionMenuType::MOUSE_MENU);
-    EXPECT_FALSE(pattern->SelectOverlayIsOn());
-    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::SHARE, OptionMenuType::MOUSE_MENU);
-    EXPECT_FALSE(pattern->SelectOverlayIsOn());
-    pattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::CAMERA_INPUT, OptionMenuType::MOUSE_MENU);
-    EXPECT_FALSE(pattern->SelectOverlayIsOn());
+    pattern->sourceType_ = SourceType::MOUSE;
+    auto selectOverlay = pattern->GetSelectOverlay();
+    ASSERT_NE(selectOverlay, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pattern->clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    selectOverlay->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::MOUSE_MENU);
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsOn());
+    selectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::MOUSE_MENU);
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsOn());
+    selectOverlay->OnMenuItemAction(OptionMenuActionId::TRANSLATE, OptionMenuType::MOUSE_MENU);
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsOn());
+    selectOverlay->OnMenuItemAction(OptionMenuActionId::SEARCH, OptionMenuType::MOUSE_MENU);
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsOn());
+    selectOverlay->OnMenuItemAction(OptionMenuActionId::SHARE, OptionMenuType::MOUSE_MENU);
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsOn());
+    selectOverlay->OnMenuItemAction(OptionMenuActionId::CAMERA_INPUT, OptionMenuType::MOUSE_MENU);
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsOn());
 }
 
 /**
@@ -260,12 +266,14 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction002, TestSize.Level1)
      * @tc.step: step4. test OnMenuItemAction
      */
     pattern->isMousePressed_ = true;
-    pattern->GetSelectOverlay();
-    auto info = pattern->selectOverlay_->GetSelectOverlayInfos();
+    pattern->sourceType_ = SourceType::MOUSE;
+    auto selectOverlay = pattern->GetSelectOverlay();
+    ASSERT_NE(selectOverlay, nullptr);
+    auto info = selectOverlay->GetSelectOverlayInfos();
     info->menuCallback.onAIMenuOption("");
-    EXPECT_FALSE(pattern->SelectOverlayIsOn());
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsOn());
     info->menuCallback.onAIMenuOption("test");
-    EXPECT_FALSE(pattern->SelectOverlayIsOn());
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsOn());
 }
 
 HWTEST_F(TextTestNineNg, CheckHandleVisible001, TestSize.Level1)

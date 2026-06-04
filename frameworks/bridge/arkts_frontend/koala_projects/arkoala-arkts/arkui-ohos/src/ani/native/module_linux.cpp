@@ -33,6 +33,7 @@
 #include "stateMgmt/stateMgmt_module.h"
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
+#include "with_env/with_env_module.h"
 
 namespace {
 namespace Stubs {
@@ -77,6 +78,51 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Extractors_ToWebviewWebviewControllerPtr",
             nullptr,
             reinterpret_cast<void*>(Stubs::ExtractorsToWebviewWebviewControllerPtr)
+        },
+        ani_native_function {
+            "_WithEnv_construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvConstruct)
+        },
+        ani_native_function {
+            "_WithEnv_removeSystemEnvProperty",
+            "lC{std.core.String}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvRemoveSystemEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_setSystemEnvProperty",
+            "lC{std.core.String}d:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetSystemEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_setCustomEnvProperty",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvSetCustomEnvProperty)
+        },
+        ani_native_function {
+            "_WithEnv_removeCustomEnvProperty",
+            "li:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::WithEnvRemoveCustomEnvProperty)
+        },
+        ani_native_function {
+            "_CustomNode_findCustomValueByKey",
+            "li:Y",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeFindCustomEnvValueByKey)
+        },
+        ani_native_function {
+            "_CustomNode_findSystemEnvValueByKey",
+            "lC{std.core.String}:Y",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeFindSystemEnvValueByKey)
+        },
+        ani_native_function {
+            "_CustomNode_registerOnCustomEnvUpdateCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnCustomEnvUpdate)
+        },
+        ani_native_function {
+            "_CustomNode_registerOnSystemEnvUpdateCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CustomNodeRegisterOnSystemEnvUpdate)
         },
         ani_native_function {
             "_CustomNode_QueryNavigationInfo",

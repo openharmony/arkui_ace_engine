@@ -83,6 +83,28 @@ const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr uint32_t MIN_LINES = 0;
 const int32_t DEFAULT_LINE_HEIGHT = 28;
 
+class JsTextNoArgNodeCallback {
+public:
+    JsTextNoArgNodeCallback(const JSExecutionContext& execCtx, RefPtr<JsFunction> func,
+        WeakPtr<NG::FrameNode> node, const char* eventName)
+        : execCtx_(execCtx), func_(std::move(func)), node_(std::move(node)), eventName_(eventName)
+    {}
+
+    void operator()() const
+    {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx_);
+        ACE_SCORING_EVENT(eventName_);
+        PipelineContext::SetCallBackNode(node_);
+        func_->Execute();
+    }
+
+private:
+    JSExecutionContext execCtx_;
+    RefPtr<JsFunction> func_;
+    WeakPtr<NG::FrameNode> node_;
+    const char* eventName_ = nullptr;
+};
+
 void ParseFontWeightInfo(const JSRef<JSVal>& fontWeight, std::string& weight,
     int32_t& variableFontWeight, FontWeight& fontWeightEnum)
 {
@@ -442,12 +464,14 @@ void JSText::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     Color selectedColor;
     RefPtr<ResourceObject> resObj;
     UnRegisterResource("SelectedBackgroundColor");
+    bool flagByUser = true;
     if (!ParseJsColor(info[0], selectedColor, resObj)) {
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         selectedColor = theme->GetSelectedColor();
+        flagByUser = false;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<Color>("SelectedBackgroundColor", resObj, selectedColor);
@@ -458,6 +482,7 @@ void JSText::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         selectedColor = selectedColor.ChangeOpacity(JSThemeUtils::DEFAULT_OPACITY);
     }
     TextModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+    TextModel::GetInstance()->SetSelectedBackgroundColorFlagByUser(flagByUser);
 }
 
 void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
@@ -1013,6 +1038,12 @@ void JSText::Create(const JSCallbackInfo& info)
                 jsController->ClearStyledString();
             }
         }
+        // bind text controller
+        auto castObj = JSRef<JSObject>::Cast(controllerObj);
+        auto jSTextControllerBinder = [castObj]() {
+            return;
+        };
+        TextModel::GetInstance()->BindJSTextController(std::move(jSTextControllerBinder));
     }
 }
 
@@ -1022,12 +1053,15 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
         return;
     }
     auto copyOptions = CopyOptions::None;
+    bool flagByUser = false;
     auto tmpInfo = info[0];
     if (tmpInfo->IsNumber()) {
         auto emunNumber = tmpInfo->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
+        flagByUser = true;
     }
     TextModel::GetInstance()->SetCopyOption(copyOptions);
+    TextModel::GetInstance()->SetCopyOptionFlagByUser(flagByUser);
 }
 
 void JSText::SetOnWillCopy(const JSCallbackInfo& info)
@@ -1220,13 +1254,8 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     }
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
-                                          node = frameNode]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("BindSelectionMenu");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute();
-    };
+    std::function<void()> buildFunc = JsTextNoArgNodeCallback(info.GetExecutionContext(), std::move(builderFunc),
+        frameNode, "BindSelectionMenu");
 
     // SelectionMenuOptions
     NG::SelectMenuParam menuParam;
@@ -1311,10 +1340,12 @@ void JSText::SetHalfLeading(const JSCallbackInfo& info)
 void JSText::SetEnableHapticFeedback(const JSCallbackInfo& info)
 {
     bool state = true;
+    bool flagByUser = false;
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         state = info[0]->ToBoolean();
+        flagByUser = true;
     }
-    TextModel::GetInstance()->SetEnableHapticFeedback(state);
+    TextModel::GetInstance()->SetEnableHapticFeedback(state, flagByUser);
 }
 
 void JSText::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
@@ -1326,6 +1357,15 @@ void JSText::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
     }
     
     TextModel::GetInstance()->SetCompressLeadingPunctuation(state);
+}
+
+void JSText::SetPunctuationOverflow(const JSCallbackInfo& info)
+{
+    bool state = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetPunctuationOverflow(state);
 }
 
 void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
@@ -1528,10 +1568,12 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxLineHeight", &JSText::SetMaximumLineHeight);
     JSClass<JSText>::StaticMethod("minLineHeight", &JSText::SetMinimumLineHeight);
     JSClass<JSText>::StaticMethod("compressLeadingPunctuation", &JSText::SetCompressLeadingPunctuation);
+    JSClass<JSText>::StaticMethod("punctuationOverflow", &JSText::SetPunctuationOverflow);
     JSClass<JSText>::StaticMethod("includeFontPadding", &JSText::SetIncludeFontPadding);
     JSClass<JSText>::StaticMethod("fallbackLineSpacing", &JSText::SetFallbackLineSpacing);
     JSClass<JSText>::StaticMethod("selectedDragPreviewStyle", &JSText::SetSelectedDragPreviewStyle);
     JSClass<JSText>::StaticMethod("incrementalUpdatePolicy", &JSText::SetIncrementalUpdatePolicy);
+    JSClass<JSText>::StaticMethod("tailIndents", &JSText::SetTailIndents);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1650,14 +1692,8 @@ void JSText::ParseMenuParam(
     if (onDisappearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
-        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
-                               node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDisappear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        menuParam.onDisappear = std::move(onDisappear);
+        menuParam.onDisappear = JsTextNoArgNodeCallback(info.GetExecutionContext(), std::move(jsOnDisAppearFunc),
+            frameNode, "onDisappear");
     }
     menuParam.onMenuShow = ParseMenuCallback(frameNode, menuOptions, info, "onMenuShow");
     menuParam.onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
@@ -1891,5 +1927,51 @@ void JSText::SetIncrementalUpdatePolicy(const JSCallbackInfo& info)
     }
     auto policy = static_cast<IncrementalUpdatePolicy>(policyValue);
     TextModel::GetInstance()->SetIncrementalUpdatePolicy(policy);
+}
+
+void JSText::SetTailIndents(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    UnRegisterResource("TailIndents");
+
+    NG::TailIndents tailIndents;
+    RefPtr<ResourceObject> firstResObj;
+    NG::TailIndentsArray indentsArray;
+
+    auto parseDimension = [&firstResObj, &indentsArray, isFirst = true](const JSRef<JSVal>& value) mutable {
+        CalcDimension dimension;
+        RefPtr<ResourceObject> resObj;
+        bool parsed = value->IsObject() &&
+            JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(value), dimension, resObj);
+        if (!parsed) {
+            parsed = ParseJsDimensionFpNG(value, dimension, resObj);
+        }
+        if (parsed) {
+            indentsArray.emplace_back(static_cast<Dimension>(dimension));
+            if (isFirst && resObj) {
+                firstResObj = resObj;
+                isFirst = false;
+            }
+        } else {
+            dimension.Reset();
+            indentsArray.emplace_back(dimension);
+        }
+    };
+
+    if (args->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
+        for (size_t i = 0; i < array->Length(); i++) {
+            parseDimension(array->GetValueAt(i));
+        }
+    } else {
+        parseDimension(args);
+    }
+
+    tailIndents.indentsArray = indentsArray;
+
+    if (SystemProperties::ConfigChangePerform() && firstResObj) {
+        RegisterResource<NG::TailIndents>("TailIndents", firstResObj, tailIndents);
+    }
+    TextModel::GetInstance()->SetTailIndents(tailIndents);
 }
 } // namespace OHOS::Ace::Framework

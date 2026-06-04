@@ -55,6 +55,7 @@ import { StackLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 import { RowLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 import { ColumnLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 import { CustomLayoutAlgorithm } from "arkui/LayoutAlgorithm"
+import { GridLayoutAlgorithm } from "arkui/LayoutAlgorithm"
 
 export class ArkUIAniModule {
     static {
@@ -65,6 +66,18 @@ export class ArkUIAniModule {
     native static _SetDynamicLayoutRowLayoutAlgorithm(ptr: KPointer, value: RowLayoutAlgorithm): void;
     native static _SetDynamicLayoutColumnLayoutAlgorithm(ptr: KPointer, value: ColumnLayoutAlgorithm): void;
     native static _SetDynamicLayoutCustomLayoutAlgorithm(ptr: KPointer, value: CustomLayoutAlgorithm, frameNode: FrameNode): void;
+    native static _SetDynamicLayoutGridLayoutAlgorithm(ptr: KPointer, value: GridLayoutAlgorithm): void;
+    native static _WithEnv_construct(id: KInt): KPointer;
+    native static _WithEnv_removeSystemEnvProperty(ptr: KPointer, key: string): void;
+    native static _WithEnv_setSystemEnvProperty(ptr: KPointer, key: string, value: KDouble): void;
+    native static _WithEnv_setCustomEnvProperty(ptr: KPointer, key: KInt, value: Any): void;
+    native static _WithEnv_removeCustomEnvProperty(ptr: KPointer, key: KInt): void;
+    native static _CustomNode_findCustomValueByKey(ptr: KPointer, key: KInt): Any | undefined;
+    native static _CustomNode_findSystemEnvValueByKey(ptr: KPointer, key: string): Any | undefined;
+    native static _CustomNode_registerOnCustomEnvUpdateCallback(
+        ptr: KPointer, callback: (key: KInt, value: Any) => void): void;
+    native static _CustomNode_registerOnSystemEnvUpdateCallback(
+        ptr: KPointer, callback: (key: string, value: Any) => void): void;
     native static _Extractors_ToDrawableDescriptorPtr(value: DrawableDescriptor): KPointer;
     native static _Extractors_ToDrawingColorFilterPtr(drawingColorFilter: drawing.ColorFilter): KPointer;
     native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;
@@ -403,6 +416,8 @@ export class ArkUIAniModule {
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
     native static _CheckThreadValid(checkUIThread: boolean, ptr: KPointer): void
+    native static _FireArkUIObjectLifecycleCallback(
+        weakRef: object, className: string, nodeType: string, nodePtr: KPointer): void
     native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
         getCallback: (name: string) => string | undefined,
         getAllCustomPropertiesCallback: () => string): void

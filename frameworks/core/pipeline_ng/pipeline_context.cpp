@@ -63,6 +63,7 @@
 #include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
+#include "base/utils/feature_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/back_press_handler_manager.h"
@@ -2629,6 +2630,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         FlushVsync(GetTimeFromExternalTimer(), 0);
     }
 #endif
+    FireLpxUpdateCallbacks();
     MarkLpxDirtyNodes();
 }
 
@@ -4338,6 +4340,19 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true });
         DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-featuremanager") {
+        if (params.size() < PARAM_NUM) {
+            DumpLog::GetInstance().Print("Error: -featuremanager needs key");
+        } else {
+            std::string value;
+            auto ret = FeatureManager::GetInstance().GetFeatureParam(params[1], value);
+            if (ret == FeatureManager::SUCCESS) {
+                DumpLog::GetInstance().Print(value);
+            } else {
+                DumpLog::GetInstance().Print(
+                    "Error: FeatureManager get feature param failed, ret: " + std::to_string(ret));
+            }
+        }
     } else if (params[0] == "-resource") {
         DumpResLoadError();
     } else if (params[0] == "-start") {
@@ -7987,6 +8002,18 @@ void PipelineContext::UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node)
     lpxDirtyNodes_.erase(node);
 }
 
+void PipelineContext::FireLpxUpdateCallbacks()
+{
+    auto lpxDirtyNodes = lpxDirtyNodes_;
+    for (auto& nodeWeak : lpxDirtyNodes) {
+        auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
+        node->FireLpxUpdateCallbacks();
+    }
+}
+
 void PipelineContext::MarkLpxDirtyNodes()
 {
     auto lpxDirtyNodes = lpxDirtyNodes_;
@@ -8128,22 +8155,13 @@ std::optional<TextDirection> PipelineContext::ResolveDirectionFromEnv(const RefP
     auto envManager = GetEnvironmentManager();
     CHECK_NULL_RETURN(envManager, std::nullopt);
 
-    EnvironmentQueryResult result;
-    if (!envManager->FindValueByKey(
-        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_DIRECTION, result)) {
+    SystemEnvValue envValue;
+    if (!envManager->ResolveSystemEnvValueForImplicitReader(host, ENV_KEY_DIRECTION, envValue)) {
         return std::nullopt;
     }
 
-    if (result.type == EnvironmentValueType::STRING) {
-        if (result.stringValue == "Ltr") {
-            return TextDirection::LTR;
-        }
-        if (result.stringValue == "Rtl") {
-            return TextDirection::RTL;
-        }
-        if (result.stringValue == "Auto") {
-            return TextDirection::AUTO;
-        }
+    if (auto direction = envValue.GetDirection()) {
+        return *direction;
     }
     return std::nullopt;
 }
@@ -8154,14 +8172,13 @@ std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<Frame
     auto envManager = GetEnvironmentManager();
     CHECK_NULL_RETURN(envManager, std::nullopt);
 
-    EnvironmentQueryResult result;
-    if (!envManager->FindValueByKey(
-        host, host, EnvironmentPropertyKind::ENV, ENV_KEY_FONT_SCALE, result)) {
+    SystemEnvValue envValue;
+    if (!envManager->ResolveSystemEnvValueForImplicitReader(host, ENV_KEY_FONT_SCALE, envValue)) {
         return std::nullopt;
     }
 
-    if (result.type == EnvironmentValueType::NUMBER) {
-        return static_cast<float>(result.numberValue);
+    if (auto fontScale = envValue.GetDouble()) {
+        return static_cast<float>(*fontScale);
     }
     return std::nullopt;
 }

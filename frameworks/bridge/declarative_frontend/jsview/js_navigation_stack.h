@@ -141,6 +141,12 @@ public:
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
     int32_t GetRecoveredDestinationMode(int32_t index) override;
+    bool IsAutoCleaned(int32_t index) const override;
+    void ClearAutoCleanedState(int32_t index) override;
+    std::string GetAutoCleanedState(int32_t index) const override;
+    void SaveStateToJsCallback(
+        int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state) override;
+    void MarkAutoCleanedFlag(uint64_t navDestinationId) override;
     void SetRecoveryFromReplaceDestination(int32_t index, bool value) override;
     bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex) override;
 

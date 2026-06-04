@@ -204,6 +204,7 @@ enum class CancelButtonStyle {
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
     HandlePolicy handlePolicy = HandlePolicy::DEFAULT;
+    bool forceShowHandle = false; // Used to force show the selection menu when stylus selects text on PC.
 };
 
 enum class PreviewTextStyle {
@@ -481,6 +482,7 @@ public:
     virtual void ResetGradientShaderStyle() = 0;
     virtual void SetOrphanCharOptimization(bool isOrphanChar) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
+    virtual void SetPunctuationOverflow(bool enabled) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) = 0;
     virtual void SetTextAreaScrollBarColor(const Color& value) {};
     virtual void ResetTextAreaScrollBarColor() {};

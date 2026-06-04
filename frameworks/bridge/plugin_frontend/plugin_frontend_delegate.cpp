@@ -39,6 +39,125 @@ const char I18N_FOLDER[] = "i18n/";
 const char RESOURCES_FOLDER[] = "resources/";
 const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
+
+enum class ShowDialogTaskType {
+    SUCCESS,
+    CANCEL,
+    COMPLETE,
+};
+
+struct ShowDialogTaskDispatch {
+    std::function<void(int32_t, int32_t)> callback;
+    ShowDialogTaskType type;
+    int32_t successType = 0;
+
+    void operator()() const
+    {
+        switch (type) {
+            case ShowDialogTaskType::SUCCESS:
+                callback(0, successType);
+                return;
+            case ShowDialogTaskType::CANCEL:
+                callback(1, 0);
+                return;
+            case ShowDialogTaskType::COMPLETE:
+                callback(MIN_ROUT_COUNT, 0);
+                return;
+        }
+    }
+};
+
+inline ShowDialogTaskDispatch MakeShowDialogSuccessTask(
+    const std::function<void(int32_t, int32_t)>& callback, int32_t successType)
+{
+    return { callback, ShowDialogTaskType::SUCCESS, successType };
+}
+
+inline ShowDialogTaskDispatch MakeShowDialogCancelTask(const std::function<void(int32_t, int32_t)>& callback)
+{
+    return { callback, ShowDialogTaskType::CANCEL, 0 };
+}
+
+inline ShowDialogTaskDispatch MakeShowDialogCompleteTask(const std::function<void(int32_t, int32_t)>& callback)
+{
+    return { callback, ShowDialogTaskType::COMPLETE, 0 };
+}
+
+template<typename Method>
+auto MakeWeakPluginFrontendDelegateTask(const WeakPtr<PluginFrontendDelegate>& weak, Method method)
+{
+    return [weak, method]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        ((*delegate).*method)();
+    };
+}
+
+struct PluginFrontendDelegateStringTask {
+    std::function<void(const std::string&)> callback;
+    std::string payload;
+
+    void operator()() const
+    {
+        callback(payload);
+    }
+};
+
+inline PluginFrontendDelegateStringTask MakePluginFrontendDelegateStringTask(
+    const std::function<void(const std::string&)>& callback, const std::string& payload)
+{
+    return { callback, payload };
+}
+
+struct PluginFrontendDelegatePackageStateTask {
+    UpdateApplicationStateCallback callback;
+    std::string packageName;
+    Frontend::State state;
+
+    void operator()() const
+    {
+        callback(packageName, state);
+    }
+};
+
+inline PluginFrontendDelegatePackageStateTask MakePluginFrontendDelegatePackageStateTask(
+    const UpdateApplicationStateCallback& callback, const std::string& packageName, Frontend::State state)
+{
+    return { callback, packageName, state };
+}
+
+struct PluginFrontendDelegateDisplayModeTask {
+    OnWindowDisplayModeChangedCallBack callback;
+    bool isShownInMultiWindow;
+    std::string data;
+
+    void operator()() const
+    {
+        callback(isShownInMultiWindow, data);
+    }
+};
+
+inline PluginFrontendDelegateDisplayModeTask MakePluginFrontendDelegateDisplayModeTask(
+    const OnWindowDisplayModeChangedCallBack& callback, bool isShownInMultiWindow, const std::string& data)
+{
+    return { callback, isShownInMultiWindow, data };
+}
+
+struct PluginFrontendDelegateSaveAbilityStateTask {
+    OnSaveAbilityStateCallBack callback;
+    std::string* data;
+
+    void operator()() const
+    {
+        callback(*data);
+    }
+};
+
+inline PluginFrontendDelegateSaveAbilityStateTask MakePluginFrontendDelegateSaveAbilityStateTask(
+    const OnSaveAbilityStateCallBack& callback, std::string& data)
+{
+    return { callback, &data };
+}
 } // namespace
 
 int32_t PluginFrontendDelegate::GenerateNextPageId()
@@ -393,29 +512,20 @@ void PluginFrontendDelegate::OnSuspended()
 void PluginFrontendDelegate::OnBackGround()
 {
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            delegate->OnPageHide();
-        },
+        MakeWeakPluginFrontendDelegateTask(AceType::WeakClaim(this), &PluginFrontendDelegate::OnPageHide),
         TaskExecutor::TaskType::JS, "ArkUIPluginPageHide");
 }
 
 void PluginFrontendDelegate::OnForeground()
 {
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            delegate->OnPageShow();
-        },
+        MakeWeakPluginFrontendDelegateTask(AceType::WeakClaim(this), &PluginFrontendDelegate::OnPageShow),
         TaskExecutor::TaskType::JS, "ArkUIPluginPageShow");
 }
 
 void PluginFrontendDelegate::OnConfigurationUpdated(const std::string& data)
 {
-    taskExecutor_->PostSyncTask(
-        [onConfigurationUpdated = onConfigurationUpdated_, data] { onConfigurationUpdated(data); },
+    taskExecutor_->PostSyncTask(MakePluginFrontendDelegateStringTask(onConfigurationUpdated_, data),
         TaskExecutor::TaskType::JS, "ArkUIPluginConfigurationUpdated");
 }
 
@@ -507,13 +617,12 @@ void PluginFrontendDelegate::GetPluginsUsed(std::string& data)
 
 void PluginFrontendDelegate::OnActive()
 {
-    taskExecutor_->PostTask([onActive = onActive_]() { onActive(); }, TaskExecutor::TaskType::JS, "ArkUIPluginActive");
+    taskExecutor_->PostTask(onActive_, TaskExecutor::TaskType::JS, "ArkUIPluginActive");
 }
 
 void PluginFrontendDelegate::OnInactive()
 {
-    taskExecutor_->PostTask(
-        [onInactive = onInactive_]() { onInactive(); }, TaskExecutor::TaskType::JS, "ArkUIPluginInactive");
+    taskExecutor_->PostTask(onInactive_, TaskExecutor::TaskType::JS, "ArkUIPluginInactive");
 }
 
 void PluginFrontendDelegate::OnNewRequest(const std::string& data)
@@ -528,47 +637,44 @@ void PluginFrontendDelegate::CallPopPage()
 
 void PluginFrontendDelegate::ResetStagingPage()
 {
-    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS,
-        "ArkUIPluginResetStagingPage");
+    taskExecutor_->PostTask(resetStagingPage_, TaskExecutor::TaskType::JS, "ArkUIPluginResetStagingPage");
 }
 
 void PluginFrontendDelegate::OnApplicationDestroy(const std::string& packageName)
 {
-    taskExecutor_->PostSyncTask(
-        [destroyApplication = destroyApplication_, packageName] { destroyApplication(packageName); },
+    taskExecutor_->PostSyncTask(MakePluginFrontendDelegateStringTask(destroyApplication_, packageName),
         TaskExecutor::TaskType::JS, "ArkUIPluginApplicationDestroy");
 }
 
 void PluginFrontendDelegate::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    taskExecutor_->PostTask([updateApplicationState = updateApplicationState_, packageName,
-                                state] { updateApplicationState(packageName, state); },
+    taskExecutor_->PostTask(MakePluginFrontendDelegatePackageStateTask(updateApplicationState_, packageName, state),
         TaskExecutor::TaskType::JS, "ArkUIPluginUpdateApplicationState");
 }
 
 void PluginFrontendDelegate::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
-    taskExecutor_->PostTask([onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow,
-                                data] { onWindowDisplayModeChanged(isShownInMultiWindow, data); },
+    taskExecutor_->PostTask(
+        MakePluginFrontendDelegateDisplayModeTask(onWindowDisplayModeChanged_, isShownInMultiWindow, data),
         TaskExecutor::TaskType::JS, "ArkUIPluginWindowDisplayModeChanged");
 }
 
 void PluginFrontendDelegate::OnSaveAbilityState(std::string& data)
 {
-    taskExecutor_->PostSyncTask([onSaveAbilityState = onSaveAbilityState_, &data] { onSaveAbilityState(data); },
+    taskExecutor_->PostSyncTask(MakePluginFrontendDelegateSaveAbilityStateTask(onSaveAbilityState_, data),
         TaskExecutor::TaskType::JS, "ArkUIPluginSaveAbilityState");
 }
 
 void PluginFrontendDelegate::OnRestoreAbilityState(const std::string& data)
 {
-    taskExecutor_->PostTask([onRestoreAbilityState = onRestoreAbilityState_, data] { onRestoreAbilityState(data); },
+    taskExecutor_->PostTask(MakePluginFrontendDelegateStringTask(onRestoreAbilityState_, data),
         TaskExecutor::TaskType::JS, "ArkUIPluginRestoreAbilityState");
 }
 
 void PluginFrontendDelegate::OnNewWant(const std::string& data)
 {
     taskExecutor_->PostTask(
-        [onNewWant = onNewWant_, data] { onNewWant(data); }, TaskExecutor::TaskType::JS, "ArkUIPluginNewWant");
+        MakePluginFrontendDelegateStringTask(onNewWant_, data), TaskExecutor::TaskType::JS, "ArkUIPluginNewWant");
 }
 
 void PluginFrontendDelegate::FireAsyncEvent(
@@ -907,7 +1013,7 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
             successEventMarker, [callback, taskExecutor = taskExecutor_](int32_t successType) {
-                taskExecutor->PostTask([callback, successType]() { callback(0, successType); },
+                taskExecutor->PostTask(MakeShowDialogSuccessTask(callback, successType),
                     TaskExecutor::TaskType::JS, "ArkUIPluginShowDialogSuccess");
             });
         callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
@@ -917,8 +1023,8 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         auto cancelEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
-                taskExecutor->PostTask(
-                    [callback]() { callback(1, 0); }, TaskExecutor::TaskType::JS, "ArkUIPluginShowDialogCancel");
+                taskExecutor->PostTask(MakeShowDialogCancelTask(callback), TaskExecutor::TaskType::JS,
+                    "ArkUIPluginShowDialogCancel");
             });
         callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     }
@@ -927,7 +1033,7 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         auto completeEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             completeEventMarker, [callback, taskExecutor = taskExecutor_] {
-                taskExecutor->PostTask([callback]() { callback(MIN_ROUT_COUNT, 0); }, TaskExecutor::TaskType::JS,
+                taskExecutor->PostTask(MakeShowDialogCompleteTask(callback), TaskExecutor::TaskType::JS,
                     "ArkUIPluginShowDialogComplete");
             });
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);

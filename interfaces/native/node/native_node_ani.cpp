@@ -290,18 +290,22 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
 
 ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle node, ani_env* env, ani_value* param)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(env, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(param, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(env, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "env is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(param, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "param is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(fullImpl, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Full implementation is null");
     auto navigationAPI = fullImpl->getNavigation();
-    CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED,
+        __FUNCTION__, "Navigation API is null");
     char idBuffer[512] = { 0 };
     ArkUI_Int32 idLen = 0;
     auto ret = navigationAPI->getNavDestinationId(node->uiNodeHandle, idBuffer, sizeof(idBuffer), &idLen);
     if (ret != OHOS::Ace::ERROR_CODE_NO_ERROR) {
         LOGE("AceNavigation failed to get NavDestinationId ret:%{public}d", ret);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED, __FUNCTION__, "failed to get NavDestination id");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     LOGI("AceNavigation get navDestinationId:%{public}s", std::string(idBuffer).c_str());
@@ -309,6 +313,7 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle
     ani_class cls;
     if ((status = env->FindClass(NAV_PATH_STACK_CLASS, &cls)) != ANI_OK) {
         LOGE("AceNavigation failed to find %{public}s class, status:%{public}d", NAV_PATH_STACK_CLASS, status);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED, __FUNCTION__, "can not find navPathStack");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     ani_static_method getParamMethod;
@@ -316,16 +321,19 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle
         cls, GET_PARAM_WITH_NAVDESTINATION_ID_METHOD, nullptr, &getParamMethod)) != ANI_OK) {
         LOGE("AceNavigation failed to find %{public}s method, status:%{public}d",
             GET_PARAM_WITH_NAVDESTINATION_ID_METHOD, status);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED, __FUNCTION__, "failed to get param by id");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     ani_string navDestinatinIdRef;
     if ((status = env->String_NewUTF8(idBuffer, idLen, &navDestinatinIdRef)) != ANI_OK) {
         LOGE("AceNavigation failed to create navDestinationId ani_string, status:%{public}d", status);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED, __FUNCTION__, "create string failed");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     ani_ref paramRef;
     if ((status = env->Class_CallStaticMethod_Ref(cls, getParamMethod, &paramRef, navDestinatinIdRef)) != ANI_OK) {
         LOGE("AceNavigation failed to get NavDestination param, status:%{public}d", status);
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_GET_INFO_FAILED, __FUNCTION__, "failed to get NavDestination param");
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     param->r = paramRef;

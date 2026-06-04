@@ -127,6 +127,7 @@ enum class AccessibilityCallbackEventId : uint32_t {
     ON_SHOW = 1,
     ON_HIDE = 2,
     ON_SEND_ELEMENT_INFO_CHANGE = 3,
+    ON_SEND_DETACH_FOCUS_FALLBACK = 4,
 };
 
 struct AccessibilityCallbackEvent {

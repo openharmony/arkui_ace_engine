@@ -131,7 +131,11 @@ bool FocusManager::RearrangeViewStack()
         if (std::find(focusViewStack_.begin(), focusViewStack_.end(), curFocusViewWeak) != focusViewStack_.end()) {
             focusViewStack_.remove(curFocusViewWeak);
         }
-        lastFocusView_ = focusViewStack_.back();
+        if (focusViewStack_.empty()) {
+            lastFocusView_ = nullptr;
+        } else {
+            lastFocusView_ = focusViewStack_.back();
+        }
         return true;
     }
     if (focusViewStackState_ == FocusViewStackState::CLOSE) {
@@ -457,7 +461,7 @@ void FocusManager::ArrangeModalFocusViewStack()
     CHECK_NULL_VOID(frameNode);
     auto focusPattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(focusPattern);
-    if (!focusPattern->GetModalFlag()) { // GetIsFixFocus()
+    if (!focusPattern->GetIsModalFixFocus()) {
         return;
     }
     for (RefPtr<UINode> node = focusRef->GetFrameNode(); node; node = node->GetParent()) {

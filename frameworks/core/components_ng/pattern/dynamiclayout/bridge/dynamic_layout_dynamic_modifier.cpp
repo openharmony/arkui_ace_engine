@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <memory>
 #include "core/components_ng/pattern/dynamiclayout/dynamic_layout_model_ng.h"
+#include "core/components_ng/pattern/dynamiclayout/lazy_dynamic_layout_model_ng.h"
 #include "core/components_ng/pattern/dynamiclayout/algorithm_param_base.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
@@ -24,14 +26,64 @@ void CreateDynamicLayout(void* params, ArkUI_Int32 type)
     model.Create(algorithmParams, static_cast<DynamicLayoutType>(type));
 }
 
+void CreateLazyDynamicLayout(void* params, ArkUI_Int32 type)
+{
+    static LazyDynamicLayoutModelNG model;
+    auto lazyCustomParams = AceType::Claim(reinterpret_cast<LazyCustomLayoutAlgorithmParam*>(params));
+    model.Create(lazyCustomParams);
+}
+
+void SetOnVisibleIndexesChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        std::unique_ptr<OnVisibleIndexesChangeEvent> onVisibleIndexesChange(
+            reinterpret_cast<OnVisibleIndexesChangeEvent*>(extraParam));
+        LazyDynamicLayoutModelNG::SetOnVisibleIndexesChange(frameNode, std::move(*onVisibleIndexesChange));
+    } else {
+        LazyDynamicLayoutModelNG::SetOnVisibleIndexesChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnVisibleIndexesChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyDynamicLayoutModelNG::SetOnVisibleIndexesChange(frameNode, nullptr);
+}
+
+void SetAdjustedOffset(ArkUINodeHandle node, ArkUI_Float32 adjustedOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LazyDynamicLayoutModelNG::SetAdjustedOffset(frameNode, adjustedOffset);
+}
+
+void SetInActiveChildren(ArkUINodeHandle node, const ArkUI_Int32* children, ArkUI_Uint32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<int32_t> inActiveChildren;
+    if (children && size > 0) {
+        inActiveChildren.assign(children, children + size);
+    }
+    LazyDynamicLayoutModelNG::SetInActiveChildren(frameNode, inActiveChildren);
+}
+
 namespace NodeModifier {
 const ArkUIDynamicLayoutModifier* GetDynamicLayoutDynamicModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN();
     static const ArkUIDynamicLayoutModifier modifier = {
         .createDynamicLayout = CreateDynamicLayout,
+        .createLazyDynamicLayout = CreateLazyDynamicLayout,
+        .setOnVisibleIndexesChange = SetOnVisibleIndexesChange,
+        .resetOnVisibleIndexesChange = ResetOnVisibleIndexesChange,
+        .setAdjustedOffset = SetAdjustedOffset,
+        .setInActiveChildren = SetInActiveChildren,
     };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0);
     return &modifier;
 }
 } // namespace NodeModifier

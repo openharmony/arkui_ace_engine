@@ -15,7 +15,7 @@
 
 /// <reference path='./import.ts' />
 function loadComponent() {
-  if (globalThis.__ArkComponent__ !== undefined && loadComponent.componentObj === undefined) {
+  if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
       constructor(value) {
         super(value);
@@ -1654,7 +1654,9 @@ class JSSearch extends JSViewAbstract {
     getUINativeModule().search.setStrokeJoinStyle(true, value);
   }
   static shaderStyle(value) {
-    if (value.options) {
+    if (value === undefined || value === null) {
+      getUINativeModule().search.resetShaderStyle(true, null);
+    } else if (value.options) {
       getUINativeModule().search.setShaderStyle(true, value.options.center, value.options.radius, value.options.angle,
         value.options.direction, value.options.repeating, value.options.colors, value.options.color);
     } else {
@@ -1767,7 +1769,7 @@ class JSSearch extends JSViewAbstract {
   }
   static attributeModifier(modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new createComponent(nativePtr);
+      return createComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SearchModifier(nativePtr, classType);
     });
@@ -1800,6 +1802,7 @@ class JSSearch extends JSViewAbstract {
 }
 
 function createComponent(nativePtr, classType) {
+  loadComponent();
   if (loadComponent.componentObj !== undefined) {
     return new loadComponent.componentObj.component(nativePtr, classType);
   }

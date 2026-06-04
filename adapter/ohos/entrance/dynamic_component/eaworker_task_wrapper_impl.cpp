@@ -34,7 +34,13 @@ void GetVM(int32_t hostInstanceId, ani_vm **vm)
 {
     auto container = Container::GetContainer(hostInstanceId);
     CHECK_NULL_VOID(container);
-    RefPtr<Frontend> frontend = container->GetFrontend();
+    RefPtr<Frontend> frontend = nullptr;
+    auto frontendType = container->GetFrontendType();
+    if (frontendType == FrontendType::STATIC_HYBRID_DYNAMIC || frontendType == FrontendType::DYNAMIC_HYBRID_STATIC) {
+        frontend = container->GetSubFrontend();
+    } else {
+        frontend = container->GetFrontend();
+    }
     CHECK_NULL_VOID(frontend);
     *vm = frontend->GetVM();
 }

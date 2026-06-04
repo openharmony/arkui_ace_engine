@@ -58,7 +58,6 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
     auto theme = option->GetTheme();
     if (!theme) {
         LOGE("option theme is null.");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
 

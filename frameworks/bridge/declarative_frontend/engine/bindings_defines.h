@@ -53,4 +53,7 @@ using JSDestructorCallback = void (*)(T* instance);
 template<typename T>
 using JSGCMarkCallback = void (*)(T* instance, const OHOS::Ace::Framework::JSGCMarkCallbackInfo&);
 
+using JSDestructorCallbackErased = void (*)(void* instance);
+using JSGCMarkCallbackErased = void (*)(void* instance, const OHOS::Ace::Framework::JSGCMarkCallbackInfo&);
+
 #endif

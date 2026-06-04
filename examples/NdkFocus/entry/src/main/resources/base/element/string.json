@@ -1,0 +1,100 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "NdkFocus"
+    },
+    {
+      "name": "a_status",
+      "value": "手动激活状态: "
+    },
+    {
+      "name": "is_status",
+      "value": "已激活"
+    },
+    {
+      "name": "no_status",
+      "value": "未激活"
+    },
+    {
+      "name": "state_information",
+      "value": "焦点状态信息"
+    },
+    {
+      "name": "transfer_status",
+      "value": "自动转移状态: "
+    },
+    {
+      "name": "enable",
+      "value": "启用"
+    },
+    {
+      "name": "disable",
+      "value": "禁用"
+    },
+    {
+      "name": "control_operation",
+      "value": "焦点控制操作"
+    },
+    {
+      "name": "test_button",
+      "value": "菜单测试按钮"
+    },
+    {
+      "name": "check_button",
+      "value": "拉起菜单观察是否Button失焦"
+    },
+    {
+      "name": "set_be_focusable",
+      "value": "设置Button0可聚焦"
+    },
+    {
+      "name": "set_be_not_focusable",
+      "value": "设置Button0不可聚焦"
+    },
+    {
+      "name": "synchronize_request_focus",
+      "value": "同步请求焦点(0)"
+    },
+    {
+      "name": "synchronize_request_focus1",
+      "value": "异步请求焦点(1)"
+    },
+    {
+      "name": "deactivate",
+      "value": "取消激活"
+    },
+    {
+      "name": "activate_focus",
+      "value": "激活焦点"
+    },
+    {
+      "name": "clear_focus",
+      "value": "清除焦点"
+    },
+    {
+      "name": "disable_automatic_transfer",
+      "value": "禁用自动转移"
+    },
+    {
+      "name": "enable_automatic_transfer",
+      "value": "启用自动转移"
+    },
+    {
+      "name": "propagate_upward_to_ancestor_components",
+      "value": "向上传递给祖先组件"
+    },
+    {
+      "name": "key_events_are_used_for_focus_navigation",
+      "value": "按键事件用于走焦"
+    }
+  ]
+}

@@ -23,4 +23,12 @@
         ErrorMessageManager::GetInstance().SetErrorCodeAndMessage(errorCode, errorMessage); \
     } while (0)
 
+#define CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(ptr, errorCode, errorMessage)                        \
+    do {                                                                                            \
+        if (!(ptr)) {                                                                               \
+            ErrorMessageManager::GetInstance().SetErrorCodeAndMessage(errorCode, errorMessage);     \
+            return errorCode;                                                                       \
+        }                                                                                           \
+    } while (0)
+
 #endif // ARKUI_ERROR_MESSAGE_MACROS_H

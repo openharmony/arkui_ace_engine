@@ -550,6 +550,7 @@ HWTEST_F(ScrollableOptionErrorTest, Expand_WrongNodeType_002, TestSize.Level1)
     ASSERT_NE(errorMessage, nullptr);
     std::string errorMessageStr(errorMessage);
     EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_ListItemSwipeAction_Expand"), std::string::npos);
     EXPECT_NE(errorMessageStr.find("errorMessage: node type is not ListItem"), std::string::npos);
 
     nodeAPI->disposeNode(columnNode);
@@ -575,6 +576,7 @@ HWTEST_F(ScrollableOptionErrorTest, Expand_InvalidDirection_003, TestSize.Level1
     ASSERT_NE(errorMessage, nullptr);
     std::string errorMessageStr(errorMessage);
     EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_ListItemSwipeAction_Expand"), std::string::npos);
     EXPECT_NE(errorMessageStr.find("errorMessage: direction is invalid"), std::string::npos);
 
     nodeAPI->disposeNode(listItemNode);
@@ -600,6 +602,7 @@ HWTEST_F(ScrollableOptionErrorTest, Expand_NodeNotOnMainTree_004, TestSize.Level
     ASSERT_NE(errorMessage, nullptr);
     std::string errorMessageStr(errorMessage);
     EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_ListItemSwipeAction_Expand"), std::string::npos);
     EXPECT_NE(errorMessageStr.find("errorMessage: node is not on main tree"), std::string::npos);
 
     nodeAPI->disposeNode(listItemNode);
@@ -665,6 +668,7 @@ HWTEST_F(ScrollableOptionErrorTest, Collapse_WrongNodeType_002, TestSize.Level1)
     ASSERT_NE(errorMessage, nullptr);
     std::string errorMessageStr(errorMessage);
     EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_ListItemSwipeAction_Collapse"), std::string::npos);
     EXPECT_NE(errorMessageStr.find("errorMessage: node type is not ListItem"), std::string::npos);
 
     nodeAPI->disposeNode(columnNode);
@@ -689,6 +693,7 @@ HWTEST_F(ScrollableOptionErrorTest, Collapse_NodeNotOnMainTree_003, TestSize.Lev
     ASSERT_NE(errorMessage, nullptr);
     std::string errorMessageStr(errorMessage);
     EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_ListItemSwipeAction_Collapse"), std::string::npos);
     EXPECT_NE(errorMessageStr.find("errorMessage: node is not on main tree"), std::string::npos);
 
     nodeAPI->disposeNode(listItemNode);

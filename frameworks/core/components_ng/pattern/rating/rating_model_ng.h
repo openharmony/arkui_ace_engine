@@ -41,9 +41,12 @@ public:
     void SetIndicator(bool value) override;
     void SetStars(int32_t value) override;
     void SetStepSize(double value) override;
-    void SetForegroundSrc(const std::string& value, bool flag = false) override;
-    void SetSecondarySrc(const std::string& value, bool flag = false) override;
-    void SetBackgroundSrc(const std::string& value, bool flag = false) override;
+    void SetForegroundSrc(
+        const std::string& value, bool flag = false, const RefPtr<ResourceObject>& resObj = nullptr) override;
+    void SetSecondarySrc(
+        const std::string& value, bool flag = false, const RefPtr<ResourceObject>& resObj = nullptr) override;
+    void SetBackgroundSrc(
+        const std::string& value, bool flag = false, const RefPtr<ResourceObject>& resObj = nullptr) override;
     void SetOnChange(RatingChangeEvent&& onChange) override;
     void SetOnChangeEvent(RatingChangeEvent&& onChangeEvent) override;
     void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj, const RatingUriType ratingUriType) override;
@@ -56,9 +59,12 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetStars(FrameNode* frameNode, int32_t value);
     static void SetStepSize(FrameNode* frameNode, double value);
-    static void SetForegroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false);
-    static void SetSecondarySrc(FrameNode* frameNode, const std::string& value, bool flag = false);
-    static void SetBackgroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false);
+    static void SetForegroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false,
+        const RefPtr<ResourceObject>& resObj = nullptr);
+    static void SetSecondarySrc(FrameNode* frameNode, const std::string& value, bool flag = false,
+        const RefPtr<ResourceObject>& resObj = nullptr);
+    static void SetBackgroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false,
+        const RefPtr<ResourceObject>& resObj = nullptr);
     static void SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, double value);
     static void SetRatingOptions(FrameNode* frameNode, double rating = .0, bool indicator = false);

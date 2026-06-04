@@ -25,6 +25,7 @@
 
 #include "base/error/error_code.h"
 #include "core/components/common/layout/position_param.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"

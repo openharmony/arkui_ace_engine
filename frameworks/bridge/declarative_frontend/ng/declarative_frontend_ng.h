@@ -204,6 +204,15 @@ public:
         return jsEngine_;
     }
 
+    bool SetExternalClearCallback(std::function<void()>&& func) override
+    {
+        if (!jsEngine_) {
+            LOGW("SetExternalClearCallback failed, jsEngine is null");
+            return false;
+        }
+        return jsEngine_->SetExternalClearCallback(std::move(func));
+    }
+
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context) override;
 
     void FlushReload() override;

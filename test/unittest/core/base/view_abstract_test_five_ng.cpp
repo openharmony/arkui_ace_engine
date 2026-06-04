@@ -1085,4 +1085,308 @@ HWTEST_F(ViewAbstractTestFiveNg, SweepGradientHDRColorTest012, TestSize.Level1)
     pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: ViewAbstractLpxWidthHeight001
+ * @tc.desc: Test SetWidth/SetHeight with LPX unit registers LPX attribute, non-LPX unregisters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxWidthHeight001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetWidth(NG::CalcLength(lpxDim));
+    ViewAbstract::SetHeight(NG::CalcLength(lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    ViewAbstract::SetWidth(NG::CalcLength(vpDim));
+    ViewAbstract::SetHeight(NG::CalcLength(vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxMinMax001
+ * @tc.desc: Test SetMinWidth/Height, SetMaxWidth/Height with LPX unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxMinMax001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetMinWidth(NG::CalcLength(lpxDim));
+    ViewAbstract::SetMinHeight(NG::CalcLength(lpxDim));
+    ViewAbstract::SetMaxWidth(NG::CalcLength(lpxDim));
+    ViewAbstract::SetMaxHeight(NG::CalcLength(lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 4);
+
+    ViewAbstract::SetMinWidth(NG::CalcLength(vpDim));
+    ViewAbstract::SetMinHeight(NG::CalcLength(vpDim));
+    ViewAbstract::SetMaxWidth(NG::CalcLength(vpDim));
+    ViewAbstract::SetMaxHeight(NG::CalcLength(vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxPadding001
+ * @tc.desc: Test SetPadding with LPX unit registers LPX_PADDING attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxPadding001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetPadding(NG::CalcLength(lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetPadding(NG::CalcLength(vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxSafeAreaPadding001
+ * @tc.desc: Test SetSafeAreaPadding with LPX unit registers LPX_SAFE_AREA_PADDING attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxSafeAreaPadding001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetSafeAreaPadding(NG::CalcLength(lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetSafeAreaPadding(NG::CalcLength(vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxMargin001
+ * @tc.desc: Test SetMargin with LPX unit registers LPX_MARGIN attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxMargin001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetMargin(NG::CalcLength(lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetMargin(NG::CalcLength(vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxBorderRadius001
+ * @tc.desc: Test SetBorderRadius with LPX unit registers LPX_BORDER_RADIUS attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxBorderRadius001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetBorderRadius(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetBorderRadius(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxBorderWidth001
+ * @tc.desc: Test SetBorderWidth with LPX unit registers LPX_BORDER_WIDTH attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxBorderWidth001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetBorderWidth(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetBorderWidth(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxPosition001
+ * @tc.desc: Test SetPosition with LPX unit registers LPX_POSITION_X/Y attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxPosition001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetPosition(OffsetT<Dimension>(lpxDim, lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    ViewAbstract::SetPosition(OffsetT<Dimension>(vpDim, vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxOffset001
+ * @tc.desc: Test SetOffset with LPX unit registers LPX_OFFSET_X/Y attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxOffset001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetOffset(OffsetT<Dimension>(lpxDim, lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    ViewAbstract::SetOffset(OffsetT<Dimension>(vpDim, vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxMarkAnchor001
+ * @tc.desc: Test MarkAnchor with LPX unit registers LPX_MARK_ANCHOR_X/Y attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxMarkAnchor001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::MarkAnchor(OffsetT<Dimension>(lpxDim, lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    ViewAbstract::MarkAnchor(OffsetT<Dimension>(vpDim, vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxPositionEdges001
+ * @tc.desc: Test SetPositionEdges with LPX unit registers LPX_POSITION_EDGES attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxPositionEdges001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    EdgesParam edges;
+    edges.left = lpxDim;
+    edges.top = lpxDim;
+    ViewAbstract::SetPositionEdges(edges);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    EdgesParam vpEdges;
+    vpEdges.left = vpDim;
+    vpEdges.top = vpDim;
+    ViewAbstract::SetPositionEdges(vpEdges);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxFrameNodeWidthHeight001
+ * @tc.desc: Test FrameNode-based SetWidth/SetHeight with LPX unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxFrameNodeWidthHeight001, TestSize.Level1)
+{
+    auto frameNode = AceType::RawPtr(FRAME_NODE_REGISTER);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetWidth(frameNode, NG::CalcLength(lpxDim));
+    ViewAbstract::SetHeight(frameNode, NG::CalcLength(lpxDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    ViewAbstract::SetWidth(frameNode, NG::CalcLength(vpDim));
+    ViewAbstract::SetHeight(frameNode, NG::CalcLength(vpDim));
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

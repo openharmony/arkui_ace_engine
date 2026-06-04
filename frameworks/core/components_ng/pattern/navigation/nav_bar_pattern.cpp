@@ -272,10 +272,13 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         CHECK_NULL_VOID(navBarPattern);
         auto titleBarMenuItems = navBarPattern->GetTitleBarMenuItems();
         auto toolBarMenuItems = navBarPattern->GetToolBarMenuItems();
-
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
         if (navBarPattern->HasMenuNodeId()) {
             auto menuNode = CreateMenuItems(navBarPattern->GetMenuNodeId(), titleBarMenuItems, navBarNode, false);
             CHECK_NULL_VOID(menuNode);
+            if (menuNode == titleBarNode->GetMenu() && titleBarPattern) {
+                titleBarPattern->MarkMenuUIEffectNeedUpdate();
+            }
             navBarNode->SetMenu(menuNode);
         }
 
@@ -283,6 +286,9 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         auto landscapeMenuNode =
             CreateMenuItems(navBarPattern->GetLandscapeMenuNodeId(), titleBarMenuItems, navBarNode, true);
         CHECK_NULL_VOID(landscapeMenuNode);
+        if (landscapeMenuNode == titleBarNode->GetMenu() && titleBarPattern) {
+            titleBarPattern->MarkMenuUIEffectNeedUpdate();
+        }
         navBarNode->SetLandscapeMenu(landscapeMenuNode);
     }
 }

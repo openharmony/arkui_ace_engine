@@ -16,11 +16,45 @@
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include <tuple>
+#include <type_traits>
+#include <utility>
+
 namespace OHOS::Ace {
 namespace {
 
 const char MANIFEST_JSON[] = "manifest.json";
 const char FILE_TYPE_JSON[] = ".json";
+
+template<typename Owner, typename... Args>
+struct WeakDispatchTask {
+    using Dispatch = void (*)(Owner&, const Args& ...);
+
+    WeakPtr<Owner> weak;
+    Dispatch dispatch;
+    std::tuple<Args...> args;
+
+    void operator()() const
+    {
+        auto target = weak.Upgrade();
+        if (!target) {
+            return;
+        }
+        std::apply(
+            [this, &target](const auto&... unpacked) {
+                dispatch(*target, unpacked...);
+            },
+            args);
+    }
+};
+
+template<typename Owner, typename... Args>
+WeakDispatchTask<Owner, std::decay_t<Args>...> MakeWeakDispatchTask(
+    const WeakPtr<Owner>& weak, typename WeakDispatchTask<Owner, std::decay_t<Args>...>::Dispatch dispatch,
+    Args&&... args)
+{
+    return { weak, dispatch, std::tuple<std::decay_t<Args>...>{std::forward<Args>(args)...} };
+}
 
 } // namespace
 
@@ -94,14 +128,14 @@ UIContentErrorCode CardFrontend::RunPage(const std::string& url, const std::stri
         TAG_LOGW(AceLogTag::ACE_FORM, "fail to run page due to path url is empty");
         return UIContentErrorCode::NULL_URL;
     }
+    using Dispatch = WeakDispatchTask<CardFrontend, std::string, std::string>::Dispatch;
+    static constexpr Dispatch dispatch = [](CardFrontend& frontend, const std::string& loadUrlPath,
+                                         const std::string& loadParams) {
+        frontend.LoadPage(loadUrlPath, loadParams);
+    };
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), urlPath, params] {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->LoadPage(urlPath, params);
-            }
-        },
-        TaskExecutor::TaskType::JS, "ArkUICardFrontendRunPage");
+        MakeWeakDispatchTask(AceType::WeakClaim(this), dispatch, urlPath, params), TaskExecutor::TaskType::JS,
+        "ArkUICardFrontendRunPage");
     
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -193,31 +227,32 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
     auto jsCommands = std::make_shared<std::vector<RefPtr<Framework::JsCommand>>>();
     page->PopAllCommands(*jsCommands);
     page->SetPipelineContext(holder_.Get());
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), page, jsCommands] {
-            auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID(frontend);
-            // Flush all JS commands.
-            for (const auto& command : *jsCommands) {
-                command->Execute(page);
+    using PageLoadedDispatch =
+        WeakDispatchTask<CardFrontend, RefPtr<Framework::JsAcePage>,
+            std::shared_ptr<std::vector<RefPtr<Framework::JsCommand>>>>::Dispatch;
+    static constexpr PageLoadedDispatch pageLoadedDispatch =
+        [](CardFrontend& frontend, const RefPtr<Framework::JsAcePage>& loadedPage,
+            const std::shared_ptr<std::vector<RefPtr<Framework::JsCommand>>>& commands) {
+            for (const auto& command : *commands) {
+                command->Execute(loadedPage);
             }
 
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(frontend->holder_.Get());
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(frontend.holder_.Get());
             CHECK_NULL_VOID(pipelineContext);
-            auto minSdk = frontend->manifestParser_->GetMinPlatformVersion();
+            auto minSdk = frontend.manifestParser_->GetMinPlatformVersion();
             pipelineContext->SetMinPlatformVersion(minSdk);
 
-            auto document = page->GetDomDocument();
-            if (frontend->pageLoaded_) {
-                page->ClearShowCommand();
+            auto document = loadedPage->GetDomDocument();
+            if (frontend.pageLoaded_) {
+                loadedPage->ClearShowCommand();
                 std::vector<NodeId> dirtyNodes;
-                page->PopAllDirtyNodes(dirtyNodes);
+                loadedPage->PopAllDirtyNodes(dirtyNodes);
                 if (dirtyNodes.empty()) {
                     return;
                 }
                 auto rootNodeId = dirtyNodes.front();
                 if (rootNodeId == DOM_ROOT_NODE_ID_BASE) {
-                    auto patchComponent = page->BuildPagePatch(rootNodeId);
+                    auto patchComponent = loadedPage->BuildPagePatch(rootNodeId);
                     if (patchComponent) {
                         pipelineContext->ScheduleUpdate(patchComponent);
                     }
@@ -226,7 +261,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
                     // When a component is configured with "position: fixed", there is a proxy node in root tree
                     // instead of the real composed node. So here updates the real composed node.
                     for (int32_t nodeId : document->GetProxyRelatedNodes()) {
-                        auto patchComponent = page->BuildPagePatch(nodeId);
+                        auto patchComponent = loadedPage->BuildPagePatch(nodeId);
                         if (patchComponent) {
                             pipelineContext->ScheduleUpdate(patchComponent);
                         }
@@ -235,8 +270,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
                 return;
             }
 
-            // Just clear all dirty nodes.
-            page->ClearAllDirtyNodes();
+            loadedPage->ClearAllDirtyNodes();
             if (document) {
                 document->HandleComponentPostBinding();
             }
@@ -244,33 +278,34 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
                 pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
             }
             if (pipelineContext->CanPushPage()) {
-                pipelineContext->PushPage(page->BuildPage(page->GetUrl()));
-                frontend->pageLoaded_ = true;
-                if (frontend->delegate_) {
-                    frontend->delegate_->GetJsAccessibilityManager()->SetRunningPage(page);
+                pipelineContext->PushPage(loadedPage->BuildPage(loadedPage->GetUrl()));
+                frontend.pageLoaded_ = true;
+                if (frontend.delegate_) {
+                    frontend.delegate_->GetJsAccessibilityManager()->SetRunningPage(loadedPage);
                 }
             }
-        },
-        TaskExecutor::TaskType::UI, "ArkUICardFrontendPageLoaded");
+        };
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-            auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID(frontend);
-            frontend->FireFormVisiableCallback();
-        },
-        TaskExecutor::TaskType::UI, "ArkUICardFrontendFireFormVisiable");
+        MakeWeakDispatchTask(AceType::WeakClaim(this), pageLoadedDispatch, page, jsCommands),
+        TaskExecutor::TaskType::UI, "ArkUICardFrontendPageLoaded");
+    using FireVisibleDispatch = WeakDispatchTask<CardFrontend>::Dispatch;
+    static constexpr FireVisibleDispatch fireVisibleDispatch = [](CardFrontend& frontend) {
+        frontend.FireFormVisiableCallback();
+    };
+    taskExecutor_->PostTask(
+        MakeWeakDispatchTask(AceType::WeakClaim(this), fireVisibleDispatch), TaskExecutor::TaskType::UI,
+        "ArkUICardFrontendFireFormVisiable");
 }
 
 void CardFrontend::UpdateData(const std::string& dataList)
 {
+    using Dispatch = WeakDispatchTask<CardFrontend, std::string>::Dispatch;
+    static constexpr Dispatch dispatch = [](CardFrontend& frontend, const std::string& updateDataList) {
+        frontend.UpdatePageData(updateDataList);
+    };
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), dataList] {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->UpdatePageData(dataList);
-            }
-        },
-        TaskExecutor::TaskType::JS, "ArkUICardFrontendUpdatePageData");
+        MakeWeakDispatchTask(AceType::WeakClaim(this), dispatch, dataList), TaskExecutor::TaskType::JS,
+        "ArkUICardFrontendUpdatePageData");
 }
 
 void CardFrontend::UpdatePageData(const std::string& dataList)
@@ -285,47 +320,46 @@ void CardFrontend::UpdatePageData(const std::string& dataList)
 
 void CardFrontend::SetColorMode(ColorMode colorMode)
 {
+    using Dispatch = WeakDispatchTask<CardFrontend, ColorMode>::Dispatch;
+    static constexpr Dispatch dispatch = [](CardFrontend& frontend, const ColorMode& newColorMode) {
+        frontend.colorMode_ = newColorMode;
+        if (!frontend.delegate_ || !frontend.parseJsCard_) {
+            return;
+        }
+        frontend.parseJsCard_->SetColorMode(frontend.colorMode_);
+        frontend.OnMediaFeatureUpdate();
+    };
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), colorMode]() {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->colorMode_ = colorMode;
-                if (!frontend->delegate_ || !frontend->parseJsCard_) {
-                    return;
-                }
-                frontend->parseJsCard_->SetColorMode(frontend->colorMode_);
-                frontend->OnMediaFeatureUpdate();
-            }
-        },
-        TaskExecutor::TaskType::JS, "ArkUICardFrontendSetColorMode");
+        MakeWeakDispatchTask(AceType::WeakClaim(this), dispatch, colorMode), TaskExecutor::TaskType::JS,
+        "ArkUICardFrontendSetColorMode");
 }
 
 void CardFrontend::RebuildAllPages()
 {
     CHECK_NULL_VOID(delegate_);
     auto page = delegate_->GetPage();
+    using Dispatch = WeakDispatchTask<Framework::JsAcePage>::Dispatch;
+    static constexpr Dispatch dispatch = [](Framework::JsAcePage& targetPage) {
+        auto domDoc = targetPage.GetDomDocument();
+        CHECK_NULL_VOID(domDoc);
+        auto rootNode = domDoc->GetDOMNodeById(domDoc->GetRootNodeId());
+        CHECK_NULL_VOID(rootNode);
+        rootNode->UpdateStyleWithChildren();
+    };
     taskExecutor_->PostTask(
-        [weakPage = WeakPtr<Framework::JsAcePage>(page)] {
-            auto page = weakPage.Upgrade();
-            CHECK_NULL_VOID(page);
-            auto domDoc = page->GetDomDocument();
-            CHECK_NULL_VOID(domDoc);
-            auto rootNode = domDoc->GetDOMNodeById(domDoc->GetRootNodeId());
-            CHECK_NULL_VOID(rootNode);
-            rootNode->UpdateStyleWithChildren();
-        },
+        MakeWeakDispatchTask(WeakPtr<Framework::JsAcePage>(page), dispatch),
         TaskExecutor::TaskType::UI, "ArkUICardFrontendRebuildAllPages");
 }
 
 void CardFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
+    using Dispatch = WeakDispatchTask<CardFrontend, int32_t, int32_t>::Dispatch;
+    static constexpr Dispatch dispatch = [](CardFrontend& frontend, const int32_t& changedWidth,
+                                         const int32_t& changedHeight) {
+        frontend.HandleSurfaceChanged(changedWidth, changedHeight);
+    };
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), width, height] {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->HandleSurfaceChanged(width, height);
-            }
-        },
+        MakeWeakDispatchTask(AceType::WeakClaim(this), dispatch, width, height),
         TaskExecutor::TaskType::JS, "ArkUICardFrontendSurfaceChanged");
 }
 

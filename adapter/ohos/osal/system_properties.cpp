@@ -835,6 +835,7 @@ bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::autoResizeEnabled_ = false;
+int32_t SystemProperties::sensorCorrectionEnable_ = 0;
 
 std::once_flag SystemProperties::getSysPropertiesFlag_;
 
@@ -1022,6 +1023,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
         autoResizeEnabled_ = system::GetBoolParameter(ENABLE_IMAGE_AUTO_RESIZE_KEY, false);
         isOpenYuvDecode_ = ReadIsOpenYuvDecode();
+        sensorCorrectionEnable_ = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", -1);
 
         // watch animation scale
         animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
@@ -1466,6 +1468,11 @@ bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
 bool SystemProperties::IsAutoFillSupport()
 {
     return isAutoFillSupport_;
+}
+
+bool SystemProperties::IsSensorCorrectionEnabled()
+{
+    return sensorCorrectionEnable_ == 1;
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()

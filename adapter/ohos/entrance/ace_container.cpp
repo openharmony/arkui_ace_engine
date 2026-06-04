@@ -83,7 +83,9 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
+#include "core/components_ng/render/adapter/rosen_luminance_sampling_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
@@ -401,6 +403,34 @@ void InitNavigationManagerCallback(const RefPtr<NG::PipelineContext>& context)
         return true;
     };
     navMgr->SetGetSystemColorCallback(std::move(getColorCallback));
+    auto registerCallback = [](const RefPtr<NG::FrameNode>& node, int32_t samplingInterval,
+        int32_t brightThreshold, int32_t darkThreshold, NG::ColorPickerCallback&& callback) {
+        NG::LuminanceSamplingHelper::SetSamplingOptions(node, samplingInterval,
+            brightThreshold, darkThreshold, std::nullopt);
+        NG::LuminanceSamplingHelper::RegisterSamplingCallback(node, std::move(callback));
+    };
+    navMgr->SetRegisterColorPickerCallback(std::move(registerCallback));
+    auto unregisterCallback = [](const RefPtr<NG::FrameNode>& node) {
+        NG::LuminanceSamplingHelper::UnRegisterSamplingCallback(node);
+    };
+    navMgr->SetUnregisterColorPickerCallback(std::move(unregisterCallback));
+}
+
+void InitForceSplitManagerCallback(const RefPtr<NG::PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    auto createSnapshotCallback = [](RefPtr<NG::FrameNode> node) -> RefPtr<OHOS::Ace::PixelMap> {
+        NG::SnapshotOptions options;
+        auto result = NG::ComponentSnapshot::GetSync(node, options);
+        if (result.first != ERROR_CODE_NO_ERROR) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Failed to get snapshot, errorCode:%{public}d", result.first);
+            return nullptr;
+        }
+        return OHOS::Ace::PixelMap::Create(result.second);
+    };
+    forceSplitMgr->SetCreateSnapshotCallback(std::move(createSnapshotCallback));
 }
 
 std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
@@ -1818,15 +1848,14 @@ UIContentErrorCode AceContainer::RunPage(
     return front->RunPage(content, params);
 }
 
-bool AceContainer::RunDynamicPage(
-    int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint)
+bool AceContainer::RunDynamicPage(int32_t instanceId, const DynamicOptions& options)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, false);
-    front->RunDynamicPage(content, params, entryPoint);
+    front->RunDynamicPage(options);
     return true;
 }
 
@@ -3068,6 +3097,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         auto newPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
         if (newPipeline) {
             InitNavigationManagerCallback(newPipeline);
+            InitForceSplitManagerCallback(newPipeline);
         }
     } else {
         taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI, "ArkUIInitThemeManager");

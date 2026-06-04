@@ -1397,14 +1397,14 @@ void PanRecognizer::OnFingerEscaped(int32_t fingerId)
     // Drop ALL per-finger state for this finger so subsequent recognizer
     // bookkeeping (UP handling, fingers count, gesture-accept math) stays
     // consistent.
+    if (AboutToMinusCurrentFingers(fingerId)) {
+        --currentFingers_;
+    }
     touchPoints_.erase(fingerId);
     touchPointsDistance_.erase(fingerId);
     fingersId_.erase(fingerId);
     panVelocity_.Reset(fingerId);
     activeFingers_.remove(fingerId);
-    if (currentFingers_ > 0) {
-        --currentFingers_;
-    }
 }
 
 void PanRecognizer::SetEscapeModeForPan(const std::unordered_set<int32_t>& existingFingers)

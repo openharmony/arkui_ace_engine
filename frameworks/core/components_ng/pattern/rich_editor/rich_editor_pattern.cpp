@@ -38,6 +38,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/view_data/ace_auto_fill_error.h"
@@ -1261,11 +1262,12 @@ RefPtr<FrameNode> RichEditorPattern::GetContentHost() const
 void RichEditorPattern::OnAttachToFrameNode()
 {
     ACE_SCOPED_TRACE("RichEditorPattern::OnAttachToFrameNode");
+    auto frameNode = GetHost();
+    THREAD_SAFE_NODE_CHECK(frameNode, OnAttachToFrameNode);
     TextPattern::OnAttachToFrameNode();
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     richEditorInstanceId_ = Container::CurrentIdSafely();
-    auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     ACE_UINODE_TRACE(frameNode);
     frameId_ = frameNode->GetId();
@@ -1285,11 +1287,28 @@ void RichEditorPattern::OnAttachToMainTreeMultiThreadExtension()
 {
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
+    richEditorInstanceId_ = Container::CurrentIdSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    frameId_ = host->GetId();
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(host, WeakClaim(this));
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowSizeChangeCallback(frameId_);
+    auto patternCreator = [weak = WeakClaim(this)]() { return AceType::MakeRefPtr<RichEditorContentPattern>(weak); };
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_CONTENT_ETS_TAG, nodeId, patternCreator);
+    CHECK_NULL_VOID(contentNode);
+    host->AddChild(contentNode);
+    auto contentPattern = contentNode->GetPattern<RichEditorContentPattern>();
+    CHECK_NULL_VOID(contentPattern);
+    SetContentPattern(contentPattern);
 }
 
 void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDetachFromFrameNode");
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
     CloseSelectOverlay();
     CHECK_NULL_VOID(node);
     TextPattern::OnDetachFromFrameNode(node);
@@ -5638,7 +5657,11 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
                 relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
                 HandleOnDelete(true);
             } else {
-                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
+                if (value->compose.GetStart() == 0 && value->text.empty()) {
+                    DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
+                } else {
+                    DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
+                }
                 value->compose.Update(-1);
             }
         } else {
@@ -5656,7 +5679,8 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
             if (value->selection.IsValid() && value->selection.GetStart() == value->selection.GetEnd() &&
                 !value->text.empty()) {
                 TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateEditingValue set caret to %{public}d", value->selection.GetEnd());
-                SetCaretOffset(value->selection.GetEnd());
+                SetCaretPosition(value->selection.GetEnd());
+                StartTwinkling();
             }
             return;
         }
@@ -5958,6 +5982,8 @@ void RichEditorPattern::BeforeAttachInputMethod(MiscServices::TextConfig& textCo
 {
     auto clientInfo = GetIMEClientInfo();
     FireOnWillAttachIME(clientInfo);
+    textConfig.inputAttribute.gradientMode = static_cast<int32_t>(imeGradientMode_);
+    textConfig.inputAttribute.fluidLightMode = static_cast<int32_t>(imeFluidLightMode_);
     CHECK_NULL_VOID(clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo());
     textConfig.inputAttribute.extraConfig =
         *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
@@ -10533,7 +10559,8 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
         IF_TRUE(handlePolicy == HandlePolicy::HIDE, CloseSelectOverlay());
         CHECK_NULL_VOID(handlePolicy == HandlePolicy::DEFAULT);
     }
-    if (!IsShowHandle()) {
+    bool forceShowHandle = options.has_value() ? options.value().forceShowHandle : false;
+    if (!IsShowHandle() && !forceShowHandle) {
         CloseSelectOverlay();
     } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
         ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
@@ -10970,7 +10997,6 @@ void RichEditorPattern::RemoveOverlayModifier()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->RemoveOverlayModifier(hostOverlayMod_);
-    SetScrollBarOverlayModifier(nullptr);
     hostOverlayMod_.Reset();
 }
 
@@ -14682,6 +14708,8 @@ void RichEditorPattern::OnAttachToMainTree()
 
 void RichEditorPattern::OnDetachFromMainTree()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
     TextPattern::OnDetachFromMainTree();
 }
 
@@ -15087,6 +15115,14 @@ void RichEditorPattern::SetKeyboardAppearance(KeyboardAppearance value)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
     keyboardAppearance_ = value;
+}
+
+void RichEditorPattern::SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearanceConfig, config=[%{public}d,%{public}d]",
+        config.gradientMode, config.fluidLightMode);
+    imeGradientMode_ = config.gradientMode;
+    imeFluidLightMode_ = config.fluidLightMode;
 }
 
 KeyboardAppearance RichEditorPattern::GetKeyboardAppearance() const

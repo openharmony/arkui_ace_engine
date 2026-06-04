@@ -662,3 +662,122 @@ HWTEST_F(AnimateImplTest, AnimateImplTest040, TestSize.Level1)
     delete update;
     delete complete;
 }
+
+/**
+ * @tc.name: AnimatorPlay_NullHandle_001
+ * @tc.desc: Test AnimatorPlay with null handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimateImplTest, AnimatorPlay_NullHandle_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = AnimatorPlay(nullptr);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: AnimatorPlay"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: animatorHandle is null"),
+        std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorFinish_NullHandle_001
+ * @tc.desc: Test AnimatorFinish with null handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimateImplTest, AnimatorFinish_NullHandle_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = AnimatorFinish(nullptr);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: AnimatorFinish"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: animatorHandle is null"),
+        std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorPause_NullHandle_001
+ * @tc.desc: Test AnimatorPause with null handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimateImplTest, AnimatorPause_NullHandle_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = AnimatorPause(nullptr);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: AnimatorPause"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: animatorHandle is null"),
+        std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorCancel_NullHandle_001
+ * @tc.desc: Test AnimatorCancel with null handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimateImplTest, AnimatorCancel_NullHandle_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = AnimatorCancel(nullptr);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: AnimatorCancel"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: animatorHandle is null"),
+        std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorReverse_NullHandle_001
+ * @tc.desc: Test AnimatorReverse with null handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimateImplTest, AnimatorReverse_NullHandle_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = AnimatorReverse(nullptr);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: AnimatorReverse"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: animatorHandle is null"),
+        std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorReset_NullParams_001
+ * @tc.desc: Test AnimatorReset with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimateImplTest, AnimatorReset_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = AnimatorReset(nullptr, nullptr);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: AnimatorReset"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: animatorHandle or option is null"), std::string::npos);
+}

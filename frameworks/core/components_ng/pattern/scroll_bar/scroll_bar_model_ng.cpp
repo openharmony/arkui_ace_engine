@@ -83,6 +83,13 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
     }
 }
 
+RefPtr<FrameNode> ScrollBarModelNG::CreateArcScrollBar(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::ARC_SCROLL_BAR_ETS_TAG, nodeId);
+    return FrameNode::GetOrCreateFrameNode(
+        V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcScrollBarPattern>(); });
+}
+
 void ScrollBarModelNG::SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern)
 {
     CHECK_NULL_VOID(frameNode);

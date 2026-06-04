@@ -224,41 +224,57 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
     public readValue(isFirstRun: boolean, sources: Array<MonitorTarget> | undefined): boolean {
         try {
             this.now = this.lambda();
-            if (isFirstRun) {
-                this.before = this.now;
+        } catch (e) {
+            // Wildcard paths describe a sub-tree, so a throw on re-read
+            // typically means the upstream shape changed (collection shrank,
+            // chain link became undefined) — silently dropping the path would
+            // lose the dirty signal the dependency already published. Treat
+            // the throw as "value is now undefined" and let the regular dirty
+            // check decide. Non-wildcard paths keep the old suppress
+            // semantics: a thrown user lambda is treated as "no callback this
+            // drain", matching the long-standing edge-case contract.
+            if (isFirstRun || this.enableWildcard === false) {
+                StateMgmtConsole.log(
+                    `Caught exception while reading monitor path ${this.path} value: ${e}.`);
                 return false;
             }
-
-            // No wildcard in the path, compare values now and before
-            if (this.enableWildcard === false) {
-                this.dirty_ = this.before !== this.now;
-                return this.dirty_;
-            }
-
-            // Wildcard path. If any of the sources that triggered this drain
-            // matches our last-seen value, the change was a transit-dep on the
-            // LSV itself and we must fire even when before === now (e.g. a
-            // wildcard `comp.a.*` whose lambda returns comp.a sees comp.a's
-            // own properties change without the comp.a reference moving).
-            if (sources && sources.includes(this.before as MonitorTarget)) {
-                this.dirty_ = true;
-            } else {
-                this.dirty_ = this.before !== this.now;
-            }
-            return this.dirty_;
-        } catch (e) {
-            StateMgmtConsole.log(`Caught exception while reading monitor path ${this.path} value: ${e}.`);
+            this.now = undefined;
+        }
+        if (isFirstRun) {
+            this.before = this.now;
             return false;
         }
+
+        // No wildcard in the path, compare values now and before
+        if (this.enableWildcard === false) {
+            this.dirty_ = this.before !== this.now;
+            return this.dirty_;
+        }
+
+        // Wildcard path. If any of the sources that triggered this drain
+        // matches our last-seen value, the change was a transit-dep on the
+        // LSV itself and we must fire even when before === now (e.g. a
+        // wildcard `comp.a.*` whose lambda returns comp.a sees comp.a's
+        // own properties change without the comp.a reference moving).
+        if (sources && sources.includes(this.before as MonitorTarget)) {
+            this.dirty_ = true;
+        } else {
+            this.dirty_ = this.before !== this.now;
+        }
+        return this.dirty_;
     }
 
     public readValueWhenReuse(): boolean {
         try {
             this.now = this.lambda();
-            this.before = this.now;
         } catch (e) {
+            // Mirror the readValue throw treatment: don't leave the previous
+            // owner's value as our baseline, otherwise the next mutation
+            // compares against stale state and either over- or under-fires.
             StateMgmtConsole.log(`Caught exception while reading monitor path ${this.path} value: ${e}.`);
+            this.now = undefined;
         }
+        this.before = this.now;
         return true;
     }
 

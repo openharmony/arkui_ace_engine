@@ -42,6 +42,9 @@ struct TextPickerDialog {
     std::optional<EffectOption> effectOption;
     std::optional<Shadow> shadow;
     std::optional<HoverModeAreaType> hoverModeArea;
+    RefPtr<UiMaterial> systemMaterial;
+    std::optional<DistortionMode> distortionMode;
+    std::optional<EdgeLightMode> edgeLightMode;
 };
 struct TextPickerDialogEvent {
     std::function<void()> onDidAppear;

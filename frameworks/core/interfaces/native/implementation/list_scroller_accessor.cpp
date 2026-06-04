@@ -106,7 +106,7 @@ void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
 
     auto funcOpt = Converter::OptConvertPtr<Callback_Void>(options);
     if (funcOpt.has_value()) {
-        auto func =  [arkCallback = CallbackHelper(funcOpt.value())]() { arkCallback.Invoke(); };
+        auto func = GetAsyncInvoker(funcOpt.value());
         scrollController->CloseAllSwipeActions(std::move(func));
     } else {
         ScrollerPeerImpl::ThrowParamsError(vmContext);

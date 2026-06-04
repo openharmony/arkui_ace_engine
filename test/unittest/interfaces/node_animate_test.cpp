@@ -609,4 +609,1033 @@ HWTEST_F(NodeAnimateTest, MotionPathOptionsGetRotatable001, TestSize.Level1)
     EXPECT_EQ(rotatableVal, true);
     OH_ArkUI_MotionPathOptions_Dispose(options);
 }
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetDelay_NullOption_001
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetDelay with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetDelay_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetDelay(nullptr, 100);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetDelay"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetIterations_NullOption_001
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetIterations with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetIterations_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetIterations(nullptr, 1);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetIterations"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetIterations_InvalidValue_002
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetIterations with value less than -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetIterations_InvalidValue_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_KeyframeAnimateOption* option = OH_ArkUI_KeyframeAnimateOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetIterations(option, -2);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetIterations"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: value is less than -1"), std::string::npos);
+    OH_ArkUI_KeyframeAnimateOption_Dispose(option);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetDuration_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetDuration with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetDuration_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_SetDuration(nullptr, 100);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetDuration"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetDuration_NegativeValue_002
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetDuration with negative value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetDuration_NegativeValue_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(0);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetDuration(option, -1);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetDuration"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: value is negative"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetFill_InvalidValue_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetFill with invalid fill mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetFill_InvalidValue_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(0);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetFill(option, static_cast<ArkUI_AnimationFillMode>(100));
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetFill"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: value is out of range"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+}
+
+/**
+ * @tc.name: MotionPathOptions_SetPath_NullParams_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_SetPath with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_SetPath_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_MotionPathOptions_SetPath(nullptr, "M0,0");
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_SetPath"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or svgPath is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: MotionPathOptions_GetPath_NullParams_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_GetPath with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_GetPath_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    char buffer[50] = { 0 };
+    int32_t writeLen = 0;
+    auto result = OH_ArkUI_MotionPathOptions_GetPath(nullptr, buffer, 50, &writeLen);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_GetPath"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("options, options->path, svgPathBuffer or writeLength is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: MotionPathOptions_SetFrom_NullOptions_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_SetFrom with null options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_SetFrom_NullOptions_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_MotionPathOptions_SetFrom(nullptr, 0.5f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_SetFrom"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: MotionPathOptions_SetFrom_OutOfRange_002
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_SetFrom with value out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_SetFrom_OutOfRange_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    auto result = OH_ArkUI_MotionPathOptions_SetFrom(options, 1.5f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_SetFrom"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: from is out of range"), std::string::npos);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptions_GetRotatable_NullParams_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_GetRotatable with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_GetRotatable_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    bool rotatable = false;
+    auto result = OH_ArkUI_MotionPathOptions_GetRotatable(nullptr, &rotatable);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_GetRotatable"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or rotatable is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_RegisterOnFinishCallback_NullOption_001
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_RegisterOnFinishCallback_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback(nullptr, nullptr, AnimationCallback);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback"),
+        std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetDuration_NullOption_001
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetDuration with null option or invalid index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetDuration_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetDuration(nullptr, 100, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetDuration"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null or index is invalid"), std::string::npos);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetDuration_InvalidIndex_002
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetDuration with invalid index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetDuration_InvalidIndex_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_KeyframeAnimateOption* option = OH_ArkUI_KeyframeAnimateOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetDuration(option, 100, -1);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetDuration"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null or index is invalid"), std::string::npos);
+    OH_ArkUI_KeyframeAnimateOption_Dispose(option);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetCurve_NullOption_001
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetCurve with null option or invalid index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetCurve_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto icurve = OH_ArkUI_Curve_CreateCurveByType(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR);
+    ASSERT_NE(icurve, nullptr);
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetCurve(nullptr, icurve, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetCurve"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null or index is invalid"), std::string::npos);
+    OH_ArkUI_Curve_DisposeCurve(icurve);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetCurve_NullCurve_002
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetCurve with null curve.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetCurve_NullCurve_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_KeyframeAnimateOption* option = OH_ArkUI_KeyframeAnimateOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetCurve(option, nullptr, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetCurve"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: value or value->curve is null"), std::string::npos);
+    OH_ArkUI_KeyframeAnimateOption_Dispose(option);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetCurve_InvalidCurveType_003
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetCurve with invalid curve type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetCurve_InvalidCurveType_003, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_KeyframeAnimateOption* option = OH_ArkUI_KeyframeAnimateOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto springMotion = OH_ArkUI_Curve_CreateSpringMotion(0.5f, 0.5f, 0.5f);
+    ASSERT_NE(springMotion, nullptr);
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetCurve(option, springMotion, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetCurve"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: curve type is invalid"), std::string::npos);
+    OH_ArkUI_KeyframeAnimateOption_Dispose(option);
+    OH_ArkUI_Curve_DisposeCurve(springMotion);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_RegisterOnEventCallback_NullOption_001
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_RegisterOnEventCallback with null option or invalid index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_RegisterOnEventCallback_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_KeyframeAnimateOption_RegisterOnEventCallback(nullptr, nullptr, AnimationCallback, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_RegisterOnEventCallback"),
+        std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null or index is invalid"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetDelay_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetDelay with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetDelay_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_SetDelay(nullptr, 100);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetDelay"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetIterations_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetIterations with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetIterations_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_SetIterations(nullptr, 1);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetIterations"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetFill_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetFill with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetFill_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_SetFill(nullptr, ARKUI_ANIMATION_FILL_MODE_NONE);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetFill"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetDirection_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetDirection with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetDirection_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_SetDirection(nullptr, ARKUI_ANIMATION_DIRECTION_NORMAL);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetDirection"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetDirection_OutOfRange_002
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetDirection with value out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetDirection_OutOfRange_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(0);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetDirection(option, static_cast<ArkUI_AnimationDirection>(100));
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetDirection"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: value is out of range"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetCurve_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetCurve with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetCurve_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto icurve = OH_ArkUI_Curve_CreateCurveByType(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR);
+    ASSERT_NE(icurve, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetCurve(nullptr, icurve);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetCurve"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+    OH_ArkUI_Curve_DisposeCurve(icurve);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetCurve_InvalidCurveType_002
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetCurve with invalid curve type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetCurve_InvalidCurveType_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(0);
+    ASSERT_NE(option, nullptr);
+    auto springCurve = OH_ArkUI_Curve_CreateSpringCurve(0.5f, 0.5f, 0.5f, 0.5f);
+    ASSERT_NE(springCurve, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetCurve(option, springCurve);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetCurve"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: curve type is invalid"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+    OH_ArkUI_Curve_DisposeCurve(springCurve);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetBegin_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetBegin with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetBegin_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_SetBegin(nullptr, 0.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetBegin"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetBegin_KeyframesExist_002
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetBegin when keyframes exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetBegin_KeyframesExist_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetBegin(option, 0.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetBegin"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: keyframes exist, cannot set begin"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetEnd_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetEnd with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetEnd_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_SetEnd(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetEnd"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetEnd_KeyframesExist_002
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetEnd when keyframes exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetEnd_KeyframesExist_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetEnd(option, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetEnd"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: keyframes exist, cannot set end"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetExpectedFrameRateRange_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetExpectedFrameRateRange_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_ExpectedFrameRateRange range = {1, 100, 50};
+    auto result = OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange(nullptr, &range);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(
+        errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetExpectedFrameRateRange_NullValue_002
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange with null value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetExpectedFrameRateRange_NullValue_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(0);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange(option, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(
+        errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: value is null"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetKeyframe_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetKeyframe with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetKeyframe_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_SetKeyframe(nullptr, 0.5f, 0.0f, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetKeyframe"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetKeyframe_TimeOutOfRange_002
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetKeyframe with time out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetKeyframe_TimeOutOfRange_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetKeyframe(option, -0.5f, 0.0f, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetKeyframe"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: time is out of range"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetKeyframe_InvalidIndex_003
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetKeyframe with invalid index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetKeyframe_InvalidIndex_003, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetKeyframe(option, 0.5f, 0.0f, -1);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetKeyframe"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: index is invalid"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetKeyframeCurve_NullOption_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetKeyframeCurve with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetKeyframeCurve_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto icurve = OH_ArkUI_Curve_CreateCurveByType(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR);
+    ASSERT_NE(icurve, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetKeyframeCurve(nullptr, icurve, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetKeyframeCurve"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+    OH_ArkUI_Curve_DisposeCurve(icurve);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetKeyframeCurve_InvalidCurveType_002
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetKeyframeCurve with invalid curve type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetKeyframeCurve_InvalidCurveType_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto springCurve = OH_ArkUI_Curve_CreateSpringCurve(0.5f, 0.5f, 0.5f, 0.5f);
+    ASSERT_NE(springCurve, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetKeyframeCurve(option, springCurve, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetKeyframeCurve"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: curve type is invalid"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+    OH_ArkUI_Curve_DisposeCurve(springCurve);
+}
+
+/**
+ * @tc.name: AnimatorOption_SetKeyframeCurve_InvalidIndex_003
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_SetKeyframeCurve with invalid index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_SetKeyframeCurve_InvalidIndex_003, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_AnimatorOption* option = OH_ArkUI_AnimatorOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto icurve = OH_ArkUI_Curve_CreateCurveByType(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR);
+    ASSERT_NE(icurve, nullptr);
+    auto result = OH_ArkUI_AnimatorOption_SetKeyframeCurve(option, icurve, -1);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_SetKeyframeCurve"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: index is invalid"), std::string::npos);
+    OH_ArkUI_AnimatorOption_Dispose(option);
+    OH_ArkUI_Curve_DisposeCurve(icurve);
+}
+
+/**
+ * @tc.name: AnimatorOption_RegisterOnFrameCallback_NullParams_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_RegisterOnFrameCallback with null option or callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_RegisterOnFrameCallback_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_RegisterOnFrameCallback(nullptr, nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_RegisterOnFrameCallback"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option or callback is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_RegisterOnFinishCallback_NullParams_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_RegisterOnFinishCallback with null option or callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_RegisterOnFinishCallback_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_RegisterOnFinishCallback(nullptr, nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(
+        errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_RegisterOnFinishCallback"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option or callback is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_RegisterOnCancelCallback_NullParams_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_RegisterOnCancelCallback with null option or callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_RegisterOnCancelCallback_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_RegisterOnCancelCallback(nullptr, nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(
+        errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_RegisterOnCancelCallback"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option or callback is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: AnimatorOption_RegisterOnRepeatCallback_NullParams_001
+ * @tc.desc: Test OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback with null option or callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, AnimatorOption_RegisterOnRepeatCallback_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback(nullptr, nullptr, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(
+        errorMessageStr.find("functionName: OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option or callback is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetExpectedFrameRate_NullOption_001
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetExpectedFrameRate_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_ExpectedFrameRateRange range = {1, 100, 50};
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate(nullptr, &range);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(
+        errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: option is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: KeyframeAnimateOption_SetExpectedFrameRate_NullFrameRate_002
+ * @tc.desc: Test OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate with null frameRate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, KeyframeAnimateOption_SetExpectedFrameRate_NullFrameRate_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_KeyframeAnimateOption* option = OH_ArkUI_KeyframeAnimateOption_Create(1);
+    ASSERT_NE(option, nullptr);
+    auto result = OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate(option, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(
+        errorMessageStr.find("functionName: OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: frameRate is null"), std::string::npos);
+    OH_ArkUI_KeyframeAnimateOption_Dispose(option);
+}
+
+/**
+ * @tc.name: MotionPathOptions_GetPath_BufferTooSmall_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_GetPath when buffer size is too small.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_GetPath_BufferTooSmall_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    const char* testPath = "M0,0 L200,200 Z";
+    OH_ArkUI_MotionPathOptions_SetPath(options, testPath);
+    int32_t writeLen = -1;
+    char buffer[5] = { 0 };
+    auto result = OH_ArkUI_MotionPathOptions_GetPath(options, buffer, 5, &writeLen);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_GetPath"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: buffer size is too small"), std::string::npos);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptions_GetFrom_NullParams_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_GetFrom with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_GetFrom_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float fromVal = 0.0f;
+    auto result = OH_ArkUI_MotionPathOptions_GetFrom(nullptr, &fromVal);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_GetFrom"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or from is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: MotionPathOptions_SetTo_NullOptions_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_SetTo with null options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_SetTo_NullOptions_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_MotionPathOptions_SetTo(nullptr, 0.5f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_SetTo"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: MotionPathOptions_SetTo_OutOfRange_002
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_SetTo with value out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_SetTo_OutOfRange_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_MotionPathOptions* options = OH_ArkUI_MotionPathOptions_Create();
+    ASSERT_NE(options, nullptr);
+    auto result = OH_ArkUI_MotionPathOptions_SetTo(options, 1.5f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_SetTo"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: to is out of range"), std::string::npos);
+    OH_ArkUI_MotionPathOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: MotionPathOptions_GetTo_NullParams_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_GetTo with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_GetTo_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float toVal = 0.0f;
+    auto result = OH_ArkUI_MotionPathOptions_GetTo(nullptr, &toVal);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_GetTo"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or to is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: MotionPathOptions_SetRotatable_NullOptions_001
+ * @tc.desc: Test OH_ArkUI_MotionPathOptions_SetRotatable with null options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAnimateTest, MotionPathOptions_SetRotatable_NullOptions_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_MotionPathOptions_SetRotatable(nullptr, true);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_MotionPathOptions_SetRotatable"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
 } // namespace OHOS::Ace

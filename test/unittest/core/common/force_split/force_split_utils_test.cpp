@@ -37,6 +37,8 @@ constexpr int32_t TEST_NAVIGATION_DEPTH = 3;
 constexpr float EXPECTED_HALF_RATIO = 0.5f;
 constexpr float EXPECTED_ONE_THIRD_RATIO = 1.0f / 3.0f;
 constexpr float EXPECTED_TWO_THIRDS_RATIO = 2.0f / 3.0f;
+constexpr char WIDE_SPLIT_KEY[] = "wideSplit";
+constexpr char SQUARE_SPLIT_KEY[] = "squareSplit";
 } // namespace
 
 class ForceSplitUtilsTest : public testing::Test {
@@ -427,8 +429,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam023, TestSize.Level1)
     EXPECT_TRUE(config.pagePairs.find("PageA") != config.pagePairs.end());
     EXPECT_TRUE(config.pagePairs["PageA"].empty());
     EXPECT_EQ(config.pagePairs.size(), 1);
-    EXPECT_EQ(config.transPages.size(), 1);
-    EXPECT_TRUE(config.transPages.find("TransitionPage") != config.transPages.end());
+    EXPECT_TRUE(config.transPages.empty());
 }
 
 /**
@@ -438,7 +439,7 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam023, TestSize.Level1)
  */
 HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam024, TestSize.Level1)
 {
-    std::string configStr = "{ \"transPages\": {} }";
+    std::string configStr = "{ \"mode\": 0, \"transPages\": {} }";
     bool isRouterSplit = NAVIGATION_SPLIT;
     NG::ForceSplitParam config;
     auto ret = NG::ForceSplitUtils::ParseForceSplitParam(isRouterSplit, configStr, config);
@@ -552,5 +553,178 @@ HWTEST_F(ForceSplitUtilsTest, ParseForceSplitParam030, TestSize.Level1)
     EXPECT_FALSE(config.navigationId.has_value());
     EXPECT_FALSE(config.wideSplitRatio.has_value());
     EXPECT_TRUE(config.dialogSupportSplit);
+}
+
+/**
+ * @tc.name: ParseSplitParam_IsDraggable001
+ * @tc.desc: Branch: if (!split || !split->IsObject()) => true
+ *           ParseSplitParam with null json object returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable001, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> split = nullptr;
+    std::optional<float> splitRatio;
+    bool isDraggable = false;
+    auto ret = NG::ForceSplitUtils::ParseSplitParam(split, WIDE_SPLIT_KEY, splitRatio, isDraggable);
+    EXPECT_FALSE(ret);
+    EXPECT_FALSE(splitRatio.has_value());
+}
+
+/**
+ * @tc.name: ParseSplitParam_IsDraggable002
+ * @tc.desc: Branch: if (!split || !split->IsObject()) => false
+ *                   if (!split->Contains(RATIO_KEY) && !split->Contains(IS_DRAGGABLE_KEY)) => true
+ *           ParseSplitParam with empty object returns true without setting ratio or draggable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable002, TestSize.Level1)
+{
+    auto split = JsonUtil::ParseJsonData("{}");
+    ASSERT_NE(split, nullptr);
+    std::optional<float> splitRatio;
+    bool isDraggable = false;
+    auto ret = NG::ForceSplitUtils::ParseSplitParam(split, WIDE_SPLIT_KEY, splitRatio, isDraggable);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(splitRatio.has_value());
+    EXPECT_FALSE(isDraggable);
+}
+
+/**
+ * @tc.name: ParseSplitParam_IsDraggable003
+ * @tc.desc: Branch: if (!split->Contains(RATIO_KEY) && !split->Contains(IS_DRAGGABLE_KEY)) => false
+ *                   if (split->Contains(IS_DRAGGABLE_KEY)) => true
+ *                   isDraggable = split->GetBool(IS_DRAGGABLE_KEY, false) => true
+ *           ParseSplitParam with isDraggable=true returns true without parsing ratio
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable003, TestSize.Level1)
+{
+    auto split = JsonUtil::ParseJsonData("{\"isDraggable\": true}");
+    ASSERT_NE(split, nullptr);
+    std::optional<float> splitRatio;
+    bool isDraggable = false;
+    auto ret = NG::ForceSplitUtils::ParseSplitParam(split, WIDE_SPLIT_KEY, splitRatio, isDraggable);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(isDraggable);
+    EXPECT_FALSE(splitRatio.has_value());
+}
+
+/**
+ * @tc.name: ParseSplitParam_IsDraggable004
+ * @tc.desc: Branch: if (split->Contains(IS_DRAGGABLE_KEY)) => true
+ *                   isDraggable = split->GetBool(IS_DRAGGABLE_KEY, false) => false
+ *                   if (isDraggable) => false
+ *                   continue to parse ratio
+ *           ParseSplitParam with isDraggable=false continues to parse ratio
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable004, TestSize.Level1)
+{
+    auto split = JsonUtil::ParseJsonData("{\"isDraggable\": false, \"ratio\": \"1 | 2\"}");
+    ASSERT_NE(split, nullptr);
+    std::optional<float> splitRatio;
+    bool isDraggable = false;
+    auto ret = NG::ForceSplitUtils::ParseSplitParam(split, WIDE_SPLIT_KEY, splitRatio, isDraggable);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(isDraggable);
+    ASSERT_TRUE(splitRatio.has_value());
+    EXPECT_FLOAT_EQ(splitRatio.value(), EXPECTED_TWO_THIRDS_RATIO);
+}
+
+/**
+ * @tc.name: ParseSplitParam_IsDraggable005
+ * @tc.desc: Branch: isDraggable=false, has both ratio and isDraggable keys
+ *                   isDraggable key value is false, ratio is valid
+ *           ParseSplitParam parses ratio when isDraggable key exists but value is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable005, TestSize.Level1)
+{
+    auto split = JsonUtil::ParseJsonData("{\"isDraggable\": false, \"ratio\": \"1 | 1\"}");
+    ASSERT_NE(split, nullptr);
+    std::optional<float> splitRatio;
+    bool isDraggable = false;
+    auto ret = NG::ForceSplitUtils::ParseSplitParam(split, SQUARE_SPLIT_KEY, splitRatio, isDraggable);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(isDraggable);
+    ASSERT_TRUE(splitRatio.has_value());
+    EXPECT_FLOAT_EQ(splitRatio.value(), EXPECTED_HALF_RATIO);
+}
+
+/**
+ * @tc.name: ParseSplitParam_IsDraggable006
+ * @tc.desc: Branch: has ratio but no isDraggable key
+ *                   ParseSplitParam parses ratio normally
+ *           ParseSplitParam parses ratio when only ratio key exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable006, TestSize.Level1)
+{
+    auto split = JsonUtil::ParseJsonData("{\"ratio\": \"2 | 1\"}");
+    ASSERT_NE(split, nullptr);
+    std::optional<float> splitRatio;
+    bool isDraggable = false;
+    auto ret = NG::ForceSplitUtils::ParseSplitParam(split, WIDE_SPLIT_KEY, splitRatio, isDraggable);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(isDraggable);
+    ASSERT_TRUE(splitRatio.has_value());
+    EXPECT_FLOAT_EQ(splitRatio.value(), EXPECTED_ONE_THIRD_RATIO);
+}
+
+/**
+ * @tc.name: ParseSplitParam_IsDraggable007
+ * @tc.desc: Branch: has isDraggable=true and invalid ratio
+ *                   ParseSplitParam returns true without checking ratio validity
+ *           ParseSplitParam skips ratio validation when isDraggable is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable007, TestSize.Level1)
+{
+    auto split = JsonUtil::ParseJsonData("{\"isDraggable\": true, \"ratio\": \"invalid_ratio\"}");
+    ASSERT_NE(split, nullptr);
+    std::optional<float> splitRatio;
+    bool isDraggable = false;
+    auto ret = NG::ForceSplitUtils::ParseSplitParam(split, WIDE_SPLIT_KEY, splitRatio, isDraggable);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(isDraggable);
+    EXPECT_FALSE(splitRatio.has_value());
+}
+
+/**
+ * @tc.name: ParseSplitParam_IsDraggable008
+ * @tc.desc: Branch: json object is array (not object)
+ *                   ParseSplitParam returns false
+ *           ParseSplitParam with invalid json type returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSplitParam_IsDraggable008, TestSize.Level1)
+{
+    auto split = JsonUtil::ParseJsonData("[\"item1\", \"item2\"]");
+    ASSERT_NE(split, nullptr);
+    std::optional<float> splitRatio;
+    bool isDraggable = false;
+    auto ret = NG::ForceSplitUtils::ParseSplitParam(split, WIDE_SPLIT_KEY, splitRatio, isDraggable);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ParseCommonConfig_IsDraggable001
+ * @tc.desc: Branch: wideSplit has isDraggable=true, squareSplit has isDraggable=false
+ *           ParseCommonConfig correctly sets both isDraggable flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseCommonConfig_IsDraggable001, TestSize.Level1)
+{
+    std::string configStr =
+        "{ \"wideSplit\": { \"isDraggable\": true }, \"squareSplit\": { \"ratio\": \"1 | 1\" } }";
+    bool isRouterSplit = NAVIGATION_SPLIT;
+    NG::ForceSplitConfig config;
+    auto ret = NG::ForceSplitUtils::ParseForceSplitConfig(isRouterSplit, configStr, config);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(config.wideSplitIsDraggable);
+    EXPECT_FALSE(config.squareSplitIsDraggable);
+    ASSERT_TRUE(config.squareSplitRatio.has_value());
+    EXPECT_FLOAT_EQ(config.squareSplitRatio.value(), EXPECTED_HALF_RATIO);
 }
 } // namespace OHOS::Ace

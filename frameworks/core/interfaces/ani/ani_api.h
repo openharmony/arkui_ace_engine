@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 
+#include <any>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -512,6 +513,13 @@ struct ArkUIColumnLayoutAlgorithm {
     ani_boolean isReverse = false;
 };
 
+struct ArkUIGridLayoutAlgorithm {
+    const char* columnsTemplate = nullptr;
+    ArkUI_Int32 itemFillPolicy = -1;
+    ArkUILayoutAlgorithmLengthMetrics rowsGap;
+    ArkUILayoutAlgorithmLengthMetrics columnsGap;
+};
+
 struct ArkUIAniWebModifier {
     void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
@@ -680,6 +688,7 @@ struct ArkUIAniCommonModifier {
     ani_long (*getPageRootNode)();
     ani_boolean(*isEasySplit)(ArkUI_Int32 instanceId);
     void(*dumpLogPrint)(int32_t depth, const char* content);
+    void(*fireArkUIObjectLifecycleCallback)(ani_long nodePtr, const std::string& className, void* data);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -751,6 +760,36 @@ struct ArkUIAniDynamicLayoutModifier {
     bool (*setDynamicLayoutRowOptions)(ArkUINodeHandle node, ArkUIRowLayoutAlgorithm algorithm);
     bool (*setDynamicLayoutColumnOptions)(ArkUINodeHandle node, ArkUIColumnLayoutAlgorithm algorithm);
     bool (*setDynamicLayoutCustomOptions)(ArkUINodeHandle node, const ArkUICustomLayoutAlgorithm& algorithm);
+    bool (*setDynamicLayoutGridOptions)(ArkUINodeHandle node, ArkUIGridLayoutAlgorithm algorithm);
+};
+
+enum ArkUIAniEnvironmentValueType {
+    ARKUI_ANI_ENV_VALUE_TYPE_NONE = 0,
+    ARKUI_ANI_ENV_VALUE_TYPE_NUMBER,
+    ARKUI_ANI_ENV_VALUE_TYPE_CUSTOM,
+};
+
+struct ArkUIAniEnvironmentQueryResult {
+    ArkUI_Int32 type = ARKUI_ANI_ENV_VALUE_TYPE_NONE;
+    double numberValue = 0.0;
+    std::any customValue;
+};
+
+using ArkUIAniEnvironmentUpdateCallback =
+    std::function<void(const std::string&, const std::optional<ArkUIAniEnvironmentQueryResult>&)>;
+
+struct ArkUIAniWithEnvModifier {
+    ArkUINodeHandle (*construct)(ArkUI_Int32 id);
+    void (*removeSystemEnvProperty)(ArkUINodeHandle node, const std::string& key);
+    void (*setSystemEnvProperty)(ArkUINodeHandle node, const std::string& key, double value);
+    void (*removeCustomEnvProperty)(ArkUINodeHandle node, const std::string& key);
+    void (*setCustomEnvProperty)(ArkUINodeHandle node, const std::string& key, std::any value);
+    bool (*findCustomEnvValueByKey)(
+        ArkUINodeHandle node, const std::string& key, ArkUIAniEnvironmentQueryResult& outResult);
+    bool (*findSystemEnvValueByKey)(
+        ArkUINodeHandle node, const std::string& key, ArkUIAniEnvironmentQueryResult& outResult);
+    void (*setOnCustomEnvUpdate)(ArkUINodeHandle node, ArkUIAniEnvironmentUpdateCallback&& callback);
+    void (*setOnSystemEnvUpdate)(ArkUINodeHandle node, ArkUIAniEnvironmentUpdateCallback&& callback);
 };
 
 struct ArkUIAniListItemGroupModifier {
@@ -1013,6 +1052,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
     const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
     const ArkUIAniGestureEventUIObserverModifier* (*getArkUIAniGestureEventUIObserverModifier)();
+    const ArkUIAniWithEnvModifier* (*getArkUIAniWithEnvModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

@@ -728,6 +728,12 @@ struct CJUITextModifier {
     void (*setTextResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
     void (*resetTextResponseRegion)(ArkUINodeHandle node);
+    void (*setTailIndents)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetTailIndents)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTailIndentsCount)(ArkUINodeHandle node);
+    void (*getTailIndents)(ArkUINodeHandle node, ArkUI_Float32* values,
+        ArkUI_Int32* units, ArkUI_Int32 size);
 };
 
 struct CJUIButtonModifier {
@@ -2829,8 +2835,8 @@ struct CJUICalendarPickerDialogModifier {
 struct CJUIRatingModifier {
     void (*setStars)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setRatingStepSize)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*setStarStyle)(
-        ArkUINodeHandle node, ArkUI_CharPtr backgroundUri, ArkUI_CharPtr foregroundUri, ArkUI_CharPtr secondaryUri);
+    void (*setStarStyle)(ArkUINodeHandle node, ArkUI_CharPtr backgroundUri, ArkUI_CharPtr foregroundUri,
+        ArkUI_CharPtr secondaryUri, const ArkUIRatingStyleStruct& resObj);
     void (*resetStars)(ArkUINodeHandle node);
     void (*resetRatingStepSize)(ArkUINodeHandle node);
     void (*resetStarStyle)(ArkUINodeHandle node);
@@ -2868,7 +2874,7 @@ struct CJUISearchModifier {
         ArkUINodeHandle node, const struct ArkUIIconOptionsStruct* value, ArkUIImageIconRes* imageIconRes);
     void (*resetSearchSearchIcon)(ArkUINodeHandle node);
     void (*setSearchSearchButton)(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
-        ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView);
+        const ArkUI_InnerColor* fontColor, ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView);
     void (*resetSearchSearchButton)(ArkUINodeHandle node);
     void (*setSearchFontColor)(ArkUINodeHandle node, const ArkUI_InnerColor* value, void* resRawPtr);
     void (*resetSearchFontColor)(ArkUINodeHandle node);

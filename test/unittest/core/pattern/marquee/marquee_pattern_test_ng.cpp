@@ -1224,7 +1224,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart005, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(secondStart, -200.0f);
+    EXPECT_EQ(secondStart, 0.0f);
 }
 
 /**
@@ -1260,7 +1260,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart006, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(firstStart, 300.0f);
+    EXPECT_EQ(firstStart, 200.0f);
 }
 
 /**
@@ -1296,7 +1296,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart007, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(firstStart, 300.0f);
+    EXPECT_EQ(firstStart, 200.0f);
 }
 
 /**
@@ -1332,7 +1332,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart008, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(firstStart, 200.0f);
+    EXPECT_EQ(firstStart, -200.0f);
 }
 
 /**
@@ -1368,7 +1368,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart009, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(firstStart, -300.0f);
+    EXPECT_EQ(firstStart, -200.0f);
 }
 
 /**
@@ -1404,7 +1404,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart010, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(firstStart, 400.0f);
+    EXPECT_EQ(firstStart, 200.0f);
 }
 
 /**
@@ -1440,7 +1440,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart011, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(firstStart, -400.0f);
+    EXPECT_EQ(firstStart, -200.0f);
 }
 
 /**
@@ -1477,7 +1477,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart012, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(secondStart, 600.0f);
+    EXPECT_EQ(secondStart, 400.0f);
 }
 
 /**
@@ -1549,7 +1549,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart014, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(secondStart, -600.0f);
+    EXPECT_EQ(secondStart, -400.0f);
 }
 
 /**
@@ -1585,7 +1585,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalcAnimationStart015, TestSize.Le
 
     marqueeModel->CalcAnimationStart(firstStart, secondStart, textTotalLen, aniStartPos, aniEndPos, directionMoveLeft);
 
-    EXPECT_EQ(secondStart, -200.0f);
+    EXPECT_EQ(secondStart, 0.0f);
 }
 
 /**

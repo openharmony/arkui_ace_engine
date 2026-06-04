@@ -44,7 +44,6 @@ void ClockDeclaration::InitializeStyle()
     auto theme = GetTheme<ClockTheme>();
     if (!theme) {
         LOGE("ClockTheme is null!");
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
     defaultSize_ = theme->GetDefaultSize();

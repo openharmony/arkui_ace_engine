@@ -545,6 +545,14 @@ void MenuItemModelNG::SetOnChange(FrameNode* frameNode, std::function<void(bool)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void MenuItemModelNG::SetSubBuilder(FrameNode* frameNode, std::function<void()>&& subBuilder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSubBuilder(std::move(subBuilder));
+}
+
 void MenuItemModelNG::SetFontSize(const Dimension& fontSize)
 {
     ACE_CHECK_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE);

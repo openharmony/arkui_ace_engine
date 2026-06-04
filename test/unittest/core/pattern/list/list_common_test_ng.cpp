@@ -2951,6 +2951,95 @@ HWTEST_F(ListCommonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate when developer has set custom background color.
+ *           Verify that theme color overrides developer-set color for CARD style,
+ *           and NONE style remains unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create test list with CARD and NONE style groups
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::CARD);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get CARD style group and item, set developer custom colors
+     * @tc.expected: Background colors are set to developer values (BLUE for group, GREEN for item)
+     */
+    auto firstGroup = GetChildFrameNode(frameNode_, 0);
+    auto firstGroupRender = firstGroup->GetRenderContext();
+    auto firstGroupPattern = firstGroup->GetPattern<ListItemGroupPattern>();
+    auto firstGroupLayoutProperty = firstGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    auto firstGroupItem = GetChildFrameNode(firstGroup, 0);
+    auto firstGroupItemRender = firstGroupItem->GetRenderContext();
+    auto firstGroupItemPattern = firstGroupItem->GetPattern<ListItemPattern>();
+    auto firstGroupItemLayoutProperty = firstGroupItem->GetLayoutProperty<ListItemLayoutProperty>();
+
+    // Set developer custom colors
+    firstGroupRender->UpdateBackgroundColor(Color::BLUE);
+    firstGroupLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+    firstGroupItemRender->UpdateBackgroundColor(Color::GREEN);
+    firstGroupItemLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    EXPECT_EQ(firstGroupRender->GetBackgroundColor(), Color::BLUE);
+    EXPECT_EQ(firstGroupItemRender->GetBackgroundColor(), Color::GREEN);
+
+    /**
+     * @tc.steps: step3. Get NONE style group and item, set developer custom colors
+     * @tc.expected: Background colors are set to developer values (GRAY for group, BLACK for item)
+     */
+    auto secondGroup = GetChildFrameNode(frameNode_, 1);
+    auto secondGroupRender = secondGroup->GetRenderContext();
+    auto secondGroupPattern = secondGroup->GetPattern<ListItemGroupPattern>();
+    auto secondGroupLayoutProperty = secondGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    auto secondGroupItem = GetChildFrameNode(secondGroup, 0);
+    auto secondGroupItemRender = secondGroupItem->GetRenderContext();
+    auto secondGroupItemPattern = secondGroupItem->GetPattern<ListItemPattern>();
+    auto secondGroupItemLayoutProperty = secondGroupItem->GetLayoutProperty<ListItemLayoutProperty>();
+
+    // Set developer custom colors
+    secondGroupRender->UpdateBackgroundColor(Color::GRAY);
+    secondGroupLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+    secondGroupItemRender->UpdateBackgroundColor(Color::BLACK);
+    secondGroupItemLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    EXPECT_EQ(secondGroupRender->GetBackgroundColor(), Color::GRAY);
+    EXPECT_EQ(secondGroupItemRender->GetBackgroundColor(), Color::BLACK);
+
+    /**
+     * @tc.steps: step4. Set theme color to RED and call OnColorConfigurationUpdate
+     * @tc.expected: CARD style colors are overridden by theme color (RED), NONE style remain unchanged
+     */
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    listItemTheme->defaultColor_ = Color::RED;
+    listItemTheme->itemDefaultColor_ = Color::RED;
+
+    firstGroupPattern->OnColorConfigurationUpdate();
+    firstGroupItemPattern->OnColorConfigurationUpdate();
+    secondGroupPattern->OnColorConfigurationUpdate();
+    secondGroupItemPattern->OnColorConfigurationUpdate();
+
+    // Verify CARD style: developer colors overridden by theme
+    EXPECT_EQ(firstGroupRender->GetBackgroundColor(), Color::RED);
+    EXPECT_EQ(firstGroupItemRender->GetBackgroundColor(), Color::RED);
+
+    // Verify NONE style: developer colors unchanged (method returns early for NONE style)
+    EXPECT_EQ(secondGroupRender->GetBackgroundColor(), Color::GRAY);
+    EXPECT_EQ(secondGroupItemRender->GetBackgroundColor(), Color::BLACK);
+
+    /**
+     * @tc.steps: step5. Reset theme color to WHITE
+     */
+    listItemTheme->defaultColor_ = Color::WHITE;
+    listItemTheme->itemDefaultColor_ = Color::WHITE;
+}
+
+/**
  * @tc.name: GetScrollIndexAbility001
  * @tc.desc: Test GetScrollIndexAbility
  * @tc.type: FUNC

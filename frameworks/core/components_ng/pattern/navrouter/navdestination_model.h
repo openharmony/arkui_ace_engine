@@ -79,6 +79,8 @@ public:
     virtual void SetOnWillDisAppear(std::function<void()>&& willDisAppear) = 0;
     virtual void SetOnActive(std::function<void(int32_t)>&& onActive) = 0;
     virtual void SetOnInactive(std::function<void(int32_t)>&& onInactive) = 0;
+    virtual void SetOnSaveState(NG::NavDestinationSaveStateCallback&& onSaveState) {}
+    virtual void SetOnRestoreState(NG::NavDestinationRestoreStateCallback&& onRestoreState) {}
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;
     virtual void SetOnReady(std::function<void(RefPtr<NG::NavDestinationContext>)>&& onReady) = 0;
     virtual void SetOnPop(std::function<void(const RefPtr<NG::NavPathInfo>&)>&& onPop) = 0;

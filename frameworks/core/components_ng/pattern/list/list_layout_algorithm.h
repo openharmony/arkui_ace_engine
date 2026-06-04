@@ -24,6 +24,7 @@
 #include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_offset.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
@@ -34,7 +35,6 @@ namespace OHOS::Ace::NG {
 class PipelineContext;
 class ListPattern;
 class ListPositionMap;
-struct AdjustOffset;
 
 struct ListItemGroupLayoutInfo {
     bool atStart = false;
@@ -536,7 +536,6 @@ public:
 
     void UpdateListItemEditModeCheckBoxSpace(const RefPtr<LayoutWrapper>& wrapper) const;
 
-    static bool NeedReserveEditModeCheckBoxSpaceForList(const RefPtr<FrameNode>& listNode);
     static void UpdateListItemEditModeCheckBoxSpaceForPredictBuild(
         const RefPtr<LayoutWrapper>& wrapper, const RefPtr<FrameNode>& listNode);
 protected:
@@ -570,6 +569,7 @@ protected:
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
     void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
+    void AdjustPostionForLazyChild(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
     LayoutConstraintF CreateLazyChildConstraint(float referencePos, bool forward) const;
     void MeasureLazyChild(
         const RefPtr<LayoutWrapper>& wrapper, int32_t index, float& referencePos, bool forward);
@@ -611,6 +611,7 @@ protected:
     RefPtr<ListLayoutProperty> listLayoutProperty_;
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
     bool defaultMultiSelectStyleEnabled_ = true;
+    std::unordered_set<int32_t> lazyChildIndex_;
 
     virtual void MeasureList(LayoutWrapper* layoutWrapper);
     LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);

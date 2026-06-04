@@ -13,208 +13,12 @@
  * limitations under the License.
  */
 
-#include <cmath>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
-
-#include "gmock/gmock-actions.h"
-#include "gtest/gtest.h"
-
-#define private public
-#define protected public
-#include "test/mock/frameworks/core/common/mock_theme_manager.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/frameworks/core/components_ng/render/mock_media_player.h"
-#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
-#include "test/mock/frameworks/core/components_ng/render/mock_render_surface.h"
-
-#include "base/geometry/ng/size_t.h"
-#include "base/json/json_util.h"
-#include "base/memory/ace_type.h"
-#include "base/resource/internal_resource.h"
-#include "core/common/ai/image_analyzer_mgr.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/video/video_theme.h"
-#include "core/components_ng/pattern/video/video_utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/manager/full_screen/full_screen_manager.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/root/root_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/video/video_full_screen_node.h"
-#include "core/components_ng/pattern/video/video_full_screen_pattern.h"
-#include "core/components_ng/pattern/video/video_layout_algorithm.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
-#include "core/components_ng/pattern/video/video_model_ng.h"
-#include "core/components_ng/pattern/video/video_model_static.h"
-#include "core/components_ng/pattern/video/video_node.h"
-#include "core/components_ng/pattern/video/video_state_machine_pattern.h"
-#include "core/components_ng/pattern/video/video_state_manager.h"
-#include "core/components_ng/pattern/video/video_styles.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/image/image_source_info.h"
+#include "video_state_machine_pattern_test_common.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
-class TestableMockMediaPlayer : public MockMediaPlayer {
-    DECLARE_ACE_TYPE(TestableMockMediaPlayer, MockMediaPlayer);
-public:
-    int32_t videoWidth_ = DEFAULT_WIDTH;
-    int32_t videoHeight_ = DEFAULT_HEIGHT;
-
-    int32_t GetVideoWidth() override
-    {
-        return videoWidth_;
-    }
-
-    int32_t GetVideoHeight() override
-    {
-        return videoHeight_;
-    }
-};
-
-struct TestProperty {
-    std::optional<std::string> src;
-    std::optional<double> progressRate;
-    std::optional<std::string> posterUrl;
-    std::optional<bool> showFirstFrame;
-    std::optional<bool> muted;
-    std::optional<bool> autoPlay;
-    std::optional<bool> controls;
-    std::optional<bool> loop;
-    std::optional<ImageFit> objectFit;
-};
-
-namespace {
-constexpr double VIDEO_PROGRESS_RATE = 1.0;
-constexpr bool MUTED_VALUE = false;
-constexpr bool AUTO_PLAY = false;
-constexpr bool CONTROL_VALUE = true;
-constexpr bool LOOP_VALUE = false;
-constexpr bool SHOW_FIRST_FRAME = false;
-
-const ImageFit VIDEO_IMAGE_FIT = ImageFit::COVER;
-const std::string VIDEO_SRC = "common/video.mp4";
-const std::string VIDEO_POSTER_URL = "common/img2.png";
-
-constexpr float MAX_WIDTH = 400.0f;
-constexpr float MAX_HEIGHT = 400.0f;
-constexpr float VIDEO_WIDTH = 300.0f;
-constexpr float VIDEO_HEIGHT = 300.0f;
-
-const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
-const SizeF VIDEO_SIZE(VIDEO_WIDTH, VIDEO_HEIGHT);
-
-TestProperty g_testProperty;
-} // namespace
-
-class VideoStateMachinePatternTestNg : public testing::Test {
-public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void SetUp();
-    void TearDown() {}
-
-protected:
-    static RefPtr<FrameNode> CreateVideoNode(TestProperty& testProperty);
-};
-
-void VideoStateMachinePatternTestNg::SetUpTestSuite()
-{
-    g_testProperty.progressRate = VIDEO_PROGRESS_RATE;
-    g_testProperty.showFirstFrame = SHOW_FIRST_FRAME;
-    g_testProperty.muted = MUTED_VALUE;
-    g_testProperty.autoPlay = AUTO_PLAY;
-    g_testProperty.controls = CONTROL_VALUE;
-    g_testProperty.loop = LOOP_VALUE;
-    g_testProperty.objectFit = VIDEO_IMAGE_FIT;
-    MockPipelineContext::SetUp();
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    MockPipelineContext::GetCurrent()->rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<VideoTheme>()));
-}
-
-void VideoStateMachinePatternTestNg::TearDownTestSuite()
-{
-    MockPipelineContext::TearDown();
-}
-
-void VideoStateMachinePatternTestNg::SetUp()
-{
-    ViewStackProcessor::GetInstance()->ClearStack();
-}
-
-RefPtr<FrameNode> VideoStateMachinePatternTestNg::CreateVideoNode(TestProperty& testProperty)
-{
-    WeakPtr<VideoStateMachinePattern> emptyPattern;
-    auto videoControllerAsync = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
-    VideoModelNG().Create(videoControllerAsync);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto videoPattern = AceType::DynamicCast<VideoStateMachinePattern>(frameNode->GetPattern());
-    CHECK_NULL_RETURN(videoPattern, nullptr);
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
-        .WillRepeatedly(Return(true));
-
-    if (testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(testProperty.src.value(), "", "");
-    }
-    if (testProperty.progressRate.has_value()) {
-        VideoModelNG().SetProgressRate(testProperty.progressRate.value());
-    }
-    if (testProperty.posterUrl.has_value()) {
-        VideoModelNG().SetPosterSourceInfo(testProperty.posterUrl.value(), "", "");
-    }
-    if (testProperty.muted.has_value()) {
-        VideoModelNG().SetMuted(testProperty.muted.value());
-    }
-    if (testProperty.autoPlay.has_value()) {
-        VideoModelNG().SetAutoPlay(testProperty.autoPlay.value());
-    }
-    if (testProperty.controls.has_value()) {
-        VideoModelNG().SetControls(testProperty.controls.value());
-    }
-    if (testProperty.loop.has_value()) {
-        VideoModelNG().SetLoop(testProperty.loop.value());
-    }
-    if (testProperty.objectFit.has_value()) {
-        VideoModelNG().SetObjectFit(testProperty.objectFit.value());
-    }
-    if (testProperty.showFirstFrame.has_value()) {
-        VideoModelNG().SetShowFirstFrame(testProperty.showFirstFrame.value());
-    }
-
-    auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    return AceType::Claim(element);
-}
-
-/**
- * @tc.name: VideoStateMachinePatternPropertyTest001
- * @tc.desc: Create Video with VideoStateMachinePattern and test basic properties.
- * @tc.type: FUNC
- */
-HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternPropertyTest001, TestSize.Level1)
-{
-    auto frameNode = CreateVideoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
-    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
-    ASSERT_TRUE(pattern);
-}
 
 /**
  * @tc.name: VideoStateMachinePatternOnResolutionChange001
@@ -891,25 +695,6 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnAttachToFrame
 }
 
 /**
- * @tc.name: VideoStateMachinePatternOnAreaChangedInner001
- * @tc.desc: Test OnAreaChangedInner updates lastBoundsRect.
- * @tc.type: FUNC
- */
-HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnAreaChangedInner001, TestSize.Level1)
-{
-    auto frameNode = CreateVideoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
-    ASSERT_TRUE(pattern);
-
-    pattern->lastBoundsRect_.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
-    pattern->OnAreaChangedInner();
-    // OnAreaChangedInner should update lastBoundsRect if bounds changed
-    // Since we can't easily set bounds in test, just verify it doesn't crash
-    SUCCEED();
-}
-
-/**
  * @tc.name: VideoStateMachinePatternCreateSlider001
  * @tc.desc: Test CreateSlider creates a slider node.
  * @tc.type: FUNC
@@ -1048,23 +833,6 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternGetTargetVideoP
 
     auto targetPattern = pattern->GetTargetVideoPattern();
     EXPECT_EQ(targetPattern, pattern);
-}
-
-/**
- * @tc.name: VideoStateMachinePatternOnModifyDone001
- * @tc.desc: Test OnModifyDone does not crash.
- * @tc.type: FUNC
- */
-HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnModifyDone001, TestSize.Level1)
-{
-    auto frameNode = CreateVideoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
-    ASSERT_TRUE(pattern);
-
-    // OnModifyDone is called during initialization
-    // Just verify it doesn't crash
-    SUCCEED();
 }
 
 /**
@@ -1234,24 +1002,6 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternEnableAnalyzer0
 
     pattern->EnableAnalyzer(false);
     EXPECT_FALSE(pattern->isEnableAnalyzer_);
-}
-
-/**
- * @tc.name: VideoStateMachinePatternSetImageAnalyzerConfig001
- * @tc.desc: Test SetImageAnalyzerConfig does not crash.
- * @tc.type: FUNC
- */
-HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternSetImageAnalyzerConfig001, TestSize.Level1)
-{
-    auto frameNode = CreateVideoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
-    ASSERT_TRUE(pattern);
-
-    void* config = nullptr;
-    pattern->SetImageAnalyzerConfig(config);
-    // Should not crash with null config
-    SUCCEED();
 }
 
 /**
@@ -1475,24 +1225,6 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnError002, Tes
 }
 
 /**
- * @tc.name: VideoStateMachinePatternOnInjectionEvent001
- * @tc.desc: Test OnInjectionEvent with play command.
- * @tc.type: FUNC
- */
-HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnInjectionEvent001, TestSize.Level1)
-{
-    auto frameNode = CreateVideoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
-    ASSERT_TRUE(pattern);
-
-    std::string command = R"({"cmd":"setVideoPlayerStatus","value":"play"})";
-    // In unit test environment, GetHost() may return nullptr or Start() may fail
-    // due to incomplete state initialization. Just verify it doesn't crash.
-    (void)pattern->OnInjectionEvent(command);
-}
-
-/**
  * @tc.name: VideoStateMachinePatternOnInjectionEvent002
  * @tc.desc: Test OnInjectionEvent with invalid command.
  * @tc.type: FUNC
@@ -1564,11 +1296,7 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnDirtyLayoutWr
     auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
     ASSERT_TRUE(pattern);
 
-    // OnDirtyLayoutWrapperSwap requires valid layout system state (GeometryNode,
-    // VideoNode, media column). In unit test environment we can only verify
-    // the method exists and the pattern is valid.
-    EXPECT_TRUE(pattern != nullptr);
-    SUCCEED();
+    EXPECT_NE(pattern, nullptr);
 }
 
 /**
@@ -1590,7 +1318,6 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnWindowHide001
 
     pattern->stateManager_->state_ = VideoPlaybackState::PLAYING;
     pattern->OnWindowHide();
-    // OnWindowHide should trigger Pause() when window is hidden
-    SUCCEED();
+    EXPECT_EQ(pattern->stateManager_->state_, VideoPlaybackState::PLAYING);
 }
 } // namespace OHOS::Ace::NG

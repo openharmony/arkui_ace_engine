@@ -62,6 +62,10 @@ public:
     void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
     void SetOnActive(std::function<void(int32_t)>&& onActive) override;
     void SetOnInactive(std::function<void(int32_t)>&& onInactive) override;
+    void SetOnSaveState(NG::NavDestinationSaveStateCallback&& onSaveState) override;
+    static void SetOnSaveState(FrameNode* frameNode, NG::NavDestinationSaveStateCallback&& onSaveState);
+    void SetOnRestoreState(NG::NavDestinationRestoreStateCallback&& onRestoreState) override;
+    static void SetOnRestoreState(FrameNode* frameNode, NG::NavDestinationRestoreStateCallback&& onRestoreState);
     void SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& popCallback) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetHideToolBar(bool hideToolBar, bool animated) override;

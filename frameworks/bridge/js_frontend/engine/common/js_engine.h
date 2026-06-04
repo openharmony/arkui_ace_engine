@@ -465,6 +465,8 @@ public:
         return nativeEngine_;
     }
 
+    bool SetExternalClearCallback(std::function<void()>&& func);
+
     void ACE_EXPORT RegisterMediaUpdateCallback(std::function<void(JsEngine*)> cb)
     {
         mediaUpdateCallback_ = std::move(cb);

@@ -1206,4 +1206,367 @@ HWTEST_F(NavigationPatternTestNineNg, RebuildSplitDisplayNodes005, TestSize.Leve
     EXPECT_EQ(context.pattern->primaryNodes_[0].Upgrade(), detailDest1);
     ASSERT_EQ(context.pattern->splitPopEnterNode_.Upgrade(), detailDest1);
 }
+
+/**
+ * @tc.name: AdjustNodeForSplitDisplayReconfigure001
+ * @tc.desc: Branch: hasHomePage && idx == topNodeIndex && idx != homePageIndex => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, AdjustNodeForSplitDisplayReconfigure001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto homeDest = CreateNavDestinationNode("Home", 0);
+    auto topDest = CreateNavDestinationNode("TopPrimary", 1);
+    ASSERT_NE(homeDest, nullptr);
+    ASSERT_NE(topDest, nullptr);
+
+    topDest->SetColumnType(ForceSplitPageColumnType::PRIMARY);
+    AddDestinationToStack(context, PAGE01, homeDest);
+    AddDestinationToStack(context, PAGE02, topDest);
+    MountDestinationToNavContent(context, homeDest);
+    MountDestinationToNavContent(context, topDest);
+
+    context.pattern->forceSplitSuccess_ = true;
+    context.pattern->navBarIsHome_ = false;
+    context.pattern->forceSplitHomeDest_ = WeakPtr<NavDestinationGroupNode>(homeDest);
+
+    EXPECT_EQ(topDest->GetColumnType(), ForceSplitPageColumnType::PRIMARY);
+
+    context.pattern->AdjustNodeForSplitDisplayReconfigure();
+
+    EXPECT_EQ(topDest->GetColumnType(), ForceSplitPageColumnType::SECONDARY);
+    ASSERT_EQ(context.pattern->primaryNodes_.size(), 1U);
+    ASSERT_EQ(context.pattern->secondaryNodes_.size(), 1U);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragUpdate001
+ * @tc.desc: Branch: forceSplitMgr->IsForceSplitDragging() => false
+ *           HandleForceSplitDragUpdate returns early when not dragging
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragUpdate001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetIsForceSplitDragging(false);
+    manager->SetTemporarySplitRatio(0.55f);
+
+    context.pattern->HandleForceSplitDragUpdate(100.0f);
+
+    auto result = manager->GetTemporarySplitRatio();
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(result.value(), 0.55f);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragUpdate002
+ * @tc.desc: Branch: geometryNode->GetFrameSize().Width() == 0 => early return
+ *           HandleForceSplitDragUpdate returns early when frame width is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragUpdate002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetIsForceSplitDragging(true);
+    manager->temporarySplitRatio_ = std::nullopt;
+
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(0.0f, 100.0f));
+
+    context.pattern->HandleForceSplitDragUpdate(100.0f);
+
+    auto result = manager->GetTemporarySplitRatio();
+    EXPECT_FALSE(result.has_value());
+}
+
+/**
+ * @tc.name: HandleForceSplitDragUpdate003
+ * @tc.desc: Branch: valid conditions => calculates new ratio with clamp
+ *           HandleForceSplitDragUpdate updates temporary ratio correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragUpdate003, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetIsForceSplitDragging(true);
+    manager->splitRatio_ = 0.5f;
+
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000.0f, 100.0f));
+
+    constexpr float xOffset = 100.0f;
+    constexpr float expectedRatio = 0.5f - xOffset / 1000.0f;
+    context.pattern->HandleForceSplitDragUpdate(xOffset);
+
+    auto result = manager->GetTemporarySplitRatio();
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(result.value(), expectedRatio);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragUpdate004
+ * @tc.desc: Branch: xOffset causes ratio below MIN_SPLIT_DRAG_RATIO => clamp to minimum
+ *           HandleForceSplitDragUpdate clamps ratio to MIN_SPLIT_DRAG_RATIO
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragUpdate004, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetIsForceSplitDragging(true);
+    manager->splitRatio_ = 0.5f;
+
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    constexpr float xOffset = 50.0f;
+    constexpr float minSplitDragRatio = 1.0f / 7;
+    context.pattern->HandleForceSplitDragUpdate(xOffset);
+
+    auto result = manager->GetTemporarySplitRatio();
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(result.value(), minSplitDragRatio);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragUpdate005
+ * @tc.desc: Branch: negative xOffset causes ratio above MAX_SPLIT_DRAG_RATIO => clamp to maximum
+ *           HandleForceSplitDragUpdate clamps ratio to MAX_SPLIT_DRAG_RATIO
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragUpdate005, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetIsForceSplitDragging(true);
+    manager->splitRatio_ = 0.5f;
+
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    constexpr float xOffset = -50.0f;
+    constexpr float maxSplitDragRatio = 6.0f / 7;
+    context.pattern->HandleForceSplitDragUpdate(xOffset);
+
+    auto result = manager->GetTemporarySplitRatio();
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(result.value(), maxSplitDragRatio);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragEnd001
+ * @tc.desc: Branch: forceSplitMgr->IsForceSplitDragging() => false
+ *           HandleForceSplitDragEnd returns early when not dragging
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragEnd001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    constexpr float testRatio = 0.5f;
+    manager->SetTemporarySplitRatio(testRatio);
+    manager->SetIsForceSplitDragging(false);
+
+    context.pattern->HandleForceSplitDragEnd();
+    auto ratio = manager->GetTemporarySplitRatio();
+    ASSERT_TRUE(ratio.has_value());
+    EXPECT_FLOAT_EQ(ratio.value(), testRatio);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragEnd002
+ * @tc.desc: Branch: tempRatio has no value => uses splitRatio
+ *           HandleForceSplitDragEnd uses splitRatio when temporary ratio is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragEnd002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetIsForceSplitDragging(true);
+    manager->ClearTemporarySplitRatio();
+    manager->splitRatio_ = 0.5f;
+
+    context.pattern->HandleForceSplitDragEnd();
+
+    EXPECT_FALSE(manager->IsForceSplitDragging());
+}
+
+/**
+ * @tc.name: HandleForceSplitDragEnd003
+ * @tc.desc: Branch: tempRatio equals finalRatio (snap point) => snap directly
+ *           HandleForceSplitDragEnd snaps directly when ratio is already at snap point
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragEnd003, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetIsForceSplitDragging(true);
+    constexpr float snapRatio = 0.5f;
+    manager->SetTemporarySplitRatio(snapRatio);
+
+    context.pattern->HandleForceSplitDragEnd();
+
+    EXPECT_FALSE(manager->IsForceSplitDragging());
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), snapRatio);
+}
+
+/**
+ * @tc.name: GetOrCreateMaskNode001
+ * @tc.desc: Branch: isLeft=true, leftMaskNode_ exists => returns cached leftMaskNode_
+ *           GetOrCreateMaskNode returns cached mask node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, GetOrCreateMaskNode001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+
+    auto existingMask = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    context.navNode->leftMaskNode_ = existingMask;
+
+    auto result = context.navNode->GetOrCreateMaskNode(true);
+    EXPECT_EQ(result, existingMask);
+}
+
+/**
+ * @tc.name: GetOrCreateMaskNode002
+ * @tc.desc: Branch: isLeft=false, rightMaskNode_ exists => returns cached rightMaskNode_
+ *           GetOrCreateMaskNode returns cached right mask node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, GetOrCreateMaskNode002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+
+    auto existingMask = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    context.navNode->rightMaskNode_ = existingMask;
+
+    auto result = context.navNode->GetOrCreateMaskNode(false);
+    EXPECT_EQ(result, existingMask);
+}
+
+/**
+ * @tc.name: GetOrCreateMaskNode003
+ * @tc.desc: Branch: isLeft=true, leftMaskNode_ is null => creates new mask node
+ *           GetOrCreateMaskNode creates and caches new left mask node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, GetOrCreateMaskNode003, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+
+    context.navNode->leftMaskNode_ = nullptr;
+
+    auto result = context.navNode->GetOrCreateMaskNode(true);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetTag(), V2::STACK_ETS_TAG);
+    EXPECT_EQ(context.navNode->leftMaskNode_, result);
+}
+
+/**
+ * @tc.name: GetOrCreateMaskNode004
+ * @tc.desc: Branch: isLeft=false, rightMaskNode_ is null => creates new mask node
+ *           GetOrCreateMaskNode creates and caches new right mask node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, GetOrCreateMaskNode004, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+
+    context.navNode->rightMaskNode_ = nullptr;
+
+    auto result = context.navNode->GetOrCreateMaskNode(false);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetTag(), V2::STACK_ETS_TAG);
+    EXPECT_EQ(context.navNode->rightMaskNode_, result);
+}
+
+/**
+ * @tc.name: UpdateMaskNodeVisibility001
+ * @tc.desc: Branch: isLeft=true, VisibleType::VISIBLE => updates visibility
+ *           UpdateMaskNodeVisibility updates left mask visibility correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, UpdateMaskNodeVisibility001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+
+    context.navNode->UpdateMaskNodeVisibility(true, VisibleType::VISIBLE);
+    auto maskNode = context.navNode->GetOrCreateMaskNode(true);
+    ASSERT_NE(maskNode, nullptr);
+    auto property = maskNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+    auto visibility = property->GetVisibilityValue(VisibleType::VISIBLE);
+    EXPECT_EQ(visibility, VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: UpdateMaskNodeVisibility002
+ * @tc.desc: Branch: isLeft=false, VisibleType::GONE => updates visibility
+ *           UpdateMaskNodeVisibility updates right mask visibility correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, UpdateMaskNodeVisibility002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+
+    context.navNode->UpdateMaskNodeVisibility(false, VisibleType::GONE);
+    auto maskNode = context.navNode->GetOrCreateMaskNode(false);
+    ASSERT_NE(maskNode, nullptr);
+    auto property = maskNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+    auto visibility = property->GetVisibilityValue(VisibleType::VISIBLE);
+    EXPECT_EQ(visibility, VisibleType::GONE);
+}
 } // namespace OHOS::Ace::NG

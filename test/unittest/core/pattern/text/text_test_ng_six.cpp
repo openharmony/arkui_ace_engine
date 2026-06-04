@@ -1624,7 +1624,7 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent003, TestSize.Level1)
 
 /**
  * @tc.name: TextHighlightSelectedContent004
- * @tc.desc: Test TextHighlightSelectedContent with image/custom spans
+ * @tc.desc: Test TextHighlightSelectedContent with image/custom spans.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNgSix, TextHighlightSelectedContent004, TestSize.Level1)
@@ -1675,7 +1675,7 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent004, TestSize.Level1)
 
 /**
  * @tc.name: TextHighlightSelectedContent005
- * @tc.desc: Test TextHighlightSelectedContent with symbol spans
+ * @tc.desc: Test TextHighlightSelectedContent with symbol spans.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNgSix, TextHighlightSelectedContent005, TestSize.Level1)
@@ -1723,7 +1723,7 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent005, TestSize.Level1)
 
 /**
  * @tc.name: TextHighlightSelectedContent006
- * @tc.desc: Test TextHighlightSelectedContent with complex span combinations
+ * @tc.desc: Test TextHighlightSelectedContent with complex span combinations.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNgSix, TextHighlightSelectedContent006, TestSize.Level1)
@@ -1733,10 +1733,10 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent006, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
-    // Clear any existing spans
+    // Clear any existing spans.
     textPattern->spans_.clear();
 
-    // Create complex scenario: text + image + text + symbol + text
+    // Create complex scenario: text + image + text + symbol + text.
     auto span1 = AceType::MakeRefPtr<SpanItem>();
     span1->content = u"Start";
     span1->position = 5;
@@ -1789,7 +1789,7 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent006, TestSize.Level1)
 
 /**
  * @tc.name: ReportSelectedText001
- * @tc.desc: Test ReportSelectedText when SelectTextEvent is not registered
+ * @tc.desc: Test ReportSelectedText when SelectTextEvent is not registered.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNgSix, ReportSelectedText001, TestSize.Level1)
@@ -1799,19 +1799,19 @@ HWTEST_F(TextTestNgSix, ReportSelectedText001, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
-    // Mock UiSessionManager to return false for GetSelectTextEventRegistered
+    // Mock UiSessionManager to return false for GetSelectTextEventRegistered.
     MockUiSessionManager* mockUiSessionManager =
         reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
     EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(false));
 
-    // Set text selector with some content
+    // Set text selector with some content.
     textPattern->textSelector_.Update(0, 5);
     textPattern->textSelector_.lastReportContent_ = "previous content";
 
-    // Call the function
+    // Call the function.
     textPattern->ReportSelectedText();
 
-    // Verify lastReportContent_ is cleared
+    // Verify lastReportContent_ is cleared.
     EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "");
 }
 

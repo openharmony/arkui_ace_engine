@@ -427,4 +427,901 @@ HWTEST_F(NodeVisualEffectTest, Matrix4004, TestSize.Level1)
         EXPECT_LE(diff, epsilon);
     }
 }
+
+/**
+ * @tc.name: Matrix4ScaleOptions_SetX_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_SetX with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_SetX_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4ScaleOptions_SetX(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_SetX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_GetX_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_GetX with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_GetX_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4ScaleOptions_GetX(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_GetX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or scaleX is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_SetX_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_SetX with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_SetX_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4RotationOptions_SetX(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_SetX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4TranslationOptions_SetX_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4TranslationOptions_SetX with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4TranslationOptions_SetX_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4TranslationOptions_SetX(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4TranslationOptions_SetX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4_Invert_NullMatrix_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_Invert with null matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_Invert_NullMatrix_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4_Invert(nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_Invert"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4_Combine_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_Combine with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_Combine_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4* matrix = OH_ArkUI_Matrix4_CreateIdentity();
+    ASSERT_NE(matrix, nullptr);
+    auto result = OH_ArkUI_Matrix4_Combine(nullptr, matrix);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_Combine"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: oriMatrix or anotherMatrix is null"), std::string::npos);
+    OH_ArkUI_Matrix4_Dispose(matrix);
+}
+
+/**
+ * @tc.name: Matrix4_Scale_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_Scale with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_Scale_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4ScaleOptions* scaleOptions = OH_ArkUI_Matrix4ScaleOptions_Create();
+    ASSERT_NE(scaleOptions, nullptr);
+    auto result = OH_ArkUI_Matrix4_Scale(nullptr, scaleOptions);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_Scale"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix or scale is null"), std::string::npos);
+    OH_ArkUI_Matrix4ScaleOptions_Dispose(scaleOptions);
+}
+
+/**
+ * @tc.name: Matrix4_Translate_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_Translate with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_Translate_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4TranslationOptions* translateOptions = OH_ArkUI_Matrix4TranslationOptions_Create();
+    ASSERT_NE(translateOptions, nullptr);
+    auto result = OH_ArkUI_Matrix4_Translate(nullptr, translateOptions);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_Translate"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix or translate is null"), std::string::npos);
+    OH_ArkUI_Matrix4TranslationOptions_Dispose(translateOptions);
+}
+
+/**
+ * @tc.name: Matrix4_SetPolyToPoly_PointCountTooLarge_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_SetPolyToPoly with pointCount greater than 4.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_SetPolyToPoly_PointCountTooLarge_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4* matrix = OH_ArkUI_Matrix4_CreateIdentity();
+    ASSERT_NE(matrix, nullptr);
+    ArkUI_PointF src[5] = {{0, 0}, {100, 0}, {0, 100}, {100, 100}, {50, 50}};
+    ArkUI_PointF dst[5] = {{0, 0}, {100, 0}, {0, 100}, {100, 100}, {50, 50}};
+    auto result = OH_ArkUI_Matrix4_SetPolyToPoly(matrix, src, dst, 5);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_SetPolyToPoly"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: pointCount is greater than 4"), std::string::npos);
+    OH_ArkUI_Matrix4_Dispose(matrix);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_SetY_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_SetY with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_SetY_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4ScaleOptions_SetY(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_SetY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_GetY_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_GetY with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_GetY_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4ScaleOptions_GetY(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_GetY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or scaleY is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_SetZ_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_SetZ with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_SetZ_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4ScaleOptions_SetZ(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_SetZ"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_GetZ_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_GetZ with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_GetZ_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4ScaleOptions_GetZ(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_GetZ"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or scaleZ is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_SetCenterX_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_SetCenterX with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_SetCenterX_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4ScaleOptions_SetCenterX(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_SetCenterX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_GetCenterX_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_GetCenterX with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_GetCenterX_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4ScaleOptions_GetCenterX(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_GetCenterX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or centerX is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_SetCenterY_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_SetCenterY with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_SetCenterY_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4ScaleOptions_SetCenterY(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_SetCenterY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4ScaleOptions_GetCenterY_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4ScaleOptions_GetCenterY with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4ScaleOptions_GetCenterY_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4ScaleOptions_GetCenterY(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4ScaleOptions_GetCenterY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or centerY is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetX_NotSet_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetX when isSetX is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetX_NotSet_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4RotationOptions* options = OH_ArkUI_Matrix4RotationOptions_Create();
+    ASSERT_NE(options, nullptr);
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetX(options, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options, x is null or isSetX is false"), std::string::npos);
+    OH_ArkUI_Matrix4RotationOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetX_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetX with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetX_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetX(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options, x is null or isSetX is false"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_SetY_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_SetY with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_SetY_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4RotationOptions_SetY(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_SetY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetY_NotSet_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetY when isSetY is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetY_NotSet_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4RotationOptions* options = OH_ArkUI_Matrix4RotationOptions_Create();
+    ASSERT_NE(options, nullptr);
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetY(options, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options, y is null or isSetY is false"), std::string::npos);
+    OH_ArkUI_Matrix4RotationOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetY_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetY with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetY_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetY(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options, y is null or isSetY is false"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_SetZ_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_SetZ with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_SetZ_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4RotationOptions_SetZ(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_SetZ"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetZ_NotSet_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetZ when isSetZ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetZ_NotSet_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4RotationOptions* options = OH_ArkUI_Matrix4RotationOptions_Create();
+    ASSERT_NE(options, nullptr);
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetZ(options, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetZ"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options, z is null or isSetZ is false"), std::string::npos);
+    OH_ArkUI_Matrix4RotationOptions_Dispose(options);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetZ_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetZ with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetZ_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetZ(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetZ"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options, z is null or isSetZ is false"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_SetAngle_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_SetAngle with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_SetAngle_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4RotationOptions_SetAngle(nullptr, 45.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_SetAngle"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetAngle_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetAngle with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetAngle_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetAngle(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetAngle"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or angle is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_SetCenterX_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_SetCenterX with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_SetCenterX_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4RotationOptions_SetCenterX(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_SetCenterX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetCenterX_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetCenterX with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetCenterX_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetCenterX(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetCenterX"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or centerX is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_SetCenterY_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_SetCenterY with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_SetCenterY_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4RotationOptions_SetCenterY(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_SetCenterY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4RotationOptions_GetCenterY_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4RotationOptions_GetCenterY with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4RotationOptions_GetCenterY_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4RotationOptions_GetCenterY(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4RotationOptions_GetCenterY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or centerY is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4TranslationOptions_SetY_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4TranslationOptions_SetY with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4TranslationOptions_SetY_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4TranslationOptions_SetY(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4TranslationOptions_SetY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4TranslationOptions_GetY_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4TranslationOptions_GetY with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4TranslationOptions_GetY_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4TranslationOptions_GetY(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4TranslationOptions_GetY"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or y is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4TranslationOptions_SetZ_NullOption_001
+ * @tc.desc: Test OH_ArkUI_Matrix4TranslationOptions_SetZ with null option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4TranslationOptions_SetZ_NullOption_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4TranslationOptions_SetZ(nullptr, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4TranslationOptions_SetZ"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4TranslationOptions_GetZ_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4TranslationOptions_GetZ with null parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4TranslationOptions_GetZ_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float value = 0.0f;
+    auto result = OH_ArkUI_Matrix4TranslationOptions_GetZ(nullptr, &value);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4TranslationOptions_GetZ"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: options or z is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4_Rotate_NullMatrix_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_Rotate with null matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_Rotate_NullMatrix_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4RotationOptions* rotationOptions = OH_ArkUI_Matrix4RotationOptions_Create();
+    ASSERT_NE(rotationOptions, nullptr);
+    auto result = OH_ArkUI_Matrix4_Rotate(nullptr, rotationOptions);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_Rotate"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix or rotate is null"), std::string::npos);
+    OH_ArkUI_Matrix4RotationOptions_Dispose(rotationOptions);
+}
+
+/**
+ * @tc.name: Matrix4_Rotate_NullRotate_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_Rotate with null rotate options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_Rotate_NullRotate_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4* matrix = OH_ArkUI_Matrix4_CreateIdentity();
+    ASSERT_NE(matrix, nullptr);
+    auto result = OH_ArkUI_Matrix4_Rotate(matrix, nullptr);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_Rotate"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix or rotate is null"), std::string::npos);
+    OH_ArkUI_Matrix4_Dispose(matrix);
+}
+
+/**
+ * @tc.name: Matrix4_Skew_NullMatrix_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_Skew with null matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_Skew_NullMatrix_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto result = OH_ArkUI_Matrix4_Skew(nullptr, 1.0f, 1.0f);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_Skew"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4_TransformPoint_NullMatrix_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_TransformPoint with null matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_TransformPoint_NullMatrix_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_PointF oriPoint = {2.0f, 2.0f};
+    ArkUI_PointF resultPoint = {0.0f, 0.0f};
+    auto result = OH_ArkUI_Matrix4_TransformPoint(nullptr, &oriPoint, &resultPoint);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_TransformPoint"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix, oriPoint or result is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4_TransformPoint_NullParams_002
+ * @tc.desc: Test OH_ArkUI_Matrix4_TransformPoint with null oriPoint or result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_TransformPoint_NullParams_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4* matrix = OH_ArkUI_Matrix4_CreateIdentity();
+    ASSERT_NE(matrix, nullptr);
+    ArkUI_PointF resultPoint = {0.0f, 0.0f};
+    auto result = OH_ArkUI_Matrix4_TransformPoint(matrix, nullptr, &resultPoint);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_TransformPoint"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix, oriPoint or result is null"), std::string::npos);
+    OH_ArkUI_Matrix4_Dispose(matrix);
+}
+
+/**
+ * @tc.name: Matrix4_SetPolyToPoly_NullParams_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_SetPolyToPoly with null matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_SetPolyToPoly_NullParams_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_PointF src[4] = {{0, 0}, {100, 0}, {0, 100}, {100, 100}};
+    ArkUI_PointF dst[4] = {{0, 0}, {100, 0}, {0, 100}, {100, 100}};
+    auto result = OH_ArkUI_Matrix4_SetPolyToPoly(nullptr, src, dst, NUM_4);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_SetPolyToPoly"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix, src or dst is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4_SetPolyToPoly_NullSrc_002
+ * @tc.desc: Test OH_ArkUI_Matrix4_SetPolyToPoly with null src.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_SetPolyToPoly_NullSrc_002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4* matrix = OH_ArkUI_Matrix4_CreateIdentity();
+    ASSERT_NE(matrix, nullptr);
+    ArkUI_PointF dst[4] = {{0, 0}, {100, 0}, {0, 100}, {100, 100}};
+    auto result = OH_ArkUI_Matrix4_SetPolyToPoly(matrix, nullptr, dst, NUM_4);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(result)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_SetPolyToPoly"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix, src or dst is null"), std::string::npos);
+    OH_ArkUI_Matrix4_Dispose(matrix);
+}
+
+/**
+ * @tc.name: Matrix4_GetElements_NullMatrix_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_GetElements with null matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_GetElements_NullMatrix_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float result[NUM_16] = {0};
+    auto errorCode = OH_ArkUI_Matrix4_GetElements(nullptr, result);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(errorCode)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_GetElements"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix or result is null"), std::string::npos);
+}
+
+/**
+ * @tc.name: Matrix4_GetElements_NullResult_001
+ * @tc.desc: Test OH_ArkUI_Matrix4_GetElements with null result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeVisualEffectTest, Matrix4_GetElements_NullResult_001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Matrix4* matrix = OH_ArkUI_Matrix4_CreateIdentity();
+    ASSERT_NE(matrix, nullptr);
+    auto errorCode = OH_ArkUI_Matrix4_GetElements(matrix, nullptr);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    const char* errorMessage = OH_ArkUI_NativeModule_GetErrorMessage();
+    ASSERT_NE(errorMessage, nullptr);
+    std::string errorMessageStr(errorMessage);
+    EXPECT_NE(errorMessageStr.find(std::string("errorCode: ") + std::to_string(errorCode)), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("functionName: OH_ArkUI_Matrix4_GetElements"), std::string::npos);
+    EXPECT_NE(errorMessageStr.find("errorMessage: matrix or result is null"), std::string::npos);
+    OH_ArkUI_Matrix4_Dispose(matrix);
+}
 } // namespace OHOS::Ace

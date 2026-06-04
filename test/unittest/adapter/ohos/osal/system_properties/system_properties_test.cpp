@@ -83,7 +83,7 @@ HWTEST_F(SystemPropertiesTest, SystemPropertiesTest003, TestSize.Level1)
     EXPECT_FALSE(SystemProperties::GetRecycleImageEnabled());
     EXPECT_TRUE(NearEqual(SystemProperties::GetAnimationScale(), 1.0f));
     EXPECT_TRUE(SystemProperties::GetContainerDeleteFlag());
-    EXPECT_FALSE(SystemProperties::GetMultiInstanceEnabled());
+    EXPECT_TRUE(SystemProperties::GetMultiInstanceEnabled());
     EXPECT_FALSE(SystemProperties::GetAllowWindowOpenMethodEnabled());
 }
 

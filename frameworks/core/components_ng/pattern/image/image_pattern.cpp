@@ -30,6 +30,7 @@
 
 #include "base/image/image_perf.h"
 #include "base/log/dump_log.h"
+#include "base/log/event_report.h"
 #include "base/network/download_manager.h"
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine_ext.h"
@@ -46,6 +47,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/drawable/animated_drawable_descriptor.h"
+#include "core/drawable/picture_drawable_descriptor.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -845,6 +847,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);
+    bool autoResizeExplicitlySet = props->GetAutoResize().has_value();
     bool autoResize = props->GetAutoResize().value_or(GetAutoResizeDefaultBeforeDecode());
     imageDfxConfig_.SetAutoResize(autoResize);
 
@@ -861,19 +864,25 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         loadingCtx_->SetImageQuality(GetImageQuality());
         loadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
-        loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+        loadingCtx_->MakeCanvasImageIfNeed(
+            dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, loadingCtx_), imageFit, sourceSize,
+            hasValidSlice);
     }
     if (altErrorCtx_) {
         altErrorCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         altErrorCtx_->SetImageQuality(GetImageQuality());
         altErrorCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
-        altErrorCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+        altErrorCtx_->MakeCanvasImageIfNeed(
+            dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, altErrorCtx_), imageFit, sourceSize,
+            hasValidSlice);
     }
     if (altLoadingCtx_) {
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
         altLoadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
-        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+        altLoadingCtx_->MakeCanvasImageIfNeed(
+            dstSize, GetAutoResizeForCtx(autoResize, autoResizeExplicitlySet, altLoadingCtx_), imageFit, sourceSize,
+            hasValidSlice);
     }
 }
 
@@ -890,6 +899,31 @@ bool ImagePattern::GetAutoResizeDefaultBeforeDecode() const
         return false;
     }
     return SystemProperties::GetImageAutoResizeEnabled();
+}
+
+bool ImagePattern::GetAutoResizeForCtx(
+    bool autoResize, bool autoResizeExplicitlySet, const RefPtr<ImageLoadingContext>& ctx) const
+{
+    // If the app explicitly set autoResize, respect that value
+    if (autoResizeExplicitlySet) {
+        return autoResize;
+    }
+    CHECK_NULL_RETURN(ctx, autoResize);
+    // Memory protection for large images: force autoResize when pixel count exceeds this threshold
+    static constexpr double IMAGE_PIXEL_COUNT_THRESHOLD = 50000000.0;
+    auto originImageSize = ctx->GetOriginImageSize();
+    if (originImageSize.IsPositive() &&
+        static_cast<double>(originImageSize.Width()) * static_cast<double>(originImageSize.Height()) >
+            IMAGE_PIXEL_COUNT_THRESHOLD) {
+        EventReport::SendComponentException(ComponentExcepType::IMAGE_LARGE_PIXEL_COUNT_ERR);
+        if (!autoResize) {
+            TAG_LOGI(AceLogTag::ACE_IMAGE,
+                "AutoResize forced to true, image pixels(%{public}lf * %{public}lf) exceed threshold %{public}lf",
+                originImageSize.Width(), originImageSize.Height(), IMAGE_PIXEL_COUNT_THRESHOLD);
+        }
+        return true;
+    }
+    return autoResize;
 }
 
 void ImagePattern::UpdateSvgSmoothEdgeValue()
@@ -1235,7 +1269,6 @@ void ImagePattern::UpdateGestureAndDragWhenModify()
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    LoadPixelMapDrawable();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
     CHECK_EQUAL_VOID(CheckImagePrivacyForCopyOption(), true);
@@ -1243,73 +1276,6 @@ void ImagePattern::OnModifyDone()
     UpdateOffsetForImageAnalyzerOverlay();
     SetFrameOffsetForOverlayNode();
     InitOnKeyEvent();
-    if (imageType_ == ImageType::ANIMATED_DRAWABLE) {
-        RegisterVisibleAreaChange();
-    }
-}
-
-void ImagePattern::LoadPixelMapDrawable()
-{
-    if (imageType_ != ImageType::PIXELMAP_DRAWABLE || !drawable_) {
-        return;
-    }
-    if (syncLoad_) {
-        LoadPixelMapDrawableSync();
-        return;
-    }
-    drawable_->LoadAsync([weak = WeakClaim(this)](DrawableDescriptorLoadResult result) {
-        ImageUtils::PostToUI(
-            [weak, result]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->OnPixelMapDrawableLoaded(result);
-            },
-            "AceImagePixelMapDrawableLoadAsync");
-    });
-}
-
-void ImagePattern::LoadPixelMapDrawableSync()
-{
-    if (imageType_ != ImageType::PIXELMAP_DRAWABLE || !syncLoad_ || !drawable_) {
-        return;
-    }
-    auto result = drawable_->LoadSync();
-    if (result.errorCode != 0) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "sync load pixelmap drawable failed, error code: %d", result.errorCode);
-        return;
-    }
-    auto pixelMap = drawable_->GetPixelMap();
-    auto srcInfo = ImageSourceInfo(pixelMap);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateImageSourceInfo(srcInfo);
-}
-
-void ImagePattern::OnPixelMapDrawableLoaded(DrawableDescriptorLoadResult result)
-{
-    if (result.errorCode != 0 || !drawable_) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "async load pixelmap drawable failed, error code: %d", result.errorCode);
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pixelMap = drawable_->GetPixelMap();
-    if (!pixelMap) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "async load pixelmap drawable failed, no pixel map available");
-        return;
-    }
-    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto srcInfo = ImageSourceInfo(pixelMap);
-    layoutProperty->UpdateImageSourceInfo(srcInfo);
-    host->MarkModifyDone();
-}
-
-void ImagePattern::SetPixelMapDrawable(const RefPtr<DrawableDescriptor>& drawable)
-{
-    drawable_ = drawable;
 }
 
 void ImagePattern::UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& newDrawable)
@@ -1325,32 +1291,44 @@ void ImagePattern::UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& ne
     }
     drawable_ = newDrawable;
     CHECK_NULL_VOID(drawable_);
-    drawable_->LoadAsync([weak = WeakClaim(this), nodeId](DrawableDescriptorLoadResult result) {
+    drawable_->LoadAsync([weak = WeakClaim(this)](DrawableDescriptorLoadResult result) {
         ImageUtils::PostToUI(
-            [weak, nodeId, result]() {
+            [weak, result]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                pattern->InitializeStatus(result);
+                pattern->DrawableRegisterUpdateCallback();
+                pattern->OnDrawableLoadComplete(result);
             },
             "AceImageUpdateDrawableDescriptor");
     });
 }
 
-void ImagePattern::InitializeStatus(DrawableDescriptorLoadResult result)
+void ImagePattern::OnDrawableLoadComplete(DrawableDescriptorLoadResult result)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
     auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    imageSize_.SetWidth(static_cast<float>(result.imageWidth_));
-    imageSize_.SetHeight(static_cast<float>(result.imageHeight_));
-    if (isMeasured_) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        isMeasured_ = false;
+    if (imageType_ == ImageType::PICTURE_DRAWABLE) {
+        auto pixelMap = drawable_->GetPixelMap();
+        if (pixelMap) {
+            layoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+            host->MarkModifyDone();
+        }
+        return;
     }
-    DrawableRegisterUpdateCallback();
-    AnimatedDrawableControllAnimation(nodeId);
+    if (imageType_ == ImageType::ANIMATED_DRAWABLE) {
+        RegisterVisibleAreaChange();
+        imageSize_.SetWidth(static_cast<float>(result.imageWidth_));
+        imageSize_.SetHeight(static_cast<float>(result.imageHeight_));
+        if (isMeasured_) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            isMeasured_ = false;
+        }
+        AnimatedDrawableControllAnimation(nodeId);
+        return;
+    }
 }
 
 void ImagePattern::AnimatedDrawableControllAnimation(const int32_t id)
@@ -1374,9 +1352,9 @@ void ImagePattern::DrawableRegisterUpdateCallback()
             [weak, pixelMap]() {
                 auto node = weak.Upgrade();
                 CHECK_NULL_VOID(node);
-                auto srcInfo = ImageSourceInfo(pixelMap);
                 auto property = node->GetLayoutProperty<ImageLayoutProperty>();
-                property->UpdateImageSourceInfo(srcInfo);
+                CHECK_NULL_VOID(property);
+                property->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
                 node->MarkModifyDone();
             },
             "AceImageUpdateDrawableDescriptor");

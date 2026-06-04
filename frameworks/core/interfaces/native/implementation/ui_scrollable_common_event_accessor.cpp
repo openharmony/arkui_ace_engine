@@ -48,7 +48,7 @@ void SetOnReachStartImpl(Ark_UIScrollableCommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnReachStart = Converter::GetOptPtr(callback_);
     if (arkOnReachStart) {
-        auto onReachStart = [arkCallback = CallbackHelper(arkOnReachStart.value())]() { arkCallback.InvokeSync(); };
+        auto onReachStart = GetSyncInvoker(arkOnReachStart.value());
         ScrollableModelStatic::SetOnReachStart(rawPtr, std::move(onReachStart));
     } else {
         ScrollableModelStatic::SetOnReachStart(rawPtr, nullptr);
@@ -63,7 +63,7 @@ void SetOnReachEndImpl(Ark_UIScrollableCommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnReachEnd = Converter::GetOptPtr(callback_);
     if (arkOnReachEnd) {
-        auto onReachEnd = [arkCallback = CallbackHelper(arkOnReachEnd.value())]() { arkCallback.InvokeSync(); };
+        auto onReachEnd = GetSyncInvoker(arkOnReachEnd.value());
         ScrollableModelStatic::SetOnReachEnd(rawPtr, std::move(onReachEnd));
     } else {
         ScrollableModelStatic::SetOnReachEnd(rawPtr, nullptr);
@@ -78,7 +78,7 @@ void SetOnScrollStartImpl(Ark_UIScrollableCommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnScrollStart = Converter::GetOptPtr(callback_);
     if (arkOnScrollStart) {
-        auto onScrollStart = [arkCallback = CallbackHelper(arkOnScrollStart.value())]() { arkCallback.InvokeSync(); };
+        auto onScrollStart = GetSyncInvoker(arkOnScrollStart.value());
         ScrollableModelStatic::SetOnScrollStart(rawPtr, std::move(onScrollStart));
     } else {
         ScrollableModelStatic::SetOnScrollStart(rawPtr, nullptr);
@@ -93,7 +93,7 @@ void SetOnScrollStopImpl(Ark_UIScrollableCommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnScrollStop = Converter::GetOptPtr(callback_);
     if (arkOnScrollStop) {
-        auto onScrollStop = [arkCallback = CallbackHelper(arkOnScrollStop.value())]() { arkCallback.InvokeSync(); };
+        auto onScrollStop = GetSyncInvoker(arkOnScrollStop.value());
         ScrollableModelStatic::SetOnScrollStop(rawPtr, std::move(onScrollStop));
     } else {
         ScrollableModelStatic::SetOnScrollStop(rawPtr, nullptr);

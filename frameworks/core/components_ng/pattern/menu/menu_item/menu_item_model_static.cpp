@@ -134,6 +134,14 @@ void MenuItemModelStatic::SetSelectedChangeEvent(FrameNode* frameNode, std::func
     eventHub->SetSelectedChangeEvent(std::move(selectedChangeEvent));
 }
 
+void MenuItemModelStatic::SetSubBuilder(FrameNode* frameNode, std::function<void()>&& subBuilder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSubBuilder(std::move(subBuilder));
+}
+
 void MenuItemModelStatic::SetSelected(FrameNode* frameNode, const std::optional<bool>& isSelected)
 {
     CHECK_NULL_VOID(frameNode);

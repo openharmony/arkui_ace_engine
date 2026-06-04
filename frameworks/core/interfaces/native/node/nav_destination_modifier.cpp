@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
@@ -173,11 +174,12 @@ void ResetIgnoreLayoutSafeArea(ArkUINodeHandle node)
     NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
-void UpdateNavDestinationTitlebarOptions(FrameNode* frameNode, ArkUINavigationTitlebarOptions options)
+void UpdateNavDestinationTitlebarOptions(
+    FrameNode* frameNode, ArkUINavigationTitlebarOptions options, RefPtr<UiMaterial> material)
 {
     CHECK_NULL_VOID(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    auto&& updateFunc = [wekNode = AceType::WeakClaim(frameNode), options](
+    auto&& updateFunc = [wekNode = AceType::WeakClaim(frameNode), options, material](
                             const RefPtr<ResourceObject>& resObj) mutable {
         options.ReloadResources();
         NG::NavigationTitlebarOptions finalOptions;
@@ -208,6 +210,7 @@ void UpdateNavDestinationTitlebarOptions(FrameNode* frameNode, ArkUINavigationTi
         if (options.enableCustomTitlePaddingCheck.isSet) {
             finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
         }
+        finalOptions.material = material;
         auto localFinalOptions = finalOptions;
         auto frameNode = wekNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -247,6 +250,10 @@ void SetNavigationTitlebarOptions(NG::NavigationTitlebarOptions& finalOptions, A
     if (options.enableCustomTitlePaddingCheck.isSet) {
         finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
     }
+    if (options.material) {
+        auto* castMaterial = reinterpret_cast<UiMaterial*>(options.material);
+        finalOptions.material = castMaterial->Copy();
+    }
 }
 
 void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options,
@@ -275,9 +282,10 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
     }
     NG::NavigationTitlebarOptions finalOptions;
     SetNavigationTitlebarOptions(finalOptions, options);
+    auto material = finalOptions.material;
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
     if (SystemProperties::ConfigChangePerform()) {
-        UpdateNavDestinationTitlebarOptions(frameNode, options);
+        UpdateNavDestinationTitlebarOptions(frameNode, options, material);
     }
 }
 
@@ -492,6 +500,10 @@ void SetNavDestinationTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitle
     if (opts.enableCustomTitlePaddingCheck.isSet) {
         finalOptions.enableCustomTitlePaddingCheck = opts.enableCustomTitlePaddingCheck.value;
     }
+    if (opts.material) {
+        auto* castMaterial = reinterpret_cast<UiMaterial*>(opts.material);
+        finalOptions.material = castMaterial->Copy();
+    }
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }
 
@@ -645,6 +657,24 @@ void ResetEnableNavigationIndicator(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::optional<bool> navigationIndicator;
     NavDestinationModelNG::SetEnableNavigationIndicator(frameNode, navigationIndicator);
+}
+
+void SetFullScreenOverlay(ArkUINodeHandle node, ArkUIOptionalBool fullScreenOverlay)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<bool> overlay;
+    if (fullScreenOverlay.isSet) {
+        overlay = fullScreenOverlay.value;
+    }
+    NavDestinationModelNG::SetFullScreenOverlay(frameNode, overlay);
+}
+
+void ResetFullScreenOverlay(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetFullScreenOverlay(frameNode, std::nullopt);
 }
 
 void SetNavDestinationOnShown(ArkUINodeHandle node, void* callback)
@@ -992,6 +1022,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .setMenuItemSymbol = SetMenuItemSymbol,
         .setRecoverable = SetNavDestinationRecoverable,
         .resetRecoverable = ResetNavDestinationRecoverable,
+        .setFullScreenOverlay = SetFullScreenOverlay,
+        .resetFullScreenOverlay = ResetFullScreenOverlay,
         .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
         .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
         .setNavDestinationCustomTitle = SetNavDestinationCustomTitle,

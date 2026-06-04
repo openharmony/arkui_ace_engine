@@ -151,6 +151,10 @@ void NativeNavigationUtils::ParseTitleOptions(const EcmaVM* vm, const Local<JSVa
         options.enableHoverMode.isSet = 1;
         options.enableHoverMode.value = enableHoverModeProperty->ToBoolean(vm)->Value();
     }
+    auto materialProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "systemMaterial"));
+    if (materialProperty->IsObject(vm)) {
+        options.material = ArkTSUtils::UnwrapNapiValue(vm, materialProperty);
+    }
 }
 
 void NativeNavigationUtils::UpdateNavigationBackgroundColor(const EcmaVM* vm, const Local<panda::ObjectRef>& obj,

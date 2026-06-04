@@ -1740,6 +1740,7 @@ public:
     void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
     void SetIsSystemRtlEnable(bool enable);
     void FetchCloudControlWebAutoLayoutConfig();
+    void UpdateTouchEventFeatureDetectionEnabled();
 private:
     void InitWebEvent();
     void RegisterWebEvent();

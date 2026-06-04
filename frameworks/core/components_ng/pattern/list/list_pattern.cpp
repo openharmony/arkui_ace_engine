@@ -26,7 +26,6 @@
 #include "base/utils/system_properties.h"
 #include "base/memory/referenced.h"
 #include "core/animation/curves.h"
-#include "core/common/back_press_handler_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
@@ -105,12 +104,13 @@ float GetEditModeCheckBoxHotZoneWidthPx(const RefPtr<FrameNode>& host)
     return std::max(0.0f, static_cast<float>(hotZoneWidth.ConvertToPx()));
 }
 
-void SetEditModeForListItemOrGroup(const RefPtr<FrameNode>& itemNode, bool enabled)
+void SetEditModeForListItemOrGroup(FrameNode* itemNode, bool enabled, bool needReserveCheckBoxSpace)
 {
     CHECK_NULL_VOID(itemNode);
-    auto itemPattern = itemNode->GetPattern<SelectableItemPattern>();
-    if (itemPattern) {
-        itemPattern->SetEditModeEnabled(enabled);
+    auto listItemPattern = itemNode->GetPattern<ListItemPattern>();
+    if (listItemPattern) {
+        listItemPattern->SetNeedReserveEditModeCheckBoxSpace(enabled && needReserveCheckBoxSpace);
+        listItemPattern->SetEditModeEnabled(enabled);
         return;
     }
     auto groupPattern = itemNode->GetPattern<ListItemGroupPattern>();
@@ -118,11 +118,18 @@ void SetEditModeForListItemOrGroup(const RefPtr<FrameNode>& itemNode, bool enabl
     std::list<RefPtr<FrameNode>> children;
     itemNode->GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
-        auto childPattern = child->GetPattern<SelectableItemPattern>();
-        if (childPattern) {
-            childPattern->SetEditModeEnabled(enabled);
+        auto childListItemPattern = child->GetPattern<ListItemPattern>();
+        if (childListItemPattern) {
+            childListItemPattern->SetNeedReserveEditModeCheckBoxSpace(enabled && needReserveCheckBoxSpace);
+            childListItemPattern->SetEditModeEnabled(enabled);
         }
     }
+}
+
+void SetEditModeForListItemOrGroup(
+    const RefPtr<FrameNode>& itemNode, bool enabled, bool needReserveCheckBoxSpace)
+{
+    SetEditModeForListItemOrGroup(AceType::RawPtr(itemNode), enabled, needReserveCheckBoxSpace);
 }
 
 RefPtr<FrameNode> GetListTargetFrameNode(
@@ -248,6 +255,7 @@ void ListPattern::OnModifyDone()
         }
         ResetEditModeChanged();
     }
+    UpdateBackPressCallback();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusDependence(FocusDependence::CHILD);
@@ -259,22 +267,6 @@ void ListPattern::OnModifyDone()
     if (!overlayNode && fadingEdge) {
         CreateAnalyzerOverlay(host);
     }
-}
-
-void ListPattern::OnDetachFromMainTree()
-{
-    ScrollablePattern::OnDetachFromMainTree();
-    if (!hasBackPressHandlerRegistered_) {
-        return;
-    }
-    auto pipeline = GetContext();
-    auto host = GetHost();
-    if (!pipeline || !host) {
-        hasBackPressHandlerRegistered_ = false;
-        return;
-    }
-    pipeline->GetBackPressHandlerManager()->RemoveBackPressHandler(AceType::WeakClaim(AceType::RawPtr(host)));
-    hasBackPressHandlerRegistered_ = false;
 }
 
 bool ListPattern::GetIsAllowMouse() const
@@ -676,7 +668,17 @@ bool ListPattern::UpdateStartListItemIndex()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    CHECK_EQUAL_RETURN(host->GetChildTrueTotalCount(), 0, false);
+    auto count = host->GetChildTrueTotalCount();
+    if (count == 0) {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return false;
+        }
+        if (startInfo_.index != -1) {
+            startInfo_ = {-1, -1, -1};
+            return true;
+        }
+        return false;
+    }
     auto startWrapper = host->GetOrCreateChildByIndex(startIndex_);
     int32_t startArea = -1;
     int32_t startItemIndexInGroup = -1;
@@ -706,12 +708,23 @@ bool ListPattern::UpdateEndListItemIndex()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    CHECK_EQUAL_RETURN(host->GetChildTrueTotalCount(), 0, false);
+    auto count = host->GetChildTrueTotalCount();
+    if (count == 0) {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return false;
+        }
+        if (endInfo_.index != -1) {
+            endInfo_ = {-1, -1, -1};
+            return true;
+        }
+        return false;
+    }
     auto endWrapper = host->GetOrCreateChildByIndex(endIndex_);
     int32_t endArea = -1;
     int32_t endItemIndexInGroup = -1;
     bool endFlagChanged = (endInfo_.index != endIndex_);
-    bool endIsGroup = endWrapper && endWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    bool endIsGroup =
+        endWrapper && endWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG && endWrapper->GetHostNode();
     if (endIsGroup) {
         auto endPattern = endWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo endGroupInfo = GetEndListItemIndex(endPattern);
@@ -3426,10 +3439,10 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         canReplaceSwiperItem_ = false;
     }
     FireAndCleanScrollingListener();
-    UpdateBackPressCloseSwipeActionCallback();
+    UpdateBackPressCallback();
 }
 
-WeakPtr<ListItemPattern> ListPattern::GetSwiperItem()
+WeakPtr<ListItemPattern> ListPattern::GetSwiperItem() const
 {
     if (!swiperItem_.Upgrade()) {
         return nullptr;
@@ -3467,39 +3480,35 @@ bool ListPattern::CanReplaceSwiperItem()
     return canReplaceSwiperItem_;
 }
 
+bool ListPattern::NeedBackPressHandler() const
+{
+    return SelectableContainerPattern::NeedBackPressHandler() ||
+           (GetBackPressCloseSwipeAction() && GetSwiperItem().Upgrade());
+}
+
+bool ListPattern::HandleBackPress()
+{
+    if (CloseSwipeActionOnBackPressed()) {
+        return true;
+    }
+    return ExitSwipeSelectModeOnBackPressed();
+}
+
+bool ListPattern::CloseSwipeActionOnBackPressed()
+{
+    if (!GetBackPressCloseSwipeAction()) {
+        return false;
+    }
+    auto swiperItem = GetSwiperItem().Upgrade();
+    if (!swiperItem) {
+        return false;
+    }
+    return !swiperItem->CloseSwipeAction(nullptr);
+}
+
 void ListPattern::UpdateBackPressCloseSwipeActionCallback()
 {
-    bool needRegister = GetBackPressCloseSwipeAction() && GetSwiperItem().Upgrade();
-    if (needRegister == hasBackPressHandlerRegistered_) {
-        return;
-    }
-    auto pipeline = GetContext();
-    auto host = GetHost();
-    CHECK_NULL_VOID(pipeline);
-    CHECK_NULL_VOID(host);
-    auto weakHost = AceType::WeakClaim(AceType::RawPtr(host));
-    if (!needRegister) {
-        pipeline->GetBackPressHandlerManager()->RemoveBackPressHandler(weakHost);
-        hasBackPressHandlerRegistered_ = false;
-        return;
-    }
-    auto weak = AceType::WeakClaim(this);
-    pipeline->GetBackPressHandlerManager()->AddBackPressHandler(weakHost, [weak]() -> bool {
-        auto listPattern = weak.Upgrade();
-        if (!listPattern) {
-            return false;
-        }
-        listPattern->hasBackPressHandlerRegistered_ = false;
-        if (!listPattern->GetBackPressCloseSwipeAction()) {
-            return false;
-        }
-        auto swiperItem = listPattern->GetSwiperItem().Upgrade();
-        if (!swiperItem) {
-            return false;
-        }
-        return !swiperItem->CloseSwipeAction(nullptr);
-    });
-    hasBackPressHandlerRegistered_ = true;
+    UpdateBackPressCallback();
 }
 
 int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset) const
@@ -4112,10 +4121,11 @@ void ListPattern::ApplyEditModeToVisibleItems()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    bool needReserveCheckBoxSpace = NeedJudgeWithHotZone();
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
-        SetEditModeForListItemOrGroup(child, true);
+        SetEditModeForListItemOrGroup(child, true, needReserveCheckBoxSpace);
     }
     ApplyEditModeToCachedItems(true);
 }
@@ -4127,9 +4137,49 @@ void ListPattern::RemoveEditModeFromItems()
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
-        SetEditModeForListItemOrGroup(child, false);
+        SetEditModeForListItemOrGroup(child, false, false);
     }
     ApplyEditModeToCachedItems(false);
+}
+
+void ListPattern::ApplyEditModeToCachedItems(bool enabled)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (itemPosition_.empty()) {
+        return;
+    }
+    bool needReserveCheckBoxSpace = enabled && NeedJudgeWithHotZone();
+    auto applyEditModeToItem =
+        [weakPattern = WeakClaim(this), enabled, needReserveCheckBoxSpace](int32_t index) -> bool {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            auto host = pattern->GetHost();
+            CHECK_NULL_RETURN(host, false);
+            auto childWrapper = host->GetChildByIndex(index + pattern->itemStartIndex_, true);
+            if (!childWrapper) {
+                return false;
+            }
+            auto child = childWrapper->GetHostNode();
+            CHECK_NULL_RETURN(child, false);
+            SetEditModeForListItemOrGroup(child, enabled, needReserveCheckBoxSpace);
+            return true;
+        };
+
+    auto startIndex = itemPosition_.begin()->first;
+    for (int32_t index = startIndex - 1; index >= 0; --index) {
+        if (!applyEditModeToItem(index)) {
+            break;
+        }
+    }
+
+    int32_t totalCount = std::max(maxListItemIndex_ + 1, 0);
+    auto endIndex = itemPosition_.rbegin()->first;
+    for (int32_t index = endIndex + 1; index < totalCount; ++index) {
+        if (!applyEditModeToItem(index)) {
+            break;
+        }
+    }
 }
 
 RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()

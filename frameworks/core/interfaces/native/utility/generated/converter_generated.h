@@ -1429,6 +1429,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_LengthMetrics_Array_LengthMetrics& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_LengthMetrics_F64& src)
 {
     switch (src.selector) {
@@ -2072,7 +2087,6 @@ void AssignUnionTo(std::optional<T>& dst,
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3674,6 +3688,7 @@ ASSIGN_OPT(Opt_EffectType)
 ASSIGN_OPT(Opt_EllipseShape)
 ASSIGN_OPT(Opt_EllipsisMode)
 ASSIGN_OPT(Opt_EmbeddedType)
+ASSIGN_OPT(Opt_EmbeddedOptions)
 ASSIGN_OPT(Opt_EnterKeyType)
 ASSIGN_OPT(Opt_EventLocationInfo)
 ASSIGN_OPT(Opt_EventQueryType)
@@ -4011,6 +4026,7 @@ ASSIGN_OPT(Opt_ScrollState)
 ASSIGN_OPT(Opt_SearchController)
 ASSIGN_OPT(Opt_SearchType)
 ASSIGN_OPT(Opt_SecurityComponentLayoutDirection)
+ASSIGN_OPT(Opt_SecurityComponentRoleType)
 ASSIGN_OPT(Opt_SeekMode)
 ASSIGN_OPT(Opt_SelectedMode)
 ASSIGN_OPT(Opt_SelectStatus)
@@ -5029,7 +5045,6 @@ ASSIGN_OPT(Opt_TranslateOptions)
 ASSIGN_OPT(Opt_Tuple_ColorMetrics_F64)
 ASSIGN_OPT(Opt_Tuple_ResourceColor_F64)
 ASSIGN_OPT(Opt_Tuple_ResourceColor_ResourceColor)
-ASSIGN_OPT(Opt_uiEffect_HdrDarkenBlender)
 ASSIGN_OPT(Opt_UIExtensionOptions)
 ASSIGN_OPT(Opt_uiObserver_NavigationInfo)
 ASSIGN_OPT(Opt_UIPickerComponentOptions)
@@ -5078,6 +5093,7 @@ ASSIGN_OPT(Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy)
 ASSIGN_OPT(Opt_Union_image_PixelMap_ResourceStr)
 ASSIGN_OPT(Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource)
 ASSIGN_OPT(Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent)
+ASSIGN_OPT(Opt_Union_LengthMetrics_Array_LengthMetrics)
 ASSIGN_OPT(Opt_Union_LengthMetrics_F64)
 ASSIGN_OPT(Opt_Union_LengthMetrics_String)
 ASSIGN_OPT(Opt_Union_MenuPreviewMode_CustomNodeBuilder)

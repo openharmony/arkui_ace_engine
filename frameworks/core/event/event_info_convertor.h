@@ -22,10 +22,19 @@
 namespace OHOS::Ace::NG {
 class EventInfoConvertor final {
 public:
+    enum class Mouse2TouchEventModeResult {
+        MATCHED = 0,
+        UNMATCHED = 1,
+        INIT_FAILED = 2,
+        NOT_FOUND = 3,
+    };
+    static EventInfoConvertor::Mouse2TouchEventModeResult IsCompatibleFromFeatureManager(
+        const std::string& matchedMode);
     static bool ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo, TouchEventInfo& touchEventInfo);
     static bool IsTouchEventNeedAbandoned(const TouchEventInfo& touchEventInfo);
     static bool MatchCompatibleCondition();
     static bool IfNeedMouseTransform();
+    static bool IsAppDevelopedForPC();
 private:
     EventInfoConvertor() = default;
     ~EventInfoConvertor() = default;

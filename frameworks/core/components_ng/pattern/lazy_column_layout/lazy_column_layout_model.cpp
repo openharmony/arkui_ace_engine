@@ -37,6 +37,7 @@ void LazyColumnLayoutModel::Create()
 
 void LazyColumnLayoutModel::SetSpace(const Dimension& space)
 {
+    ACE_CHECK_LPX_ATTRIBUTE(space, LpxAttribute::LPX_SPACE);
     ACE_UPDATE_LAYOUT_PROPERTY(LazyColumnLayoutProperty, Space, space);
 }
 
@@ -53,6 +54,7 @@ void LazyColumnLayoutModel::SetOnVisibleIndexesChange(VisibleIndexesChangeEvent&
 
 void LazyColumnLayoutModel::SetSpace(FrameNode* frameNode, const Dimension& space)
 {
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(space, LpxAttribute::LPX_SPACE, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyColumnLayoutProperty, Space, space, frameNode);
 }
 

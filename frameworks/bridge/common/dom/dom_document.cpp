@@ -332,7 +332,6 @@ void DOMDocument::HandlePageLoadFinish()
 void DOMDocument::SetUpRootComponent(const RefPtr<DOMNode>& node)
 {
     if (!node) {
-        EventReport::SendComponentException(ComponentExcepType::SET_ROOT_DOM_NODE_ERR);
         return;
     }
     std::list<RefPtr<Component>> stackChildren { node->GetRootComponent() };

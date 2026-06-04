@@ -20,6 +20,7 @@
 
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components/declaration/common/attribute.h"
+#include "core/components/declaration/common/common_background_style.h"
 #include "core/components/declaration/common/event.h"
 #include "core/components/declaration/common/method.h"
 #include "core/components/declaration/common/style.h"

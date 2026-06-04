@@ -559,6 +559,20 @@ class TextCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextPunctuationOverflowModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textPunctuationOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetPunctuationOverflow(node);
+    } else {
+      getUINativeModule().text.setPunctuationOverflow(node, this.value!);
+    }
+  }
+}
+
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   constructor(value: { overflow: TextOverflow }) {
     super(value);
@@ -1202,6 +1216,38 @@ class TextIncrementalUpdatePolicyModifier extends ModifierWithKey<IncrementalUpd
   }
 }
 
+class TextTailIndentsModifier extends ModifierWithKey<LengthMetrics | Array<LengthMetrics>> {
+  constructor(value: LengthMetrics | Array<LengthMetrics>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textTailIndents');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTailIndents(node);
+    } else {
+      getUINativeModule().text.setTailIndents(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!Array.isArray(this.stageValue) && !Array.isArray(this.value)) {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+    if (Array.isArray(this.stageValue) && Array.isArray(this.value)) {
+      if (this.stageValue.length !== this.value.length) {
+        return true;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        if (!isBaseOrResourceEqual(this.stageValue[i], this.value[i])) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return true;
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1339,6 +1385,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   compressLeadingPunctuation(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextCompressLeadingPunctuationModifier.identity, TextCompressLeadingPunctuationModifier, value);
+    return this;
+  }
+  punctuationOverflow(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextPunctuationOverflowModifier.identity, TextPunctuationOverflowModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {
@@ -1504,6 +1554,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   incrementalUpdatePolicy(value: IncrementalUpdatePolicy): this {
     modifierWithKey(this._modifiersWithKeys, TextIncrementalUpdatePolicyModifier.identity,
       TextIncrementalUpdatePolicyModifier, value);
+    return this;
+  }
+  tailIndents(value: LengthMetrics | Array<LengthMetrics>): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextTailIndentsModifier.identity, TextTailIndentsModifier, value);
     return this;
   }
 }

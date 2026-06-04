@@ -1,0 +1,100 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "NdkKeyEvent"
+    },
+    {
+      "name": "event_info",
+      "value": "\uD83C\uDFB9 按任意键查看按键事件信息..."
+    },
+    {
+      "name": "demo_title",
+      "value": "\uD83C\uDFB9 按键事件示例"
+    },
+    {
+      "name": "demo_introduce",
+      "value": "本示例展示了Native API (CAPI) 中的按键事件处理功能，包括："
+    },
+    {
+      "name": "demo_introduce_item1",
+      "value": "• NODE_ON_KEY_EVENT - 标准按键事件处理"
+    },
+    {
+      "name": "demo_introduce_item2",
+      "value": "• NODE_ON_KEY_PRE_IME - 输入法前置按键事件"
+    },
+    {
+      "name": "demo_introduce_item3",
+      "value": "• NODE_DISPATCH_KEY_EVENT - 按键事件分发处理"
+    },
+    {
+      "name": "demo_introduce_item4",
+      "value": "• 事件冒泡与消费机制演示 (Column+Button层级结构)"
+    },
+    {
+      "name": "key_count",
+      "value": "按键次数"
+    },
+    {
+      "name": "last_key",
+      "value": "最后按键"
+    },
+    {
+      "name": "native_component",
+      "value": "\uD83C\uDFAF Native 按键事件组件"
+    },
+    {
+      "name": "use_direction",
+      "value": "\uD83D\uDCA1 使用说明"
+    },
+    {
+      "name": "basic_test",
+      "value": "\uD83D\uDCCC 基础功能测试："
+    },
+    {
+      "name": "test_step1",
+      "value": "1. 点击上方三个按钮使其获得焦点，测试各自不同的按键事件处理类型"
+    },
+    {
+      "name": "test_step2",
+      "value": "2. 使用键盘输入按键，观察事件信息的实时更新"
+    },
+    {
+      "name": "test_step3",
+      "value": "3. 第三个按钮可测试按键事件分发，监听到按键事件后会跳转至第一个按钮，继续处理按键事件逻辑"
+    },
+    {
+      "name": "other_test",
+      "value": "\uD83D\uDD04 事件冒泡与消费测试："
+    },
+    {
+      "name": "test_step4",
+      "value": "4. 在事件冒泡演示区域的子按钮上："
+    },
+    {
+      "name": "test_step4_1",
+      "value": "   • 按 ESC 键 - 演示事件消费 (SetConsumed)"
+    },
+    {
+      "name": "test_step4_2",
+      "value": "   • 按 F1 键 - 演示阻止事件冒泡 (StopPropagation)"
+    },
+    {
+      "name": "test_step4_3",
+      "value": "   • 按其他键 - 事件正常冒泡到父容器"
+    },
+    {
+      "name": "test_step5",
+      "value": "5. 支持常用按键：字母、数字、方向键、功能键等"
+    }
+  ]
+}

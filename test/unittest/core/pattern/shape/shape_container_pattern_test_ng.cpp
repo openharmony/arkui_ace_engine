@@ -1288,4 +1288,31 @@ HWTEST_F(ShapeContainerPatternTestNg, SetAntiAlias_Test, TestSize.Level1)
     EXPECT_TRUE(shapePaintProp->GetAntiAlias().has_value());
     EXPECT_EQ(shapePaintProp->GetAntiAlias().value(), false);
 }
+
+/**
+ * @tc.name: ShapeContainerLpxAttribute001
+ * @tc.desc: Test ShapeModelStatic SetStrokeDashOffset/SetStrokeWidth with LPX unit registers LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeContainerPatternTestNg, ShapeContainerLpxAttribute001, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    std::optional<Dimension> lpxOpt(lpxDim);
+    std::optional<Dimension> vpOpt(vpDim);
+
+    ShapeModelStatic::SetStrokeDashOffset(frameNode, lpxOpt);
+    ShapeModelStatic::SetStrokeWidth(frameNode, lpxOpt);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+
+    ShapeModelStatic::SetStrokeDashOffset(frameNode, vpOpt);
+    ShapeModelStatic::SetStrokeWidth(frameNode, vpOpt);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

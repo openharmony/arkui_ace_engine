@@ -143,6 +143,7 @@ void UpdateTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLine
         textStyle.SetGradient(textTheme->GetTextStyle().GetGradient());
     }
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ColorShaderStyle, ColorShaderStyle);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TailIndents, TailIndent);
 }
 
 void UpdateTextStyleFromFontAndTextLine(const std::unique_ptr<FontStyle>& fontStyle,
@@ -282,6 +283,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
             textStyle.SetGradient(GradientConvert::ToGradient((textLineStyle)->GetGradient()));
         }
         UPDATE_TEXT_STYLE(textLineStyle, ColorShaderStyle, SetColorShaderStyle);
+        UPDATE_TEXT_STYLE(textLineStyle, TailIndents, SetTailIndent);
     }
 }
 

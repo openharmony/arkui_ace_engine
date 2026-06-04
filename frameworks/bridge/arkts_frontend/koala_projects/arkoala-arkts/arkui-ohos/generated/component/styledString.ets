@@ -751,6 +751,7 @@ export class ParagraphStyle implements MaterializedBase {
     public readonly textDirection?: TextDirection | undefined
     public readonly leadingMarginSpan?: LeadingMarginSpan | undefined
     public readonly shaderStyle?: ShaderStyle | undefined
+    public readonly tailIndents?: Array<double> | undefined
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ParagraphStyle.getFinalizer())
         this.textAlign = this.getTextAlign()
@@ -764,6 +765,7 @@ export class ParagraphStyle implements MaterializedBase {
         this.textDirection = this.getTextDirection()
         this.leadingMarginSpan = this.getLeadingMarginSpan()
         this.shaderStyle = this.getShaderStyle()
+        this.tailIndents = this.getTailIndents()
     }
     constructor(value?: ParagraphStyleInterface) {
         this(MaterializedBaseTag.NOP, ParagraphStyle.construct(value))
@@ -778,6 +780,7 @@ export class ParagraphStyle implements MaterializedBase {
         this.textDirection = this.getTextDirection()
         this.leadingMarginSpan = this.getLeadingMarginSpan()
         this.shaderStyle = this.getShaderStyle()
+        this.tailIndents = this.getTailIndents()
     }
     static construct(value?: ParagraphStyleInterface): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -827,6 +830,9 @@ export class ParagraphStyle implements MaterializedBase {
     }
     private getShaderStyle(): ShaderStyle | undefined {
         return this.getShaderStyle_serialize()
+    }
+    private getTailIndents(): Array<double> | undefined {
+        return this.getTailIndents_serialize()
     }
     private getTextAlign_serialize(): TextAlign | undefined {
         const retval = ArkUIGeneratedNativeModule._ParagraphStyle_getTextAlign(this.peer!.ptr)
@@ -969,6 +975,22 @@ export class ParagraphStyle implements MaterializedBase {
         const returnResult: ShaderStyle | undefined = buffer
         retvalDeserializer.dispose()
         return (returnResult as ShaderStyle | undefined)
+    }
+    private getTailIndents_serialize(): Array<double> | undefined {
+        const retval = ArkUIGeneratedNativeModule._ParagraphStyle_getTailIndents(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<double> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            const bufferOpt: Array<double> = new Array<double>(bufferOptLength, (arg0: int32):double => {
+            return retvalDeserializer.readFloat64();
+        })
+            buffer = bufferOpt
+        }
+        const returnResult: Array<double> | undefined = buffer
+        retvalDeserializer.dispose()
+        return (returnResult as Array<double> | undefined)
     }
 }
 export class StyledStringInternal {
@@ -1603,6 +1625,7 @@ export interface ParagraphStyleInterface {
     textDirection?: TextDirection;
     leadingMarginSpan?: LeadingMarginSpan;
     shaderStyle?: ShaderStyle;
+    tailIndents?: arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics>;
 }
 export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | LineSpacingStyle;
 export enum StyledStringKey {
@@ -2818,6 +2841,34 @@ export class ParagraphStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTailIndents = value.tailIndents
+        if (valueHolderForTailIndents !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTailIndentsTmpValue = valueHolderForTailIndents!
+            if (valueHolderForTailIndentsTmpValue instanceof arkui_component_units_LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForTailIndentsTmpValueForIdx0 = valueHolderForTailIndentsTmpValue as arkui_component_units_LengthMetrics
+                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTailIndentsTmpValueForIdx0)
+            } else if (valueHolderForTailIndentsTmpValue instanceof Array) {
+                if (valueHolderForTailIndentsTmpValue.length == 0) {
+                    valueSerializer.writeInt8((1).toByte())
+                    valueSerializer.writeInt32(0)
+                } else {
+                    const valueHolderForTailIndentsTmpValueElem = valueHolderForTailIndentsTmpValue[0]
+                    if (valueHolderForTailIndentsTmpValueElem instanceof arkui_component_units_LengthMetrics) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForTailIndentsTmpValueForIdx1 = valueHolderForTailIndentsTmpValue as Array<arkui_component_units_LengthMetrics>
+                        valueSerializer.writeInt32((valueHolderForTailIndentsTmpValueForIdx1.length).toInt())
+                        for (let valueHolderForTailIndentsTmpValueForIdx1CounterI = 0; valueHolderForTailIndentsTmpValueForIdx1CounterI < valueHolderForTailIndentsTmpValueForIdx1.length; valueHolderForTailIndentsTmpValueForIdx1CounterI++) {
+                            const valueHolderForTailIndentsTmpValueForIdx1TmpElement: arkui_component_units_LengthMetrics = valueHolderForTailIndentsTmpValueForIdx1[valueHolderForTailIndentsTmpValueForIdx1CounterI]
+                            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTailIndentsTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ParagraphStyleInterface {
         let valueDeserializer: DeserializerBase = buffer
@@ -2897,7 +2948,26 @@ export class ParagraphStyleInterface_serializer {
             shaderStyleTmpBuf = extractors.transform_Ark_ShaderStyleProxy_to_Ark_ShaderStyle(shaderStyleTmpBufOptDeserialized)
         }
         const shaderStyleTmpResult: ShaderStyle | undefined = shaderStyleTmpBuf
-        let value: ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textVerticalAlign: textVerticalAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult, leadingMarginSpan: leadingMarginSpanTmpResult, shaderStyle: shaderStyleTmpResult} as ParagraphStyleInterface)
+        const tailIndentsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let tailIndentsTmpBuf: arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics> | undefined = undefined
+        if ((tailIndentsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const tailIndentsTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let tailIndentsTmpBufOpt: arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics> | undefined
+            if (tailIndentsTmpBufOptUnionSelector == (0).toByte()) {
+                tailIndentsTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            } else if (tailIndentsTmpBufOptUnionSelector == (1).toByte()) {
+                const tailIndentsTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
+                const tailIndentsTmpBufOptBufU: Array<arkui_component_units_LengthMetrics> = new Array<arkui_component_units_LengthMetrics>(tailIndentsTmpBufOptBufULength, (arg0: int32):arkui_component_units_LengthMetrics => {
+            return arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer);
+        })
+                tailIndentsTmpBufOpt = tailIndentsTmpBufOptBufU
+            } else {
+                throw new Error('One of the branches for tailIndentsTmpBufOpt has to be chosen through deserialisation.')
+            }
+            tailIndentsTmpBuf = (tailIndentsTmpBufOpt as arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics>)
+        }
+        const tailIndentsTmpResult: arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics> | undefined = tailIndentsTmpBuf
+        let value: ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textVerticalAlign: textVerticalAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult, leadingMarginSpan: leadingMarginSpanTmpResult, shaderStyle: shaderStyleTmpResult, tailIndents: tailIndentsTmpResult} as ParagraphStyleInterface)
         return value
     }
 }

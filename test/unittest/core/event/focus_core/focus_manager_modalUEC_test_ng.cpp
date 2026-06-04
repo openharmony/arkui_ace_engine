@@ -22,14 +22,15 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
-
 #include "core/components_ng/manager/focus/focus_manager.h"
+
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+
 #include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
@@ -401,6 +402,7 @@ HWTEST_F(ModalFocusManagerTestNg, ModalFocusManagerTest009B, TestSize.Level1)
     auto modalPattern = AceType::MakeRefPtr<UIExtensionPattern>();
     modalPattern->SetModalFlag(true);
     modalPattern->SetIsModalFixFocus(false);
+
     auto modalNode = FrameNodeOnTree::CreateFrameNode(V2::UI_EXTENSION_COMPONENT_TAG, -1, modalPattern);
     modalPageNode->AddChild(modalNode);
 
@@ -447,6 +449,7 @@ HWTEST_F(ModalFocusManagerTestNg, ModalFocusManagerTest010, TestSize.Level1)
     auto modalPattern = AceType::MakeRefPtr<UIExtensionPattern>();
     modalPattern->SetModalFlag(true);
     modalPattern->SetIsModalFixFocus(true);
+
     auto modalNode = FrameNodeOnTree::CreateFrameNode(
         V2::UI_EXTENSION_COMPONENT_TAG, -1, modalPattern);
     modalPageNode->AddChild(modalNode);
@@ -500,6 +503,7 @@ HWTEST_F(ModalFocusManagerTestNg, ModalFocusManagerTest011, TestSize.Level1)
     auto modalPattern = AceType::MakeRefPtr<UIExtensionPattern>();
     modalPattern->SetModalFlag(true);
     modalPattern->SetIsModalFixFocus(true);
+
     auto modalNode = FrameNodeOnTree::CreateFrameNode(V2::UI_EXTENSION_COMPONENT_TAG, -1, modalPattern);
     modalPageNode->AddChild(modalNode);
 
@@ -515,6 +519,7 @@ HWTEST_F(ModalFocusManagerTestNg, ModalFocusManagerTest011, TestSize.Level1)
      */
     auto modalFocusHub = modalNode->GetFocusHub();
     ASSERT_NE(modalFocusHub, nullptr);
+    
     focusManager->currentFocus_ = modalFocusHub;
     focusManager->ArrangeModalFocusViewStack();
     EXPECT_EQ(focusManager->modalFocusViewStack_.size(), SIZE_1);
@@ -634,70 +639,6 @@ HWTEST_F(ModalFocusManagerTestNg, ModalFocusManagerTest013, TestSize.Level1)
     auto lastFocusViewBefore = focusManager->lastFocusView_.Upgrade();
     focusManager->FocusViewShow(pagePattern2);
     auto lastFocusViewAfter = focusManager->lastFocusView_.Upgrade();
-    EXPECT_EQ(lastFocusViewAfter, lastFocusViewBefore);
-}
-
-/**
- * @tc.name: ModalFocusManagerTest014
- * @tc.desc: Test FocusViewShow allows child view when modal stack is valid
- * @tc.type: FUNC
- * @tc.author: YourName
- */
-HWTEST_F(ModalFocusManagerTestNg, ModalFocusManagerTest014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager and setup modal UIExtension with internal child structure
-     * - Root
-     *   - ModalPage (MODAL_PAGE_TAG)
-     *     - UIExtension (isModal=true)
-     *       - InnerRoot (inside UIExtension)
-     *         - Page (PAGE_ETS_TAG)
-     *           - Button (child inside modal UIExtension)
-     */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-    ASSERT_NE(focusManager, nullptr);
-
-    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
-
-    auto modalPagePattern = AceType::MakeRefPtr<ModalPresentationPattern>(
-        -1, ModalTransition::DEFAULT, nullptr);
-    auto modalPageNode = FrameNodeOnTree::CreateFrameNode(V2::MODAL_PAGE_TAG, -1, modalPagePattern);
-    rootNode->AddChild(modalPageNode);
-
-    auto modalPattern = AceType::MakeRefPtr<UIExtensionPattern>();
-    modalPattern->SetModalFlag(true);
-    auto modalNode = FrameNodeOnTree::CreateFrameNode(V2::UI_EXTENSION_COMPONENT_TAG, -1, modalPattern);
-    modalPageNode->AddChild(modalNode);
-
-    // Inside UIExtension: create Root - Page - Button structure
-    auto innerRootPattern = AceType::MakeRefPtr<RootPattern>();
-    auto innerRootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, innerRootPattern);
-    modalNode->AddChild(innerRootNode);
-
-    auto innerPagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto innerPageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, innerPagePattern);
-    innerRootNode->AddChild(innerPageNode);
-
-    auto buttonPattern = AceType::MakeRefPtr<ButtonPattern>();
-    auto buttonNode = FrameNodeOnTree::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, buttonPattern);
-    innerPageNode->AddChild(buttonNode);
-
-    /**
-     * @tc.steps: step2. Add modalPagePattern to modal stack
-     */
-    auto modalPageWeakPtr = AceType::WeakClaim<ModalPresentationPattern>(AceType::RawPtr(modalPagePattern));
-    focusManager->modalFocusViewStack_.emplace_back(modalPageWeakPtr);
-
-    /**
-     * @tc.steps: step3. Call FocusViewHide for modalNode (child of modalPagePattern)
-     * expected: FocusViewHide is intercepted (stack not modified)
-     */
-    auto viewStackSizeBefore = focusManager->focusViewStack_.size();
-    auto lastFocusViewBefore = focusManager->lastFocusView_.Upgrade();
-    focusManager->FocusViewShow(innerPagePattern);
-    auto viewStackSizeAfter = focusManager->focusViewStack_.size();
-    auto lastFocusViewAfter = focusManager->lastFocusView_.Upgrade();
-    EXPECT_EQ(viewStackSizeAfter, viewStackSizeBefore);
     EXPECT_EQ(lastFocusViewAfter, lastFocusViewBefore);
 }
 

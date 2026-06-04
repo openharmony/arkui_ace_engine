@@ -2664,4 +2664,264 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeCleanAllBlockedTest001, TestSize.Le
     gestureReferee.CleanAll(true);
     EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
 }
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest001
+ * @tc.desc: Test CheckNeedBlocked skips pending recognizers that belong to the queried ancestor group
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest001, TestSize.Level1)
+{
+    GestureScope gestureScope(0);
+    auto child = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> innerChildren = { child };
+    auto innerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(innerChildren);
+    std::vector<RefPtr<NGGestureRecognizer>> outerChildren = { innerGroup };
+    auto outerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(outerChildren);
+
+    child->refereeState_ = RefereeState::PENDING;
+    gestureScope.recognizers_.emplace_back(child);
+
+    EXPECT_FALSE(gestureScope.CheckNeedBlocked(outerGroup));
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest002
+ * @tc.desc: Test UnBlockGesture returns a SUCCEED_BLOCKED recognizer
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest002, TestSize.Level1)
+{
+    GestureScope gestureScope(0);
+    auto readyRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    auto blockedRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    blockedRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    gestureScope.recognizers_.emplace_back(readyRecognizer);
+    gestureScope.recognizers_.emplace_back(blockedRecognizer);
+
+    EXPECT_EQ(gestureScope.UnBlockGesture(), blockedRecognizer);
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest003
+ * @tc.desc: Test Close resolves recognizer group chain to the root group
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest003, TestSize.Level1)
+{
+    constexpr int32_t TOUCH_ID = 9;
+    GestureScope gestureScope(TOUCH_ID);
+    auto child = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> innerChildren = { child };
+    auto innerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(innerChildren);
+    std::vector<RefPtr<NGGestureRecognizer>> outerChildren = { innerGroup };
+    auto outerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(outerChildren);
+
+    outerGroup->BeginReferee(TOUCH_ID, TOUCH_ID);
+    gestureScope.recognizers_.emplace_back(child);
+    gestureScope.Close(true);
+
+    EXPECT_TRUE(outerGroup->touchPoints_.empty());
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest004
+ * @tc.desc: Test CheckRecognizerState handles group child recursion and group state checks
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest004, TestSize.Level1)
+{
+    auto child = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> children = { child };
+    auto sequenceGroup = AceType::MakeRefPtr<SequencedRecognizer>(children);
+    GestureScope gestureScope(0);
+    gestureScope.recognizers_.emplace_back(sequenceGroup);
+
+    child->refereeState_ = RefereeState::PENDING;
+    sequenceGroup->refereeState_ = RefereeState::READY;
+    EXPECT_TRUE(gestureScope.CheckRecognizerState());
+
+    child->refereeState_ = RefereeState::READY;
+    sequenceGroup->refereeState_ = RefereeState::PENDING;
+    EXPECT_TRUE(gestureScope.CheckRecognizerState());
+
+    child->refereeState_ = RefereeState::SUCCEED;
+    sequenceGroup->refereeState_ = RefereeState::PENDING;
+    EXPECT_FALSE(gestureScope.CheckRecognizerState());
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest005
+ * @tc.desc: Test CleanGestureScopeState only cleans single-original-touch multi-finger recognizers
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest005, TestSize.Level1)
+{
+    constexpr int32_t TOUCH_ID = 12;
+    constexpr int32_t OTHER_TOUCH_ID = 13;
+    GestureScope gestureScope(TOUCH_ID);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = TOUCH_ID;
+    touchEvent.originalId = TOUCH_ID;
+    clickRecognizer->touchPoints_[TOUCH_ID] = touchEvent;
+    clickRecognizer->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer->disposal_ = GestureDisposal::ACCEPT;
+    gestureScope.recognizers_.emplace_back(clickRecognizer);
+
+    gestureScope.CleanGestureScopeState();
+    EXPECT_EQ(clickRecognizer->GetRefereeState(), RefereeState::READY);
+    EXPECT_EQ(clickRecognizer->GetGestureDisposal(), GestureDisposal::NONE);
+
+    TouchEvent otherTouchEvent;
+    otherTouchEvent.id = OTHER_TOUCH_ID;
+    otherTouchEvent.originalId = OTHER_TOUCH_ID;
+    clickRecognizer->touchPoints_[TOUCH_ID] = touchEvent;
+    clickRecognizer->touchPoints_[OTHER_TOUCH_ID] = otherTouchEvent;
+    clickRecognizer->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer->disposal_ = GestureDisposal::ACCEPT;
+
+    gestureScope.CleanGestureScopeState();
+    EXPECT_EQ(clickRecognizer->GetRefereeState(), RefereeState::SUCCEED);
+    EXPECT_EQ(clickRecognizer->GetGestureDisposal(), GestureDisposal::ACCEPT);
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest006
+ * @tc.desc: Test QueryAllDone returns false for a group containing an unfinished child recognizer
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest006, TestSize.Level1)
+{
+    auto child = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    child->refereeState_ = RefereeState::PENDING;
+    std::vector<RefPtr<NGGestureRecognizer>> children = { child };
+    auto group = AceType::MakeRefPtr<ExclusiveRecognizer>(children);
+    GestureScope gestureScope(0);
+    gestureScope.recognizers_.emplace_back(group);
+
+    EXPECT_FALSE(gestureScope.QueryAllDone(0));
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest007
+ * @tc.desc: Test HandleAcceptDisposal blocks an accept recognizer while another recognizer is pending
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest007, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    auto pendingRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    pendingRecognizer->refereeState_ = RefereeState::PENDING;
+    auto acceptRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    acceptRecognizer->disposal_ = GestureDisposal::ACCEPT;
+    auto gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(pendingRecognizer);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+
+    gestureReferee.HandleAcceptDisposal(acceptRecognizer);
+
+    EXPECT_EQ(acceptRecognizer->GetRefereeState(), RefereeState::SUCCEED_BLOCKED);
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest008
+ * @tc.desc: Test HandlePendingDisposal blocks a pending recognizer while another recognizer is pending
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest008, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    auto pendingRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    pendingRecognizer->refereeState_ = RefereeState::PENDING;
+    auto blockedRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    blockedRecognizer->disposal_ = GestureDisposal::PENDING;
+    auto gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(pendingRecognizer);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+
+    gestureReferee.HandlePendingDisposal(blockedRecognizer);
+
+    EXPECT_EQ(blockedRecognizer->GetRefereeState(), RefereeState::PENDING_BLOCKED);
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest009
+ * @tc.desc: Test HandleRejectDisposal unblocks PENDING_BLOCKED and SUCCEED_BLOCKED recognizers
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest009, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    auto rejectedRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    auto pendingBlockedRecognizer = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    auto gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(rejectedRecognizer);
+    gestureScope->recognizers_.emplace_back(pendingBlockedRecognizer);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+
+    rejectedRecognizer->refereeState_ = RefereeState::PENDING;
+    pendingBlockedRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    gestureReferee.HandleRejectDisposal(rejectedRecognizer);
+    EXPECT_EQ(pendingBlockedRecognizer->GetRefereeState(), RefereeState::PENDING);
+
+    gestureScope->recognizers_.clear();
+    auto rejectedRecognizerSecond = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> children = {};
+    auto succeedBlockedGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(children);
+    rejectedRecognizerSecond->refereeState_ = RefereeState::PENDING;
+    succeedBlockedGroup->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    gestureScope->recognizers_.emplace_back(rejectedRecognizerSecond);
+    gestureScope->recognizers_.emplace_back(succeedBlockedGroup);
+    gestureReferee.HandleRejectDisposal(rejectedRecognizerSecond);
+    EXPECT_EQ(succeedBlockedGroup->GetRefereeState(), RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest010
+ * @tc.desc: Test SetRecognizerDelayStatus(END) recalls delayed recognizer acceptance
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest010, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    std::vector<RefPtr<NGGestureRecognizer>> children = {};
+    auto delayedRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(children);
+    gestureReferee.delayRecognizer_ = delayedRecognizer;
+
+    gestureReferee.SetRecognizerDelayStatus(RecognizerDelayStatus::END);
+
+    EXPECT_EQ(delayedRecognizer->GetRefereeState(), RefereeState::SUCCEED);
+    EXPECT_EQ(gestureReferee.delayRecognizer_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest011
+ * @tc.desc: Test ForEachRecognizer stops while walking group children
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest011, TestSize.Level1)
+{
+    GestureScope gestureScope(0);
+    auto childFirst = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    auto childSecond = AceType::MakeRefPtr<ClickRecognizer>(SINGLE_FINGER_NUMBER, TAPPED_COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> children = { childFirst, childSecond };
+    auto group = AceType::MakeRefPtr<ExclusiveRecognizer>(children);
+    gestureScope.recognizers_.emplace_back(group);
+
+    std::vector<RefPtr<NGGestureRecognizer>> visited;
+    auto result = gestureScope.ForEachRecognizer([&visited](const RefPtr<NGGestureRecognizer>& recognizer) {
+        visited.emplace_back(recognizer);
+        return false;
+    });
+
+    EXPECT_FALSE(result);
+    ASSERT_EQ(visited.size(), 1u);
+    EXPECT_EQ(visited.front(), childFirst);
+}
+
+/**
+ * @tc.name: GestureRefereeBranchCoverageTest012
+ * @tc.desc: Test source and event type change false branches
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeBranchCoverageTest012, TestSize.Level1)
+{
+    GestureReferee gestureReferee;
+    gestureReferee.lastSourceType_ = SourceType::TOUCH;
+    gestureReferee.lastIsAxis_ = false;
+
+    EXPECT_FALSE(gestureReferee.CheckSourceTypeChange(SourceType::TOUCH, false));
+
+    gestureReferee.lastIsAxis_ = true;
+    EXPECT_FALSE(gestureReferee.CheckEventTypeChange(SourceType::TOUCH, true));
+}
 } // namespace OHOS::Ace::NG

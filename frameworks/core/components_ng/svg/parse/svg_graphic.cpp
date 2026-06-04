@@ -42,8 +42,9 @@ namespace {
         auto matrixType = ToRSCMSMatrixType(color.GetColorSpace());
         if (color.GetHeadRoomColor().has_value()) {
             auto colorFloat = color.GetHeadRoomColor().value();
+            auto blendedAlpha = std::clamp(colorFloat.alpha * static_cast<float>(opacity), 0.0f, 1.0f);
             auto uiColor = RSUIColor(
-                colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
+                colorFloat.red, colorFloat.green, colorFloat.blue, blendedAlpha, colorFloat.headRoom);
             brush.SetUIColor(uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType));
         } else if (color.GetColorSpace() == ColorSpace::SRGB) {
             brush.SetColor(color.BlendOpacity(opacity).GetValue());

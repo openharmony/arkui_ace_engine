@@ -18,6 +18,7 @@
 
 #include "base/error/error_code.h"
 #include "base/log/ace_trace.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
@@ -477,8 +478,14 @@ void DisposeAnimator(ArkUIAnimatorHandle animatorHandle)
 
 int32_t AnimatorReset(ArkUIAnimatorHandle animatorHandle, ArkUIAnimatorOption* option)
 {
-    CHECK_NULL_RETURN(animatorHandle, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(animatorHandle->animator, ERROR_CODE_PARAM_INVALID);
+    if (!animatorHandle) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle->animator) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle->animator is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto animator = reinterpret_cast<Animator*>(animatorHandle->animator);
     animator->Cancel();
     ParseAnimatorOption(AceType::Claim(animator), option);
@@ -490,8 +497,14 @@ int32_t AnimatorReset(ArkUIAnimatorHandle animatorHandle, ArkUIAnimatorOption* o
 
 int32_t AnimatorPlay(ArkUIAnimatorHandle animatorHandle)
 {
-    CHECK_NULL_RETURN(animatorHandle, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(animatorHandle->animator, ERROR_CODE_PARAM_INVALID);
+    if (!animatorHandle) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle->animator) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle->animator is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto animator = reinterpret_cast<Animator*>(animatorHandle->animator);
     animator->Play();
     return ERROR_CODE_NO_ERROR;
@@ -499,8 +512,14 @@ int32_t AnimatorPlay(ArkUIAnimatorHandle animatorHandle)
 
 int32_t AnimatorFinish(ArkUIAnimatorHandle animatorHandle)
 {
-    CHECK_NULL_RETURN(animatorHandle, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(animatorHandle->animator, ERROR_CODE_PARAM_INVALID);
+    if (!animatorHandle) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle->animator) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle->animator is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto animator = reinterpret_cast<Animator*>(animatorHandle->animator);
     animator->Finish();
     return ERROR_CODE_NO_ERROR;
@@ -508,8 +527,14 @@ int32_t AnimatorFinish(ArkUIAnimatorHandle animatorHandle)
 
 int32_t AnimatorPause(ArkUIAnimatorHandle animatorHandle)
 {
-    CHECK_NULL_RETURN(animatorHandle, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(animatorHandle->animator, ERROR_CODE_PARAM_INVALID);
+    if (!animatorHandle) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle->animator) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle->animator is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto animator = reinterpret_cast<Animator*>(animatorHandle->animator);
     animator->Pause();
     return ERROR_CODE_NO_ERROR;
@@ -517,8 +542,14 @@ int32_t AnimatorPause(ArkUIAnimatorHandle animatorHandle)
 
 int32_t AnimatorCancel(ArkUIAnimatorHandle animatorHandle)
 {
-    CHECK_NULL_RETURN(animatorHandle, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(animatorHandle->animator, ERROR_CODE_PARAM_INVALID);
+    if (!animatorHandle) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle->animator) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle->animator is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto animator = reinterpret_cast<Animator*>(animatorHandle->animator);
     animator->Cancel();
     return ERROR_CODE_NO_ERROR;
@@ -526,8 +557,14 @@ int32_t AnimatorCancel(ArkUIAnimatorHandle animatorHandle)
 
 int32_t AnimatorReverse(ArkUIAnimatorHandle animatorHandle)
 {
-    CHECK_NULL_RETURN(animatorHandle, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(animatorHandle->animator, ERROR_CODE_PARAM_INVALID);
+    if (!animatorHandle) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!animatorHandle->animator) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID, "animatorHandle->animator is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto animator = reinterpret_cast<Animator*>(animatorHandle->animator);
     animator->Reverse();
     return ERROR_CODE_NO_ERROR;

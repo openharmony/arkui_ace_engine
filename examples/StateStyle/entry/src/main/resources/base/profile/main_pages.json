@@ -1,0 +1,8 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/StateStyle/StateStylesSample",
+    "pages/NormalStyle/MyComponent",
+    "pages/FocusStyle/CompWithInlineStateStyles"
+  ]
+}

@@ -21,6 +21,7 @@ import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IncrementalNode } from '@koalaui/runtime';
 import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
+import window from '@ohos.window';
 import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
 export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
 export { ReusePoolOwnership } from '../component/customComponent';
@@ -55,6 +56,15 @@ export interface IVariableOwner {
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
     __addEnvInstance__Internal(envProperty: IEnvVariable): void;
+    __addSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean;
+    __removeSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean;
+    __setSimpleEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void;
+    __getAndClearSimpleEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined;
+    __getSimpleEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void>;
+    __setSimpleEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void;
+    __getSimpleEnvUnregisterFuncs__Internal(): Map<string, () => void>;
+    __clearAllSimpleEnvRegistrations__Internal(): void;
+    __getSimpleEnvCallbackSet__Internal(envKey: string): (Set<(value: Any) => void>) | undefined;
     __getCustomComponentContext__Internal(): CustomComponentContext;
     __registerActiveAndInactiveCallback__Internal(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void;
     __getCanUpdateStateVars__Internal(): boolean;
@@ -303,7 +313,7 @@ export interface IStateMgmtFactory {
     makeMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
     makeEnv<T>(
         owningView: IVariableOwner,
-        envValue: string,
+        envValue: string | SystemEnvKey<T>,
         varName: string,
         envOptions?: EnvOptions<T>
     ): IEnvDecoratedVariable<T>;
@@ -356,3 +366,33 @@ export interface IMonitorValue<T> {
 export type MonitorValueCallback = () => Any;
 export type MonitorCallback = (m: IMonitor) => void;
 export type ComputeCallback<T> = () => T;
+ 
+export class SystemEnvKey<T> {
+    key: string = '';
+    constructor(key: string) {
+        this.key = key;
+    }
+}
+ 
+class WritableSystemEnvKey<T> extends SystemEnvKey<T> {
+    constructor(key: string) {
+        super(key)
+    }
+}
+ 	 
+class ReadonlySystemEnvKey<T> extends SystemEnvKey<T> {
+    constructor(key: string) {
+        super(key)
+    }
+}
+ 
+export class ReadonlyEnvKey {
+    static readonly WINDOW_IS_FOCUSED: ReadonlySystemEnvKey<boolean> = new ReadonlySystemEnvKey<boolean>('system.window.focused');
+    static readonly WINDOW_DISPLAY_ID: ReadonlySystemEnvKey<long> = new ReadonlySystemEnvKey<long>('system.window.displayid');
+    static readonly WINDOW_SYSTEM_DENSITY: ReadonlySystemEnvKey<double> = new ReadonlySystemEnvKey<double>('system.window.density.system');
+    static readonly WINDOW_IS_HIGHLIGHTED: ReadonlySystemEnvKey<boolean> = new ReadonlySystemEnvKey<boolean>('system.window.highlighted');
+    static readonly WINDOW_SIZE: ReadonlySystemEnvKey<window.SizeInVP> = new ReadonlySystemEnvKey<window.SizeInVP>('system.window.size');
+    static readonly WINDOW_SIZE_PX: ReadonlySystemEnvKey<window.Size> = new ReadonlySystemEnvKey<window.Size>('system.window.size.px');
+    static readonly WINDOW_AVOID_AREA: ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoVP> = new ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoVP>('system.window.avoidarea');
+    static readonly WINDOW_AVOID_AREA_PX: ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoPX> = new ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoPX>('system.window.avoidarea.px');
+}

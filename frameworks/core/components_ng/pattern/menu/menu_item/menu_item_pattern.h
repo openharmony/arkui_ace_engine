@@ -493,18 +493,22 @@ protected:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
+    void RegisterOnHover();
+    void RegisterOnClick();
     void RegisterAccessibilityClickAction();
     void RegisterOnPress();
+    bool OnClick();
     void OnAfterModifyDone() override;
     RefPtr<FrameNode> GetMenuWrapper();
     void InitFocusPadding();
     Dimension focusPadding_ = 0.0_vp;
+    void ShowSubMenu(ShowSubMenuType type = ShowSubMenuType::DEFAULT);
+    SubMenuExpandingMode expandingMode_ = SubMenuExpandingMode::SIDE;
+    RefPtr<SelectTheme> GetCurrentSelectTheme();
+    RefPtr<ClickEvent> onClickEvent_;
 
 private:
 friend class ServiceCollaborationMenuAceHelper;
-    // register menu item's callback
-    void RegisterOnClick();
-    void RegisterOnHover();
     void CleanParentMenuItemBgColor();
     void SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type);
     virtual void OnTouch(const TouchEventInfo& info);
@@ -513,7 +517,6 @@ friend class ServiceCollaborationMenuAceHelper;
     {
         return false;
     }
-    bool OnClick();
 
     void RegisterWrapperMouseEvent();
 
@@ -538,7 +541,6 @@ friend class ServiceCollaborationMenuAceHelper;
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
 
-    void ShowSubMenu(ShowSubMenuType type = ShowSubMenuType::DEFAULT);
     RefPtr<UINode> BuildSubMenuCustomNode();
     RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode);
     void UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode);
@@ -602,7 +604,6 @@ friend class ServiceCollaborationMenuAceHelper;
     void HandleOptionBackgroundColor();
     void HandleOptionFontColor();
     void UpdateOptionStyle();
-    RefPtr<SelectTheme> GetCurrentSelectTheme();
     void UpdateTextAlignment(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
     void OnAttachToMainTree() override;
     void UpdateFontByThemeColor(RefPtr<MenuLayoutProperty>& menuProperty,
@@ -651,7 +652,6 @@ friend class ServiceCollaborationMenuAceHelper;
     RefPtr<TouchEventImpl> onTouchEvent_;
     std::function<void(UIState)> onPressEvent_;
     RefPtr<InputEvent> onHoverEvent_;
-    RefPtr<ClickEvent> onClickEvent_;
     RefPtr<FrameNode> endRowNode_ = nullptr;
     std::vector<RefPtr<FrameNode>> expandableItems_;
     bool onTouchEventSet_ = false;
@@ -659,7 +659,6 @@ friend class ServiceCollaborationMenuAceHelper;
     bool onHoverEventSet_ = false;
     bool onKeyEventSet_ = false;
     bool onClickEventSet_ = false;
-    SubMenuExpandingMode expandingMode_ = SubMenuExpandingMode::SIDE;
     bool isStackSubmenuHeader_ = false;
     bool expandingModeSet_ = false;
 
@@ -709,6 +708,7 @@ public:
         return MakeRefPtr<CustomMenuItemLayoutAlgorithm>();
     }
     void OnAttachToFrameNode() override;
+    void OnModifyDone() override;
 
 private:
     void OnTouch(const TouchEventInfo& info) override;

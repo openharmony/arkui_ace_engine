@@ -512,6 +512,20 @@ bool JSRichEditor::ParseJsSymbolColorWithResource(const JSRef<JSVal>& jsValue, s
     return true;
 }
 
+void JSRichEditor::SetRichEditorKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm && info.Length() > 1);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(info[1]->IsObject());
+
+    NG::KeyboardAppearanceConfig config = JSTextField::ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
+    NG::RichEditorModelNG::SetKeyboardAppearanceConfig(frameNode, config);
+}
+
 ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);

@@ -236,25 +236,23 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
     AddOnWillDismiss(dialogProps, value->onWillDismiss);
     auto onDidAppear = Converter::OptConvert<VoidCallback>(value->onDidAppear);
     if (onDidAppear) {
-        dialogProps.onDidAppear = [arkCallback = CallbackHelper(onDidAppear.value())]() { arkCallback.InvokeSync(); };
+        dialogProps.onDidAppear = GetSyncInvoker(onDidAppear.value());
     }
     auto onDidDisappear = Converter::OptConvert<VoidCallback>(value->onDidDisappear);
     if (onDidDisappear) {
-        dialogProps.onDidDisappear = [arkCallback = CallbackHelper(onDidDisappear.value())]() { arkCallback.Invoke(); };
+        dialogProps.onDidDisappear = GetAsyncInvoker(onDidDisappear.value());
     }
     auto onWillAppear = Converter::OptConvert<VoidCallback>(value->onWillAppear);
     if (onWillAppear) {
-        dialogProps.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() { arkCallback.Invoke(); };
+        dialogProps.onWillAppear = GetAsyncInvoker(onWillAppear.value());
     }
     auto onWillDisappear = Converter::OptConvert<VoidCallback>(value->onWillDisappear);
     if (onWillDisappear) {
-        dialogProps.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
-            arkCallback.Invoke();
-        };
+        dialogProps.onWillDisappear = GetAsyncInvoker(onWillDisappear.value());
     }
     auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(value->cancel);
     if (cancelCallbackOpt) {
-        auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        auto cancelFunc = GetAsyncInvoker(*cancelCallbackOpt);
         dialogProps.onCancel = cancelFunc;
     }
     dialogProps.onLanguageChange = [actionSheetValue = *value, updateDialogProperties = UpdateDynamicDialogProperties](

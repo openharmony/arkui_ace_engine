@@ -42,12 +42,20 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // EmbeddedComponentModifier
 namespace EmbeddedComponentInterfaceModifier {
-void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
+void SetEmbeddedComponentOptions0Impl(Ark_NativePointer node,
                                      Ark_Want loader,
                                      const Opt_EmbeddedType* type)
 {
     ACE_UINODE_TRACE(reinterpret_cast<FrameNode *>(node));
-    LOGE("EmbeddedComponentModifier::SetEmbeddedComponentOptions - is not supported");
+    LOGE("EmbeddedComponentModifier::SetEmbeddedComponentOptions0 - is not supported");
+}
+void SetEmbeddedComponentOptions1Impl(Ark_NativePointer node,
+                                     Ark_Want loader,
+                                     const Opt_EmbeddedType* type,
+                                     const Opt_EmbeddedOptions* options)
+{
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode *>(node));
+    LOGE("EmbeddedComponentModifier::SetEmbeddedComponentOptions1 - is not supported");
 }
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
@@ -63,14 +71,21 @@ void SetOnErrorImpl(Ark_NativePointer node,
     ACE_UINODE_TRACE(reinterpret_cast<FrameNode *>(node));
     LOGE("EmbeddedComponentModifier::OnError - is not supported");
 }
+void SetOnDrawReadyImpl(Ark_NativePointer node,
+                        const Opt_VoidCallback* value)
+{
+    LOGE("EmbeddedComponentModifier::OnDrawReadyImpl - is not supported");
+}
 } // EmbeddedComponentAttributeModifier
 const GENERATED_ArkUIEmbeddedComponentModifier* GetEmbeddedComponentModifier()
 {
     static const GENERATED_ArkUIEmbeddedComponentModifier ArkUIEmbeddedComponentModifierImpl {
         EmbeddedComponentModifier::ConstructImpl,
-        EmbeddedComponentInterfaceModifier::SetEmbeddedComponentOptionsImpl,
+        EmbeddedComponentInterfaceModifier::SetEmbeddedComponentOptions0Impl,
+        EmbeddedComponentInterfaceModifier::SetEmbeddedComponentOptions1Impl,
         EmbeddedComponentAttributeModifier::SetOnTerminatedImpl,
         EmbeddedComponentAttributeModifier::SetOnErrorImpl,
+        EmbeddedComponentAttributeModifier::SetOnDrawReadyImpl,
     };
     return &ArkUIEmbeddedComponentModifierImpl;
 }

@@ -61,6 +61,7 @@ declare class MutableBuilder<Args extends Object[]> {
 // implemented in C++  for release
 abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
+  protected __notifyDecoratedWatch__Internal(_varName: string): void {}
   // List of inactive components used for Dfx
   protected static readonly inactiveComponents_: Set<string> = new Set<string>();
   protected get isReusable_(): boolean {
@@ -483,6 +484,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         }
         this[storeProp] = updatedEnvValue;
         ObserveV2.getObserve().fireChange(this, varName);
+        this.__notifyDecoratedWatch__Internal(varName);
         needUpdated = true;
       });
     if (needUpdated) {
@@ -509,6 +511,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         }
         this[storeProp] = updatedEnvValue;
         ObserveV2.getObserve().fireChange(this, varName);
+        this.__notifyDecoratedWatch__Internal(varName);
         needUpdated = true;
       });
     if (needUpdated) {
@@ -762,6 +765,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           stateMgmtConsole.debug(`findAllEnvPropertiesInView ${this.debugInfo__()} @Env(${envKey}) ${varName} find EnvValue in parent, value is different, reset the local value`);
           this[storeProp] = updatedInstanceEnvValue;
           ObserveV2.getObserve().fireChange(this, varName);
+          this.__notifyDecoratedWatch__Internal(varName);
           needUpdated = true;
         }
       })

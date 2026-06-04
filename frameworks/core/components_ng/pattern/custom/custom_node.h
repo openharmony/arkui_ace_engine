@@ -16,10 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H
 
+#include <any>
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
@@ -220,29 +223,31 @@ public:
         onCleanupFunc_ = onCleanupFunc;
     }
 
-    void SetOnCustomEnvUpdateFunc(std::function<void(const std::string&)>&& onCustomEnvUpdate)
+    void SetOnCustomEnvUpdateFunc(
+        std::function<void(const std::string&, const std::optional<std::any>&)>&& onCustomEnvUpdate)
     {
         onCustomEnvUpdateFunc_ = std::move(onCustomEnvUpdate);
     }
 
-    void FireOnCustomEnvUpdate(const std::string& key)
+    void FireOnCustomEnvUpdate(const std::string& key, const std::optional<std::any>& value = std::nullopt)
     {
         auto callback = onCustomEnvUpdateFunc_;
         if (callback) {
-            callback(key);
+            callback(key, value);
         }
     }
 
-    void SetOnSystemEnvUpdateFunc(std::function<void(const std::string&)>&& onSystemEnvUpdate)
+    void SetOnSystemEnvUpdateFunc(
+        std::function<void(const std::string&, const std::optional<SystemEnvValue>&)>&& onSystemEnvUpdate)
     {
         onSystemEnvUpdateFunc_ = std::move(onSystemEnvUpdate);
     }
 
-    void FireOnSystemEnvUpdate(const std::string& key)
+    void FireOnSystemEnvUpdate(const std::string& key, const std::optional<SystemEnvValue>& value = std::nullopt)
     {
         auto callback = onSystemEnvUpdateFunc_;
         if (callback) {
-            callback(key);
+            callback(key, value);
         }
     }
 
@@ -299,8 +304,8 @@ private:
     std::function<bool()> onBackPressFunc_ = nullptr;
     std::function<void()> pageTransitionFunc_ = nullptr;
     std::function<void()> onCleanupFunc_ = nullptr;
-    std::function<void(const std::string&)> onCustomEnvUpdateFunc_ = nullptr;
-    std::function<void(const std::string&)> onSystemEnvUpdateFunc_ = nullptr;
+    std::function<void(const std::string&, const std::optional<std::any>&)> onCustomEnvUpdateFunc_ = nullptr;
+    std::function<void(const std::string&, const std::optional<SystemEnvValue>&)> onSystemEnvUpdateFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

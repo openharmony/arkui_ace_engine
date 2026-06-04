@@ -29,6 +29,10 @@
 
 namespace OHOS::Ace::Ani {
 namespace {
+constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
+constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
 constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
 constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
 constexpr char ARRAY_GET[] = "i:Y";
@@ -42,10 +46,6 @@ constexpr char LOAD_RESULT_IMPL[] = "@ohos.arkui.drawableDescriptor.DrawableDesc
 constexpr char ANIMATION_CONTROLLER_INNER[] = "@ohos.arkui.drawableDescriptor.AnimationControllerInner";
 constexpr char ANIMATION_OPTIONS_IMPL[] = "@ohos.arkui.drawableDescriptor.AnimationOptionsImpl";
 
-constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
-constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
-constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
-constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
 constexpr char DEFAULT_MASK[] = "ohos_icon_mask";
 constexpr size_t MAX_TYPENAME_LEN = 255;
 constexpr int32_t SPECIFIED_CAPACITY = 16;

@@ -35,6 +35,8 @@ struct ForceSplitParam {
     bool navigationDisablePlaceholder = false;
     bool navigationDisableDivider = false;
     bool dialogSupportSplit = true;
+    bool wideSplitIsDraggable = false;
+    bool squareSplitIsDraggable = false;
     std::optional<std::string> navigationId;
     std::optional<int32_t> navigationDepth;
     std::unordered_set<std::string> fullScreenPages;
@@ -63,8 +65,8 @@ private:
     static bool ParseBehaviorModeConfig(const std::unique_ptr<JsonValue>& configJson, ForceSplitParam& config);
     static bool ParseFullScreenPages(const std::unique_ptr<JsonValue>& fullScreenPages, ForceSplitParam& config);
     static bool ParseSplitDividerColor(const std::unique_ptr<JsonValue>& splitDividerColor, ForceSplitParam& config);
-    static bool ParseSplitParam(
-        const std::unique_ptr<JsonValue>& split, const std::string& splitType, std::optional<float>& splitRatio);
+    static bool ParseSplitParam(const std::unique_ptr<JsonValue>& split, const std::string& splitType, 
+                                std::optional<float>& splitRatio, bool& isDraggable);
     static bool ParseNavigationOptions(const std::unique_ptr<JsonValue>& configJson, ForceSplitParam& config);
     static bool ParsePagePairs(const std::unique_ptr<JsonValue>& pagePairs, ForceSplitParam& config);
     static bool ParseTransPages(const std::unique_ptr<JsonValue>& transPages, ForceSplitParam& config);

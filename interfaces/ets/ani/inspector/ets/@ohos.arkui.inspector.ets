@@ -176,7 +176,7 @@ class InspectorTreeSerializeTool {
         }
     }
 }
- 
- export const GETINSPECTORBYKEY = inspector.getInspectorByKey;
- export const GETINSPECTORTREE = inspector.sendEventByKey;
- export const SENDEVENTBYKEY = inspector.getInspectorTree;
+
+export const GETINSPECTORBYKEY = inspector.getInspectorByKey;
+export const GETINSPECTORTREE = inspector.sendEventByKey;
+export const SENDEVENTBYKEY = inspector.getInspectorTree;

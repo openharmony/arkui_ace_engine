@@ -782,6 +782,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute;
     optimizeTrailingSpace(trim: boolean): TextAttribute;
     compressLeadingPunctuation(enable: boolean): TextAttribute;
+    punctuationOverflow(enable: boolean): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -813,6 +814,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         repeating?: boolean;
     }): this;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAttribute;
+    tailIndents(value: LengthMetrics | Array<LengthMetrics>): TextAttribute;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -848,6 +850,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     strokeColor(value: ResourceColor): TextAreaAttribute;
     orphanCharOptimization(enable: boolean): TextAreaAttribute;
     compressLeadingPunctuation(enable: boolean): TextAreaAttribute;
+    punctuationOverflow(enable: boolean): TextAreaAttribute;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
@@ -903,6 +906,7 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     strokeColor(value: ResourceColor): TextInputAttribute;
     orphanCharOptimization(enable: boolean): TextInputAttribute;
     compressLeadingPunctuation(enable: boolean): TextInputAttribute;
+    punctuationOverflow(enable: boolean): TextInputAttribute;
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
@@ -1150,6 +1154,7 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
     recoverable(value: boolean | undefined): this;
+    fullScreenOverlay(value: boolean | undefined): this;
     bindToScrollable(scrollers: Array<Scroller>): this;
     bindToNestedScrollable(scrollInfos: Array<NestedScrollInfo>): this;
     backButtonIcon(value: any, text?: ResourceStr): this;
@@ -1364,6 +1369,7 @@ declare class ArkMenuItemComponent extends ArkComponent implements MenuItemAttri
     contentFontColor(value: ResourceColor): this;
     labelFont(value: Font): this;
     labelFontColor(value: ResourceColor): this;
+    subMenuBuilder(value: () => void): this;
 }
 declare class ArkMenuItemGroupComponent extends ArkComponent implements MenuItemGroupAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

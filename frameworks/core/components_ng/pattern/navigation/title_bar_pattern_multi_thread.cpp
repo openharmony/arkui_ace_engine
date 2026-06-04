@@ -43,6 +43,7 @@ void TitleBarPattern::OnAttachToMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UpdateIsBackgroundDark();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
@@ -59,6 +60,8 @@ void TitleBarPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UnregisterColorPicker();
+    UnregisterTransparencyListener();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 

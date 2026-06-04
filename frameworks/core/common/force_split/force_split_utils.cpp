@@ -24,6 +24,7 @@
 #include "base/json/json_util.h"
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
+#include "core/common/force_split/force_split_constants.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -60,8 +61,7 @@ constexpr char COLOR_DARK[] = "dark";
 constexpr char WIDE_SPLIT_KEY[] = "wideSplit";
 constexpr char SQUARE_SPLIT_KEY[] = "squareSplit";
 constexpr char RATIO_KEY[] = "ratio";
-constexpr float MIN_SPLIT_RATIO = 1.0f / 3;
-constexpr float MAX_SPLIT_RATIO = 2.0f / 3;
+constexpr char IS_DRAGGABLE_KEY[] = "isDraggable";
 constexpr char BEHAVIOR_MODE_KEY[] = "mode";
 constexpr char PAGE_PAIRS_KEY[] = "pagePairs";
 constexpr char TRANS_PAGES_KEY[] = "transPages";
@@ -365,15 +365,21 @@ bool ForceSplitUtils::ParseSplitDividerColor(const std::unique_ptr<JsonValue>& s
     return true;
 }
 
-bool ForceSplitUtils::ParseSplitParam(
-    const std::unique_ptr<JsonValue>& split, const std::string& splitType, std::optional<float>& splitRatio)
+bool ForceSplitUtils::ParseSplitParam(const std::unique_ptr<JsonValue>& split, const std::string& splitType,
+                                      std::optional<float>& splitRatio, bool& isDraggable)
 {
     splitRatio = std::nullopt;
     if (!split || !split->IsObject()) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Error, %{public}s is an invalid json Object!", splitType.c_str());
         return false;
     }
-    if (!split->Contains(RATIO_KEY)) {
+    if (!split->Contains(RATIO_KEY) && !split->Contains(IS_DRAGGABLE_KEY)) {
+        return true;
+    }
+    if (split->Contains(IS_DRAGGABLE_KEY)) {
+        isDraggable = split->GetBool(IS_DRAGGABLE_KEY, false);
+    }
+    if (isDraggable) {
         return true;
     }
     auto ratioJson = split->GetValue(RATIO_KEY);
@@ -491,12 +497,14 @@ bool ForceSplitUtils::ParseCommonConfig(const std::unique_ptr<JsonValue>& config
         }
     }
     if (configJson->Contains(WIDE_SPLIT_KEY)) {
-        if (!ParseSplitParam(configJson->GetValue(WIDE_SPLIT_KEY), WIDE_SPLIT_KEY, config.wideSplitRatio)) {
+        if (!ParseSplitParam(configJson->GetValue(WIDE_SPLIT_KEY), WIDE_SPLIT_KEY, config.wideSplitRatio,
+                             config.wideSplitIsDraggable)) {
             return false;
         }
     }
     if (configJson->Contains(SQUARE_SPLIT_KEY)) {
-        if (!ParseSplitParam(configJson->GetValue(SQUARE_SPLIT_KEY), SQUARE_SPLIT_KEY, config.squareSplitRatio)) {
+        if (!ParseSplitParam(configJson->GetValue(SQUARE_SPLIT_KEY), SQUARE_SPLIT_KEY, config.squareSplitRatio,
+                             config.squareSplitIsDraggable)) {
             return false;
         }
     }
@@ -636,7 +644,7 @@ void ForceSplitUtils::LogForceSplitParam(bool isRouterSplit, const ForceSplitPar
         "fullScreenPages:%{public}s, enableArkUIHook:%{public}d, navId:%{public}s,"
         "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d, "
         "dividerColorLight:%{public}s, dividerColorDark:%{public}s, "
-        "wideSplit[ratio:%{public}s], squareSplit[ratio:%{public}s], "
+        "wideSplit[ratio:%{public}s, isDraggable:%{public}d], squareSplit[ratio:%{public}s, isDraggable:%{public}d], "
         "behaviorMode:%{public}d, transPages:%{public}s",
         isRouterSplit, config.homePage.c_str(), config.relatedPage.c_str(),
         JoinStringSet(config.fullScreenPages).c_str(), config.isArkUIHookEnabled,
@@ -646,7 +654,9 @@ void ForceSplitUtils::LogForceSplitParam(bool isRouterSplit, const ForceSplitPar
         (config.splitDividerColorLight.has_value() ?  config.splitDividerColorLight.value().ToString().c_str() : "NA"),
         (config.splitDividerColorDark.has_value() ?  config.splitDividerColorDark.value().ToString().c_str() : "NA"),
         (config.wideSplitRatio.has_value() ? std::to_string(config.wideSplitRatio.value()).c_str() : "NA"),
+        config.wideSplitIsDraggable,
         (config.squareSplitRatio.has_value() ? std::to_string(config.squareSplitRatio.value()).c_str() : "NA"),
+        config.squareSplitIsDraggable,
         static_cast<int32_t>(config.behaviorMode), JoinStringSet(config.transPages).c_str());
 }
 } // namespace OHOS::Ace::NG

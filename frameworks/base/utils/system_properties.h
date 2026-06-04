@@ -790,6 +790,7 @@ public:
 	
     static int32_t GetFormTaskPriority();
 
+    static bool IsSensorCorrectionEnabled();
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -909,6 +910,7 @@ private:
     static bool isOpenYuvDecode_;
 
     static std::once_flag getSysPropertiesFlag_;
+    static int32_t sensorCorrectionEnable_;
 };
 
 } // namespace OHOS::Ace

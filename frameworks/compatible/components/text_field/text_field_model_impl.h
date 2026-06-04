@@ -121,6 +121,7 @@ public:
     void SetColorShaderStyle(const Color& value) override {};
     void ResetGradientShaderStyle() override {};
     void SetCompressLeadingPunctuation(bool enabled) override {};
+    void SetPunctuationOverflow(bool enabled) override {};
     void SetOnWillAttachIME(IMEAttachCallback&& func) override {};
 
 private:

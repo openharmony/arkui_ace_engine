@@ -43,6 +43,10 @@ const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
 const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
+const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DISTORTION_AUTO,
+    DistortionMode::DISTORTION_ENABLED, DistortionMode::DISTORTION_DISABLED };
+const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
+    EdgeLightMode::EDGELIGHT_ENABLED, EdgeLightMode::EDGELIGHT_DISABLED };
 
 PickerTime ParseTime(
     const EcmaVM* vm, const Local<JSValueRef>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
@@ -554,6 +558,33 @@ void ParseDatePickerEffectOption(const EcmaVM* vm, PickerDialogInfo& pickerDialo
     }
 }
 
+void ParseTimePickerDialogMaterial(
+    const EcmaVM* vm, PickerDialogInfo& pickerDialog, const Local<JSValueRef>& paramObject)
+{
+    auto systemMaterialValue = ArkTSUtils::GetProperty(vm, paramObject, "systemMaterial");
+    if (systemMaterialValue->IsObject(vm)) {
+        auto* systemUiMaterial =
+            reinterpret_cast<UiMaterial*>(ArkTSUtils::UnwrapNapiValue(vm, systemMaterialValue->ToObject(vm)));
+        pickerDialog.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
+    }
+    
+    auto distortionModeValue = ArkTSUtils::GetProperty(vm, paramObject, "distortionMode");
+    if (distortionModeValue->IsNumber()) {
+        auto distortionMode = distortionModeValue->ToNumber(vm)->Int32Value(vm);
+        if (distortionMode >= 0 && distortionMode < static_cast<int32_t>(DIALOG_DISTORTION_MODE.size())) {
+            pickerDialog.distortionMode = DIALOG_DISTORTION_MODE[distortionMode];
+        }
+    }
+    
+    auto edgeLightModeValue = ArkTSUtils::GetProperty(vm, paramObject, "edgeLightMode");
+    if (edgeLightModeValue->IsNumber()) {
+        auto edgeLightMode = edgeLightModeValue->ToNumber(vm)->Int32Value(vm);
+        if (edgeLightMode >= 0 && edgeLightMode < static_cast<int32_t>(DIALOG_EDGELIGHT_MODE.size())) {
+            pickerDialog.edgeLightMode = DIALOG_EDGELIGHT_MODE[edgeLightMode];
+        }
+    }
+}
+
 void ExecuteInternal(const EcmaVM* vm, const std::unique_ptr<JsonValue>& value, const std::string& key,
     const Local<panda::ObjectRef>& eventInfo)
 {
@@ -804,6 +835,7 @@ ArkUINativeModuleValue TimePickerDialogBridge::JSShow(ArkUIRuntimeCallInfo* runt
     ParseDatePickerHoverMode(vm, pickerDialog, paramObject);
     ParseDatePickerBlurStyleOption(vm, pickerDialog, paramObject);
     ParseDatePickerEffectOption(vm, pickerDialog, paramObject);
+    ParseTimePickerDialogMaterial(vm, pickerDialog, paramObject);
 
     auto buttonInfos = ParseButtonStyles(vm, paramObject);
 

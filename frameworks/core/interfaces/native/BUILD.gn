@@ -133,6 +133,7 @@ template("ace_core_interfaces_native_node") {
       "node/row_split_modifier.cpp",
       "node/scrollable_modifier.cpp",
       "node/scroller_modifier.cpp",
+      "node/selection_container_modifier.cpp",
       "node/search_modifier.cpp",
       "node/select_modifier.cpp",
       "node/shape_modifier.cpp",
@@ -197,6 +198,7 @@ template("ace_core_interfaces_native_node") {
         "ani/visual_effect_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
         "ani/web_ani_modifier.cpp",
+        "ani/with_env_ani_modifier.cpp",
         "ani/xbar_ani_modifier.cpp",
         "ani/xcomponent_ani_modifier.cpp",
         "ani/parallelize_ui_ani_modifier.cpp",
@@ -224,6 +226,7 @@ template("ace_core_interfaces_native_node") {
           "ani/uinode_ani_modifier.cpp",
           "ani/waterflow_ani_modifier.cpp",
           "ani/image_ani_modifier.cpp",
+          "ani/with_env_ani_modifier.cpp",
           "ani/dynamiclayout_ani_modifier.cpp",
         ]
       }

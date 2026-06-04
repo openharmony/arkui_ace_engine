@@ -18,12 +18,421 @@
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
 #include "base/memory/ace_type.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-void ListItemGroupPatternTestNg::SetUp() {}
+class ListItemGroupPatternTestNg : public ListTestNg {};
 
-void ListItemGroupPatternTestNg::TearDown() {}
+/**
+ * @tc.name: OnThemeScopeUpdate000
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API>=26 + CARD + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate000, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set theme color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    // Set theme color to RED
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    auto originalColor = listItemTheme->defaultColor_;
+    listItemTheme->defaultColor_ = Color::RED;
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color is updated to theme color (RED)
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::RED); // Verify color equals theme color
+
+    // Restore
+    listItemGroup->apiVersion_ = oriApiVersion;
+    listItemTheme->defaultColor_ = originalColor;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API>=26 + CARD + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set theme color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    // Set theme color to RED
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    auto originalColor = listItemTheme->defaultColor_;
+    listItemTheme->defaultColor_ = Color::RED;
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color is updated to theme color (RED)
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::RED); // Verify color equals theme color
+
+    // Restore
+    listItemGroup->apiVersion_ = oriApiVersion;
+    listItemTheme->defaultColor_ = originalColor;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate002
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API>=26 + CARD + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set background color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    auto layoutProperty = listItemGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to BLUE)
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+
+    listItemGroup->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate003
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API>=26 + NONE + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with NONE style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set background color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::RED);
+
+    auto layoutProperty = listItemGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged due to NONE style
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::RED);
+
+    listItemGroup->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate004
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API>=26 + NONE + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with NONE style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set background color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GREEN);
+
+    auto layoutProperty = listItemGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_SIX and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to GREEN)
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GREEN);
+
+    listItemGroup->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate005
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API<26 + CARD + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set background color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GRAY);
+
+    auto layoutProperty = listItemGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged due to API < 26
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GRAY);
+
+    listItemGroup->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate006
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API<26 + CARD + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with CARD style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::CARD);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set background color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::RED);
+
+    auto layoutProperty = listItemGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to RED)
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::RED);
+
+    listItemGroup->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate007
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API<26 + NONE + UserNotSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with NONE style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set background color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+
+    auto layoutProperty = listItemGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(false);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to BLUE)
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::BLUE);
+
+    listItemGroup->apiVersion_ = oriApiVersion;
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate008
+ * @tc.desc: Test ListItemGroupPattern OnThemeScopeUpdate: API<26 + NONE + UserSetBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupPatternTestNg, OnThemeScopeUpdate008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with NONE style ListItemGroup
+     */
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ListItemGroup node and set background color
+     */
+    auto listItemGroup = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(listItemGroup, nullptr);
+
+    auto pattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = listItemGroup->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::GRAY);
+
+    auto layoutProperty = listItemGroup->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsUserSetBackgroundColor(true);
+
+    /**
+     * @tc.steps: step3. Set API version to VERSION_TWENTY_FIVE and call OnThemeScopeUpdate
+     * @tc.expected: Background color remains unchanged (equal to GRAY)
+     */
+    auto oriApiVersion = listItemGroup->apiVersion_;
+    listItemGroup->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    pattern->OnThemeScopeUpdate(0);
+    auto bgColor = renderContext->GetBackgroundColor();
+    EXPECT_TRUE(bgColor.has_value());
+    EXPECT_EQ(bgColor.value(), Color::GRAY);
+
+    listItemGroup->apiVersion_ = oriApiVersion;
+}
 
 /**
  * @tc.name: GetStartListItemIndex001

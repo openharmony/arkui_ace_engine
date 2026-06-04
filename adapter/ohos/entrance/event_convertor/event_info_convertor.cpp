@@ -17,18 +17,47 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "core/common/transform/input_compatible_manager.h"
 #include "adapter/ohos/entrance/event_compatible/compatible_interface.h"
+#include "base/utils/feature_manager.h"
 namespace OHOS::Ace::NG {
 const int32_t COMPATIBLE_INPUT_MODE = 1;
 const int32_t DISABLE_TRANSFORM = 8;
+const char MOUSE_2_TOUCH_EVENT_MODE[] = "mouse2TouchEventMode";
+const char MOUSE_2_TOUCH_EVENT_MODE_XCOMPONENT_AND_WEB_ONLY[] = "xcomponentAndWebOnly";
+
+EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::IsCompatibleFromFeatureManager(
+    const std::string& matchedMode)
+{
+    std::string config;
+    auto ret = FeatureManager::GetInstance().GetFeatureParam(MOUSE_2_TOUCH_EVENT_MODE, config);
+    if (ret == FeatureManager::INIT_FAILED) {
+        return Mouse2TouchEventModeResult::INIT_FAILED;
+    }
+    if (ret != FeatureManager::SUCCESS) {
+        return Mouse2TouchEventModeResult::NOT_FOUND;
+    }
+    if (config == matchedMode) {
+        return Mouse2TouchEventModeResult::MATCHED;
+    }
+    return Mouse2TouchEventModeResult::UNMATCHED;
+}
 
 bool EventInfoConvertor::ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo, TouchEventInfo& touchEventInfo)
 {
     if (mouseInfo.GetButton() != MouseButton::LEFT_BUTTON) {
         return false;
     }
-    auto condition = EventInfoConvertor::MatchCompatibleCondition();
-    if (!condition) {
+
+    auto convertControllByFeatureManager =
+        EventInfoConvertor::IsCompatibleFromFeatureManager(MOUSE_2_TOUCH_EVENT_MODE_XCOMPONENT_AND_WEB_ONLY);
+    if (convertControllByFeatureManager == Mouse2TouchEventModeResult::UNMATCHED ||
+        convertControllByFeatureManager == Mouse2TouchEventModeResult::NOT_FOUND) {
         return false;
+    }
+    if (convertControllByFeatureManager == Mouse2TouchEventModeResult::INIT_FAILED) {
+        auto condition = EventInfoConvertor::MatchCompatibleCondition();
+        if (!condition) {
+            return false;
+        }
     }
 
     TouchLocationInfo touchLocationInfo(0);
@@ -116,4 +145,25 @@ bool EventInfoConvertor::IfNeedMouseTransform()
     }
     return enable;
 }
+
+bool EventInfoConvertor::IsAppDevelopedForPC()
+{
+    static bool isAppDevelopedForPC = false;
+
+    auto compatiable = DelayedSingleton<CompatibleInterface>::GetInstance();
+    if (compatiable == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_XCOMPONENT, "fail to get compatiable instance.");
+        return false;
+    }
+
+    isAppDevelopedForPC = compatiable->IsAppDevelopedForPC();
+    if (isAppDevelopedForPC) {
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT,
+            "IsAppDevelopedForPC get result successfully \n "
+            "isAppDevelopedForPC is %{public}d.", isAppDevelopedForPC);
+    }
+
+    return isAppDevelopedForPC;
+}
+
 } // namespace OHOS::Ace::NG

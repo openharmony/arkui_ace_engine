@@ -24,7 +24,14 @@ ohos_shared_library("arkuiuiextension_ani") {
   shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   defines = []
-  include_dirs = [ "//foundation/arkui/ace_engine/frameworks" ]
+  if (use_linux) {
+    include_dirs = [
+      "$ace_root/test/mock/external_mock",
+      "$ace_root/frameworks"
+     ]
+  } else {
+    include_dirs = [ "$ace_root/frameworks" ]
+  }
   sources = [
     "../utils/ani_utils.cpp",
     "ani_callback_info.cpp",
@@ -34,6 +41,18 @@ ohos_shared_library("arkuiuiextension_ani") {
     "native_ui_extension_common.cpp",
     "native_ui_extension.cpp",
   ]
+if (use_linux) {
+  sources += [
+    "$ace_root/frameworks/core/interfaces/native/utility/preview_placeholder.cpp"
+  ]
+}
+
+if (use_linux) {
+  external_deps = [
+    "hilog:libhilog",
+    "runtime_core:ani",
+  ]
+} else {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ani_common",
@@ -45,8 +64,14 @@ ohos_shared_library("arkuiuiextension_ani") {
     "napi:ace_napi",
     "runtime_core:ani",
   ]
+}
 
+if (!use_linux) {
   defines += [ "WINDOW_SCENE_SUPPORTED" ]
+} else {
+  defines += [ "PREVIEW" ]
+}
+  
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"
   subsystem_name = "arkui"

@@ -2396,6 +2396,40 @@ HWTEST_F(SearchTestNg, testSelectedBackgroundColor002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SearchOnThemeScopeUpdate001
+ * @tc.desc: Test SearchPattern::OnThemeScopeUpdate API26 isolation branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchOnThemeScopeUpdate001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = frameNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(1);
+    ASSERT_NE(textFieldTheme, nullptr);
+
+    Color customBgColor = textFieldTheme->GetBgColor() == Color::RED ? Color::BLUE : Color::RED;
+    renderContext->UpdateBackgroundColor(customBgColor);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(1));
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(1));
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: testInputFilter001
  * @tc.desc: Test Search input filter
  * @tc.type: FUNC

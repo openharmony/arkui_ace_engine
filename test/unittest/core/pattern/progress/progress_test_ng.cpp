@@ -1564,6 +1564,32 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ProgressPatternTest004
+ * @tc.desc: Test OnThemeScopeUpdate updates theme colors on API26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternTest004, TestSize.Level0)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    paintProperty->UpdateColor(Color::RED);
+    paintProperty->UpdateBackgroundColor(Color::GREEN);
+
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(1));
+    EXPECT_EQ(paintProperty->GetColorValue(), FRONT_COLOR);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: ProgressThemeWrapperTest001
  * @tc.desc: Test Builder fuction of ProgressThemeWrapper.
  * @tc.type: FUNC

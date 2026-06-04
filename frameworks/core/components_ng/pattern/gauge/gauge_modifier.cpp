@@ -989,8 +989,8 @@ void GaugeModifier::NewDrawImageIndicator(
 
     ImagePainter indicatorIconImagePainter(indicatorIconCanvasImage);
     indicatorIconImagePainter.DrawImage(canvas,
-        OffsetF(pathStartVertexX - INDICATOR_WIDTH_RADIO * data.radius, pathStartVertexY),
-        SizeF(INDICATOR_WIDTH_RADIO * diameter, INDICATOR_HEIGHT_RADIO * diameter));
+        OffsetF(pathStartVertexX - CUSTOM_INDICATOR_SIZE_RATIO * data.radius, pathStartVertexY),
+        SizeF(CUSTOM_INDICATOR_SIZE_RATIO * diameter, CUSTOM_INDICATOR_SIZE_RATIO * diameter));
     canvas.Restore();
 }
 

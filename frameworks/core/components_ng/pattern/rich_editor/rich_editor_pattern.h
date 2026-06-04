@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
 #include "core/text/text_emoji_processor.h"
@@ -730,8 +731,11 @@ public:
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTreeMultiThreadExtension() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnDetachFromMainTreeMultiThread();
     bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsAtTop() const override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;
@@ -866,6 +870,7 @@ public:
     void SetFallbackLineSpacing(bool isFallbackLineSpacing);
     bool IsFallbackLineSpacing();
     void SetKeyboardAppearance(KeyboardAppearance value);
+    void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config);
     KeyboardAppearance GetKeyboardAppearance() const;
     void SetSupportStyledUndo(bool enabled);
     bool IsSupportStyledUndo() const;
@@ -1447,6 +1452,8 @@ private:
     std::optional<int32_t> maxLength_ = std::nullopt;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
+    KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
     RefPtr<UINode> customKeyboardNode_;
     LRUMap<uint64_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;

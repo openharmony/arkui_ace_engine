@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/depth_component/depth_component_event_hub.h"
 #include "core/components_ng/pattern/depth_component/depth_component_layout_algorithm.h"
 #include "core/components_ng/pattern/depth_component/depth_component_layout_property.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -48,6 +49,18 @@
 #endif
 
 namespace OHOS::Ace::NG {
+
+struct DepthComponentCompleteEvent {
+    double componentWidth = 0.0;
+    double componentHeight = 0.0;
+};
+
+struct DepthComponentErrorEvent {
+    double componentWidth = 0.0;
+    double componentHeight = 0.0;
+    int32_t errorCode = 0;
+    std::string errorMessage;
+};
 
 class DepthComponentPaintMethod;
 
@@ -120,34 +133,6 @@ public:
         return backgroundSource.IsImage() ? backgroundSource.imageSourceInfo : ImageSourceInfo();
     }
 
-    DepthBackgroundOffset GetBackgroundOffset() const
-    {
-        auto host = GetHost();
-        if (!host) {
-            return {};
-        }
-
-        auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-        if (!depthLayoutProperty) {
-            return {};
-        }
-        return depthLayoutProperty->GetBackgroundOffset().value_or(DepthBackgroundOffset());
-    }
-
-    std::optional<NG::VectorF> GetBackgroundScale() const
-    {
-        auto host = GetHost();
-        if (!host) {
-            return std::nullopt;
-        }
-
-        auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-        if (!depthLayoutProperty) {
-            return std::nullopt;
-        }
-        return depthLayoutProperty->GetBackgroundScale().value_or(std::nullopt);
-    }
-
     bool IsGltfBackground() const
     {
         return GetBackgroundSource().IsGltf();
@@ -193,6 +178,20 @@ public:
         depthMap_ = depthMap;
     }
 
+    void SetOnComplete(std::function<void(const DepthComponentCompleteEvent&)>&& callback)
+    {
+        onComplete_ = std::move(callback);
+    }
+    void SetOnError(std::function<void(const DepthComponentErrorEvent&)>&& callback)
+    {
+        onError_ = std::move(callback);
+    }
+
+    void SetOnDepthMapError(std::function<void(int32_t, const std::string&)>&& callback)
+    {
+        onDepthMapError_ = std::move(callback);
+    }
+
     const ImageSourceInfo& GetDepthMap() const
     {
         return depthMap_;
@@ -202,11 +201,13 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(DepthComponentPattern);
     void SetupBackgroundImageNode();
     void RemoveBackgroundImageNode();
-    void ApplyBackgroundOffset(const RefPtr<FrameNode>& backgroundImageNode);
-    void ApplyBackgroundScale(const RefPtr<FrameNode>& backgroundImageNode);
+    void ApplyOnCompleteCallback(const RefPtr<FrameNode>& backgroundImageNode);
+    void ApplyOnErrorCallback(const RefPtr<FrameNode>& backgroundImageNode);
+    std::function<void(bool)> CreateGltfLoadCallback();
     void ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode);
     void PropagateCropToChildren();
     void OnPaint3D();
+    bool IsCameraChange();
 
 #ifdef ENABLE_ROSEN_BACKEND
     void LoadDepthMap();
@@ -236,8 +237,6 @@ private:
     void CreateCustomNativeWindows(float width, float height);
     Render3D::WindowChangeInfo GetWindowChangeInfos(float width, float height) const;
     void UpdateWindowChangeSize(bool recreateWindow);
-    void Update3DOffset();
-    void Update3DScale();
     bool NeedUpdateWindowInfo();
     void UpdateWindowInfo();
     void MarkRender3D();
@@ -246,6 +245,9 @@ private:
     OHOS::Ace::DepthSpaceType depthSpace_ = OHOS::Ace::DepthSpaceType::INSTANCE;
     ImageSourceInfo depthMap_;
     std::optional<int32_t> backgroundImageId_;
+    std::function<void(const DepthComponentCompleteEvent&)> onComplete_;
+    std::function<void(const DepthComponentErrorEvent&)> onError_;
+    std::function<void(int32_t, const std::string&)> onDepthMapError_;
 
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     BASE_NS::shared_ptr<Render3D::IMrtDepthAdapter> mrtDepthAdapter_;
@@ -272,6 +274,9 @@ private:
     std::string lastLoadedDepthMapKey_;
     float depthMapWidth_ = 0.0f;
     float depthMapHeight_ = 0.0f;
+    bool isGltfLoaded_ = false;
+    bool isNeedRender_ = false;
+    std::optional<OHOS::Ace::DepthCameraParams> preCameraParams_;
 };
 
 } // namespace OHOS::Ace::NG

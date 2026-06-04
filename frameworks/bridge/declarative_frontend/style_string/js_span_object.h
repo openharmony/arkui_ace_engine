@@ -117,6 +117,7 @@ public:
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& leadingMarginObject);
     static void ParseJsTextDirection(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsShaderStyle(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsTailIndents(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     void GetTextAlign(const JSCallbackInfo& info);
     void SetTextAlign(const JSCallbackInfo& info);
     void GetTextVerticalAlign(const JSCallbackInfo& info);
@@ -139,6 +140,8 @@ public:
     void SetTextDirection(const JSCallbackInfo& info);
     void GetShaderStyle(const JSCallbackInfo& info);
     void SetShaderStyle(const JSCallbackInfo& info);
+    void GetTailIndents(const JSCallbackInfo& info);
+    void SetTailIndents(const JSCallbackInfo& info);
 
     static bool IsPixelMap(const JSRef<JSVal>& jsValue);
 

@@ -640,6 +640,20 @@ public:
         }
     }
 
+    void RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes)
+    {
+        auto guard = GetGuard();
+        for (const auto& node : nodes) {
+            for (auto it = partFrameNodeChildren_.begin(); it != partFrameNodeChildren_.end();) {
+                if (it->second && it->second->GetHostNode() == node) {
+                    it = partFrameNodeChildren_.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+    }
+
 private:
     std::list<FrameChildNode> children_;
     std::list<FrameChildNode>::iterator cursor_ = children_.begin();
@@ -2063,6 +2077,25 @@ void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChan
 
 void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
 {
+    if (AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
+        if (preVisibility == VisibleType::VISIBLE && currentVisibility != VisibleType::VISIBLE) {
+            auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+            if (accessibilityProperty && accessibilityProperty->GetAccessibilityFocusState()) {
+                TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+                    "[DetachFocusFallback] Node(%{public}s/%{public}d) visibility changed "
+                    "%{public}d->%{public}d with a11y focus, trigger detach focus fallback.",
+                    tag_.c_str(), nodeId_,
+                    static_cast<int32_t>(preVisibility), static_cast<int32_t>(currentVisibility));
+                auto pipeline = GetContextRefPtr();
+                if (pipeline) {
+                    auto accessibilityManager = pipeline->GetAccessibilityManager();
+                    if (accessibilityManager) {
+                        accessibilityManager->OnAccessbibilityDetachFromMainTree(AceType::Claim(this));
+                    }
+                }
+            }
+        }
+    }
     if ((preVisibility != currentVisibility &&
             (preVisibility == VisibleType::GONE || currentVisibility == VisibleType::GONE)) &&
         SelfExpansive()) {
@@ -6615,6 +6648,11 @@ void FrameNode::RecycleItemsByIndex(int32_t start, int32_t end)
     frameProxy_->RecycleItemsByIndex(start, end);
 }
 
+void FrameNode::RemoveFromPartFrameNodeChildren(const std::list<RefPtr<FrameNode>>& nodes)
+{
+    frameProxy_->RemoveFromPartFrameNodeChildren(nodes);
+}
+
 void FrameNode::RemoveChildInRenderTree(uint32_t index)
 {
     frameProxy_->RemoveChildInRenderTree(index);
@@ -8797,6 +8835,30 @@ bool FrameNode::IsPreMakeAndScroll()
         return true;
     }
     return false;
+}
+
+void FrameNode::RegisterLpxUpdateCallback(LpxAttribute attribute, std::function<void()>&& callback)
+{
+    if (!callback) {
+        LOGW("RegisterLpxUpdateCallback with null callback");
+        return;
+    }
+    lpxUpdateCallbacks_[attribute] = std::move(callback);
+}
+
+void FrameNode::UnRegisterLpxUpdateCallback(LpxAttribute attribute)
+{
+    lpxUpdateCallbacks_.erase(attribute);
+}
+
+void FrameNode::FireLpxUpdateCallbacks()
+{
+    for (const auto& entry : lpxUpdateCallbacks_) {
+        const auto& callback = entry.second;
+        if (callback) {
+            callback();
+        }
+    }
 }
 
 template<typename T>

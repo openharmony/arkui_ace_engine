@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/depth_component/depth_component_model.h"
 #include "core/image/image_source_info.h"
@@ -83,10 +84,37 @@ void JSDepthComponent::SetDepthMap(const JSCallbackInfo& info)
         return;
     }
 
+    // Parse optional callback
+    RefPtr<JsFunction> jsFunc;
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    }
+
+    auto setDepthMapWithCallback = [&info, &jsFunc](const ImageSourceInfo& imageSourceInfo) {
+        if (jsFunc) {
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            node = frameNode](int32_t code, const std::string& msg) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("DepthComponent.depthMap");
+                PipelineContext::SetCallBackNode(node);
+                JSRef<JSObject> errorObj = JSRef<JSObject>::New();
+                errorObj->SetProperty<int32_t>("code", code);
+                errorObj->SetProperty<std::string>("name", "BusinessError");
+                errorObj->SetProperty<std::string>("message", msg);
+                JSRef<JSVal> param = JSRef<JSVal>::Cast(errorObj);
+                func->ExecuteJS(1, &param);
+            };
+            NG::DepthComponentModel::SetDepthMap(imageSourceInfo, std::move(onError));
+        } else {
+            NG::DepthComponentModel::SetDepthMap(imageSourceInfo);
+        }
+    };
+
 #if defined(PIXEL_MAP_SUPPORTED)
     auto pixelMap = CreatePixelMapFromNapiValue(info[0]);
     if (pixelMap) {
-        NG::DepthComponentModel::SetDepthMap(ImageSourceInfo(pixelMap));
+        setDepthMapWithCallback(ImageSourceInfo(pixelMap));
         TAG_LOGI(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent depthMap set from PixelMap");
         info.ReturnSelf();
         return;
@@ -95,7 +123,7 @@ void JSDepthComponent::SetDepthMap(const JSCallbackInfo& info)
 
     auto backgroundSource = ParseBackgroundSource(info[0]);
     if (backgroundSource.IsImage()) {
-        NG::DepthComponentModel::SetDepthMap(backgroundSource.imageSourceInfo);
+        setDepthMapWithCallback(backgroundSource.imageSourceInfo);
         TAG_LOGI(AceLogTag::ACE_DEPTH_COMPONENT, "DepthComponent depthMap set");
     }
     info.ReturnSelf();
@@ -185,6 +213,59 @@ void JSDepthComponent::SetLight(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSDepthComponent::SetOnComplete(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    RefPtr<JsFunction> jsFunc =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                       node = frameNode](const NG::DepthComponentCompleteEvent& completeEvent) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("DepthComponent.onComplete");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObject> eventObj = JSRef<JSObject>::New();
+        eventObj->SetProperty<double>("componentWidth", completeEvent.componentWidth);
+        eventObj->SetProperty<double>("componentHeight", completeEvent.componentHeight);
+        JSRef<JSVal> param = JSRef<JSVal>::Cast(eventObj);
+        func->ExecuteJS(1, &param);
+    };
+    NG::DepthComponentModel::SetOnComplete(std::move(onComplete));
+    info.ReturnSelf();
+}
+
+void JSDepthComponent::SetOnError(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    RefPtr<JsFunction> jsFunc =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    node = frameNode](const NG::DepthComponentErrorEvent& errorEvent) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("DepthComponent.onError");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObject> eventObj = JSRef<JSObject>::New();
+        eventObj->SetProperty<double>("componentWidth", errorEvent.componentWidth);
+        eventObj->SetProperty<double>("componentHeight", errorEvent.componentHeight);
+        if (errorEvent.errorCode != 0 || !errorEvent.errorMessage.empty()) {
+            JSRef<JSObject> errorObj = JSRef<JSObject>::New();
+            errorObj->SetProperty<int32_t>("code", errorEvent.errorCode);
+            errorObj->SetProperty<std::string>("name", "BusinessError");
+            errorObj->SetProperty<std::string>("message", errorEvent.errorMessage);
+            eventObj->SetProperty<JSRef<JSObject>>("error", errorObj);
+        }
+        JSRef<JSVal> param = JSRef<JSVal>::Cast(eventObj);
+        func->ExecuteJS(1, &param);
+    };
+    NG::DepthComponentModel::SetOnError(std::move(onError));
+    info.ReturnSelf();
+}
+
 void JSDepthComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDepthComponent>::Declare("DepthComponent");
@@ -193,6 +274,8 @@ void JSDepthComponent::JSBind(BindingTarget globalObj)
     JSClass<JSDepthComponent>::StaticMethod("depthMap", &JSDepthComponent::SetDepthMap, opt);
     JSClass<JSDepthComponent>::StaticMethod("camera", &JSDepthComponent::SetCamera, opt);
     JSClass<JSDepthComponent>::StaticMethod("light", &JSDepthComponent::SetLight, opt);
+    JSClass<JSDepthComponent>::StaticMethod("onComplete", &JSDepthComponent::SetOnComplete, opt);
+    JSClass<JSDepthComponent>::StaticMethod("onError", &JSDepthComponent::SetOnError, opt);
     JSClass<JSDepthComponent>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSDepthComponent>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSDepthComponent>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

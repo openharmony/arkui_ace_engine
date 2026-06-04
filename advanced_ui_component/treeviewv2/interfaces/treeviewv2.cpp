@@ -38,7 +38,7 @@ static napi_module TreeViewV2Module = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_modname = "arkui.advanced.TreeViewV2",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = { 0 },
 };
 

@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/engine/functions/js_callback_state.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 
@@ -40,6 +41,7 @@ RepeatVirtualScrollModel* RepeatVirtualScrollModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+namespace {
 enum {
     PARAM_TOTAL_COUNT = 0,
     PARAM_TEMPLATE_OPTS = 1,
@@ -93,6 +95,8 @@ static bool ParseAndVerifyParams(const JSCallbackInfo& info)
 
     return true;
 }
+
+} // namespace
 
 void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
 {
@@ -204,12 +208,12 @@ void JSRepeatVirtualScroll::OnMove(const JSCallbackInfo& info)
         RepeatVirtualScrollModel::GetInstance()->OnMove(nullptr);
         return;
     }
-    auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](
-                      int32_t from, int32_t to) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto params = ConvertToJSValues(from, to);
-        func->Call(JSRef<JSObject>(), params.size(), params.data());
-    };
+    auto onMove = JsCallbackWithoutNode<void(int32_t, int32_t)>(
+        info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]),
+        [](const JSRef<JSFunc>& func, int32_t from, int32_t to) {
+            auto params = ConvertToJSValues(from, to);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        });
     RepeatVirtualScrollModel::GetInstance()->OnMove(std::move(onMove));
 }
 

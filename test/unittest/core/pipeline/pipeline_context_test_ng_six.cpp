@@ -152,6 +152,95 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg114, TestSize.Level
 }
 
 /**
+ * @tc.name: FireArkUIObjectLifecycleCallback_FromFrameNode
+ * @tc.desc: Test FrameNode::GetContext returns PipelineContext that fires lifecycle callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, FireArkUIObjectLifecycleCallback_FromFrameNode001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree(context_);
+
+    int callbackCount = 0;
+    void* receivedData = nullptr;
+    context_->RegisterArkUIObjectLifecycleCallback([&](void* data) {
+        callbackCount++;
+        receivedData = data;
+    });
+    EXPECT_NE(context_->objectLifecycleCallback_, nullptr);
+
+    auto* nodeContext = frameNode->GetContext();
+    ASSERT_NE(nodeContext, nullptr);
+    EXPECT_EQ(nodeContext, AceType::RawPtr(context_));
+
+    int payload = 42;
+    nodeContext->FireArkUIObjectLifecycleCallback(&payload);
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_EQ(receivedData, &payload);
+
+    context_->UnregisterArkUIObjectLifecycleCallback();
+}
+
+/**
+ * @tc.name: FireArkUIObjectLifecycleCallback_NullNodePtr
+ * @tc.desc: Test null node pointer does not crash the callback path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, FireArkUIObjectLifecycleCallback_NullNodePtr002, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    int callbackCount = 0;
+    context_->RegisterArkUIObjectLifecycleCallback([&](void*) { callbackCount++; });
+
+    context_->FireArkUIObjectLifecycleCallback(nullptr);
+    EXPECT_EQ(callbackCount, 1);
+
+    context_->UnregisterArkUIObjectLifecycleCallback();
+}
+
+/**
+ * @tc.name: FireArkUIObjectLifecycleCallback_NoRegisteredCallback
+ * @tc.desc: Test FireArkUIObjectLifecycleCallback skips when no callback registered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, FireArkUIObjectLifecycleCallback_NoCallback003, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 2, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree(context_);
+
+    auto* nodeContext = frameNode->GetContext();
+    ASSERT_NE(nodeContext, nullptr);
+    int payload = 42;
+    nodeContext->FireArkUIObjectLifecycleCallback(&payload);
+}
+
+/**
+ * @tc.name: FireArkUIObjectLifecycleCallback_UnregisterAfterRegister
+ * @tc.desc: Test unregister stops the callback from firing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, FireArkUIObjectLifecycleCallback_Unregister004, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    int callbackCount = 0;
+    context_->RegisterArkUIObjectLifecycleCallback([&](void*) { callbackCount++; });
+    EXPECT_NE(context_->objectLifecycleCallback_, nullptr);
+
+    context_->FireArkUIObjectLifecycleCallback(nullptr);
+    EXPECT_EQ(callbackCount, 1);
+
+    context_->UnregisterArkUIObjectLifecycleCallback();
+    EXPECT_EQ(context_->objectLifecycleCallback_, nullptr);
+
+    context_->FireArkUIObjectLifecycleCallback(nullptr);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
  * @tc.name: PipelineContextFourTestNg115
  * @tc.desc: Test CheckSourceTypeChange updates state only when source type changes.
  * @tc.type: FUNC

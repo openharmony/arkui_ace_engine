@@ -24,18 +24,19 @@
 
 namespace OHOS::Ace {
 
+enum class TextDirection;
+
 class ACE_FORCE_EXPORT WithEnvModel {
 public:
     static WithEnvModel* GetInstance();
     virtual ~WithEnvModel() = default;
 
     virtual void Create() = 0;
-    virtual void RemoveEnvProperty(const std::string& key) = 0;
-    virtual void SetEnvProperty(const std::string& key, const std::string& value) = 0;
-    virtual void SetEnvProperty(const std::string& key, double value) = 0;
-    virtual void SetEnvProperty(const std::string& key, bool value) = 0;
+    virtual void RemoveSystemEnvProperty(const std::string& key) = 0;
+    virtual void SetSystemEnvProperty(const std::string& key, TextDirection value) = 0;
+    virtual void SetSystemEnvProperty(const std::string& key, double value) = 0;
+    virtual void RemoveCustomEnvProperty(const std::string& key) = 0;
     virtual void SetCustomEnvProperty(const std::string& key, std::any value) = 0;
-    virtual const std::any* GetCustomEnvPropertyAny(const std::string& key) = 0;
 };
 
 } // namespace OHOS::Ace

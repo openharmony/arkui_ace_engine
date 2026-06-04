@@ -1346,7 +1346,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          const index = this.getIndexByPosition(finger.localX, finger.localY);
           if (!this.isItemEnabled(index)) {
             return;
           }
@@ -1390,7 +1390,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          const index = this.getIndexByPosition(finger.localX, finger.localY);
           if (!this.isItemEnabled(index)) {
             return;
           }
@@ -1404,7 +1404,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (this.isPressing) {
             this.dragWithPress = true;
           }
-          this.panStartGlobalX = finger.globalX;
+          this.panStartGlobalX = finger.localX;
           this.panStartIndex = index;
           if (this.isBackgroundSystemMaterialEnabled() && this.isDragging) {
             this.backplatePosition = {
@@ -1441,7 +1441,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
             return;
           }
           if (this.isBackgroundSystemMaterialEnabled()) {
-            let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect.position.x;
+            let nowX = finger.localX - this.panStartGlobalX + this.selectedItemRect.position.x;
             let startX = this.itemRects[0].position.x;
             let endX = this.itemRects[this.items.length - 1].position.x;
             if (this.isRTL()) {
@@ -1455,7 +1455,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
                 y: this.backplatePosition.y
             };
           } else {
-            const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+            const index = this.getIndexByPosition(finger.localX, finger.localY);
             this.updateSelectedIndex(index);
           }
         });
@@ -1527,7 +1527,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (!finger) {
             return;
           }
-          let deltaIndex = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
+          let deltaIndex = finger.localX - this.panStartGlobalX < 0 ? -1 : 1;
           if (this.isRTL()) {
             deltaIndex = -deltaIndex;
           }
@@ -2229,12 +2229,12 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     }
     return -1;
   }
-  isPointOnRect(globalX, globalY, rect) {
+  isPointOnRect(localX, localY, rect) {
     return (
-      globalX >= rect.globalPosition.x &&
-      globalX <= rect.globalPosition.x + rect.size.width &&
-      globalY >= rect.globalPosition.y &&
-      globalY <= rect.globalPosition.y + rect.size.height
+      localX >= rect.position.x &&
+      localX <= rect.position.x + rect.size.width &&
+      localY >= rect.position.y &&
+      localY <= rect.position.y + rect.size.height
     );
   }
   updateSelectedIndex(selectedIndex) {
@@ -3301,9 +3301,15 @@ class SegmentButtonV2ItemContent extends ViewV2 {
   }
   getItemSymbolFillColor() {
     if (this.selected) {
-      return this.itemSelectedSymbolFontColor?.color ?? this.theme.itemSelectedSymbolFontColor;
+      if (this.itemSelectedSymbolFontColor) {
+        return this.getColorMetricsResourceColor(this.itemSelectedSymbolFontColor);
+      }
+      return this.theme.itemSelectedSymbolFontColor;
     }
-    return this.itemSymbolFontColor?.color ?? this.theme.itemSymbolFontColor;
+    if (this.itemSymbolFontColor) {
+      return this.getColorMetricsResourceColor(this.itemSymbolFontColor);
+    }
+    return this.theme.itemSymbolFontColor;
   }
   getSymbolFontSize() {
     if (
@@ -3365,13 +3371,13 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     return this.hasHybrid ? this.theme.hybridItemMinHeight : this.theme.itemMinHeight;
   }
   getColorMetricsResourceColor(colorMetrics) {
-    const resourceId = colorMetrics.getResourceId();
-    if (resourceId !== undefined && resourceId !== -1) {
-      const abilityContext = this.getUIContext().getHostContext();
+    const resourceId = Reflect.get(colorMetrics, 'resourceId_');
+    if (typeof resourceId === 'number' && resourceId !== -1) {
+      const context = this.getUIContext().getHostContext();
       return {
         id: resourceId, type: COLOR_RESOURCE_TYPE,
-        bundleName: abilityContext?.abilityInfo?.bundleName ?? '',
-        moduleName: abilityContext?.abilityInfo?.moduleName ?? ''
+        bundleName: context?.abilityInfo?.bundleName ?? '',
+        moduleName: context?.abilityInfo?.moduleName ?? '',
       };
     }
     return colorMetrics.color;

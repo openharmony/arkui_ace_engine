@@ -973,4 +973,6 @@ RefPtr<SmartGestureProperty> FrameNode::GetSmartGestureProperty() const
     return smartGestureProperty_;
 }
 #pragma clang diagnostic pop
+
+void FrameNode::FireLpxUpdateCallbacks() {}
 } // namespace OHOS::Ace::NG
