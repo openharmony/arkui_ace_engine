@@ -103,6 +103,7 @@ private:
     bool ValidateSelectProposal(const SmartGestureProposal& proposal) const;
     bool ValidateScrollProposal(const SmartGestureProposal& proposal) const;
     bool ExecuteProposal(const SmartGestureProposal& proposal, const KeyEvent& event);
+    bool ExecuteSelectProposal(const RefPtr<FrameNode>& node);
     bool ExecuteClickProposal(const RefPtr<FrameNode>& node, const KeyEvent& event);
     bool ExecuteScrollProposal(const SmartGestureProposal& proposal);
     void ExecuteBackPressProposal();

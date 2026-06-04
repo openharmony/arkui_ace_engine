@@ -518,7 +518,9 @@ public:
         if (originalCallback == nullptr) {
             return false;
         }
-        return IsStrictlyEqual(env_, originalCallback, callback);
+        auto inputOriginalCallback = GetOriginalMonitorCallback(env_, callback);
+        return IsStrictlyEqual(env_, originalCallback, callback) ||
+               IsStrictlyEqual(env_, originalCallback, inputOriginalCallback);
     }
 
     int32_t GetInstanceId() const

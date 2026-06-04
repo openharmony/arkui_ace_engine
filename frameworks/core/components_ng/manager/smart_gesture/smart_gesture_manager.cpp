@@ -489,7 +489,7 @@ void SmartGestureManager::AddPrimaryActionNode(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(node);
     auto it = primaryActionRegistry_.find(node->GetId());
     uint64_t order = (it != primaryActionRegistry_.end()) ? it->second.order : nextPrimaryActionOrder_++;
-    primaryActionRegistry_.insert_or_assign(node->GetId(), PrimaryActionEntry{node, order});
+    primaryActionRegistry_.insert_or_assign(node->GetId(), PrimaryActionEntry { node, order });
     auto selectedNode = selectedNode_.Upgrade();
     if (selectedNode && selectedNode->GetId() == node->GetId()) {
         SyncSelectedNodePaint(node);
@@ -806,9 +806,16 @@ bool SmartGestureManager::ValidateScrollProposal(const SmartGestureProposal& pro
     auto node = proposal.GetTargetNode();
     CHECK_NULL_RETURN(ValidateTargetNode(node), false);
     CHECK_NULL_RETURN(proposal.scrollingConfig.has_value() && proposal.scrollingConfig->HasValue(), false);
+    const auto& config = proposal.scrollingConfig.value();
+    if (config.count.has_value()) {
+        CHECK_NULL_RETURN(config.count.value() >= 0, false);
+    }
+    if (config.distance.has_value()) {
+        CHECK_NULL_RETURN(std::isfinite(config.distance.value()) && config.distance.value() >= 0.0, false);
+    }
     auto pattern = node->GetPattern();
     CHECK_NULL_RETURN(pattern, false);
-    return pattern->IsScrollAble(proposal.scrollingConfig->direction);
+    return pattern->IsScrollAble(config.direction);
 }
 
 bool SmartGestureManager::ExecuteProposal(const SmartGestureProposal& proposal, const KeyEvent& event)
@@ -818,8 +825,7 @@ bool SmartGestureManager::ExecuteProposal(const SmartGestureProposal& proposal, 
         case SmartGestureProposalType::NONE_ACTION:
             return false;
         case SmartGestureProposalType::SELECT:
-            UpdateSelectedNode(targetNode);
-            return true;
+            return ExecuteSelectProposal(targetNode);
         case SmartGestureProposalType::CLICK:
             return ExecuteClickProposal(targetNode, event);
         case SmartGestureProposalType::SCROLL:
@@ -829,6 +835,18 @@ bool SmartGestureManager::ExecuteProposal(const SmartGestureProposal& proposal, 
             return true;
     }
     return false;
+}
+
+bool SmartGestureManager::ExecuteSelectProposal(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_RETURN(IsPrimaryActionNodeActive(node), false);
+    CHECK_NULL_RETURN(IsNodeClickable(node), false);
+
+    UpdateSelectedNode(node);
+
+    auto selectedNode = selectedNode_.Upgrade();
+    return selectedNode && selectedNode->GetId() == node->GetId();
 }
 
 bool SmartGestureManager::ExecuteClickProposal(const RefPtr<FrameNode>& node, const KeyEvent& event)
