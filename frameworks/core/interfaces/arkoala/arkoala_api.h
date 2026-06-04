@@ -2414,6 +2414,17 @@ struct ArkUIImageFrameInfo {
     void* drawable;
 };
 
+struct ArkUIImageJSProperties {
+    ArkUI_CharPtr src;
+    ArkUI_Float32 number[4];  // width, height, top, left values
+    ArkUI_Int32 unit[4];       // DimensionUnit for each
+    char* calc[4];             // CALC expressions
+    ArkUI_Int32 duration;
+    void* pixelMap;            // RefPtr<PixelMap>
+    ArkUI_CharPtr bundleName;
+    ArkUI_CharPtr moduleName;
+};
+
 struct ArkUIAccessibilityState {
     ArkUIOptionalInt isDisabled;
     ArkUIOptionalInt isSelected;
@@ -7378,6 +7389,7 @@ struct ArkUILoadingProgressModifier {
 };
 
 struct ArkUIImageAnimatorModifier {
+    void (*createModel)();
     void (*setState)(ArkUINodeHandle node, ArkUI_Int32 state);
     void (*resetState)(ArkUINodeHandle node);
     void (*setDuration)(ArkUINodeHandle node, ArkUI_Int32 duration);
@@ -7393,6 +7405,7 @@ struct ArkUIImageAnimatorModifier {
     void (*resetImageAnimatorIteration)(ArkUINodeHandle node);
     void (*setAutoMonitorInvisibleArea)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setImageAnimatorSrc)(ArkUINodeHandle node, ArkUIImageFrameInfo* imageInfos, ArkUI_Int32 size);
+    void (*setJSImages)(ArkUINodeHandle node, struct ArkUIImageJSProperties* images, ArkUI_Int32 length);
     void (*resetDuration)(ArkUINodeHandle node);
     ArkUI_Bool (*getIsReverse)(ArkUINodeHandle node);
     ArkUI_Int32 (*getDuration)(ArkUINodeHandle node);
@@ -7411,6 +7424,12 @@ struct ArkUIImageAnimatorModifier {
     void (*resetImageAnimatorOnCancel)(ArkUINodeHandle node);
     void (*setImageAnimatorOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetImageAnimatorOnFinish)(ArkUINodeHandle node);
+    void (*setImageAnimatorOnStartExt)(ArkUINodeHandle node, void* extraParam);
+    void (*setImageAnimatorOnPauseExt)(ArkUINodeHandle node, void* extraParam);
+    void (*setImageAnimatorOnRepeatExt)(ArkUINodeHandle node, void* extraParam);
+    void (*setImageAnimatorOnCancelExt)(ArkUINodeHandle node, void* extraParam);
+    void (*setImageAnimatorOnFinishExt)(ArkUINodeHandle node, void* extraParam);
+    ArkUINodeHandle (*createImageAnimatorFrameNode)(ArkUI_Int32 nodeId);
 };
 
 enum class ArkUIWidthType : uint32_t {

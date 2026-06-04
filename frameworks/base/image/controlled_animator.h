@@ -29,7 +29,7 @@ using AnimatorEvent = std::function<void()>;
 using PictureInfo = std::pair<float, int32_t>;
 using IndexChangeListener = std::function<void(int32_t)>;
 
-class ControlledAnimator : public AceType {
+class ACE_FORCE_EXPORT ControlledAnimator : public AceType {
     DECLARE_ACE_TYPE(ControlledAnimator, AceType);
 public:
     ControlledAnimator() = default;

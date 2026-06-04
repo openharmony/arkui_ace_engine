@@ -663,10 +663,10 @@ namespace Converter {
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src);
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src);
     template<> ACE_FORCE_EXPORT ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
-    template<> CalcDimension Convert(const Ark_Float64& src);
+    template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Float64& src);
     template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);
-    template<> CalcDimension Convert(const Ark_String& src);
+    template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT CalcLength Convert(const Ark_Float64& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Number& src);

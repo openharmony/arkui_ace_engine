@@ -101,6 +101,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "MenuItemGroup", "menu" },
         { "LazyColumnLayout", "lazycolumnlayout" },
         { "Toggle", "toggle" },
+        { "ImageAnimator", "imageanimator" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

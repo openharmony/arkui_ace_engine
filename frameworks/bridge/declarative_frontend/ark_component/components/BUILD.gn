@@ -107,6 +107,7 @@ special_components = [
   "arkpatternlock",
   "arkcounter",
   "arktoggle",
+  "arkimageanimator",
 ]
 
 if (qrcodegen_support) {

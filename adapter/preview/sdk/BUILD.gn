@@ -209,6 +209,7 @@ if (is_ohos_standard_system) {
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkcounter",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkqrcode",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arktoggle",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkimageanimator",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
@@ -254,6 +255,7 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkricheditor.abc",
       "${out_path}/arkui/ace_engine/arklazycolumnlayout.abc",
       "${out_path}/arkui/ace_engine/arktoggle.abc",
+      "${out_path}/arkui/ace_engine/arkimageanimator.abc",
     ]
     if (!ace_engine_feature_wearable) { 
       sources += [

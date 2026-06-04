@@ -16,7 +16,11 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_image_animator_ffi.h"
 
 #include "cj_lambda.h"
+
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model.h"
+#include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -26,6 +30,20 @@ namespace {
 const std::vector<Animator::Status> ANIMATOR_STATUS = { Animator::Status::IDLE, Animator::Status::RUNNING,
     Animator::Status::PAUSED, Animator::Status::STOPPED };
 const std::vector<FillMode> FILL_MODES = { FillMode::NONE, FillMode::FORWARDS, FillMode::BACKWARDS, FillMode::BOTH };
+
+// Should use CJUIModifier API later
+NG::ImageAnimatorModelNG* GetImageAnimatorModel()
+{
+    static NG::ImageAnimatorModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("ImageAnimator");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find ImageAnimator dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::ImageAnimatorModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
 
 void ParseImages(const FfiImage& ffiImages, ImageProperties& imageProperties)
 {
@@ -48,7 +66,7 @@ void ParseImages(const FfiImage& ffiImages, ImageProperties& imageProperties)
 extern "C" {
 void FfiOHOSAceFrameworkImageAnimatorCreate()
 {
-    ImageAnimatorModel::GetInstance()->Create();
+    GetImageAnimatorModel()->Create();
 }
 
 void FfiOHOSAceFrameworkImageAnimatorSetImages(VectorFfiImageHandle vecContent)
@@ -60,7 +78,7 @@ void FfiOHOSAceFrameworkImageAnimatorSetImages(VectorFfiImageHandle vecContent)
         ParseImages(imagesVec[i], imageProperties);
         images.push_back(imageProperties);
     }
-    ImageAnimatorModel::GetInstance()->SetImages(std::move(images));
+    GetImageAnimatorModel()->SetImages(std::move(images));
 }
 
 void FfiOHOSAceFrameworkImageAnimatorSetState(int32_t state)
@@ -69,27 +87,27 @@ void FfiOHOSAceFrameworkImageAnimatorSetState(int32_t state)
         LOGE("invalid value for animator state");
         return;
     }
-    ImageAnimatorModel::GetInstance()->SetState(static_cast<int32_t>(ANIMATOR_STATUS[state]));
+    GetImageAnimatorModel()->SetState(static_cast<int32_t>(ANIMATOR_STATUS[state]));
 }
 
 void FfiOHOSAceFrameworkImageAnimatorSetDuration(int32_t duration)
 {
-    ImageAnimatorModel::GetInstance()->SetDuration(duration);
+    GetImageAnimatorModel()->SetDuration(duration);
 }
 
 void FfiOHOSAceFrameworkImageAnimatorSetReverse(bool isReverse)
 {
-    ImageAnimatorModel::GetInstance()->SetIsReverse(isReverse);
+    GetImageAnimatorModel()->SetIsReverse(isReverse);
 }
 
 void FfiOHOSAceFrameworkImageAnimatorSetFixedSize(bool fixedSize)
 {
-    ImageAnimatorModel::GetInstance()->SetFixedSize(fixedSize);
+    GetImageAnimatorModel()->SetFixedSize(fixedSize);
 }
 
 void FfiOHOSAceFrameworkImageAnimatorSetPreDecode(int32_t preDecode)
 {
-    ImageAnimatorModel::GetInstance()->SetPreDecode(preDecode);
+    GetImageAnimatorModel()->SetPreDecode(preDecode);
 }
 
 void FfiOHOSAceFrameworkImageAnimatorSetFillMode(int32_t mode)
@@ -98,37 +116,37 @@ void FfiOHOSAceFrameworkImageAnimatorSetFillMode(int32_t mode)
         LOGE("invalid value for animator fillMode");
         return;
     }
-    ImageAnimatorModel::GetInstance()->SetFillMode(static_cast<int32_t>(FILL_MODES[mode]));
+    GetImageAnimatorModel()->SetFillMode(static_cast<int32_t>(FILL_MODES[mode]));
 }
 
 void FfiOHOSAceFrameworkImageAnimatorSetIterations(int32_t iteration)
 {
-    ImageAnimatorModel::GetInstance()->SetIteration(iteration);
+    GetImageAnimatorModel()->SetIteration(iteration);
 }
 
 void FfiOHOSAceFrameworkImageAnimatorOnStart(void (*callback)())
 {
-    ImageAnimatorModel::GetInstance()->SetOnStart(CJLambda::Create(callback));
+    GetImageAnimatorModel()->SetOnStart(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkImageAnimatorOnPause(void (*callback)())
 {
-    ImageAnimatorModel::GetInstance()->SetOnPause(CJLambda::Create(callback));
+    GetImageAnimatorModel()->SetOnPause(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkImageAnimatorOnRepeat(void (*callback)())
 {
-    ImageAnimatorModel::GetInstance()->SetOnRepeat(CJLambda::Create(callback));
+    GetImageAnimatorModel()->SetOnRepeat(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkImageAnimatorOnCancel(void (*callback)())
 {
-    ImageAnimatorModel::GetInstance()->SetOnCancel(CJLambda::Create(callback));
+    GetImageAnimatorModel()->SetOnCancel(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkImageAnimatorOnFinish(void (*callback)())
 {
-    ImageAnimatorModel::GetInstance()->SetOnFinish(CJLambda::Create(callback));
+    GetImageAnimatorModel()->SetOnFinish(CJLambda::Create(callback));
 }
 
 VectorFfiImageHandle FfiCJCreateVectorFfiImage(int64_t size)

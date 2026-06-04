@@ -599,6 +599,7 @@ frameworks/bridge/declarative_frontend/ark_direct_component/src/arkdatapanel.ts 
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkpatternlock.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arkqrcode.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktextclock.ts @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_direct_component/src/arkimageanimator.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_direct_component/src/arktoggle.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
@@ -642,7 +643,6 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkGridItem.ts @arkuisc
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGridRow.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGrid.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkHyperlink.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkImageAnimator.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyGridLayout.ts @arkuiscroll
@@ -1211,8 +1211,6 @@ frameworks/bridge/declarative_frontend/jsview/js_hyperlink.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_if_else.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_if_else.h @arkuieco3
-frameworks/bridge/declarative_frontend/jsview/js_image_animator.cpp @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_image_animator.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_image.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_image.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_image_span.cpp @huawei_g_five
