@@ -5901,12 +5901,12 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<ForceSplitConfig>& s
         return;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "forceSplit is supported.");
-    NG::ForceSplitConfig config;
-    if (!NG::ForceSplitUtils::ParseForceSplitConfig(splitConfig->isRouter, splitConfig->configJsonStr, config)) {
+    NG::ForceSplitParam config;
+    if (!NG::ForceSplitUtils::ParseForceSplitParam(splitConfig->isRouter, splitConfig->configJsonStr, config)) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
         return;
     }
-    NG::ForceSplitUtils::LogForceSplitConfig(splitConfig->isRouter, config);
+    NG::ForceSplitUtils::LogForceSplitParam(splitConfig->isRouter, config);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     forceSplitMgr->SetIsRouter(splitConfig->isRouter);
     forceSplitMgr->SetDialogSupportSplit(config.dialogSupportSplit);
