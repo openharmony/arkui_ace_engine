@@ -27,6 +27,7 @@ build_component_ng("property_ng") {
     "magic_layout_property.cpp",
     "measure_property.cpp",
     "measure_utils.cpp",
+    "particle_property.cpp",
     "property.cpp",
     "safe_area_insets.cpp",
     "templates_parser.cpp",

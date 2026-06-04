@@ -15,6 +15,8 @@
 #include "core/components_ng/base/ui_node.h"
 
 #include <queue>
+
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "base/utils/feature_param.h"
@@ -2914,6 +2916,88 @@ void UINode::UpdateSelectionContainerId(int32_t selectionContainerId)
             continue;
         }
         child->UpdateSelectionContainerId(selectionContainerId);
+    }
+}
+
+void UINode::SetLayoutTime(int64_t time)
+{
+    if (nodeInfo_) {
+        nodeInfo_->layoutTime = time;
+    }
+}
+
+int64_t UINode::GetLayoutTime()
+{
+    if (nodeInfo_) {
+        return nodeInfo_->layoutTime;
+    }
+    return 0;
+}
+
+int32_t UINode::GetFlexLayouts()
+{
+    if (nodeInfo_) {
+        return nodeInfo_->flexLayouts;
+    }
+    return 0;
+}
+
+int32_t UINode::GetRow() const
+{
+    if (nodeInfo_) {
+        return nodeInfo_->codeRow;
+    }
+    return 0;
+}
+
+int32_t UINode::GetCol() const
+{
+    if (nodeInfo_) {
+        return nodeInfo_->codeCol;
+    }
+    return 0;
+}
+
+void UINode::SetRow(const int32_t row)
+{
+    if (nodeInfo_) {
+        nodeInfo_->codeRow = row;
+    }
+}
+
+void UINode::SetCol(const int32_t col)
+{
+    if (nodeInfo_) {
+        nodeInfo_->codeCol = col;
+    }
+}
+
+void UINode::SetFilePath(const std::string& sources)
+{
+    if (nodeInfo_) {
+        nodeInfo_->pagePath = sources;
+    }
+}
+
+std::string UINode::GetFilePath() const
+{
+    if (nodeInfo_) {
+        return nodeInfo_->pagePath;
+    }
+    return "";
+}
+
+void UINode::SetForeachItem()
+{
+    if (nodeInfo_) {
+        nodeInfo_->isForEachItem = true;
+    }
+}
+
+void UINode::AddFlexLayouts()
+{
+    if (nodeInfo_) {
+        nodeInfo_->flexLayouts++;
     }
 }
 } // namespace OHOS::Ace::NG

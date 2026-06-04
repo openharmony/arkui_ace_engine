@@ -452,6 +452,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_pattern_multi_thread.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_properties.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scroller_observer_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/selectable_item_event_hub.cpp",

@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_container_base_ffi.h"
 
+#include "bridge/common/utils/source_map.h"
 #include "core/components_ng/base/view_stack_model_ng.h"
 
 using namespace OHOS::Ace;

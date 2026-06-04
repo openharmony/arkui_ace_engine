@@ -22,7 +22,6 @@
 #include "base/geometry/offset.h"
 #include "base/image/image_defines.h"
 #include "base/memory/referenced.h"
-#include "core/common/clipboard/clipboard.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_provider.h"
@@ -40,6 +39,7 @@
 
 // Forward declarations to reduce header dependencies
 namespace OHOS::Ace {
+class Clipboard;
 class ImageAnalyzerManager;
 class ImageSourceInfo;
 class PixelMap;
