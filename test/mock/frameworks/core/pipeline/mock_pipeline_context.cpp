@@ -415,26 +415,11 @@ void PipelineContext::SetupRootElement()
     layoutConstraint.maxSize = idealSize;
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
     auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
-    rootFocusHub->SetFocusType(FocusType::SCOPE);
-    rootFocusHub->SetFocusable(true);
+    if (rootFocusHub) {
+        rootFocusHub->SetFocusType(FocusType::SCOPE);
+        rootFocusHub->SetFocusable(true);
+    }
     rootNode_->AttachToMainTree(false, this);
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    rootNode_->AddChild(stageNode);
-    stageManager_ = MakeRefPtr<StageManager>(stageNode);
-    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
-        auto frontend = weakFrontend.Upgrade();
-        CHECK_NULL_RETURN(frontend, "");
-        return frontend->GetPagePathByUrl(url);
-    };
-    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
-    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
-    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
-    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
-    dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
-    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
-    inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
 }
 
 void PipelineContext::SendEventToAccessibilityWithNode(

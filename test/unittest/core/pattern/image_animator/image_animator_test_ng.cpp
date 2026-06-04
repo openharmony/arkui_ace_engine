@@ -33,6 +33,9 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
+#undef protected
+#undef private
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -1543,7 +1546,6 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_Play_005, TestSize.Level1)
     auto animator = pattern_->controlledAnimator_;
     animator->SetDuration(1000);
     animator->Forward();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     animator->Pause();
     animator->Forward();
     EXPECT_EQ(animator->GetControlStatus(), ControlledAnimator::ControlStatus::RUNNING);
@@ -2824,7 +2826,6 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest001, TestSize.Level1)
     imageAnimatorPattern->OnModifyDone();
     EXPECT_TRUE(pauseFlag);
 }
-
 
 /**
  * @tc.name: ImageAnimatorSetImagesTest002

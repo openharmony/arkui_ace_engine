@@ -14,13 +14,6 @@
  */
 
 #include "core/components_ng/pattern/custom/custom_node.h"
-
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/custom/custom_node_base.h"
-#include "core/components_ng/pattern/custom/custom_node_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline/base/element_register.h"
-
 namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {

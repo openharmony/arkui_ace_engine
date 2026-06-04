@@ -16,6 +16,11 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
+{
+    return nullptr;
+}
+
 OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, bool checkPosition) const
 {
     (void)checkBoundary;
