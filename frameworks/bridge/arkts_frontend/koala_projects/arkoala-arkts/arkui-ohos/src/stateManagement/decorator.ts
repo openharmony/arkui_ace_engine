@@ -23,6 +23,11 @@ import { CustomComponentLifecycle } from '@component/customComponent';
 import { IEnvVariable } from '@decoratorEnv';
 import window from '@ohos.window';
 import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
+import { Direction } from '#generated'
+
+const SYSTEM_ENV_KEY_DIRECTION = 'system.arkui.layout.direction'
+const SYSTEM_ENV_KEY_FONT_SCALE = 'system.arkui.fontScale'
+
 export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
 export { ReusePoolOwnership } from '../component/customComponent';
 /**
@@ -211,6 +216,8 @@ export interface MakeMonitorOptions {
 
 export interface IEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
 
+export interface ICustomEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
+
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeMutableStateMeta(observedObject: IObservedObject | undefined, propertyName: string): IMutableStateMeta;
@@ -321,6 +328,12 @@ export interface IStateMgmtFactory {
     ): IEnvDecoratedVariable<T>;
     makeSyncMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
     makeGlobalReusePool(ownership: ReusePoolOwnership, acceptedClasses: Class[], owner: IVariableOwner): IGlobalReusePoolVariable;
+    makeCustomEnv<T>(
+        owningView: IVariableOwner,
+        envKey: CustomEnvKey<T>,
+        varName: string,
+        defaultValue: T
+    ): ICustomEnvDecoratedVariable<T>;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -376,13 +389,13 @@ export class SystemEnvKey<T> {
     }
 }
  
-class WritableSystemEnvKey<T> extends SystemEnvKey<T> {
+export class WritableSystemEnvKey<T> extends SystemEnvKey<T> {
     constructor(key: string) {
         super(key)
     }
 }
  	 
-class ReadonlySystemEnvKey<T> extends SystemEnvKey<T> {
+export class ReadonlySystemEnvKey<T> extends SystemEnvKey<T> {
     constructor(key: string) {
         super(key)
     }
@@ -397,4 +410,28 @@ export class ReadonlyEnvKey {
     static readonly WINDOW_SIZE_PX: ReadonlySystemEnvKey<window.Size> = new ReadonlySystemEnvKey<window.Size>('system.window.size.px');
     static readonly WINDOW_AVOID_AREA: ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoVP> = new ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoVP>('system.window.avoidarea');
     static readonly WINDOW_AVOID_AREA_PX: ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoPX> = new ReadonlySystemEnvKey<window.UIEnvWindowAvoidAreaInfoPX>('system.window.avoidarea.px');
+}
+
+export class WritableEnvKey {
+    static readonly DIRECTION: WritableSystemEnvKey<Direction> =
+        new WritableSystemEnvKey<Direction>(SYSTEM_ENV_KEY_DIRECTION)
+    static readonly FONT_SCALE: WritableSystemEnvKey<number> =
+        new WritableSystemEnvKey<number>(SYSTEM_ENV_KEY_FONT_SCALE)
+}
+
+export class CustomEnvKey<S> {
+    private static nextId: int32 = 1
+    private _internal_id: int32 = -1
+
+    constructor() {
+        this._internal_id = CustomEnvKey.nextId++
+    }
+
+    get internalId(): int32 {
+        return this._internal_id
+    }
+
+    static create<T>(): CustomEnvKey<T> {
+        return new CustomEnvKey<T>()
+    }
 }

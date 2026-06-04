@@ -29,6 +29,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.arkui.componentUtils.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkDynamicLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.WithEnv.ets",
   "arkui-preprocessed/@ohos.arkui.dragController.ets",
   "arkui-preprocessed/@ohos.arkui.drawableDescriptor.ets",
   "arkui-preprocessed/@ohos.arkui.focusController.ets",
@@ -459,6 +460,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorConsume.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorConsumer.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
+  "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorCustomEnv.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorInteropWatch.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorLink.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorLocal.ets",
@@ -564,6 +566,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/typedNode/ArkXComponentNode.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopBackingValue.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
+  "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorCustomEnv.ets",
   "arkui-preprocessed/arkui/base/ArkUIObjectFinalizationRegisterProxy.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopBinding.ets",
 ]
@@ -632,6 +635,7 @@ arkui_path_keys = [
   "@aceTrace",
   "@decoratorEnv",
   "@ohos.arkui.components.ArkDynamicLayout",
+  "@ohos.arkui.WithEnv",
 ]
 
 arkui_path_values = [
@@ -698,6 +702,7 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/base/AceTrace.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkDynamicLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.WithEnv.ets",
 ]
 
 if (defined(ace_engine_feature_enable_smart_gesture) &&

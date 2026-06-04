@@ -25,7 +25,8 @@ import {
     IVariableOwner,
     ConsumeOptions,
     IObservedObject,
-    MakeMonitorOptions
+    MakeMonitorOptions,
+    CustomEnvKey
 } from '../decorator';
 import {
     IStateDecoratedVariable,
@@ -46,6 +47,7 @@ import {
     IGlobalReusePoolVariable,
     ReusePoolOwnership,
     EnvOptions,
+    ICustomEnvDecoratedVariable,
     SystemEnvKey
 } from '../decorator';
 import { IMutableStateMeta } from '../decorator';
@@ -73,6 +75,7 @@ import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
 import { uiUtils } from './uiUtilsImpl';
 import { FactoryInternal } from './iFactoryInternal';
 import { EnvDecoratedVariable } from '@decoratorEnv';
+import { CustomEnvDecoratedVariable } from '../decoratorImpl/decoratorCustomEnv';
 import { ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 import { GlobalReusePoolDecoratedVariable } from '../decoratorImpl/decoratorGlobalReusePool';
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
@@ -662,5 +665,19 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             true,
             options?.functionName
         );
+    }
+
+    makeCustomEnv<T>(
+        owningView: IVariableOwner,
+        envKey: CustomEnvKey<T>,
+        varName: string,
+        defaultValue: T
+    ): ICustomEnvDecoratedVariable<T> {
+        return new CustomEnvDecoratedVariable<T>(
+            owningView,
+            envKey,
+            varName,
+            uiUtils.autoProxyObject(defaultValue) as T
+        ) as ICustomEnvDecoratedVariable<T>;
     }
 }
