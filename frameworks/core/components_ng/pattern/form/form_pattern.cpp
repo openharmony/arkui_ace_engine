@@ -622,12 +622,12 @@ void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
 
     // delete image rs node and frame node
     RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
-    
+
     // clean up snapshot data after recover
     pixelMap_.Reset();
     isSnapshot_ = false;
     needSnapshotAgain_ = false;
-    
+
     RequestRender();
     // handle cached pointer event
     if (needHandleCachedClick && formManagerBridge_) {
