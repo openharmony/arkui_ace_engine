@@ -1187,6 +1187,20 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetAttachedNodeHandleById002, TestSi
 }
 
 /**
+ * @tc.name: OH_ArkUI_NativeModule_SetNodeMountPolicy001
+ * @tc.desc: Test OH_ArkUI_NativeModule_SetChildMountPolicy with nullptr node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NativeModule_SetNodeMountPolicy001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+
+    auto result = OH_ArkUI_NativeModule_SetChildMountPolicy(nullptr, OH_ARKUI_NODE_MOUNT_POLICY_MIXED);
+
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
  * @tc.name: OH_ArkUI_NativeModule_AdoptChild001
  * @tc.desc: Test OH_ArkUI_NativeModule_AdoptChild when node or child is not CNode.
  * @tc.type: FUNC

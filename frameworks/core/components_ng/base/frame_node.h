@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 
+#include <cstdint>
 #include <functional>
 #include <list>
 #include <mutex>
@@ -113,6 +114,7 @@ class DrawModifier;
 class NodeAnimatablePropertyBase;
 class CustomAnimatableArithmetic;
 class ContentModifier;
+enum class MountPolicy : int32_t;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -611,6 +613,13 @@ public:
         return DynamicCast<T>(eventHub_);
     }
 
+    MountPolicy GetMountPolicy();
+
+    void SetMountPolicy(MountPolicy mountPolicy);
+
+    void OnMixedMountChildAdded(const RefPtr<UINode>& child) override;
+    void OnMixedMountChildRemoved(const RefPtr<UINode>& child) override;
+
     RefPtr<GestureEventHub> GetOrCreateGestureEventHub();
 
     RefPtr<InputEventHub> GetOrCreateInputEventHub();
@@ -656,6 +665,9 @@ public:
     bool IsAtomicNode() const override;
 
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
+    void ClearNeedSyncRenderTree();
+
+    void GenerateRenderTreeFrameChildren(std::list<RefPtr<FrameNode>>& children);
 
     void RebuildRenderContextTree() override;
 
@@ -995,11 +1007,7 @@ public:
         return dragPreviewInfo_;
     }
 
-    void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
-    {
-        overlayNode_ = overlayNode;
-        SetOverlayNodeIsFree(IsFree());
-    }
+    void SetOverlayNode(const RefPtr<FrameNode>& overlayNode);
 
     void SetOverlayNodeIsFree(bool isFree);
 
@@ -1614,10 +1622,7 @@ public:
         return paintNode_;
     }
 
-    void SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode)
-    {
-        accessibilityFocusPaintNode_ = accessibilityFocusPaintNode;
-    }
+    void SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode);
 
     const RefPtr<FrameNode>& GetFocusPaintNode() const
     {
@@ -2002,6 +2007,9 @@ private:
     bool isPendingState_ = false;
     // Marks whether the background builder needs to be refreshed due to surface changes.
     bool isNeedRefreshBackgroundBuilder_ = false;
+
+    MountPolicy mountPolicy_;
+
     int32_t refreshBackgroundBuilderId_ = 0;
 
     bool hasPreMake_ = false;

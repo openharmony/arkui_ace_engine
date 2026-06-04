@@ -559,6 +559,7 @@ typedef enum {
  *
  * @since 20
  */
+
 typedef enum {
     /** 基线对齐。 */
     ARKUI_TEXT_VERTICAL_ALIGNMENT_BASELINE = 0,
@@ -10222,6 +10223,25 @@ void OH_ArkUI_TextController_Destroy(OH_ArkUI_TextController* controller);
 ArkUI_ErrorCode OH_ArkUI_TextController_SetStyledString(
     OH_ArkUI_TextController* controller, ArkUI_StyledString_Descriptor* descriptor);
 
+/**
+ * @brief Enumeration of the policy for mounting child node to the target node.
+ *
+ * @since 26.0.0
+ */
+typedef enum {
+    /**
+     * If you want to mount a RenderNode as a child node, that RenderNode must be the only child.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_NODE_MOUNT_POLICY_SINGLE_IF_RENDER_NODE = 0,
+    /*
+     * Multiple child nodes of type Node or RenderNode allowed.
+     *
+     * @since 26.0.0
+     */
+    OH_ARKUI_NODE_MOUNT_POLICY_MIXED = 1,
+} OH_ArkUI_NodeMountPolicy;
 #ifdef __cplusplus
 };
 #endif

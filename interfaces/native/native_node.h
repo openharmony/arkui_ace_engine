@@ -13874,22 +13874,30 @@ int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle
 ArkUI_GestureCollectInterceptInfo* OH_ArkUI_NodeEvent_GetGestureCollectInterceptInfo(ArkUI_NodeEvent* nodeEvent);
 
 /**
- * @brief Retrieves the latest error message, which includes the error code, method name, and error cause.
- * When other interfaces return an error code, they save the corresponding error message,
- * and this interface can retrieve the currently stored error message.
- * The information returned by this interface may evolve with versions and is intended solely for
- * output to aid in analysis and troubleshooting. It should not be used for logical decisions.
+ * @brief Set the subnode mounting policy of the target node.
  *
- * The returned string is a thread-local string created by the system. Different threads maintain
- * independent error messages, and other threads do not overwrite the current thread's result.
- * The pointer remains valid until the current thread records another error or exits. The caller must
- * not modify its content. If any editing is required, create a copy of the string content yourself.
- * No memory deallocation is required by the caller.
- * 
- * @return Returns the most recent error message.
+ * @param node the target node handle.
+ * @param policy the policy to set. Valid values correspond to {@link OH_ArkUI_NodeMountPolicy}.
+ * @return Error code.
+ *          <ul><li>{@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *          </li><li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *          </li><li>{@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.</li></ul>
  * @since 26.0.0
  */
-const char* OH_ArkUI_NativeModule_GetErrorMessage();
+ArkUI_ErrorCode OH_ArkUI_NativeModule_SetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy policy);
+
+/**
+ * @brief Get the current child mount policy of the specified node.
+ *
+ * @param node the target node handle.
+ * @param policy the pointer to receive child mounting policy of the target node.
+ * @return Error code.
+ *          <ul><li>{@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *          </li><li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *          </li><li>{@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.</li></ul>
+ * @since 26.0.0
+ */
+ArkUI_ErrorCode OH_ArkUI_NativeModule_GetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy* policy);
 
 #ifdef __cplusplus
 }
