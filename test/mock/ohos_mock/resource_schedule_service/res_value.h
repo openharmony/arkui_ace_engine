@@ -36,7 +36,7 @@ enum EventListenerGroup : uint32_t {
     LISTENER_GROUP_DH = 5,
     LISTENER_GROUP_KIDDO = 6,
     LISTENER_GROUP_END,
-}; 
+};
 } // end ResType
 } // end ResourceSchedule
 } // OHOS

@@ -14,12 +14,8 @@
  */
 
 #include "gtest/gtest.h"
-#define private public
-#define protected public
 #include "adapter/ohos/entrance/listener/ressched_event_listener.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,11 +36,14 @@ public:
 
     void SetUp() override
     {
-        ResschedEventListener::GetInstance()->RegisterToRSS(10, 20);
+        int32_t windowId = 10;
+        int32_t instanceId = 20;
+        ResschedEventListener::GetInstance()->RegisterToRSS(windowId, instanceId);
     }
     void TearDown() override
     {
-        ResschedEventListener::GetInstance()->UnRegisterToRSS(10, 20);
+        int32_t windowId = 10;
+        ResschedEventListener::GetInstance()->UnRegisterToRSS(windowId);
     }
 };
 
@@ -61,8 +60,9 @@ HWTEST_F(ResschedEventListenerTest, OnComponentPreMake001, TestSize.Level1)
     std::unordered_map<std::string, std::string>& extInfo;
     extInfo["windowId"] = 10;
     extInfo["pageName"] = "pageName";
+    uint32_t swiperType = 21;
 
-    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, extInfo);
     EXPECT_NE(listener_->containerMap_.empty(), false);
 
     MockPipelineContext::pipeline_ = pipeline_bak;
@@ -78,8 +78,9 @@ HWTEST_F(ResschedEventListenerTest, OnComponentPreMake002, TestSize.Level1)
     std::unordered_map<std::string, std::string>& extInfo;
     extInfo["windowId"] = 10;
     extInfo["pageName"] = "pageName";
+    uint32_t swiperType = 21;
 
-    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, extInfo);
     EXPECT_NE(listener_->containerMap_.empty(), false);
 }
 
@@ -93,7 +94,9 @@ HWTEST_F(ResschedEventListenerTest, OnComponentPreMake003, TestSize.Level1)
     std::unordered_map<std::string, std::string>& extInfo;
     extInfo["windowId"] = 10;
     extInfo["pageName"] = "";
-    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    uint32_t swiperType = 21;
+
+    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, extInfo);
     EXPECT_NE(listener_->containerMap_.empty(), false);
 }
 }

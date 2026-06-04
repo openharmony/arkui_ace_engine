@@ -16,7 +16,7 @@
 #define RES_SCHED_CLIENT_LISTENER_H
 
 #include <cstdint>
-#include <string> 
+#include <string>
 #include "res_sched_event_listener.h"
 
 namespace OHOS {
