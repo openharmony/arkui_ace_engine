@@ -32,7 +32,7 @@ public:
     RefPtr<FrameNode> GetHostNode() const override;
     std::optional<RectF> GetFirstHandleRect() override;
     std::optional<RectF> GetSecondHandleRect() override;
-    RectF GetSelectionArea(const RefPtr<FrameNode>& targetNode, SelectRectsType pos) override;
+    RectF GetSelectionArea(SelectRectsType pos, SelectionAreaResultType& resultType) override;
     SelectionIndexRange GetSelectionIndexes() const override;
     SelectionIndexRange GetSelectionIndexesByPoints(const OffsetF& firstPoint, const OffsetF& secondPoint) override;
     int32_t GetSelectionIndexByPoint(const OffsetF& point) override;
@@ -57,14 +57,15 @@ public:
     void OnContainerPropertyUpdate(uint32_t flags) override;
     void UpdateChildHandleGlobalOffset() override;
     OffsetF GetChildHandleGlobalOffset() const override;
+    bool HasOrUpdateRenderTransform();
 
 private:
     Offset GetMovingHandleReferenceOffset(const OffsetF& point) const;
     bool GetRenderClipValue() const;
     bool CheckChildHasTransformAttr() const;
-    bool HasOrUpdateRenderTransform();
     void UpdateTransformFlag();
     OffsetF GetChildPaintOffsetWithoutTransform() const;
+    bool GetClipHandleViewPortForChild(const RefPtr<FrameNode>& host, RectF& rect);
 
     WeakPtr<TextPattern> pattern_;
     OffsetF handleGlobalOffset_;

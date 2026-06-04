@@ -925,7 +925,8 @@ public:
     VectorF GetHostScale() const;
 
 protected:
-    RefPtr<TextSelectOverlay> GetSelectOverlay() override;
+    RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay() override;
+    RefPtr<TextSelectOverlay> GetSelectOverlay() const override;
     bool CanStartAITask() const override;
 
     template<typename T>

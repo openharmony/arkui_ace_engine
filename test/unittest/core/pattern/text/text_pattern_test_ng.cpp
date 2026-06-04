@@ -434,7 +434,7 @@ HWTEST_F(TextPatternTestNg, HandleSingleClickEvent001, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     GestureEvent info;
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
-    ASSERT_NE(textPattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(textPattern->GetOrCreateSelectOverlay(), nullptr);
     textPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->selectOverlay_->originalMenuIsShow_, true);
@@ -451,7 +451,7 @@ HWTEST_F(TextPatternTestNg, HandleSingleClickEvent002, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     GestureEvent info;
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
-    ASSERT_NE(textPattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(textPattern->GetOrCreateSelectOverlay(), nullptr);
     textPattern->dataDetectorAdapter_->hasClickedAISpan_ = false;
     textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->selectOverlay_->originalMenuIsShow_, true);
@@ -2514,7 +2514,7 @@ HWTEST_F(TextPatternTestNg, HandleMouseRightButton001, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     Offset textOffset;
     textPattern->HandleMouseRightButton(info, textOffset);
-    EXPECT_NE(textPattern->GetSelectOverlay(), nullptr);
+    EXPECT_NE(textPattern->GetOrCreateSelectOverlay(), nullptr);
 }
 
 /**

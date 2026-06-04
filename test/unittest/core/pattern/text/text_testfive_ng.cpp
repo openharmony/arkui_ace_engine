@@ -52,7 +52,7 @@ HWTEST_F(TextTestFiveNg, CalcHandleLevelMode001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     ASSERT_NE(frameNode->GetGeometryNode(), nullptr);
 
@@ -84,7 +84,7 @@ HWTEST_F(TextTestFiveNg, OnAncestorNodeChanged001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     FrameNodeChangeInfoFlag frameNodeChangeInfoFlag = 0;
@@ -123,7 +123,7 @@ HWTEST_F(TextTestFiveNg, OnHandleMarkInfoChange001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);
@@ -179,7 +179,7 @@ HWTEST_F(TextTestFiveNg, IsNeedMenuTranslate001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->IsNeedMenuTranslate(), false);
@@ -197,7 +197,7 @@ HWTEST_F(TextTestFiveNg, HandleOnTranslate001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->HandleOnTranslate();
@@ -217,7 +217,7 @@ HWTEST_F(TextTestFiveNg, IsNeedMenuSearch001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->IsNeedMenuSearch(), false);
@@ -235,7 +235,7 @@ HWTEST_F(TextTestFiveNg, HandleOnSearch001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->HandleOnSearch();
@@ -255,7 +255,7 @@ HWTEST_F(TextTestFiveNg, IsNeedMenuShare001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->IsNeedMenuShare(), false);
@@ -273,7 +273,7 @@ HWTEST_F(TextTestFiveNg, IsNeedMenuShare002, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     pattern->textForDisplay_ = TEXT_U16CONTENT;
 
@@ -292,7 +292,7 @@ HWTEST_F(TextTestFiveNg, HandleOnShare001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->HandleOnShare();
@@ -1572,7 +1572,7 @@ HWTEST_F(TextTestFiveNg, HandleSurfaceChanged001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);

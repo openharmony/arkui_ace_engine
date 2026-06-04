@@ -27,6 +27,12 @@
 #include "core/components_ng/manager/select_content_overlay/selection_container_child.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
+namespace OHOS::Ace {
+class GestureEvent;
+enum class WindowSizeChangeReason : uint32_t;
+class TouchEventInfo;
+}
+
 namespace OHOS::Ace::NG {
 struct OverlayRequest;
 
@@ -67,12 +73,24 @@ public:
     virtual void SwitchToOverlayMode() = 0;
     virtual void ToggleMenu() = 0;
     virtual void HideMenu(bool noAnimation = false, bool showSubMenu = false) = 0;
+    virtual void DisableMenu() = 0;
+    virtual void UpdateAISelectMenu() = 0;
+    virtual bool IsCurrentMenuVisibile() = 0;
+    virtual bool GetIsHandleDragging() { return false; }
+    virtual bool IsClickAtHandle(const GestureEvent& info) { return false; }
+    virtual bool IsTouchAtHandle(const TouchEventInfo& info) { return false; }
+    virtual void UpdateAllHandlesOffset() {}
+    virtual void UpdateViewPort() {}
+    virtual void MarkOverlayDirty() {}
+    virtual bool IsShowMouseMenu() { return false; }
+    virtual void UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type) {}
     virtual bool IsUsingMouse() = 0;
     virtual void SetSourceType(SourceType sourceType) {}
     virtual void SetMouseMenuOffset(const OffsetF& offset) {}
     virtual void UpdateHandleColor() = 0;
     virtual bool SelectOverlayIsOn() = 0;
     virtual void HandleOnCopy() = 0;
+    virtual void HandleOnCopyFromAI(const RefPtr<SelectionContainerChild>& child) {}
     virtual void HandleOnSelectAll() = 0;
     virtual bool GetEnableHapticFeedback() const = 0;
     virtual CopyOptions GetCopyOption() const = 0;
@@ -117,6 +135,7 @@ public:
     bool ProcessHandleMoveSelectionEnd(const OffsetF& movingPointInContainer);
     void ResetAllSelection();
     void ReportSelectionText();
+    void RecordSelectedChild(const RefPtr<SelectionContainerChild>& child);
     bool IsSelectAll();
     bool HasSelectableText();
     void UpdateSelectionBoundaryChild(const RefPtr<SelectionContainerChild>& child);
@@ -159,6 +178,7 @@ protected:
     WeakPtr<SelectionContainerChild> selectionEndChild_;
     WeakPtr<SelectionContainerChild> selectionFixedChild_;
     WeakPtr<SelectionContainerChild> selectionMovingChild_;
+    std::vector<WeakPtr<SelectionContainerChild>> selectedChildren_;
     int32_t selectionFixedIndex_ = -1;
     int32_t selectionStartIndex_ = -1;
     int32_t selectionEndIndex_ = -1;

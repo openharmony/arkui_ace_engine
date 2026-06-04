@@ -430,7 +430,6 @@ private:
     void GetHandlePoints(const RectF& handleRect, std::vector<PointF>& points, bool handleOnTop);
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
     bool CheckAndUpdateHostGlobalPaintRect();
-    bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context);
     bool IsEnableSelectionMenu();
     bool NeedsProcessMenuOnWinChange();
     bool isHandleDragging_ = false;

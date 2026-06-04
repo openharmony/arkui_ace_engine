@@ -228,7 +228,7 @@ bool SelectionSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
 
 bool SelectionSelectOverlay::GetRenderClipValue() const
 {
-    auto defaultClipValue = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    auto defaultClipValue = false;
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, defaultClipValue);
     auto host = pattern->GetHost();
@@ -285,27 +285,30 @@ RectF SelectionSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
-    auto manager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_RETURN(manager, {});
-    auto overlayRoot = manager->GetSelectOverlayRoot();
-    CHECK_NULL_RETURN(overlayRoot, {});
 
     RectF selectArea;
     bool hasArea = false;
+    bool hasClippedOut = false;
     for (const auto& weakChild : pattern->GetChildList()) {
         auto child = weakChild.Upgrade();
         CHECK_NULL_CONTINUE(child);
         if (child->GetSelectionText().empty()) {
             continue;
         }
-        auto childArea = child->GetSelectionArea(overlayRoot, pos);
+        SelectionAreaResultType resultType = SelectionAreaResultType::NONE;
+        auto childArea = child->GetSelectionArea(pos, resultType);
         if (pos == SelectRectsType::LEFT_TOP_POINT) {
-            ApplySelectAreaWithKeyboard(childArea);
-            return childArea;
+            selectArea = childArea;
+            hasArea = true;
+            break;
         }
         if (pos == SelectRectsType::RIGHT_BOTTOM_POINT) {
             selectArea = childArea;
             hasArea = true;
+            continue;
+        }
+        if (resultType == SelectionAreaResultType::CLIPPED_OUT) {
+            hasClippedOut = true;
             continue;
         }
         if (childArea.IsEmpty()) {
@@ -314,17 +317,11 @@ RectF SelectionSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
         selectArea = hasArea ? selectArea.CombineRectT(childArea) : childArea;
         hasArea = true;
     }
+    if (hasClippedOut && !hasArea) {
+        return {};
+    }
     if (!hasArea) {
         return GetSelectAreaFromHandleFallback();
-    }
-    auto containerNode = pattern->GetHost();
-    if (containerNode && pos == SelectRectsType::ALL_LINES) {
-        auto visibleRect = GetContainerVisibleRect(containerNode, overlayRoot);
-        if (!visibleRect.IsEmpty()) {
-            selectArea = selectArea.IntersectRectT(visibleRect);
-            selectArea.SetWidth(std::max(selectArea.Width(), 0.0f));
-            selectArea.SetHeight(std::max(selectArea.Height(), 0.0f));
-        }
     }
     ApplySelectAreaWithKeyboard(selectArea);
     return selectArea;
@@ -699,6 +696,16 @@ std::optional<CopyOptions> SelectionSelectOverlay::ResolveCopyOptionForSelectedT
     return selectedCopyOption;
 }
 
+void SelectionSelectOverlay::UpdateAISelectMenu()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if (!IsUsingMouse()) {
+        manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
+        manager->FocusFirstFocusableChildInMenu();
+    }
+}
+
 RectF SelectionSelectOverlay::GetSelectAreaFromHandleFallback()
 {
     RectF rect;
@@ -714,22 +721,6 @@ RectF SelectionSelectOverlay::GetSelectAreaFromHandleFallback()
     }
     ApplySelectAreaWithKeyboard(rect);
     return rect;
-}
-
-RectF SelectionSelectOverlay::GetContainerVisibleRect(
-    const RefPtr<FrameNode>& containerNode, const RefPtr<FrameNode>& overlayRoot)
-{
-    CHECK_NULL_RETURN(containerNode, {});
-    CHECK_NULL_RETURN(overlayRoot, {});
-    auto geoNode = containerNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geoNode, {});
-    auto frameRect = geoNode->GetFrameRect();
-    auto leftTop = containerNode->ConvertPoint(frameRect.GetOffset(), overlayRoot);
-    auto rightBottom = containerNode->ConvertPoint(
-        { frameRect.Right(), frameRect.Bottom() }, overlayRoot);
-    RectF visibleRect(leftTop.GetX(), leftTop.GetY(),
-        rightBottom.GetX() - leftTop.GetX(), rightBottom.GetY() - leftTop.GetY());
-    return GetVisibleRect(containerNode, visibleRect);
 }
 
 bool SelectionSelectOverlay::IsAskCeliaSupported() const

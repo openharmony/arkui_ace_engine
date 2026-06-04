@@ -29,7 +29,10 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
+class GestureEvent;
 class SpanString;
+enum class WindowSizeChangeReason : uint32_t;
+class TouchEventInfo;
 }
 
 namespace OHOS::Ace::NG {
@@ -37,6 +40,15 @@ class SelectionContainer;
 class ScrollablePattern;
 enum class SelectRectsType;
 struct OverlayRequest;
+
+enum class SelectionAreaResultType {
+    // The child has no valid selection range.
+    NONE,
+    // The child has a visible selection area after clipping.
+    VISIBLE_AREA,
+    // The child has text boxes, but they are fully clipped by ancestor viewports.
+    CLIPPED_OUT,
+};
 
 struct ScrollableParentResult {
     WeakPtr<ScrollablePattern> scrollable;
@@ -116,7 +128,9 @@ public:
     void MarkChildSortDirty();
     void ResetAllSelection();
     bool HandleOnCopy();
+    void HandleOnCopyFromAI();
     bool HandleOnSelectAll();
+    virtual void RecordSelectedChild();
     void NotifySelectionChanged(const std::u16string& selectedText);
     void NotifyResponseTypeChanged(TextResponseType responseType);
     void NotifySourceTypeChanged(SourceType sourceType);
@@ -125,6 +139,17 @@ public:
     void SetMouseMenuOffset(const OffsetF& offset);
     bool BetweenContainerSelectedPosition(const Offset& globalOffset) const;
     bool ExtendSelectionFromFixedAnchor(const Offset& localPoint);
+    void DisableMenu();
+    void UpdateAISelectMenu();
+    bool IsCurrentMenuVisibile();
+    bool GetIsHandleDragging();
+    bool IsClickAtHandle(const GestureEvent& info);
+    bool IsTouchAtHandle(const TouchEventInfo& info);
+    void UpdateAllHandlesOffset();
+    void UpdateViewPort();
+    void MarkOverlayDirty();
+    bool IsShowMouseMenu();
+    void UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type);
 
     void SetSelectionContainer(const WeakPtr<SelectionContainer>& selectionContainer)
     {
@@ -148,8 +173,9 @@ public:
 
     virtual std::optional<RectF> GetFirstHandleRect() = 0;
     virtual std::optional<RectF> GetSecondHandleRect() = 0;
-    virtual RectF GetSelectionArea(const RefPtr<FrameNode>& targetNode, SelectRectsType pos)
+    virtual RectF GetSelectionArea(SelectRectsType pos, SelectionAreaResultType& resultType)
     {
+        resultType = SelectionAreaResultType::NONE;
         return {};
     }
     virtual SelectionIndexRange GetSelectionIndexes() const

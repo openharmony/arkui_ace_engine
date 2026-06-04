@@ -551,6 +551,7 @@ build_component_ng("pattern_ng") {
     "tabs/tabs_model_static.cpp",
     "tabs/tabs_node.cpp",
     "tabs/tabs_pattern.cpp",
+    "text/base_text_select_geometry_utils.cpp",
     "text/base_text_select_overlay.cpp",
     "text/image_span_view.cpp",
     "text/image_span_view_static.cpp",

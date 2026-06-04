@@ -15186,7 +15186,12 @@ RefPtr<TextOverlayModifier> RichEditorPattern::GetOverlayModifier() const
     return overlayMod_;
 }
 
-RefPtr<TextSelectOverlay> RichEditorPattern::GetSelectOverlay()
+RefPtr<TextSelectOverlay> RichEditorPattern::GetOrCreateSelectOverlay()
+{
+    return selectOverlay_;
+}
+
+RefPtr<TextSelectOverlay> RichEditorPattern::GetSelectOverlay() const
 {
     return selectOverlay_;
 }

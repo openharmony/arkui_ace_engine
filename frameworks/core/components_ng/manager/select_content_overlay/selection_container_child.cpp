@@ -320,13 +320,151 @@ void SelectionContainerChild::CloseSelectOverlay(bool animation, CloseReason rea
     container->CloseSelectOverlay(animation, reason);
 }
 
+void SelectionContainerChild::DisableMenu()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->DisableMenu();
+        return;
+    }
+
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->DisableMenu();
+}
+
+void SelectionContainerChild::UpdateAISelectMenu()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->UpdateAISelectMenu();
+        return;
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->UpdateAISelectMenu();
+}
+
+bool SelectionContainerChild::IsCurrentMenuVisibile()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->IsCurrentMenuVisibile();
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsCurrentMenuVisibile();
+}
+
+bool SelectionContainerChild::GetIsHandleDragging()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->GetIsHandleDragging();
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_RETURN(container, false);
+    return container->GetIsHandleDragging();
+}
+
+bool SelectionContainerChild::IsClickAtHandle(const GestureEvent& info)
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->IsClickAtHandle(info);
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsClickAtHandle(info);
+}
+
+bool SelectionContainerChild::IsTouchAtHandle(const TouchEventInfo& info)
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->IsTouchAtHandle(info);
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsTouchAtHandle(info);
+}
+
+void SelectionContainerChild::UpdateAllHandlesOffset()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->UpdateAllHandlesOffset();
+        return;
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->UpdateAllHandlesOffset();
+}
+
+void SelectionContainerChild::UpdateViewPort()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->UpdateViewPort();
+        return;
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->UpdateViewPort();
+}
+
+void SelectionContainerChild::MarkOverlayDirty()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->MarkOverlayDirty();
+        return;
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->MarkOverlayDirty();
+}
+
+bool SelectionContainerChild::IsShowMouseMenu()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->IsShowMouseMenu();
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsShowMouseMenu();
+}
+
+void SelectionContainerChild::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type)
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->UpdateMenuOnWindowSizeChanged(type);
+        return;
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->UpdateMenuOnWindowSizeChanged(type);
+}
+
 void SelectionContainerChild::ProcessOverlay(const OverlayRequest& request)
 {
     auto self = AceType::DynamicCast<SelectionContainerChild>(Claim(this));
     CHECK_NULL_VOID(self);
     auto parentContainer = GetSelectionContainer();
     if (parentContainer) {
-        parentContainer->UpdateSelectionBoundaryChild(self);
         parentContainer->ProcessOverlay(request);
         return;
     }
@@ -334,7 +472,6 @@ void SelectionContainerChild::ProcessOverlay(const OverlayRequest& request)
     auto node = GetHostNode();
     auto container = GetSelectionContainerFromNode(node);
     CHECK_NULL_VOID(container);
-    container->UpdateSelectionBoundaryChild(self);
     container->ProcessOverlay(request);
 }
 
@@ -568,6 +705,19 @@ bool SelectionContainerChild::HandleOnCopy()
     return true;
 }
 
+void SelectionContainerChild::HandleOnCopyFromAI()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->HandleOnCopyFromAI(Claim(this));
+        return;
+    }
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_VOID(container);
+    container->HandleOnCopyFromAI(Claim(this));
+}
+
 bool SelectionContainerChild::HandleOnSelectAll()
 {
     auto parentContainer = GetSelectionContainer();
@@ -623,6 +773,21 @@ void SelectionContainerChild::NotifySelectionChanged(const std::u16string& selec
     auto container = GetSelectionContainerFromNode(node);
     if (container) {
         container->OnSelectionRangeChanged({ selectedText }, selectionState);
+    }
+}
+
+void SelectionContainerChild::RecordSelectedChild()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        parentContainer->RecordSelectedChild(Claim(this));
+        return;
+    }
+
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    if (container) {
+        container->RecordSelectedChild(Claim(this));
     }
 }
 

@@ -705,7 +705,7 @@ HWTEST_F(TextTestNgNine, HandleDoubleClickEvent002, TestSize.Level1)
     EXPECT_TRUE(pattern->isDoubleClick_);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::NONE);
     EXPECT_TRUE(pattern->textSelector_.IsValid());
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
     pattern->pManager_->Reset();
 }
@@ -1059,7 +1059,7 @@ HWTEST_F(TextTestNgNine, CloseSelectionMenu001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     pattern->ShowSelectOverlay();
 
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     auto isClosed = !pattern->selectOverlay_->SelectOverlayIsOn();
     EXPECT_FALSE(isClosed);
     textController = pattern->GetTextController();
@@ -1177,7 +1177,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange003, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
@@ -1235,7 +1235,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange004, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
@@ -1293,7 +1293,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange005, TestSize.Level1)
     frameNode->draggable_ = true;
     auto pattern = frameNode->GetPattern<TextPattern>();
 
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**

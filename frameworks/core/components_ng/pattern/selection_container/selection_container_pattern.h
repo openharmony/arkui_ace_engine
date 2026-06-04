@@ -30,9 +30,11 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
+class GestureEvent;
 struct KeyEvent;
 class SpanString;
 class MutableSpanString;
+enum class WindowSizeChangeReason : uint32_t;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -67,6 +69,9 @@ public:
     void SwitchToOverlayMode() override;
     void ToggleMenu() override;
     void HideMenu(bool noAnimation = false, bool showSubMenu = false) override;
+    void DisableMenu() override;
+    void UpdateAISelectMenu() override;
+    bool IsCurrentMenuVisibile() override;
     bool IsUsingMouse() override;
     void SetSourceType(SourceType sourceType) override
     {
@@ -75,6 +80,7 @@ public:
     void SetMouseMenuOffset(const OffsetF& offset) override;
     void UpdateHandleColor() override;
     void HandleOnCopy() override;
+    void HandleOnCopyFromAI(const RefPtr<SelectionContainerChild>& child) override;
     void HandleOnSelectAll() override;
     bool GetEnableHapticFeedback() const override
     {
@@ -124,6 +130,14 @@ public:
     void EnableMouseLeftSelectionTracking(const OffsetF& globalPoint) override;
     void StopMouseLeftSelectionTracking() override;
     void UpdateMovingChildForHandle(bool isFirstHandle);
+    bool GetIsHandleDragging() override;
+    bool IsClickAtHandle(const GestureEvent& info) override;
+    bool IsTouchAtHandle(const TouchEventInfo& info) override;
+    void UpdateAllHandlesOffset() override;
+    void UpdateViewPort() override;
+    void MarkOverlayDirty() override;
+    bool IsShowMouseMenu() override;
+    void UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type) override;
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
     FrameNodeChangeInfoFlag CollectDescendantChangeFlags() override;
     void BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,

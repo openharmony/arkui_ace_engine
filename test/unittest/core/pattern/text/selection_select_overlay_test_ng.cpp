@@ -43,7 +43,6 @@ namespace {
 constexpr int32_t TEST_NODE_ID = 100;
 constexpr int32_t TEST_NODE_ID_CHILD1 = 200;
 constexpr int32_t TEST_NODE_ID_CHILD2 = 300;
-constexpr int32_t TEST_NODE_ID_OVERLAY_ROOT = 110;
 constexpr int32_t TEST_START_INDEX = 10;
 constexpr int32_t TEST_END_INDEX = 20;
 constexpr int32_t TEST_SELECT_ALL_END_INDEX = 100;
@@ -156,9 +155,15 @@ public:
         hasSecondHandle_ = has;
     }
 
-    RectF GetSelectionArea(const RefPtr<FrameNode>& targetNode, SelectRectsType pos) override
+    RectF GetSelectionArea(SelectRectsType pos, SelectionAreaResultType& resultType) override
     {
-        return RectF(TEST_RECT_X, TEST_RECT_Y, TEST_RECT_WIDTH, TEST_RECT_HEIGHT);
+        resultType = selectionArea_.IsEmpty() ? SelectionAreaResultType::NONE : SelectionAreaResultType::VISIBLE_AREA;
+        return selectionArea_;
+    }
+
+    void SetSelectionArea(const RectF& area)
+    {
+        selectionArea_ = area;
     }
 
     SelectionIndexRange GetSelectionIndexesByPoints(const OffsetF& firstPoint, const OffsetF& secondPoint) override
@@ -317,6 +322,7 @@ private:
     bool textReported_ = false;
     bool vibratorStarted_ = false;
     bool propertyUpdated_ = false;
+    RectF selectionArea_ = RectF(TEST_RECT_X, TEST_RECT_Y, TEST_RECT_WIDTH, TEST_RECT_HEIGHT);
 };
 
 class SelectionSelectOverlayTest : public testing::Test {
@@ -999,52 +1005,26 @@ HWTEST_F(SelectionSelectOverlayTest, GetSelectAreaFromRectsTest001, TestSize.Lev
 }
 
 /**
- * @tc.name: GetContainerVisibleRectTest001
- * @tc.desc: Test GetContainerVisibleRect001 returns expected value
+ * @tc.name: GetSelectAreaFromRectsTest002
+ * @tc.desc: Test fallback area uses handle paintRect coordinate when selected boxes are empty
  * @tc.type: FUNC
  */
-HWTEST_F(SelectionSelectOverlayTest, GetContainerVisibleRectTest001, TestSize.Level1)
+HWTEST_F(SelectionSelectOverlayTest, GetSelectAreaFromRectsTest002, TestSize.Level1)
 {
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(TEST_WIDTH, TEST_HEIGHT));
-    containerNode_->geometryNode_ = geometryNode;
-    
-    RefPtr<FrameNode> overlayRoot =
-        FrameNode::CreateFrameNode(TEST_OVERLAY_ROOT_TAG, TEST_NODE_ID_OVERLAY_ROOT, AceType::MakeRefPtr<Pattern>());
-    
-    auto result = overlay_->GetContainerVisibleRect(containerNode_, overlayRoot);
-    
-    EXPECT_FALSE(result.IsEmpty());
+    child1_->SetSelectionText(TEST_SELECTION_TEXT1);
+    child1_->SetSelectionIndexes(TEST_START_INDEX, TEST_END_INDEX);
+    child1_->SetSelectionArea(RectF());
+    child1_->SetHasFirstHandle(true);
+    pattern_->RegisterChild(child1_);
+    pattern_->RecordSelectedChild(child1_);
+
+    auto result = overlay_->GetSelectAreaFromRects(SelectRectsType::ALL_LINES);
+
+    EXPECT_EQ(result.GetX(), TEST_RECT_X);
+    EXPECT_EQ(result.GetY(), TEST_RECT_Y);
+    EXPECT_EQ(result.Width(), TEST_RECT_WIDTH);
+    EXPECT_EQ(result.Height(), TEST_RECT_HEIGHT);
 }
 
-/**
- * @tc.name: GetContainerVisibleRectTest002
- * @tc.desc: Test GetContainerVisibleRect002 returns expected value
- * @tc.type: FUNC
- */
-HWTEST_F(SelectionSelectOverlayTest, GetContainerVisibleRectTest002, TestSize.Level1)
-{
-    RefPtr<FrameNode> nullContainer = nullptr;
-    RefPtr<FrameNode> overlayRoot =
-        FrameNode::CreateFrameNode(TEST_OVERLAY_ROOT_TAG, TEST_NODE_ID_OVERLAY_ROOT, AceType::MakeRefPtr<Pattern>());
-    
-    auto result = overlay_->GetContainerVisibleRect(nullContainer, overlayRoot);
-    
-    EXPECT_TRUE(result.IsEmpty());
-}
-
-/**
- * @tc.name: GetContainerVisibleRectTest003
- * @tc.desc: Test GetContainerVisibleRect003 returns expected value
- * @tc.type: FUNC
- */
-HWTEST_F(SelectionSelectOverlayTest, GetContainerVisibleRectTest003, TestSize.Level1)
-{
-    RefPtr<FrameNode> overlayRoot = nullptr;
-    
-    auto result = overlay_->GetContainerVisibleRect(containerNode_, overlayRoot);
-    
-    EXPECT_TRUE(result.IsEmpty());
-}
 
 } // namespace OHOS::Ace::NG

@@ -1256,7 +1256,7 @@ HWTEST_F(TextFieldTenPatternNg, GetAncestorNodeViewPort001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     auto parentPattern1 = AceType::MakeRefPtr<TextPattern>();
@@ -1329,7 +1329,7 @@ HWTEST_F(TextFieldTenPatternNg, GetVisibleDragViewHandles, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, pattern);
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
     pattern->selectOverlay_->OnBind(manager);
 
     RectF firstRect;

@@ -99,7 +99,7 @@ HWTEST_F(TextTestNgTen, InitUrlTouchEvent_TouchTask, TestSize.Level1)
     pattern->status_ = Status::FLOATING;
     RefPtr<TextPattern> textPattern = AceType::MakeRefPtr<TextPattern>();
     WeakPtr<TextPattern> textBase = pattern->WeakClaim(AceType::RawPtr(textPattern));
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     RefPtr<TextSelectOverlay> selectOverlay = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     pattern->selectOverlay_ = selectOverlay;
 
@@ -363,7 +363,7 @@ HWTEST_F(TextTestNgTen, BetweenSelectedPosition_HasRenderTransform, TestSize.Lev
     frameNode->renderContext_->UpdateMotionPath(motionPathOption);
     RefPtr<TextPattern> textPattern = AceType::MakeRefPtr<TextPattern>();
     WeakPtr<TextPattern> textBase = pattern->WeakClaim(AceType::RawPtr(textPattern));
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     RefPtr<TextSelectOverlay> selectOverlay = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     pattern->selectOverlay_ = selectOverlay;
     pattern->selectOverlay_->hasTransform_ = true;
@@ -406,7 +406,7 @@ HWTEST_F(TextTestNgTen, BeforeCreateLayoutWrapper_HasSpanOnHoverEvent, TestSize.
     pattern->spanMouseEventInitialized_ = false;
     RefPtr<TextPattern> textPattern = AceType::MakeRefPtr<TextPattern>();
     WeakPtr<TextPattern> textBase = pattern->WeakClaim(AceType::RawPtr(textPattern));
-    pattern->GetSelectOverlay();
+    pattern->GetOrCreateSelectOverlay();
     RefPtr<TextSelectOverlay> selectOverlay = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     pattern->selectOverlay_ = selectOverlay;
     pattern->spans_.clear();

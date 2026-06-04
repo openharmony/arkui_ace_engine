@@ -198,6 +198,14 @@ void SelectionContainer::UnregisterChild(int32_t childId)
         }
         childIter = childList.erase(childIter);
     }
+    selectedChildren_.erase(
+        std::remove_if(selectedChildren_.begin(), selectedChildren_.end(),
+            [childId](const WeakPtr<SelectionContainerChild>& weak) {
+                auto child = weak.Upgrade();
+                auto node = child ? child->GetHostNode() : nullptr;
+                return !child || !node || node->GetId() == childId;
+            }),
+        selectedChildren_.end());
     MarkChildSortDirty();
 }
 
@@ -233,6 +241,7 @@ bool SelectionContainer::HandleSelectionStartCommon(
     bool fixedHandleIsTopOnStart)
 {
     CHECK_NULL_RETURN(startChild, false);
+
     selectionFixedChild_ = startChild;
     selectionFixedIndex_ = startIndex >= 0 ? startIndex : endIndex;
     selectionStartIndex_ = startIndex;
@@ -287,6 +296,7 @@ bool SelectionContainer::HandleSelectionUpdate(const OffsetF& movingPointInConta
     auto childList = GetChildList();
     CHECK_NULL_RETURN(!childList.empty(), false);
 
+    selectedChildren_.clear();
     RefPtr<SelectionContainerChild> firstSelectedChild;
     RefPtr<SelectionContainerChild> lastSelectedChild;
     auto fixedIndex = selectionFixedIndex_;
@@ -306,6 +316,7 @@ bool SelectionContainer::HandleSelectionUpdate(const OffsetF& movingPointInConta
             continue;
         }
         selectedTexts.push_back(std::move(childSelectionText));
+        selectedChildren_.emplace_back(child);
         auto childHostNode = child->GetHostNode();
         if (childHostNode) {
             auto indexes = child->GetSelectionIndexes();
@@ -496,6 +507,7 @@ void SelectionContainer::ResetAllSelection()
         child->SelectTextByIndex(-1, -1);
         child->ReportSelectionText();
     }
+    selectedChildren_.clear();
     selectionStartChild_.Reset();
     selectionEndChild_.Reset();
     selectionStartIndex_ = -1;
@@ -533,6 +545,22 @@ void SelectionContainer::ReportSelectionText()
         CHECK_NULL_CONTINUE(child);
         child->ReportSelectionText();
     }
+}
+
+void SelectionContainer::RecordSelectedChild(const RefPtr<SelectionContainerChild>& child)
+{
+    CHECK_NULL_VOID(child);
+    for (const auto& weakOld : selectedChildren_) {
+        auto old = weakOld.Upgrade();
+        if (old && old != child) {
+            old->SelectTextByIndex(-1, -1);
+            old->ReportSelectionText();
+        }
+    }
+    selectedChildren_.clear();
+    selectedChildren_.emplace_back(child);
+    selectionStartChild_ = child;
+    selectionEndChild_ = child;
 }
 
 void SelectionContainer::NotifyRegisteredChildrenPropertyUpdate(uint32_t flags)
