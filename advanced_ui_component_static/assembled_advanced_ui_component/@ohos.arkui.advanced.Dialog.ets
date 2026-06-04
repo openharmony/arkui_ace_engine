@@ -614,6 +614,7 @@ export struct SelectDialog {
               .accessibilityRole(AccessibilityRoleType.RADIO)
               .onClick((event: ClickEvent) => {
                 this.selectedIndex = index as Int;
+                item?.action();
                 this.controller?.close();
               })
             }
