@@ -502,7 +502,7 @@ void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateContentClip({ paintProperty->GetDefaultContentClip(), nullptr });
+    paintProperty->UpdateContentClip(ContentClip(paintProperty->GetDefaultContentClip(), nullptr));
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateContentClip(std::nullopt);

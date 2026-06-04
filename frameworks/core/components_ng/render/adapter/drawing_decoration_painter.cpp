@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 
+#include "base/geometry/shape.h"
 #include "core/common/container.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline/base/constants.h"

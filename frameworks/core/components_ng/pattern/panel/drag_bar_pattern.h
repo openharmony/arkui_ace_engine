@@ -37,8 +37,8 @@ class DragBarPattern : public Pattern {
     DECLARE_ACE_TYPE(DragBarPattern, Pattern);
 
 public:
-    DragBarPattern() = default;
-    ~DragBarPattern() override = default;
+    DragBarPattern();
+    ~DragBarPattern() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {

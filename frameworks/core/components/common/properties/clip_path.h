@@ -41,16 +41,14 @@ enum class LengthMode {
     OTHER,
 };
 
-class ACE_EXPORT ClipPath final : public AceType {
+class ACE_FORCE_EXPORT ClipPath final : public AceType {
     DECLARE_ACE_TYPE(ClipPath, AceType);
 
 public:
-    ClipPath() = default;
-    explicit ClipPath(const RefPtr<BasicShape>& basicShape) : basicShape_(basicShape) {}
-    ClipPath(GeometryBoxType geometryBoxType, const RefPtr<BasicShape>& basicShape)
-        : geometryBoxType_(geometryBoxType), basicShape_(basicShape)
-    {}
-    ~ClipPath() override = default;
+    ClipPath();
+    explicit ClipPath(const RefPtr<BasicShape>& basicShape);
+    ClipPath(GeometryBoxType geometryBoxType, const RefPtr<BasicShape>& basicShape);
+    ~ClipPath() override;
 
     static GeometryBoxType GetGeometryBoxType(const std::string& value);
     static void GetBasicShapeInfo(const std::string& value, BasicShapeType& basicShapeType, std::string& data);
@@ -66,21 +64,14 @@ public:
         return geometryBoxType_;
     }
 
-    void SetBasicShape(const RefPtr<BasicShape>& basicShape)
-    {
-        basicShape_ = basicShape;
-    }
+    void SetBasicShape(const RefPtr<BasicShape>& basicShape);
 
     const RefPtr<BasicShape>& GetBasicShape() const
     {
         return basicShape_;
     }
 
-    bool NeedClip() const
-    {
-        return (basicShape_ && basicShape_->GetBasicShapeType() != BasicShapeType::NONE) ||
-               geometryBoxType_ != GeometryBoxType::NONE;
-    }
+    bool NeedClip() const;
 
 private:
     static RefPtr<Circle> CreateCircle(const std::string& data);
@@ -95,16 +86,18 @@ private:
     RefPtr<BasicShape> basicShape_;
 };
 
-class ACE_EXPORT MaskPath final : public AceType {
+class ACE_FORCE_EXPORT MaskPath final : public AceType {
     DECLARE_ACE_TYPE(MaskPath, AceType);
 
 public:
-    MaskPath() = default;
-    explicit MaskPath(const RefPtr<BasicShape>& basicShape) : basicShape_(basicShape) {}
-    MaskPath(GeometryBoxType geometryBoxType, const RefPtr<BasicShape>& basicShape)
-        : geometryBoxType_(geometryBoxType), basicShape_(basicShape)
-    {}
-    ~MaskPath() override = default;
+    MaskPath();
+    explicit MaskPath(const RefPtr<BasicShape>& basicShape);
+    MaskPath(GeometryBoxType geometryBoxType, const RefPtr<BasicShape>& basicShape);
+    ~MaskPath() override;
+
+    static GeometryBoxType GetGeometryBoxType(const std::string& value);
+    static void GetBasicShapeInfo(const std::string& value, BasicShapeType& basicShapeType, std::string& data);
+    static RefPtr<MaskPath> CreateShape(const std::string& value);
 
     void SetGeometryBoxType(GeometryBoxType geometryBoxType)
     {
@@ -116,10 +109,7 @@ public:
         return geometryBoxType_;
     }
 
-    void SetBasicShape(const RefPtr<BasicShape>& basicShape)
-    {
-        basicShape_ = basicShape;
-    }
+    void SetBasicShape(const RefPtr<BasicShape>& basicShape);
 
     const RefPtr<BasicShape>& GetBasicShape() const
     {

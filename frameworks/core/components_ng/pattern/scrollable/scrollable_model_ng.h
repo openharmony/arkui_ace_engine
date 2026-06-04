@@ -18,7 +18,6 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
-#include "base/geometry/shape.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"

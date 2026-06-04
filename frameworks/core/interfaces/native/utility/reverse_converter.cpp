@@ -17,6 +17,7 @@
 
 // SORTED_SECTION
 #include "base/utils/string_utils.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/picker/picker_date.h"
 #include "core/components_ng/pattern/picker/picker_time.h"

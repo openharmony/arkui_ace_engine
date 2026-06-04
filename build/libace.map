@@ -1768,6 +1768,7 @@
       "OHOS::Ace::NG::ScrollableModelNG::SetScrollBarWidth(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ScrollableModelStatic::SetOnDidScroll(OHOS::Ace::NG::FrameNode*, std::__h::function<void (OHOS::Ace::Dimension, OHOS::Ace::ScrollState)>&&)";
       "OHOS::Ace::NG::ScrollableModelStatic::SetOnWillScroll(OHOS::Ace::NG::FrameNode*, std::__h::function<OHOS::Ace::ScrollFrameResult (OHOS::Ace::Dimension, OHOS::Ace::ScrollState, OHOS::Ace::ScrollSource)>&&)";
+      "OHOS::Ace::NG::ContentClip::*";
       "OHOS::Ace::NG::ScrollablePaintMethod::TryContentClip(OHOS::Ace::NG::PaintWrapper*)";
       "OHOS::Ace::NG::ScrollablePaintMethod::UpdateFadingGradient(OHOS::Ace::RefPtr<OHOS::Ace::NG::RenderContext> const&)";
       "OHOS::Ace::NG::ScrollablePaintProperty::GetBarColor() const";
@@ -3558,6 +3559,7 @@
       OHOS::Ace::CalendarPickerModel::*;
       OHOS::Ace::CanvasPath2D::*;
       OHOS::Ace::CircleModel::*;
+      OHOS::Ace::ClipPath::*;
       OHOS::Ace::Color::*;
       OHOS::Ace::ColorInverter::*;
       OHOS::Ace::ColumnModel::*;
@@ -3692,6 +3694,7 @@
       OHOS::Ace::LoadingProgressModel::*;
       OHOS::Ace::Localization::*;
       OHOS::Ace::LogWrapper::*;
+      OHOS::Ace::MaskPath::*;
       OHOS::Ace::MaterialUtils::*;
       OHOS::Ace::Matrix4::*;
       OHOS::Ace::MeasureUtil::*;
@@ -3754,6 +3757,7 @@
       OHOS::Ace::NG::LayoutProperty::*;
       OHOS::Ace::NG::LayoutWrapper::*;
       OHOS::Ace::NG::ListItemModelNG::*;
+      OHOS::Ace::NG::ListItemPattern::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::LocationButtonModelNG::*;
       OHOS::Ace::NG::LongPressEventActuator::*;

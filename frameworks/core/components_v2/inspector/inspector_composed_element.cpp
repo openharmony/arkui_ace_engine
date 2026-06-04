@@ -16,6 +16,7 @@
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include "base/geometry/shape.h"
 #include "core/components/box/box_element.h"
 #include "core/components/coverage/render_coverage.h"
 #include "core/components/display/render_display.h"

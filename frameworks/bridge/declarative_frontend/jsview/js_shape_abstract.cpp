@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
+#include "base/geometry/shape.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/shape_abstract_model_impl.h"
 #include "core/common/container.h"
@@ -667,5 +668,10 @@ void JSShapeAbstract::SetForegroundColor(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
     }
     ShapeAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
+void JSShapeAbstract::SetBasicShape(const RefPtr<BasicShape>& basicShape)
+{
+    basicShape_ = basicShape;
 }
 } // namespace OHOS::Ace::Framework

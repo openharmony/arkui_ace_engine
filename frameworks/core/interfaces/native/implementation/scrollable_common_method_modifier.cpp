@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/geometry/shape.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"

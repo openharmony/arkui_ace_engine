@@ -58,10 +58,8 @@ public:
 
     void SwipeBackward();
 
-    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
-    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
-        : listItemStyle_(listItemStyle), shallowBuilder_(shallowBuilder)
-    {}
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle);
     ~ListItemPattern() override;
 
     void OnRecycle() override;

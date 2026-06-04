@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/linear_split/bridge/arkts_native_row_split_bridge.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/shape.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/linear_split/bridge/arkts_native_column_split_bridge.h"
 #include "core/interfaces/native/node/node_api.h"

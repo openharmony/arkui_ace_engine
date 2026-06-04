@@ -32,8 +32,10 @@
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/sys_options.h"
@@ -72,6 +74,7 @@ class Blender;
 namespace OHOS::Ace {
 class ImageSourceInfo;
 class BasicShape;
+class BorderImage;
 class SpanString;
 class CalcDimensionRect;
 class ResponseRegion;
