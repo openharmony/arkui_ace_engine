@@ -376,6 +376,8 @@ public:
         continueFeature_ = continueFeature;
     }
 
+    int32_t GetSessionId(const RefPtr<NG::FrameNode>& host);
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);

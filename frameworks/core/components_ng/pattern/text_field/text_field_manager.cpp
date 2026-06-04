@@ -98,6 +98,24 @@ bool TextFieldManagerNG::OnBackPressed()
     return textBasePattern->OnBackPressed();
 }
 
+int32_t TextFieldManagerNG::GetSessionId(const RefPtr<NG::FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, -1);
+    auto textFieldPattern = host->GetPattern<TextFieldPattern>();
+    if (textFieldPattern) {
+        return textFieldPattern->GetSessionId();
+    }
+    if (host->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(textFieldFrameNode, -1);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        if (textFieldPattern) {
+            return textFieldPattern->GetSessionId();
+        }
+    }
+    return -1;
+}
+
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();

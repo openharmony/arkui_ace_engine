@@ -350,12 +350,16 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
     if (!isHardKeyboardConnected && info.panelInfo.panelType == MiscServices::PanelType::SOFT_KEYBOARD &&
         !info.visible) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo panel is closed, trigger=%{public}d", info.trigger);
-        auto task = [textField = pattern_, triggerFrom = info.trigger] {
+        auto task = [textField = pattern_, triggerFrom = info.trigger, clientSessionId = info.clientSessionId] {
             auto client = textField.Upgrade();
             CHECK_NULL_VOID(client);
             ContainerScope scope(client->GetInstanceId());
             if (triggerFrom == MiscServices::Trigger::IME_APP) {
                 client->NotifyKeyboardClosedByUser();
+            }
+            if (clientSessionId != -1) {
+                TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo Get SessionId=%{public}d", clientSessionId);
+                return;
             }
             client->NotifyKeyboardClosed();
         };

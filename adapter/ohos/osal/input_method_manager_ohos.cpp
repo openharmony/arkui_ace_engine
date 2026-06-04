@@ -28,6 +28,19 @@
 #endif
 
 namespace OHOS::Ace {
+namespace {
+bool IsTextInputComponentTag(const std::string& tag)
+{
+    return tag == V2::SEARCH_ETS_TAG || tag == V2::TEXTAREA_ETS_TAG || tag == V2::TEXTINPUT_ETS_TAG;
+}
+
+bool IsNotTextEditingTag(const std::string& tag)
+{
+    return tag != V2::TEXTINPUT_ETS_TAG || tag != V2::TEXTAREA_ETS_TAG ||
+        tag != V2::RICH_EDITOR_ETS_TAG || tag != V2::SEARCH_ETS_TAG;
+}
+} // namespace
+
 std::unique_ptr<InputMethodManager> InputMethodManager::instance_ = nullptr;
 std::mutex InputMethodManager::mtx_;
 
@@ -84,12 +97,22 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CurFocusNode Not Exist");
         return;
     }
-    bool lastFocusNodeExist = curFocusNode_.Upgrade() ? true : false;
-    if (lastFocusNodeExist) {
+    bool lastFocusNodeExist = false;
+    lastTextInputSessionId_ = -1;
+    preTag = "";
+    if (curFocusNode_.Upgrade()) {
+        lastFocusNodeExist = true;
         preTag = curFocusNode_.Upgrade()->GetTag();
-    } else {
-        preTag = "";
+        if (IsTextInputComponentTag(preTag)) {
+            auto lastFocusNode = curFocusNode_.Upgrade();
+            auto context = lastFocusNode->GetContext();
+            if (context) {
+                auto manager = AceType::DynamicCast<NG::TextFieldManagerNG>(context->GetTextFieldManager());
+                lastTextInputSessionId_ = manager ? manager->GetSessionId(lastFocusNode) : -1;
+            }
+        }
     }
+
     if (lastFocusNodeExist && isLastFocusUIExtension_ && lastFocusNodeId_ != curFocusNode->GetId()) {
         curFocusNode_ = curFocusNode;
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension switch focus");
@@ -105,9 +128,7 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
             HideKeyboardAcrossProcesses();
         }
     }
-    if (preTag != V2::WEB_ETS_TAG &&
-        (curFocusNode->GetTag() != V2::TEXTINPUT_ETS_TAG || curFocusNode->GetTag() != V2::TEXTAREA_ETS_TAG ||
-            curFocusNode->GetTag() != V2::RICH_EDITOR_ETS_TAG || curFocusNode->GetTag() != V2::SEARCH_ETS_TAG)) {
+    if (preTag != V2::WEB_ETS_TAG && IsNotTextEditingTag(curFocusNode->GetTag())) {
         CloseCustomKeyboard(true);
     }
 
@@ -267,8 +288,13 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
         TAG_LOGW(AceLogTag::ACE_KEYBOARD, "Get InputMethodController Instance Failed");
         return;
     }
-    inputMethod->Close();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");
+    if (lastTextInputSessionId_ != -1) {
+        inputMethod->Close(lastTextInputSessionId_);
+    } else {
+        inputMethod->Close();
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+        "PageChange CloseKeyboard, sessionId=%{public}d.", lastTextInputSessionId_);
 #endif
 }
 

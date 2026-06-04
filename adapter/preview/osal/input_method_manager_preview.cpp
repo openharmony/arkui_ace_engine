@@ -31,6 +31,7 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
 {
     isLastFocusUIExtension_ = false;
     lastFocusNodeId_ = -1;
+    lastTextInputSessionId_ = -1;
 }
 
 void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNode, FocusReason focusReason,

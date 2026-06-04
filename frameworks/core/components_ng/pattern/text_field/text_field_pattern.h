@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
+#include <atomic>
 #include <cstdint>
 #include <optional>
 #include <queue>
@@ -498,6 +499,11 @@ public:
     RefPtr<Referenced> GetJSTextEditableController()
     {
         return jsTextEditableController_.Upgrade();
+    }
+
+    int32_t GetSessionId() const
+    {
+        return sessionId_;
     }
 
     std::string GetTextValue() const
@@ -2532,6 +2538,8 @@ private:
     RefPtr<TextInputResponseArea> voiceResponseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
     RefPtr<TextInputResponseArea> placeholderResponseArea_;
+    int32_t sessionId_ = 0;
+    static std::atomic<int32_t> sessionIdCounter_;
     std::optional<Rect> baseScrollBarRect_;
     std::string lastAutoFillTextValue_;
     std::function<void()> processOverlayDelayTask_;
