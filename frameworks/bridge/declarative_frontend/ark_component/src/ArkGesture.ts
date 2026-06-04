@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 enum CommonGestureType {
     TAP_GESTURE = 0,
     LONG_PRESS_GESTURE,
@@ -26,6 +25,7 @@ enum CommonGestureType {
 
 class GestureHandler {
     gestureType: CommonGestureType;
+    gestureTag?: string;
 
     constructor(gestureType: CommonGestureType) {
         this.gestureType = gestureType;
@@ -38,7 +38,6 @@ class TapGestureHandler extends GestureHandler {
     distanceThreshold?: number;
     limitFingerCount?: boolean;
     gestureTag?: string;
-    allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
 
     constructor(options?: TapGestureHandlerOptions) {
@@ -59,6 +58,7 @@ class TapGestureHandler extends GestureHandler {
         return this;
     }
     allowedTypes(types: Array<SourceTool>): TapGestureHandler {
+        // @ts-ignore
         this.allowedTypes = types;
         return this;
     }
@@ -71,7 +71,6 @@ class LongPressGestureHandler extends GestureHandler {
     allowableMovement?: number;
     gestureTag?: string;
     limitFingerCount?: boolean;
-    allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
     onActionCancelCallback?: Callback<GestureEvent>;
@@ -107,6 +106,7 @@ class LongPressGestureHandler extends GestureHandler {
     }
 
     allowedTypes(types: Array<SourceTool>): LongPressGestureHandler {
+        // @ts-ignore
         this.allowedTypes = types;
         return this;
     }
@@ -119,7 +119,6 @@ class PanGestureHandler extends GestureHandler {
     limitFingerCount?: boolean;
     distanceMap?: Map<SourceTool, number>;
     gestureTag?: string;
-    allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
@@ -166,6 +165,7 @@ class PanGestureHandler extends GestureHandler {
     }
 
     allowedTypes(types: Array<SourceTool>): PanGestureHandler {
+        // @ts-ignore
         this.allowedTypes = types;
         return this;
     }
@@ -177,10 +177,9 @@ class SwipeGestureHandler extends GestureHandler {
     speed?: number;
     limitFingerCount?: boolean;
     gestureTag?: string;
-    allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
     constructor(options?: SwipeGestureHandlerOptions) {
-        super(CommonGestureType.PAN_GESTURE);
+        super(CommonGestureType.SWIPE_GESTURE);
         if (options !== undefined && options !== null) {
             this.fingers = options.fingers;
             this.direction = options.direction;
@@ -200,6 +199,7 @@ class SwipeGestureHandler extends GestureHandler {
     }
 
     allowedTypes(types: Array<SourceTool>): SwipeGestureHandler {
+        // @ts-ignore
         this.allowedTypes = types;
         return this;
     }
@@ -210,7 +210,6 @@ class PinchGestureHandler extends GestureHandler {
     distance?: number;
     limitFingerCount?: boolean;
     gestureTag?: string;
-    allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
@@ -250,6 +249,7 @@ class PinchGestureHandler extends GestureHandler {
     }
 
     allowedTypes(types: Array<SourceTool>): PinchGestureHandler {
+        // @ts-ignore
         this.allowedTypes = types;
         return this;
     }
@@ -260,7 +260,6 @@ class RotationGestureHandler extends GestureHandler {
     angle?: number;
     limitFingerCount?: boolean;
     gestureTag?: string;
-    allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
@@ -300,6 +299,7 @@ class RotationGestureHandler extends GestureHandler {
     }
 
     allowedTypes(types: Array<SourceTool>): RotationGestureHandler {
+        // @ts-ignore
         this.allowedTypes = types;
         return this;
     }
@@ -314,7 +314,7 @@ class GestureGroupHandler extends GestureHandler {
         super(CommonGestureType.GESTURE_GROUP);
         if (options !== undefined && options !== null) {
             this.mode = options.mode;
-            this.gestures = options.gestures;
+            this.gestures = options.gestures as any;
         }
     }
 

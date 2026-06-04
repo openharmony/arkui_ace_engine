@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 type SpanFontVariation = { axis: string; value: number; isNormalized?: boolean };
 
 class SpanFontSizeModifier extends ModifierWithKey<Length> {
+  constructor(value) {
+    super(value);
+  }
   static identity: Symbol = Symbol('spanFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -31,6 +33,9 @@ class SpanFontSizeModifier extends ModifierWithKey<Length> {
   }
 }
 class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
+  constructor(value) {
+    super(value);
+  }
   static identity: Symbol = Symbol('spanFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -45,6 +50,9 @@ class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
   }
 }
 class SpanLineHeightModifier extends ModifierWithKey<Length> {
+  constructor(value) {
+    super(value);
+  }
   static identity: Symbol = Symbol('spanLineHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -59,6 +67,9 @@ class SpanLineHeightModifier extends ModifierWithKey<Length> {
   }
 }
 class SpanFontStyleModifier extends ModifierWithKey<number> {
+  constructor(value) {
+    super(value);
+  }
   static identity: Symbol = Symbol('spanFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -72,6 +83,9 @@ class SpanFontStyleModifier extends ModifierWithKey<number> {
   }
 }
 class SpanTextCaseModifier extends ModifierWithKey<number> {
+  constructor(value) {
+    super(value);
+  }
   static identity: Symbol = Symbol('spanTextCase');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -158,6 +172,9 @@ class SpanTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
   }
 }
 class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value) {
+    super(value);
+  }
   static identity = Symbol('spanFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -197,6 +214,9 @@ class SpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
   }
 }
 class SpanFontModifier extends ModifierWithKey<Font> {
+  constructor(value) {
+    super(value);
+  }
   static identity = Symbol('spanFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -207,21 +227,22 @@ class SpanFontModifier extends ModifierWithKey<Font> {
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
+    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style ||
+      (this.stageValue as any).enableVariableFontWeight !== (this.value as any).enableVariableFontWeight) {
       return true;
     }
     if ((!isResource(this.stageValue.size) && !isResource(this.value.size) &&
-        this.stageValue.size === this.value.size) &&
-      ((!isResource(this.stageValue.family) && !isResource(this.value.family) &&
-          this.stageValue.family === this.value.family))) {
+      this.stageValue.size === this.value.size) &&
+      (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
+        this.stageValue.family === this.value.family)) {
       return false;
     } else {
       return true;
     }
   }
 }
-class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }> {
-  constructor(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }) {
+class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle; thicknessScale?: number }> {
+  constructor(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle; thicknessScale?: number }) {
     super(value);
   }
   static identity = Symbol('spanDecoration');
@@ -229,12 +250,14 @@ class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType,
     if (reset) {
       getUINativeModule().span.resetDecoration(node);
     } else {
-      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color, this.value.style);
+      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color,
+        this.value.style, this.value.thicknessScale);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style ||
+        this.stageValue.thicknessScale !== this.value.thicknessScale) {
       return true;
     }
     if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
@@ -343,14 +366,13 @@ class SpanOnHoverModifier extends ModifierWithKey<(isHover?: boolean, event?: Ho
   }
 }
 
-class ArkSpanComponent implements CommonMethod<SpanAttribute> {
+class ArkSpanComponent {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
   nativePtr: KNode;
   _weakPtr: JsPointerClass;
   _classType: ModifierType | undefined;
   _nativePtrChanged: boolean;
-  _needDiff: boolean;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiersWithKeys = new Map();
@@ -359,7 +381,6 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     this._classType = classType;
     this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
-    this._needDiff = true;
   }
   initialize(value: Object[]): this {
     modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
@@ -389,7 +410,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   applyModifierPatch(): void {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr, this)) {
+      if (value.applyStage(this.nativePtr, this as any)) {
         expiringItemsWithKeys.push(key);
       }
     });
@@ -425,6 +446,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
 
   expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
     throw new BusinessError(100201, 'expandSafeArea function not supported in attributeModifier scenario.');
+  }
+
+  responseRegionList(value: Array<ResponseRegion>): this {
+    throw new BusinessError(100201, 'responseRegionList function not supported in attributeModifier scenario.');
   }
 
   responseRegion(value: Array<Rectangle> | Rectangle): this {
@@ -525,7 +550,8 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   onClick(event: (event?: ClickEvent) => void): this {
-    throw new BusinessError(100201, 'onClick function not supported in attributeModifier scenario.');
+    modifierWithKey(this._modifiersWithKeys, ClickModifier.identity, ClickModifier, event);
+    return this;
   }
 
   onHover(event: (isHover?: boolean, event?: HoverEvent) => void): this {
@@ -557,6 +583,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new BusinessError(100201, 'onFocus function not supported in attributeModifier scenario.');
   }
 
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback: () => boolean): this {
+    throw new Error('Method not implemented.');
+  }
+
   onBlur(event: () => void): this {
     throw new BusinessError(100201, 'onBlur function not supported in attributeModifier scenario.');
   }
@@ -581,7 +611,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new BusinessError(100201, 'animation function not supported in attributeModifier scenario.');
   }
 
-  transition(value: TransitionOptions | TransitionEffect): this {
+  transition(value: TransitionOptions | TransitionEffect, callback: (transitionIn: boolean) => void): this {
     throw new BusinessError(100201, 'transition function not supported in attributeModifier scenario.');
   }
 
@@ -774,7 +804,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new BusinessError(100201, 'clickEffect function not supported in attributeModifier scenario.');
   }
 
-  enableClickSoundEffect(enabled: boolean | undefined): this {
+  enableClickSoundEffect(value: boolean | undefined): this {
     throw new BusinessError(100201, 'enableClickSoundEffect function not supported in attributeModifier scenario.');
   }
 
@@ -786,7 +816,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new BusinessError(100201, 'onDragEnter function not supported in attributeModifier scenario.');
   }
 
-  onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this {
+  onDragSpringLoading(value: Function): this {
     throw new BusinessError(100201, 'onDragSpringLoading function not supported in attributeModifier scenario.');
   }
 
@@ -844,6 +874,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
 
   motionPath(value: MotionPathOptions): this {
     throw new BusinessError(100201, 'motionPath function not supported in attributeModifier scenario.');
+  }
+
+  motionBlur(value: MotionBlurOptions): this {
+    throw new BusinessError(100201, 'motionBlur function not supported in attributeModifier scenario.');
   }
 
   shadow(value: ShadowOptions | ShadowStyle): this {
@@ -973,21 +1007,23 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new BusinessError(100201, 'materialFilter function not supported in attributeModifier scenario.');
   }
 
+  useUnionEffect(value: boolean): this {
+    throw new BusinessError(100201, 'useUnionEffect function not supported in attributeModifier scenario.');
+  }
+
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
   }
-  decoration(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }): SpanAttribute {
+  decoration(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }): this {
     modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
   }
-  font(value: Font, fontConfigs?: FontConfigs): SpanAttribute {
+  font(value: Font, fontConfigs?: FontConfigs): this {
     let arkFontWeight = new ArkFontWeight();
     arkFontWeight.value = value?.weight;
-    if (fontConfigs !== null && fontConfigs !== undefined &&
-        fontConfigs.fontWeightConfigs !== null && fontConfigs.fontWeightConfigs !== undefined &&
-        'fontWeightConfigs' in fontConfigs) {
-      arkFontWeight.enableVariableFontWeight = fontConfigs.fontWeightConfigs?.enableVariableFontWeight ?? false;
-      arkFontWeight.enableDeviceFontWeightCategory = fontConfigs.fontWeightConfigs?.enableDeviceFontWeightCategory ?? true;
+    if (fontConfigs?.fontWeightConfigs !== null && fontConfigs?.fontWeightConfigs !== undefined && typeof fontConfigs?.fontWeightConfigs === 'object') {
+      arkFontWeight.enableVariableFontWeight = fontConfigs.fontWeightConfigs.enableVariableFontWeight ?? false;
+      arkFontWeight.enableDeviceFontWeightCategory = fontConfigs.fontWeightConfigs.enableDeviceFontWeightCategory ?? true;
     }
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier, value?.size);
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
@@ -995,23 +1031,23 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value?.style);
     return this;
   }
-  lineHeight(value: Length): SpanAttribute {
+  lineHeight(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, SpanLineHeightModifier.identity, SpanLineHeightModifier, value);
     return this;
   }
-  fontSize(value: Length): SpanAttribute {
+  fontSize(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier, value);
     return this;
   }
-  fontColor(value: ResourceColor): SpanAttribute {
+  fontColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, SpanFontColorModifier.identity, SpanFontColorModifier, value);
     return this;
   }
-  fontStyle(value: FontStyle): SpanAttribute {
+  fontStyle(value: FontStyle): this {
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string | Resource, fontWeightConfigs?: FontWeightConfigs): SpanAttribute {
+  fontWeight(value: number | FontWeight | string | Resource, fontWeightConfigs?: FontWeightConfigs): this {
     let arkFontWeight = new ArkFontWeight();
     arkFontWeight.value = value;
     if (fontWeightConfigs !== null && fontWeightConfigs !== undefined && typeof fontWeightConfigs === 'object') {
@@ -1021,40 +1057,42 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     return this;
   }
-  fontFamily(value: string | Resource): SpanAttribute {
+  fontFamily(value: string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier, value);
     return this;
   }
-  letterSpacing(value: number | string | Resource): SpanAttribute {
+  letterSpacing(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
     return this;
   }
-  baselineOffset(value: LengthMetrics): SpanAttribute {
+  baselineOffset(value: LengthMetrics): this {
     modifierWithKey(this._modifiersWithKeys, SpanBaselineOffsetModifier.identity, SpanBaselineOffsetModifier, value);
     return this;
   }
-  textCase(value: TextCase): SpanAttribute {
+  textCase(value: TextCase): this {
     modifierWithKey(this._modifiersWithKeys, SpanTextCaseModifier.identity, SpanTextCaseModifier, value);
     return this;
   }
-  textBackgroundStyle(value: TextBackgroundStyle): SpanAttribute {
+  textBackgroundStyle(value: TextBackgroundStyle): this {
     modifierWithKey(this._modifiersWithKeys, SpanTextBackgroundStyleModifier.identity, SpanTextBackgroundStyleModifier, value);
     return this;
   }
-  textShadow(value: ShadowOptions | Array<ShadowOptions>): SpanAttribute {
+  textShadow(value: ShadowOptions | Array<ShadowOptions>): this {
     modifierWithKey(this._modifiersWithKeys, SpanTextShadowModifier.identity, SpanTextShadowModifier, value);
     return this;
   }
-  fontVariations(value: Array<SpanFontVariation>): SpanAttribute {
+  fontVariations(value: Array<SpanFontVariation>): this {
     modifierWithKey(this._modifiersWithKeys, SpanFontVariationsModifier.identity, SpanFontVariationsModifier, value);
     return this;
   }
 }
 // @ts-ignore
-globalThis.Span.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkSpanComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.SpanModifier(nativePtr, classType);
-  });
-};
+if (globalThis.Span !== undefined) {
+  (globalThis as any).Span.attributeModifier = function (modifier) {
+    attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr) => {
+      return new ArkSpanComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.SpanModifier(nativePtr, classType);
+    });
+  };
+}

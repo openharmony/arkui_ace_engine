@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -105,6 +104,46 @@ class ColumnPointLightModifier extends ModifierWithKey<PointLightStyle> {
   }
 }
 
+class CommonPointLightModifier extends ModifierWithKey<PointLightStyle> {
+  constructor(value: PointLightStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('commonPointLight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX: Dimension | undefined;
+      let positionY: Dimension | undefined;
+      let positionZ: Dimension | undefined;
+      let intensity: number | undefined;
+      let color: ResourceColor | undefined;
+      let illuminated: number | undefined;
+      let bloom: number | undefined;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+
 class ColumnReverseModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -125,38 +164,40 @@ class ColumnReverseModifier extends ModifierWithKey<boolean> {
 interface ColumnParam {
   space: string | number;
 }
-class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute> {
+class ArkColumnComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  initialize(value: Object[]): ColumnAttribute {
+  initialize(value: Object[]): this {
     if (value[0] !== undefined) {
       modifierWithKey(this._modifiersWithKeys, ColumnSpaceModifier.identity, ColumnSpaceModifier, (value[0] as ColumnParam).space);
     }
     return this
   }
-  alignItems(value: HorizontalAlign): ColumnAttribute {
+  alignItems(value: HorizontalAlign): this {
     modifierWithKey(this._modifiersWithKeys, ColumnAlignItemsModifier.identity, ColumnAlignItemsModifier, value);
     return this;
   }
-  justifyContent(value: FlexAlign): ColumnAttribute {
+  justifyContent(value: FlexAlign): this {
     modifierWithKey(this._modifiersWithKeys, ColumnJustifyContentModifier.identity, ColumnJustifyContentModifier, value);
     return this;
   }
-  pointLight(value: PointLightStyle): ColumnAttribute {
+  pointLight(value: PointLightStyle): this {
     modifierWithKey(this._modifiersWithKeys, ColumnPointLightModifier.identity, ColumnPointLightModifier, value);
     return this;
   }
-  reverse(value: boolean | undefined): ColumnAttribute {
+  reverse(value: boolean | undefined): this {
     modifierWithKey(this._modifiersWithKeys, ColumnReverseModifier.identity, ColumnReverseModifier, value);
     return this;
   }
 }
 // @ts-ignore
-globalThis.Column.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkColumnComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.ColumnModifier(nativePtr, classType);
-  });
-};
+if (globalThis.Column !== undefined) {
+  (globalThis as any).Column.attributeModifier = function (modifier: ArkComponent): void {
+    attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+      return new ArkColumnComponent(nativePtr);
+    }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+      return new modifierJS.ColumnModifier(nativePtr, classType);
+    });
+  };
+}

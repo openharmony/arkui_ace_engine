@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class FlexInitializeModifier extends ModifierWithKey<FlexParam> {
   constructor(value: FlexParam) {
     super(value);
@@ -36,21 +35,6 @@ interface FlexParam {
   alignItems?: ItemAlign;
   alignContent?: FlexAlign;
   space?: FlexSpaceOptions;
-}
-class ArkFlexComponent extends ArkComponent implements FlexAttribute {
-  constructor(nativePtr: KNode, classType?: ModifierType) {
-    super(nativePtr, classType);
-  }
-  pointLight(value: PointLightStyle): this {
-    modifierWithKey(this._modifiersWithKeys, FlexPointLightModifier.identity, FlexPointLightModifier, value);
-    return this;
-  }
-  initialize(value: Object[]): FlexAttribute {
-    if (value[0] !== undefined) {
-      modifierWithKey(this._modifiersWithKeys, FlexInitializeModifier.identity,
-        FlexInitializeModifier, (value[0] as FlexParam));
-    }
-  }
 }
 
 class FlexPointLightModifier extends ModifierWithKey<PointLightStyle> {
@@ -93,11 +77,30 @@ class FlexPointLightModifier extends ModifierWithKey<PointLightStyle> {
   }
 }
 
+class ArkFlexComponent extends ArkComponent {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
+  pointLight(value: PointLightStyle): this {
+    modifierWithKey(this._modifiersWithKeys, FlexPointLightModifier.identity, FlexPointLightModifier, value);
+    return this;
+  }
+  initialize(value: Object[]): this {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, FlexInitializeModifier.identity,
+        FlexInitializeModifier, (value[0] as FlexParam));
+    }
+    return this;
+  }
+}
+
 // @ts-ignore
-globalThis.Flex.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkFlexComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.FlexModifier(nativePtr, classType);
-  });
-};
+if (globalThis.Flex !== undefined) {
+  (globalThis as any).Flex.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkFlexComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.FlexModifier(nativePtr, classType);
+    });
+  };
+}

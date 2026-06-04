@@ -13,15 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-namespace BreakpointConstants {
-  export const XS = 0;
-  export const SM = 1;
-  export const MD = 2;
-  export const LG = 3;
-  export const XL = 4;
-  export const XXL = 5;
-};
 class GridRowAlignItemsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -36,6 +27,19 @@ class GridRowAlignItemsModifier extends ModifierWithKey<number> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class GridRowOnBreakpointChangeModifier extends ModifierWithKey<(breakpoints: string) => void> {
+  constructor(value: (breakpoints: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('gridRowOnBreakpointChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().gridRow.resetOnBreakpointChange(node);
+    } else {
+      getUINativeModule().gridRow.setOnBreakpointChange(node, this.value);
+    }
   }
 }
 class SetDirectionModifier extends ModifierWithKey<number> {
@@ -73,12 +77,14 @@ class SetColumnsModifier extends ModifierWithKey<number | GridRowColumnOption> {
     if (reset) {
       getUINativeModule().gridRow.resetColumns(node);
     } else {
-      if (isNumber(this.value)) {
+      if (isUndefined(this.value) || isNull(this.value)) {
+        getUINativeModule().gridRow.resetColumns(node);
+      } else if (isNumber(this.value)) {
         getUINativeModule().gridRow.setColumns(node, this.value,
           this.value, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().gridRow.setColumns(node, this.value.xs,
-          this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+        getUINativeModule().gridRow.setColumns(node, (this.value as any).xs,
+          (this.value as any).sm, (this.value as any).md, (this.value as any).lg, (this.value as any).xl, (this.value as any).xxl);
       }
     }
   }
@@ -88,56 +94,45 @@ class SetGutterModifier extends ModifierWithKey<number | GutterOption> {
     super(value);
   }
   static identity: Symbol = Symbol('gridRowGutter');
-  parseGutter(value: number | GridRowSizeOption): number[] {
-    let gutters: number[] = [0, 0, 0, 0, 0, 0];
-    if (isNumber(value)) {
-      gutters[BreakpointConstants.XS] = value;
-      gutters[BreakpointConstants.SM] = value;
-      gutters[BreakpointConstants.MD] = value;
-      gutters[BreakpointConstants.LG] = value;
-      gutters[BreakpointConstants.XL] = value;
-      gutters[BreakpointConstants.XXL] = value;
-    } else {
-      gutters[BreakpointConstants.XS] = value?.xs;
-      gutters[BreakpointConstants.SM] = value?.sm;
-      gutters[BreakpointConstants.MD] = value?.md;
-      gutters[BreakpointConstants.LG] = value?.lg;
-      gutters[BreakpointConstants.XL] = value?.xl;
-      gutters[BreakpointConstants.XXL] = value?.xxl;
-    }
-    return gutters;
-  }
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().gridRow.resetGutter(node);
-      return;
     }
-    if (isNumber(this.value)) {
-      getUINativeModule().gridRow.setGutter(node, this.value,
-        this.value, this.value, this.value, this.value, this.value,
-        this.value, this.value, this.value, this.value, this.value, this.value);
-      return;
-    }
-    let xGutters: number[] = this.parseGutter(this.value.x);
-    let yGutters: number[] = this.parseGutter(this.value.y);
-    getUINativeModule().gridRow.setGutter(node,
-      xGutters[BreakpointConstants.XS], xGutters[BreakpointConstants.SM], xGutters[BreakpointConstants.MD],
-      xGutters[BreakpointConstants.LG], xGutters[BreakpointConstants.XL], xGutters[BreakpointConstants.XXL],
-      yGutters[BreakpointConstants.XS], yGutters[BreakpointConstants.SM], yGutters[BreakpointConstants.MD],
-      yGutters[BreakpointConstants.LG], yGutters[BreakpointConstants.XL], yGutters[BreakpointConstants.XXL]
-    );
-  }
-}
-class GridRowOnBreakpointChangeModifier extends ModifierWithKey<(breakpoints: string) => void> {
-  constructor(value: (breakpoints: string) => void) {
-    super(value);
-  }
-  static identity = Symbol('gridRowOnBreakpointChange');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().gridRow.resetOnBreakpointChange(node);
-    } else {
-      getUINativeModule().gridRow.setOnBreakpointChange(node, this.value);
+    else {
+      if (isUndefined(this.value) || isNull(this.value)) {
+        getUINativeModule().gridRow.resetGutter(node);
+      }
+      if (isNumber(this.value)) {
+        getUINativeModule().gridRow.setGutter(node, this.value,
+          this.value, this.value, this.value, this.value, this.value,
+          this.value, this.value, this.value, this.value, this.value, this.value);
+      }
+      else {
+        if (isNumber((this.value as any).x)) {
+          if (isNumber((this.value as any).y)) {
+            getUINativeModule().gridRow.setGutter(node,
+              (this.value as any).x, (this.value as any).x, (this.value as any).x, (this.value as any).x, (this.value as any).x, (this.value as any).x,
+              (this.value as any).y, (this.value as any).y, (this.value as any).y, (this.value as any).y, (this.value as any).y, (this.value as any).y);
+          }
+          else {
+            getUINativeModule().gridRow.setGutter(node,
+              (this.value as any).x, (this.value as any).x, (this.value as any).x, (this.value as any).x, (this.value as any).x, (this.value as any).x,
+              (this.value as any).y?.xs, (this.value as any).y?.sm, (this.value as any).y?.md, (this.value as any).y?.lg, (this.value as any).y?.xl, (this.value as any).y?.xxl);
+          }
+        }
+        else {
+          if (isNumber((this.value as any).y)) {
+            getUINativeModule().gridRow.setGutter(node,
+              (this.value as any).x?.xs, (this.value as any).x?.sm, (this.value as any).x?.md, (this.value as any).x?.lg, (this.value as any).x?.xl, (this.value as any).x?.xxl,
+              (this.value as any).y, (this.value as any).y, (this.value as any).y, (this.value as any).y, (this.value as any).y, (this.value as any).y);
+          }
+          else {
+            getUINativeModule().gridRow.setGutter(node,
+              (this.value as any).x?.xs, (this.value as any).x?.sm, (this.value as any).x?.md, (this.value as any).x?.lg, (this.value as any).x?.xl, (this.value as any).x?.xxl,
+              (this.value as any).y?.xs, (this.value as any).y?.sm, (this.value as any).y?.md, (this.value as any).y?.lg, (this.value as any).y?.xl, (this.value as any).y?.xxl);
+          }
+        }
+      }
     }
   }
 }
@@ -147,38 +142,38 @@ interface GridRowParam {
   breakpoints?: BreakPoints;
   direction?: number;
 }
-class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAttribute> {
+class ArkGridRowComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   allowChildTypes(): string[] {
     return ["GridCol"];
   }
-  onBreakpointChange(callback: (breakpoints: string) => void): GridRowAttribute {
+  onBreakpointChange(callback: (breakpoints: string) => void): this {
     modifierWithKey(this._modifiersWithKeys, GridRowOnBreakpointChangeModifier.identity, GridRowOnBreakpointChangeModifier, callback);
     return this;
   }
-  alignItems(value: ItemAlign): GridRowAttribute {
+  alignItems(value: ItemAlign): this {
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);
     return this;
   }
-  setDirection(value: number): GridRowAttribute {
+  setDirection(value: number): this {
     modifierWithKey(this._modifiersWithKeys, SetDirectionModifier.identity, SetDirectionModifier, value);
     return this;
   }
-  setBreakpoints(value: BreakPoints): GridRowAttribute {
+  setBreakpoints(value: BreakPoints): this {
     modifierWithKey(this._modifiersWithKeys, SetBreakpointsModifier.identity, SetBreakpointsModifier, value);
     return this;
   }
-  setColumns(value: number | GridRowColumnOption): GridRowAttribute {
+  setColumns(value: number | GridRowColumnOption): this {
     modifierWithKey(this._modifiersWithKeys, SetColumnsModifier.identity, SetColumnsModifier, value);
     return this;
   }
-  setGutter(value: number | GutterOption): GridRowAttribute {
+  setGutter(value: number | GutterOption): this {
     modifierWithKey(this._modifiersWithKeys, SetGutterModifier.identity, SetGutterModifier, value);
     return this;
   }
-  initialize(value: Object[]): GridRowAttribute {
+  initialize(value: Object[]): this {
     if (value[0] !== undefined) {
       this.setGutter((value[0] as GridRowParam).gutter);
       this.setColumns((value[0] as GridRowParam).columns);
@@ -194,10 +189,12 @@ class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAt
   }
 }
 // @ts-ignore
-globalThis.GridRow.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkGridRowComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.GridRowModifier(nativePtr, classType);
-  });
-};
+if (globalThis.GridRow !== undefined) {
+  (globalThis as any).GridRow.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkGridRowComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.GridRowModifier(nativePtr, classType);
+    });
+  };
+}

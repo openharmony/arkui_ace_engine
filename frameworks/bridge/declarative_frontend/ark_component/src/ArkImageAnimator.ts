@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>> {
   constructor(value: Array<ImageFrameInfo>) {
     super(value);
@@ -195,23 +194,6 @@ class ImageAnimatorIterationsModeModifier extends ModifierWithKey<number> {
   }
 }
 
-class ImageAnimatorAutoMonitorInvisibleAreaModeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('autoMonitorInvisibleAreaMode');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().imageAnimator.setAutoMonitorInvisibleAreaMode(node, false);
-    } else {
-      getUINativeModule().imageAnimator.setAutoMonitorInvisibleAreaMode(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
-  }
-}
-
 declare type OnStart = () => void;
 class ImageAnimatorOnStartModifier extends ModifierWithKey<OnStart> {
   constructor(value: OnStart) {
@@ -287,79 +269,98 @@ class ImageAnimatorOnFinishModifier extends ModifierWithKey<OnFinish> {
   }
 }
 
-class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute> {
+class ImageAnimatorAutoMonitorInvisibleAreaModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('autoMonitorInvisibleArea');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageAnimator.setAutoMonitorInvisibleArea(node, false);
+    } else {
+      getUINativeModule().imageAnimator.setAutoMonitorInvisibleArea(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class ArkImageAnimatorComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  images(value: Array<ImageFrameInfo>): ImageAnimatorAttribute {
+  images(value: Array<ImageFrameInfo>): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorImagesModifier.identity,
       ImageAnimatorImagesModifier, value);
     return this;
   }
-  state(value: AnimationStatus): ImageAnimatorAttribute {
+  state(value: AnimationStatus): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorStateModifier.identity,
       ImageAnimatorStateModifier, value);
     return this;
   }
-  duration(value: number): ImageAnimatorAttribute {
+  duration(value: number): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorDurationModifier.identity,
       ImageAnimatorDurationModifier, value);
     return this;
   }
-  reverse(value: boolean): ImageAnimatorAttribute {
+  reverse(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorReverseModifier.identity,
       ImageAnimatorReverseModifier, value);
     return this;
   }
-  fixedSize(value: boolean): ImageAnimatorAttribute {
+  fixedSize(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorFixedSizeModifier.identity,
       ImageAnimatorFixedSizeModifier, value);
     return this;
   }
-  preDecode(value: number): ImageAnimatorAttribute {
+  preDecode(value: number): this {
     throw new BusinessError(100201, 'preDecode function not supported in attributeModifier scenario.');
   }
-  fillMode(value: FillMode): ImageAnimatorAttribute {
+  fillMode(value: FillMode): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorFillModeModifier.identity,
       ImageAnimatorFillModeModifier, value);
     return this;
   }
-  iterations(value: number): ImageAnimatorAttribute {
+  iterations(value: number): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorIterationsModeModifier.identity,
       ImageAnimatorIterationsModeModifier, value);
     return this;
   }
-  monitorInvisibleAreaMode(value: boolean): ImageAnimatorAttribute {
-    modifierWithKey(this._modifiersWithKeys, ImageAnimatorAutoMonitorInvisibleAreaModeModifier.identity,
-      ImageAnimatorAutoMonitorInvisibleAreaModeModifier, value);
+  monitorInvisibleArea(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorAutoMonitorInvisibleAreaModifier.identity,
+      ImageAnimatorAutoMonitorInvisibleAreaModifier, value);
     return this;
   }
-  onStart(event: () => void): ImageAnimatorAttribute {
-    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnStartModifier.identity, ImageAnimatorOnIncModifier, event);
+  onStart(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnStartModifier.identity, ImageAnimatorOnStartModifier, event);
     return this;
   }
-  onPause(event: () => void): ImageAnimatorAttribute {
+  onPause(event: () => void): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnPauseModifier.identity, ImageAnimatorOnPauseModifier, event);
     return this;
   }
-  onRepeat(event: () => void): ImageAnimatorAttribute {
+  onRepeat(event: () => void): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnRepeatModifier.identity, ImageAnimatorOnRepeatModifier, event);
     return this;
   }
-  onCancel(event: () => void): ImageAnimatorAttribute {
+  onCancel(event: () => void): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnCancelModifier.identity, ImageAnimatorOnCancelModifier, event);
     return this;
   }
-  onFinish(event: () => void): ImageAnimatorAttribute {
+  onFinish(event: () => void): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnFinishModifier.identity, ImageAnimatorOnFinishModifier, event);
     return this;
   }
 }
 // @ts-ignore
-globalThis.ImageAnimator.attributeModifier = function (modifier: ArkComponent): void {
+if (globalThis.ImageAnimator !== undefined) {
+(globalThis as any).ImageAnimator.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkImageAnimatorComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.ImageAnimatorModifier(nativePtr, classType);
   });
 };
+}

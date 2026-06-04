@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class DividerVerticalModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -78,38 +77,40 @@ class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
     return this.stageValue !== this.value;
   }
 }
-class ArkDividerComponent extends ArkComponent implements DividerAttribute {
+class ArkDividerComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  initialize(value: Object[]): DividerAttribute {
+  initialize(value: Object[]): this {
     return this;
   }
   allowChildCount(): number {
     return 0;
   }
-  vertical(value: boolean): DividerAttribute {
+  vertical(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;
   }
-  color(value: ResourceColor): DividerAttribute {
+  color(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, DividerColorModifier.identity, DividerColorModifier, value);
     return this;
   }
-  strokeWidth(value: number | string): DividerAttribute {
+  strokeWidth(value: number | string): this {
     modifierWithKey(this._modifiersWithKeys, DividerStrokeWidthModifier.identity, DividerStrokeWidthModifier, value);
     return this;
   }
-  lineCap(value: LineCapStyle): DividerAttribute {
+  lineCap(value: LineCapStyle): this {
     modifierWithKey(this._modifiersWithKeys, DividerLineCapModifier.identity, DividerLineCapModifier, value);
     return this;
   }
 }
 // @ts-ignore
-globalThis.Divider.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-    return new ArkDividerComponent(nativePtr);
-  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-    return new modifierJS.DividerModifier(nativePtr, classType);
-  });
-};
+if (globalThis.Divider !== undefined) {
+  (globalThis as any).Divider.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkDividerComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.DividerModifier(nativePtr, classType);
+    });
+  };
+}

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ClipContentModifier extends ModifierWithKey<ContentClipMode | RectShape> {
     constructor(value: ContentClipMode | RectShape) {
@@ -27,6 +26,24 @@ class ClipContentModifier extends ModifierWithKey<ContentClipMode | RectShape> {
             getUINativeModule().scrollable.setContentClip(node, this.value);
         }
     }
+}
+
+class ScrollableFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
+  constructor(value: ArkFadingEdge) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollableFadingEdge');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetFadingEdge(node);
+    } else {
+      getUINativeModule().scrollable.setFadingEdge(node, this.value.value!, this.value.options?.fadingEdgeLength);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
 }
 
 class EdgeEffectModifier extends ModifierWithKey<ArkEdgeEffect> {
@@ -49,24 +66,6 @@ class EdgeEffectModifier extends ModifierWithKey<ArkEdgeEffect> {
   }
 }
 
-class ScrollableFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
-  constructor(value: ArkFadingEdge) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('scrollableFadingEdge');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().scrollable.resetFadingEdge(node);
-    } else {
-      getUINativeModule().scrollable.setFadingEdge(node, this.value.value!, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-
 class OnReachStartModifier extends ModifierWithKey<() => void> {
     constructor(value: () => void) {
         super(value);
@@ -79,6 +78,34 @@ class OnReachStartModifier extends ModifierWithKey<() => void> {
             getUINativeModule().scrollable.setOnReachStart(node, this.value);
         }
     }
+}
+
+class OnReachEndModifier extends ModifierWithKey<() => void> {
+    constructor(value: () => void) {
+        super(value);
+    }
+    static identity: Symbol = Symbol('onReachEnd');
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            getUINativeModule().scrollable.resetOnReachEnd(node);
+        } else {
+            getUINativeModule().scrollable.setOnReachEnd(node, this.value);
+        }
+    }
+}
+
+class FlingSpeedLimitModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('flingSpeedLimit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetFlingSpeedLimit(node);
+    } else {
+      getUINativeModule().scrollable.setFlingSpeedLimit(node, this.value);
+    }
+  }
 }
 
 class BackToTopModifier extends ModifierWithKey<boolean> {
@@ -207,20 +234,6 @@ class OnDidStopFlingModifier extends ModifierWithKey<() => void> {
   }
 }
 
-class OnReachEndModifier extends ModifierWithKey<() => void> {
-    constructor(value: () => void) {
-        super(value);
-    }
-    static identity: Symbol = Symbol('onReachEnd');
-    applyPeer(node: KNode, reset: boolean): void {
-        if (reset) {
-            getUINativeModule().scrollable.resetOnReachEnd(node);
-        } else {
-            getUINativeModule().scrollable.setOnReachEnd(node, this.value);
-        }
-    }
-}
-
 class ContentStartOffsetModifier extends ModifierWithKey<number | Resource> {
   constructor(value: number | Resource) {
     super(value);
@@ -252,22 +265,22 @@ class ContentEndOffsetModifier extends ModifierWithKey<number | Resource> {
 /**
  * base class of Grid, Scroll, List, and WaterFlow.
  */
-export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMethod<T> {
+class ArkScrollable<T> extends ArkComponent {
     constructor(nativePtr: KNode, classType?: ModifierType) {
       super(nativePtr, classType);
     }
-    clipContent(clip: ContentClipMode | RectShape): T {
+    clipContent(clip: ContentClipMode | RectShape): this {
         modifierWithKey(this._modifiersWithKeys, ClipContentModifier.identity, ClipContentModifier, clip);
         return this;
     }
-    edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): T {
+    edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this {
       let effect: ArkEdgeEffect = new ArkEdgeEffect();
       effect.value = value;
       effect.options = options;
       modifierWithKey(this._modifiersWithKeys, EdgeEffectModifier.identity, EdgeEffectModifier, effect);
       return this;
     }
-    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): T {
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this {
       let fadingEdge: ArkFadingEdge = new ArkFadingEdge();
       fadingEdge.value = value;
       fadingEdge.options = options;
@@ -283,6 +296,10 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
         modifierWithKey(this._modifiersWithKeys, OnReachEndModifier.identity, OnReachEndModifier, event);
         return this;
     }
+    flingSpeedLimit(value: number): this {
+      modifierWithKey(this._modifiersWithKeys, FlingSpeedLimitModifier.identity, FlingSpeedLimitModifier, value);
+      return this;
+    }
     backToTop(value: boolean): this {
       modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
       return this;
@@ -291,39 +308,39 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
       modifierWithKey(this._modifiersWithKeys, EnableScrollWithMouseModifier.identity, EnableScrollWithMouseModifier, value);
       return this;
     }
-    scrollBarMargin(margin: ScrollBarMargin): T {
-      modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, margin);
+    scrollBarMargin(value: ScrollBarMargin): this {
+      modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, value);
       return this;
     }
-    autoAdjustScrollBarMargin(value: boolean): T {
+    autoAdjustScrollBarMargin(value: boolean): this {
       modifierWithKey(this._modifiersWithKeys, AutoAdjustScrollBarMarginModifier.identity, AutoAdjustScrollBarMarginModifier, value);
       return this;
     }
-    onWillStopDragging(callback: (velocity: number) => void) : this {
-      modifierWithKey(this._modifiersWithKeys, OnWillStopDraggingModifier.identity, OnWillStopDraggingModifier, callback);
+    onWillStopDragging(value: (velocity: number) => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnWillStopDraggingModifier.identity, OnWillStopDraggingModifier, value);
       return this;
     }
-    onWillStartDragging(callback: () => void) : this {
-      modifierWithKey(this._modifiersWithKeys, OnWillStartDraggingModifier.identity, OnWillStartDraggingModifier, callback);
+    onWillStartDragging(value: () => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnWillStartDraggingModifier.identity, OnWillStartDraggingModifier, value);
       return this;
     }
-    onDidStopDragging(callback: (isAnimate: boolean) => void) : this {
-      modifierWithKey(this._modifiersWithKeys, OnDidStopDraggingModifier.identity, OnDidStopDraggingModifier, callback);
+    onDidStopDragging(value: (isAnimate: boolean) => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnDidStopDraggingModifier.identity, OnDidStopDraggingModifier, value);
       return this;
     }
-    onWillStartFling(callback: () => void) : this {
-      modifierWithKey(this._modifiersWithKeys, OnWillStartFlingModifier.identity, OnWillStartFlingModifier, callback);
+    onWillStartFling(value: () => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnWillStartFlingModifier.identity, OnWillStartFlingModifier, value);
       return this;
     }
-    onDidStopFling(callback: () => void) : this {
-      modifierWithKey(this._modifiersWithKeys, OnDidStopFlingModifier.identity, OnDidStopFlingModifier, callback);
+    onDidStopFling(value: () => void) : this {
+      modifierWithKey(this._modifiersWithKeys, OnDidStopFlingModifier.identity, OnDidStopFlingModifier, value);
       return this;
     }
-    contentStartOffset(value: number | Resource): T {
+    contentStartOffset(value: number | Resource): this {
       modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
       return this;
     }
-    contentEndOffset(value: number | Resource): T {
+    contentEndOffset(value: number | Resource): this {
       modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
       return this;
     }
