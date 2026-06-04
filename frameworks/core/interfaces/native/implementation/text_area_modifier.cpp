@@ -132,7 +132,7 @@ void SetPlaceholderColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelStatic::SetPlaceholderColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    TextFieldModelStatic::SetPlaceholderColor(frameNode, Converter::OptConvertColorForMaterial(value));
 }
 void SetPlaceholderFontImpl(Ark_NativePointer node,
                             const Opt_arkui_component_units_Font* value)
@@ -167,7 +167,7 @@ void SetFontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelStatic::SetTextColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    TextFieldModelStatic::SetTextColor(frameNode, Converter::OptConvertColorForMaterial(value));
 }
 void SetFontSizeImpl(Ark_NativePointer node,
                      const Opt_Length* value)

@@ -255,6 +255,7 @@ void MultipleParagraphLayoutAlgorithm::RelayoutShaderStyle(const RefPtr<TextLayo
                 textStyle.SetGradient(GradientConvert::ToGradient(gradient.value()));
             } else if (textLineStyle->GetColorShaderStyle().has_value()) {
                 textStyle.SetColorShaderStyle(textLineStyle->GetColorShaderStyle());
+                textStyle.ResetGradient();
             }
         } else {
             textStyle = textStyle_;

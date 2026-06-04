@@ -54,6 +54,10 @@ const std::string STR_TEST_TEXT2("test_text2");
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
+const std::string COLOR_BLUE = "#FF0000FF";
+const std::string COLOR_GREEN = "#FF008000";
+const std::string COLOR_HALF_ALPHA_RED = "#7FFF0000";
+const std::string COLOR_LOW_ALPHA_BLUE = "#330000FF";
 const auto COLOR_NAME = NamedResourceId("color_name", ResourceType::COLOR);
 const auto COLOR_ID = IntResourceId(1234, ResourceType::COLOR);
 const auto WRONG_COLOR_NAME = NamedResourceId("color_name", ResourceType::STRING);
@@ -400,6 +404,137 @@ HWTEST_F(TextAreaModifierTest, setFontColorTest, TestSize.Level1)
         checkVal = GetAttrValue<std::string>(node_, propName);
         EXPECT_THAT(checkVal, Eq(expectVal));
     }
+}
+
+/**
+ * @tc.name: setFontColorTestNullNode
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setFontColor with null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setFontColorTestNullNode, TestSize.Level1)
+{
+    static const std::string propName("fontColor");
+    ASSERT_NE(modifier_->setFontColor, nullptr);
+
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(COLOR_BLACK));
+
+    auto redColor = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED));
+    modifier_->setFontColor(node_, &redColor);
+    checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(COLOR_RED));
+
+    modifier_->setFontColor(nullptr, &redColor);
+    checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(COLOR_RED));
+}
+
+/**
+ * @tc.name: setFontColorTestTransparent
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setFontColor with transparent colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setFontColorTestTransparent, TestSize.Level1)
+{
+    static const std::string propName("fontColor");
+
+    ASSERT_NE(modifier_->setFontColor, nullptr);
+
+    auto transparentColor = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#00000000"));
+    modifier_->setFontColor(node_, &transparentColor);
+    auto result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_TRANSPARENT));
+
+    auto halfAlphaRed = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#7FFF0000"));
+    modifier_->setFontColor(node_, &halfAlphaRed);
+    result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_HALF_ALPHA_RED));
+
+    auto lowAlphaBlue = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#330000FF"));
+    modifier_->setFontColor(node_, &lowAlphaBlue);
+    result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_LOW_ALPHA_BLUE));
+}
+
+/**
+ * @tc.name: setFontColorTestEmptyOptional
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setFontColor with empty optional
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setFontColorTestEmptyOptional, TestSize.Level1)
+{
+    static const std::string propName("fontColor");
+    ASSERT_NE(modifier_->setFontColor, nullptr);
+
+    auto redColor = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED));
+    modifier_->setFontColor(node_, &redColor);
+    auto result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_RED));
+
+    auto emptyOptional = Converter::ArkValue<Opt_ResourceColor>();
+    modifier_->setFontColor(node_, &emptyOptional);
+    result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_BLACK));
+}
+
+/**
+ * @tc.name: setFontColorTestInvalidUnion
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setFontColor with invalid union
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setFontColorTestInvalidUnion, TestSize.Level1)
+{
+    static const std::string propName("fontColor");
+    ASSERT_NE(modifier_->setFontColor, nullptr);
+
+    auto redColor = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED));
+    modifier_->setFontColor(node_, &redColor);
+    auto result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_RED));
+
+    auto invalidUnion = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+    modifier_->setFontColor(node_, &invalidUnion);
+    result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_BLACK));
+}
+
+/**
+ * @tc.name: setFontColorTestColorSequence
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setFontColor with color sequence
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setFontColorTestColorSequence, TestSize.Level1)
+{
+    static const std::string propName("fontColor");
+
+
+    ASSERT_NE(modifier_->setFontColor, nullptr);
+
+    auto redColor = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED));
+    auto blueColor = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE));
+    auto greenColor = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREEN));
+
+    modifier_->setFontColor(node_, &redColor);
+    auto result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_RED));
+
+    modifier_->setFontColor(node_, &blueColor);
+    result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_BLUE));
+
+    modifier_->setFontColor(node_, &greenColor);
+    result = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(result, Eq(COLOR_GREEN));
 }
 
 /**

@@ -57,6 +57,7 @@ public:
     static void SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt);
     static void SetHorizontalScrolling(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
+    static void UpdateTextColor(FrameNode* frameNode, const Color& color);
     static void SetCaretPosition(FrameNode* frameNode, const std::optional<int32_t>& optValue);
     static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& valueOpt);
     static void SetCaretStyle(FrameNode* frameNode, const std::optional<CaretStyle>& value);

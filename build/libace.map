@@ -1035,6 +1035,7 @@
       "OHOS::Ace::NG::Converter::ConvContext::Store(std::__h::basic_string_view<char, std::__h::char_traits<char>> const&)";
       "OHOS::Ace::NG::Converter::ConvertAngleWithDefault(Opt_Union_F64_String const&, std::__h::optional<float>&, float)";
       "OHOS::Ace::NG::Converter::FontFamilies OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontFamilies, InteropString>(InteropString const&)";
+      "OHOS::Ace::NG::Converter::OptConvertColorForMaterial(Opt_ResourceColor const*)";
       "OHOS::Ace::NG::Converter::ProcessLinearGradient(Opt_LinearGradientOptions const&, OHOS::Ace::NG::Gradient&)";
       "OHOS::Ace::NG::Converter::RadioStyle OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::RadioStyle, Ark_RadioStyle>(Ark_RadioStyle const&)";
       "OHOS::Ace::NG::Converter::ResourceConverter::ResourceConverter(Ark_Resource const&)";
