@@ -68,7 +68,6 @@
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 namespace OHOS::Ace::NG {
-std::atomic<int32_t> TextFieldPattern::sessionIdCounter_ { 0 };
 namespace {
 
 const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
@@ -1476,7 +1475,7 @@ bool TextFieldPattern::GetEditingBoxModel() const
 
 void TextFieldPattern::HandleFocusEvent()
 {
-    sessionId_ = ++sessionIdCounter_;
+    sessionId_++;
     isFocusedBeforeClick_ = true;
     focusIndex_ = FocuseIndex::TEXT;
     auto host = GetHost();
