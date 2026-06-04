@@ -992,6 +992,7 @@ export class SelectDialogV2 extends ViewV2 {
               Radio.id(String(index));
               Radio.focusable(false);
               Radio.accessibilityLevel('no');
+              Radio.visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden);
               Radio.radioStyle({ uncheckedBorderColor: Color.Transparent });
               Radio.onFocus(() => {
                 this.isFocus = true;

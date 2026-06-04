@@ -1354,6 +1354,7 @@ export class SelectDialog extends ViewPU {
                             Radio.id(String(index));
                             Radio.focusable(false);
                             Radio.accessibilityLevel('no');
+                            Radio.visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden);
                             Radio.radioStyle({ uncheckedBorderColor: Color.Transparent });
                             Radio.onFocus(() => {
                                 this.isFocus = true;

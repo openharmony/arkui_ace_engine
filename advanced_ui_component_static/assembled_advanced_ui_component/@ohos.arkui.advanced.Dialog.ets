@@ -576,6 +576,7 @@ export struct SelectDialog {
                       .id(index.toString())
                       .focusable(false)
                       .accessibilityLevel('no')
+                      .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
                       .radioStyle({ uncheckedBorderColor: Color.Transparent })
                       .onFocus(() => {
                         this.isFocus = true;

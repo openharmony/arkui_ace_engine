@@ -630,6 +630,7 @@ import {
                         .id(String(index))
                         .focusable(false)
                         .accessibilityLevel('no')
+                        .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
                         .radioStyle({ uncheckedBorderColor: Color.Transparent })
                         .onFocus(() => {
                           this.isFocus = true;
