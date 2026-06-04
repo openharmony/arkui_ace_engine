@@ -189,9 +189,7 @@ export class UIUtils {
      * Apps use this as the entry point to the IReusePool that recycles the
      * component:
      *
-     * Returns undefined when called with a non-component value. The returned
-     * context's getCustomComponentReusePool() walks the parent chain and returns the
-     * nearest ancestor pool that accepts this component's class.
+     * Returns undefined when called with a non-component value.
      */
     static getCustomComponentContext<T extends IVariableOwner>(customComponent: T): CustomComponentContext  | undefined {
         if (customComponent === undefined || customComponent === null) {
@@ -379,7 +377,7 @@ export class MutableBinding<T> {
 export interface CustomComponentContext {
 
     /**
-     * The getCustomComponentReusePool function gets the reuse pool.
+     * The getReusePool function gets the reuse pool.
      *
      * Walks up from the wrapped component looking for the nearest ancestor
      * whose ___reusePool accepts this component's class and is still active.
@@ -391,7 +389,7 @@ export interface CustomComponentContext {
      * @stagemodelonly
      * @since 26.0.0 static
      */
-    getCustomComponentReusePool(): IReusePool | undefined;
+    getReusePool(): IReusePool | undefined;
 
     /**
      * Register active and inactive callback.

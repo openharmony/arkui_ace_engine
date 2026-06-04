@@ -101,7 +101,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     * Used by PeerNode.reuse/recycle to route reusable instances to the correct shared pool.
     * Returns undefined if no matching pool is found.
     */
-    public __getReusePoolForClass__Internal(classKey: string): GlobalReusePool | undefined {
+    public __getReusePoolForClass__Internal(classKey: string, skipPool?: GlobalReusePool): GlobalReusePool | undefined {
         // Fast path: no pool anywhere in the chain we can see
         if (this.___reusePool === undefined && this.parent_ === undefined) {
             return undefined;
@@ -110,7 +110,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         let current: ExtendableComponent | undefined = this;
         while (current !== undefined) {
             const pool = current!.___reusePool;
-            if (pool !== undefined && pool!.acceptsComponent(classKey) && pool!.isActive()) {
+            if (pool !== undefined && pool!.acceptsComponent(classKey) && pool!.isActive() && pool !== skipPool) {
                 return pool;
             }
             current = current!.parent_;
@@ -509,6 +509,17 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     
     __getPeerNode__Internal(): PeerNode | undefined {
         return this.delegate_?.getPeerNode();
+    }
+
+    /**
+     * Reports whether this component's backing peer node is in the process of
+     * being disposed (or already disposed). Used by GlobalReusePool to decide
+     * whether the pool's owner is being torn down — in which case recycled
+     * children must disappear rather than be pooled.
+     */
+    __isPeerNodeDisposing__Internal(): boolean {
+        const peer = this.__getPeerNode__Internal();
+        return peer !== undefined ? (peer!.disposed || peer!.disposing) : false;
     }
 
     public __onDumpInspector__Internal(): string {

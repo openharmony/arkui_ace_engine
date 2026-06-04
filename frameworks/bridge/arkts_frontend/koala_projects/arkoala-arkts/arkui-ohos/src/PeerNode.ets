@@ -26,6 +26,8 @@ import { ExtendableComponent } from './component/extendableComponent'
 import { ElementInfo } from './stateManagement/utils';
 import { ArkCustomComponentRootPeer } from './component/staticComponents';
 import { BaseCustomComponent } from './component/customComponent'
+import { GlobalReusePool } from './stateManagement/tools/globalReusePool'
+
 export const PeerNodeType = 11
 export const RootPeerType = 33
 export const LazyForEachType = 13
@@ -224,13 +226,19 @@ export class PeerNode extends IncrementalNode {
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
-          if (!this.isKind(RootPeerType)) {
-            // this.parent may already be cleared during the same teardown sweep
-            // that triggered this recycle call. Use the resilient walk-up
-            // (live walk + cached ancestor + nodeRef fallback) instead of raw this.parent.
+        if (!this.isKind(RootPeerType)) {
             const upward = this.getParentNodeWhenRecycle()
             if (upward !== undefined && upward !== (this as IncrementalNode)) {
                 return (upward as PeerNode).recycle(reuseKey, child, id)
+            }
+            const parsed = this.parseReuseKey(reuseKey);
+            const pool = GlobalReusePool.findPoolForClass(parsed.classKey);
+            if (pool !== undefined && !pool!.isOwnerDisposing()) {
+                // A live pool exists for this class — return true to prevent disposal.
+                // Do NOT push here; the actual push happens when recycle reaches
+                // the RootPeer through the normal delegation path. Pushing here
+                // would cause duplicate entries in the pool.
+                return true;
             }
             return false
         }
@@ -245,13 +253,24 @@ export class PeerNode extends IncrementalNode {
             const classKey = parsed.classKey;
             const reuseId = parsed.reuseId;
             const pool = instance!.__getReusePoolForClass__Internal(classKey);
+            if (pool !== undefined && pool!.isOwnerDisposing()) {
+                console.log(`GlobalReuse: PN.recycle owner disposing — skip pool, allow disappear`);
+                return false;
+            }
             console.log(`GlobalReuse: pool=${pool !== undefined ? 'found' : 'undef'}`);
             if (pool !== undefined) {
                 return pool!.push(classKey, child as Object, reuseId);
             }
         }
         if (this.disposing) {
-	        console.log(`GlobalReuse: PN.recycle disposing, bail`);
+	        let ancestor: PeerNode | undefined = this._recycleParentRef;
+            while (ancestor !== undefined && ancestor !== (this as PeerNode)) {
+                if (!ancestor!.disposed && ancestor!.isKind(RootPeerType)) {
+                    return ancestor!.recycle(reuseKey, child, id);
+                }
+                ancestor = ancestor!._recycleParentRef;
+            }
+            console.log(`GlobalReuse: PN.recycle disposing, no ancestor pool found, bail`);
             return false;
         }
         if (!this._reusePool)
@@ -364,11 +383,10 @@ export class PeerNode extends IncrementalNode {
             // Improve: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
-                if (peer.isKind(RootPeerType)) {
-                    peer._recycleParentRef = peer;
-                } else {
-                    peer._recycleParentRef = this.isKind(RootPeerType) ? this : this._recycleParentRef;
-                }
+                // Note: RootPeer nodes intentionally do NOT point _recycleParentRef to
+                // themselves. The previous self-loop caused infinite ancestor walks
+                // during dispose (Bug 5b). The walk terminates on undefined.
+                peer._recycleParentRef = this.isKind(RootPeerType) ? this : this._recycleParentRef;
                 if (peer.reusable) {
                     peer!.onReuse(false)
                 } else {
@@ -397,9 +415,9 @@ export class PeerNode extends IncrementalNode {
         }
         this.onChildRemoved = (child: IncrementalNode) => {
             if (child.isKind(PeerNodeType) && !child.disposed) {
-                const peer = child as PeerNode
-                peer.onRecycle()
-                this.peer.removeChild(peer.peer.ptr)
+                const peer = child as PeerNode;
+                peer.onRecycle();
+                this.peer.removeChild(peer.peer.ptr);
             }
         }
         this.name = name

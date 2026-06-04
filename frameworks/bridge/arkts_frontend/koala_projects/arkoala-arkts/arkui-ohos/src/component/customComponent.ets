@@ -451,6 +451,17 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance.__switchHasBeenRecycle_Internal(recycle);
     }
 
+    private unrecycleChildren(component: ExtendableComponent): void {
+        component.__getChildrenWeakRefMap__Internal().forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            if (child !== undefined) {
+                child.__switchHasBeenRecycle_Internal(false);
+                child.__unfreezeWhenReuse__Internal();
+                this.unrecycleChildren(child!);
+            }
+        });
+    }
+
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
         console.log(`GlobalReuse: aboutToReuse ENTRY instance=${Class.of(this.instance as Object).getName()} uniqueId=${this.getUniqueId()} hasParam=${param !== undefined} hasInitializers=${initializers !== undefined}`)
         this.instance.__switchHasBeenRecycle_Internal(false);
@@ -480,6 +491,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                 this.instance.__addMeToParent__Internal();
             }
             console.log(`GlobalReuse: V1 reusable class=${Class.of(this.instance as Object).getName()}`);
+            this.unrecycleChildren(this.instance);
             if (initializers0 !== undefined) { console.log(`GlobalReuse: V1 PROBE initializers0 class=${Class.of(initializers0 as Object).getName()}`); }
             const _userMethod = Class.of(this.instance as Object).getInstanceMethod('resetStateVarsOnReuse'); 
             if (_userMethod !== undefined && initializers0 !== undefined) { 
@@ -530,30 +542,24 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             this.updateUISync(); 
         } else if (this.instance instanceof ReusableV2LifeCycle) {
             console.log(`GlobalReuse: CD.aboutToReuse for ${Class.of(this.instance as Object).getName()}`);
-            // Cross-parent reuse: koalaui memo-cache may have skipped _instantiateReusable's body,
-            // leaving _initializers pointing at the previous parent's closure. The new caller stashed
-            // its closure before NodeAttach; consume it here so resetStateVarsOnReuse sees fresh values.
-           const stashedInitObj = GlobalReusePool.pendingInitializersForReuse;
-            if (stashedInitObj !== undefined) {
-                this._initializers = stashedInitObj as (() => T_Options);
-                GlobalReusePool.pendingInitializersForReuse = undefined;
-            }
+            // Clear stale global stash - _initializers already set correctly by setInitializers()
+            GlobalReusePool.pendingInitializersForReuse = undefined;
 
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
             const reusable = this.instance as ReusableV2LifeCycle<T_Options>;
-            const initializers0 = (this._initializers as (() => T_Options) | undefined)?.() as T_Options | undefined;
-
-            // Restore parent_ from the stash captured at POP time
+              // Restore parent_ so @Consumer rebinds to the new @Provider chain
             let pendingParent: ExtendableComponent | undefined = undefined;
             if (GlobalReusePool.pendingParentQueue.length > 0) {
                 pendingParent = GlobalReusePool.pendingParentQueue.shift();
             }
             if (pendingParent !== undefined) {
-                console.log(`GlobalReuse: CD.aboutToReuse restored parent=${Class.of(pendingParent!).getName()} queueRemaining=${GlobalReusePool.pendingParentQueue.length}`);
                 this.instance.__removeMeFromParent__Internal();
                 this.instance.__setParent__Internal(pendingParent!);
                 this.instance.__addMeToParent__Internal();
             }
+            const initializers0 = (this._initializers as (() => T_Options) | undefined)?.() as T_Options | undefined;
+            // Un-recycle and unfreeze all nested children so @Param updates propagate after reuse
+            this.unrecycleChildren(this.instance);
             reusable.resetStateVarsOnReuse(initializers0);
             this.instance.__unfreezeWhenReuse__Internal();
             reusable.aboutToReuse();
@@ -564,6 +570,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             throw new Error('not an custom component');
         }
     }
+
     aboutToRecycle(): void {
         console.log(`GlobalReuse: aboutToRecycle hit instance=${Class.of(this.instance as Object).getName()}`);
         this.instance.__switchHasBeenRecycle_Internal(true);
@@ -993,21 +1000,18 @@ export class CustomComponentContextImpl implements CustomComponentContext {
     }
 
     /**
-     * If this component owns a pool, return it directly. Otherwise walk the
-     * parent chain via __getReusePoolForClass__Internal to find the nearest
-     * ancestor whose pool accepts this component's class.
-     */
-    getCustomComponentReusePool(): IReusePool | undefined {
+     * Returns the reuse pool only if this component directly owns one.
+     * Does NOT walk the parent chain — ancestor pools belong to ancestors,
+     * not to this component. Child components and their descendants should
+     * not claim ownership of a parent's pool.
+    */
+    getReusePool(): IReusePool | undefined {
         const comp = this.customComponent as Object as ExtendableComponent;
 
-        // If this component owns a pool, return it directly.
         if (comp.___reusePool !== undefined) {
             return comp.___reusePool as Object as IReusePool;
         }
-
-        const classKey = CustomComponentContextImpl.shortClassName_(comp);
-        const pool = comp.__getReusePoolForClass__Internal(classKey);
-        return pool as IReusePool | undefined;
+        return undefined;
     }
 
     registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void {

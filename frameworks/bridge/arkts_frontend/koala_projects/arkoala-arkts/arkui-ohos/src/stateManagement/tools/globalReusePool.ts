@@ -106,6 +106,20 @@ export class GlobalReusePool implements IGlobalReusePoolVariable {
      */
     private static preRenderPool_: GlobalReusePool | undefined = undefined;
 
+    // activePools_ tracks all live pools. Pools register in the constructor
+    // and unregister in deactivate() (called from dispose). ArkUI is
+    // single-threaded so no synchronization is needed.
+    private static activePools_: Set<GlobalReusePool> = new Set<GlobalReusePool>();
+
+    public static findPoolForClass(classKey: string): GlobalReusePool | undefined {
+        for (const pool of GlobalReusePool.activePools_) {
+            if (pool.acceptsComponent(classKey) && pool.isActive()) {
+                return pool;
+            }
+        }
+        return undefined;
+    }
+
     public static beginPreRender(pool: GlobalReusePool): void {
         GlobalReusePool.preRenderPool_ = pool;
     }
@@ -134,6 +148,7 @@ export class GlobalReusePool implements IGlobalReusePoolVariable {
             const lastDot = c.lastIndexOf('.');
             this.accepts_.add(lastDot >= 0 ? c.substring(lastDot + 1) : c);
         }
+        GlobalReusePool.activePools_.add(this);
     }
 
     public __setRegistryKey_Internal(k: string): void {
@@ -169,7 +184,32 @@ export class GlobalReusePool implements IGlobalReusePoolVariable {
         return this.owners_.size > 0;
     }
 
+    /**
+     * Returns true when this pool's owning component(s) are themselves being
+     * torn down, i.e. the pool is about to be destroyed and must NOT accept
+     * newly recycled children. When a pool is dying, recycled components
+     * should disappear normally (aboutToDisappear) instead of being pushed
+     * into a doomed pool (which would wrongly fire aboutToRecycle).
+     *
+     * A SHARED pool may have several owners and survives as long as ANY owner
+     * is still live, so this returns true only when every owner's peer node is
+     * disposing/disposed (or when there are no owners left at all).
+     */
+    public isOwnerDisposing(): boolean {
+        if (this.owners_.size === 0) {
+            return true;
+        }
+        for (const owner of this.owners_) {
+            if (!owner.__isPeerNodeDisposing__Internal()) {
+                // At least one owner is still alive → the pool stays usable.
+                return false;
+            }
+        }
+        return true;
+    }
+
     private deactivate(): void {
+        GlobalReusePool.activePools_.delete(this);
         this.cached_.forEach((arr: Array<Object>) => {
             arr.forEach((scope: Object) => {
                 (scope as Disposable).dispose();

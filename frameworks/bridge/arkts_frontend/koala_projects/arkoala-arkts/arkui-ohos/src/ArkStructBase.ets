@@ -83,6 +83,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     // Can be overridden as an effect of @Prop, @Watch etc
     protected __updateStruct(initializers?: T_Options): void { }
 
+
     /** @memo */
     static _instantiate<T extends ArkStructBase<T, T_Options>, T_Options>(
         factory: () => T,
@@ -227,12 +228,22 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         let preRendered: T | undefined = undefined;
         const currentObj = ExtendableComponent.current;
         if (currentObj !== undefined && currentObj instanceof ExtendableComponent) {
-            const pool = (currentObj as ExtendableComponent).__getReusePoolForClass__Internal(classKey);
+            let pool = (currentObj as ExtendableComponent).__getReusePoolForClass__Internal(classKey);
             if (pool !== undefined && pool!.isActive()) {
                 const peeked = pool!.peek(classKey, userReuseId);
                 if (peeked !== undefined && peeked instanceof ArkStructBase) {
                     const popped = pool!.pop(classKey, userReuseId);
                     preRendered = popped as T;
+                } else {
+                    // First pool empty — try next pool up the chain
+                    const alt = (currentObj as ExtendableComponent).__getReusePoolForClass__Internal(classKey, pool);
+                    if (alt !== undefined && alt!.isActive()) {
+                        const peeked2 = alt!.peek(classKey, userReuseId);
+                        if (peeked2 !== undefined && peeked2 instanceof ArkStructBase) {
+                            const popped2 = alt!.pop(classKey, userReuseId);
+                            preRendered = popped2 as T;
+                        }
+                    }
                 }
             }
         }
@@ -244,7 +255,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                     instance.__initializeStruct(content, initializers?.());
                 }
 
-                node.setOnRecycle(() => {
+                node.setOnRecycle((): void => {
                     instance.__setReuseInFlight_Internal(false);
                     instance.switchHasBeenRecycle(true);
                     instance.__aboutToRecycle_Internal();
@@ -259,6 +270,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                 component.__setReuseInFlight_Internal(true);
                 component.switchHasBeenRecycle(false);
                 component.__aboutToReuse_Internal(param);
+                component.__setReuseInFlight_Internal(false);
             });
             component.setInitializers(initializers);
             component._buildWrapper(content, initializers, true);
