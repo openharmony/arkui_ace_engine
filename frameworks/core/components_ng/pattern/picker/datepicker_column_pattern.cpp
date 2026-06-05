@@ -498,6 +498,13 @@ void DatePickerColumnPattern::GetStartIndex(uint32_t& startIndex, uint32_t& tota
     }
 }
 
+void DatePickerColumnPattern::HandleDragHapticFeedback(int32_t dragDelta)
+{
+    if (hapticController_ && isShow_ && isEnableHaptic_ && !stopHaptic_ && !isHapticPlayOnce_) {
+        hapticController_->HandleDelta(dragDelta);
+    }
+}
+
 void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
@@ -509,18 +516,15 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         uint32_t startIndex = 0;
         GetStartIndex(startIndex, totalCount);
         if ((currentIndex == startIndex && dir == PickerScrollDirection::DOWN && GreatOrEqual(yOffset_, 0.0)) ||
-            (currentIndex == totalCount - 1 && dir == PickerScrollDirection::UP && LessOrEqual(yOffset_, 0.0))) {
+            (totalCount > 0 && currentIndex == totalCount - 1 && dir == PickerScrollDirection::UP &&
+            LessOrEqual(yOffset_, 0.0))) {
             auto toss = GetToss();
             CHECK_NULL_VOID(toss);
             toss->StopTossAnimation();
             return;
         }
     }
-    if (hapticController_ && isShow_) {
-        if (isEnableHaptic_ && !stopHaptic_ && !isHapticPlayOnce_) {
-            hapticController_->HandleDelta(dragDelta);
-        }
-    }
+    HandleDragHapticFeedback(dragDelta);
     offsetCurSet_ = 0.0;
     auto midIndex = GetShowCount() / 2;
     auto shiftDistance = (dir == PickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance

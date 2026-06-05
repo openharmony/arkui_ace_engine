@@ -1078,4 +1078,80 @@ HWTEST_F(TimePickerColumnPatternTestNg, TimePickerRowPattern032, TestSize.Level0
     hourPickerColumnPattern->SetEnterIndex(AM_PM_HOUR_12 - 1);
     EXPECT_EQ(timePickerRowPattern->GetCurrentEnterTime().GetHour(), AM_PM_HOUR_12);
 }
+
+/**
+ * @tc.name: GetTimeUnitStringValidMinute
+ * @tc.desc: Test GetTimeUnitString with valid minute value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerColumnPatternTestNg, GetTimeUnitStringValidMinute, TestSize.Level1)
+{
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    const std::string minuteValue = "5";
+    auto result = columnPattern_->GetTimeUnitString(
+        minuteValue, TimeUnitStyle::MINUTE, MeasureFormatStyle::WIDTH_WIDE);
+    EXPECT_EQ(result, minuteValue);
+}
+
+/**
+ * @tc.name: GetTimeUnitStringValidSecond
+ * @tc.desc: Test GetTimeUnitString with valid second value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerColumnPatternTestNg, GetTimeUnitStringValidSecond, TestSize.Level1)
+{
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    const std::string secondValue = "30";
+    auto result = columnPattern_->GetTimeUnitString(
+        secondValue, TimeUnitStyle::SECOND, MeasureFormatStyle::WIDTH_WIDE);
+    EXPECT_EQ(result, secondValue);
+}
+
+/**
+ * @tc.name: GetTimeUnitStringInvalidInput
+ * @tc.desc: Test GetTimeUnitString returns original value when parse fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerColumnPatternTestNg, GetTimeUnitStringInvalidInput, TestSize.Level1)
+{
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    const std::string invalidValue = "abc";
+    auto result = columnPattern_->GetTimeUnitString(
+        invalidValue, TimeUnitStyle::MINUTE, MeasureFormatStyle::WIDTH_WIDE);
+    EXPECT_EQ(result, invalidValue);
+}
+
+/**
+ * @tc.name: GetTimeUnitStringPartialParse
+ * @tc.desc: Test GetTimeUnitString returns original value when input is not fully consumed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerColumnPatternTestNg, GetTimeUnitStringPartialParse, TestSize.Level1)
+{
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    const std::string partialValue = "5m";
+    auto result = columnPattern_->GetTimeUnitString(
+        partialValue, TimeUnitStyle::SECOND, MeasureFormatStyle::WIDTH_WIDE);
+    EXPECT_EQ(result, partialValue);
+}
+
+/**
+ * @tc.name: GetTimeUnitStringEmptyFormattedUnit
+ * @tc.desc: Test GetTimeUnitString returns original value when formatted unit is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerColumnPatternTestNg, GetTimeUnitStringEmptyFormattedUnit, TestSize.Level1)
+{
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    const std::string minuteValue = "8";
+    auto result = columnPattern_->GetTimeUnitString(
+        minuteValue, TimeUnitStyle::YEAR, MeasureFormatStyle::WIDTH_WIDE);
+    EXPECT_EQ(result, minuteValue);
+}
+
 } // namespace OHOS::Ace::NG

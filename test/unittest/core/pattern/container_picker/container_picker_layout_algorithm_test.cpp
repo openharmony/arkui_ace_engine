@@ -1984,6 +1984,54 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsWithExactlyLimitC
 }
 
 /**
+ * @tc.name: RetainDisplayItemsCustomDisplayCountAtTop
+ * @tc.desc: Test RetainDisplayItems retains displayedItemCount + 1 items from top with custom display count
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsCustomDisplayCountAtTop, TestSize.Level1)
+{
+    constexpr int32_t CUSTOM_DISPLAY_COUNT = 3;
+    constexpr int32_t MAX_RETAIN_COUNT = CUSTOM_DISPLAY_COUNT + 1;
+    constexpr int32_t TOTAL_ITEMS = 10;
+    algorithm_->displayedItemCount_ = CUSTOM_DISPLAY_COUNT;
+    for (int32_t i = 0; i < TOTAL_ITEMS; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    algorithm_->RetainDisplayItems(true);
+
+    EXPECT_EQ(static_cast<int32_t>(algorithm_->itemPosition_.size()), MAX_RETAIN_COUNT);
+    EXPECT_EQ(algorithm_->itemPosition_.begin()->first, 0);
+    EXPECT_EQ(algorithm_->itemPosition_.rbegin()->first, MAX_RETAIN_COUNT - 1);
+}
+
+/**
+ * @tc.name: RetainDisplayItemsCustomDisplayCountAtBottom
+ * @tc.desc: Test RetainDisplayItems retains displayedItemCount + 1 items from bottom with custom display count
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, RetainDisplayItemsCustomDisplayCountAtBottom, TestSize.Level1)
+{
+    constexpr int32_t CUSTOM_DISPLAY_COUNT = 3;
+    constexpr int32_t MAX_RETAIN_COUNT = CUSTOM_DISPLAY_COUNT + 1;
+    constexpr int32_t TOTAL_ITEMS = 10;
+    algorithm_->displayedItemCount_ = CUSTOM_DISPLAY_COUNT;
+    for (int32_t i = 0; i < TOTAL_ITEMS; i++) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        algorithm_->itemPosition_[i] = { static_cast<float>(i * 40), static_cast<float>((i + 1) * 40), textNode };
+    }
+
+    algorithm_->RetainDisplayItems(false);
+
+    EXPECT_EQ(static_cast<int32_t>(algorithm_->itemPosition_.size()), MAX_RETAIN_COUNT);
+    EXPECT_EQ(algorithm_->itemPosition_.begin()->first, TOTAL_ITEMS - MAX_RETAIN_COUNT);
+    EXPECT_EQ(algorithm_->itemPosition_.rbegin()->first, TOTAL_ITEMS - 1);
+}
+
+/**
  * @tc.name: SetLazyLoadWithLazyNode
  * @tc.desc: Test SetLazyLoad method with lazyNode
  * @tc.type: FUNC

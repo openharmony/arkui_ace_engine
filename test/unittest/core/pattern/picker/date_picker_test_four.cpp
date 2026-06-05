@@ -1719,6 +1719,62 @@ HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionHapticStopMaxBound001, Tes
 }
 
 /**
+ * @tc.name: GetStartIndexEmptyOptions
+ * @tc.desc: Test GetStartIndex when column options are empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, GetStartIndexEmptyOptions, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    uint32_t startIndex = 1;
+    uint32_t totalCount = 1;
+    auto options = columnPattern_->GetOptions();
+    options[columnNode_] = {};
+    columnPattern_->options_ = options;
+
+    columnPattern_->GetStartIndex(startIndex, totalCount);
+
+    EXPECT_EQ(totalCount, 0U);
+    EXPECT_EQ(startIndex, 1U);
+}
+
+/**
+ * @tc.name: UpdateColumnChildPositionZeroTotalCount
+ * @tc.desc: Test UpdateColumnChildPosition when totalCount is zero does not access invalid max index
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionZeroTotalCount, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode_->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto rowLayout = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(rowLayout, nullptr);
+    rowLayout->UpdateCanLoop(false);
+
+    auto options = columnPattern_->GetOptions();
+    options[columnNode_] = {};
+    columnPattern_->options_ = options;
+
+    columnPattern_->SetCurrentIndex(0);
+    columnPattern_->yLast_ = PREVIOUS_Y_LAST_FOR_UPWARD_DRAG;
+    columnPattern_->yOffset_ = 0.0;
+    columnPattern_->hapticController_ = nullptr;
+
+    columnPattern_->UpdateColumnChildPosition(OFFSET_Y_FOR_UPWARD_DRAG_END);
+
+    EXPECT_DOUBLE_EQ(columnPattern_->yLast_, OFFSET_Y_FOR_UPWARD_DRAG_END);
+}
+
+/**
  * @tc.name: InitHapticControllerTest003
  * @tc.desc: When haptic feedback is disabled while a haptic controller exists, Stop should be invoked.
  * @tc.type: FUNC
