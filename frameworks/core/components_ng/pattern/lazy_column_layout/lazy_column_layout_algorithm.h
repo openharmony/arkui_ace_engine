@@ -77,6 +77,9 @@ private:
     void MeasureHeader(LayoutWrapper* layoutWrapper);
     // Measure the footer (if mounted) and update layoutInfo_->footerMainSize_.
     void MeasureFooter(LayoutWrapper* layoutWrapper);
+    // Compose the insets forwarded to child sections: this column's received inset plus its own sticky
+    // header/footer size. Updates childStickyTopInset_ / childStickyBottomInset_.
+    void ComposeChildStickyInsets(LayoutWrapper* layoutWrapper);
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
 
     void LayoutItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
@@ -124,6 +127,12 @@ private:
     float endPos_ = 0.0f;
     float viewExtStart_ = 0.0f;
     float viewExtEnd_ = 0.0f;
+    // Parent-reserved insets for this column's own header/footer; childSticky*Inset_ = these + own sticky
+    // edge size, passed down to nested lazy children.
+    float stickyTopInset_ = 0.0f;
+    float stickyBottomInset_ = 0.0f;
+    float childStickyTopInset_ = 0.0f;
+    float childStickyBottomInset_ = 0.0f;
     float space_ = 0.0f;
     LayoutConstraintF childLayoutConstraint_;
     // Constraint used when measuring header / footer; full cross size, infinite main.

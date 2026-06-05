@@ -142,14 +142,15 @@ std::pair<int32_t, int32_t> LazyWaterFlowLayoutPattern::GetVisibleIndexesRangeFo
     if (!layoutInfo_) {
         return { -1, -1 };
     }
-    if (layoutInfo_->totalItemCount_ <= 0 || layoutInfo_->startIndex_ < 0 || layoutInfo_->endIndex_ < 0) {
+    if (layoutInfo_->totalItemCount_ <= 0 || layoutInfo_->visibleStartIndex_ < 0 ||
+        layoutInfo_->visibleEndIndex_ < 0) {
         return { -1, -1 };
     }
-    if (layoutInfo_->startIndex_ >= layoutInfo_->totalItemCount_ ||
-        layoutInfo_->endIndex_ >= layoutInfo_->totalItemCount_) {
+    if (layoutInfo_->visibleStartIndex_ >= layoutInfo_->totalItemCount_ ||
+        layoutInfo_->visibleEndIndex_ >= layoutInfo_->totalItemCount_) {
         return { -1, -1 };
     }
-    return { layoutInfo_->startIndex_, layoutInfo_->endIndex_ };
+    return { layoutInfo_->visibleStartIndex_, layoutInfo_->visibleEndIndex_ };
 }
 
 void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange()

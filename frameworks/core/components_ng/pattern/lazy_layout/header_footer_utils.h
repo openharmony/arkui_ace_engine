@@ -48,6 +48,9 @@ struct HeaderFooterStickyMetrics {
     float totalMainSize = 0.0f;
     float headerMainSize = 0.0f;
     float footerMainSize = 0.0f;
+    // Insets the header pins below / the footer pins above (ancestor sticky edge height or contentStart/EndOffset).
+    float stickyTopInset = 0.0f;
+    float stickyBottomInset = 0.0f;
 };
 
 // Shared helper for header/footer nodes used by scrollable lazy containers. It centralizes ownership,
@@ -75,15 +78,18 @@ public:
     // Pure-math sticky-position helpers; kept inline so hot-path layout code does not pay call overhead.
     static float CalcStickyHeaderPos(const HeaderFooterStickyMetrics& metrics)
     {
-        return std::max(0.0f,
-            std::min(metrics.viewStart, metrics.totalMainSize - metrics.footerMainSize - metrics.headerMainSize));
+        // +stickyTopInset shifts the pinned header down by the inset (lands just below the ancestor inset).
+        return std::max(0.0f, std::min(metrics.viewStart + metrics.stickyTopInset,
+            metrics.totalMainSize - metrics.footerMainSize - metrics.headerMainSize));
     }
 
     static float CalcStickyFooterPos(const HeaderFooterStickyMetrics& metrics)
     {
         const auto minFooterPos = metrics.headerMainSize;
         const auto maxFooterPos = std::max(minFooterPos, metrics.totalMainSize - metrics.footerMainSize);
-        return std::min(maxFooterPos, std::max(minFooterPos, metrics.viewEnd - metrics.footerMainSize));
+        // -stickyBottomInset lifts the pinned footer up by the inset (lands above the ancestor inset).
+        return std::min(maxFooterPos,
+            std::max(minFooterPos, metrics.viewEnd - metrics.stickyBottomInset - metrics.footerMainSize));
     }
 };
 

@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model_static.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
@@ -44,6 +45,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -137,6 +139,30 @@ RefPtr<LazyWaterFlowMockLazy> CreateLazyForEachContent(const std::vector<float>&
     ViewStackProcessor::GetInstance()->Pop();
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     return mockLazy;
+}
+
+// Mount a static (ArkoalaLazyNode) grouped child under the current LazyVWaterFlow. updateRangeCount, when
+// non-null, counts active-range updates the child receives, proving wrapper-level forwarding reaches it.
+RefPtr<ArkoalaLazyNode> CreateArkoalaContent(int32_t totalCount, int32_t* updateRangeCount)
+{
+    auto arkoalaNode = AceType::MakeRefPtr<ArkoalaLazyNode>(ElementRegister::GetInstance()->MakeUniqueId());
+    arkoalaNode->SetTotalCount(totalCount);
+    arkoalaNode->SetCallbacks(
+        [](int32_t idx) -> RefPtr<UINode> {
+            auto item = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+            item->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(1.0f, DimensionUnit::PERCENT), CalcLength(LAZY_WATER_FLOW_ITEM_HEIGHT)));
+            return item;
+        },
+        [updateRangeCount](int32_t, int32_t, int32_t, int32_t, bool) {
+            if (updateRangeCount != nullptr) {
+                ++(*updateRangeCount);
+            }
+        });
+    ViewStackProcessor::GetInstance()->Push(arkoalaNode);
+    ViewStackProcessor::GetInstance()->Pop();
+    return arkoalaNode;
 }
 
 void InsertTopBatch(
@@ -654,8 +680,8 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, NeedPredictContinuesStartedOffscreenCache
     layoutInfo->UpdateVisibleRange(-568.0f, 0.0f);
     layoutInfo->UpdateCachedRange(-852.0f, 284.0f);
 
-    EXPECT_EQ(layoutInfo->startIndex_, -1);
-    EXPECT_EQ(layoutInfo->endIndex_, -1);
+    EXPECT_EQ(layoutInfo->startIndex_, 0);
+    EXPECT_EQ(layoutInfo->endIndex_, 0);
     EXPECT_EQ(layoutInfo->cachedStartIndex_, 0);
     EXPECT_EQ(layoutInfo->cachedEndIndex_, 0);
     EXPECT_TRUE(layoutInfo->NeedPredict());
@@ -850,7 +876,7 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, LazyForEachTopInsertKeepsVisiblePosition_
     EXPECT_FLOAT_EQ(insertedPos->startPos, 0.0f);
     EXPECT_FLOAT_EQ(insertedPos->endPos, 100.0f);
     EXPECT_FLOAT_EQ(shiftedVisiblePos->startPos - offsetAfter, firstVisibleViewportY);
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, firstVisibleIndex + 1);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, firstVisibleIndex);
 }
 
 /**
@@ -903,7 +929,9 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, LazyForEachScrollBackTopInsertKeepsNewIte
     auto shiftedTopPos = pattern_->layoutInfo_->GetPos(topIndexBeforeInsert + insertCount);
     ASSERT_NE(shiftedTopPos, nullptr);
     EXPECT_FLOAT_EQ(shiftedTopPos->startPos - offsetAfterInsert, topViewportY);
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, topIndexBeforeInsert + insertCount);
+    constexpr int32_t laneCount = 2;
+    // The last inserted row touches the compensated viewport start, so it remains in the active range.
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, topIndexBeforeInsert + insertCount - laneCount);
 }
 
 /**
@@ -1998,11 +2026,12 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ColumnsTemplateChangeDeactivatesOldVisibl
 }
 
 /**
- * @tc.name: ArkoalaChildKeepsVisibleAndCacheRangesSeparated_001
- * @tc.desc: Verify static lazy children receive visible range separately from the cache expansion.
+ * @tc.name: ArkoalaChildReceivesItemRange_001
+ * @tc.desc: Verify ActivateContentItemRange forwards the content window to a static lazy child as an
+ *           item-local range. Cache expansion is no longer forwarded per child, so cacheStart/End stay 0.
  * @tc.type: FUNC
  */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildKeepsVisibleAndCacheRangesSeparated_001, TestSize.Level1)
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildReceivesItemRange_001, TestSize.Level1)
 {
     auto host = FrameNode::CreateFrameNode(
         V2::LAZY_V_WATERFLOW_LAYOUT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LazyWaterFlowLayoutPattern>());
@@ -2012,15 +2041,16 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildKeepsVisibleAndCacheRangesSep
 
     auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
     auto algorithm = AceType::MakeRefPtr<LazyWaterFlowLayoutAlgorithm>(layoutInfo);
-    algorithm->UpdateItemActiveRangeOnChildren(host, 1, 10, 1, 3);
+    algorithm->ActivateContentItemRange(host, 1, 10);
 
-    const ActiveRangeParam expectedRange = { 1, 10, 1, 3 };
+    const ActiveRangeParam expectedRange = { 1, 10, 0, 0 };
     EXPECT_EQ(arkoalaLazyNode->activeRangeParam_, expectedRange);
 }
 
 /**
  * @tc.name: ArkoalaChildWithHeaderKeepsItemRange_001
- * @tc.desc: Verify header raw index is removed before forwarding range to static lazy children.
+ * @tc.desc: Verify the header raw index is stripped before forwarding range to static lazy children:
+ *           a raw window [2,11] (header occupies raw 0) reaches the child as item-local [1,10].
  * @tc.type: FUNC
  */
 HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildWithHeaderKeepsItemRange_001, TestSize.Level1)
@@ -2036,35 +2066,69 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildWithHeaderKeepsItemRange_001,
     auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
     auto algorithm = AceType::MakeRefPtr<LazyWaterFlowLayoutAlgorithm>(layoutInfo);
     algorithm->headerIndex_ = 0;
-    algorithm->UpdateItemActiveRangeOnChildren(host, 1, 10, 1, 3);
+    algorithm->ActivateContentItemRange(host, 2, 11);
 
-    const ActiveRangeParam expectedRange = { 1, 10, 1, 3 };
+    const ActiveRangeParam expectedRange = { 1, 10, 0, 0 };
     EXPECT_EQ(arkoalaLazyNode->activeRangeParam_, expectedRange);
 }
 
 /**
- * @tc.name: ArkoalaChildReceivesOneRangeUpdate_001
- * @tc.desc: Verify static lazy children are not first reactivated by the raw cache range.
+ * @tc.name: ArkoalaChildReceivesActiveWindowInScroll_001
+ * @tc.desc: Integration: a static (ArkoalaLazyNode) child under a real Scroll > LazyVWaterFlow must receive a
+ *           coherent active window via wrapper-level forwarding. Supersedes the bare-host unit test.
  * @tc.type: FUNC
  */
-HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildReceivesOneRangeUpdate_001, TestSize.Level1)
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaChildReceivesActiveWindowInScroll_001, TestSize.Level1)
 {
-    auto host = FrameNode::CreateFrameNode(
-        V2::LAZY_V_WATERFLOW_LAYOUT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LazyWaterFlowLayoutPattern>());
-    auto arkoalaLazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetElmtId());
-    arkoalaLazyNode->SetTotalCount(12);
     int32_t updateRangeCount = 0;
-    arkoalaLazyNode->SetCallbacks(nullptr,
-        [&updateRangeCount](int32_t, int32_t, int32_t, int32_t, bool) { ++updateRangeCount; });
-    host->AddChild(arkoalaLazyNode);
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    auto arkoalaNode = CreateArkoalaContent(50, &updateRangeCount);
+    CreateDone();
 
-    auto layoutInfo = AceType::MakeRefPtr<LazyWaterFlowLayoutInfo>();
-    auto algorithm = AceType::MakeRefPtr<LazyWaterFlowLayoutAlgorithm>(layoutInfo);
-    algorithm->UpdateActiveChildRange(AceType::RawPtr(host), 6, 11, 2, 11);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(arkoalaNode, nullptr);
 
-    EXPECT_EQ(updateRangeCount, 1);
-    const ActiveRangeParam expectedRange = { 6, 11, 4, 0 };
-    EXPECT_EQ(arkoalaLazyNode->activeRangeParam_, expectedRange);
+    // Forwarding must reach the static child: window starts at top and covers at least the visible items.
+    EXPECT_GT(updateRangeCount, 0);
+    EXPECT_EQ(arkoalaNode->activeRangeParam_.start, 0);
+    EXPECT_GE(arkoalaNode->activeRangeParam_.end, 4);
+    EXPECT_LT(arkoalaNode->activeRangeParam_.end, 50);
+}
+
+/**
+ * @tc.name: ArkoalaWindowSwitchTracksScrollAndRestores_001
+ * @tc.desc: Integration: the static child's active window advances on forward scroll and returns to the top
+ *           after an equal back-scroll. Guards the "dropped items on scroll-back" regression end-to-end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ArkoalaWindowSwitchTracksScrollAndRestores_001, TestSize.Level1)
+{
+    int32_t updateRangeCount = 0;
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    auto arkoalaNode = CreateArkoalaContent(50, &updateRangeCount);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_NE(arkoalaNode, nullptr);
+    EXPECT_EQ(arkoalaNode->activeRangeParam_.start, 0);
+
+    // Forward switch: window advances with the scroll.
+    scrollablePattern_->UpdateCurrentOffset(-800.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    const int32_t forwardCount = updateRangeCount;
+    EXPECT_GT(arkoalaNode->activeRangeParam_.start, 0);
+    EXPECT_GT(forwardCount, 0);
+
+    // Equal back-scroll: window returns to the top (no stranded/dropped items).
+    scrollablePattern_->UpdateCurrentOffset(800.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_GT(updateRangeCount, forwardCount);
+    EXPECT_EQ(arkoalaNode->activeRangeParam_.start, 0);
 }
 
 /**
@@ -2260,6 +2324,57 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, ScrollBottomThenTopOvershoot_001, TestSiz
     ASSERT_FALSE(pattern_->layoutInfo_->lanes_.empty());
     EXPECT_EQ(pattern_->layoutInfo_->lanes_[0].items_.empty() ? -1 :
               pattern_->layoutInfo_->lanes_[0].items_.front().idx, 0);
+}
+
+/**
+ * @tc.name: SwSlowScrollReachesBottomOfTallLazyChild_001
+ * @tc.desc: Regression for the sliding-window WaterFlow spring-back with a single needLazyLayout child
+ *           taller than the viewport. The SW kept the lazy child's lane endPos stale (tracking only the
+ *           realized extent, not the child's full measured height), so growth below the viewport - which
+ *           the child reports as adjustOffset 0 - never reached lane.endPos. AdjustOverScroll then treated
+ *           each incremental scroll near the end as "at bottom" and snapped it back; only fast flings
+ *           (which rebuild the lane via a jump) could reach the end. After MeasureLazyChild pins
+ *           lane.endPos to the child's full measured height, slow step-by-step scrolling must reach the
+ *           true bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, SwSlowScrollReachesBottomOfTallLazyChild_001, TestSize.Level1)
+{
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    // Single-lane WaterFlow so the lazy child takes the single-lane lazy contract (MeasureLazyChild path).
+    WaterFlowModelNG::SetColumnsTemplate(AceType::RawPtr(scrollableFrameNode_), "1fr");
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    // Short front (60), tall tail (200): the initial average-size estimate is biased low, so the lazy
+    // child's reported total grows as the tall tail is measured during scroll. That growth lands below the
+    // viewport and is reported as adjustOffset 0 - exactly the case the stale-lane bug dropped.
+    std::vector<float> heights(50, 200.0f);
+    std::fill(heights.begin(), heights.begin() + 25, 60.0f);
+    CreateContent(heights);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_LT(pattern_->layoutInfo_->endIndex_, 49);
+
+    // Scroll to the end in small increments (each below the viewport height) so layout takes the
+    // incremental ApplyDelta path rather than converting a large delta into a jump rebuild (which would
+    // dodge the bug). Total cumulative request (-9000) overshoots the real max so it clamps to the bottom.
+    for (int32_t i = 0; i < 60; ++i) {
+        scrollablePattern_->UpdateCurrentOffset(-150.0f, SCROLL_FROM_UPDATE);
+        FlushUITasks();
+    }
+
+    // Full content height (single lane, no header/footer/gap): 25*60 + 25*200 = 6500.
+    constexpr float totalHeight = 25 * 60.0f + 25 * 200.0f;
+    const float maxOffset = totalHeight - LAZY_WATER_FLOW_SCROLL_HEIGHT;
+    // The lazy child must have measured its full height, and the SW must let the scroll reach the real
+    // bottom (before the fix it clamped well short and the last item never became reachable).
+    EXPECT_NEAR(pattern_->layoutInfo_->totalMainSize_, totalHeight, 1.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 49);
+    EXPECT_NEAR(static_cast<float>(scrollablePattern_->GetTotalOffset()), maxOffset, 1.0f);
+    EXPECT_NE(pattern_->layoutInfo_->posMap_.find(49), pattern_->layoutInfo_->posMap_.end());
 }
 
 /**
@@ -2466,5 +2581,71 @@ HWTEST_F(LazyVWaterFlowLayoutCoreTest, LazyWaterFlowLpxAttribute001, TestSize.Le
         AceType::RawPtr(frameNode), std::make_optional(Dimension(12.0, DimensionUnit::VP)));
     EXPECT_FALSE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_ROWS_GAP));
     EXPECT_TRUE(frameNode->lpxAttributes_.count(LpxAttribute::LPX_COLUMNS_GAP));
+}
+
+/**
+ * @tc.name: ValidateScrollableParentAcceptsVerticalScroll_001
+ * @tc.desc: LazyVWaterFlow must accept a vertical Scroll as its scrollable parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentAcceptsVerticalScroll_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    CreateContent(5);
+    CreateDone();
+
+    ASSERT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_TRUE(LazyLayoutUtils::IsVerticalScrollableParent(scrollableFrameNode_));
+}
+
+/**
+ * @tc.name: ValidateScrollableParentAcceptsVerticalList_001
+ * @tc.desc: LazyVWaterFlow must accept a vertical List as its scrollable parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentAcceptsVerticalList_001, TestSize.Level1)
+{
+    CreateList();
+    CreateLazyWaterFlowLayout();
+    CreateContent(5);
+    CreateDone();
+
+    ASSERT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_TRUE(LazyLayoutUtils::IsVerticalScrollableParent(scrollableFrameNode_));
+}
+
+/**
+ * @tc.name: ValidateScrollableParentAcceptsVerticalWaterFlow_001
+ * @tc.desc: LazyVWaterFlow must accept a vertical WaterFlow as its scrollable parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentAcceptsVerticalWaterFlow_001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    CreateLazyWaterFlowLayout();
+    CreateContent(5);
+    CreateDone();
+
+    ASSERT_NE(scrollableFrameNode_, nullptr);
+    EXPECT_TRUE(LazyLayoutUtils::IsVerticalScrollableParent(scrollableFrameNode_));
+}
+
+/**
+ * @tc.name: ValidateScrollableParentRejectsNullAndNonScrollable_001
+ * @tc.desc: LazyVWaterFlow parent validation must reject a null node and a non-scrollable container (Stack).
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutCoreTest, ValidateScrollableParentRejectsNullAndNonScrollable_001, TestSize.Level1)
+{
+    RefPtr<UINode> nullNode = nullptr;
+    EXPECT_FALSE(LazyLayoutUtils::IsVerticalScrollableParent(nullNode));
+
+    StackModelNG stackModel;
+    stackModel.Create();
+    auto stackNode = GetMainFrameNode();
+    ASSERT_NE(stackNode, nullptr);
+    EXPECT_FALSE(LazyLayoutUtils::IsVerticalScrollableParent(stackNode));
+    CreateDone();
 }
 } // namespace OHOS::Ace::NG

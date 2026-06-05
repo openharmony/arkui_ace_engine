@@ -22,6 +22,7 @@
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/utils.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -178,7 +179,7 @@ void LazyGridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // stores startPos_/endPos_ in body-local coords (header subtracted in UpdateReferencePos); add the header
     // back so the metrics match totalMainSize_'s section frame.
     const HeaderFooterStickyMetrics stickyMetrics { startPos_ + headerMainSize, endPos_ + headerMainSize,
-        totalMainSize_, headerMainSize, footerMainSize };
+        totalMainSize_, headerMainSize, footerMainSize, stickyTopInset_, stickyBottomInset_ };
     const auto stickyHeaderPos = HeaderFooterUtils::CalcStickyHeaderPos(stickyMetrics);
     const auto stickyFooterPos = HeaderFooterUtils::CalcStickyFooterPos(stickyMetrics);
 
@@ -316,12 +317,16 @@ void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper, s
     }
     if (!posRef.has_value() || posRef.value().axis != axis_) {
         needAllLayout_ = true;
+        stickyTopInset_ = 0.0f;
+        stickyBottomInset_ = 0.0f;
         return;
     }
     forwardLayout_ = posRef.value().referenceEdge == ReferenceEdge::START;
     referencePos_ = posRef.value().referencePos;
     viewExtStart_ = posRef.value().viewExtStart;
     viewExtEnd_ = posRef.value().viewExtEnd;
+    stickyTopInset_ = posRef.value().stickyInsetStart;
+    stickyBottomInset_ = posRef.value().stickyInsetEnd;
     if (forwardLayout_) {
         startPos_ = posRef.value().viewPosStart - viewExtStart_ - referencePos_;
         endPos_ = posRef.value().viewPosEnd + viewExtEnd_ - referencePos_;
@@ -1163,6 +1168,14 @@ void LazyGridLayoutAlgorithm::UpdateHeaderFooterIndexes(LayoutWrapper* layoutWra
         headerIndex_ = -1;
         footerIndex_ = -1;
         return;
+    }
+    // Re-resolve edges from the owner: a reused algorithm's construction-time weak-ref dangles after the edge
+    // nodes are rebuilt (e.g. toggling sticky), which would otherwise drop the header.
+    if (auto host = layoutWrapper->GetHostNode()) {
+        if (auto pattern = host->GetPattern<LazyGridLayoutPattern>()) {
+            header_ = pattern->GetHeaderNode();
+            footer_ = pattern->GetFooterNode();
+        }
     }
     const auto rawCount = layoutWrapper->GetTotalChildCount();
     // Header / footer are normalized by SyncHeaderFooter(): header at raw index 0, footer at raw index last.

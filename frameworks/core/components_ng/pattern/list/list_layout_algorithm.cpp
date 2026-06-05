@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
@@ -2252,6 +2253,10 @@ LayoutConstraintF ListLayoutAlgorithm::CreateLazyChildConstraint(float reference
     }
     LayoutConstraintF constraint = childLayoutConstraint_;
     constraint.viewPosRef = ref;
+    // stackFromEnd swaps which physical edge the start/end offsets reserve.
+    LazyLayoutUtils::SetStickyInsets(constraint,
+        isStackFromEnd_ ? contentEndOffset_ : contentStartOffset_,
+        isStackFromEnd_ ? contentStartOffset_ : contentEndOffset_);
     return constraint;
 }
 
@@ -2905,6 +2910,11 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyChild(
 
     LayoutConstraintF constraint = param.layoutConstraint;
     constraint.viewPosRef = ref;
+    const auto stickyInsetStart = pattern->IsStackFromEnd() ? param.listMainSizeValues.contentEndOffset :
+                                                               param.listMainSizeValues.contentStartOffset;
+    const auto stickyInsetEnd = pattern->IsStackFromEnd() ? param.listMainSizeValues.contentStartOffset :
+                                                             param.listMainSizeValues.contentEndOffset;
+    LazyLayoutUtils::SetStickyInsets(constraint, stickyInsetStart, stickyInsetEnd);
     frameNode->GetGeometryNode()->SetParentLayoutConstraint(constraint);
     FrameNode::ProcessOffscreenNode(frameNode, param.show);
 }

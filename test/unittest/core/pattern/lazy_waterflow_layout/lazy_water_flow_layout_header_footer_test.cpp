@@ -18,6 +18,7 @@
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
@@ -118,6 +119,157 @@ void InsertLazyItems(
         lazyForEachNode->OnDataAdded(insertIndex);
     }
 }
+
+constexpr float PIXEL_CONTRACT_HEADER_HEIGHT = 40.0f;
+constexpr float PIXEL_CONTRACT_FOOTER_HEIGHT = 30.0f;
+constexpr float PIXEL_CONTRACT_ITEM_HEIGHT = 100.0f;
+constexpr int32_t PIXEL_CONTRACT_ITEM_COUNT = 30;
+constexpr float PIXEL_CONTRACT_MID_SCROLL_OFFSET = 200.0f;
+constexpr int32_t PIXEL_CONTRACT_LAZY_FOREACH_CHILD_INDEX = 1; // header at 0 with sticky BOTH set
+constexpr float PIXEL_CONTRACT_SLACK = 1.0f;
+
+// Fixed-height mock for the sticky pixel-contract tests; exposes Insert/Erase by data-index so the
+// prepend / prefix-delete preserve tests can mutate the data set.
+class PixelContractMockLazy : public Framework::MockLazyForEachBuilder {
+public:
+    PixelContractMockLazy()
+    {
+        for (int32_t i = 0; i < PIXEL_CONTRACT_ITEM_COUNT; ++i) {
+            ids_.push_back(nextId_++);
+        }
+    }
+
+    // Insert at `index`; caller must follow with LazyForEachNode::OnDataAdded(index).
+    void Insert(int32_t index)
+    {
+        const auto insertIndex = std::max(0, std::min(index, static_cast<int32_t>(ids_.size())));
+        ids_.insert(ids_.begin() + insertIndex, nextId_++);
+    }
+
+    // Erase at `index`; caller pairs this with LazyForEachNode::OnDataDeleted(index).
+    void Erase(int32_t index)
+    {
+        if (index < 0 || index >= static_cast<int32_t>(ids_.size())) {
+            return;
+        }
+        ids_.erase(ids_.begin() + index);
+    }
+
+    int32_t Count() const
+    {
+        return static_cast<int32_t>(ids_.size());
+    }
+
+protected:
+    int32_t OnGetTotalCount() override
+    {
+        return static_cast<int32_t>(ids_.size());
+    }
+
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
+    {
+        ScopedViewStackProcessor scope;
+        StackModelNG stackModel;
+        stackModel.Create();
+        ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+        ViewAbstract::SetHeight(CalcLength(PIXEL_CONTRACT_ITEM_HEIGHT));
+        auto node = ViewStackProcessor::GetInstance()->Finish();
+        const std::string key = (index >= 0 && index < static_cast<int32_t>(ids_.size()))
+                                    ? std::to_string(ids_[index])
+                                    : std::to_string(index);
+        return { key, node };
+    }
+
+private:
+    int32_t nextId_ = 0;
+    std::vector<int32_t> ids_;
+};
+
+void PixelContractCreateLazyForEach(const RefPtr<PixelContractMockLazy>& builder, int32_t elmtId)
+{
+    RefPtr<LazyForEachActuator> actuator = builder;
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
+    LazyForEachModelNG lazyForEachModel;
+    lazyForEachModel.Create(actuator);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+}
+
+// finalPixelInParentContent = lazyHostMarginOffsetInParent + itemSelfLocalY (Scroll has baked
+// parent.currentOffset into the host margin offset).
+struct PixelContractChannels {
+    float parentCurrentOffset = 0.0f;
+    float lazyHostMarginOffsetInParent = 0.0f;
+    float itemSelfLocalY = 0.0f;
+    float finalPixelInParentContent = 0.0f;
+};
+
+class LazyVWaterFlowStickyScrollTest : public LazyWaterFlowLayoutTestBase {
+protected:
+    // Scroll > LazyVWaterFlow with sticky header / 30 items / sticky footer.
+    void BuildDemo()
+    {
+        CreateScroll();
+        CreateLazyWaterFlowLayout();
+        LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+        LazyWaterFlowLayoutModel::SetSticky(StickyStyle::BOTH);
+        LazyWaterFlowLayoutModel::SetHeader([]() { CreateEdge(PIXEL_CONTRACT_HEADER_HEIGHT); });
+        builder_ = AceType::MakeRefPtr<PixelContractMockLazy>();
+        PixelContractCreateLazyForEach(builder_, GetElmtId());
+        LazyWaterFlowLayoutModel::SetFooter([]() { CreateEdge(PIXEL_CONTRACT_FOOTER_HEIGHT); });
+        CreateDone();
+    }
+
+    // Capture pixel channels for an item; nullopt when it is outside the materialised window.
+    std::optional<PixelContractChannels> CaptureChannels(int32_t probeItemIdx) const
+    {
+        if (!scrollablePattern_ || !frameNode_) {
+            return std::nullopt;
+        }
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(
+            frameNode_->GetChildAtIndex(PIXEL_CONTRACT_LAZY_FOREACH_CHILD_INDEX));
+        if (!lazyForEachNode) {
+            return std::nullopt;
+        }
+        auto itemFrame = lazyForEachNode->GetFrameNode(probeItemIdx);
+        if (!itemFrame) {
+            return std::nullopt;
+        }
+        PixelContractChannels ch;
+        ch.parentCurrentOffset = static_cast<float>(scrollablePattern_->GetTotalOffset());
+        ch.lazyHostMarginOffsetInParent = frameNode_->GetGeometryNode()->GetMarginFrameOffset().GetY();
+        ch.itemSelfLocalY = itemFrame->GetGeometryNode()->GetMarginFrameOffset().GetY();
+        ch.finalPixelInParentContent = ch.lazyHostMarginOffsetInParent + ch.itemSelfLocalY;
+        return ch;
+    }
+
+    // Insert one item at a data index and trigger OnDataAdded (drives the data-change relayout).
+    void InsertItemAt(int32_t index)
+    {
+        ASSERT_NE(builder_, nullptr);
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(
+            frameNode_->GetChildAtIndex(PIXEL_CONTRACT_LAZY_FOREACH_CHILD_INDEX));
+        ASSERT_NE(lazyForEachNode, nullptr);
+        builder_->Insert(index);
+        lazyForEachNode->OnDataAdded(index);
+        FlushUITasks();
+    }
+
+    // Erase one item at a data index and trigger OnDataDeleted.
+    void EraseItemAt(int32_t index)
+    {
+        ASSERT_NE(builder_, nullptr);
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(
+            frameNode_->GetChildAtIndex(PIXEL_CONTRACT_LAZY_FOREACH_CHILD_INDEX));
+        ASSERT_NE(lazyForEachNode, nullptr);
+        builder_->Erase(index);
+        lazyForEachNode->OnDataDeleted(index);
+        FlushUITasks();
+    }
+
+    RefPtr<PixelContractMockLazy> builder_;
+};
 
 } // namespace
 
@@ -517,6 +669,73 @@ HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, StickyFooterUndersizedContent_001
 }
 
 /**
+ * @tc.name: CalcStickyHeaderPosHonorsTopInset_001
+ * @tc.desc: Verify a sticky header pins below the reserved top inset (ancestor sticky header / contentStartOffset).
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, CalcStickyHeaderPosHonorsTopInset_001, TestSize.Level1)
+{
+    constexpr float topInset = 30.0f;
+    HeaderFooterStickyMetrics metrics {
+        .viewStart = 100.0f,
+        .viewEnd = 800.0f,
+        .totalMainSize = 5000.0f,
+        .headerMainSize = 80.0f,
+        .footerMainSize = 60.0f,
+    };
+
+    // Without an inset the header pins at viewStart; the inset pushes the pinned position down by topInset.
+    EXPECT_FLOAT_EQ(HeaderFooterUtils::CalcStickyHeaderPos(metrics), metrics.viewStart);
+    metrics.stickyTopInset = topInset;
+    EXPECT_FLOAT_EQ(HeaderFooterUtils::CalcStickyHeaderPos(metrics), metrics.viewStart + topInset);
+}
+
+/**
+ * @tc.name: CalcStickyHeaderPosTopInsetClampedAtZero_001
+ * @tc.desc: Verify the top inset cannot push the header above the content origin (top-overscroll cancels it).
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, CalcStickyHeaderPosTopInsetClampedAtZero_001, TestSize.Level1)
+{
+    constexpr float topInset = 45.0f;
+    // At the top the viewport is pulled above the content origin (viewStart == -topInset), so the inset is
+    // exactly cancelled and the header rests at the content origin (0), not negative.
+    HeaderFooterStickyMetrics metrics {
+        .viewStart = -topInset,
+        .viewEnd = 800.0f,
+        .totalMainSize = 5000.0f,
+        .headerMainSize = 80.0f,
+        .footerMainSize = 60.0f,
+        .stickyTopInset = topInset,
+    };
+
+    EXPECT_FLOAT_EQ(HeaderFooterUtils::CalcStickyHeaderPos(metrics), 0.0f);
+}
+
+/**
+ * @tc.name: CalcStickyFooterPosHonorsBottomInset_001
+ * @tc.desc: Verify a floating sticky footer pins above the reserved bottom inset (contentEndOffset).
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, CalcStickyFooterPosHonorsBottomInset_001, TestSize.Level1)
+{
+    constexpr float bottomInset = 30.0f;
+    HeaderFooterStickyMetrics metrics {
+        .viewStart = 0.0f,
+        .viewEnd = 800.0f,
+        .totalMainSize = 5000.0f,
+        .headerMainSize = 80.0f,
+        .footerMainSize = 60.0f,
+    };
+
+    // Without an inset the floating footer pins at viewEnd - footer; the inset lifts it up by bottomInset.
+    EXPECT_FLOAT_EQ(HeaderFooterUtils::CalcStickyFooterPos(metrics), metrics.viewEnd - metrics.footerMainSize);
+    metrics.stickyBottomInset = bottomInset;
+    EXPECT_FLOAT_EQ(
+        HeaderFooterUtils::CalcStickyFooterPos(metrics), metrics.viewEnd - bottomInset - metrics.footerMainSize);
+}
+
+/**
  * @tc.name: ScrollStickyBothFooterBeforeContent_001
  * @tc.desc: Verify footer is normalized to the trailing child slot even when it is mounted before lazy content.
  * @tc.type: FUNC
@@ -650,6 +869,58 @@ HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, StickyHeaderFooterRtlAlignment_00
 }
 
 /**
+ * @tc.name: StickyToggleKeepsHeaderLaidOut_001
+ * @tc.desc: Toggling sticky at runtime must not drop the header. Regression for the header collapsing onto
+ *           item 0 (headerMainSize -> 0, items starting at 0) when a property-only relayout left the layout
+ *           algorithm addressing a stale edge reference; the header must stay sized and keep items below it
+ *           across BOTH -> NONE -> BOTH without needing a scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, StickyToggleKeepsHeaderLaidOut_001, TestSize.Level1)
+{
+    constexpr float headerHeight = 40.0f;
+    constexpr float footerHeight = 30.0f;
+
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    LazyWaterFlowLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyWaterFlowLayoutModel::SetHeader([]() { CreateEdge(headerHeight); });
+    CreateContent(12);
+    LazyWaterFlowLayoutModel::SetFooter([]() { CreateEdge(footerHeight); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode_->GetChildIndex(pattern_->GetHeader()), 0);
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0.0f);
+
+    // BOTH -> NONE: header must remain sized and keep item 0 below it (not collapse to the top).
+    layoutProperty_->CleanDirty();
+    LazyWaterFlowLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::NONE);
+    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::NONE);
+    EXPECT_EQ(frameNode_->GetChildIndex(pattern_->GetHeader()), 0);
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0.0f);
+
+    // NONE -> BOTH: header is still intact after toggling back.
+    layoutProperty_->CleanDirty();
+    LazyWaterFlowLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::BOTH);
+    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::BOTH);
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
+}
+
+/**
  * @tc.name: ContentItemsRenderWithStickyHeaderFooter001
  * @tc.desc: A header+footer sticky LazyVWaterFlowLayout must render its content items, not just the header/footer.
  * @tc.type: FUNC
@@ -682,6 +953,462 @@ HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, ContentItemsRenderWithStickyHeade
     EXPECT_FLOAT_EQ(firstItemPos->startPos, 40.0f);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 1), 40.0f);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 2), 140.0f);
+}
+
+/**
+ * @tc.name: ListContentOffsetForwardsToLazyChildInset_001
+ * @tc.desc: A List's contentStartOffset/contentEndOffset must be forwarded through the nested
+ *           LazyVWaterFlowLayout's layout constraint, so sticky header/footer reserve that space.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, ListContentOffsetForwardsToLazyChildInset_001, TestSize.Level1)
+{
+    constexpr float startOffset = 30.0f;
+    constexpr float endOffset = 20.0f;
+    constexpr float headerHeight = 40.0f;
+    constexpr float footerHeight = 30.0f;
+
+    CreateList();
+    ListModelNG::SetContentStartOffset(AceType::RawPtr(scrollableFrameNode_), startOffset);
+    ListModelNG::SetContentEndOffset(AceType::RawPtr(scrollableFrameNode_), endOffset);
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    LazyWaterFlowLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyWaterFlowLayoutModel::SetHeader([headerHeight]() { CreateEdge(headerHeight); });
+    CreateContent(12);
+    LazyWaterFlowLayoutModel::SetFooter([footerHeight]() { CreateEdge(footerHeight); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+
+    scrollablePattern_->UpdateCurrentOffset(-120.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+
+    const auto lazyWaterFlowY = GetChildY(scrollableFrameNode_, 0);
+    EXPECT_FLOAT_EQ(lazyWaterFlowY + GetChildY(frameNode_, 0), startOffset);
+    EXPECT_FLOAT_EQ(lazyWaterFlowY + GetChildY(frameNode_, 13),
+        LAZY_WATER_FLOW_SCROLL_HEIGHT - endOffset - footerHeight);
+}
+
+/**
+ * @tc.name: HeaderFooterOnlyNoContent_001
+ * @tc.desc: A header+footer LazyVWaterFlowLayout with zero content items still lays out both edges:
+ *           header at the top, footer right below it, sizes intact, no crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, HeaderFooterOnlyNoContent_001, TestSize.Level1)
+{
+    constexpr float headerHeight = 40.0f;
+    constexpr float footerHeight = 30.0f;
+
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    LazyWaterFlowLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyWaterFlowLayoutModel::SetHeader([]() { CreateEdge(headerHeight); });
+    LazyWaterFlowLayoutModel::SetFooter([]() { CreateEdge(footerHeight); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    auto headerNode = AceType::DynamicCast<FrameNode>(pattern_->GetHeader());
+    auto footerNode = AceType::DynamicCast<FrameNode>(pattern_->GetFooter());
+    ASSERT_NE(headerNode, nullptr);
+    ASSERT_NE(footerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_TRUE(footerNode->IsActive());
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 0);
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+    EXPECT_EQ(pattern_->GetFooterMainSize(), footerHeight);
+    EXPECT_EQ(frameNode_->GetChildren().size(), 2u);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    // Under-sized content clamps the footer to just below the header (header at slot 0, footer at slot 1).
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 1), headerHeight);
+}
+
+/**
+ * @tc.name: DynamicHeaderHeightChangeReflows_001
+ * @tc.desc: Growing the header height at runtime must re-measure the header and reflow the content below it
+ *           (item 0 starts at the new header height), without needing a scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, DynamicHeaderHeightChangeReflows_001, TestSize.Level1)
+{
+    constexpr float initialHeader = 40.0f;
+    constexpr float grownHeader = 120.0f;
+
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    LazyWaterFlowLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyWaterFlowLayoutModel::SetHeader([]() { CreateEdge(initialHeader); });
+    CreateContent(12);
+    LazyWaterFlowLayoutModel::SetFooter([]() { CreateEdge(30.0f); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), initialHeader);
+    auto firstPos = pattern_->layoutInfo_->GetPos(0);
+    ASSERT_NE(firstPos, nullptr);
+    EXPECT_FLOAT_EQ(firstPos->startPos, initialHeader);
+
+    auto headerNode = AceType::DynamicCast<FrameNode>(pattern_->GetHeader());
+    ASSERT_NE(headerNode, nullptr);
+    headerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0f, DimensionUnit::PERCENT), CalcLength(grownHeader)));
+    headerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), grownHeader);
+    EXPECT_EQ(GetChildHeight(frameNode_, 0), grownHeader);
+    firstPos = pattern_->layoutInfo_->GetPos(0);
+    ASSERT_NE(firstPos, nullptr);
+    EXPECT_FLOAT_EQ(firstPos->startPos, grownHeader);
+}
+
+/**
+ * @tc.name: HeaderTallerThanViewport_001
+ * @tc.desc: A header taller than the viewport must still lay out (size intact, content reflowed below it)
+ *           without breaking the layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, HeaderTallerThanViewport_001, TestSize.Level1)
+{
+    const float tallHeader = LAZY_WATER_FLOW_SCROLL_HEIGHT + 50.0f;
+
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    LazyWaterFlowLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyWaterFlowLayoutModel::SetHeader([tallHeader]() { CreateEdge(tallHeader); });
+    CreateContent(5);
+    LazyWaterFlowLayoutModel::SetFooter([]() { CreateEdge(30.0f); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    auto headerNode = AceType::DynamicCast<FrameNode>(pattern_->GetHeader());
+    ASSERT_NE(headerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), tallHeader);
+    EXPECT_EQ(GetChildHeight(frameNode_, 0), tallHeader);
+    auto firstPos = pattern_->layoutInfo_->GetPos(0);
+    ASSERT_NE(firstPos, nullptr);
+    EXPECT_FLOAT_EQ(firstPos->startPos, tallHeader);
+}
+
+/**
+ * @tc.name: DemoStructureBaseline_001
+ * @tc.desc: Verify steady-state pixel positions for a probe item after a mid scroll, and that
+ *           lane.startPos init equals headerMainSize_ alone (no double-scroll).
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowStickyScrollTest, DemoStructureBaseline_001, TestSize.Level1)
+{
+    BuildDemo();
+
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->layoutInfo_, nullptr);
+    ASSERT_FALSE(pattern_->layoutInfo_->lanes_.empty());
+
+    /**
+     * @tc.expected: at rest, lane base equals headerMainSize_; no extra top margin offset
+     *               folded into lane.startPos.
+     */
+    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->headerMainSize_, PIXEL_CONTRACT_HEADER_HEIGHT);
+    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->lanes_[0].startPos, PIXEL_CONTRACT_HEADER_HEIGHT);
+
+    /**
+     * @tc.steps: step1. Scroll parent to MID; capture 4 channels for the probe item.
+     */
+    scrollablePattern_->UpdateCurrentOffset(-PIXEL_CONTRACT_MID_SCROLL_OFFSET, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+
+    // Viewport 450 - sticky header 40 - sticky footer 30 leaves items area [240, 620] at mid scroll;
+    // item 3 sits at [340, 440] safely inside it.
+    constexpr int32_t kProbeItemIdx = 3;
+    auto channels = CaptureChannels(kProbeItemIdx);
+    ASSERT_TRUE(channels.has_value())
+        << "item " << kProbeItemIdx << " not materialised at parent offset " << PIXEL_CONTRACT_MID_SCROLL_OFFSET
+        << "; pick a different probe idx or scroll offset";
+
+    /**
+     * @tc.expected: at parent_offset = 200, probe item 3 final pixel = 140
+     *   (host margin Y = -200, item self-local Y = 40 + 3 * 100 = 340, final = -200 + 340).
+     */
+    EXPECT_FLOAT_EQ(channels->parentCurrentOffset, PIXEL_CONTRACT_MID_SCROLL_OFFSET);
+    EXPECT_FLOAT_EQ(channels->lazyHostMarginOffsetInParent, -PIXEL_CONTRACT_MID_SCROLL_OFFSET);
+    EXPECT_FLOAT_EQ(channels->itemSelfLocalY,
+        PIXEL_CONTRACT_HEADER_HEIGHT + kProbeItemIdx * PIXEL_CONTRACT_ITEM_HEIGHT);
+    EXPECT_FLOAT_EQ(channels->finalPixelInParentContent,
+        -PIXEL_CONTRACT_MID_SCROLL_OFFSET + PIXEL_CONTRACT_HEADER_HEIGHT + kProbeItemIdx * PIXEL_CONTRACT_ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: PureScrollPreservesContentInvariants_001
+ * @tc.desc: Verify a pure-scroll round-trip keeps totalMainSize_ stable, returns parent
+ *           offset to its starting value, and restores the probe item's final pixel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowStickyScrollTest, PureScrollPreservesContentInvariants_001, TestSize.Level1)
+{
+    BuildDemo();
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->layoutInfo_, nullptr);
+
+    constexpr int32_t kProbeItemIdx = 3; // visible at both rest (0..4) and mid (2..6)
+    const float totalMainSizeAtRest = pattern_->layoutInfo_->totalMainSize_;
+    const float parentOffsetAtRest = static_cast<float>(scrollablePattern_->GetTotalOffset());
+    auto channelsAtRest = CaptureChannels(kProbeItemIdx);
+    ASSERT_TRUE(channelsAtRest.has_value()) << "probe item " << kProbeItemIdx << " not materialised at rest";
+    ASSERT_GT(totalMainSizeAtRest, 0.0f);
+
+    // Down by MID; record state.
+    scrollablePattern_->UpdateCurrentOffset(-PIXEL_CONTRACT_MID_SCROLL_OFFSET, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    const float totalMainSizeMid = pattern_->layoutInfo_->totalMainSize_;
+    const float parentOffsetMid = static_cast<float>(scrollablePattern_->GetTotalOffset());
+    auto channelsAtMid = CaptureChannels(kProbeItemIdx);
+    ASSERT_TRUE(channelsAtMid.has_value()) << "probe item " << kProbeItemIdx << " not materialised at mid";
+
+    // Equal-and-opposite scroll back; verify round-trip.
+    scrollablePattern_->UpdateCurrentOffset(PIXEL_CONTRACT_MID_SCROLL_OFFSET, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    const float totalMainSizeBack = pattern_->layoutInfo_->totalMainSize_;
+    const float parentOffsetBack = static_cast<float>(scrollablePattern_->GetTotalOffset());
+    auto channelsBack = CaptureChannels(kProbeItemIdx);
+    ASSERT_TRUE(channelsBack.has_value()) << "probe item " << kProbeItemIdx << " not materialised at back";
+
+    /**
+     * @tc.expected: totalMainSize_ stable across rest / mid / back; parent offset returns to
+     *               its starting value exactly (no leak round-trip).
+     */
+    EXPECT_NEAR(totalMainSizeMid, totalMainSizeAtRest, PIXEL_CONTRACT_SLACK);
+    EXPECT_NEAR(totalMainSizeBack, totalMainSizeAtRest, PIXEL_CONTRACT_SLACK);
+    EXPECT_FLOAT_EQ(parentOffsetMid, PIXEL_CONTRACT_MID_SCROLL_OFFSET);
+    EXPECT_NEAR(parentOffsetBack, parentOffsetAtRest, PIXEL_CONTRACT_SLACK);
+
+    /**
+     * @tc.expected: self-local Y is constant; final pixel shifts by exactly the scroll delta at
+     *               MID and returns to the rest value at BACK.
+     */
+    EXPECT_NEAR(channelsAtMid->itemSelfLocalY, channelsAtRest->itemSelfLocalY, PIXEL_CONTRACT_SLACK);
+    EXPECT_NEAR(channelsBack->itemSelfLocalY, channelsAtRest->itemSelfLocalY, PIXEL_CONTRACT_SLACK);
+    EXPECT_NEAR(channelsAtMid->finalPixelInParentContent,
+        channelsAtRest->finalPixelInParentContent - PIXEL_CONTRACT_MID_SCROLL_OFFSET, PIXEL_CONTRACT_SLACK);
+    EXPECT_NEAR(channelsBack->finalPixelInParentContent,
+        channelsAtRest->finalPixelInParentContent, PIXEL_CONTRACT_SLACK);
+}
+
+/**
+ * @tc.name: TopBoundary_001
+ * @tc.desc: Verify item 0 sits at headerMainSize_ at the top edge (parent_offset = 0). A
+ *           regression that drops headerMainSize_ from lane.startPos would land item 0 at 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowStickyScrollTest, TopBoundary_001, TestSize.Level1)
+{
+    BuildDemo();
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    auto channels = CaptureChannels(0);
+    ASSERT_TRUE(channels.has_value());
+
+    /**
+     * @tc.expected: at parent_offset = 0, item 0 final pixel = headerMainSize_ (40).
+     */
+    EXPECT_FLOAT_EQ(channels->parentCurrentOffset, 0.0f);
+    EXPECT_FLOAT_EQ(channels->lazyHostMarginOffsetInParent, 0.0f);
+    EXPECT_FLOAT_EQ(channels->itemSelfLocalY, PIXEL_CONTRACT_HEADER_HEIGHT);
+    EXPECT_FLOAT_EQ(channels->finalPixelInParentContent, PIXEL_CONTRACT_HEADER_HEIGHT);
+}
+
+/**
+ * @tc.name: BottomBoundary_001
+ * @tc.desc: Verify the last item lands inside the viewport after ScrollToEdge(SCROLL_BOTTOM),
+ *           and that totalMainSize_ matches headerMainSize_ + N*itemHeight + footerMainSize_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowStickyScrollTest, BottomBoundary_001, TestSize.Level1)
+{
+    BuildDemo();
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->layoutInfo_, nullptr);
+
+    scrollablePattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+
+    /**
+     * @tc.expected: endIndex_ reaches the last item, maxHeight_ within
+     *               header + N*itemH + footer + slack, parent.currentOffset > 0.
+     */
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, PIXEL_CONTRACT_ITEM_COUNT - 1);
+    const float bodyHeightUpperBound =
+        PIXEL_CONTRACT_HEADER_HEIGHT + PIXEL_CONTRACT_ITEM_COUNT * PIXEL_CONTRACT_ITEM_HEIGHT
+        + PIXEL_CONTRACT_FOOTER_HEIGHT + PIXEL_CONTRACT_SLACK;
+    EXPECT_LE(pattern_->layoutInfo_->maxHeight_, bodyHeightUpperBound);
+    EXPECT_GT(pattern_->layoutInfo_->maxHeight_, 0.0f);
+    EXPECT_GT(scrollablePattern_->GetTotalOffset(), 0.0);
+
+    /**
+     * @tc.expected: last item self-local Y = headerMainSize + (N-1) * itemHeight,
+     *               final pixel sits inside the viewport [0, viewport_height].
+     */
+    auto channels = CaptureChannels(PIXEL_CONTRACT_ITEM_COUNT - 1);
+    ASSERT_TRUE(channels.has_value()) << "last item should be materialised at bottom edge";
+
+    const float expectedItemSelfLocalY =
+        PIXEL_CONTRACT_HEADER_HEIGHT + (PIXEL_CONTRACT_ITEM_COUNT - 1) * PIXEL_CONTRACT_ITEM_HEIGHT;
+    const float expectedFinalPixel =
+        -channels->parentCurrentOffset + expectedItemSelfLocalY;
+
+    EXPECT_NEAR(channels->lazyHostMarginOffsetInParent, -channels->parentCurrentOffset, PIXEL_CONTRACT_SLACK);
+    EXPECT_FLOAT_EQ(channels->itemSelfLocalY, expectedItemSelfLocalY);
+    EXPECT_NEAR(channels->finalPixelInParentContent, expectedFinalPixel, PIXEL_CONTRACT_SLACK);
+    // Last item is visible somewhere in viewport: final pixel + itemHeight covers some of
+    // [0, parent_viewport_height] without going below 0 or above viewport.
+    EXPECT_GE(channels->finalPixelInParentContent + PIXEL_CONTRACT_ITEM_HEIGHT, 0.0f - PIXEL_CONTRACT_SLACK);
+    EXPECT_LE(channels->finalPixelInParentContent, LAZY_WATER_FLOW_SCROLL_HEIGHT + PIXEL_CONTRACT_SLACK);
+}
+
+// Data-change preserve tests. Inserting or deleting items in front of the retained window must
+// keep the visible probe item at the same final pixel even though its data-index changes.
+
+/**
+ * @tc.name: PrependPreservesVisibleItemPosition_001
+ * @tc.desc: Verify inserting an item at data-index 0 after a mid scroll keeps the visible
+ *           probe item at the same final pixel even though its data-index shifts +1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowStickyScrollTest, PrependPreservesVisibleItemPosition_001, TestSize.Level1)
+{
+    BuildDemo();
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->layoutInfo_, nullptr);
+
+    /**
+     * @tc.steps: step1. Scroll to mid so a probe item is materialized + visible.
+     */
+    scrollablePattern_->UpdateCurrentOffset(-PIXEL_CONTRACT_MID_SCROLL_OFFSET, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    constexpr int32_t kProbeIdxBefore = 4;
+    auto channelsBefore = CaptureChannels(kProbeIdxBefore);
+    ASSERT_TRUE(channelsBefore.has_value())
+        << "probe item " << kProbeIdxBefore << " should be visible at mid";
+
+    /**
+     * @tc.steps: step2. Prepend one item at data-index 0. Probe item's new data-index is +1.
+     * @tc.expected: visible probe item's final pixel UNCHANGED (preserve invariant).
+     */
+    InsertItemAt(0);
+
+    constexpr int32_t kProbeIdxAfter = kProbeIdxBefore + 1;
+    auto channelsAfter = CaptureChannels(kProbeIdxAfter);
+    ASSERT_TRUE(channelsAfter.has_value())
+        << "probe item " << kProbeIdxAfter << " should still be visible after prepend";
+
+    EXPECT_NEAR(channelsAfter->finalPixelInParentContent,
+        channelsBefore->finalPixelInParentContent, PIXEL_CONTRACT_SLACK)
+        << "prepend preserve: visible item shifted by "
+        << (channelsAfter->finalPixelInParentContent - channelsBefore->finalPixelInParentContent)
+        << " px (lane geometry not absorbing prefix delta correctly)";
+}
+
+/**
+ * @tc.name: PrefixDeletePreservesVisibleItemPosition_001
+ * @tc.desc: Verify erasing the item at data-index 0 after a mid scroll keeps the visible
+ *           probe item at the same final pixel even though its data-index shifts -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowStickyScrollTest, PrefixDeletePreservesVisibleItemPosition_001, TestSize.Level1)
+{
+    BuildDemo();
+    ASSERT_NE(scrollablePattern_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    scrollablePattern_->UpdateCurrentOffset(-PIXEL_CONTRACT_MID_SCROLL_OFFSET, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    constexpr int32_t kProbeIdxBefore = 4;
+    auto channelsBefore = CaptureChannels(kProbeIdxBefore);
+    ASSERT_TRUE(channelsBefore.has_value())
+        << "probe item " << kProbeIdxBefore << " should be visible at mid";
+
+    EraseItemAt(0);
+
+    constexpr int32_t kProbeIdxAfter = kProbeIdxBefore - 1;
+    auto channelsAfter = CaptureChannels(kProbeIdxAfter);
+    ASSERT_TRUE(channelsAfter.has_value())
+        << "probe item " << kProbeIdxAfter << " should still be visible after prefix-delete";
+
+    EXPECT_NEAR(channelsAfter->finalPixelInParentContent,
+        channelsBefore->finalPixelInParentContent, PIXEL_CONTRACT_SLACK)
+        << "prefix-delete preserve: visible item shifted by "
+        << (channelsAfter->finalPixelInParentContent - channelsBefore->finalPixelInParentContent)
+        << " px (lane geometry not absorbing prefix delta correctly)";
+}
+
+/**
+ * @tc.name: HeaderFooterTotalStableOnIdle_001
+ * @tc.desc: A header+footer LazyVWaterFlow must not inflate totalMainSize_ on idle frames.
+ *           Regression lock for the footer double-count across idle frames.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, HeaderFooterTotalStableOnIdle_001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    LazyWaterFlowLayoutModel::SetHeader([]() { CreateEdge(60.0f); });
+    CreateContent(30);
+    LazyWaterFlowLayoutModel::SetFooter([]() { CreateEdge(40.0f); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->layoutInfo_, nullptr);
+
+    // Baseline: body height exceeds header + footer (real content present).
+    const float totalAfterLayout = pattern_->layoutInfo_->totalMainSize_;
+    EXPECT_GT(totalAfterLayout, pattern_->GetHeaderMainSize() + pattern_->GetFooterMainSize());
+
+    // Two idle frames must keep totalMainSize_ at the baseline (footer counted once).
+    FlushIdleTask();
+    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
+    FlushIdleTask();
+    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
+}
+
+/**
+ * @tc.name: ListBackScrollWithFooter_001
+ * @tc.desc: A footer-backed LazyVWaterFlow under a List must be able to scroll back from the bottom.
+ *           Regression for the footer-leak that pinned startIndex_ at the bottom and blocked back-scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, ListBackScrollWithFooter_001, TestSize.Level1)
+{
+    CreateList();
+    CreateLazyWaterFlowLayout();
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr");
+    CreateContent(20);
+    LazyWaterFlowLayoutModel::SetFooter([]() { CreateEdge(60.0f); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(scrollablePattern_, nullptr);
+
+    scrollablePattern_->UpdateCurrentOffset(-1500.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    const int32_t startAtBottom = pattern_->layoutInfo_->startIndex_;
+    EXPECT_GT(startAtBottom, 0);
+
+    // Back-scroll: start index must decrease (the footer-leak bug pinned it at the bottom).
+    scrollablePattern_->UpdateCurrentOffset(700.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_LT(pattern_->layoutInfo_->startIndex_, startAtBottom);
 }
 
 } // namespace OHOS::Ace::NG

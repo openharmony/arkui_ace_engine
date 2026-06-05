@@ -117,7 +117,7 @@ void UpdateRangeIndexes(const std::map<int32_t, LazyWaterFlowItemMainPos>& itemP
 {
     ResetRangeIndexes(startIndex, endIndex);
     for (const auto& [index, pos] : itemPositions) {
-        if (pos.endPos <= rangeStart || pos.startPos >= rangeEnd) {
+        if (LessNotEqual(pos.endPos, rangeStart) || GreatNotEqual(pos.startPos, rangeEnd)) {
             continue;
         }
         if (startIndex < 0) {
@@ -161,6 +161,7 @@ void LazyWaterFlowLayoutInfo::ResetPerFrameState()
 {
     posMap_.clear();
     ResetRangeIndexes(startIndex_, endIndex_);
+    ResetRangeIndexes(visibleStartIndex_, visibleEndIndex_);
     totalMainSize_ = 0.0f;
     adjustOffset_ = {};
     ResetRangeIndexes(layoutedStartIndex_, layoutedEndIndex_);
@@ -607,6 +608,8 @@ void LazyWaterFlowLayoutInfo::TransformStoredIndexesAfterDataChange(int32_t inde
 {
     TransformStoredIndex(startIndex_, index, count);
     TransformStoredIndex(endIndex_, index, count);
+    TransformStoredIndex(visibleStartIndex_, index, count);
+    TransformStoredIndex(visibleEndIndex_, index, count);
     TransformStoredIndex(layoutedStartIndex_, index, count);
     TransformStoredIndex(layoutedEndIndex_, index, count);
     TransformStoredIndex(cachedStartIndex_, index, count);
@@ -703,6 +706,25 @@ void LazyWaterFlowLayoutInfo::UpdateVisibleRange(float viewStart, float viewEnd)
     }
 
     UpdateRangeIndexes(posMap_, viewStart, viewEnd, startIndex_, endIndex_);
+}
+
+void LazyWaterFlowLayoutInfo::UpdateVisibleCallbackRange(float viewStart, float viewEnd)
+{
+    if (totalItemCount_ <= 0 || posMap_.empty()) {
+        ResetRangeIndexes(visibleStartIndex_, visibleEndIndex_);
+        return;
+    }
+    if (!std::isfinite(viewEnd)) {
+        visibleStartIndex_ = posMap_.begin()->first;
+        visibleEndIndex_ = posMap_.rbegin()->first;
+        return;
+    }
+    if (viewEnd <= viewStart) {
+        ResetRangeIndexes(visibleStartIndex_, visibleEndIndex_);
+        return;
+    }
+
+    UpdateRangeIndexes(posMap_, viewStart, viewEnd, visibleStartIndex_, visibleEndIndex_);
 }
 
 void LazyWaterFlowLayoutInfo::UpdateCachedRange(float cacheStart, float cacheEnd)
@@ -909,6 +931,8 @@ void LazyWaterFlowLayoutInfo::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc("itemStartIndex:" + std::to_string(startIndex_));
     DumpLog::GetInstance().AddDesc("itemEndIndex:" + std::to_string(endIndex_));
+    DumpLog::GetInstance().AddDesc("visibleStartIndex:" + std::to_string(visibleStartIndex_));
+    DumpLog::GetInstance().AddDesc("visibleEndIndex:" + std::to_string(visibleEndIndex_));
     DumpLog::GetInstance().AddDesc("itemTotalCount:" + std::to_string(totalItemCount_));
     DumpLog::GetInstance().AddDesc("headerMainSize:" + std::to_string(headerMainSize_));
     DumpLog::GetInstance().AddDesc("footerMainSize:" + std::to_string(footerMainSize_));
@@ -925,6 +949,8 @@ void LazyWaterFlowLayoutInfo::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(json);
     json->Put("itemStartIndex", startIndex_);
     json->Put("itemEndIndex", endIndex_);
+    json->Put("visibleStartIndex", visibleStartIndex_);
+    json->Put("visibleEndIndex", visibleEndIndex_);
     json->Put("itemTotalCount", totalItemCount_);
     json->Put("headerMainSize", headerMainSize_);
     json->Put("footerMainSize", footerMainSize_);

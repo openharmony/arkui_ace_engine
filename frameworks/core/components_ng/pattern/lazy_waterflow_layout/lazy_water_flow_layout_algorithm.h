@@ -77,10 +77,12 @@ private:
 
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize, const PaddingPropertyF& padding);
     /**
-     * @brief Project the parent viewport into self-local content coords (viewStart_ / viewEnd_ / cacheStartPos_ /
-     * cacheEndPos_).
+     * @brief Project the parent viewport into self-local content coords, including parent viewExt and this
+     * component's cache expansion.
      */
     void UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef);
+    // Fallback viewport when there is no usable (vertical) parent reference.
+    void ApplyFallbackReferencePos(LayoutWrapper* layoutWrapper, const std::optional<ViewPosReference>& posRef);
     void UpdateGap(const RefPtr<LazyWaterFlowLayoutProperty>& layoutProperty, const OptionalSizeF& selfIdealSize);
     void UpdateItemConstraints(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     // Resolve the raw indices of header / footer in the child sequence into headerIndex_ / footerIndex_.
@@ -160,6 +162,8 @@ private:
      * refill the new cache edges and refresh totalMainSize_ / maxHeight_ / measured ranges accordingly.
      */
     void ApplyAdjustedMeasureWindow(LayoutWrapper* layoutWrapper, float consumedOffset);
+    void RefillRebasedMeasureWindow(LayoutWrapper* layoutWrapper);
+    bool RebaseEndReferenceToCurrentSize();
     void UpdateMeasuredRanges();
     /**
      * @brief Translate totalDelta into AdjustOffset. Prefer end-anchor when valid, else start-anchor.
@@ -170,10 +174,7 @@ private:
     void UpdateVisibleAdjustOffset(float totalDelta);
 
     void LayoutItems(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset);
-    LayoutRange GetLayoutRange(const RefPtr<FrameNode>& host) const;
-    bool NeedVisibleRangeForChild(const RefPtr<UINode>& child) const;
-    bool NeedVisibleRangeForChildren(const RefPtr<FrameNode>& host) const;
-    bool ShouldReuseCachedOffscreenSize(LayoutWrapper* layoutWrapper, bool maybeVisible, bool hasCachedSize) const;
+    LayoutRange GetLayoutRange() const;
     // Generic header / footer layout; isSticky reports whether this edge currently participates in sticky
     // layering, in which case its z-index is raised to the sticky default.
     void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
@@ -194,8 +195,7 @@ private:
         int32_t cachedStart, int32_t cachedEnd) const;
     // Explicitly mark header / footer as active so they are not collected by ActiveChildRange filtering.
     void SetHeaderFooterActive(LayoutWrapper* layoutWrapper) const;
-    void UpdateItemActiveRangeOnChildren(const RefPtr<FrameNode>& host, int32_t activeStart, int32_t activeEnd,
-        int32_t cacheStart, int32_t cacheEnd) const;
+    void ActivateContentItemRange(const RefPtr<FrameNode>& host, int32_t rawStart, int32_t rawEnd) const;
     ActiveChildSets BuildActiveChildSets(int32_t rawStart, int32_t rawEnd) const;
 
     // ---------------------------- State fields ----------------------------
@@ -208,10 +208,16 @@ private:
     float crossSize_ = 0.0f;
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
-    // Real viewport in self-local content coords. Infinity = parent provides no bounded upper edge.
+    // Parent-reserved sticky insets (set before measure); pin this section's header/footer inside them.
+    float stickyTopInset_ = 0.0f;
+    float stickyBottomInset_ = 0.0f;
+    // Parent viewExt-expanded layout window in self-local content coords. Infinity = parent provides no bounded upper
+    // edge.
     float viewStart_ = 0.0f;
     float viewEnd_ = Infinity<float>();
-    // Real viewport plus parent-provided viewExt; the child cache window expands from this range.
+    float viewExtStart_ = 0.0f;
+    float viewExtEnd_ = 0.0f;
+    // Real viewport plus parent-provided viewExt. Kept separate from the half-screen cache window.
     float extendedViewStart_ = 0.0f;
     float extendedViewEnd_ = Infinity<float>();
     // Cache window per side, as a fraction of the parent viewport main size.

@@ -171,6 +171,9 @@ private:
     float endPos_ = 0.0f;
     float viewExtStart_ = 0.0f;
     float viewExtEnd_ = 0.0f;
+    // Parent-reserved sticky insets, applied to this grid's own header/footer.
+    float stickyTopInset_ = 0.0f;
+    float stickyBottomInset_ = 0.0f;
 
     // cache
     float cacheSize_ = 0.5f;
