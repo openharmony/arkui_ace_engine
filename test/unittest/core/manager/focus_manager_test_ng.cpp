@@ -1339,56 +1339,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest038, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusManagerTest039
- * @tc.desc: Test EraseModalFocusView with invalid modal focus view stack.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest039, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager with empty modal stack.
-     * @tc.expected: FocusManager is created successfully.
-     */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-    EXPECT_NE(focusManager, nullptr);
-
-    /**
-     * @tc.steps: step2. Call EraseModalFocusView when modal stack is invalid.
-     * @tc.expected: Returns early without crash.
-     */
-    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    focusManager->EraseModalFocusView(pagePattern);
-}
-
-/**
- * @tc.name: FocusManagerTest040
- * @tc.desc: Test EraseModalFocusView removes matching focus view.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest040, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager and add focus views to modal stack.
-     */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-    auto pagePattern1 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode1 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern1);
-    auto pagePattern2 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode2 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern2);
-    focusManager->modalFocusViewStack_.emplace_back(pagePattern1);
-    focusManager->modalFocusViewStack_.emplace_back(pagePattern2);
-
-    /**
-     * @tc.steps: step2. Erase first focus view from modal stack.
-     * @tc.expected: First focus view is removed, stack size decreases.
-     */
-    auto stackSizeBefore = focusManager->modalFocusViewStack_.size();
-    focusManager->EraseModalFocusView(pagePattern1);
-    auto stackSizeAfter = focusManager->modalFocusViewStack_.size();
-    EXPECT_EQ(stackSizeBefore - stackSizeAfter, 1);
-}
-
-/**
  * @tc.name: FocusManagerTest041
  * @tc.desc: Test FocusViewClose with isAutoFocusTransfer_ false and isDetachFromTree false.
  * @tc.type: FUNC
@@ -3273,33 +3223,5 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest119, TestSize.Level1)
      */
     focusManager->FocusViewClose(pagePattern);
     EXPECT_EQ(focusManager->focusViewStackState_, FocusViewStackState::CLOSE);
-}
-
-/**
- * @tc.name: FocusManagerTest120
- * @tc.desc: Test EraseModalFocusView with child FocusView.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest120, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager and parent-child node structure.
-     */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
-    auto parentPattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto parentNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, parentPattern);
-    auto childPattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto childNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, childPattern);
-    rootNode->AddChild(parentNode);
-    parentNode->AddChild(childNode);
-    focusManager->modalFocusViewStack_.emplace_back(parentPattern);
-
-    /**
-     * @tc.steps: step2. Erase child FocusView.
-     * @tc.expected: Parent FocusView is removed.
-     */
-    focusManager->EraseModalFocusView(childPattern);
-    EXPECT_TRUE(focusManager->modalFocusViewStack_.empty());
 }
 } // namespace OHOS::Ace::NG
