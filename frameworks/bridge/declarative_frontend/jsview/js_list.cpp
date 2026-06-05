@@ -18,6 +18,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/axis.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
@@ -34,6 +35,7 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 namespace OHOS::Ace {
 
+#define SCROLLABLE_LIST_ATTRIBUTE "Scrollable.ListAttribute."
 std::unique_ptr<ListModel> ListModel::instance_ = nullptr;
 std::mutex ListModel::mutex_;
 
@@ -826,6 +828,9 @@ void JSList::ItemDeleteCallback(const JSCallbackInfo& args)
             return true;
         };
         ListModel::GetInstance()->SetOnItemDelete(std::move(onItemDelete));
+        ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "OnItemDelete", 1);
+    } else {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_LIST_ATTRIBUTE "OnItemDelete", 0);
     }
     args.ReturnSelf();
 }

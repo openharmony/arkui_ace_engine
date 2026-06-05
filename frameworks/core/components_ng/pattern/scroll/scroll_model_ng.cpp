@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
@@ -25,6 +26,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
+#define SCROLLABLE_SCROLL_ATTRIBUTE "Scrollable.ScrollAttribute."
+
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 
 bool HasLpxUnit(const std::vector<Dimension>& dimensions)
@@ -107,6 +111,7 @@ void ScrollModelNG::SetScrollController(
 
 void ScrollModelNG::SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetOnScroll", event ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -181,6 +186,7 @@ void ScrollModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
 
 void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetOnScroll", event ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     SetOnScroll(frameNode, std::move(event));
 }
@@ -221,6 +227,7 @@ void ScrollModelNG::SetOnDidScroll(FrameNode* frameNode, ScrollEventWithState&& 
 
 void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetOnScrollEdge", event ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
@@ -230,6 +237,7 @@ void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)
 
 void ScrollModelNG::SetOnScrollEnd(NG::ScrollEndEvent&& event)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetOnScrollEnd", event ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
@@ -306,6 +314,7 @@ int32_t ScrollModelNG::GetEnablePaging(FrameNode* frameNode)
 
 void ScrollModelNG::SetEnablePaging(bool enablePaging)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetEnablePaging", enablePaging);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -332,6 +341,11 @@ void ScrollModelNG::SetScrollBar(FrameNode* frameNode, DisplayMode barState)
 
 void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLL_ATTRIBUTE "SetNestedScroll",
+        static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
+        static_cast<int32_t>(nestedOpt.backward) +
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_PARALLEL_PARALLEL));
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
@@ -348,6 +362,7 @@ float ScrollModelNG::GetFriction(FrameNode* frameNode)
 
 void ScrollModelNG::SetFriction(FrameNode* frameNode, double friction)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetFriction", 1);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
@@ -391,6 +406,9 @@ ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
 void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
     const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLL_ATTRIBUTE "SetScrollSnap",
+        static_cast<int32_t>(scrollSnapAlign) + static_cast<int32_t>(ScrollableErrorCode::SCROLL_SNAP_ALIGN_NONE),
+        static_cast<int32_t>(ScrollableErrorCode::SCROLL_SNAP_ALIGN_END));
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
@@ -422,6 +440,7 @@ int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
 
 void ScrollModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetScrollEnabled", scrollEnabled);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
 }
 
@@ -477,11 +496,20 @@ EffectEdge ScrollModelNG::GetEffectEdge(FrameNode* frameNode)
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLL_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(edge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLL_ATTRIBUTE "SetNestedScroll",
+        static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
+        static_cast<int32_t>(nestedOpt.backward) +
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_PARALLEL_PARALLEL));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -491,11 +519,13 @@ void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 
 void ScrollModelNG::SetScrollEnabled(bool scrollEnabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetScrollEnabled", scrollEnabled);
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled);
 }
 
 void ScrollModelNG::SetFriction(double friction)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetFriction", 1);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -506,6 +536,9 @@ void ScrollModelNG::SetFriction(double friction)
 void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
     const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLL_ATTRIBUTE "SetScrollSnap",
+        static_cast<int32_t>(scrollSnapAlign) + static_cast<int32_t>(ScrollableErrorCode::SCROLL_SNAP_ALIGN_NONE),
+        static_cast<int32_t>(ScrollableErrorCode::SCROLL_SNAP_ALIGN_END));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -562,11 +595,16 @@ void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dim
 void ScrollModelNG::SetEdgeEffect(
     FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLL_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(edge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 
 void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetEnablePaging", enablePaging);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
@@ -592,6 +630,7 @@ RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController(FrameNode* fra
 
 void ScrollModelNG::SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLL_ATTRIBUTE "SetOnScrollEdge", event ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);

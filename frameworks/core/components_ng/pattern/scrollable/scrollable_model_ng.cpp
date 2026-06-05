@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -29,8 +30,14 @@
 
 namespace OHOS::Ace::NG {
 
+#define SCROLLABLE_SCROLLABLE_ATTRIBUTE "Scrollable.ScrollableAttribute."
+ 
 void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(effectEdge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
@@ -151,6 +158,7 @@ void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optio
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
@@ -345,6 +353,7 @@ void ScrollableModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFram
 
 void ScrollableModelNG::SetFadingEdge(bool fadingEdge, const Dimension& fadingEdgeLength)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetFadingEdge", fadingEdge);
     ACE_CHECK_LPX_ATTRIBUTE(fadingEdgeLength, LpxAttribute::LPX_FADING_EDGE_LENGTH);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdge, fadingEdge);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength, fadingEdgeLength);
@@ -352,6 +361,7 @@ void ScrollableModelNG::SetFadingEdge(bool fadingEdge, const Dimension& fadingEd
 
 void ScrollableModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge, const Dimension& fadingEdgeLength)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetFadingEdge", fadingEdge);
     ACE_CHECK_NODE_LPX_ATTRIBUTE(fadingEdgeLength, LpxAttribute::LPX_FADING_EDGE_LENGTH, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdge, fadingEdge, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength, fadingEdgeLength, frameNode);
@@ -360,6 +370,10 @@ void ScrollableModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge, con
 void ScrollableModelNG::SetEdgeEffect(
     FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(effectEdge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
@@ -445,6 +459,9 @@ float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
 
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetContentClip",
+        static_cast<int32_t>(mode) + static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_CONTENT_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_DEFAULT));
     ContentClip contentClip = std::make_pair(mode, shape);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -469,6 +486,9 @@ ContentClipMode ScrollableModelNG::GetContentClip(FrameNode* frameNode)
 
 void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetContentClip",
+        static_cast<int32_t>(mode) + static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_CONTENT_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_DEFAULT));
     ContentClip contentClip = std::make_pair(mode, rect);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip, frameNode);
     CHECK_NULL_VOID(frameNode);
@@ -534,6 +554,7 @@ void ScrollableModelNG::SetFriction(FrameNode* frameNode, const std::optional<do
 
 void ScrollableModelNG::SetBackToTop(bool backToTop)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetBackToTop", backToTop);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     SetBackToTop(frameNode, backToTop);
@@ -548,6 +569,7 @@ void ScrollableModelNG::ResetBackToTop()
 
 void ScrollableModelNG::SetBackToTop(FrameNode* frameNode, bool backToTop)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetBackToTop", backToTop);
     // call SetBackToTopMultiThread by multi thread
     FREE_NODE_CHECK(frameNode, SetBackToTop, frameNode, backToTop);
     CHECK_NULL_VOID(frameNode);
