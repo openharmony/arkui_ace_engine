@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 #undef private
 #undef protected

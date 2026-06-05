@@ -16608,6 +16608,16 @@ class ArkNavDestinationComponent extends ArkComponent {
       NavDestinationOnWillShowModifier, callback);
     return this;
   }
+  onSaveState(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnSaveStateModifier.identity,
+      NavDestinationOnSaveStateModifier, callback);
+    return this;
+  }
+  onRestoreState(callback) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationOnRestoreStateModifier.identity,
+      NavDestinationOnRestoreStateModifier, callback);
+    return this;
+  }
   onWillDisappear(callback) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationOnWillDisappearModifier.identity,
       NavDestinationOnWillDisappearModifier, callback);
@@ -17152,6 +17162,34 @@ class NavDestinationOnBackPressedModifier extends ModifierWithKey {
 }
 NavDestinationOnBackPressedModifier.identity = Symbol('onBackPressed');
 
+class NavDestinationOnSaveStateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnSaveState(node);
+    } else {
+      getUINativeModule().navDestination.setOnSaveState(node, this.value);
+    }
+  }
+}
+NavDestinationOnSaveStateModifier.identity = Symbol('onSaveState');
+
+class NavDestinationOnRestoreStateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetOnRestoreState(node);
+    } else {
+      getUINativeModule().navDestination.setOnRestoreState(node, this.value);
+    }
+  }
+}
+NavDestinationOnRestoreStateModifier.identity = Symbol('onRestoreState');
+
 class NavDestinationOnReadyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -17668,7 +17706,29 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, NavigationDividerStyleModifier.identitiy, NavigationDividerStyleModifier, style);
     return this;
   }
+  configuration(config) {
+    modifierWithKey(this._modifiersWithKeys, NavigationConfigurationModifier.identity,
+      NavigationConfigurationModifier, config);
+    return this;
+  }
 }
+
+class NavigationConfigurationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().navigation.resetConfiguration(node);
+    } else {
+      getUINativeModule().navigation.setConfiguration(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+NavigationConfigurationModifier.identity = Symbol('configuration');
 
 class OnTitleModeChangeModifier extends ModifierWithKey {
   constructor(value) {

@@ -1405,6 +1405,8 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
 void PipelineContext::InitManagers()
 {
     memoryMgr_ = MakeRefPtr<MemoryManager>();
+    avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
+    toolbarManager_ = MakeRefPtr<ToolbarManager>();
     navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
@@ -1979,6 +1981,7 @@ ACE_WEAK_SYM ScopedEnvConsumer::~ScopedEnvConsumer()
 
 bool PipelineContext::GetIsRequestVsync()
 {
-    return false;
+    CHECK_NULL_RETURN(window_, false);
+    return window_->GetIsRequestVsync();
 }
 } // namespace OHOS::Ace::NG

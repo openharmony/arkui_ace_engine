@@ -78,6 +78,8 @@ public:
     static ArkUINativeModuleValue ResetSystemBarStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetNavigationConfiguration(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetNavigationConfiguration(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     static void ParseCustomContentTransition(

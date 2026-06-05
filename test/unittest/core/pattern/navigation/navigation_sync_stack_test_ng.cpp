@@ -1351,4 +1351,201 @@ HWTEST_F(NavigationSyncStackTestNg, AddCacheNodeTest2, TestSize.Level1)
     ASSERT_NE(mockNavPathStack->cacheNodes_.empty(), true);
     ASSERT_NE(navNode->IsCacheNode(), true);
 }
+
+/**
+ * @tc.name: NavigationAutoCleanTest001
+ * @tc.desc: Test auto clean clears invisible destinations when stackSizeLimit is exceeded.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationAutoCleanTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation with five destinations.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    const int32_t stackSize = 5;
+    const int32_t stackSizeLimit = 2;
+    for (int32_t index = 0; index < stackSize; ++index) {
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest" + std::to_string(index)));
+    }
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    RunNavigationStackSync(navigationPattern);
+
+    /**
+     * @tc.steps: step2. limit active page nodes to two.
+     * @tc.expected: the first three destinations are cleaned and marked autoCleaned.
+     */
+    navigationPattern->config_.stackSizeLimit = stackSizeLimit;
+    ASSERT_EQ(navigationPattern->GetAutoCleanRestoreMinIndex(stackSize - 1, stackSize), stackSize - stackSizeLimit);
+    ASSERT_TRUE(navigationPattern->ProcessAutoCleanAndRestore(stackSize - 1));
+    auto& navPathList = mockNavPathStack->GetAllNavDestinationNodes();
+    ASSERT_EQ(static_cast<int32_t>(navPathList.size()), stackSize);
+    for (int32_t index = 0; index < stackSize - stackSizeLimit; ++index) {
+        EXPECT_EQ(navPathList[index].second, nullptr);
+        EXPECT_TRUE(mockNavPathStack->IsAutoCleaned(index));
+    }
+    for (int32_t index = stackSize - stackSizeLimit; index < stackSize; ++index) {
+        EXPECT_NE(navPathList[index].second, nullptr);
+        EXPECT_FALSE(mockNavPathStack->IsAutoCleaned(index));
+    }
+}
+
+/**
+ * @tc.name: NavigationAutoCleanTest002
+ * @tc.desc: Test auto cleaned destinations are recreated and the saved state flag is cleared.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationAutoCleanTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and auto clean old destinations.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    const int32_t stackSize = 5;
+    const int32_t cleanLimit = 2;
+    for (int32_t index = 0; index < stackSize; ++index) {
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest" + std::to_string(index)));
+    }
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    RunNavigationStackSync(navigationPattern);
+    navigationPattern->config_.stackSizeLimit = cleanLimit;
+    ASSERT_TRUE(navigationPattern->ProcessAutoCleanAndRestore(stackSize - 1));
+    ASSERT_TRUE(mockNavPathStack->IsAutoCleaned(0));
+    mockNavPathStack->SaveStateToJsCallback(0, "dest0", 0, "{\"count\":1}");
+
+    /**
+     * @tc.steps: step2. enlarge limit and process restore.
+     * @tc.expected: cleaned destination nodes are recreated and autoCleaned state is cleared.
+     */
+    navigationPattern->config_.stackSizeLimit = stackSize;
+    ASSERT_TRUE(navigationPattern->ProcessAutoCleanAndRestore(0));
+    auto& navPathList = mockNavPathStack->GetAllNavDestinationNodes();
+    ASSERT_EQ(static_cast<int32_t>(navPathList.size()), stackSize);
+    for (int32_t index = 0; index < stackSize; ++index) {
+        EXPECT_NE(navPathList[index].second, nullptr);
+        EXPECT_FALSE(mockNavPathStack->IsAutoCleaned(index));
+        EXPECT_EQ(mockNavPathStack->GetAutoCleanedState(index), "");
+    }
+}
+
+/**
+ * @tc.name: NavigationAutoCleanTest003
+ * @tc.desc: Test auto clean defers an animating destination and marks it when pending clean is cleared.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationAutoCleanTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mark one invisible destination animating.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    const int32_t stackSize = 4;
+    const int32_t stackSizeLimit = 1;
+    const int32_t animatingIndex = 1;
+    for (int32_t index = 0; index < stackSize; ++index) {
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest" + std::to_string(index)));
+    }
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    RunNavigationStackSync(navigationPattern);
+    auto& navPathList = mockNavPathStack->GetAllNavDestinationNodes();
+    auto animatingDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(navPathList[animatingIndex].second));
+    ASSERT_NE(animatingDestination, nullptr);
+    animatingDestination->SetIsOnAnimation(true);
+
+    /**
+     * @tc.steps: step2. process auto clean while the destination is animating.
+     * @tc.expected: the animating destination is kept and marked pendingToClean.
+     */
+    navigationPattern->config_.stackSizeLimit = stackSizeLimit;
+    ASSERT_TRUE(navigationPattern->ProcessAutoCleanAndRestore(stackSize - 1));
+    auto animatingPattern = animatingDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(animatingPattern, nullptr);
+    EXPECT_NE(navPathList[animatingIndex].second, nullptr);
+    EXPECT_TRUE(animatingPattern->GetPendingToClean());
+    EXPECT_FALSE(mockNavPathStack->IsAutoCleaned(animatingIndex));
+    EXPECT_EQ(navigationPattern->pendingToCleanCount_, 1);
+
+    /**
+     * @tc.steps: step3. simulate transition finish callback clearing pendingToClean.
+     * @tc.expected: JS stack autoCleaned flag is marked and pending count is cleared.
+     */
+    animatingPattern->SetPendingToClean(false);
+    EXPECT_FALSE(animatingPattern->GetPendingToClean());
+    EXPECT_TRUE(mockNavPathStack->IsAutoCleaned(animatingIndex));
+    EXPECT_EQ(navigationPattern->pendingToCleanCount_, 0);
+}
+
+/**
+ * @tc.name: NavigationAutoCleanTest004
+ * @tc.desc: Test onSaveState saves state to stack and onRestoreState receives the saved state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationAutoCleanTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create destination and fire onSaveState.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest0"));
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    RunNavigationStackSync(navigationPattern);
+    auto& navPathList = mockNavPathStack->GetAllNavDestinationNodes();
+    ASSERT_EQ(static_cast<int32_t>(navPathList.size()), 1);
+    auto destination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(navPathList[0].second));
+    ASSERT_NE(destination, nullptr);
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    const std::string savedState = "{\"title\":\"page\"}";
+    eventHub->SetOnSaveState([savedState]() { return savedState; });
+    eventHub->FireOnSaveState();
+    EXPECT_EQ(mockNavPathStack->GetAutoCleanedState(0), savedState);
+
+    /**
+     * @tc.steps: step2. mark the destination autoCleaned and restore it.
+     * @tc.expected: onRestoreState receives the saved state and the stack state is cleared.
+     */
+    std::string restoredState;
+    eventHub->SetOnRestoreState([&restoredState](const std::string& state) { restoredState = state; });
+    auto destinationPattern = destination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(destinationPattern, nullptr);
+    mockNavPathStack->MarkAutoCleanedFlag(destinationPattern->GetNavDestinationId());
+    ASSERT_TRUE(navigationPattern->RestoreAutoCleanedDestination(navPathList, 0));
+    EXPECT_EQ(restoredState, savedState);
+    EXPECT_FALSE(mockNavPathStack->IsAutoCleaned(0));
+    EXPECT_EQ(mockNavPathStack->GetAutoCleanedState(0), "");
+}
 } // namespace OHOS::Ace::NG

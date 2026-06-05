@@ -947,6 +947,97 @@ ArkUINativeModuleValue NavDestinationBridge::ResetOnWillShow(ArkUIRuntimeCallInf
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue NavDestinationBridge::SetOnSaveState(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    using namespace OHOS::Ace::Framework;
+    JsiCallbackInfo callbackArg = JsiCallbackInfo(runtimeCallInfo);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (!callbackArg[NUM_1]->IsFunction()) {
+        nodeModifiers->getNavDestinationModifier()->resetNavDestinationOnSaveState(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto saveStateCallback =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callbackArg[NUM_1]));
+    std::function<std::string()> onSaveState = [execCtx = callbackArg.GetExecutionContext(),
+                                                   func = std::move(saveStateCallback)]() -> std::string {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, "");
+        ACE_SCORING_EVENT("NavDestination.onSaveState");
+        auto result = func->ExecuteJS();
+        if (result.IsEmpty() || result->IsUndefined() || result->IsNull()) {
+            return "";
+        }
+        return result->ToString();
+    };
+    nodeModifiers->getNavDestinationModifier()->setNavDestinationOnSaveState(
+        nativeNode, reinterpret_cast<void*>(&onSaveState));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetOnSaveState(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getNavDestinationModifier()->resetNavDestinationOnSaveState(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetOnRestoreState(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    using namespace OHOS::Ace::Framework;
+    JsiCallbackInfo callbackArg = JsiCallbackInfo(runtimeCallInfo);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (!callbackArg[NUM_1]->IsFunction()) {
+        nodeModifiers->getNavDestinationModifier()->resetNavDestinationOnRestoreState(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto restoreStateCallback =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callbackArg[NUM_1]));
+    std::function<void(const std::string&)> onRestoreState =
+        [execCtx = callbackArg.GetExecutionContext(), func = std::move(restoreStateCallback)](
+            const std::string& state) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("NavDestination.onRestoreState");
+            JSRef<JSVal> params[NUM_1] = { JSRef<JSVal>::Make() };
+            if (!state.empty()) {
+                params[NUM_0] = JSRef<JSObject>::New()->ToJsonObject(state.c_str());
+            }
+            func->ExecuteJS(NUM_1, params);
+        };
+    nodeModifiers->getNavDestinationModifier()->setNavDestinationOnRestoreState(
+        nativeNode, reinterpret_cast<void*>(&onRestoreState));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetOnRestoreState(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getNavDestinationModifier()->resetNavDestinationOnRestoreState(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue NavDestinationBridge::SetOnWillDisappear(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
