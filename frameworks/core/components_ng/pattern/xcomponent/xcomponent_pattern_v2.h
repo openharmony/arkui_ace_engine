@@ -73,7 +73,7 @@ public:
     std::pair<bool, bool> UpdateSurfaceRect();
     void HandleSurfaceChangeEvent(bool needForceRender, bool offsetChanged, bool sizeChanged, bool frameOffsetChange);
 
-private:
+protected:
     void OnAttachToFrameNode() override;
     void OnAttachToMainTree() override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
@@ -85,6 +85,7 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
 
+private:
     void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
     void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
     void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);

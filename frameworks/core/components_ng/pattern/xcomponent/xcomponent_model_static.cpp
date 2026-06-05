@@ -18,12 +18,8 @@
 #include <any>
 
 #include "base/utils/utils.h"
-// Include <any> before this access-control macro, because xcomponent headers pull in custom_node.h.
-// This macro must be undefined after include xcomponent pattern headers.
-#define private protected
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
-#undef private
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "base/display_manager/display_manager.h"

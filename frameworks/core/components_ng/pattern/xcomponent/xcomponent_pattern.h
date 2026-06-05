@@ -394,6 +394,8 @@ protected:
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void RegisterTransformHintCallback(PipelineContext* context);
+    void LoadNative();
+    void OnSurfaceCreated();
 
     std::optional<std::string> id_;
     std::string nodeId_ = "-1";
@@ -439,6 +441,12 @@ protected:
     std::optional<float> selfIdealSurfaceOffsetX_;
     std::optional<float> selfIdealSurfaceOffsetY_;
 
+    std::shared_ptr<InnerXComponentController> xcomponentController_;
+    std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
+    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
+    bool isTypedNode_ = false;
+    bool isNativeXComponent_ = false;
+
     OffsetF globalPosition_;
     void NativeXComponentOffset(double x, double y);
     std::string GetLeakType();
@@ -457,11 +465,9 @@ private:
     void OnDetachContext(PipelineContext *context) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    void LoadNative();
     void OnNativeLoad(FrameNode* frameNode);
     void OnNativeUnload(FrameNode* frameNode);
 
-    void OnSurfaceCreated();
     void OnSurfaceChanged(const RectF& surfaceRect, bool needResizeNativeWindow);
 
     void NativeSurfaceShow();
@@ -528,15 +534,9 @@ private:
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::optional<std::string> libraryname_;
-    std::shared_ptr<InnerXComponentController> xcomponentController_;
     std::optional<std::string> soPath_;
     std::optional<uint64_t> screenId_;
-
     WeakPtr<XComponentPattern> extPattern_;
-
-    std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
-    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
-
     bool hasXComponentInit_ = false;
     bool isXComponentSizeInit_ = false;
 
@@ -560,8 +560,6 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
     uint32_t rotation_ = 0;
-    bool isTypedNode_ = false;
-    bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
     SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
     std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
