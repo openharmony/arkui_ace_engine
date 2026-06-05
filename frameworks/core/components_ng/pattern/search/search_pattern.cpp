@@ -1113,17 +1113,6 @@ bool SearchPattern::IsSearchAttached()
     return textFieldManager->GetIsImeAttached();
 }
 
-bool SearchPattern::IsTV() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_RETURN(textFieldFrameNode, false);
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsTV();
-}
-
 bool SearchPattern::IsConsumeEvent()
 {
     return !directionKeysMoveFocusOut_;

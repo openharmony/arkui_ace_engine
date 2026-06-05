@@ -2958,7 +2958,7 @@ HWTEST_F(SearchTestTwoNg, searchToJsonTest, TestSize.Level1)
     pattern->ToJsonValueForCancelButton(jsonValue, filter);
     pattern->ToJsonValueForCursor(jsonValue, filter);
     pattern->ToJsonValueForSearchButtonOption(jsonValue, filter);
-    EXPECT_TRUE(filter.CheckFixedAttr(FIXED_ATTR_CONTENT));
+    EXPECT_TRUE(filter.CheckExtAttr("content"));
     EXPECT_EQ(filter.IsFastFilter(), true);
 
     InspectorFilter filter2;

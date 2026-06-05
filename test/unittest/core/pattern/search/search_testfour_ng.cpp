@@ -1156,48 +1156,4 @@ HWTEST_F(SearchTestFourNg, SearchCancelButton_Style_Input, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::CONSTANT),
         CancelButtonStyle::INPUT);
 }
-
-/**
- * @tc.name: IsTVTest001
- * @tc.desc: Test IsTV returns false by default (hoverAndPressBgColorEnabled_=false)
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestFourNg, IsTVTest001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    EXPECT_FALSE(pattern->IsTV());
-}
-
-/**
- * @tc.name: IsTVTest002
- * @tc.desc: Test IsTV returns true when hoverAndPressBgColorEnabled_=true
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestFourNg, IsTVTest002, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    ASSERT_NE(textFieldFrameNode, nullptr);
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    auto textFieldTheme = textFieldPattern->GetTheme();
-    ASSERT_NE(textFieldTheme, nullptr);
-    textFieldTheme->hoverAndPressBgColorEnabled_ = true;
-
-    EXPECT_TRUE(pattern->IsTV());
-
-    textFieldTheme->hoverAndPressBgColorEnabled_ = false;
-}
 } // namespace OHOS::Ace::NG
