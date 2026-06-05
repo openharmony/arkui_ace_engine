@@ -52,6 +52,86 @@ bool IsResponseRegionOverRectWithPrecision(const RectF& responseRect, const Rect
 } // namespace
 
 
+void CustomAccessibilityProperty::SetAccessibilityText(const std::string& text)
+{
+    accessibilityText_ = text;
+}
+
+const std::string& CustomAccessibilityProperty::GetAccessibilityText() const
+{
+    return accessibilityText_;
+}
+
+void CustomAccessibilityProperty::SetAccessibilityLevel(const std::string& level)
+{
+    accessibilityLevel_ = level;
+}
+
+const std::string& CustomAccessibilityProperty::GetAccessibilityLevel() const
+{
+    return accessibilityLevel_;
+}
+
+void CustomAccessibilityProperty::SetAccessibilityGroup(bool group)
+{
+    accessibilityGroup_ = group;
+}
+
+bool CustomAccessibilityProperty::GetAccessibilityGroup() const
+{
+    return accessibilityGroup_;
+}
+
+void CustomAccessibilityProperty::SetRole(const std::string& role)
+{
+    role_ = role;
+}
+
+const std::string& CustomAccessibilityProperty::GetRole() const
+{
+    return role_;
+}
+
+void CustomAccessibilityProperty::SetCheckable(bool checkable)
+{
+    checkable_ = checkable;
+}
+
+bool CustomAccessibilityProperty::GetCheckable() const
+{
+    return checkable_;
+}
+
+void CustomAccessibilityProperty::SetChecked(bool checked)
+{
+    checked_ = checked;
+}
+
+bool CustomAccessibilityProperty::GetChecked() const
+{
+    return checked_;
+}
+
+void CustomAccessibilityProperty::SetEnabled(bool enabled)
+{
+    isEnable_ = enabled;
+}
+
+bool CustomAccessibilityProperty::GetEnabled() const
+{
+    return isEnable_;
+}
+
+void CustomAccessibilityProperty::SetSelected(bool selected)
+{
+    isSelected_ = selected;
+}
+
+bool CustomAccessibilityProperty::GetSelected() const
+{
+    return isSelected_;
+}
+
 std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
 {
     static const AceAction allActions[] = {
@@ -1596,5 +1676,20 @@ void AccessibilityProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("accessibilityText", GetAccessibilityText().c_str(), filter);
     json->PutExtAttr("accessibilityTextHint", GetTextType().c_str(), filter);
     json->PutExtAttr("accessibilityDescription", GetAccessibilityDescription().c_str(), filter);
+}
+
+RefPtr<CustomAccessibilityProperty> AccessibilityProperty::CreateCustomAccessibilityProperty()
+{
+    return AceType::MakeRefPtr<CustomAccessibilityProperty>();
+}
+
+RefPtr<CustomAccessibilityProperty> AccessibilityProperty::GetCustomAccessibilityProperty() const
+{
+    return customAccessibilityProperty_;
+}
+
+void AccessibilityProperty::SetCustomAccessibilityProperty(const RefPtr<CustomAccessibilityProperty>& property)
+{
+    customAccessibilityProperty_ = property;
 }
 } // namespace OHOS::Ace::NG
