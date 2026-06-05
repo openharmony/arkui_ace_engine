@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <memory>
+#include <cmath>
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -272,8 +273,8 @@ Local<panda::ObjectRef> GenLazyLayoutInfoObj(EcmaVM* vm, LayoutWrapper* layoutWr
         viewEnd -= (viewPosRef.referencePos - mainSize);
     }
     Local<JSValueRef> lazyLayoutInfoValues[] = {
-        panda::NumberRef::New(vm, viewStart),
-        panda::NumberRef::New(vm, viewEnd),
+        panda::NumberRef::New(vm, std::floor(viewStart)),
+        panda::NumberRef::New(vm, std::floor(viewEnd)),
         panda::NumberRef::New(vm, static_cast<int32_t>(viewPosRef.referenceEdge))
     };
     const char* lazyLayoutInfoKeys[] = { "viewStart", "viewEnd", "lazyLayoutDirection" };
@@ -293,26 +294,33 @@ void HandleLazyMeasureResult(EcmaVM* vm, FrameNode* frameNode, const Local<panda
     auto adjustedOffsetVal = resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "adjustedOffset"));
     if (adjustedOffsetVal->IsNumber()) {
         float adjustedOffset = adjustedOffsetVal->ToNumber(vm)->Value();
+        if (std::isnan(adjustedOffset) || std::isinf(adjustedOffset)) {
+            adjustedOffset = 0.0f;
+        }
         GetArkUINodeModifiers()->getDynamicLayoutModifier()->setAdjustedOffset(
             reinterpret_cast<ArkUINodeHandle>(frameNode), adjustedOffset);
     }
     
     auto inActiveChildrenVal = resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "inActiveChildren"));
-    if (inActiveChildrenVal->IsArray(vm)) {
-        auto array = inActiveChildrenVal->ToObject(vm);
-        auto length = ArkTSUtils::GetArrayLength(vm, array);
-        std::vector<int32_t> inActiveChildren;
-        for (uint32_t i = 0; i < length; ++i) {
-            auto element = panda::ArrayRef::GetValueAt(vm, array, i);
-            if (element->IsNumber()) {
-                inActiveChildren.push_back(static_cast<int32_t>(element->ToNumber(vm)->Value()));
+    if (!inActiveChildrenVal->IsArray(vm)) {
+        return;
+    }
+    auto array = inActiveChildrenVal->ToObject(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, array);
+    std::vector<int32_t> inActiveChildren;
+    for (uint32_t i = 0; i < length; ++i) {
+        auto element = panda::ArrayRef::GetValueAt(vm, array, i);
+        if (element->IsNumber()) {
+            auto number = element->ToNumber(vm)->Value();
+            if (!std::isnan(number) && number <= INT32_MAX && number >= 0) {
+                inActiveChildren.push_back(static_cast<int32_t>(number));
             }
         }
-        GetArkUINodeModifiers()->getDynamicLayoutModifier()->setInActiveChildren(
-            reinterpret_cast<ArkUINodeHandle>(frameNode),
-            inActiveChildren.data(),
-            static_cast<ArkUI_Uint32>(inActiveChildren.size()));
     }
+    GetArkUINodeModifiers()->getDynamicLayoutModifier()->setInActiveChildren(
+        reinterpret_cast<ArkUINodeHandle>(frameNode),
+        inActiveChildren.data(),
+        static_cast<ArkUI_Uint32>(inActiveChildren.size()));
 }
 
 std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Local<panda::ObjectRef>& jsObj)
