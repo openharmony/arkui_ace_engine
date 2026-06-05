@@ -47,7 +47,7 @@
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"

@@ -26,7 +26,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;

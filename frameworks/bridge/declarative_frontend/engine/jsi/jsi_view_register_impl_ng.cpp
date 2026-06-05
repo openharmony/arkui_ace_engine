@@ -34,6 +34,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_animator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_badge.h"
@@ -48,7 +49,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
@@ -162,6 +162,7 @@
 #endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
+#include "core/common/plugin_manager.h"
 #endif
 #ifdef WEB_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_web.h"
@@ -453,12 +454,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPolyline::JSBind(globalObj);
     JSEllipse::JSBind(globalObj);
     JSTextPicker::JSBind(globalObj);
-    JSDatePicker::JSBind(globalObj);
     JSContainerPicker::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
 #ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);
-    JSDatePickerDialog::JSBind(globalObj);
 #endif
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);

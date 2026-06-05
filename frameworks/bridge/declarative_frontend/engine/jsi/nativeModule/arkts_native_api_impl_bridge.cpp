@@ -47,7 +47,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.h"
@@ -569,6 +568,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "LazyColumnLayout" },
         { "Toggle" },
         { "ImageAnimator" },
+        { "DatePicker" },
+        { "DatePickerDialog" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -1673,7 +1674,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterPolylineAttributes(object, vm);
     RegisterTabAttributes(object, vm);
     RegisterTabContentAttributes(object, vm);
-    RegisterDatePickerAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSelectAttributes(object, vm);
     RegisterTextpickerAttributes(object, vm);
@@ -3254,52 +3254,6 @@ void ArkUINativeModule::RegisterEmbeddedComponentAttributes(Local<panda::ObjectR
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "embeddedComponent"), embeddedComponent);
 }
 #endif
-
-void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto datePicker = panda::ObjectRef::New(vm);
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetSelectedTextStyle));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetSelectedTextStyle));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetTextStyle));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetTextStyle));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDisappearTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetDisappearTextStyle));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisappearTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetDisappearTextStyle));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLunar"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetLunar));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLunar"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetLunar));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetBackgroundColor));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetBackgroundColor));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetEnableHapticFeedback));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetEnableHapticFeedback));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDatePickerOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetDatePickerOnChange));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDatePickerOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetDatePickerOnChange));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDatePickerOnDateChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetDatePickerOnDateChange));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDatePickerOnDateChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetDatePickerOnDateChange));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "datePicker"), datePicker);
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDigitalCrownSensitivity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetDigitalCrownSensitivity));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDigitalCrownSensitivity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetDigitalCrownSensitivity));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCanLoop"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetCanLoop));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCanLoop"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetCanLoop));
-}
 
 void ArkUINativeModule::RegisterScrollableAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {

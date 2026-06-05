@@ -332,6 +332,7 @@
       "OHOS::Ace::Date::CalculateWeekDay(int, int, int)";
       "OHOS::Ace::Date::GetMilliSecondsByDateTime(tm&)";
       "OHOS::Ace::DateTimeSequence::GetAmPmTimeOrder(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::DateTimeSequence::GetDateOrder(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::DebugBoundaryPainter::PaintDebugBoundary(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::Offset const&, OHOS::Ace::Size const&)";
       "OHOS::Ace::DebugBoundaryPainter::PaintDebugCorner(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::Offset const&, OHOS::Ace::Size const&)";
       "OHOS::Ace::Declaration::~Declaration()";
@@ -1019,6 +1020,8 @@
       "OHOS::Ace::NG::CommonBridge::SetBorder(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::SetMargin(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::SetWidth(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::CommonBridge::SetBackgroundColor(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::CommonBridge::ResetBackgroundColor(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode(int)";
       "OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy(OHOS::Ace::NG::LayoutConstraintT<float> const&, OHOS::Ace::LayoutCalPolicy, OHOS::Ace::LayoutCalPolicy, OHOS::Ace::Axis)";
       "OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy(OHOS::Ace::NG::LayoutConstraintT<float> const&, std::__h::optional<OHOS::Ace::NG::LayoutPolicyProperty> const&, OHOS::Ace::Axis)";
@@ -1060,6 +1063,7 @@
       "OHOS::Ace::NG::Converter::AssignArkValue(long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerDate, long>(std::__h::optional<OHOS::Ace::PickerDate>&, long const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::PickerDate, long>(std::__h::optional<OHOS::Ace::PickerDate>&, long const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::DatePickerMode, Ark_DatePickerMode>(std::__h::optional<OHOS::Ace::DatePickerMode>&, Ark_DatePickerMode const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(long long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Converter::AssignGradientColors(OHOS::Ace::NG::Gradient*, Array_Tuple_ResourceColor_F64 const*)";
       "OHOS::Ace::NG::Converter::AssignLinearGradientDirection(std::__h::shared_ptr<OHOS::Ace::NG::LinearGradient>&, OHOS::Ace::NG::GradientDirection const&)";

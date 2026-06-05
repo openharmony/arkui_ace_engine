@@ -949,8 +949,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_coun
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.h @huawei_g_five
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.cpp @arkui001
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h @arkui001
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.cpp @arkuilayout1
@@ -1164,7 +1162,6 @@ frameworks/bridge/declarative_frontend/jsview/js_data_change_listener.h @arkuiec
 frameworks/bridge/declarative_frontend/jsview/js_data_panel.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_data_panel.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_datepicker.cpp @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_datepicker.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_depth_component.cpp @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_depth_component.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_divider.cpp @arkuilayout1
@@ -2506,6 +2503,7 @@ frameworks/core/components_ng/pattern/custom/ @arkuilayout1
 frameworks/core/components_ng/pattern/custom_frame_node/ @arkui_framework_xnode
 frameworks/core/components_ng/pattern/custom_node_ext/
 frameworks/core/components_ng/pattern/data_panel/ @huawei_g_five
+frameworks/core/components_ng/pattern/date_picker/ @arkui001
 frameworks/core/components_ng/pattern/depth_component/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/divider/ @arkuilayout1
@@ -2592,7 +2590,6 @@ frameworks/core/components_ng/pattern/panel/ @arkuicodepulse
 frameworks/core/components_ng/pattern/particle/ @arkuicodepulse
 frameworks/core/components_ng/pattern/pattern.h @arkui_architecture
 frameworks/core/components_ng/pattern/patternlock/ @huawei_g_five
-frameworks/core/components_ng/pattern/picker/ @arkui001
 frameworks/core/components_ng/pattern/picker_utils/ @arkui001
 frameworks/core/components_ng/pattern/plugin/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/preview_mock/ @arkuilayout1

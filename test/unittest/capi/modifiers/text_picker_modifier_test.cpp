@@ -18,7 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "compatible/components/picker/picker_text_component.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"

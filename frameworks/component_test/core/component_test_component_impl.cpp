@@ -35,7 +35,7 @@
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"

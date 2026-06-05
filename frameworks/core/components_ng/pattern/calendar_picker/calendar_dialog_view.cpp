@@ -15,7 +15,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 
 #include "core/components/calendar/calendar_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include <utility>
 
 #include "base/i18n/localization.h"

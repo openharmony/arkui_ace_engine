@@ -20,7 +20,7 @@
 #include "base/i18n/localization.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "base/utils/utils.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/view_abstract_model.h"

@@ -73,7 +73,6 @@ private:
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

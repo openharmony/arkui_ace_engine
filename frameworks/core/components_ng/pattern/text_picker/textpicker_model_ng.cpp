@@ -18,7 +18,7 @@
 
 #include <securec.h>
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"

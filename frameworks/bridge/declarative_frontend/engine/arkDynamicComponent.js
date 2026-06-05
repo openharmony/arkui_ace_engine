@@ -15,7 +15,7 @@
 function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
   getUINativeModule().loadNativeModule(componentName);
   let module = globalThis.requireNapi(abcName);
-  if (componentName === 'CalendarPickerDialog' || componentName === 'TimePickerDialog') {
+  if (componentName === 'CalendarPickerDialog' || componentName === 'TimePickerDialog' || componentName === 'DatePickerDialog') {
     module.exportViewDialog();
   } else {
     module.exportView();
@@ -515,5 +515,32 @@ if (globalThis.ImageAnimator === undefined) {
       getUINativeModule().imageAnimator.create();
     },
     name: 'JSImageAnimator'
+  }
+}
+
+// @ts-ignore
+if (globalThis.DatePicker === undefined) {
+  globalThis.DatePicker = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('DatePicker');
+      const module = globalThis.requireNapi('arkui.components.arkdatepicker');
+      module.exportView();
+      getUINativeModule().datePicker.create(params);
+    },
+    name: 'JSDatePicker'
+  }
+}
+
+// @ts-ignore
+if (globalThis.DatePickerDialog === undefined) {
+  globalThis.DatePickerDialog = class {
+    static name = 'JSDatePickerDialog'
+    constructor() {}
+    static show(params) {
+      getUINativeModule().loadNativeModule('DatePickerDialog');
+      let module = globalThis.requireNapi('arkui.components.arkdatepicker');
+      module.exportViewDialog();
+      getUINativeModule().datePickerDialog.show(params);
+    }
   }
 }
