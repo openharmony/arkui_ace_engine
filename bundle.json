@@ -287,7 +287,8 @@
             ],
             "test": [
                 "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/test/benchmark:benchmark"
+                "//foundation/arkui/ace_engine/test/benchmark:benchmark",
+                "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/stateMgmtTest/test/arktstest:arktstest"
             ],
             "conditions": {
                 "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent": {
