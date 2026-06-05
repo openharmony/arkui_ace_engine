@@ -24,12 +24,13 @@ import { IEnvVariable } from '@decoratorEnv';
 import window from '@ohos.window';
 import { ActiveAndInactiveCallbackType, CustomComponentContext } from './utils';
 import { Direction } from '#generated'
+import { ReusePoolOwnership } from '../component/customComponent';
 
 const SYSTEM_ENV_KEY_DIRECTION = 'system.arkui.layout.direction'
 const SYSTEM_ENV_KEY_FONT_SCALE = 'system.arkui.fontScale'
 
 export { IncrementalNode, CustomComponentLifecycle, IEnvVariable };
-export { ReusePoolOwnership } from '../component/customComponent';
+export { ReusePoolOwnership };
 /**
  * Framework-internal extension of IReusePool. Carries the methods the
  * framework needs to push/pop instances and inspect ownership; not exposed

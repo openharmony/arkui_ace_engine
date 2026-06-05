@@ -4,5 +4,13 @@ export * from "./../component/builder"
 export * from "./../component/customComponent"
 export * from "./../component/lazyForEach"
 export * from "./../component/staticComponents"
+export {
+    ArkRootPeer,
+    ArkComponentRootPeer,
+    Root,
+    ComponentRoot,
+    ArkRootComponent,
+    ArkComponentRootComponent,
+} from "./../component/staticComponents"
 export * from "./../component/interop"
 export * from "./../component/resources"
