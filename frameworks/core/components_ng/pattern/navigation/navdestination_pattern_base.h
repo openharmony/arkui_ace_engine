@@ -330,18 +330,12 @@ public:
         const RefPtr<TitleBarPattern>& titleBarPattern, float currentOffset, float startOffset, float endOffset);
     void SetTitleBarOptions(
         const RefPtr<TitleBarPattern>& titleBarPattern, const NavigationTitleBarStyle& titleBarBgStyle);
-    void UpdateBackgroundBlurStyle(const RefPtr<TitleBarPattern>& titleBarPattern);
     void UpdateTitleBarStartOptions(const RefPtr<TitleBarPattern>& titleBarPattern);
     void UpdateTitleBarEndOptions(const RefPtr<TitleBarPattern>& titleBarPattern);
     void InitScrollEffectOptions();
     void ParseScrollOffsetValue(const RefPtr<TitleBarNode>& titleBarNode);
 
-    bool IsScrollEffectEnabled() const
-    {
-        return isScrollEffectEnabled_;
-    }
-
-    RefPtr<FrameNode> GetTitleBarMaskFrameNode();
+    bool IsScrollEffectEnabled() const;
 
 protected:
     virtual void AdjustScrollOffsetForTitleMode(
@@ -387,7 +381,6 @@ protected:
     WeakPtr<UINode> navigationNode_;
     WeakPtr<FrameNode> scrollableNode_;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
-    bool isScrollEffectEnabled_ = false;
     double currentScrollOffset_ = 0.0;
 };
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 
 #include "include/utils/SkParsePath.h"
 #include "modifier/rs_property.h"
+#include "render/rs_gradient_blur_para.h"
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_base/include/render/rs_mask.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
@@ -30,6 +31,8 @@
 #include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_effect_node.h"
+#include "render_service_client/core/ui_effect/effect/include/brightness_blender.h"
+#include "render_service_client/core/ui_effect/filter/include/filter_radius_gradient_blur_para.h"
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_base/include/common/rs_color.h"
@@ -39,6 +42,7 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_union_node.h"
 #include "rosen_render_context.h"
+#include "ui_effect/filter/include/filter_radius_gradient_blur_para.h"
 #include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 
 #include "base/geometry/calc_dimension.h"
@@ -5655,6 +5659,15 @@ void RosenRenderContext::UpdateBlender(const OHOS::Rosen::Blender* blender)
     RequestNextFrame();
 }
 
+void RosenRenderContext::ResetBlender()
+{
+    FREE_RS_CONTEXT_CHECK(ResetBlender);
+    CHECK_NULL_VOID(rsNode_);
+    auto blender = OHOS::Rosen::BrightnessBlender();
+    rsNode_->SetBlender(&blender);
+    RequestNextFrame();
+}
+
 // called when frameNode size changes
 void RosenRenderContext::PaintGraphics()
 {
@@ -9279,6 +9292,33 @@ void RosenRenderContext::OnDoubleSidedUpdate(bool doubleSided)
     FREE_RS_CONTEXT_CHECK(OnDoubleSidedUpdate, doubleSided);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetDoubleSidedEnabled(doubleSided);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara)
+{
+    CHECK_NULL_VOID(rsNode_);
+    FREE_RS_CONTEXT_CHECK(UpdateRadiusGradientBlur, blurPara);
+    std::shared_ptr<Rosen::RadiusGradientBlurPara> rsBlurPara = std::make_shared<Rosen::RadiusGradientBlurPara>();
+    rsBlurPara->SetBlurRadius(blurPara.blurRadius_.ConvertToPx());
+    rsBlurPara->SetFractionStops(blurPara.fractionStops_);
+    rsBlurPara->SetDirection(static_cast<Rosen::GradientDirection>(blurPara.direction_));
+
+    OHOS::Rosen::Filter compositingFilter;
+    compositingFilter.AddPara(rsBlurPara);
+    rsNode_->SetUICompositingFilter(&compositingFilter);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::ResetRadiusGradientBlur()
+{
+    CHECK_NULL_VOID(rsNode_);
+    std::shared_ptr<Rosen::RadiusGradientBlurPara> rsBlurPara = std::make_shared<Rosen::RadiusGradientBlurPara>();
+    rsBlurPara->SetBlurRadius(-1.0f);
+
+    OHOS::Rosen::Filter compositingFilter;
+    compositingFilter.AddPara(rsBlurPara);
+    rsNode_->SetUICompositingFilter(&compositingFilter);
     RequestNextFrame();
 }
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "ui/properties/gradient_property.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -376,6 +377,7 @@ public:
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
     virtual void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
+    virtual void ResetBlender() {}
     virtual void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) {}
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}
@@ -967,6 +969,9 @@ public:
     virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
 
     virtual void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) {}
+
+    virtual void UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara) {}
+    virtual void ResetRadiusGradientBlur() {}
 protected:
     RenderContext();
     std::unique_ptr<BorderImageProperty> propBdImage_;

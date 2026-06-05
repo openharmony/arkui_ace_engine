@@ -5189,6 +5189,18 @@ void ViewAbstract::SetBlender(const OHOS::Rosen::Blender* blender)
     ACE_UPDATE_RENDER_CONTEXT(Blender, blender);
 }
 
+void ViewAbstract::ResetBlender()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->ResetBlender();
+}
+
 void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -9118,6 +9130,14 @@ void ViewAbstract::SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* 
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Blender, blender, frameNode);
+}
+
+void ViewAbstract::ResetBlender(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->ResetBlender();
 }
 
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)

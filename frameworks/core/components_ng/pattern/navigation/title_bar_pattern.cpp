@@ -16,20 +16,25 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include <algorithm>
+#include <array>
 #include <sstream>
 
 #include "base/i18n/localization.h"
 #include "base/utils/multi_thread.h"
+#include "base/utils/system_properties.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_util.h"
@@ -40,6 +45,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/components_v2/inspector/utils.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -57,6 +63,9 @@ constexpr uint32_t LUMINANCE_THRESHOLD_LOW = 150;
 constexpr uint32_t LUMINANCE_THRESHOLD_HIGH = 220;
 const Color DEFAULT_LIGHT_EFFECT_COLOR = Color::FromString("#33FFFFFF");
 constexpr int32_t INVERT_COLOR_ANIMATION_DURATION = 133;
+constexpr int32_t SCROLL_EFFECT_TITLEBAR_MASK_BLUR_ZINDEX = -2;
+constexpr int32_t SCROLL_EFFECT_TITLEBAR_MASK_ZINDEX = -1;
+const std::vector<std::pair<float, float>> MASK_BLUR_STOPS = { { 1.0f, 0.0f }, { 0.6f, 0.6f }, { 0.0f, 1.0f } };
 
 constexpr char ICON_PRIMARY_COLOR_NAME[] = "sys.color.icon_primary";
 constexpr char ICON_ON_PRIMARY_COLOR_NAME[] = "sys.color.icon_on_primary";
@@ -122,6 +131,78 @@ const TitleBarTokenColors* GetOrCreateTitleBarTokenColors(const RefPtr<PipelineC
 }
 
 #ifdef ENABLE_ROSEN_BACKEND
+constexpr int32_t VECTOR_3F_LENGTH = 3;
+using BlenderCoeff = std::array<float, VECTOR_3F_LENGTH>;
+
+struct TitleBarMaskBlenderParam {
+    float cubicRate;
+    float quadRate;
+    float linearRate;
+    float degree;
+    float saturation;
+    BlenderCoeff positiveCoeff;
+    BlenderCoeff negativeCoeff;
+    float fraction;
+};
+
+const TitleBarMaskBlenderParam TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM = {
+    0.0f, 0.0f, 1.0f, 0.0f, 1.0f, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, 0.0f
+};
+
+const TitleBarMaskBlenderParam LIGHT_TITLE_BAR_MASK_BLENDER_PARAM = {
+    0.0f, -0.418f, 0.7254f, 0.68f, 1.2f, { -0.2f, 0.2f, 1.0f }, { -1.0f, 2.0f, 2.0f }, 0.0f
+};
+
+const TitleBarMaskBlenderParam DARK_TITLE_BAR_MASK_BLENDER_PARAM = {
+    0.5722f, -1.207f, 0.9025f, 0.0706f, 1.4f, { 3.0f, 5.0f, 3.0f }, { 2.0f, 2.0f, 1.0f }, 0.0f
+};
+
+float LerpBlenderParam(float start, float end, float scrollScale)
+{
+    return start + scrollScale * (end - start);
+}
+
+BlenderCoeff LerpBlenderCoeff(const BlenderCoeff& start, const BlenderCoeff& end, float scrollScale)
+{
+    return {
+        LerpBlenderParam(start[0], end[0], scrollScale),
+        LerpBlenderParam(start[1], end[1], scrollScale),
+        LerpBlenderParam(start[2], end[2], scrollScale),
+    };
+}
+
+TitleBarMaskBlenderParam InterpolateTitleBarMaskBlenderParam(bool isDarkMode, float scrollScale)
+{
+    const auto clampedScale = std::clamp(scrollScale, 0.0f, 1.0f);
+    const auto& level3Param = isDarkMode ? DARK_TITLE_BAR_MASK_BLENDER_PARAM : LIGHT_TITLE_BAR_MASK_BLENDER_PARAM;
+    return {
+        LerpBlenderParam(TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM.cubicRate, level3Param.cubicRate, clampedScale),
+        LerpBlenderParam(TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM.quadRate, level3Param.quadRate, clampedScale),
+        LerpBlenderParam(TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM.linearRate, level3Param.linearRate, clampedScale),
+        LerpBlenderParam(TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM.degree, level3Param.degree, clampedScale),
+        LerpBlenderParam(TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM.saturation, level3Param.saturation, clampedScale),
+        LerpBlenderCoeff(TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM.positiveCoeff, level3Param.positiveCoeff, clampedScale),
+        LerpBlenderCoeff(TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM.negativeCoeff, level3Param.negativeCoeff, clampedScale),
+        LerpBlenderParam(TITLE_BAR_MASK_BLENDER_LEVEL0_PARAM.fraction, level3Param.fraction, clampedScale),
+    };
+}
+
+std::shared_ptr<Rosen::BrightnessBlender> CreateTitleBarMaskBrightnessBlender(const TitleBarMaskBlenderParam& param)
+{
+    auto blender = std::make_shared<Rosen::BrightnessBlender>();
+    blender->SetCubicRate(param.cubicRate);
+    blender->SetQuadRate(param.quadRate);
+    blender->SetLinearRate(param.linearRate);
+    blender->SetDegree(param.degree);
+    blender->SetSaturation(param.saturation);
+    blender->SetPositiveCoeff(
+        Rosen::Vector3f { param.positiveCoeff[0], param.positiveCoeff[1], param.positiveCoeff[2] });
+    blender->SetNegativeCoeff(
+        Rosen::Vector3f { param.negativeCoeff[0], param.negativeCoeff[1], param.negativeCoeff[2] });
+    blender->SetFraction(param.fraction);
+    return blender;
+}
+
 struct BrightnessBlenderParam {
     float cubicRate;
     float quadRate;
@@ -164,6 +245,39 @@ std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender(bool isLight)
 static const auto LIGHT_ICON_BRIGHTNESS_BLENDER = CreateBrightnessBlender(true);
 static const auto DARK_ICON_BRIGHTNESS_BLENDER = CreateBrightnessBlender(false);
 #endif
+
+Gradient CreateFadeOutGradient(const Color& color, double opacity, const LinearGradientBlurPara& gradientBlurPara)
+{
+    auto blendColor = color.BlendOpacity(opacity);
+    Gradient gradient;
+    gradient.CreateGradientWithType(GradientType::LINEAR);
+    gradient.SetDirection(GradientDirection::BOTTOM);
+    for (const auto& fractionStop : gradientBlurPara.fractionStops_) {
+        GradientColor stepColor(blendColor.BlendOpacity(fractionStop.first));
+        stepColor.SetDimension(fractionStop.second * 100.0f, DimensionUnit::PERCENT);
+        gradient.AddColor(stepColor);
+    }
+    return gradient;
+}
+
+RefPtr<FrameNode> CreateTitleBarEffectNode(const std::string& tag)
+{
+    auto node = FrameNode::CreateFrameNode(
+        tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ViewAbstract::SetHitTestMode(AceType::RawPtr(node), HitTestMode::HTMNONE);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT, .edges = SAFE_AREA_EDGE_TOP };
+    ViewAbstract::UpdateSafeAreaExpandOpts(AceType::RawPtr(node), opts);
+    return node;
+}
+
+void RemoveTitleBarEffectNodeFromParent(const RefPtr<FrameNode>& effectNode)
+{
+    CHECK_NULL_VOID(effectNode);
+    auto parent = effectNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->RemoveChild(effectNode);
+    effectNode->MountToParent(nullptr);
+}
 
 std::string TextLayoutPropertyToString(const RefPtr<TextLayoutProperty>& property)
 {
@@ -2201,6 +2315,278 @@ void TitleBarPattern::HandleColorInvert()
     UpdateMenuBrightnessEffect(menuNode, true);
     UpdateBackButtonIconEffect(true);
     UpdateBackButtonBrightnessEffect(true);
+}
+
+RefPtr<NavDestinationNodeBase> TitleBarPattern::GetHostParentNode() const
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_RETURN(host, nullptr);
+    return AceType::DynamicCast<NavDestinationNodeBase>(host->GetParent());
+}
+
+void TitleBarPattern::UpdateTitleBarClipForMask(bool enableClip)
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(enableClip);
+    renderContext->UpdateClipEdge(enableClip);
+}
+
+void TitleBarPattern::ResetTitleBarMaskBlendEffect()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    titleBarMaskBlender_.reset();
+#endif
+    CHECK_NULL_VOID(titleBarMaskNode_);
+    ViewAbstract::ResetBlender(AceType::RawPtr(titleBarMaskNode_));
+    ViewAbstract::SetBlendApplyType(AceType::RawPtr(titleBarMaskNode_), BlendApplyType::FAST);
+}
+
+void TitleBarPattern::UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType)
+{
+    CHECK_NULL_VOID(titleBarMaskNode_);
+    if (scrollEffectType != ScrollEffectType::COMMON_BLUR) {
+        ResetTitleBarMaskBlendEffect();
+        return;
+    }
+#ifdef ENABLE_ROSEN_BACKEND
+    auto isDarkMode = GetCurrentColorMode(false) == ColorMode::DARK;
+    titleBarMaskBlender_ =
+        CreateTitleBarMaskBrightnessBlender(InterpolateTitleBarMaskBlenderParam(isDarkMode, scrollScale_));
+    ViewAbstract::SetBlender(AceType::RawPtr(titleBarMaskNode_), titleBarMaskBlender_.get());
+#else
+    ViewAbstract::ResetBlender(AceType::RawPtr(titleBarMaskNode_));
+#endif
+    ViewAbstract::SetBlendApplyType(AceType::RawPtr(titleBarMaskNode_), BlendApplyType::OFFSCREEN);
+}
+
+void TitleBarPattern::ResetTitleBarMaskNodes()
+{
+    ResetTitleBarMaskBlendEffect();
+    if (titleBarMaskNode_) {
+        RemoveTitleBarEffectNodeFromParent(titleBarMaskNode_);
+        titleBarMaskNode_ = nullptr;
+    }
+    if (titleBarMaskBlurNode_) {
+        RemoveTitleBarEffectNodeFromParent(titleBarMaskBlurNode_);
+        titleBarMaskBlurNode_ = nullptr;
+    }
+}
+
+void TitleBarPattern::EnsureTitleBarEffectNode(const RefPtr<FrameNode>& node, int32_t zIndex)
+{
+    CHECK_NULL_VOID(node);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(zIndex);
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (node->GetParent() != host) {
+        RemoveTitleBarEffectNodeFromParent(node);
+        host->AddChild(node);
+    }
+}
+
+void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrollEffectType)
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto themeScopeId = host->GetThemeScopeId();
+    auto tokenTheme = TokenThemeStorage::GetInstance()->GetTheme(themeScopeId);
+    if (!tokenTheme) {
+        tokenTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    }
+    CHECK_NULL_VOID(tokenTheme);
+    auto tokenColors = tokenTheme->Colors();
+    CHECK_NULL_VOID(tokenColors);
+
+    auto shadowBlurRadius = static_cast<double>(Dimension(40.0, DimensionUnit::VP).ConvertToPx());
+    auto shadowSpreadRadius = static_cast<double>(Dimension(0.0, DimensionUnit::VP).ConvertToPx());
+    auto shadowOffsetY = static_cast<float>(Dimension(4.0, DimensionUnit::VP).ConvertToPx());
+    bool isDarkMode = GetCurrentColorMode(false) == ColorMode::DARK;
+
+    std::vector<std::pair<float, float>> linearGradientBlurFractionStops;
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+        linearGradientBlurFractionStops = {
+            {1.0f, 0.0f}, {0.99764f, 0.450f}, {0.99010f, 0.478f}, {0.97627f, 0.508f},
+            {0.95574f, 0.536f}, {0.92808f, 0.566f}, {0.89108f, 0.594f}, {0.84375f, 0.624f},
+            {0.78547f, 0.652f}, {0.71344f, 0.682f}, {0.63048f, 0.710f}, {0.53513f, 0.740f},
+            {0.43280f, 0.768f}, {0.33021f, 0.798f}, {0.23699f, 0.826f}, {0.15625f, 0.854f},
+            {0.09588f, 0.884f}, {0.05096f, 0.914f}, {0.02089f, 0.942f}, {0.00491f, 0.972f},
+            {0.0f, 1.0f}
+        };
+    } else {
+        linearGradientBlurFractionStops = {
+            {1.0f, 0.0f}, {1.0f, 0.3f}, {0.99764f, 0.335f}, {0.99010f, 0.370f},
+            {0.97627f, 0.405f}, {0.95574f, 0.440f}, {0.92808f, 0.475f},
+            {0.89108f, 0.510f}, {0.84375f, 0.545f}, {0.78547f, 0.580f},
+            {0.71344f, 0.615f}, {0.63048f, 0.650f}, {0.53513f, 0.685f},
+            {0.43280f, 0.720f}, {0.33021f, 0.755f}, {0.23699f, 0.790f},
+            {0.15625f, 0.825f}, {0.09588f, 0.860f}, {0.05096f, 0.895f},
+            {0.02089f, 0.930f}, {0.00491f, 0.965f}, {0.0f, 1.0f}
+        };
+    }
+    auto originalGradientBlurPara = LinearGradientBlurPara(
+        Dimension(0.0, DimensionUnit::VP), linearGradientBlurFractionStops, GradientDirection::BOTTOM);
+    auto scrollEffectGradientBlurPara = LinearGradientBlurPara(
+        Dimension(12.0, DimensionUnit::VP), linearGradientBlurFractionStops, GradientDirection::BOTTOM);
+
+    auto isGradualBlur = scrollEffectType == ScrollEffectType::GRADUAL_BLUR;
+    auto originalShadowOpacity = isGradualBlur ? (isDarkMode ? 0.2f : 0.8f) : 0.0f;
+    auto scrollEffectBlurRadius = isGradualBlur ? Dimension(12.0, DimensionUnit::VP)
+                                                 : Dimension(30.0, DimensionUnit::VP);
+    NavigationTitleBarStyle originalBgStyle {
+        .titleColor = tokenColors->FontPrimary(),
+        .buttonTextColor = tokenColors->FontPrimary(),
+        .subTitleColor = tokenColors->FontPrimary(),
+        .iconColor = tokenColors->IconPrimary(),
+        .iconBackgroundStyle {
+            .backgroundColor = tokenColors->CompBackgroundTertiary(),
+            .opacity = 1.0,
+        },
+        .backgroundStyle {
+            .backgroundColor = tokenColors->CompBackgroundGray(),
+            .brightness = 0,
+            .blurRadius = Dimension(0.0),
+            .opacity = isGradualBlur ? 0.0 : 1.0,
+            .offset = Dimension::FromString("8vp"),
+            .linearGradientBlur = originalGradientBlurPara
+        },
+        .titleShadow = std::vector<Shadow>{ Shadow(
+              shadowBlurRadius, shadowSpreadRadius, Offset(0, shadowOffsetY),
+              tokenColors->CompBackgroundGray().ChangeOpacity(originalShadowOpacity)) },
+        .subTitleShadow = std::vector<Shadow>{ Shadow(
+              shadowBlurRadius, shadowSpreadRadius, Offset(0, shadowOffsetY),
+              tokenColors->CompBackgroundGray().ChangeOpacity(originalShadowOpacity)) }
+    };
+    SetOriginalTitleBarBgStyle(originalBgStyle);
+    NavigationTitleBarStyle scrollEffectBgStyle {
+        .titleColor = tokenColors->FontPrimary(),
+        .buttonTextColor = tokenColors->FontPrimary(),
+        .subTitleColor = tokenColors->FontPrimary(),
+        .iconColor = tokenColors->IconPrimary(),
+        .iconBackgroundStyle {
+            .backgroundColor = tokenColors->CompBackgroundTertiary(),
+            .opacity = 1.0,
+        },
+        .backgroundStyle {
+            .backgroundColor = tokenColors->CompBackgroundGray(),
+            .brightness = 0,
+            .blurRadius = scrollEffectBlurRadius,
+            .opacity = isGradualBlur ? (isDarkMode ? 0.4 : 0.8) : 1.0,
+            .offset = Dimension::FromString("8vp"),
+            .linearGradientBlur = scrollEffectGradientBlurPara
+        },
+        .titleShadow = std::vector<Shadow>{ Shadow(
+              shadowBlurRadius, shadowSpreadRadius, Offset(0, shadowOffsetY),
+              tokenColors->CompBackgroundGray().ChangeOpacity(isDarkMode ? 0.2f : 0.8f)) },
+        .subTitleShadow = std::vector<Shadow>{ Shadow(
+              shadowBlurRadius, shadowSpreadRadius, Offset(0, shadowOffsetY),
+              tokenColors->CompBackgroundGray().ChangeOpacity(isDarkMode ? 0.2f : 0.8f)) }
+    };
+    SetScrollEffectTitleBarBgStyle(scrollEffectBgStyle);
+}
+
+void TitleBarPattern::UpdateBackgroundBlurStyle()
+{
+    if (!isScrollEffectEnabled_) {
+        return;
+    }
+    CHECK_NULL_VOID(titleBarMaskNode_ && titleBarMaskBlurNode_);
+    auto maskRenderContext = titleBarMaskNode_->GetRenderContext();
+    CHECK_NULL_VOID(maskRenderContext);
+    auto maskBlurRenderContext = titleBarMaskBlurNode_->GetRenderContext();
+    CHECK_NULL_VOID(maskBlurRenderContext);
+    auto scrollEffectOptions = options_.bgOptions.scrollEffectOptions;
+    CHECK_NULL_VOID(scrollEffectOptions.has_value());
+
+    auto bgStyle = currentBgStyle_.backgroundStyle;
+    auto startOpacity = originalBgStyle_.backgroundStyle.opacity;
+    auto endOpacity = scrollEffectBgStyle_.backgroundStyle.opacity;
+    auto opacity = startOpacity + scrollScale_ * (endOpacity - startOpacity);
+    auto scrollEffectType = scrollEffectOptions->scrollEffectType;
+    UpdateTitleBarMaskBlendEffect(scrollEffectType);
+    maskBlurRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    if (scrollEffectType == ScrollEffectType::GRADUAL_BLUR) {
+        maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+        CHECK_NULL_VOID(bgStyle.linearGradientBlur.has_value());
+        auto gradientBlurPara = bgStyle.linearGradientBlur.value();
+        auto gradient = CreateFadeOutGradient(bgStyle.backgroundColor, opacity, gradientBlurPara);
+        maskRenderContext->UpdateLinearGradient(gradient);
+
+        auto startBlurRadius =
+            originalBgStyle_.backgroundStyle.linearGradientBlur.value_or(gradientBlurPara).blurRadius_;
+        auto endBlurRadius =
+            scrollEffectBgStyle_.backgroundStyle.linearGradientBlur.value_or(gradientBlurPara).blurRadius_;
+        auto blurRadius =
+            startBlurRadius.Value() + scrollScale_ * (endBlurRadius.Value() - startBlurRadius.Value());
+        gradientBlurPara.blurRadius_ = Dimension(blurRadius, DimensionUnit::VP);
+        gradientBlurPara.fractionStops_ = MASK_BLUR_STOPS;
+        maskBlurRenderContext->UpdateBackBlurRadius(Dimension());
+        maskBlurRenderContext->UpdateRadiusGradientBlur(gradientBlurPara);
+        return;
+    }
+
+    maskRenderContext->UpdateBackgroundColor(bgStyle.backgroundColor);
+    auto startBlurRadius = originalBgStyle_.backgroundStyle.blurRadius;
+    auto endBlurRadius = scrollEffectBgStyle_.backgroundStyle.blurRadius;
+    auto blurRadius = startBlurRadius.Value() + scrollScale_ * (endBlurRadius.Value() - startBlurRadius.Value());
+    maskBlurRenderContext->UpdateBackBlurRadius(Dimension(blurRadius, DimensionUnit::VP));
+    maskBlurRenderContext->ResetRadiusGradientBlur();
+}
+
+void TitleBarPattern::ApplyTitleBarBgStyle(const NavigationTitleBarStyle& titleBarBgStyle)
+{
+    if (IsHidden()) {
+        return;
+    }
+    SetCurrentTitleBarBgStyle(titleBarBgStyle);
+    UpdateBackgroundBlurStyle();
+}
+
+void TitleBarPattern::InitScrollEffectOptions()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto hostNode = GetHostParentNode();
+    CHECK_NULL_VOID(hostNode);
+
+    auto scrollEffectOptionsOpt = options_.bgOptions.scrollEffectOptions;
+    if (!scrollEffectOptionsOpt.has_value()) {
+        if (titleBarMaskNode_ || titleBarMaskBlurNode_) {
+            ResetTitleBarMaskNodes();
+            UpdateTitleBarClipForMask(true);
+            titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        isScrollEffectEnabled_ = false;
+        return;
+    }
+
+    auto scrollEffectType = scrollEffectOptionsOpt->scrollEffectType;
+    isScrollEffectEnabled_ = true;
+    SetIsTitleBarStyleStartUpdate(false);
+    SetIsTitleBarStyleEndUpdate(false);
+    UpdateTitleBarClipForMask(scrollEffectType != ScrollEffectType::GRADUAL_BLUR);
+
+    if (!titleBarMaskBlurNode_) {
+        titleBarMaskBlurNode_ = CreateTitleBarEffectNode("TitleBarMaskBlur");
+    }
+    EnsureTitleBarEffectNode(titleBarMaskBlurNode_, SCROLL_EFFECT_TITLEBAR_MASK_BLUR_ZINDEX);
+
+    if (!titleBarMaskNode_) {
+        titleBarMaskNode_ = CreateTitleBarEffectNode("TitleBarMask");
+    }
+    EnsureTitleBarEffectNode(titleBarMaskNode_, SCROLL_EFFECT_TITLEBAR_MASK_ZINDEX);
+
+    PrepareScrollEffectTitleBarBgStyles(scrollEffectType);
+    SetCurrentTitleBarBgStyle(originalBgStyle_);
+
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)

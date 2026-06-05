@@ -25,7 +25,15 @@
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+namespace OHOS::Rosen {
+class BrightnessBlender;
+}
+#endif
+
 namespace OHOS::Ace::NG {
+
+class NavDestinationNodeBase;
 
 class TitleBarPattern : public Pattern, public CustomSafeAreaExpander {
     DECLARE_ACE_TYPE(TitleBarPattern, Pattern, CustomSafeAreaExpander);
@@ -323,6 +331,24 @@ public:
         return scrollScale_;
     }
 
+    void ApplyTitleBarBgStyle(const NavigationTitleBarStyle& titleBarBgStyle);
+    void InitScrollEffectOptions();
+
+    bool IsScrollEffectEnabled() const
+    {
+        return isScrollEffectEnabled_;
+    }
+
+    RefPtr<FrameNode> GetTitleBarMaskNode() const
+    {
+        return titleBarMaskNode_;
+    }
+
+    RefPtr<FrameNode> GetTitleBarMaskBlurNode() const
+    {
+        return titleBarMaskBlurNode_;
+    }
+
     void SetParseStartOffset(const std::optional<Dimension>& parseStartOffset)
     {
         parseStartOffset_ = parseStartOffset;
@@ -399,6 +425,7 @@ public:
     void UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
     void MarkMenuUIEffectNeedUpdate();
     RefPtr<UiMaterial> GetCurrentMaterial();
+    ColorMode GetCurrentColorMode(bool enableColorInvert = false);
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -478,6 +505,14 @@ private:
         const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
     void HandleMenuLongPressActionEnd();
     void UpdateBackButtonColor();
+    void UpdateBackgroundBlurStyle();
+    void PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrollEffectType);
+    void UpdateTitleBarClipForMask(bool enableClip);
+    void ResetTitleBarMaskBlendEffect();
+    void UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType);
+    void ResetTitleBarMaskNodes();
+    void EnsureTitleBarEffectNode(const RefPtr<FrameNode>& node, int32_t zIndex);
+    RefPtr<NavDestinationNodeBase> GetHostParentNode() const;
 
     struct IconColorParam {
         // color invert is supported in new material
@@ -502,7 +537,6 @@ private:
 
     void UpdateIsBackgroundDark();
     void OnLuminanceUpdate(uint32_t luminance);
-    ColorMode GetCurrentColorMode(bool enableColorInvert = false);
     bool IsColorInvertEnabled();
     static bool IsApplyShadowEnabled(const RefPtr<UiMaterial>& material);
     void InitColorPickerIfNeeded();
@@ -589,6 +623,12 @@ private:
     NavigationTitleBarStyle originalBgStyle_;
     NavigationTitleBarStyle scrollEffectBgStyle_;
     NavigationTitleBarStyle currentBgStyle_;
+    RefPtr<FrameNode> titleBarMaskNode_;
+    RefPtr<FrameNode> titleBarMaskBlurNode_;
+    bool isScrollEffectEnabled_ = false;
+#ifdef ENABLE_ROSEN_BACKEND
+    std::shared_ptr<Rosen::BrightnessBlender> titleBarMaskBlender_;
+#endif
 
     RefPtr<UiMaterial> gradualBlurMaterial_ = nullptr;
     std::optional<bool> isColorPickerDark_;
