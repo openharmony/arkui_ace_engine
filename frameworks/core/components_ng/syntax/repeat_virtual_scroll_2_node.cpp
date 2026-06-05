@@ -461,7 +461,7 @@ void RepeatVirtualScroll2Node::NotifyContainerLayoutChange(int32_t index, int32_
     children_.clear();
 
     auto frameNode = GetParentFrameNode();
-    if (frameNode && frameNode->GetTag() == V2::LIST_ETS_TAG) {
+    if (frameNode && (frameNode->GetTag() == V2::LIST_ETS_TAG || frameNode->GetTag() == V2::SWIPER_ETS_TAG)) {
         frameNode->NotifyChange(index + startIndex_, count, accessibilityId, notificationType);
     }
 }
