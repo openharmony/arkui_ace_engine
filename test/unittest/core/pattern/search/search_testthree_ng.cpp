@@ -1765,16 +1765,7 @@ HWTEST_F(SearchTestThreeNg, SetTextFont_AllFields, TestSize.Level1)
 HWTEST_F(SearchTestThreeNg, CreateSearchNode_BorderWidthPropertyNotExist, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set TV mode so UpdateSearchNodeBorderProps executes
-     */
-    auto pipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeline, nullptr);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    ASSERT_NE(textFieldTheme, nullptr);
-    textFieldTheme->hoverAndPressBgColorEnabled_ = true;
-
-    /**
-     * @tc.steps: step2. Create Search node using CreateSearchNode directly
+     * @tc.steps: step1. Create Search node using CreateSearchNode directly
      * @tc.expected: CreateSearchNode should create SearchNode and call UpdateSearchNodeBorderProps
      */
     int32_t nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
@@ -1786,7 +1777,7 @@ HWTEST_F(SearchTestThreeNg, CreateSearchNode_BorderWidthPropertyNotExist, TestSi
     ASSERT_NE(searchNode, nullptr);
 
     /**
-     * @tc.steps: step3. Get layout property and verify BorderWidthProperty was set by UpdateSearchNodeBorderProps
+     * @tc.steps: step2. Get layout property and verify BorderWidthProperty was set by UpdateSearchNodeBorderProps
      * @tc.expected: BorderWidthProperty should be set from theme (since it didn't exist before)
      */
     auto searchLayoutProperty = searchNode->GetLayoutProperty<SearchLayoutProperty>();
@@ -1794,9 +1785,8 @@ HWTEST_F(SearchTestThreeNg, CreateSearchNode_BorderWidthPropertyNotExist, TestSi
 
     const auto* currentBorderWidth = searchLayoutProperty->GetBorderWidthProperty().get();
     ASSERT_NE(currentBorderWidth, nullptr);
+    // BorderWidthProperty should exist (was set by UpdateSearchNodeBorderProps)
     EXPECT_TRUE(currentBorderWidth->leftDimen.has_value());
-
-    textFieldTheme->hoverAndPressBgColorEnabled_ = false;
 }
 
 /**
@@ -1891,15 +1881,6 @@ HWTEST_F(SearchTestThreeNg, CreateSearchNode_RenderContextHasBorderWidthAndColor
 HWTEST_F(SearchTestThreeNg, CreateSearchNode_ComprehensiveBorderPropsCoverage, TestSize.Level1)
 {
     /**
-     * @tc.steps: step0. Set TV mode so UpdateSearchNodeBorderProps executes
-     */
-    auto pipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeline, nullptr);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    ASSERT_NE(textFieldTheme, nullptr);
-    textFieldTheme->hoverAndPressBgColorEnabled_ = true;
-
-    /**
      * @tc.steps: step1. Create first Search node - default case
      * @tc.expected: UpdateSearchNodeBorderProps is called (GetBorderWidthProperty may return nullptr or valid ptr)
      */
@@ -1952,8 +1933,6 @@ HWTEST_F(SearchTestThreeNg, CreateSearchNode_ComprehensiveBorderPropsCoverage, T
 
     EXPECT_TRUE(renderContext2->HasBorderWidth());
     EXPECT_TRUE(renderContext2->HasBorderColor());
-
-    textFieldTheme->hoverAndPressBgColorEnabled_ = false;
 }
 
 /**

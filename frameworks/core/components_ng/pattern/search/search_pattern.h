@@ -227,7 +227,6 @@ public:
     int32_t OnInjectionEvent(const std::string& command) override;
     void ProcessTextFieldDefaultStyleAndBehaviors();
     void ProcessDividerDefaultStyleAndBehaviors();
-    bool IsTV() const;
 
 private:
     void OnModifyDone() override;
