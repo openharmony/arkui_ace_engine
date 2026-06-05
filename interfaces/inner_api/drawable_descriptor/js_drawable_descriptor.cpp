@@ -1258,7 +1258,7 @@ napi_value JsDrawableDescriptor::PictureConstructor(napi_env env, napi_callback_
     }
     auto* drawable = modifier->createDrawableDescriptorByType(PICTURE_TYPE);
     if (argc > 0 && argv[0] != nullptr) {
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#ifdef PICTURE_DRAWABLE_ENABLED
         auto picture = Media::PictureNapi::GetPicture(env, argv[0]);
         if (picture) {
             modifier->setPicture(drawable, &picture);
