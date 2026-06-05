@@ -107,6 +107,10 @@ build_component_ng("menu_pattern_ng") {
         "ability_base:want",
         "accessibility:accessibility_common",
       ]
+      if (defined(global_parts_info) &&
+          defined(global_parts_info.hiviewdfx_api_metrics)) {
+        external_deps += [ "api_metrics:histogrammanager" ]
+      }
     }
   }
 }

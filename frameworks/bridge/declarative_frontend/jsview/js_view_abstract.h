@@ -224,6 +224,8 @@ public:
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
+    static void JsBindContextMenuByResponseType(const JSCallbackInfo& info);
+    static void JsBindContextMenuByIsShow(const JSCallbackInfo& info);
     static void JsBindContextMenuWithResponse(const JSCallbackInfo& info);
     static void MenuDefaultParam(NG::MenuParam& menuParam);
     static void ParseContentMenuCommonParam(

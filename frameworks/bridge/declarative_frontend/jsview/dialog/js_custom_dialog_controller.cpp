@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/engine/js_converter.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -400,6 +401,9 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSViewAbstract::SetDialogEffectOption(constructorArg, instance->dialogProperties_);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
+    } else {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController::ConstructorCallback failed!");
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("Component.CustomDialogController", 1);
     }
 }
 

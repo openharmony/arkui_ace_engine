@@ -17,6 +17,8 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/with_theme_node.h"
@@ -798,6 +800,7 @@ void OverlayManager::SetContainerButtonEnable(bool isEnabled)
 
 void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("PromptAction.ShowToast", 1);
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
@@ -1161,6 +1164,7 @@ const WeakPtr<UINode>& OverlayManager::GetEmbeddedNode(const PopupInfo& popupInf
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.BindPopup", 1);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show popup enter, targetId: %{public}d", targetId);
     if (!UpdatePopupMap(targetId, popupInfo)) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "failed to update popup map, tag:%{public}s",
@@ -2161,6 +2165,11 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
+    if (dialogProps.isAlertDialog) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("UIContext.ShowAlertDialog", 1);
+    } else {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("PromptAction.ShowDialog", 1);
+    }
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     RefPtr<UINode> customNode;
     // create custom builder content
@@ -2362,6 +2371,7 @@ bool OverlayManager::IsMenuShow()
 void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
     std::function<void(int32_t)> &&callback, const RefPtr<FrameNode> dialog, bool showComponentContent)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN("PromptAction.OpenCustomDialog", 1);
     if (!dialog) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to create dialog node.");
         callback(showComponentContent ? ERROR_CODE_DIALOG_CONTENT_ERROR : -1);

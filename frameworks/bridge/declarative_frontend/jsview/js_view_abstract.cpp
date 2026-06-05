@@ -10343,6 +10343,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("background", &JSViewAbstract::JsBackground);
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
+    JSClass<JSViewAbstract>::StaticMethod("bindContextMenuByResponseType", &JSViewAbstract::JsBindContextMenuByResponseType);
+    JSClass<JSViewAbstract>::StaticMethod("bindContextMenuByIsShow", &JSViewAbstract::JsBindContextMenuByIsShow);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenuWithResponse", &JSViewAbstract::JsBindContextMenuWithResponse);
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
     JSClass<JSViewAbstract>::StaticMethod("bindSheet", &JSViewAbstract::JsBindSheet);
