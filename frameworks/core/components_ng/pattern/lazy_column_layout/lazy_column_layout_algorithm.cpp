@@ -19,10 +19,13 @@
 #include <cstdint>
 #include <iterator>
 
+#include "base/log/log_wrapper.h"
 #include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
+#include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -48,8 +51,11 @@ void LazyColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateAttribute(layoutProperty, contentConstraint);
     UpdateChildConstraint(layoutProperty, contentIdealSize);
 
-    // Measure header first so the body baseline starts at headerMainSize_.
+    // Measure edges up front so ComposeChildStickyInsets sees this frame's sizes.
     MeasureHeader(layoutWrapper);
+    MeasureFooter(layoutWrapper);
+
+    ComposeChildStickyInsets(layoutWrapper);
 
     if (totalItemCount_ == 0) {
         layoutInfo_->SetTotalItemCount(0);
@@ -69,8 +75,6 @@ void LazyColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureItemsLazy(layoutWrapper);
     }
 
-    // Measure footer last so its size is available before we recompute total main size below.
-    MeasureFooter(layoutWrapper);
     // body span is the lane content excluding footer; clamp at headerMainSize_ so an empty list still
     // reports header height as the body baseline (mirrors LazyVWaterFlowLayout body-height semantics).
     const auto bodyEnd = std::max(layoutInfo_->headerMainSize_, totalMainSize_);
@@ -100,6 +104,16 @@ void LazyColumnLayoutAlgorithm::MeasureFooter(LayoutWrapper* layoutWrapper)
     layoutInfo_->footerMainSize_ = footerMainSize;
 }
 
+void LazyColumnLayoutAlgorithm::ComposeChildStickyInsets(LayoutWrapper* layoutWrapper)
+{
+    // Header / footer are already measured this frame, so the composed insets reflect current edge sizes.
+    const auto stickyStyle = ResolveStickyStyle(layoutWrapper);
+    const bool headerSticky = stickyStyle == StickyStyle::HEADER || stickyStyle == StickyStyle::BOTH;
+    const bool footerSticky = stickyStyle == StickyStyle::FOOTER || stickyStyle == StickyStyle::BOTH;
+    childStickyTopInset_ = stickyTopInset_ + (headerSticky ? layoutInfo_->headerMainSize_ : 0.0f);
+    childStickyBottomInset_ = stickyBottomInset_ + (footerSticky ? layoutInfo_->footerMainSize_ : 0.0f);
+}
+
 void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
     std::optional<ViewPosReference>& posRef)
 {
@@ -108,12 +122,16 @@ void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
     }
     if (!posRef.has_value() || posRef.value().axis != Axis::VERTICAL) {
         needAllLayout_ = true;
+        stickyTopInset_ = 0.0f;
+        stickyBottomInset_ = 0.0f;
         return;
     }
     forwardLayout_ = posRef.value().referenceEdge == ReferenceEdge::START;
     referencePos_ = posRef.value().referencePos;
     viewExtStart_ = posRef.value().viewExtStart;
     viewExtEnd_ = posRef.value().viewExtEnd;
+    stickyTopInset_ = posRef.value().stickyInsetStart;
+    stickyBottomInset_ = posRef.value().stickyInsetEnd;
     if (forwardLayout_) {
         startPos_ = posRef.value().viewPosStart - viewExtStart_ - referencePos_;
         endPos_ = posRef.value().viewPosEnd + viewExtEnd_ - referencePos_;
@@ -183,6 +201,14 @@ void LazyColumnLayoutAlgorithm::UpdateHeaderFooterIndexes(LayoutWrapper* layoutW
         headerIndex_ = -1;
         footerIndex_ = -1;
         return;
+    }
+    // Re-resolve edges from the owner: a reused algorithm's construction-time weak-ref dangles after the edge
+    // nodes are rebuilt (e.g. toggling sticky), which would otherwise drop the header.
+    if (auto host = layoutWrapper->GetHostNode()) {
+        if (auto pattern = host->GetPattern<LazyColumnLayoutPattern>()) {
+            header_ = pattern->GetHeaderNode();
+            footer_ = pattern->GetFooterNode();
+        }
     }
     const auto rawCount = layoutWrapper->GetTotalChildCount();
     // Header / footer are normalized by SyncHeaderFooter(): header at raw index 0, footer at raw index last.
@@ -366,6 +392,7 @@ LayoutConstraintF LazyColumnLayoutAlgorithm::GetLazyLayoutConstraint(float refer
     };
     auto constraint = childLayoutConstraint_;
     constraint.viewPosRef = ref;
+    LazyLayoutUtils::SetStickyInsets(constraint, childStickyTopInset_, childStickyBottomInset_);
     return constraint;
 }
 
@@ -711,7 +738,7 @@ void LazyColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto stickyStyle = ResolveStickyStyle(layoutWrapper);
     const HeaderFooterStickyMetrics stickyMetrics { startPos_, endPos_, totalMainSize_,
-        layoutInfo_->headerMainSize_, layoutInfo_->footerMainSize_ };
+        layoutInfo_->headerMainSize_, layoutInfo_->footerMainSize_, stickyTopInset_, stickyBottomInset_ };
     const auto stickyHeaderPos = HeaderFooterUtils::CalcStickyHeaderPos(stickyMetrics);
     const auto stickyFooterPos = HeaderFooterUtils::CalcStickyFooterPos(stickyMetrics);
 
@@ -899,11 +926,13 @@ void LazyColumnLayoutAlgorithm::SyncPredictLayoutInfo(LayoutWrapper* layoutWrapp
     layoutInfo_->cachedEndIndex_ = cachedEndIndex_;
     layoutInfo_->layoutedEnd_ = layoutedEnd_;
 
-    // Skip posMap update if only self measure changed,
-    // as child positions remain valid
+    // Skip posMap update if only self measure changed, as child positions remain valid.
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_MEASURE_SELF) {
+        // totalMainSize_ still holds last frame's complete total (body + footer); strip the footer so Measure()'s
+        // unconditional "+ footerMainSize_" doesn't double-count it (inflated height misplaces the SW END anchor).
+        totalMainSize_ = std::max(0.0f, totalMainSize_ - layoutInfo_->footerMainSize_);
         return;
     }
     layoutInfo_->UpdatePosMap();

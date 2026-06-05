@@ -99,6 +99,7 @@ public:
      */
     bool UpdateLaneCrossLens(const std::vector<double>& laneCrossLens);
     void UpdateVisibleRange(float viewStart, float viewEnd);
+    void UpdateVisibleCallbackRange(float viewStart, float viewEnd);
     void UpdateCachedRange(float cacheStart, float cacheEnd);
     /**
      * @brief Forward gap between min(lane.endPos) and cacheEndPos_; signals Pattern to post a predict task.
@@ -179,6 +180,8 @@ private:
     std::unordered_map<int32_t, size_t> idxToLane_;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    int32_t visibleStartIndex_ = -1;
+    int32_t visibleEndIndex_ = -1;
     int32_t totalItemCount_ = 0;
     // Header / footer main-axis sizes; the header counts toward the lane internal coords' baseline at 0.
     float headerMainSize_ = 0.0f;
@@ -190,7 +193,7 @@ private:
     int32_t layoutedEndIndex_ = -1;
     float cacheStartPos_ = 0.0f;
     float cacheEndPos_ = 0.0f;
-    // Real viewport plus parent-provided viewExt, excluding this component's own cache expansion.
+    // Parent-provided viewExt-expanded layout window, excluding this component's own cache expansion.
     float extendedViewStartPos_ = 0.0f;
     float extendedViewEndPos_ = Infinity<float>();
     int32_t cachedStartIndex_ = -1;

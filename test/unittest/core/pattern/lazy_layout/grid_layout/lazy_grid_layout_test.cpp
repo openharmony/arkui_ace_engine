@@ -2538,4 +2538,53 @@ HWTEST_F(LazyGridLayoutTest, StickyHeaderStaysLaidOutOnIdle001, TestSize.Level1)
     EXPECT_TRUE(headerNode->IsActive());
     EXPECT_TRUE(footerNode->IsActive());
 }
+
+/**
+ * @tc.name: StickyToggleKeepsHeaderLaidOut_001
+ * @tc.desc: Toggling sticky at runtime must not drop the header. Regression for the header collapsing onto
+ *           item 0 (headerMainSize -> 0) when a property-only relayout addressed a stale edge reference; the
+ *           header must stay sized and keep items below it across BOTH -> NONE -> BOTH without a scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, StickyToggleKeepsHeaderLaidOut_001, TestSize.Level1)
+{
+    constexpr float headerHeight = 60.0f;
+    constexpr float footerHeight = 40.0f;
+
+    CreateWaterFlow();
+    CreateLazyGridLayout();
+    LazyGridLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyGridLayoutModel::SetHeader([]() { CreateGridEdge(headerHeight); });
+    CreateContent(30);
+    LazyGridLayoutModel::SetFooter([]() { CreateGridEdge(footerHeight); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    auto headerNode = pattern_->GetHeaderNode();
+    ASSERT_NE(headerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+
+    // BOTH -> NONE: header must not be dropped.
+    layoutProperty_->CleanDirty();
+    LazyGridLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::NONE);
+    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::NONE);
+    headerNode = pattern_->GetHeaderNode();
+    ASSERT_NE(headerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+
+    // NONE -> BOTH: header is still intact after toggling back.
+    layoutProperty_->CleanDirty();
+    LazyGridLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::BOTH);
+    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::BOTH);
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+}
 } // namespace OHOS::Ace::NG

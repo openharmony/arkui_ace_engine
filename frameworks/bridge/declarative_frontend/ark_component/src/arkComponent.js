@@ -28067,6 +28067,23 @@ class ArkLazyVGridLayoutComponent extends ArkLazyGridLayout {
     modifierWithKey(this._modifiersWithKeys, LazyGridColumnsTemplateModifier.identity, LazyGridColumnsTemplateModifier, value);
     return this;
   }
+  sticky(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridStickyModifier.identity, LazyGridStickyModifier, value);
+    return this;
+  }
+  header(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridHeaderModifier.identity, LazyGridHeaderModifier, value);
+    return this;
+  }
+  footer(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridFooterModifier.identity, LazyGridFooterModifier, value);
+    return this;
+  }
+  onVisibleIndexesChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridOnVisibleIndexesChangeModifier.identity,
+      LazyGridOnVisibleIndexesChangeModifier, callback);
+    return this;
+  }
 }
 class LazyGridColumnsTemplateModifier extends ModifierWithKey {
   constructor(value) {
@@ -28116,6 +28133,62 @@ class LazyGridRowsGapModifier extends ModifierWithKey {
   }
 }
 LazyGridRowsGapModifier.identity = Symbol('lazyGridRowsGap');
+class LazyGridStickyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isNumber(this.value)) {
+      getUINativeModule().lazyVGridLayout.resetSticky(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setSticky(node, this.value);
+    }
+  }
+}
+LazyGridStickyModifier.identity = Symbol('lazyVGridSticky');
+class LazyGridHeaderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVGridLayout.resetHeader(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setHeader(node, this.value);
+    }
+  }
+}
+LazyGridHeaderModifier.identity = Symbol('lazyVGridHeader');
+class LazyGridFooterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVGridLayout.resetFooter(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setFooter(node, this.value);
+    }
+  }
+}
+LazyGridFooterModifier.identity = Symbol('lazyVGridFooter');
+class LazyGridOnVisibleIndexesChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isFunction(this.value)) {
+      getUINativeModule().lazyVGridLayout.resetOnVisibleIndexesChange(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setOnVisibleIndexesChange(node, this.value);
+    }
+  }
+}
+LazyGridOnVisibleIndexesChangeModifier.identity = Symbol('lazyVGridOnVisibleIndexesChange');
 // @ts-ignore
 if (globalThis.LazyVGridLayout !== undefined) {
 globalThis.LazyVGridLayout.attributeModifier = function (modifier) {

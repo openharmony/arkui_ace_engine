@@ -25,43 +25,27 @@
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
+#include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
-#include "core/components_ng/syntax/arkoala_lazy_node.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
-bool IsSameViewPosReference(const std::optional<ViewPosReference>& left, const std::optional<ViewPosReference>& right)
+void RestoreActiveFrameSubtree(const RefPtr<UINode>& node, bool isRoot = true)
 {
-    if (left.has_value() != right.has_value()) {
-        return false;
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    if (frameNode) {
+        frameNode->SetActive(true);
+        if (!isRoot && frameNode->GetPattern<LazyLayoutPattern>()) {
+            return;
+        }
     }
-    if (!left.has_value()) {
-        return true;
+    for (const auto& child : node->GetChildren()) {
+        RestoreActiveFrameSubtree(child, false);
     }
-
-    const auto& leftValue = left.value();
-    const auto& rightValue = right.value();
-    return NearEqual(leftValue.viewPosStart, rightValue.viewPosStart) &&
-           NearEqual(leftValue.viewPosEnd, rightValue.viewPosEnd) &&
-           NearEqual(leftValue.viewExtStart, rightValue.viewExtStart) &&
-           NearEqual(leftValue.viewExtEnd, rightValue.viewExtEnd) &&
-           NearEqual(leftValue.referencePos, rightValue.referencePos) &&
-           leftValue.referenceEdge == rightValue.referenceEdge &&
-           leftValue.axis == rightValue.axis;
-}
-
-bool IsSameLayoutConstraint(const LayoutConstraintF& left, const LayoutConstraintF& right)
-{
-    return left.scaleProperty == right.scaleProperty &&
-           left.minSize == right.minSize &&
-           left.maxSize == right.maxSize &&
-           left.percentReference == right.percentReference &&
-           left.parentIdealSize == right.parentIdealSize &&
-           left.selfIdealSize == right.selfIdealSize &&
-           IsSameViewPosReference(left.viewPosRef, right.viewPosRef);
 }
 } // namespace
 
@@ -330,6 +314,35 @@ std::optional<ViewPosReference> LazyWaterFlowLayoutAlgorithm::GetReferencePos(co
     return LazyLayoutUtils::GetViewPosReference(frameNode);
 }
 
+void LazyWaterFlowLayoutAlgorithm::ApplyFallbackReferencePos(
+    LayoutWrapper* layoutWrapper, const std::optional<ViewPosReference>& posRef)
+{
+    referenceEdge_ = ReferenceEdge::START;
+    auto hostNode = layoutWrapper->GetHostNode();
+    const bool missingDirectWaterFlowRef =
+        !posRef.has_value() && LazyLayoutUtils::HasDirectWaterFlowAncestor(hostNode);
+    if (missingDirectWaterFlowRef) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout missing WaterFlow view reference");
+    } else if (posRef.has_value()) {
+        TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW,
+            "LazyWaterFlowLayout received non-vertical view reference axis:%{public}d",
+            static_cast<int32_t>(posRef.value().axis));
+    }
+    viewStart_ = 0.0f;
+    viewEnd_ = ResolveFallbackMainSize(layoutWrapper);
+    if (missingDirectWaterFlowRef && GreaterOrEqualToInfinity(viewEnd_)) {
+        viewEnd_ = Positive(realMainSize_) ? realMainSize_ : 0.0f;
+    }
+    viewExtStart_ = 0.0f;
+    viewExtEnd_ = 0.0f;
+    stickyTopInset_ = 0.0f;
+    stickyBottomInset_ = 0.0f;
+    extendedViewStart_ = viewStart_;
+    extendedViewEnd_ = viewEnd_;
+    cacheStartPos_ = 0.0f;
+    cacheEndPos_ = viewEnd_;
+}
+
 void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
     LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef)
 {
@@ -338,26 +351,7 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
         posRef = GetReferencePos(layoutWrapper->GetHostNode());
     }
     if (!posRef.has_value() || posRef.value().axis != Axis::VERTICAL) {
-        referenceEdge_ = ReferenceEdge::START;
-        auto hostNode = layoutWrapper->GetHostNode();
-        const bool missingDirectWaterFlowRef =
-            !posRef.has_value() && LazyLayoutUtils::HasDirectWaterFlowAncestor(hostNode);
-        if (missingDirectWaterFlowRef) {
-            TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW, "LazyWaterFlowLayout missing WaterFlow view reference");
-        } else if (posRef.has_value()) {
-            TAG_LOGW(AceLogTag::ACE_LAZY_WATER_FLOW,
-                "LazyWaterFlowLayout received non-vertical view reference axis:%{public}d",
-                static_cast<int32_t>(posRef.value().axis));
-        }
-        viewStart_ = 0.0f;
-        viewEnd_ = ResolveFallbackMainSize(layoutWrapper);
-        if (missingDirectWaterFlowRef && GreaterOrEqualToInfinity(viewEnd_)) {
-            viewEnd_ = Positive(realMainSize_) ? realMainSize_ : 0.0f;
-        }
-        extendedViewStart_ = viewStart_;
-        extendedViewEnd_ = viewEnd_;
-        cacheStartPos_ = 0.0f;
-        cacheEndPos_ = viewEnd_;
+        ApplyFallbackReferencePos(layoutWrapper, posRef);
         return;
     }
 
@@ -366,23 +360,24 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
         layoutInfo_->deadline_ = posRef.value().deadline;
     }
     float referencePos = posRef.value().referencePos;
-    // Keep the real viewport separate from the parent-expanded view window so visible callbacks
-    // do not include items that only exist for clip/cache coverage.
-    const float viewExtStart = posRef.value().viewExtStart;
-    const float viewExtEnd = posRef.value().viewExtEnd;
+    viewExtStart_ = posRef.value().viewExtStart;
+    viewExtEnd_ = posRef.value().viewExtEnd;
+    stickyTopInset_ = posRef.value().stickyInsetStart;
+    stickyBottomInset_ = posRef.value().stickyInsetEnd;
     if (posRef.value().referenceEdge == ReferenceEdge::START) {
-        viewStart_ = posRef.value().viewPosStart - referencePos;
-        viewEnd_ = posRef.value().viewPosEnd - referencePos;
+        viewStart_ = posRef.value().viewPosStart - viewExtStart_ - referencePos;
+        viewEnd_ = posRef.value().viewPosEnd + viewExtEnd_ - referencePos;
     } else {
         referencePos += totalMainSize_ - realMainSize_;
-        viewStart_ = posRef.value().viewPosStart - (referencePos - totalMainSize_);
-        viewEnd_ = posRef.value().viewPosEnd - (referencePos - totalMainSize_);
+        viewStart_ = posRef.value().viewPosStart - viewExtStart_ - (referencePos - totalMainSize_);
+        viewEnd_ = posRef.value().viewPosEnd + viewExtEnd_ - (referencePos - totalMainSize_);
     }
-    extendedViewStart_ = viewStart_ - viewExtStart;
-    extendedViewEnd_ = viewEnd_ + viewExtEnd;
-    auto viewSize = posRef.value().viewPosEnd - posRef.value().viewPosStart;
-    cacheStartPos_ = extendedViewStart_ - viewSize * cacheSize_;
-    cacheEndPos_ = extendedViewEnd_ + viewSize * cacheSize_;
+    extendedViewStart_ = viewStart_;
+    extendedViewEnd_ = viewEnd_;
+    const auto viewSize = posRef.value().viewPosEnd - posRef.value().viewPosStart;
+    const auto cacheExtent = viewSize * cacheSize_;
+    cacheStartPos_ = viewStart_ - cacheExtent;
+    cacheEndPos_ = viewEnd_ + cacheExtent;
 }
 
 void LazyWaterFlowLayoutAlgorithm::UpdateGap(
@@ -462,6 +457,14 @@ void LazyWaterFlowLayoutAlgorithm::UpdateHeaderFooterIndexes(LayoutWrapper* layo
         footerIndex_ = -1;
         return;
     }
+    // Re-resolve edges from the owner: a reused algorithm's construction-time weak-ref dangles after the edge
+    // nodes are rebuilt (e.g. toggling sticky), which would otherwise drop the header.
+    if (auto host = layoutWrapper->GetHostNode()) {
+        if (auto pattern = host->GetPattern<LazyWaterFlowLayoutPattern>()) {
+            header_ = pattern->GetHeaderNode();
+            footer_ = pattern->GetFooterNode();
+        }
+    }
     const auto rawCount = layoutWrapper->GetTotalChildCount();
     // Header / footer are normalized by SyncHeaderFooter(): header at raw index 0, footer at raw index last.
     const bool hasHeader = header_.Upgrade() != nullptr && rawCount > 0;
@@ -502,7 +505,7 @@ bool LazyWaterFlowLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>&
     CHECK_NULL_RETURN(geometryNode, true);
     auto constraint = geometryNode->GetParentLayoutConstraint();
     CHECK_NULL_RETURN(constraint, true);
-    return !IsSameLayoutConstraint(constraint.value(), childLayoutConstraints_[laneIdx]);
+    return constraint.value() != childLayoutConstraints_[laneIdx];
 }
 
 float LazyWaterFlowLayoutAlgorithm::ResolveFallbackMainSize(LayoutWrapper* layoutWrapper) const
@@ -1103,17 +1106,14 @@ std::optional<float> LazyWaterFlowLayoutAlgorithm::MeasureChild(
     auto startPos = referenceEdge == ReferenceEdge::START ? referencePos : referencePos - cachedSize.value_or(0.0f);
     auto endPos = referenceEdge == ReferenceEdge::START ? referencePos + cachedSize.value_or(0.0f) : referencePos;
     const bool maybeVisible = endPos > viewStart_ && startPos < viewEnd_;
-    if (ShouldReuseCachedOffscreenSize(layoutWrapper, maybeVisible, cachedSize.has_value())) {
-        return cachedSize;
-    }
     auto child = GetOrCreateChildWrapper(layoutWrapper, rawIndex, maybeVisible);
     if (!child) {
         return cachedSize;
     }
-    if (cachedSize.has_value() && !CheckNeedMeasure(child, laneIdx)) {
+    if (!CanRenderChildInDeadline(child)) {
         return cachedSize;
     }
-    if (!CanRenderChildInDeadline(child)) {
+    if (cachedSize.has_value() && !CheckNeedMeasure(child, laneIdx)) {
         return cachedSize;
     }
 
@@ -1140,11 +1140,11 @@ RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetOrCreateChildWrapper(
     CHECK_NULL_RETURN(layoutWrapper, nullptr);
     // maybeVisible drives whether LazyForEach assigns the node to the active or cache set; getting it wrong
     // means the next frame's ActiveChildRange recycles a node we just used.
+    if (maybeVisible) {
+        return layoutWrapper->GetOrCreateChildByIndex(rawIndex, true, false);
+    }
     auto isCacheItem = !maybeVisible;
     auto child = layoutWrapper->GetChildByIndex(rawIndex, isCacheItem);
-    if (!child && maybeVisible) {
-        child = layoutWrapper->GetChildByIndex(rawIndex, true);
-    }
     if (!child) {
         child = layoutWrapper->GetOrCreateChildByIndex(rawIndex, !isCacheItem, isCacheItem);
     }
@@ -1218,10 +1218,10 @@ LayoutConstraintF LazyWaterFlowLayoutAlgorithm::CreateChildConstraintForItem(
     auto constraint = childLayoutConstraints_[laneIdx];
     auto childLayoutProperty = child->GetLayoutProperty();
     if (childLayoutProperty && childLayoutProperty->GetNeedLazyLayout()) {
-        // Pass the cache window so nested lazy children measure the same half-screen range.
+        // Match LazyGrid/LazyColumn: viewPos is already expanded by parent viewExt.
         constraint.viewPosRef = ViewPosReference {
-            .viewPosStart = extendedViewStart_,
-            .viewPosEnd = cacheEndPos_,
+            .viewPosStart = viewStart_,
+            .viewPosEnd = viewEnd_,
             .referencePos = referencePos,
             .referenceEdge = referenceEdge,
             .axis = Axis::VERTICAL,
@@ -1260,6 +1260,9 @@ void LazyWaterFlowLayoutAlgorithm::FinishMeasureItems(LayoutWrapper* layoutWrapp
     // maxHeight_ caches the body-only height to mirror SW semantics. Including footerMainSize_ here would feed back
     // into next frame's EstimateTotalHeight() and double-count the footer when FinishMeasureItems() adds it again.
     layoutInfo_->maxHeight_ = std::max(layoutInfo_->maxHeight_, bodyHeight);
+    if (RebaseEndReferenceToCurrentSize()) {
+        RefillRebasedMeasureWindow(layoutWrapper);
+    }
     UpdateMeasuredRanges();
     if (IsPredictPass()) {
         // Predict must stay transparent to the parent; drop adjustOffset and skip the viewport shift.
@@ -1299,7 +1302,24 @@ void LazyWaterFlowLayoutAlgorithm::ApplyAdjustedMeasureWindow(LayoutWrapper* lay
     totalMainSize_ = bodyHeight + layoutInfo_->footerMainSize_;
     layoutInfo_->totalMainSize_ = totalMainSize_;
     layoutInfo_->maxHeight_ = std::max(layoutInfo_->maxHeight_, bodyHeight);
+    RebaseEndReferenceToCurrentSize();
     UpdateMeasuredRanges();
+}
+
+void LazyWaterFlowLayoutAlgorithm::RefillRebasedMeasureWindow(LayoutWrapper* layoutWrapper)
+{
+    auto maxMainSize = CollectMaxMainSize(layoutInfo_->lanes_, layoutInfo_->headerMainSize_);
+    RefillLaneWindow(layoutWrapper, -1, ResolveFrontBoundary(), ResolveBackBoundary(), maxMainSize);
+    ReMeasureItems(layoutWrapper);
+    layoutInfo_->SyncItemPositions(mainGap_);
+    layoutInfo_->EstimateItemSize();
+    laneEndPos_ = layoutInfo_->laneEndPos_;
+    maxMainSize = CollectMaxMainSize(layoutInfo_->lanes_, layoutInfo_->headerMainSize_);
+    const float bodyHeight = EstimateBodyHeight(maxMainSize);
+    totalMainSize_ = bodyHeight + layoutInfo_->footerMainSize_;
+    layoutInfo_->totalMainSize_ = totalMainSize_;
+    layoutInfo_->maxHeight_ = std::max(layoutInfo_->maxHeight_, bodyHeight);
+    RebaseEndReferenceToCurrentSize();
 }
 
 float LazyWaterFlowLayoutAlgorithm::EstimateBodyHeight(float maxMainSize) const
@@ -1354,11 +1374,28 @@ float LazyWaterFlowLayoutAlgorithm::EstimateTotalMainSize(float maxMainSize) con
     return std::max(maxMainSize, estimatedMaxEnd - mainGap_);
 }
 
+bool LazyWaterFlowLayoutAlgorithm::RebaseEndReferenceToCurrentSize()
+{
+    if (referenceEdge_ != ReferenceEdge::END || !Positive(totalMainSize_)) {
+        return false;
+    }
+    auto delta = totalMainSize_ - realMainSize_;
+    if (NearZero(delta)) {
+        return false;
+    }
+    LazyWaterFlowLayoutUtils::ShiftMeasureWindow(delta, viewStart_, viewEnd_, cacheStartPos_, cacheEndPos_);
+    extendedViewStart_ = viewStart_;
+    extendedViewEnd_ = viewEnd_;
+    realMainSize_ = totalMainSize_;
+    return true;
+}
+
 void LazyWaterFlowLayoutAlgorithm::UpdateMeasuredRanges()
 {
     layoutInfo_->extendedViewStartPos_ = extendedViewStart_;
     layoutInfo_->extendedViewEndPos_ = extendedViewEnd_;
     layoutInfo_->UpdateVisibleRange(viewStart_, viewEnd_);
+    layoutInfo_->UpdateVisibleCallbackRange(viewStart_ + viewExtStart_, viewEnd_ - viewExtEnd_);
     layoutInfo_->UpdateCachedRange(cacheStartPos_, cacheEndPos_);
     layoutInfo_->layoutedStartIndex_ = layoutInfo_->startIndex_;
     layoutInfo_->layoutedEndIndex_ = layoutInfo_->endIndex_;
@@ -1479,13 +1516,13 @@ void LazyWaterFlowLayoutAlgorithm::LayoutItems(LayoutWrapper* layoutWrapper, con
     const auto headerMainSize = layoutInfo_->headerMainSize_;
     const auto footerMainSize = layoutInfo_->footerMainSize_;
     const HeaderFooterStickyMetrics stickyMetrics { viewStart_, viewEnd_, totalMainSize_, headerMainSize,
-        footerMainSize };
+        footerMainSize, stickyTopInset_, stickyBottomInset_ };
     const auto stickyHeaderPos = HeaderFooterUtils::CalcStickyHeaderPos(stickyMetrics);
     const auto stickyFooterPos = HeaderFooterUtils::CalcStickyFooterPos(stickyMetrics);
 
     // Layout order follows section semantics: header -> content items -> footer.
     LayoutHeader(layoutWrapper, paddingOffset, stickyStyle, stickyHeaderPos);
-    auto range = GetLayoutRange(host);
+    auto range = GetLayoutRange();
     LayoutContentItems(layoutWrapper, paddingOffset, range);
     ClearUnlayoutedContentItems(layoutWrapper, range);
     UpdateActiveChildRange(layoutWrapper, layoutInfo_->layoutedStartIndex_, layoutInfo_->layoutedEndIndex_,
@@ -1542,15 +1579,8 @@ void LazyWaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, co
     LayoutHeaderFooter(layoutWrapper, footerIndex_, offset, isSticky);
 }
 
-LazyWaterFlowLayoutAlgorithm::LayoutRange LazyWaterFlowLayoutAlgorithm::GetLayoutRange(
-    const RefPtr<FrameNode>& host) const
+LazyWaterFlowLayoutAlgorithm::LayoutRange LazyWaterFlowLayoutAlgorithm::GetLayoutRange() const
 {
-    const bool needVisibleRange = NeedVisibleRangeForChildren(host);
-    if (needVisibleRange && layoutInfo_->layoutedStartIndex_ >= 0 &&
-        layoutInfo_->layoutedEndIndex_ >= layoutInfo_->layoutedStartIndex_) {
-        return { layoutInfo_->layoutedStartIndex_, layoutInfo_->layoutedEndIndex_ };
-    }
-
     // Prefer the cache window; fall back to visible when cache hasn't been built. Cache items laid out with
     // visible ones avoid recreate cost on the next frame.
     LayoutRange range;
@@ -1558,28 +1588,6 @@ LazyWaterFlowLayoutAlgorithm::LayoutRange LazyWaterFlowLayoutAlgorithm::GetLayou
                                                         layoutInfo_->layoutedStartIndex_;
     range.end = layoutInfo_->cachedEndIndex_ >= 0 ? layoutInfo_->cachedEndIndex_ : layoutInfo_->layoutedEndIndex_;
     return range;
-}
-
-bool LazyWaterFlowLayoutAlgorithm::NeedVisibleRangeForChild(const RefPtr<UINode>& child) const
-{
-    return AceType::DynamicCast<ArkoalaLazyNode>(child) != nullptr;
-}
-
-bool LazyWaterFlowLayoutAlgorithm::NeedVisibleRangeForChildren(const RefPtr<FrameNode>& host) const
-{
-    return host && std::any_of(host->GetChildren().begin(), host->GetChildren().end(),
-        [this](const RefPtr<UINode>& child) { return NeedVisibleRangeForChild(child); });
-}
-
-bool LazyWaterFlowLayoutAlgorithm::ShouldReuseCachedOffscreenSize(
-    LayoutWrapper* layoutWrapper, bool maybeVisible, bool hasCachedSize) const
-{
-    if (!hasCachedSize || maybeVisible || IsPredictPass() || laneTopologyChanged_ ||
-        (layoutInfo_ && layoutInfo_->hasDataChange_)) {
-        return false;
-    }
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    return NeedVisibleRangeForChildren(layoutWrapper->GetHostNode());
 }
 
 void LazyWaterFlowLayoutAlgorithm::LayoutContentItems(
@@ -1607,22 +1615,47 @@ void LazyWaterFlowLayoutAlgorithm::LayoutContentItem(
         : LazyWaterFlowLayoutUtils::IsItemVisible(
             itemIndex, layoutInfo_->layoutedStartIndex_, layoutInfo_->layoutedEndIndex_);
     auto child = GetLayoutChild(layoutWrapper, itemIndex, isVisible);
-    CHECK_NULL_VOID(child);
+    if (!child) {
+        return;
+    }
     auto geometryNode = child->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetMarginFrameOffset(
-        ResolveItemOffset(paddingOffset, itemPos->laneIdx, geometryNode->GetMarginFrameSize().Width(),
-            itemPos->startPos));
-    // First SetActive: child->Layout() must run SyncGeometryProperties under the correct active state.
+    auto itemOffset = ResolveItemOffset(
+        paddingOffset, itemPos->laneIdx, geometryNode->GetMarginFrameSize().Width(), itemPos->startPos);
+    geometryNode->SetMarginFrameOffset(itemOffset);
+    // SetActive before the geometry push so SyncGeometryProperties runs under the correct active state.
     child->SetActive(isVisible);
-    child->Layout();
     auto childHost = child->GetHostNode();
-    // Sync nested-lazy dirty wrappers on the main thread so the inner lazy doesn't lag a frame behind.
-    if (isVisible && childHost && childHost->GetPattern<LazyLayoutPattern>()) {
-        childHost->SwapDirtyLayoutWrapperOnMainThread(child);
+    if (isVisible && childHost) {
+        // A static LazyForEach item can first be built as cache, which marks its JS subtree inactive.
+        // Re-activate it before layout when the same wrapper enters the visible range.
+        RestoreActiveFrameSubtree(childHost);
+        childHost->SetJSViewActive(true);
+    }
+    const bool nestedLazy = childHost && childHost->GetPattern<LazyLayoutPattern>();
+    if (isVisible || nestedLazy || child->CheckNeedForceMeasureAndLayout()) {
+        // Visible items need a full layout pass so reactivated JS subtrees, such as Text inside a static
+        // LazyForEach item, are synced along with the item root.
+        child->Layout();
+        if (isVisible && nestedLazy) {
+            childHost->SwapDirtyLayoutWrapperOnMainThread(child);
+        }
+    } else if (childHost) {
+        // Clean item: force-sync geometry so a repositioned-but-clean item still repaints, e.g. when a sticky
+        // header resizes without changing the item's screen position.
+        childHost->ForceSyncGeometryNode();
+        childHost->ResetLayoutAlgorithm();
+    } else {
+        child->Layout();
     }
     // SwapDirtyLayoutWrapperOnMainThread can clobber the active state; reassert.
     child->SetActive(isVisible);
+    if (isVisible && childHost) {
+        RestoreActiveFrameSubtree(childHost);
+        childHost->SetJSViewActive(true);
+        childHost->MarkNeedSyncRenderTree();
+        childHost->RebuildRenderContextTree();
+    }
 }
 
 bool LazyWaterFlowLayoutAlgorithm::IsValidItemPosition(const LazyWaterFlowItemMainPos* itemPos) const
@@ -1634,13 +1667,14 @@ bool LazyWaterFlowLayoutAlgorithm::IsValidItemPosition(const LazyWaterFlowItemMa
 RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetLayoutChild(
     LayoutWrapper* layoutWrapper, int32_t itemIndex, bool isVisible) const
 {
+    CHECK_NULL_RETURN(layoutWrapper, nullptr);
     const bool isCacheItem = !isVisible;
     const auto rawIndex = GetRawIndexForItem(itemIndex);
-    auto child = layoutWrapper->GetChildByIndex(rawIndex, isCacheItem);
-    if (!child && isVisible) {
-        child = layoutWrapper->GetChildByIndex(rawIndex, true);
+    if (isVisible) {
+        return layoutWrapper->GetOrCreateChildByIndex(rawIndex, true, false);
     }
-    if (!child && (isVisible || IsPredictPass())) {
+    auto child = layoutWrapper->GetChildByIndex(rawIndex, isCacheItem);
+    if (!child && IsPredictPass()) {
         child = layoutWrapper->GetOrCreateChildByIndex(rawIndex, !isCacheItem, isCacheItem);
     }
     return child;
@@ -1688,33 +1722,21 @@ void LazyWaterFlowLayoutAlgorithm::UpdateActiveChildRange(LayoutWrapper* layoutW
     // the visible window and cache expansion separately.
     const auto windowStart = cachedStart >= 0 ? cachedStart : visibleStart;
     const auto windowEnd = cachedEnd >= cachedStart ? cachedEnd : visibleEnd;
-    const bool needVisibleRange = NeedVisibleRangeForChildren(host);
     if (windowStart < 0 || windowEnd < windowStart) {
-        if (!needVisibleRange) {
-            // h/f/s: keep header / footer active even when no content items fall in the window.
-            SetHeaderFooterActive(layoutWrapper);
-        }
-        UpdateItemActiveRangeOnChildren(host, -1, -1, 0, 0);
+        // h/f/s: keep header / footer active even when no content items fall in the window.
+        SetHeaderFooterActive(layoutWrapper);
         return;
     }
 
-    const bool hasVisibleRange = visibleStart >= 0 && visibleEnd >= visibleStart;
-    const auto activeStart = hasVisibleRange ? visibleStart : windowStart;
-    const auto activeEnd = hasVisibleRange ? visibleEnd : windowEnd;
-    const auto cacheBefore = hasVisibleRange ? std::max(activeStart - windowStart, 0) : 0;
-    const auto cacheAfter = hasVisibleRange ? std::max(windowEnd - activeEnd, 0) : 0;
-    // With header/footer, run the set-based prune even when needVisibleRange, or the section never registers its items.
     const auto rawWindowStart = GetRawIndexForItem(windowStart);
     const auto rawWindowEnd = GetRawIndexForItem(windowEnd);
     if (headerIndex_ < 0 && footerIndex_ < 0) {
-        if (!needVisibleRange) {
-            layoutWrapper->SetActiveChildRange(rawWindowStart, rawWindowEnd, 0, 0);
-        }
+        layoutWrapper->SetActiveChildRange(rawWindowStart, rawWindowEnd, 0, 0);
     } else {
         auto activeChildSets = BuildActiveChildSets(rawWindowStart, rawWindowEnd);
         layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
+        ActivateContentItemRange(host, rawWindowStart, rawWindowEnd);
     }
-    UpdateItemActiveRangeOnChildren(host, activeStart, activeEnd, cacheBefore, cacheAfter);
 }
 
 void LazyWaterFlowLayoutAlgorithm::SetHeaderFooterActive(LayoutWrapper* layoutWrapper) const
@@ -1729,15 +1751,12 @@ void LazyWaterFlowLayoutAlgorithm::SetHeaderFooterActive(LayoutWrapper* layoutWr
     layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
 }
 
-void LazyWaterFlowLayoutAlgorithm::UpdateItemActiveRangeOnChildren(const RefPtr<FrameNode>& host,
-    int32_t activeStart, int32_t activeEnd, int32_t cacheStart, int32_t cacheEnd) const
+void LazyWaterFlowLayoutAlgorithm::ActivateContentItemRange(
+    const RefPtr<FrameNode>& host, int32_t rawStart, int32_t rawEnd) const
 {
-    const auto headerOffset = headerIndex_ >= 0 ? 1 : 0;
-    const bool hasItemRange = activeStart >= 0 && activeEnd >= activeStart;
-    const auto rawActiveStart = hasItemRange ? activeStart + headerOffset : activeStart;
-    const auto rawActiveEnd = hasItemRange ? activeEnd + headerOffset : activeEnd;
-    const auto rawRangeStart = hasItemRange ? activeStart - cacheStart + headerOffset : activeStart;
-    const auto rawRangeEnd = hasItemRange ? activeEnd + cacheEnd + headerOffset : activeEnd;
+    if (rawStart < 0 || rawEnd < rawStart) {
+        return;
+    }
     int32_t childStart = 0;
     for (const auto& child : host->GetChildren()) {
         CHECK_NULL_CONTINUE(child);
@@ -1751,15 +1770,7 @@ void LazyWaterFlowLayoutAlgorithm::UpdateItemActiveRangeOnChildren(const RefPtr<
         const bool isHeader = headerIndex_ >= childStart && headerIndex_ <= childEnd;
         const bool isFooter = footerIndex_ >= childStart && footerIndex_ <= childEnd;
         if (!isHeader && !isFooter) {
-            const auto childActiveStart = hasItemRange ? rawActiveStart - childStart : activeStart;
-            const auto childActiveEnd = hasItemRange ? rawActiveEnd - childStart : activeEnd;
-            const auto childRangeStart = hasItemRange ? rawRangeStart - childStart : activeStart;
-            const auto childRangeEnd = hasItemRange ? rawRangeEnd - childStart : activeEnd;
-            if (NeedVisibleRangeForChild(child)) {
-                child->DoSetActiveChildRange(childActiveStart, childActiveEnd, cacheStart, cacheEnd);
-            } else {
-                child->DoSetActiveChildRange(childRangeStart, childRangeEnd, 0, 0);
-            }
+            child->DoSetActiveChildRange(rawStart - childStart, rawEnd - childStart, 0, 0);
         }
         childStart += childCount;
     }

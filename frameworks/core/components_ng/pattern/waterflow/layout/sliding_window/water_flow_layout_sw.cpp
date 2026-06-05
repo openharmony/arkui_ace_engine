@@ -23,6 +23,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
@@ -788,7 +789,9 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) co
         WaterFlowLayoutUtils::UpdateItemIdealSize(child, axis_, userHeight);
     }
     int32_t seg = info_->GetSegment(idx);
-    if (info_->lanes_[seg].size() == 1 && child->GetLayoutProperty()->GetNeedLazyLayout()) {
+    auto childLayoutProperty = child->GetLayoutProperty();
+    const bool needLazyLayout = childLayoutProperty && childLayoutProperty->GetNeedLazyLayout();
+    if (info_->lanes_[seg].size() == 1 && needLazyLayout) {
         MeasureLazyChild(child, idx, lane, forward);
     } else {
         child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
@@ -997,17 +1000,21 @@ void WaterFlowLayoutSW::MeasureLazyChild(
     const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, bool forward) const
 {
     int32_t seg = info_->GetSegment(idx);
+    const auto distanceToTop = info_->GetDistanceToTop(idx, lane, mainGaps_[seg]);
+    const auto distanceToBottom = info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]);
     ViewPosReference ref {
         .viewPosStart = 0,
         .viewPosEnd = mainLen_ + info_->expandHeight_,
-        .referencePos = forward ? info_->GetDistanceToTop(idx, lane, mainGaps_[seg])
-                                : info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]),
+        .referencePos = forward ? distanceToTop : distanceToBottom,
         .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
         .axis = Axis::VERTICAL,
         .deadline = cacheDeadline_,
     };
-    child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-        { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child));
+    auto childConstraint = WaterFlowLayoutUtils::CreateChildConstraint(
+        { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child);
+    // Pass WaterFlow's contentStart/EndOffset through the constraint so changes trigger child lazy remeasure.
+    LazyLayoutUtils::SetStickyInsets(childConstraint, info_->contentStartOffset_, info_->contentEndOffset_);
+    child->Measure(childConstraint);
 
     auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(child);
     if (!info_->HaveRecordIdx(idx)) {
@@ -1018,12 +1025,22 @@ void WaterFlowLayoutSW::MeasureLazyChild(
     auto allAdjustOffset = adjustOffset.start + adjustOffset.end;
     const float cacheHeight = info_->GetCachedHeightInLanes(idx);
     const float measureHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    auto& lazyLane = info_->lanes_[seg][0];
+    if (lazyLane.items_.size() == 1) {
+        // Sole lazy child: keep startPos as the anchor, pin the lane bottom to the full measured height. Covers
+        // below-viewport growth (reported as adjustOffset 0) the incremental += path misses, which would make
+        // AdjustOverScroll snap slow scrolls back near the end.
+        lazyLane.startPos -= adjustOffset.start;
+        lazyLane.endPos = lazyLane.startPos + measureHeight;
+        return;
+    }
+    // Multiple items share this lane: fall back to the incremental adjustOffset behavior.
     if (!NearEqual(allAdjustOffset, measureHeight - cacheHeight)) {
         TAG_LOGW(ACE_WATERFLOW, "AdjustOffset %{public}f is not equal to HeightChange %{public}f", allAdjustOffset,
             measureHeight - cacheHeight);
         return;
     }
-    info_->lanes_[seg][0].startPos -= adjustOffset.start;
-    info_->lanes_[seg][0].endPos += adjustOffset.end;
+    lazyLane.startPos -= adjustOffset.start;
+    lazyLane.endPos += adjustOffset.end;
 }
 } // namespace OHOS::Ace::NG

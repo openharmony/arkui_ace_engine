@@ -24,6 +24,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -576,9 +577,12 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
             .axis = axis_,
             .deadline = deadline,
         };
-        item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+        auto itemConstraint = WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, ref, props_,
-            item));
+            item);
+        // Pass WaterFlow's contentStart/EndOffset through the constraint so changes trigger child lazy remeasure.
+        LazyLayoutUtils::SetStickyInsets(itemConstraint, info_->contentStartOffset_, info_->contentEndOffset_);
+        item->Measure(itemConstraint);
         auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(item);
         info_->currentOffset_ -= adjustOffset.start;
         if (idx < info_->endIndex_ || !IsForWard()) {

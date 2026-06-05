@@ -1961,6 +1961,86 @@ HWTEST_F(LazyColumnLayoutTest, NestedGridItemsRenderWithHeaderFooter001, TestSiz
 }
 
 /**
+ * @tc.name: StickyToggleKeepsHeaderLaidOut_001
+ * @tc.desc: Toggling sticky at runtime must not drop the header. Regression for the header collapsing onto
+ *           item 0 (headerMainSize -> 0) when a property-only relayout addressed a stale edge reference; the
+ *           header must stay sized and keep items below it across BOTH -> NONE -> BOTH without a scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, StickyToggleKeepsHeaderLaidOut_001, TestSize.Level1)
+{
+    constexpr float headerHeight = 40.0f;
+    constexpr float footerHeight = 30.0f;
+
+    CreateScroll();
+    CreateLazyColumnLayout();
+    LazyColumnLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyColumnLayoutModel::SetHeader([]() { CreateLazyEdge(headerHeight); });
+    CreateContent(12);
+    LazyColumnLayoutModel::SetFooter([]() { CreateLazyEdge(footerHeight); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    auto headerNode = pattern_->GetHeaderNode();
+    ASSERT_NE(headerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
+
+    // BOTH -> NONE: header must not be dropped.
+    layoutProperty_->CleanDirty();
+    LazyColumnLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::NONE);
+    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::NONE);
+    headerNode = pattern_->GetHeaderNode();
+    ASSERT_NE(headerNode, nullptr);
+    EXPECT_TRUE(headerNode->IsActive());
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
+
+    // NONE -> BOTH: header is still intact after toggling back.
+    layoutProperty_->CleanDirty();
+    LazyColumnLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::BOTH);
+    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::BOTH);
+    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+    EXPECT_EQ(pattern_->layoutInfo_->posMap_[0].startPos, headerHeight);
+}
+
+/**
+ * @tc.name: HeaderFooterTotalStableOnIdle001
+ * @tc.desc: A header+footer LazyColumnLayout must not inflate totalMainSize_ on predictive (idle) frames.
+ *           Regression for the footer being double-counted on the PROPERTY_UPDATE_MEASURE_SELF predict path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutTest, HeaderFooterTotalStableOnIdle001, TestSize.Level1)
+{
+    constexpr float headerHeight = 60.0f;
+    constexpr float footerHeight = 40.0f;
+
+    CreateScroll();
+    CreateLazyColumnLayout();
+    LazyColumnLayoutModel::SetHeader([]() { CreateLazyEdge(headerHeight); });
+    CreateContent(30);
+    LazyColumnLayoutModel::SetFooter([]() { CreateLazyEdge(footerHeight); });
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    const float totalAfterLayout = pattern_->layoutInfo_->totalMainSize_;
+    EXPECT_GT(totalAfterLayout, pattern_->GetHeaderMainSize() + pattern_->GetFooterMainSize());
+
+    FlushIdleTask(pattern_);
+    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
+    FlushIdleTask(pattern_);
+    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
+}
+
+/**
  * @tc.name: ListBackScrollWithFooter001
  * @tc.desc: A footer-backed LazyColumnLayout under a List must be able to scroll back from the bottom.
  * @tc.type: FUNC

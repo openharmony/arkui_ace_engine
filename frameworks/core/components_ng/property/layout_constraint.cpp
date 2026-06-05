@@ -28,6 +28,8 @@ bool ViewPosReference::operator==(const ViewPosReference& other) const
            NearEqual(viewPosEnd, other.viewPosEnd) &&
            NearEqual(viewExtStart, other.viewExtStart) &&
            NearEqual(viewExtEnd, other.viewExtEnd) &&
+           NearEqual(stickyInsetStart, other.stickyInsetStart) &&
+           NearEqual(stickyInsetEnd, other.stickyInsetEnd) &&
            NearEqual(referencePos, other.referencePos) &&
            referenceEdge == other.referenceEdge &&
            axis == other.axis;
