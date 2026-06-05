@@ -212,23 +212,6 @@ struct ACE_EXPORT DepthBackgroundSource {
     }
 };
 
-struct ACE_EXPORT DepthBackgroundOffset {
-    std::optional<NG::OffsetT<Dimension>> offset;
-    std::optional<EdgesParam> offsetEdges;
-    bool useLocalizedOffset = false;
-
-    bool operator==(const DepthBackgroundOffset& other) const
-    {
-        return offset == other.offset && offsetEdges == other.offsetEdges &&
-               useLocalizedOffset == other.useLocalizedOffset;
-    }
-
-    bool operator!=(const DepthBackgroundOffset& other) const
-    {
-        return !(*this == other);
-    }
-};
-
 enum class ACE_EXPORT DepthSpaceType {
     INSTANCE = 0,
     GLOBAL = 1,
@@ -288,6 +271,18 @@ struct ACE_EXPORT DepthLightParams {
     {
         return !(*this == other);
     }
+};
+
+struct ACE_EXPORT DepthComponentCompleteEvent {
+    double componentWidth = 0.0;
+    double componentHeight = 0.0;
+};
+
+struct ACE_EXPORT DepthComponentErrorEvent {
+    double componentWidth = 0.0;
+    double componentHeight = 0.0;
+    int32_t errorCode = 0;
+    std::string errorMessage;
 };
 
 } // namespace OHOS::Ace

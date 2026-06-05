@@ -38,7 +38,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
 #include "render_service_client/core/ui/rs_depth_node.h"
 #endif
 
@@ -49,18 +49,8 @@
 #endif
 
 namespace OHOS::Ace::NG {
-
-struct DepthComponentCompleteEvent {
-    double componentWidth = 0.0;
-    double componentHeight = 0.0;
-};
-
-struct DepthComponentErrorEvent {
-    double componentWidth = 0.0;
-    double componentHeight = 0.0;
-    int32_t errorCode = 0;
-    std::string errorMessage;
-};
+using OHOS::Ace::DepthComponentCompleteEvent;
+using OHOS::Ace::DepthComponentErrorEvent;
 
 class DepthComponentPaintMethod;
 
@@ -209,7 +199,7 @@ private:
     void OnPaint3D();
     bool IsCameraChange();
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
     void LoadDepthMap();
     void OnDepthMapDataReady();
     void OnDepthMapLoadSuccess(const RefPtr<CanvasImage>& canvasImage);

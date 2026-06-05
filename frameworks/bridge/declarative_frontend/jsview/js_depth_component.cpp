@@ -222,7 +222,7 @@ void JSDepthComponent::SetOnComplete(const JSCallbackInfo& info)
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                       node = frameNode](const NG::DepthComponentCompleteEvent& completeEvent) {
+                       node = frameNode](const DepthComponentCompleteEvent& completeEvent) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DepthComponent.onComplete");
         PipelineContext::SetCallBackNode(node);
@@ -245,7 +245,7 @@ void JSDepthComponent::SetOnError(const JSCallbackInfo& info)
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                    node = frameNode](const NG::DepthComponentErrorEvent& errorEvent) {
+                    node = frameNode](const DepthComponentErrorEvent& errorEvent) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DepthComponent.onError");
         PipelineContext::SetCallBackNode(node);

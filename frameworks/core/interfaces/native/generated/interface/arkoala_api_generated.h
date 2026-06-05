@@ -1791,6 +1791,12 @@ typedef struct CustomNodeBuilderT_ResponseType CustomNodeBuilderT_ResponseType;
 typedef struct Opt_CustomNodeBuilderT_ResponseType Opt_CustomNodeBuilderT_ResponseType;
 typedef struct DataPanelModifierBuilder DataPanelModifierBuilder;
 typedef struct Opt_DataPanelModifierBuilder Opt_DataPanelModifierBuilder;
+typedef struct DepthComponentCompleteCallback DepthComponentCompleteCallback;
+typedef struct Opt_DepthComponentCompleteCallback Opt_DepthComponentCompleteCallback;
+typedef struct DepthComponentErrorCallback DepthComponentErrorCallback;
+typedef struct Opt_DepthComponentErrorCallback Opt_DepthComponentErrorCallback;
+typedef struct DepthMapCallback DepthMapCallback;
+typedef struct Opt_DepthMapCallback Opt_DepthMapCallback;
 typedef struct EditableTextOnChangeCallback EditableTextOnChangeCallback;
 typedef struct Opt_EditableTextOnChangeCallback Opt_EditableTextOnChangeCallback;
 typedef struct ErrorCallback_BusinessErrorInterface_Void ErrorCallback_BusinessErrorInterface_Void;
@@ -2265,6 +2271,8 @@ typedef struct Ark_Coordinate2D Ark_Coordinate2D;
 typedef struct Opt_Coordinate2D Opt_Coordinate2D;
 typedef struct Ark_Corners_Vector2 Ark_Corners_Vector2;
 typedef struct Opt_Corners_Vector2 Opt_Corners_Vector2;
+typedef struct Ark_CropOffset Ark_CropOffset;
+typedef struct Opt_CropOffset Opt_CropOffset;
 typedef struct Ark_CrownEvent Ark_CrownEvent;
 typedef struct Opt_CrownEvent Opt_CrownEvent;
 typedef struct Ark_CustomDialogControllerExternalOptions Ark_CustomDialogControllerExternalOptions;
@@ -2291,6 +2299,8 @@ typedef struct Ark_DeleteValue Ark_DeleteValue;
 typedef struct Opt_DeleteValue Opt_DeleteValue;
 typedef struct Ark_DepthColorRGB Ark_DepthColorRGB;
 typedef struct Opt_DepthColorRGB Opt_DepthColorRGB;
+typedef struct Ark_DepthComponentCompleteEvent Ark_DepthComponentCompleteEvent;
+typedef struct Opt_DepthComponentCompleteEvent Opt_DepthComponentCompleteEvent;
 typedef struct Ark_DepthComponentOptions Ark_DepthComponentOptions;
 typedef struct Opt_DepthComponentOptions Opt_DepthComponentOptions;
 typedef struct Ark_DepthVector3 Ark_DepthVector3;
@@ -2883,6 +2893,8 @@ typedef struct Ark_Union_RowOptions_RowOptionsV2 Ark_Union_RowOptions_RowOptions
 typedef struct Opt_Union_RowOptions_RowOptionsV2 Opt_Union_RowOptions_RowOptionsV2;
 typedef struct Ark_Union_ScrollAnimationOptions_Boolean Ark_Union_ScrollAnimationOptions_Boolean;
 typedef struct Opt_Union_ScrollAnimationOptions_Boolean Opt_Union_ScrollAnimationOptions_Boolean;
+typedef struct Ark_Union_SpatialPosition_F64 Ark_Union_SpatialPosition_F64;
+typedef struct Opt_Union_SpatialPosition_F64 Opt_Union_SpatialPosition_F64;
 typedef struct Ark_Union_String_Array_String Ark_Union_String_Array_String;
 typedef struct Opt_Union_String_Array_String Opt_Union_String_Array_String;
 typedef struct Ark_Union_String_Bindable_String Ark_Union_String_Bindable_String;
@@ -2985,6 +2997,8 @@ typedef struct Ark_cacheDownload_DownloadInfo Ark_cacheDownload_DownloadInfo;
 typedef struct Opt_cacheDownload_DownloadInfo Opt_cacheDownload_DownloadInfo;
 typedef struct Ark_CalendarOptions Ark_CalendarOptions;
 typedef struct Opt_CalendarOptions Opt_CalendarOptions;
+typedef struct Ark_CameraBufferCrop Ark_CameraBufferCrop;
+typedef struct Opt_CameraBufferCrop Opt_CameraBufferCrop;
 typedef struct Ark_CanvasParams Ark_CanvasParams;
 typedef struct Opt_CanvasParams Opt_CanvasParams;
 typedef struct Ark_CircleStyleOptions Ark_CircleStyleOptions;
@@ -3005,8 +3019,8 @@ typedef struct Ark_DecorationStyleInterface Ark_DecorationStyleInterface;
 typedef struct Opt_DecorationStyleInterface Opt_DecorationStyleInterface;
 typedef struct Ark_DecorationStyleResult Ark_DecorationStyleResult;
 typedef struct Opt_DecorationStyleResult Opt_DecorationStyleResult;
-typedef struct Ark_DepthCameraParams Ark_DepthCameraParams;
-typedef struct Opt_DepthCameraParams Opt_DepthCameraParams;
+typedef struct Ark_DepthComponentErrorEvent Ark_DepthComponentErrorEvent;
+typedef struct Opt_DepthComponentErrorEvent Opt_DepthComponentErrorEvent;
 typedef struct Ark_DepthLightParams Ark_DepthLightParams;
 typedef struct Opt_DepthLightParams Opt_DepthLightParams;
 typedef struct Ark_Dimension Ark_Dimension;
@@ -3325,6 +3339,8 @@ typedef struct Ark_ColumnSplitDividerStyle Ark_ColumnSplitDividerStyle;
 typedef struct Opt_ColumnSplitDividerStyle Opt_ColumnSplitDividerStyle;
 typedef struct Ark_ConstraintSizeOptions Ark_ConstraintSizeOptions;
 typedef struct Opt_ConstraintSizeOptions Opt_ConstraintSizeOptions;
+typedef struct Ark_DepthCameraParams Ark_DepthCameraParams;
+typedef struct Opt_DepthCameraParams Opt_DepthCameraParams;
 typedef struct Ark_DividerOptions Ark_DividerOptions;
 typedef struct Opt_DividerOptions Opt_DividerOptions;
 typedef struct Ark_DividerStyle Ark_DividerStyle;
@@ -13154,6 +13170,36 @@ typedef struct Opt_DataPanelModifierBuilder {
     Ark_Tag tag;
     DataPanelModifierBuilder value;
 } Opt_DataPanelModifierBuilder;
+typedef struct DepthComponentCompleteCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_DepthComponentCompleteEvent event);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DepthComponentCompleteEvent event);
+} DepthComponentCompleteCallback;
+typedef struct Opt_DepthComponentCompleteCallback {
+    Ark_Tag tag;
+    DepthComponentCompleteCallback value;
+} Opt_DepthComponentCompleteCallback;
+typedef struct DepthComponentErrorCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_DepthComponentErrorEvent error);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DepthComponentErrorEvent error);
+} DepthComponentErrorCallback;
+typedef struct Opt_DepthComponentErrorCallback {
+    Ark_Tag tag;
+    DepthComponentErrorCallback value;
+} Opt_DepthComponentErrorCallback;
+typedef struct DepthMapCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_BusinessErrorInterface_Void error);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_BusinessErrorInterface_Void error);
+} DepthMapCallback;
+typedef struct Opt_DepthMapCallback {
+    Ark_Tag tag;
+    DepthMapCallback value;
+} Opt_DepthMapCallback;
 typedef struct EditableTextOnChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15500,6 +15546,15 @@ typedef struct Opt_Corners_Vector2 {
     Ark_Tag tag;
     Ark_Corners_Vector2 value;
 } Opt_Corners_Vector2;
+typedef struct Ark_CropOffset {
+    /* kind: Interface */
+    Ark_Int32 x;
+    Ark_Int32 y;
+} Ark_CropOffset;
+typedef struct Opt_CropOffset {
+    Ark_Tag tag;
+    Ark_CropOffset value;
+} Opt_CropOffset;
 typedef struct Ark_CrownEvent {
     /* kind: Interface */
     Ark_Int64 timestamp;
@@ -15627,6 +15682,15 @@ typedef struct Opt_DepthColorRGB {
     Ark_Tag tag;
     Ark_DepthColorRGB value;
 } Opt_DepthColorRGB;
+typedef struct Ark_DepthComponentCompleteEvent {
+    /* kind: Interface */
+    Ark_Float64 componentWidth;
+    Ark_Float64 componentHeight;
+} Ark_DepthComponentCompleteEvent;
+typedef struct Opt_DepthComponentCompleteEvent {
+    Ark_Tag tag;
+    Ark_DepthComponentCompleteEvent value;
+} Opt_DepthComponentCompleteEvent;
 typedef struct Ark_DepthComponentOptions {
     /* kind: Interface */
     Opt_DepthSpaceType depthSpace;
@@ -18809,6 +18873,18 @@ typedef struct Opt_Union_ScrollAnimationOptions_Boolean {
     Ark_Tag tag;
     Ark_Union_ScrollAnimationOptions_Boolean value;
 } Opt_Union_ScrollAnimationOptions_Boolean;
+typedef struct Ark_Union_SpatialPosition_F64 {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_SpatialPosition value0;
+        Ark_Float64 value1;
+    };
+} Ark_Union_SpatialPosition_F64;
+typedef struct Opt_Union_SpatialPosition_F64 {
+    Ark_Tag tag;
+    Ark_Union_SpatialPosition_F64 value;
+} Opt_Union_SpatialPosition_F64;
 typedef struct Ark_Union_String_Array_String {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -19405,6 +19481,17 @@ typedef struct Opt_CalendarOptions {
     Ark_Tag tag;
     Ark_CalendarOptions value;
 } Opt_CalendarOptions;
+typedef struct Ark_CameraBufferCrop {
+    /* kind: Interface */
+    Ark_Int32 bufferWidth;
+    Ark_Int32 bufferHeight;
+    Ark_CropOffset cropOffset;
+    Ark_Float64 cropScale;
+} Ark_CameraBufferCrop;
+typedef struct Opt_CameraBufferCrop {
+    Ark_Tag tag;
+    Ark_CameraBufferCrop value;
+} Opt_CameraBufferCrop;
 typedef struct Ark_CanvasParams {
     /* kind: Interface */
     Opt_LengthMetricsUnit unit;
@@ -19518,23 +19605,21 @@ typedef struct Opt_DecorationStyleResult {
     Ark_Tag tag;
     Ark_DecorationStyleResult value;
 } Opt_DecorationStyleResult;
-typedef struct Ark_DepthCameraParams {
+typedef struct Ark_DepthComponentErrorEvent {
     /* kind: Interface */
-    Ark_DepthVector3 position;
-    Ark_DepthVector4 quaternion;
-    Ark_Number yFov;
-    Ark_Number zNear;
-    Ark_Number zFar;
-} Ark_DepthCameraParams;
-typedef struct Opt_DepthCameraParams {
+    Ark_Float64 componentWidth;
+    Ark_Float64 componentHeight;
+    Opt_BusinessErrorInterface_Void error;
+} Ark_DepthComponentErrorEvent;
+typedef struct Opt_DepthComponentErrorEvent {
     Ark_Tag tag;
-    Ark_DepthCameraParams value;
-} Opt_DepthCameraParams;
+    Ark_DepthComponentErrorEvent value;
+} Opt_DepthComponentErrorEvent;
 typedef struct Ark_DepthLightParams {
     /* kind: Interface */
     Ark_DepthVector3 direction;
     Ark_DepthColorRGB color;
-    Ark_Number intensity;
+    Ark_Float64 intensity;
 } Ark_DepthLightParams;
 typedef struct Opt_DepthLightParams {
     Ark_Tag tag;
@@ -20428,7 +20513,7 @@ typedef struct Opt_SpanStyle {
 } Opt_SpanStyle;
 typedef struct Ark_SpatialEffectParams {
     /* kind: Interface */
-    Ark_SpatialPosition position;
+    Ark_Union_SpatialPosition_F64 position;
     Opt_Float64 occlusionWeight;
 } Ark_SpatialEffectParams;
 typedef struct Opt_SpatialEffectParams {
@@ -21261,6 +21346,19 @@ typedef struct Opt_ConstraintSizeOptions {
     Ark_Tag tag;
     Ark_ConstraintSizeOptions value;
 } Opt_ConstraintSizeOptions;
+typedef struct Ark_DepthCameraParams {
+    /* kind: Interface */
+    Ark_DepthVector3 position;
+    Ark_DepthVector4 quaternion;
+    Ark_Float64 yFov;
+    Ark_Float64 zNear;
+    Ark_Float64 zFar;
+    Opt_CameraBufferCrop cameraBufferCrop;
+} Ark_DepthCameraParams;
+typedef struct Opt_DepthCameraParams {
+    Ark_Tag tag;
+    Ark_DepthCameraParams value;
+} Opt_DepthCameraParams;
 typedef struct Ark_DividerOptions {
     /* kind: Interface */
     Opt_Dimension strokeWidth;
@@ -25061,16 +25159,17 @@ typedef struct GENERATED_ArkUIDepthComponentModifier {
     void (*setDepthComponentOptions)(Ark_NativePointer node,
                                      const Ark_Union_ResourceStr_image_PixelMap* background,
                                      const Opt_DepthComponentOptions* options);
-    void (*setDepthMap)(Ark_NativePointer node,
-                        const Ark_Union_ResourceStr_image_PixelMap* value);
     void (*setCamera)(Ark_NativePointer node,
                       const Ark_DepthCameraParams* value);
     void (*setLight)(Ark_NativePointer node,
                      const Ark_DepthLightParams* value);
-    void (*setBackgroundOffset)(Ark_NativePointer node,
-                                const Ark_Union_Position_Edges_LocalizedEdges* value);
-    void (*setBackgroundScale)(Ark_NativePointer node,
-                               const Ark_ScaleOptions* value);
+    void (*setOnComplete)(Ark_NativePointer node,
+                          const DepthComponentCompleteCallback* value);
+    void (*setOnError)(Ark_NativePointer node,
+                       const DepthComponentErrorCallback* value);
+    void (*setDepthMap)(Ark_NativePointer node,
+                        const Ark_Union_ResourceStr_image_PixelMap* depthMap,
+                        const Opt_DepthMapCallback* callback_);
 } GENERATED_ArkUIDepthComponentModifier;
 
 typedef struct GENERATED_ArkUIDistortionComponentModifier {
