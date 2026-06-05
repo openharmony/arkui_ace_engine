@@ -17,11 +17,16 @@
 
 #include "core/gestures/drag_event.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/unified_data_peer.h"
 
 struct DragEventPeer {
-    virtual ~DragEventPeer() = default;
+    virtual ~DragEventPeer()
+    {
+        OHOS::Ace::NG::PeerUtils::DestroyPeer(unifiedDataPeer);
+    }
 
     OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> dragInfo;
+    unifiedDataChannel_UnifiedDataPeer* unifiedDataPeer = nullptr;
 
     static DragEventPeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::DragEvent>& src)
     {

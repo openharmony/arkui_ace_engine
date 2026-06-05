@@ -49,6 +49,7 @@ namespace {
     using namespace Converter;
 
     constexpr int32_t COUNTER_NUMBER_TEN_HANDLE = 10;
+    constexpr int32_t COUNTER_NUMBER_TWENTY_HANDLE = 20;
 
     class UnifiedDataMock : public Ace::UnifiedData {
     public:
@@ -56,6 +57,19 @@ namespace {
         {
             return COUNTER_NUMBER_TEN_HANDLE;
         }
+    };
+
+    class SizedUnifiedDataMock : public Ace::UnifiedData {
+    public:
+        explicit SizedUnifiedDataMock(int64_t size) : size_(size) {}
+
+        int64_t GetSize() override
+        {
+            return size_;
+        }
+
+    private:
+        int64_t size_ = 0;
     };
 
     const std::vector<std::tuple<std::string, Ark_DragResult, DragRet>> testFixtureEnumDragResultValues {
@@ -210,6 +224,57 @@ HWTEST_F(DragEventAccessorTest, getDataTest, TestSize.Level1)
     ASSERT_NE(dataPeer->unifiedData, nullptr);
     EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: getData";
+}
+
+/**
+ * @tc.name: getDataReusePeerTest
+ * @tc.desc: Verify getData reuses DragEventPeer cached UnifiedData peer and refreshes its data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, getDataReusePeerTest, TestSize.Level1)
+{
+    RefPtr<UnifiedData> firstData = AceType::MakeRefPtr<SizedUnifiedDataMock>(COUNTER_NUMBER_TEN_HANDLE);
+    auto firstArkData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(firstData);
+    accessor_->setData(peer_, firstArkData);
+    auto firstDataPeerOpt = Converter::GetOpt(accessor_->getData(peer_));
+    ASSERT_NE(firstDataPeerOpt, std::nullopt);
+    auto firstDataPeer = firstDataPeerOpt.value();
+    ASSERT_NE(firstDataPeer, nullptr);
+    ASSERT_NE(firstDataPeer->unifiedData, nullptr);
+    EXPECT_EQ(firstDataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE);
+
+    RefPtr<UnifiedData> secondData = AceType::MakeRefPtr<SizedUnifiedDataMock>(COUNTER_NUMBER_TWENTY_HANDLE);
+    auto secondArkData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(secondData);
+    accessor_->setData(peer_, secondArkData);
+    auto secondDataPeerOpt = Converter::GetOpt(accessor_->getData(peer_));
+    ASSERT_NE(secondDataPeerOpt, std::nullopt);
+    auto secondDataPeer = secondDataPeerOpt.value();
+    ASSERT_NE(secondDataPeer, nullptr);
+    ASSERT_NE(secondDataPeer->unifiedData, nullptr);
+    EXPECT_EQ(secondDataPeer, firstDataPeer);
+    EXPECT_EQ(secondDataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TWENTY_HANDLE);
+}
+
+/**
+ * @tc.name: setDataWithCachedPeerTest
+ * @tc.desc: Verify setData clears cached peer when native caller passes getData returned peer back.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, setDataWithCachedPeerTest, TestSize.Level1)
+{
+    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
+    accessor_->setData(peer_, arkUnifiedData);
+    auto dataPeerOpt = Converter::GetOpt(accessor_->getData(peer_));
+    ASSERT_NE(dataPeerOpt, std::nullopt);
+    auto dataPeer = dataPeerOpt.value();
+    ASSERT_NE(dataPeer, nullptr);
+    ASSERT_EQ(peer_->unifiedDataPeer, dataPeer);
+
+    accessor_->setData(peer_, dataPeer);
+    EXPECT_EQ(peer_->unifiedDataPeer, nullptr);
+    ASSERT_NE(dragEvent_->GetData(), nullptr);
+    EXPECT_EQ(dragEvent_->GetData()->GetSize(), COUNTER_NUMBER_TEN_HANDLE);
 }
 
 /**
