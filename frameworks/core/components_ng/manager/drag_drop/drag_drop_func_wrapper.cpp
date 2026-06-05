@@ -236,9 +236,12 @@ void EnvelopedDragData(
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     auto isDragDelay = (dragAction->dataLoadParams != nullptr);
     auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(dragAction->previewOption, pipeline);
+    EventPositionInfo eventPositionInfo {dragAction->dragPointerEvent.displayX, dragAction->dragPointerEvent.displayY};
+    EventPositionInfo originalPos {dragAction->dragPointerEvent.displayX, dragAction->dragPointerEvent.displayY};
+    container->GetOriginalEventInfo(eventPositionInfo, originalPos);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
-        dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
-        dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
+        dragAction->dragPointerEvent.sourceType, recordSize, pointerId, originalPos.displayX,
+        originalPos.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
         dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat,
         dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag, materialInfo.materialId };
     dragData->isSetMaterialFilter = (materialInfo.materialFilter != nullptr);

@@ -553,9 +553,12 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
+    EventPositionInfo eventPositionInfo {asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY};
+    EventPositionInfo originalPos {asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY};
+    container->GetOriginalEventInfo(eventPositionInfo, originalPos);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
-        asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
+        originalPos.displayX, originalPos.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "",
         materialInfo.materialId };
@@ -783,9 +786,12 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     auto windowId = container->GetWindowId();
     auto materialInfo = DragDropFuncWrapper::ParseDragPreviewMaterialInfo(asyncCtx->dragPreviewOption, pipeline);
     auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
+    EventPositionInfo eventPositionInfo {asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY};
+    EventPositionInfo originalPos {asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY};
+    container->GetOriginalEventInfo(eventPositionInfo, originalPos);
     dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dataSize, asyncCtx->dragPointerEvent.pointerId,
-        asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
+        originalPos.displayX, originalPos.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "",
         materialInfo.materialId };
