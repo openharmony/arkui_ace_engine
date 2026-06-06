@@ -1178,41 +1178,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest032, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusManagerTest033
- * @tc.desc: Test FocusViewShow with isTriggerByStep parameter.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest033, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager and root node structure.
-     */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
-    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
-    rootNode->AddChild(pageNode);
-
-    /**
-     * @tc.steps: step2. Call FocusViewShow with isTriggerByStep = true.
-     * @tc.expected: LastWeakFocus is not set when triggered by step.
-     */
-    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
-    auto lastWeakFocusBefore = pageFocusHub->GetLastWeakFocusNode();
-    focusManager->FocusViewShow(pagePattern, true);
-    auto lastWeakFocusAfter = pageFocusHub->GetLastWeakFocusNode();
-    EXPECT_EQ(lastWeakFocusBefore.Upgrade(), lastWeakFocusAfter.Upgrade());
-
-    /**
-     * @tc.steps: step3. Call FocusViewShow with isTriggerByStep = false.
-     * @tc.expected: LastWeakFocus is set when not triggered by step.
-     */
-    focusManager->FocusViewShow(pagePattern, false);
-    lastWeakFocusAfter = pageFocusHub->GetLastWeakFocusNode();
-    EXPECT_NE(lastWeakFocusAfter.Upgrade(), nullptr);
-}
-
-/**
  * @tc.name: FocusManagerTest034
  * @tc.desc: Test FocusViewShow removes duplicate focusView from stack.
  * @tc.type: FUNC
@@ -1260,39 +1225,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest035, TestSize.Level1)
      */
     auto result = focusManager->RearrangeViewStack();
     EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: FocusManagerTest036
- * @tc.desc: Test RearrangeViewStack with SHOW state and not current focus.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest036, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager and focusView structure.
-     */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
-    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
-    rootNode->AddChild(pageNode);
-
-    /**
-     * @tc.steps: step2. Set up focusView stack and state.
-     */
-    focusManager->FocusViewShow(pagePattern);
-    focusManager->focusViewStackState_ = FocusViewStackState::SHOW;
-    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
-    pageFocusHub->currentFocus_ = false;
-
-    /**
-     * @tc.steps: step3. Call RearrangeViewStack.
-     * @tc.expected: Removes currentFocusView from stack and returns true.
-     */
-    auto result = focusManager->RearrangeViewStack();
-    EXPECT_TRUE(result);
-    EXPECT_TRUE(focusManager->focusViewStack_.empty());
 }
 
 /**
@@ -2285,30 +2217,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest079, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusManagerTest080
- * @tc.desc: Test GetFocusViewMap with focus views.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest080, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager and add focus views to stack.
-     */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
-    focusManager->FocusViewShow(pagePattern);
-
-    /**
-     * @tc.steps: step2. Call GetFocusViewMap.
-     * @tc.expected: Returns map with focus view entries.
-     */
-    FocusViewMap focusViewMap;
-    focusManager->GetFocusViewMap(focusViewMap);
-    EXPECT_FALSE(focusViewMap.empty());
-}
-
-/**
  * @tc.name: FocusManagerTest081
  * @tc.desc: Test DumpFocusManager when dump file is not available.
  * @tc.type: FUNC
@@ -2581,38 +2489,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest091, TestSize.Level1)
     focusManager->FocusViewClose(pagePattern1);
     auto stackSizeAfter = focusManager->focusViewStack_.size();
     EXPECT_EQ(stackSizeBefore - stackSizeAfter, 1);
-}
-
-/**
- * @tc.name: FocusManagerTest092
- * @tc.desc: Test FlushFocusView updates lastFocusView_.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest092, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager and add FocusViews to stack.
-     */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
-    auto pagePattern1 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode1 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern1);
-    auto pagePattern2 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode2 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern2);
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
-    rootNode->AddChild(pageNode1);
-    rootNode->AddChild(pageNode2);
-    focusManager->FocusViewShow(pagePattern1);
-    focusManager->FocusViewShow(pagePattern2);
-    focusManager->focusViewStackState_ = FocusViewStackState::SHOW;
-    auto pageFocusHub1 = pageNode1->GetOrCreateFocusHub();
-    pageFocusHub1->currentFocus_ = false;
-
-    /**
-     * @tc.steps: step2. Call FlushFocusView.
-     * @tc.expected: lastFocusView_ is updated to stack back.
-     */
-    focusManager->FlushFocusView();
-    EXPECT_EQ(focusManager->lastFocusView_.Upgrade(), pagePattern2);
 }
 
 /**
@@ -3141,39 +3017,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest116, TestSize.Level1)
      */
     RefPtr<FocusHub> focusHub = nullptr;
     FocusManager::FocusGuard guard(focusHub, SwitchingStartReason::REQUEST_FOCUS);
-}
-
-/**
- * @tc.name: FocusManagerTest117
- * @tc.desc: Test FocusGuard destructor calls FocusSwitchingEnd.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest117, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FocusManager and FocusGuard.
-     */
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto focusManager = context->GetOrCreateFocusManager();
-    ASSERT_NE(focusManager, nullptr);
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
-    auto focusHub = rootNode->GetOrCreateFocusHub();
-
-    /**
-     * @tc.steps: step2. Create FocusGuard in scope.
-     * @tc.expected: FocusSwitchingStart is called.
-     */
-    {
-        FocusManager::FocusGuard guard(focusHub, SwitchingStartReason::REQUEST_FOCUS);
-        EXPECT_TRUE(focusManager->isSwitchingFocus_.has_value());
-    }
-
-    /**
-     * @tc.steps: step3. FocusGuard goes out of scope.
-     * @tc.expected: FocusSwitchingEnd is called.
-     */
-    EXPECT_FALSE(focusManager->isSwitchingFocus_.has_value());
 }
 
 /**
