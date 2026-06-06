@@ -53,7 +53,6 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
     auto instanceId = GetContainerId(windowId);
     CHECK_EQUAL_VOID(instanceId, DEFAULT_CONTAINER_ID);
     auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
-    CHECK_NULL_VOID(context);
     if (context == nullptr) {
         LOGE("ResschedEventListener::OnComponentPreMake context is nullptr");
         return;

@@ -58,7 +58,7 @@ HWTEST_F(ResschedEventListenerTest, OnComponentPreMake001, TestSize.Level1)
     NG::MockPipelineContext::pipeline_ = nullptr;
 
     std::unordered_map<std::string, std::string> extInfo;
-    extInfo["windowId"] = 10;
+    extInfo["windowId"] = "10";
     extInfo["pageName"] = "pageName";
     uint32_t swiperType = 21;
     uint32_t value = 0;
@@ -77,7 +77,7 @@ HWTEST_F(ResschedEventListenerTest, OnComponentPreMake001, TestSize.Level1)
 HWTEST_F(ResschedEventListenerTest, OnReceiveEvent002, TestSize.Level1)
 {
     std::unordered_map<std::string, std::string> extInfo;
-    extInfo["windowId"] = 10;
+    extInfo["windowId"] = "10";
     extInfo["pageName"] = "pageName";
     uint32_t swiperType = 21;
     uint32_t value = 0;
@@ -94,7 +94,7 @@ HWTEST_F(ResschedEventListenerTest, OnReceiveEvent002, TestSize.Level1)
 HWTEST_F(ResschedEventListenerTest, OnReceiveEvent003, TestSize.Level1)
 {
     std::unordered_map<std::string, std::string> extInfo;
-    extInfo["windowId"] = 10;
+    extInfo["windowId"] = "10";
     extInfo["pageName"] = "";
     uint32_t swiperType = 21;
     uint32_t value = 0;
