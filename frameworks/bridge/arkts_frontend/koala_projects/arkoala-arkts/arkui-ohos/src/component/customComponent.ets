@@ -41,6 +41,7 @@ import { ArkUIObjectFinalizationRegisterProxy } from '../base/ArkUIObjectFinaliz
 import { ActiveAndInactiveCallbackType, CustomComponentContext, IReusePool } from '../stateManagement/utils';
 import { IVariableOwner } from '../stateManagement/decorator';
 import { GlobalReusePool } from '../stateManagement/tools/globalReusePool';
+import { UIContextUtil } from '../base/UIContextUtil';
 
 // GlobalReuse pool ownership type
 export enum ReusePoolOwnership {
@@ -186,7 +187,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         styles: ((instance: T) => void) | undefined
     ) {
         super();
-        this.uiContext = uiContext;
+        this.uiContext = uiContext ?? UIContextUtil.getOrCreateCurrentUIContext();
         this.instance = instance;
         this.instance.__setDelegate__Internal(this);
         this.styles = styles;
