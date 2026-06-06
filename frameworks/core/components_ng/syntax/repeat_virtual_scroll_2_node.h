@@ -290,6 +290,7 @@ public:
     void SetIsSyncLoad(bool value) override;
 
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     
 
 private:

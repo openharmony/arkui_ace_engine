@@ -1228,5 +1228,14 @@ void RepeatVirtualScroll2Node::DumpInfo()
                                         .append(std::to_string(arrLen_).c_str()));
     DumpLog::GetInstance().AddDesc(std::string("totalCount of source data:")
                                         .append(std::to_string(totalCount_).c_str()));
+    DumpLog::GetInstance().AddDesc(std::string("cachedItems:")
+                                        .append(caches_.GetL2ItemsDump().c_str()));
+}
+
+void RepeatVirtualScroll2Node::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    auto info = caches_.GetL2ItemsDump();
+    CHECK_EQUAL_VOID(info.empty(), true);
+    json->Put("$CachedItems", info.c_str());
 }
 } // namespace OHOS::Ace::NG
