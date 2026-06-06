@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/focus_state.h"
 namespace OHOS::Ace::NG {
 bool FocusHub::RequestFocusImmediately(FocusReason reason)
 {
@@ -50,6 +51,54 @@ void FocusHub::SetFocusable(bool focusable, bool isExplicit)
 bool FocusHub::IsFocusableNode()
 {
     return true;
+}
+
+std::string FocusState::GetFrameName() const
+{
+    return "NULL";
+}
+
+int32_t FocusState::GetFrameId() const
+{
+    return -1;
+}
+
+bool FocusHub::TriggerFocusScroll()
+{
+    return false;
+}
+
+WeakPtr<FocusHub> FocusHub::GetUnfocusableParentFocusNode()
+{
+    return nullptr;
+}
+
+void FocusHub::DumpFocusTree(int32_t depth, bool hasJson)
+{
+    (void)depth;
+    (void)hasJson;
+}
+
+RefPtr<FocusManager> FocusHub::GetFocusManager() const
+{
+    return nullptr;
+}
+
+bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest)
+{
+    (void)id;
+    (void)isSyncRequest;
+    return false;
+}
+
+RefPtr<FrameNode> FocusState::GetFrameNode() const
+{
+    return nullptr;
+}
+
+void FocusHub::RemoveSelf(BlurReason reason)
+{
+    (void)reason;
 }
 
 } // namespace OHOS::Ace::NG

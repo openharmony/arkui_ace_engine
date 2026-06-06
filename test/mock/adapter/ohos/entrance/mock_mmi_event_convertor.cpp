@@ -26,18 +26,4 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
 void CalculatePointerEvent(
     const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode, bool useRealtimeMatrix)
 {}
-
-uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
-{
-    uint64_t modifierKeysState = 0;
-    return modifierKeysState;
-}
-
-TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
-{
-    std::chrono::microseconds microseconds(12);
-    TimeStamp time(microseconds);
-    return time;
-}
-
 } // namespace OHOS::Ace::Platform

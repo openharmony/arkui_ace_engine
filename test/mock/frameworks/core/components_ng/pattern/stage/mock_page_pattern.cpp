@@ -16,10 +16,6 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
-PagePattern::PagePattern(const RefPtr<PageInfo>& pageInfo) : pageInfo_(pageInfo) {}
-
-void PagePattern::OnAttachToFrameNode() {}
-
 void PagePattern::BeforeCreateLayoutWrapper() {}
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config)
@@ -136,6 +132,8 @@ void PagePattern::OnShow(bool isFromWindow)
     (void)isFromWindow;
 }
 
+void PagePattern::OnAttachToFrameNode() {}
+
 void PagePattern::OnHide(bool isFromWindow)
 {
     (void)isFromWindow;
@@ -201,8 +199,8 @@ void PagePattern::ProcessHideState() {}
 
 void PagePattern::ProcessShowState() {}
 
-bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish,
-    const std::function<void()>& onUIExtNodeBindingCompleted)
+bool PagePattern::ProcessAutoSave(
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
 {
     (void)onUIExtNodeBindingCompleted;
     if (onFinish) {

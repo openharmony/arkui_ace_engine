@@ -17,4 +17,10 @@
 namespace OHOS::Ace::NG {
 ContentChangeManager::ContentChangeManager(const RefPtr<TaskExecutor>& taskExecutor) {}
 void ContentChangeManager::OnImageChangeEnd(const WeakPtr<FrameNode>&, const std::string&, const RectF&) {}
+void ContentChangeManager::OnVsyncStart() {}
+void ContentChangeManager::OnVsyncEnd(const RectF& rootRect) {}
+std::string ContentChangeManager::DumpInfo() const
+{
+    return "ContentChangeManager: DumpInfo is not implemented in mock.";
+}
 } // namespace OHOS::Ace::NG
