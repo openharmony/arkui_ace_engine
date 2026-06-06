@@ -957,13 +957,12 @@ HWTEST_F(StageTestNg, StageManagerTest012, TestSize.Level1)
     StageManager stageManager(stageNode);
     RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
     MockPipelineContext::pipeline_ = nullptr;
-    pattern->PageTransitionReport("fromPage", "toPage", "fromCompoent", "toComponent");
     /**
      * @tc.steps: step3. execute PageTransitionReport Function when context is nullptr.
      * @tc.expected: Expected report success.
      */
-    stageManager->PageTransitionReport("fromPage", "toPage");
-    EXPECT_NE(pattern, nullptr);
+    stageManager.PageTransitionReport("fromPage", "toPage");
+    EXPECT_NE(stageNode, nullptr);
 
     /**
      * @tc.steps: step4. restore context

@@ -1575,15 +1575,15 @@ HWTEST_F(NavigationPatternTestNineNg, UpdateMaskNodeVisibility002, TestSize.Leve
  * @tc.desc: Branch: context == nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestNineNg, AdjustNodeForSplitDisplayReconfigure001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestNineNg, PageTransitionReport001, TestSize.Level1)
 {
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    auto context = CreateNavigationTestContext();
+    ASSERT_NE(context.pattern, nullptr);
     RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
     MockPipelineContext::pipeline_ = nullptr;
-    pattern->PageTransitionReport("fromPage", "toPage", "fromCompoent", "toComponent");
-    EXPECT_NE(pattern, nullptr);
+
+    context.pattern->PageTransitionReport("fromPage", "toPage", "fromCompoent", "toComponent");
+    EXPECT_NE(context.pattern, nullptr);
     MockPipelineContext::pipeline_ = pipeline_bak;
 }
 } // namespace OHOS::Ace::NG
