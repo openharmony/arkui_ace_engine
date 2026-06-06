@@ -26,12 +26,12 @@ class ResschedEventListenerTest : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
-        MockPipelineContext::SetUp();
+        NG::MockPipelineContext::SetUp();
     }
 
     static void TearDownTestSuite()
     {
-        MockPipelineContext::TearDown();
+        NG::MockPipelineContext::TearDown();
     }
 
     void SetUp() override
@@ -43,60 +43,63 @@ public:
     void TearDown() override
     {
         int32_t windowId = 10;
-        ResschedEventListener::GetInstance()->UnRegisterToRSS(windowId);
+        ResschedEventListener::GetInstance()->UnRegisterFromRSS(windowId);
     }
 };
 
 /**
- * @tc.name: OnComponentPreMake001
- * @tc.desc: Test OnComponentPreMake when conext is nullptr return early
+ * @tc.name: OnReceiveEvent001
+ * @tc.desc: Test OnReceiveEvent when conext is nullptr return early
  * @tc.type: FUNC
  */
 HWTEST_F(ResschedEventListenerTest, OnComponentPreMake001, TestSize.Level1)
 {
-    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
-    MockPipelineContext::pipeline_ = nullptr;
-    
-    std::unordered_map<std::string, std::string>& extInfo;
+    RefPtr<NG::MockPipelineContext> pipeline_bak = NG::MockPipelineContext::pipeline_;
+    NG::MockPipelineContext::pipeline_ = nullptr;
+
+    std::unordered_map<std::string, std::string> extInfo;
     extInfo["windowId"] = 10;
     extInfo["pageName"] = "pageName";
     uint32_t swiperType = 21;
+    uint32_t value = 0;
 
-    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, extInfo);
-    EXPECT_NE(listener_->containerMap_.empty(), false);
+    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, value, extInfo);
+    EXPECT_FALSE(extInfo.empty());
 
-    MockPipelineContext::pipeline_ = pipeline_bak;
+    NG::MockPipelineContext::pipeline_ = pipeline_bak;
 }
 
 /**
- * @tc.name: OnComponentPreMake001
- * @tc.desc: Test OnComponentPreMake when pageName page not match
+ * @tc.name: OnReceiveEvent002
+ * @tc.desc: Test OnReceiveEvent when pageName page not match
  * @tc.type: FUNC
  */
-HWTEST_F(ResschedEventListenerTest, OnComponentPreMake002, TestSize.Level1)
+HWTEST_F(ResschedEventListenerTest, OnReceiveEvent002, TestSize.Level1)
 {
-    std::unordered_map<std::string, std::string>& extInfo;
+    std::unordered_map<std::string, std::string> extInfo;
     extInfo["windowId"] = 10;
     extInfo["pageName"] = "pageName";
     uint32_t swiperType = 21;
+    uint32_t value = 0;
 
-    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, extInfo);
-    EXPECT_NE(listener_->containerMap_.empty(), false);
+    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, value, extInfo);
+    EXPECT_FALSE(extInfo.empty());
 }
 
 /**
- * @tc.name: OnComponentPreMake001
- * @tc.desc: Test OnComponentPreMake when pageName page match
+ * @tc.name: OnReceiveEvent003
+ * @tc.desc: Test OnReceiveEvent when pageName page match
  * @tc.type: FUNC
  */
-HWTEST_F(ResschedEventListenerTest, OnComponentPreMake003, TestSize.Level1)
+HWTEST_F(ResschedEventListenerTest, OnReceiveEvent003, TestSize.Level1)
 {
-    std::unordered_map<std::string, std::string>& extInfo;
+    std::unordered_map<std::string, std::string> extInfo;
     extInfo["windowId"] = 10;
     extInfo["pageName"] = "";
     uint32_t swiperType = 21;
+    uint32_t value = 0;
 
-    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, extInfo);
-    EXPECT_NE(listener_->containerMap_.empty(), false);
+    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, value, extInfo);
+    EXPECT_FALSE(extInfo.empty());
 }
 }

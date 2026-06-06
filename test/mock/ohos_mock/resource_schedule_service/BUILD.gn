@@ -26,4 +26,5 @@ ohos_source_set("mock_ressched_client") {
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
   public_configs = [ ":mock_ressched_client_config" ]
+  external_deps = [ "c_utils:utils" ]
 }

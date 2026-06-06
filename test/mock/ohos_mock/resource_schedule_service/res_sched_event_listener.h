@@ -18,9 +18,11 @@
 #include <cstdint>
 #include <string>
 
+#include "refbase.h"
+
 namespace OHOS {
 namespace ResourceSchedule {
-class ResSchedEventListener  {
+class ResSchedEventListener : public virtual RefBase {
 public:
     ResSchedEventListener() = default;
     virtual ~ResSchedEventListener() = default;

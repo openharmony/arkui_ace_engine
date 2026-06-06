@@ -17,7 +17,10 @@
 
 #include <cstdint>
 #include <string>
+
+#include "refbase.h"
 #include "res_sched_event_listener.h"
+#include "res_value.h"
 
 namespace OHOS {
 namespace ResourceSchedule {
@@ -25,9 +28,9 @@ class ResSchedClient {
 public:
     static ResSchedClient& GetInstance();
 
-    void RegisterEventListener(const sptr<ResSchedEventListner>& eventListener, uint32_t eventType,
+    void RegisterEventListener(const sptr<ResSchedEventListener>& eventListener, uint32_t eventType,
         uint32_t listernGroup = ResType::EventListenerGroup::LISTENER_GROUP_COMMON);
-    void UnRegisterEventListener(const sptr<ResSchedEventListner>& eventListener, uint32_t eventType,
+    void UnRegisterEventListener(const sptr<ResSchedEventListener>& eventListener, uint32_t eventType,
         uint32_t listernGroup = ResType::EventListenerGroup::LISTENER_GROUP_COMMON);
 protected:
     ResSchedClient() = default;

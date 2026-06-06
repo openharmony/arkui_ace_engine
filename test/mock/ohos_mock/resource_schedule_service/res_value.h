@@ -21,11 +21,11 @@ namespace OHOS {
 namespace ResourceSchedule {
 namespace ResType {
 
-enum EventType : unint32_t {
+enum EventType : uint32_t {
     EVENT_SYART = 0,
     EVENT_COMPONENT_PREMAKE = 21,
     EVENT_END,
-}
+};
 
 enum EventListenerGroup : uint32_t {
     LISTENER_GROUP_BEGIN = 0,

@@ -23,11 +23,11 @@ ResSchedClient& ResSchedClient::GetInstance()
     return instance;
 }
 
-void ResSchedClient::RegisterEventListener(const sptr<ResSchedEventListner>& eventListener,
+void ResSchedClient::RegisterEventListener(const sptr<ResSchedEventListener>& eventListener,
     uint32_t eventType, uint32_t listernGroup)
 {
 }
-void ResSchedClient::UnRegisterEventListener(const sptr<ResSchedEventListner>& eventListener,
+void ResSchedClient::UnRegisterEventListener(const sptr<ResSchedEventListener>& eventListener,
     uint32_t eventType, uint32_t listernGroup)
 {
 }

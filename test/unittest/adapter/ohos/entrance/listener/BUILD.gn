@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,27 +13,19 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("ressched_event_listener_test") {
-  module_out_path = adapter_test_output_path
+ace_unittest("ressched_event_listener_test") {
+  type = "new"
+  module_output = "adapter_test_output_path"
+
+  extra_deps = []
+  extra_deps += [ "$ace_root/test/mock/ohos_mock/resource_schedule_service:mock_ressched_client", ]
+
   sources = [
-    "$ace_root/frameworks/base/utils/string_utils.cpp",
-    "$ace_root/adapter/ohos/entrace/ressched_event_listener.cpp",
-    "$ace_root/test/mock/frameworks/base/ressched/mock_taihang_optimizer.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/adapter/ohos/entrance/listener/ressched_event_listener.cpp",
     "ressched_event_listener_test.cpp",
   ]
 
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  defines = [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
 
-  external_deps = [
-    "googletest:gmock",
-    "googletest:gtest",
-  ]
-
-  deps = [ 
-    "$ace_root/test/unittest:ace_unittest_log",
-    "$ace_root/test/mock/ohos_mock/resource_schedule_service:mock_ressched_client",
-  ]
-
-  defines = [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ];
+  external_deps = [ "bounds_checking_function:libsec_static", ]
 }
