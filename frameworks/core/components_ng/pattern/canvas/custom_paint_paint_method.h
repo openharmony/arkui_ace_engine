@@ -417,6 +417,7 @@ protected:
     std::optional<bool> fontAntiAlias_;
     bool isPathChanged_ = true;
     bool isPath2dChanged_ = true;
+    std::optional<float> fontWeightScale_;
 
     static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
         staticPattern[];
