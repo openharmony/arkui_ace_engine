@@ -18,6 +18,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 
+#include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"

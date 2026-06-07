@@ -30,15 +30,10 @@
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 
-#include "base/geometry/dimension.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
-#include "base/resource/data_provider_manager.h"
 #include "base/thread/task_executor.h"
-#include "core/common/display_info.h"
 #include "core/common/platform_bridge.h"
-#include "core/common/platform_res_register.h"
-#include "core/common/thp_extra_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
@@ -47,10 +42,6 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
-#include "core/event/non_pointer_event.h"
-#include "core/event/pointer_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -60,9 +51,15 @@ enum class AvoidAreaType : uint32_t;
 
 namespace OHOS::Ace {
 class ArkUIPerfMonitor;
+class DataProviderManagerInterface;
 class ScheduleTask;
 class SharedImageManager;
+class PlatformResRegister;
 struct RotationEvent;
+struct NonPointerEvent;
+struct DragPointerEvent;
+enum class FoldStatus : uint32_t;
+enum class FoldDisplayMode : uint32_t;
 namespace NG {
 class FrameNode;
 class THPExtraManager;
@@ -111,6 +108,7 @@ class AccessibilityManager;
 enum class FrontendType;
 enum class PlatformVersion;
 enum class AccessibilityCallbackEventId : uint32_t;
+enum class DragEventAction : int;
 struct AccessibilityEvent;
 using NodeId = int32_t;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
@@ -760,10 +758,7 @@ public:
     {
         return dataProviderManager_;
     }
-    void SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager)
-    {
-        dataProviderManager_ = dataProviderManager;
-    }
+    void SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager);
 
     const RefPtr<PlatformBridge>& GetMessageBridge() const
     {
@@ -1017,10 +1012,7 @@ public:
         return density_;
     }
 
-    RefPtr<PlatformResRegister> GetPlatformResRegister() const
-    {
-        return platformResRegister_;
-    }
+    RefPtr<PlatformResRegister> GetPlatformResRegister() const;
 
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);

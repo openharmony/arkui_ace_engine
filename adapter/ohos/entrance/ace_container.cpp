@@ -35,6 +35,7 @@
 #include "pointer_event.h"
 #include "configuration.h"
 
+#include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"

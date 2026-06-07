@@ -26,6 +26,7 @@
 #include <cctype>
 #include <string_view>
 #include "base/geometry/dimension.h"
+#include "base/resource/data_provider_manager.h"
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
 #include "base/utils/string_utils.h"

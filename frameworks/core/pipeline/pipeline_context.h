@@ -37,6 +37,7 @@
 #include "core/animation/schedule_task.h"
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_res_register.h"
+#include "core/event/pointer_event.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"

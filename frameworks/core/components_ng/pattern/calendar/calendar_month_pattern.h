@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/memory/referenced.h"
+#include "core/common/display_info.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components/common/layout/constants.h"
