@@ -1278,4 +1278,54 @@ HWTEST_F(GridCacheLayoutTestNg, OverScrollAtTopWithCacheCount011, TestSize.Level
         EXPECT_FALSE(item) << "Item " << i << " should not exist";
     }
 }
+
+/**
+ * @tc.name: SyncPreloadAfterDataReloadAndScrollToIndex
+ * @tc.desc: When Grid is single column with showCached=true, after data reload triggers
+ *           ScrollToIndex, verify that the cache line below the viewport is correctly created.
+ *           moveToEndLineIndex_ set during ScrollToIndex(AUTO) should not leak into SyncPreload
+ *           and block cache line creation in FillNewLineBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, SyncPreloadAfterDataReloadAndScrollToIndex, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid with 1 column, showCached=true, cachedCount=1,
+     *             20 items each 100px height in viewport of 400px
+     * @tc.expected: Initial layout fills viewport with 4 items (indices 0-3, lines 0-3)
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetCachedCount(1, true);
+    CreateItemsInLazyForEach(20, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    const auto& info = pattern_->info_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 3);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
+
+    /**
+     * @tc.steps: step2. Simulate data reload by calling ChildrenUpdatedFrom(0)
+     *             (equivalent to data source reset), then immediately call ScrollToIndex
+     *             before the next layout pass.
+     * @tc.expected: Both signals are queued; next Measure will process reload + scroll together
+     */
+    frameNode_->ChildrenUpdatedFrom(0);
+
+    ScrollToIndex(5, false, ScrollAlign::AUTO);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step3. After layout is done, verify the cache line below the viewport
+     *             (line after endMainLineIndex_, containing endIndex_+1) has been created.
+     *             This verifies that moveToEndLineIndex_ was cleared before SyncPreload ran.
+     * @tc.expected: Item at endIndex_+1 (the first cache line) has a wrapper node.
+     */
+    EXPECT_FALSE(info.reachEnd_);
+    int32_t cacheItemIdx = info.endIndex_ + 1;
+    EXPECT_TRUE(GetItem(cacheItemIdx, true))
+        << "Cache item " << cacheItemIdx << " should exist after data reload + ScrollToIndex";
+}
 } // namespace OHOS::Ace::NG

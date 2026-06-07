@@ -2425,6 +2425,7 @@ private:
 void GridScrollLayoutAlgorithm::SyncPreload(
     LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize)
 {
+    moveToEndLineIndex_ = -1;
     TempLayoutRange scope(info_);
     for (int32_t i = 0; i < cacheLineCnt; ++i) {
         FillNewLineForward(crossSize, mainSize, wrapper);
