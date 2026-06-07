@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#define private public
+#define protected public
+
 #include "gtest/gtest.h"
 
 #include "base/geometry/dimension.h"
