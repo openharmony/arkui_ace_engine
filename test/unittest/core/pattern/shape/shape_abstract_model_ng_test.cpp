@@ -451,12 +451,19 @@ HWTEST_F(ShapeAbstractModelNGTest, SetStrokeDashArrayFrameNode_ValidFrameNode, T
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto segments = MakeTestDashArray();
     auto resObjArray = MakeTestResObjArray(TEST_DASH_ARRAY_SIZE);
     ShapeAbstractModelNG::SetStrokeDashArray(
         AceType::RawPtr(frameNode), segments, resObjArray);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto paintProperty = GetShapePaintProperty(frameNode);
     EXPECT_FALSE(paintProperty->HasStrokeDashArray());
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -500,10 +507,17 @@ HWTEST_F(ShapeAbstractModelNGTest, SetStrokeFrameNode_ValidFrameNode, TestSize.L
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
     ShapeAbstractModelNG::SetStroke(AceType::RawPtr(frameNode), resObj);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto paintProperty = GetShapePaintProperty(frameNode);
     EXPECT_FALSE(paintProperty->HasStroke());
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -547,10 +561,17 @@ HWTEST_F(ShapeAbstractModelNGTest, SetFillFrameNode_ValidFrameNode, TestSize.Lev
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
     ShapeAbstractModelNG::SetFill(AceType::RawPtr(frameNode), resObj);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto paintProperty = GetShapePaintProperty(frameNode);
     EXPECT_FALSE(paintProperty->HasFill());
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -594,10 +615,17 @@ HWTEST_F(ShapeAbstractModelNGTest, SetForegroundColorFrameNode_ValidFrameNode, T
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
     ShapeAbstractModelNG::SetForegroundColor(AceType::RawPtr(frameNode), resObj);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto paintProperty = GetShapePaintProperty(frameNode);
     EXPECT_FALSE(paintProperty->HasFill());
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -641,10 +669,17 @@ HWTEST_F(ShapeAbstractModelNGTest, SetStrokeOpacityFrameNode_ValidFrameNode, Tes
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
     ShapeAbstractModelNG::SetStrokeOpacity(AceType::RawPtr(frameNode), resObj);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto paintProperty = GetShapePaintProperty(frameNode);
     EXPECT_FALSE(paintProperty->HasStrokeOpacity());
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -688,10 +723,17 @@ HWTEST_F(ShapeAbstractModelNGTest, SetFillOpacityFrameNode_ValidFrameNode, TestS
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
     ShapeAbstractModelNG::SetFillOpacity(AceType::RawPtr(frameNode), resObj);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto paintProperty = GetShapePaintProperty(frameNode);
     EXPECT_FALSE(paintProperty->HasFillOpacity());
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -735,10 +777,17 @@ HWTEST_F(ShapeAbstractModelNGTest, SetStrokeWidthFrameNode_ValidFrameNode, TestS
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
     ShapeAbstractModelNG::SetStrokeWidth(AceType::RawPtr(frameNode), resObj);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto paintProperty = GetShapePaintProperty(frameNode);
     EXPECT_FALSE(paintProperty->HasStrokeWidth());
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -782,10 +831,17 @@ HWTEST_F(ShapeAbstractModelNGTest, SetWidthFrameNode_ValidFrameNode, TestSize.Le
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
     ShapeAbstractModelNG::SetWidth(AceType::RawPtr(frameNode), resObj);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_TRUE(layoutProperty->GetCalcLayoutConstraint() == nullptr);
+    g_isConfigChangePerform = false;
 }
 
 /**
@@ -829,10 +885,17 @@ HWTEST_F(ShapeAbstractModelNGTest, SetHeightFrameNode_ValidFrameNode, TestSize.L
     g_isConfigChangePerform = true;
     auto frameNode = CreateCircleFrameNode(TEST_NODE_ID);
     ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+    size_t initialSize = pattern->resourceMgr_->resMap_.size();
+
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
     ShapeAbstractModelNG::SetHeight(AceType::RawPtr(frameNode), resObj);
+
+    EXPECT_GT(pattern->resourceMgr_->resMap_.size(), initialSize);
     auto layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_TRUE(layoutProperty->GetCalcLayoutConstraint() == nullptr);
+    g_isConfigChangePerform = false;
 }
 
 } // namespace OHOS::Ace::NG

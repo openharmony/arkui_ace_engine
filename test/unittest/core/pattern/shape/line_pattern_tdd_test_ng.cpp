@@ -229,11 +229,17 @@ HWTEST_F(LinePatternTddTestNg, LineModelNG_StartPointResObj_Static_ConfigChangeP
  */
 HWTEST_F(LinePatternTddTestNg, LineModelNG_StartPointResObj_Static_NullFrameNode, TestSize.Level1)
 {
+    auto observerNode = CreateLineFrameNode();
+    ASSERT_NE(observerNode, nullptr);
+    auto paintProperty = observerNode->GetPaintProperty<LinePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
     g_isConfigChangePerform = true;
     ShapePoint point{Dimension(ORIGINAL_POINT_X), Dimension(ORIGINAL_POINT_Y)};
     std::vector<RefPtr<ResourceObject>> resObjArray;
     LineModelNG::StartPoint(nullptr, point, resObjArray);
-    EXPECT_TRUE(true);
+
+    EXPECT_FALSE(paintProperty->HasStartPoint());
     g_isConfigChangePerform = false;
 }
 
@@ -269,11 +275,17 @@ HWTEST_F(LinePatternTddTestNg, LineModelNG_EndPointResObj_Static_ConfigChangePer
  */
 HWTEST_F(LinePatternTddTestNg, LineModelNG_EndPointResObj_Static_NullFrameNode, TestSize.Level1)
 {
+    auto observerNode = CreateLineFrameNode();
+    ASSERT_NE(observerNode, nullptr);
+    auto paintProperty = observerNode->GetPaintProperty<LinePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
     g_isConfigChangePerform = true;
     ShapePoint point{Dimension(ORIGINAL_POINT_X), Dimension(ORIGINAL_POINT_Y)};
     std::vector<RefPtr<ResourceObject>> resObjArray;
     LineModelNG::EndPoint(nullptr, point, resObjArray);
-    EXPECT_TRUE(true);
+
+    EXPECT_FALSE(paintProperty->HasEndPoint());
     g_isConfigChangePerform = false;
 }
 
@@ -845,6 +857,7 @@ HWTEST_F(LinePatternTddTestNg, LineModelNG_StartPointResObj_WeakExpired, TestSiz
     AddMockResourceData(ID_START_Y, MOCK_DIM_Y);
 
     RefPtr<PatternResourceManager> savedResourceMgr;
+    size_t initialResMapSize = 0;
     {
         auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
         RefPtr<FrameNode> scopedNode = FrameNode::GetOrCreateFrameNode(
@@ -862,13 +875,17 @@ HWTEST_F(LinePatternTddTestNg, LineModelNG_StartPointResObj_WeakExpired, TestSiz
 
         savedResourceMgr = pattern->resourceMgr_;
         ASSERT_NE(savedResourceMgr, nullptr);
+        initialResMapSize = savedResourceMgr->resMap_.size();
+        EXPECT_GT(initialResMapSize, static_cast<size_t>(0));
 
         g_isConfigChangePerform = false;
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
     }
 
+    // ReloadResources completes without crash when weak reference has expired
     savedResourceMgr->ReloadResources();
-    EXPECT_TRUE(true);
+    // resMap still contains registered entry (lambda cannot execute but entry remains)
+    EXPECT_EQ(savedResourceMgr->resMap_.size(), initialResMapSize);
 }
 
 /**
@@ -883,6 +900,7 @@ HWTEST_F(LinePatternTddTestNg, LineModelNG_EndPointResObj_WeakExpired, TestSize.
     AddMockResourceData(ID_END_Y, MOCK_DIM_Y);
 
     RefPtr<PatternResourceManager> savedResourceMgr;
+    size_t initialResMapSize = 0;
     {
         auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
         RefPtr<FrameNode> scopedNode = FrameNode::GetOrCreateFrameNode(
@@ -900,13 +918,16 @@ HWTEST_F(LinePatternTddTestNg, LineModelNG_EndPointResObj_WeakExpired, TestSize.
 
         savedResourceMgr = pattern->resourceMgr_;
         ASSERT_NE(savedResourceMgr, nullptr);
+        initialResMapSize = savedResourceMgr->resMap_.size();
+        EXPECT_GT(initialResMapSize, static_cast<size_t>(0));
 
         g_isConfigChangePerform = false;
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
     }
 
+    // ReloadResources completes without crash when weak reference has expired
     savedResourceMgr->ReloadResources();
-    EXPECT_TRUE(true);
+    EXPECT_EQ(savedResourceMgr->resMap_.size(), initialResMapSize);
 }
 
 } // namespace OHOS::Ace::NG
