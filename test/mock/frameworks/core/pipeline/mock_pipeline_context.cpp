@@ -2001,26 +2001,6 @@ void PipelineContext::ChangeSensitiveNodes(bool flag)
 {
 }
 
-ACE_WEAK_SYM void EnvironmentManager::OnNodeAttached(const RefPtr<UINode>& node)
-{
-}
-
-ACE_WEAK_SYM void EnvironmentManager::OnNodeDetached(const RefPtr<UINode>& node)
-{
-}
-
-ACE_WEAK_SYM ScopedEnvConsumer::ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase)
-{
-    if (!node) {
-        return;
-    }
-    active_ = true;
-}
-
-ACE_WEAK_SYM ScopedEnvConsumer::~ScopedEnvConsumer()
-{
-}
-
 bool PipelineContext::GetIsRequestVsync()
 {
     CHECK_NULL_RETURN(window_, false);

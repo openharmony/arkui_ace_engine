@@ -1386,9 +1386,15 @@ TextDirection LayoutProperty::GetLayoutDirection() const
     }
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
-    return (host && pipeline && pipeline->GetUseEnvManager())
-            ? pipeline->ResolveDirectionFromEnv(host).value_or(TextDirection::AUTO)
-            : TextDirection::AUTO;
+    if (!host || !pipeline || !pipeline->IsEnvManagerActive()) {
+        return TextDirection::AUTO;
+    }
+    auto& [directionEnv, directionEnvDirty] = envReaderCache_.direction;
+    if (directionEnvDirty) {
+        directionEnv = pipeline->ResolveDirectionFromEnv(host);
+        directionEnvDirty = false;
+    }
+    return directionEnv.value_or(TextDirection::AUTO);
 }
 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const

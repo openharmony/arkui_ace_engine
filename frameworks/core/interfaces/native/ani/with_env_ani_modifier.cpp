@@ -139,7 +139,7 @@ ArkUINodeHandle ConstructWithEnv(ArkUI_Int32 id)
     withEnvNode->IncRefCount();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     if (pipeline) {
-        pipeline->SetUseEnvManager(true);
+        pipeline->SetEnvManagerActive(true);
     }
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(withEnvNode));
 }
