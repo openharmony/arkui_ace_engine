@@ -456,6 +456,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetStrokeDashArrayFrameNode_ValidFrameNode, T
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto segments = MakeTestDashArray();
@@ -512,6 +515,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetStrokeFrameNode_ValidFrameNode, TestSize.L
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -566,6 +572,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetFillFrameNode_ValidFrameNode, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -620,6 +629,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetForegroundColorFrameNode_ValidFrameNode, T
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -674,6 +686,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetStrokeOpacityFrameNode_ValidFrameNode, Tes
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -728,6 +743,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetFillOpacityFrameNode_ValidFrameNode, TestS
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -782,6 +800,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetStrokeWidthFrameNode_ValidFrameNode, TestS
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -836,6 +857,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetWidthFrameNode_ValidFrameNode, TestSize.Le
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -890,6 +914,9 @@ HWTEST_F(ShapeAbstractModelNGTest, SetHeightFrameNode_ValidFrameNode, TestSize.L
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ShapePattern>();
     ASSERT_NE(pattern, nullptr);
+    if (pattern->resourceMgr_ == nullptr) {
+        pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    }
     size_t initialSize = pattern->resourceMgr_->resMap_.size();
 
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
