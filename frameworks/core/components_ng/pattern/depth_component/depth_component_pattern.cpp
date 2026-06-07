@@ -268,6 +268,8 @@ void DepthComponentPattern::ApplyOnCompleteCallback(const RefPtr<FrameNode>& bac
     CHECK_NULL_VOID(onComplete_);
     auto callback = onComplete_;
     imageEventHub->SetOnComplete([callback = std::move(callback)](const LoadImageSuccessEvent& event) {
+        constexpr int32_t LOADING_STATUS_LOAD_SUCCESS = 1;
+        CHECK_NE_VOID(event.GetLoadingStatus(), LOADING_STATUS_LOAD_SUCCESS);
         DepthComponentCompleteEvent completeEvent;
         completeEvent.componentWidth = event.GetComponentWidth();
         completeEvent.componentHeight = event.GetComponentHeight();
