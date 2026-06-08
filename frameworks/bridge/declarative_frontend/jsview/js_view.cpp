@@ -1574,17 +1574,16 @@ void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>&
         CHECK_NULL_VOID(self);
         ContainerScope scope(self->GetInstanceId());
         JSRef<JSVal> jsKey = JSRef<JSVal>::Make(ToJSValue(key));
-        auto jsFunc = JSRef<JSFunc>::Cast(func);
         if (self->jsViewObject_.IsEmpty() || self->jsViewObject_->IsUndefined()) {
             return;
         }
         if (value) {
             JSRef<JSVal> params[KEY_AND_VALUE_PARAM_COUNT] = { jsKey, *value };
-            jsFunc->Call(self->jsViewObject_, KEY_AND_VALUE_PARAM_COUNT, params);
+            func->Call(self->jsViewObject_, KEY_AND_VALUE_PARAM_COUNT, params);
             return;
         }
         JSRef<JSVal> params[1] = { jsKey };
-        jsFunc->Call(self->jsViewObject_, 1, params);
+        func->Call(self->jsViewObject_, 1, params);
     };
 
     auto customNode = AceType::DynamicCast<NG::CustomNode>(this->GetViewNode());
@@ -1619,17 +1618,16 @@ void JSViewPartialUpdate::RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>&
         CHECK_NULL_VOID(self);
         ContainerScope scope(self->GetInstanceId());
         JSRef<JSVal> jsKey = JSRef<JSVal>::Make(ToJSValue(key));
-        auto jsFunc = JSRef<JSFunc>::Cast(func);
         if (self->jsViewObject_.IsEmpty() || self->jsViewObject_->IsUndefined()) {
             return;
         }
         if (value) {
             JSRef<JSVal> params[KEY_AND_VALUE_PARAM_COUNT] = { jsKey, *value };
-            jsFunc->Call(self->jsViewObject_, KEY_AND_VALUE_PARAM_COUNT, params);
+            func->Call(self->jsViewObject_, KEY_AND_VALUE_PARAM_COUNT, params);
             return;
         }
         JSRef<JSVal> params[1] = { jsKey };
-        jsFunc->Call(self->jsViewObject_, 1, params);
+        func->Call(self->jsViewObject_, 1, params);
     };
 
     auto customNode = AceType::DynamicCast<NG::CustomNode>(this->GetViewNode());
