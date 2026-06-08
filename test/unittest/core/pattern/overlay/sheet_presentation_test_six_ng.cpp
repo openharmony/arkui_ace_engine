@@ -1623,4 +1623,173 @@ HWTEST_F(SheetPresentationTestSixNg, UpdateSheetRenderForceShadow001, TestSize.L
     EXPECT_EQ(renderContext->GetBackShadow().value(), initialShadow);
     SheetPresentationTestSixNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: RemoveOverlayInSubwindowTest001
+ * @tc.desc: Test OverlayManager::RemoveOverlayInSubwindow branch:
+ *           when overlay pattern is SheetWrapperPattern, should call RemoveModalInOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, RemoveOverlayInSubwindowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rootNode and overlayManager.
+     */
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheetWrapperNode and add to rootNode.
+     */
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    rootNode->AddChild(sheetWrapperNode);
+
+    /**
+     * @tc.steps: step3. create sheetNode and mount to sheetWrapperNode.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
+
+    /**
+     * @tc.steps: step4. call RemoveOverlayInSubwindow.
+     * @tc.expected: should return false because RemoveModalInOverlay returns false when no modal stack.
+     */
+    auto result = overlayManager->RemoveOverlayInSubwindow();
+    EXPECT_FALSE(result);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: PropertyCloseAniRequestFrameTest001
+ * @tc.desc: Test SheetSideObject::PropertyCloseAniRequestFrame branch:
+ *           when isTransitionIn is false, should call pipeline->RequestFrame().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, PropertyCloseAniRequestFrameTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheetNode.
+     */
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheetSideObject.
+     */
+    auto sheetSideObject = AceType::MakeRefPtr<SheetSideObject>(SheetType::SHEET_SIDE);
+    ASSERT_NE(sheetSideObject, nullptr);
+    sheetSideObject->BindPattern(sheetPattern);
+
+    /**
+     * @tc.steps: step3. call PropertyCloseAniRequestFrame with isTransitionIn = false.
+     * @tc.expected: should complete without crash.
+     */
+    sheetSideObject->PropertyCloseAniRequestFrame(false);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnWillDisappearTest001
+ * @tc.desc: Test SheetPresentationPattern::OnWillDisappear branch:
+ *           when onWillDisappear_ is null, should still call sheetWrapper->MarkRemoving().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, OnWillDisappearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheetNode.
+     */
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheetWrapperNode and mount sheetNode.
+     */
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
+    EXPECT_FALSE(sheetWrapperNode->IsRemoving());
+
+    /**
+     * @tc.steps: step3. call OnWillDisappear when onWillDisappear_ is null.
+     * @tc.expected: sheetWrapper should be marked as removing.
+     */
+    EXPECT_FALSE(sheetPattern->onWillDisappear_);
+    sheetPattern->OnWillDisappear();
+    EXPECT_TRUE(sheetWrapperNode->IsRemoving());
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnWillDisappearTest002
+ * @tc.desc: Test SheetPresentationPattern::OnWillDisappear branch:
+ *           when onWillDisappear_ is not null, should call the callback and mark removing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, OnWillDisappearTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheetNode.
+     */
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheetWrapperNode and mount sheetNode.
+     */
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
+    EXPECT_FALSE(sheetWrapperNode->IsRemoving());
+
+    /**
+     * @tc.steps: step3. set onWillDisappear_ callback.
+     */
+    bool isCallbackCalled = false;
+    auto onWillDisappearCallback = [&isCallbackCalled]() { isCallbackCalled = true; };
+    sheetPattern->UpdateOnWillDisappear(std::move(onWillDisappearCallback));
+    EXPECT_TRUE(sheetPattern->onWillDisappear_);
+
+    /**
+     * @tc.steps: step4. call OnWillDisappear when onWillDisappear_ is not null.
+     * @tc.expected: callback should be called and sheetWrapper should be marked as removing.
+     */
+    sheetPattern->OnWillDisappear();
+    EXPECT_TRUE(isCallbackCalled);
+    EXPECT_TRUE(sheetWrapperNode->IsRemoving());
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

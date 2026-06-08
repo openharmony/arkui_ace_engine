@@ -181,8 +181,22 @@ std::function<void()> SheetSideObject::GetSheetAnimationEvent(bool isTransitionI
             CHECK_NULL_VOID(sheetObject);
             pattern->GetProperty()->Set(isTransitionIn ? sheetObject->GetSideSheetWidth() : 0);
         };
+        PropertyCloseAniRequestFrame(isTransitionIn);
     }
     return event;
+}
+
+void SheetSideObject::PropertyCloseAniRequestFrame(bool isTransitionIn)
+{
+    if (!isTransitionIn) {
+        auto sheetPattern = GetPattern();
+        CHECK_NULL_VOID(sheetPattern);
+        auto sheetNode = sheetPattern->GetHost();
+        CHECK_NULL_VOID(sheetNode);
+        auto pipeline = sheetNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->RequestFrame();
+    }
 }
 
 void SheetSideObject::ClipSheetNode()
