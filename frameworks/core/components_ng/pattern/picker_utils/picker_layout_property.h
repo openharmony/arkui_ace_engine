@@ -22,7 +22,6 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"

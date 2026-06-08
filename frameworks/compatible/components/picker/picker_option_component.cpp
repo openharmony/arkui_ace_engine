@@ -15,6 +15,7 @@
 
 #include "compatible/components/picker/picker_option_component.h"
 
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "compatible/components/picker/picker_option_element.h"
 #include "compatible/components/picker/render_picker_option.h"
 
@@ -24,6 +25,11 @@ namespace {
 constexpr uint32_t PICKER_OPTION_TEXT_MAX_LINES = 1;
 
 } // namespace
+
+void PickerOptionComponent::SetTheme(const RefPtr<PickerTheme>& value)
+{
+    theme_ = value;
+}
 
 PickerOptionComponent::PickerOptionComponent()
 {

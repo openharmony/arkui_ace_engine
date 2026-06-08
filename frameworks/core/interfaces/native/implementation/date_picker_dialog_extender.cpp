@@ -21,8 +21,10 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/picker/picker_date_time.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/picker/picker_setting_data.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

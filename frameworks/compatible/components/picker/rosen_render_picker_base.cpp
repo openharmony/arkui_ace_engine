@@ -15,6 +15,7 @@
 
 #include "compatible/components/picker/rosen_render_picker_base.h"
 
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {

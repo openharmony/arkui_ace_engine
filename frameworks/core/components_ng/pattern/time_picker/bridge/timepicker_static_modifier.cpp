@@ -16,8 +16,8 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/picker/picker_change_event.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"

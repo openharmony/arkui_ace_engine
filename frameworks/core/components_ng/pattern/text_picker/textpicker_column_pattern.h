@@ -20,13 +20,15 @@
 
 #include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
+namespace OHOS::Ace {
+class PickerTheme;
+}
+
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_accessibility_property.h"
-#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"

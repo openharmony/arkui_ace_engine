@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 

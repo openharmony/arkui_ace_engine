@@ -17,6 +17,8 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include <securec.h>
+#include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -25,7 +27,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"

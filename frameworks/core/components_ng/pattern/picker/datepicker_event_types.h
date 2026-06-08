@@ -16,15 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_DATEPICKER_EVENT_TYPES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_DATEPICKER_EVENT_TYPES_H
 
+#include <cstdint>
 #include <functional>
-#include <string>
+
+#include "base/memory/referenced.h"
 #include "ui/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 
+class FrameNode;
+
 using DateChangeEvent = std::function<void(const BaseEventInfo* info)>;
-using DialogEvent = std::function<void(const std::string&)>;
-using DialogCancelEvent = std::function<void()>;
+using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, uint32_t, bool)>;
+using EventCallback = std::function<void(bool)>;
 
 } // namespace OHOS::Ace::NG
 

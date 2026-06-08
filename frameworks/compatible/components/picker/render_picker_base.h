@@ -21,6 +21,7 @@
 
 #include "compatible/components/picker/picker_base_component.h"
 #include "compatible/components/picker/picker_text_component.h"
+#include "core/components_ng/pattern/picker/picker_date.h"
 #include "compatible/components/picker/render_picker_column.h"
 
 #include "core/components/box/render_box.h"

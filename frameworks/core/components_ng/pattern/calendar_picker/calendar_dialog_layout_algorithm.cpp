@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_layout_algorithm.h"
 
+#include "core/components/calendar/calendar_theme.h"
 #include <algorithm>
 
 #include "core/components_ng/base/frame_node.h"

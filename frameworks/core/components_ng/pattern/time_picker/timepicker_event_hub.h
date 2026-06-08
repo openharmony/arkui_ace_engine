@@ -18,19 +18,9 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
-#include "ui/gestures/gesture_event.h"
-
-namespace OHOS::Ace {
-class GestureEvent;
-}
+#include "core/components_ng/pattern/time_picker/timepicker_event_types.h"
 
 namespace OHOS::Ace::NG {
-
-using TimeChangeEvent = std::function<void(const BaseEventInfo* info)>;
-using DialogEvent = std::function<void(const std::string&)>;
-using DialogCancelEvent = std::function<void()>;
-using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
-using TimeChangeEventForDatePicker = std::function<void()>;
 
 class TimePickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TimePickerEventHub, EventHub);

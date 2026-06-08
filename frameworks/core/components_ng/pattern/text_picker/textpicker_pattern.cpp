@@ -24,6 +24,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -63,6 +64,11 @@ constexpr uint32_t PRECISION_TWO = 2;
 constexpr float DEFAULT_SIZE_ZERO = 0.0f;
 const Dimension PICKER_BUTTON_PADDING = 6.0_vp;
 } // namespace
+
+RefPtr<EventHub> TextPickerPattern::CreateEventHub()
+{
+    return MakeRefPtr<TextPickerEventHub>();
+}
 
 void TextPickerPattern::OnAttachToFrameNode()
 {
@@ -415,6 +421,20 @@ void TextPickerPattern::UpdateFocusButtonState()
 
         UpdateColumnButtonStyles(currentFocusColumnNode, haveFocus_, true);
     }
+}
+
+FocusPattern TextPickerPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+    auto focusColor = pickerTheme->GetFocusColor();
+
+    FocusPaintParam focusPaintParams;
+    focusPaintParams.SetPaintColor(focusColor);
+
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
 }
 
 const RefPtr<FrameNode> TextPickerPattern::GetFocusButtonNode() const

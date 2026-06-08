@@ -17,12 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_COLUMN_LAYOUT_ALGORITHM_H
 
 #include "base/i18n/localization.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 
+namespace OHOS::Ace {
+class PickerTheme;
+}
+
 namespace OHOS::Ace::NG {
+class FrameNode;
 
 class ACE_EXPORT TimePickerColumnLayoutAlgorithm : public LinearLayoutAlgorithm {
     DECLARE_ACE_TYPE(TimePickerColumnLayoutAlgorithm, LinearLayoutAlgorithm);

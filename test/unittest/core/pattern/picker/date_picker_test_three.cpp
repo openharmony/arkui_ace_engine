@@ -28,6 +28,8 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_column_accessibility_property.h"
+#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"

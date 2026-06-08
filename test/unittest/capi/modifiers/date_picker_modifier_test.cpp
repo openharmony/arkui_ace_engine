@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/picker/picker_change_event.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"

@@ -22,13 +22,14 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_date.h"
+#include "core/components_ng/pattern/picker/picker_time.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/picker/picker_types.h"
 
 namespace OHOS::Ace {
 namespace {

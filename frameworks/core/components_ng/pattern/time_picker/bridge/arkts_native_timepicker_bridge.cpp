@@ -25,7 +25,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/picker/picker_change_event.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/i18n/time_format.h"

@@ -20,6 +20,7 @@
 #include "compatible/components/picker/picker_text_component.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

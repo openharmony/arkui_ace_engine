@@ -18,9 +18,9 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
+#include "core/components_ng/pattern/time_picker/timepicker_event_types.h"
 
 namespace OHOS::Ace::NG {
-using TimeChangeEvent = std::function<void(const BaseEventInfo* info)>;
 
 class ACE_FORCE_EXPORT TimePickerModelNG : public TimePickerModel {
 public:

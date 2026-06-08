@@ -18,17 +18,17 @@
 
 #include <optional>
 
+#include "base/i18n/localization.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
-#include "core/components/theme/app_theme.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/picker/picker_date.h"
+#include "core/components_ng/pattern/picker/picker_date_f.h"
+#include "core/components_ng/pattern/picker/picker_string_formatter.h"
+#include "core/components_ng/pattern/picker/picker_text_style.h"
+#include "core/components_ng/pattern/picker/picker_types.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
-#include "core/components_ng/pattern/picker/datepicker_layout_property.h"
+#include "core/components_ng/pattern/picker/datepicker_event_types.h"
+#include "core/components_ng/pattern/picker/datepicker_paint_method.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern_fwd.h"
 #include "core/event/ace_event_handler.h"
@@ -39,9 +39,7 @@ class DialogTheme;
 }
 
 namespace OHOS::Ace::NG {
-using OHOS::Ace::PickerTheme;
-using OHOS::Ace::DialogTheme;
-
+class FrameNode;
 class InspectorFilter;
 constexpr int32_t COLUMNS_SIZE = 3;
 namespace {
@@ -214,14 +212,7 @@ public:
 
     void OrderAllChildNode(RefPtr<FrameNode>& stackYear, RefPtr<FrameNode>& stackMonth, RefPtr<FrameNode>& stackDay);
 
-    RefPtr<FrameNode> GetColumn(const int32_t& tag) const
-    {
-        auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(), [&tag](const auto& c) {
-                auto column = c.Upgrade();
-                return column && column->GetId() == tag;
-            });
-        return (iter == datePickerColumns_.end()) ? nullptr : (*iter).Upgrade();
-    }
+    RefPtr<FrameNode> GetColumn(const int32_t& tag) const;
 
     void SetColumn(const RefPtr<FrameNode>& value)
     {
@@ -337,24 +328,11 @@ public:
         return isShowInDialog_;
     }
 
-    uint32_t GetOptionCount(RefPtr<FrameNode>& frameNode)
-    {
-        return options_[frameNode].size();
-    }
+    uint32_t GetOptionCount(RefPtr<FrameNode>& frameNode);
 
-    PickerDateF GetOptionValue(RefPtr<FrameNode>& frameNode, uint32_t index)
-    {
-        if (index >= GetOptionCount(frameNode)) {
-            LOGE("index out of range.");
-            return {};
-        }
-        return options_[frameNode][index];
-    }
+    PickerDateF GetOptionValue(RefPtr<FrameNode>& frameNode, uint32_t index);
 
-    const std::vector<PickerDateF>& GetAllOptions(RefPtr<FrameNode>& frameNode)
-    {
-        return options_[frameNode];
-    }
+    const std::vector<PickerDateF>& GetAllOptions(RefPtr<FrameNode>& frameNode);
 
     const std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>>& GetOptions() const
     {
@@ -648,17 +626,7 @@ public:
 
     const std::string GetText();
 
-    FocusPattern GetFocusPattern() const override
-    {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
-        auto focusColor = pickerTheme->GetFocusColor();
-        FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(focusColor);
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void SetCurrentFocusKeyID(int32_t value)
     {

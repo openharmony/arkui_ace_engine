@@ -18,8 +18,8 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
+#include "core/components_ng/pattern/picker/picker_setting_data.h"
 #include "frameworks/base/i18n/time_format.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"

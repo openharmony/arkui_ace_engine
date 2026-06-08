@@ -18,17 +18,26 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/button/button_theme.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern_fwd.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
+#include "core/components_ng/pattern/picker/picker_setting_data.h"
+
+namespace OHOS::Ace {
+class ButtonTheme;
+class DialogTheme;
+class PickerTheme;
+}
 
 namespace OHOS::Ace::NG {
 class DateTimeAnimationController;
 class DatePickerPattern;
+class FrameNode;
 class DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,

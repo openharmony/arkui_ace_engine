@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 
+#include "core/components/calendar/calendar_theme.h"
+#include "core/components_ng/pattern/calendar/calendar_event_hub.h"
+
 #include <optional>
 
 #include "base/geometry/offset.h"
@@ -32,6 +35,12 @@
 #include "core/components_ng/pattern/calendar/calendar_utils.h"
 
 namespace OHOS::Ace::NG {
+
+RefPtr<EventHub> CalendarPattern::CreateEventHub()
+{
+    return MakeRefPtr<CalendarEventHub>();
+}
+
 constexpr uint8_t TOTAL_COUNT = 3;
 constexpr float CALENDAR_PICKER_TEXT_MAX_SCALE = 1.45f;
 void CalendarPattern::OnAttachToFrameNode()

@@ -19,7 +19,7 @@
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/picker/picker_checkbox_setting.h"
 
 
 namespace OHOS::Ace::NG {

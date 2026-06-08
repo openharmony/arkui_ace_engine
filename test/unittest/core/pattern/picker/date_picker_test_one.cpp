@@ -33,7 +33,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 

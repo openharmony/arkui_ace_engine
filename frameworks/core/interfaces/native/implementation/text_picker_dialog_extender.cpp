@@ -22,7 +22,9 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/interfaces/native/implementation/text_picker_modifier.h"
 #include "core/interfaces/native/utility/callback_helper.h"

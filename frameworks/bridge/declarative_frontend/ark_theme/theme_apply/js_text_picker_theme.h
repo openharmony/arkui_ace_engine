@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 
 namespace OHOS::Ace::Framework {

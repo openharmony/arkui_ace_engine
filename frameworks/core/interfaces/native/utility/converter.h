@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/particle_enum.h"
@@ -89,6 +90,10 @@ enum class TextInputAction;
 enum class TextInputType;
 enum class UndoStyle;
 enum class StrokeJoinStyle;
+enum class DatePickerMode : uint32_t;
+class PickerDate;
+class PickerTime;
+struct DateTimeType;
 struct Font;
 struct PickerIndicatorStyle;
 struct PreviewText;

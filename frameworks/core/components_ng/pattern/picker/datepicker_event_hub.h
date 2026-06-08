@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_event_types.h"
+#include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
 
 namespace OHOS::Ace::NG {
 

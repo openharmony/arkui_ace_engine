@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 
+#include "core/components_ng/pattern/picker/picker_theme.h"
 namespace OHOS::Ace::NG {
 void PickerColumnPattern::OnAttachToMainTreeMultiThread()
 {

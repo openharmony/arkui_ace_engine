@@ -28,9 +28,13 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {

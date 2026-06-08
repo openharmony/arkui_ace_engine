@@ -44,10 +44,7 @@ public:
     {
         return theme_;
     }
-    void SetTheme(const RefPtr<PickerTheme>& value)
-    {
-        theme_ = value;
-    }
+    void SetTheme(const RefPtr<PickerTheme>& value);
 
     void ClearOption()
     {

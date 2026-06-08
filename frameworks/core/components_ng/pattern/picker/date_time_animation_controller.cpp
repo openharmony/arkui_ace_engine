@@ -13,8 +13,16 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
+
+#include "base/geometry/ng/vector.h"
+#include "core/animation/curves.h"
+#include "core/components/common/properties/animation_option.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "date_time_animation_controller.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -26,6 +34,9 @@ constexpr double OPACITY_DURATION = 150;
 constexpr double TRIANGLE_DURATION = 300;
 constexpr double MOVE_DURATION = 500;
 } // namespace
+
+DateTimeAnimationController::~DateTimeAnimationController() = default;
+
 void DateTimeAnimationController::PlayTitleInAnimation()
 {
     auto buttonIcon = buttonIcon_.Upgrade();

@@ -18,10 +18,13 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_types.h"
 #include "core/common/resource/resource_object.h"
+
+namespace OHOS::Ace {
+class PickerTheme;
+}
 
 namespace OHOS::Ace::Framework {
 
