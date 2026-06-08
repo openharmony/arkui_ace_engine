@@ -786,6 +786,7 @@ export struct ChipComponent {
       if (isDeleteChip || isEnterDeleteChip) {
         this.deleteChip();
       }
+      return true;
     })
     .onFocus(() => {
       if (this.isSuffixIconFocusStyleCustomized) {

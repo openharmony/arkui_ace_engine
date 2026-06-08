@@ -469,6 +469,7 @@ struct CollapsibleMenuSectionV2 {
             if (event.type === KeyType.Up) {
               this.isMoreIconOnClick = false
             }
+            return true;
           })
           .onTouch((event: TouchEvent) => {
             if (event.type === TouchType.Down) {
@@ -869,6 +870,7 @@ struct ImageMenuItemV2 {
         if (event.type === KeyType.Up) {
           this.isOnClick = false;
         }
+        return true;
       })
       .onTouch((event: TouchEvent) => {
         if (!this.item.isEnabled) {
@@ -961,6 +963,7 @@ struct ImageMenuItemV2 {
         if (event.type === KeyType.Up) {
           this.isOnClick = false;
         }
+        return true;
       })
       .onTouch((event: TouchEvent) => {
         if (!this.item.isEnabled) {
