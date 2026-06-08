@@ -1819,7 +1819,7 @@ RefPtr<FrameNode> UINode::GetFrameNodeByIdInSubTree(const std::string& id)
     }
     auto targetNode = AceType::DynamicCast<FrameNode>(BfsFindUINode(Claim(this), [&id](const RefPtr<UINode>& uiNode) {
         return AceType::InstanceOf<FrameNode>(uiNode) &&
-               (id == uiNode->propInspectorId_.value_or("") || id == std::to_string(uiNode->nodeId_));
+               (id == uiNode->propInspectorId_.value_or(""));
     }));
     return targetNode;
 }
