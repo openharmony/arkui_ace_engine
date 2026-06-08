@@ -27,18 +27,51 @@ import common from '@ohos.app.ability.common';
 import hilog from '@ohos.hilog';
 import { UIContext } from '@ohos.arkui.UIContext';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
-import { Param, Local, Monitor, IMonitor } from '@ohos.arkui.stateManagement';
+import { Param, Local, Monitor, IMonitor, ObservedV2, Trace } from '@ohos.arkui.stateManagement';
 import promptAction from '@ohos.promptAction';
 
-export class SelectTitleBarV2MenuItem {
-  value: ResourceStr = '';
+export interface SelectTitleBarV2MenuItemParams {
+  value: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
+  label?: ResourceStr;
   isEnabled?: boolean;
   action?: () => void;
-  label?: ResourceStr;
   accessibilityText?: ResourceStr;
-  accessibilityLevel?: string;
   accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
+}
+
+@ObservedV2
+export class SelectTitleBarV2MenuItem {
+  @Trace
+  value: ResourceStr = '';
+  @Trace
+  symbolStyle?: SymbolGlyphModifier;
+  @Trace
+  label?: ResourceStr;
+  @Trace
+  isEnabled?: boolean;
+  @Trace
+  action?: () => void;
+  @Trace
+  accessibilityText?: ResourceStr;
+  @Trace
+  accessibilityDescription?: ResourceStr;
+  @Trace
+  accessibilityLevel?: string;
+
+  constructor(params?: SelectTitleBarV2MenuItemParams) {
+    if (params) {
+      this.value = params.value;
+      if (params.symbolStyle !== undefined) this.symbolStyle = params.symbolStyle;
+      if (params.label !== undefined) this.label = params.label;
+      if (params.isEnabled !== undefined) this.isEnabled = params.isEnabled;
+      if (params.action !== undefined) this.action = params.action;
+      if (params.accessibilityText !== undefined) this.accessibilityText = params.accessibilityText;
+      if (params.accessibilityDescription !== undefined) this.accessibilityDescription = params.accessibilityDescription;
+      if (params.accessibilityLevel !== undefined) this.accessibilityLevel = params.accessibilityLevel;
+    }
+  }
 }
 
 const RESOURCE_TYPE_SYMBOL: number = 40000;
@@ -94,10 +127,10 @@ export struct SelectTitleBarV2 {
 
   @Param selected: int = 0;
   @Param options: Array<SelectOption> = [] as Array<SelectOption>;
-  @Param menuItems: Array<SelectTitleBarV2MenuItem> = [] as Array<SelectTitleBarV2MenuItem>;
-  @Param subtitle: ResourceStr = '';
-  @Param badgeValue: int = 0;
-  @Param hidesBackButton: boolean = false;
+  @Param menuItems?: Array<SelectTitleBarV2MenuItem> = [] as Array<SelectTitleBarV2MenuItem>;
+  @Param subtitle?: ResourceStr = '';
+  @Param badgeValue?: int = 0;
+  @Param hidesBackButton?: boolean = false;
   @Param onSelected?: (index: int) => void = undefined;
 
   @Local fontSize: number = 1;
@@ -131,7 +164,7 @@ export struct SelectTitleBarV2 {
       Row() {
         if (!this.hidesBackButton) {
           ImageMenuItemV2({
-            item: {
+            item: new SelectTitleBarV2MenuItem({
               value: '',
               symbolStyle: new SymbolGlyphModifier(this.PUBLIC_BACK),
               isEnabled: true,
@@ -139,7 +172,7 @@ export struct SelectTitleBarV2 {
               action: () => {
                 this.getUIContext()?.getRouter()?.back()
               }
-            } as SelectTitleBarV2MenuItem,
+            }),
             index: -1
           });
         }
@@ -147,7 +180,7 @@ export struct SelectTitleBarV2 {
         Column() {
           if (this.badgeValue) {
             Badge({
-              count: this.badgeValue,
+              count: this.badgeValue!,
               position: BadgePosition.Right,
               style: {
                 badgeColor: $r('sys.color.ohos_id_color_emphasize'),
@@ -171,7 +204,7 @@ export struct SelectTitleBarV2 {
                   .constraintSize({ maxWidth: this.selectMaxWidth })
                   .offset({ x: -4 } as Position)
                   .accessibilityLevel('yes')
-                  .accessibilityDescription(this.messageDesc.replace('%d', this.badgeValue.toString()))
+                  .accessibilityDescription(this.messageDesc.replace('%d', this.badgeValue!.toString()))
               }
               .justifyContent(FlexAlign.Start)
               .margin({ right: $r('sys.float.ohos_id_elements_margin_horizontal_l') } as Margin);
@@ -197,7 +230,7 @@ export struct SelectTitleBarV2 {
             }
             .justifyContent(FlexAlign.Start);
           }
-          if (this.subtitle !== '') {
+          if (this.subtitle !== undefined) {
             Row() {
               Text(this.subtitle)
                 .fontSize($r('sys.float.ohos_id_text_size_over_line'))
@@ -220,7 +253,7 @@ export struct SelectTitleBarV2 {
           $r('sys.float.ohos_id_default_padding_start')
       } as Margin);
 
-      if (this.menuItems !== undefined && this.menuItems.length > 0) {
+      if (this.menuItems !== undefined && this.menuItems!.length > 0) {
         CollapsibleMenuSectionV2({ menuItems: this.menuItems, index: 1 + SelectTitleBarV2.instanceCount++ });
       }
     }
@@ -234,8 +267,8 @@ export struct SelectTitleBarV2 {
         newWidth += SelectTitleBarV2.leftPadding;
         newWidth -= SelectTitleBarV2.leftPaddingWithBack;
       }
-      if (this.menuItems.length > 0) {
-        let menusLength: number = this.menuItems.length;
+      if (this.menuItems!.length > 0) {
+        let menusLength: number = this.menuItems!.length;
         if (menusLength >= CollapsibleMenuSectionV2.maxCountOfVisibleItems) {
           newWidth -= ImageMenuItemV2.imageHotZoneWidth * CollapsibleMenuSectionV2.maxCountOfVisibleItems;
         } else if (menusLength > 0) {
@@ -256,7 +289,7 @@ export struct SelectTitleBarV2 {
       let resourceManager = (this.getUIContext().getHostContext() as common.UIAbilityContext).resourceManager;
       this.messageDesc =
         resourceManager?.getIntPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new',
-          this.badgeValue.toInt()) as string;
+          (this.badgeValue??0).toInt()) as string;
     } catch (exception) {
       let code: undefined | number = (exception as ClassCastError)?.code;
       let message: undefined | string = (exception as ClassCastError)?.message;
@@ -273,10 +306,11 @@ struct CollapsibleMenuSectionV2 {
   private static readonly marginsNum: number = 2;
 
   @Param menuItems: Array<SelectTitleBarV2MenuItem> = [] as Array<SelectTitleBarV2MenuItem>;
-  @Param item: SelectTitleBarV2MenuItem = {
+  @Param item: SelectTitleBarV2MenuItem = new SelectTitleBarV2MenuItem({
+    value: '',
     symbolStyle: new SymbolGlyphModifier($r('sys.symbol.dot_grid_2x2')),
-    label: $r('sys.string.ohos_toolbar_more'),
-  } as SelectTitleBarV2MenuItem;
+    label: $r('sys.string.ohos_toolbar_more')
+  });
   @Param index: int = 0;
 
   @Local fontSize: number = 1;
@@ -602,7 +636,7 @@ struct ImageMenuItemV2 {
   static readonly focusBorderWidth: number = 2;
   static readonly focusablePrefix: string = 'Id-SelectTitleBar-ImageMenuItem-';
 
-  @Param item: SelectTitleBarV2MenuItem = {} as SelectTitleBarV2MenuItem;
+  @Param item: SelectTitleBarV2MenuItem = new SelectTitleBarV2MenuItem();
   @Param index: int = 0;
   @Param isPopup: boolean = true;
 
