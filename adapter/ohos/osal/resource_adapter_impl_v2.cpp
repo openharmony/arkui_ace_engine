@@ -1229,11 +1229,7 @@ RefPtr<ResourceAdapter> ResourceAdapterImplV2::GetOverrideResourceAdapter(
         overrideResConfig->SetScreenDensity(config.GetDensity());
     }
     auto overrideResMgr = sysResourceManager_->GetOverrideResourceManager(overrideResConfig);
-    auto adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
-    adapter->resConfig_ = overrideResConfig;
-    adapter->SetAppHasDarkRes(appHasDarkRes_);
-    adapter->packagePathStr_ = packagePathStr_;
-    return adapter;
+    return AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
 }
 
 bool ResourceAdapterImplV2::ExistDarkResById(const std::string& resourceId)

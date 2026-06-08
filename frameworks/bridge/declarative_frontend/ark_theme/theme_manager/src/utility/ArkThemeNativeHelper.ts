@@ -50,8 +50,6 @@ class ArkThemeNativeHelper {
 
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         getUINativeModule().theme.setDefaultTheme(colorArray, false);
-        ArkThemeScopeManager.getInstance().onExitLocalColorMode();
-
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
         getUINativeModule().theme.setDefaultTheme(darkColorArray, true);
         ArkThemeScopeManager.getInstance().onExitLocalColorMode();
