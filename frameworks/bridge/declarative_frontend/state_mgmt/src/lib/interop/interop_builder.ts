@@ -134,8 +134,8 @@ function isDynamicBuilderProxy(value: Object): boolean {
     return !!(value && value[str]);
 }
 
-function getBuilderParamProxyEntries(value: Object): any[] {
-    const res: any[] = [];
+function getBuilderParamProxyEntries(value: Object): any {
+    const res = globalThis.Panda.STValue.newSTArray();
     if (isDynamicBuilderProxy(value)) {
         const str = '__builder_param_get_target';
         const raw = value[str];
@@ -143,7 +143,10 @@ function getBuilderParamProxyEntries(value: Object): any[] {
             const entries = Array.from(raw.entries());
             entries.forEach((entry)=>{
                 if(typeof entry[1] === 'function') {
-                    res.push([entry[0], entry[1]()]);
+                    const inner = globalThis.Panda.STValue.newSTArray();
+                    inner.push(entry[0]);
+                    inner.push(entry[1]());
+                    res.push(inner);
                 }
             })
         }
