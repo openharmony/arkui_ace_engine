@@ -235,7 +235,8 @@ HWTEST_F(XComponentTestNg, InitControllerMultiThreadTest001, TestSize.Level1)
     pattern->xcomponentController_->ConfigSurface(
         static_cast<uint32_t>(SURFACE_WIDTH), static_cast<uint32_t>(SURFACE_HEIGHT));
     EXPECT_EQ(pattern->xcomponentController_->surfaceId_, pattern->surfaceId_);
-    auto controllerNG = static_cast<XComponentControllerNG*>(pattern->xcomponentController_.get());
+    auto controllerNG =
+        static_cast<XComponentControllerNG*>(pattern->xcomponentController_.get());
     EXPECT_TRUE(controllerNG);
     EXPECT_FALSE(controllerNG->pattern_.Invalid());
     EXPECT_EQ(controllerNG->pattern_.Upgrade(), pattern);
@@ -809,7 +810,8 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
 
     auto onLoad2 =
         [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
-    auto onDestroy2 = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = ""; };
+    auto onDestroy2 =
+        [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = ""; };
     testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad2);
     testProperty.destroyEvent = std::move(onDestroy2);
@@ -1405,7 +1407,8 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
 
 
     onDetachKey.clear();
-    XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_COMPONENT_TYPE_VALUE);
+    XComponentModelNG::SetXComponentType(
+        Referenced::RawPtr(frameNode), XCOMPONENT_COMPONENT_TYPE_VALUE);
     xComponent.SetDetachCallback(std::move(onDetach));
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);

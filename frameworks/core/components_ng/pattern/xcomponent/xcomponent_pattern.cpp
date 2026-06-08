@@ -130,8 +130,9 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
     const std::optional<std::string>& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight,
     bool isTypedNode)
-    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight),
-      isTypedNode_(isTypedNode)
+    : id_(id), type_(type), xcomponentController_(xcomponentController), isTypedNode_(isTypedNode),
+      initSize_(initWidth, initHeight)
+      
 {
     SetLibraryName(libraryname);
     if (!isTypedNode_) {
