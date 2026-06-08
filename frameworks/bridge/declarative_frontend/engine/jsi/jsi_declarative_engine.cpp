@@ -1886,8 +1886,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             auto fileMapperPtr = data.release();
             if (!arkRuntime->ExecuteModuleBufferSecure(fileMapperPtr->GetDataPtr(), fileMapperPtr->GetDataLen(),
                 abcPath, true, static_cast<void*>(fileMapperPtr))) {
-                fileMapperPtr->SetAutoReleaseMem(true);
-                delete fileMapperPtr;
                 return false;
             }
         }
