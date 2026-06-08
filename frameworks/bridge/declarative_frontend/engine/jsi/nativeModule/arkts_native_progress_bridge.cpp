@@ -642,8 +642,22 @@ ArkUINativeModuleValue ProgressBridge::SetProgressBackgroundColor(ArkUIRuntimeCa
         nodeModifiers->getProgressModifier()->resetProgressBackgroundColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(resObj);
-        nodeModifiers->getProgressModifier()->setProgressBackgroundColorWithColorSpace(
-            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
+        auto headRoomOptional = color.GetHeadRoomColor();
+        if (headRoomOptional.has_value()) {
+            auto colorWithHeadRoom = headRoomOptional.value();
+            ArkUI_Float32 hdrValues[5] = {
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.red),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.green),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.blue),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom)
+            };
+            nodeModifiers->getProgressModifier()->setBackgroundColorForHDR(
+                nativeNode, color.GetColorSpace(), hdrValues, colorRawPtr);
+        } else {
+            nodeModifiers->getProgressModifier()->setProgressBackgroundColorWithColorSpace(
+                nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
+        }
     }
 
     return panda::JSValueRef::Undefined(vm);

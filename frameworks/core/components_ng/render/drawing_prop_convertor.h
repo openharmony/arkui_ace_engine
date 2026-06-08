@@ -36,6 +36,8 @@ ACE_FORCE_EXPORT RSPoint ToRSPoint(const NG::PointF& point);
 ACE_FORCE_EXPORT RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 ACE_FORCE_EXPORT RSColor ToRSColor(const Color& color);
 ACE_FORCE_EXPORT RSColor ToRSColor(const LinearColor& color);
+ACE_FORCE_EXPORT std::shared_ptr<RSColorSpace> GetProgressColorSpace(const Color& color);
+ACE_FORCE_EXPORT RSUIColor ToRSUIColor(const LinearColor& linearColor, const Color& color);
 ACE_FORCE_EXPORT RSRect ToRSRect(const NG::RectF& rect);
 RSTextDirection ToRSTextDirection(const TextDirection& txtDir);
 RSTextAlign ToRSTextAlign(const TextAlign& align);

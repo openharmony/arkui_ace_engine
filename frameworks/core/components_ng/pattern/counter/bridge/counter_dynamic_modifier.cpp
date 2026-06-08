@@ -173,6 +173,33 @@ void SetCounterBackgroundColorRes(ArkUINodeHandle node, ArkUI_Uint32 color, ArkU
     }
 }
 
+void SetBackgroundColorForHDR(
+    ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32* hdrValues, void* colorRawPtr)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(hdrValues);
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else if (ColorSpace::BT2020 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::BT2020);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    CounterModelNG::SetBackgroundColor(frameNode, backgroundColor);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (colorRawPtr) {
+            auto* colorResObj = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            CounterModelNG::CreateWithResourceObj(
+                frameNode, JsCounterResourceType::BackgroundColor, AceType::Claim(colorResObj));
+        } else {
+            CounterModelNG::CreateWithResourceObj(frameNode, JsCounterResourceType::BackgroundColor, nullptr);
+        }
+    }
+}
+
 void ResetCounterBackgroundColor(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
@@ -318,6 +345,13 @@ void SetCounterBackgroundColorResImpl(
     GetCounterModelImpl()->SetBackgroundColor(backgroundColor);
 }
 
+void SetBackgroundColorForHDRImpl(
+    ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32* hdrValues, void* colorRawPtr)
+{
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    GetCounterModelImpl()->SetBackgroundColor(backgroundColor);
+}
+
 void ResetCounterBackgroundColorImpl(ArkUINodeHandle node)
 {
     GetCounterModelImpl()->SetBackgroundColor(Color::WHITE);
@@ -378,6 +412,7 @@ const ArkUICounterModifier* GetCounterDynamicModifier()
             .setCounterBackgroundColor = SetCounterBackgroundColorImpl,
             .setCounterBackgroundColorWithColorSpace = SetCounterBackgroundColorWithColorSpaceImpl,
             .setCounterBackgroundColorRes = SetCounterBackgroundColorResImpl,
+            .setBackgroundColorForHDR = SetBackgroundColorForHDRImpl,
             .resetCounterBackgroundColor = ResetCounterBackgroundColorImpl,
             .setCounterOnInc = SetCounterOnIncImpl,
             .resetCounterOnInc = ResetCounterOnIncImpl,
@@ -408,6 +443,7 @@ const ArkUICounterModifier* GetCounterDynamicModifier()
         .setCounterBackgroundColor = SetCounterBackgroundColor,
         .setCounterBackgroundColorWithColorSpace = SetCounterBackgroundColorWithColorSpace,
         .setCounterBackgroundColorRes = SetCounterBackgroundColorRes,
+        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
         .resetCounterBackgroundColor = ResetCounterBackgroundColor,
         .setCounterOnInc = SetCounterOnInc,
         .resetCounterOnInc = ResetCounterOnInc,
@@ -439,6 +475,7 @@ const CJUICounterModifier* GetCJUICounterModifier()
         .setCounterBackgroundColor = SetCounterBackgroundColor,
         .setCounterBackgroundColorWithColorSpace = SetCounterBackgroundColorWithColorSpace,
         .setCounterBackgroundColorRes = SetCounterBackgroundColorRes,
+        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
         .resetCounterBackgroundColor = ResetCounterBackgroundColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

@@ -4643,7 +4643,7 @@ void RosenRenderContext::BlendBgColor(const Color& color)
     auto blendColor =
         GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColor_).BlendColor(hoveredColor_);
     OHOS::Rosen::RSColor rsColor;
-    ColorToRSColor(blendColor, rsColor);
+    ColorToRSColorHDR(blendColor, rsColor);
     rsNode_->SetBackgroundColor(rsColor);
     RequestNextFrame();
 }

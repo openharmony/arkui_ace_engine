@@ -836,7 +836,9 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    brush.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
     double radius = strokeRadius_->Get();
     if (contentSize.Width() >= contentSize.Height()) {
         double barLength = contentSize.Width() - radius * INT32_TWO;
@@ -903,7 +905,9 @@ void ProgressModifier::PaintLinearWithGradient(RSCanvas& canvas, const OffsetF& 
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    brush.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
     double radius = strokeRadius_->Get();
 
     std::vector<GradientColor> gradientColors = GetRingProgressGradientColors();
@@ -1120,7 +1124,9 @@ void ProgressModifier::PaintRingBackground(RSCanvas& canvas, const RingProgressD
     pen.SetAntiAlias(true);
     pen.SetWidth(ringProgressData.thickness);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
-    pen.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    pen.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
 
     canvas.Save();
     canvas.AttachPen(pen);
@@ -1579,7 +1585,9 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
 #else
     pen.SetPathEffect(RSRecordingPathEffect::CreatePathDashEffect(path, pathDistance, 0.0f, RSPathDashStyle::ROTATE));
 #endif
-    pen.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    pen.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
     canvas.AttachPen(pen);
     if (isRightToLeft_->Get()) {
         canvas.Scale(-1, 1);
@@ -1608,7 +1616,9 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetAlpha(true);
-    brush.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    brush.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
     double angle = std::min((value_->Get() / maxValue_->Get()) * totalDegree, static_cast<float>(totalDegree));
 #ifndef USE_ROSEN_DRAWING
     RSPath path;
@@ -1697,7 +1707,9 @@ void ProgressModifier::PaintCapsule(
     brush.SetAntiAlias(true);
     RSPen pen;
     brush.SetAlpha(true);
-    brush.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    brush.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
     pen.SetWidth(borderWidth);
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(borderColor_->Get()));
@@ -1744,7 +1756,9 @@ void ProgressModifier::PaintCapsuleWithGradient(
     brush.SetAntiAlias(true);
     RSPen pen;
     brush.SetAlpha(true);
-    brush.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    brush.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
     pen.SetWidth(borderWidth);
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(borderColor_->Get()));
@@ -1932,7 +1946,9 @@ void ProgressModifier::PaintVerticalCapsule(
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(borderColor_->Get()));
     brush.SetAlpha(true);
-    brush.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    brush.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
 #ifndef USE_ROSEN_DRAWING
     RSPath path;
 #else
@@ -2034,7 +2050,9 @@ void ProgressModifier::PaintVerticalCapsuleWithGradient(
     pen.SetAntiAlias(true);
     pen.SetColor(ToRSColor(borderColor_->Get()));
     brush.SetAlpha(true);
-    brush.SetColor(ToRSColor(bgColor_->Get()));
+    const auto bgColor = bgColor_->Get();
+    const auto color = bgColor.ToColorWithColorSpace();
+    brush.SetUIColor(ToRSUIColor(bgColor, color), GetProgressColorSpace(color));
     RSRecordingPath path;
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect({ { offsetX, offsetY, contentSize.Width() + offsetX, contentSize.Height() + offsetY },
