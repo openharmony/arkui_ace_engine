@@ -16,6 +16,7 @@
         "src/column_split_modifier.ts",
         "src/component3d_modifier.ts",
         "src/container_picker_modifier.ts",
+        "src/container_reader_modifier.ts",
         "src/container_span_modifier.ts",
         "src/counter_modifier.ts",
         "src/data_panel_modifier.ts",
