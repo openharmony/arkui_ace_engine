@@ -63,6 +63,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.checkValueIsNotFunction(newValue);
         if (!this.checkFake) {
             this.sourceProvide_!.set(newValue);
+            this.updateObservedObjectRegistration(oldValue, this.sourceProvide_!.get(false));
             return;
         }
 
@@ -137,8 +138,6 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     }
 
     public aboutToBeDeletedInternal(): void {
-        // Unregister from the observed object before deletion
-        // Only unregister when using fake Provide source
         if (this.checkFake && this.sourceProvide_) {
             const currentValue = this.sourceProvide_!.get(false);
             this.unregisterFromObservedObject(currentValue);

@@ -318,6 +318,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             ArkUIObjectFinalizationRegisterProxy.call(new WeakRef<object>(this.instance),
                 `${Class.of(this.instance).getName()}[${this.getUniqueId()}] is in process of destruction`);
         }
+        this.instance.__clearStateVariables__Internal();
         const envSet = this.instance.getEnvSet();
         if (envSet.size > 0) {
             for (const envItem of envSet) {
