@@ -29,6 +29,7 @@
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
 type CustomEnvValue = any;
+type SystemEnvUpdateValue = string | number | undefined;
 type CustomEnvMeta = {
   varToKey: Record<string, number>;
 };
@@ -468,7 +469,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     this.dirtDescendantElementIds_.clear();
   }
 
-  protected __onCustomEnvValueUpdate__Internal(envKey: number): void {
+  protected __onCustomEnvValueUpdate__Internal(envKey: number, updatedEnvValue?: CustomEnvValue): void {
     stateMgmtConsole.debug(`${this.debugInfo__()}: custom env update ignored for key ${envKey}, no @CustomEnv property registered`);
     let needUpdated: boolean = false;
     this.__getCustomEnvPropertyNameToKey__Internal()
@@ -478,7 +479,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           return;
         }
         const storeProp = ObserveV2.OB_PREFIX + varName;
-        const updatedEnvValue = this.findCustomValueByKey(customEnvKey);
         if (updatedEnvValue === undefined) {
           return;
         }
@@ -493,7 +493,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     }
   }
 
-  protected __onEnvValueUpdate__Internal(envKey: string): void {
+  protected __onEnvValueUpdate__Internal(envKey: string, updatedEnvValue?: SystemEnvUpdateValue): void {
     stateMgmtConsole.debug(`${this.debugInfo__()}: env update ignored for key ${envKey}, no @Env property registered`);
     let needUpdated: boolean = false;
     this.__getEnvPropertyNameToKey__Internal()
@@ -505,7 +505,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           return;
         }
         const storeProp = ObserveV2.ENV_PREFIX + varName;
-        const updatedEnvValue = this.findEnvValueByKey(declaredEnvKey);
         if (updatedEnvValue === undefined) {
           return;
         }

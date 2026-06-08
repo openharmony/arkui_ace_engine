@@ -102,6 +102,7 @@ ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
 namespace OHOS::Ace::Framework {
 
 namespace {
+constexpr int32_t KEY_AND_VALUE_PARAM_COUNT = 2;
 RefPtr<NG::EnvironmentManager> GetEnvironmentManager(const RefPtr<NG::UINode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -133,6 +134,26 @@ void SetSystemEnvQueryReturnValue(const JSCallbackInfo& info, const NG::SystemEn
         return;
     }
     info.SetReturnValue(JSVal::Undefined());
+}
+
+JSRef<JSVal> MakeSystemEnvUpdateValue(const NG::SystemEnvValue& result)
+{
+    if (auto direction = result.GetDirection()) {
+        switch (*direction) {
+            case TextDirection::LTR:
+                return JSRef<JSVal>::Make(ToJSValue(std::string("Ltr")));
+            case TextDirection::RTL:
+                return JSRef<JSVal>::Make(ToJSValue(std::string("Rtl")));
+            case TextDirection::AUTO:
+                return JSRef<JSVal>::Make(ToJSValue(std::string("Auto")));
+            default:
+                return JSVal::Undefined();
+        }
+    }
+    if (auto doubleValue = result.GetDouble()) {
+        return JSRef<JSVal>::Make(ToJSValue(*doubleValue));
+    }
+    return JSVal::Undefined();
 }
 } // namespace
 
@@ -1557,6 +1578,11 @@ void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>&
         if (self->jsViewObject_.IsEmpty() || self->jsViewObject_->IsUndefined()) {
             return;
         }
+        if (value) {
+            JSRef<JSVal> params[KEY_AND_VALUE_PARAM_COUNT] = { jsKey, *value };
+            jsFunc->Call(self->jsViewObject_, KEY_AND_VALUE_PARAM_COUNT, params);
+            return;
+        }
         JSRef<JSVal> params[1] = { jsKey };
         jsFunc->Call(self->jsViewObject_, 1, params);
     };
@@ -1572,6 +1598,12 @@ void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>&
                 TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "key is not a valid integer");
             }
             std::optional<JSRef<JSVal>> jsValue;
+            if (value) {
+                jsValue.emplace(JSVal::Undefined());
+                if (auto customValue = std::any_cast<JSRef<JSVal>>(&(*value))) {
+                    jsValue = *customValue;
+                }
+            }
             if (self->updateCustomEnvCallback_) {
                 self->updateCustomEnvCallback_(customEnvKey, jsValue);
             }
@@ -1591,6 +1623,11 @@ void JSViewPartialUpdate::RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>&
         if (self->jsViewObject_.IsEmpty() || self->jsViewObject_->IsUndefined()) {
             return;
         }
+        if (value) {
+            JSRef<JSVal> params[KEY_AND_VALUE_PARAM_COUNT] = { jsKey, *value };
+            jsFunc->Call(self->jsViewObject_, KEY_AND_VALUE_PARAM_COUNT, params);
+            return;
+        }
         JSRef<JSVal> params[1] = { jsKey };
         jsFunc->Call(self->jsViewObject_, 1, params);
     };
@@ -1602,6 +1639,9 @@ void JSViewPartialUpdate::RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>&
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self);
             std::optional<JSRef<JSVal>> jsValue;
+            if (value) {
+                jsValue = MakeSystemEnvUpdateValue(*value);
+            }
             if (self->updateEnvCallback_) {
                 self->updateEnvCallback_(key, jsValue);
             }

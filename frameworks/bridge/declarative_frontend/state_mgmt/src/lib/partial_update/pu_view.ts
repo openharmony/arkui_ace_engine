@@ -70,6 +70,7 @@ abstract class ViewPU extends PUV2ViewBase
   public paramsGenerator_: () => Object;
 
   private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
+  private delayedWatchedProps_: Set<string> = new Set<string>();
 
   private recycleManager_: RecycleManager = undefined;
   private myReusePool__ : __ReusePool_Internal__  | undefined;
@@ -343,6 +344,7 @@ abstract class ViewPU extends PUV2ViewBase
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
+    this.delayedWatchedProps_.clear();
     this.providedVars_?.clear();
     if (this.ownObservedPropertiesStore__) {
       this.ownObservedPropertiesStore__.clear();
@@ -767,7 +769,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private performDelayedUpdate(): void {
-    if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size) {
+    if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size && !this.delayedWatchedProps_.size) {
       return;
     }
     stateMgmtProfiler.begin('ViewPU.performDelayedUpdate');
@@ -799,6 +801,15 @@ abstract class ViewPU extends PUV2ViewBase
         this.dirtDescendantElementIds_.add(elementId);
       }
       this.elmtIdsDelayedUpdate.clear();
+      
+      for (const varName of this.delayedWatchedProps_) {
+        const cb = this.watchedProps.get(varName);
+        if (cb) {
+          stateMgmtConsole.debug(`   ... calling delayed @Watch function`);
+          cb.call(this, varName);
+        }
+      }
+      this.delayedWatchedProps_.clear();
     } finally {
       this.restoreInstanceId();
     }
@@ -821,6 +832,11 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   protected override __notifyDecoratedWatch__Internal(varName: string): void {
+    if (this.isCompFreezeAllowed() && !this.isViewActive()) {
+      stateMgmtConsole.debug(`${this.debugInfo__()} state var ${varName} delays @Watch function while component is frozen`);
+      this.delayedWatchedProps_.add(varName);
+      return;
+    }
     const cb = this.watchedProps.get(varName);
     if (cb && typeof cb === 'function') {
       cb.call(this, varName);
