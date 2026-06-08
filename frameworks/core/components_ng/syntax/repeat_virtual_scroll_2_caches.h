@@ -281,6 +281,11 @@ public:
     bool BuildL2CacheByRid(RIDType rid, int64_t deadline);
 
     int32_t GetL1Size();
+    void SetEnableSyncLoad(bool value);
+    void SetIsSyncLoad(bool value);
+    void ProcessSyncLoadTempChildren(std::list<RefPtr<UINode>>& children, int32_t start, int32_t end);
+    void OrganizeSyncLoadCache();
+    bool CheckIsSyncLoad();
 
 private:
     /**
@@ -327,6 +332,10 @@ private:
 
     // the RID of L2 node that is restoring
     RIDType restoringRid_ = 0;
+
+    std::unordered_map<int32_t, WeakPtr<UINode>> syncLoadCache_;
+    bool enableSyncLoad_ = true;
+    bool isSyncLoad_ = true;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

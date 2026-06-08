@@ -245,6 +245,9 @@ public:
 
     void UpdateThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void SetEnableSyncLoad(bool value) override;
+    void SetIsSyncLoad(bool value) override;
+
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
     void DumpInfo() override;

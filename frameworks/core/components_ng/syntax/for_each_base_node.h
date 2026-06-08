@@ -94,6 +94,8 @@ public:
             DisableRecycle(child);
         }
     }
+    virtual void SetEnableSyncLoad(bool value) {}
+    virtual void SetIsSyncLoad(bool value) {}
 
 protected:
     std::function<void(int32_t, int32_t)> onMoveEvent_;

@@ -1554,13 +1554,13 @@ HWTEST_F(LazyForEachSyntaxTestNg, RemovingExpiringItemEmptyTest, TestSize.Level1
      */
     auto lazyForEachBuilder = CreateLazyForEachBuilder();
     ASSERT_NE(lazyForEachBuilder, nullptr);
-    
+
     /**
      * @tc.steps: step2. Ensure removingNodeList_ is empty
      * @tc.expected: removingNodeList_ is empty
      */
     EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
-    
+
     /**
      * @tc.steps: step3. Call RemovingExpiringItem with far deadline
      * @tc.expected: No crash, method returns immediately
@@ -1568,6 +1568,23 @@ HWTEST_F(LazyForEachSyntaxTestNg, RemovingExpiringItemEmptyTest, TestSize.Level1
     int64_t deadline = GetSysTimestamp() + 10000;  // 很远的时间
     lazyForEachBuilder->RemovingExpiringItem(deadline);
     EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
+}
+
+/**
+ * @tc.name: SetEnableSyncLoadTest001
+ * @tc.desc: Test LazyForEachBuilder::SetEnableSyncLoad
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetEnableSyncLoadTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->SetEnableSyncLoad(true);
+    EXPECT_EQ(lazyForEachBuilder->enableSyncLoad_, true);
+
+    lazyForEachBuilder->SetEnableSyncLoad(false);
+    EXPECT_EQ(lazyForEachBuilder->enableSyncLoad_, false);
 }
 
 } // namespace OHOS::Ace::NG
