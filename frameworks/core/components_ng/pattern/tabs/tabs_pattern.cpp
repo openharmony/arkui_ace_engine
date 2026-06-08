@@ -1079,6 +1079,7 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
 bool TabsPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
