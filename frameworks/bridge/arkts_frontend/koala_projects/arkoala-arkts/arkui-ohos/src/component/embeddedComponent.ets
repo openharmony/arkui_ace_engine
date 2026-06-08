@@ -40,6 +40,7 @@ export class ArkEmbeddedComponentPeer extends ArkUIExtensionComponentPeerBase {
     InteropNativeModule._NativeLog("[AceEmbeddedComponent] setEmbeddedComponentOptionsAttribute entry");
     if (options !== undefined) {
         let innerOption : ArkUIAniUIExtensionOptions = new ArkUIAniUIExtensionOptions();
+        innerOption.dpiFollowStrategy = 1; // 1 : Follow_UI_EXTENSION_ABILITY_DPI
         if (options.dpiFollowStrategy !== undefined) {
             innerOption.dpiFollowStrategy = (options.dpiFollowStrategy as EmbeddedDpiFollowStrategy).valueOf();
         }

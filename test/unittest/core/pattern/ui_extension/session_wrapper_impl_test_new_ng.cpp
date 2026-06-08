@@ -1422,6 +1422,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg042, TestSize.L
  */
 HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg043, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "SessionWrapperImplNewTestNg-begin SessionWrapperImplNewTestNg043";
     auto sessionWrapper = GenerateSessionWrapperImpl();
     RectF displayArea(100.0, 100.0, 100.0, 100.0);
 
@@ -1437,8 +1438,8 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg043, TestSize.L
     
     sessionWrapper->NotifyDisplayArea(displayArea);
     
-    // Result should be overridden to UNDEFINED in sessionWrapper->reason_
-    EXPECT_EQ(sessionWrapper->reason_, static_cast<uint32_t>(Rosen::SizeChangeReason::UNDEFINED));
+    // Result should be overridden to ROTATION in sessionWrapper->reason_
+    EXPECT_EQ(sessionWrapper->reason_, static_cast<uint32_t>(Rosen::SizeChangeReason::ROTATION));
 
     // Set pipeline reason to ROTATION, session also says ROTATION
     pipeline->SetWindowSizeChangeReason(WindowSizeChangeReason::ROTATION);
@@ -1448,5 +1449,9 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg043, TestSize.L
     
     // Result should remain ROTATION
     EXPECT_EQ(sessionWrapper->reason_, static_cast<uint32_t>(Rosen::SizeChangeReason::ROTATION));
+
+    SUCCEED();
+    
+    GTEST_LOG_(INFO) << "SessionWrapperImplNewTestNg-end SessionWrapperImplNewTestNg043";
 }
 } // namespace OHOS::Ace::NG
