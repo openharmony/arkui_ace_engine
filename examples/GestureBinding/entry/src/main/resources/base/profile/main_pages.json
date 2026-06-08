@@ -1,0 +1,8 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/Gesture",
+    "pages/PriorityGesture",
+    "pages/ParallelGesture"
+  ]
+}
