@@ -450,6 +450,10 @@ public:
     void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus = RecognizerDelayStatus::NONE);
     void DragNodeDetachFromParent();
 private:
+    void RegisterBasicRecognizers(
+        const std::list<RefPtr<NGGestureRecognizer>>& recognizers,
+        int32_t touchId);
+
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);

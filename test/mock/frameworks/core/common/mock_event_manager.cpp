@@ -20,6 +20,7 @@
 
 #include "base/mousestyle/mouse_style.h"
 #include "core/common/event_manager.h"
+#include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/event/focus_axis_event.h"

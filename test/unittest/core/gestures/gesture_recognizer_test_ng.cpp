@@ -2507,4 +2507,161 @@ HWTEST_F(GestureRecognizerTestNg, AddGestureProcedureTest008, TestSize.Level1)
 
     EXPECT_NE(clickRecognizer, nullptr);
 }
+
+/**
+ * @tc.name: TransStateChangeReasonTest001
+ * @tc.desc: Test TransStateChangeReason covers all StateChangeReason enum values
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, TransStateChangeReasonTest001, TestSize.Level1)
+{
+    std::vector<std::pair<StateChangeReason, std::string>> reasonMap = {
+        { StateChangeReason::UNKNOWN, "Unknown" },
+        { StateChangeReason::ACCEPTED_BY_REFEREE, "AcceptedByReferee" },
+        { StateChangeReason::REJECTED_BY_REFEREE, "RejectedByReferee" },
+        { StateChangeReason::PENDING_WAITING, "PendingWaiting" },
+        { StateChangeReason::BLOCKED_BY_OTHER, "BlockedByOtherRecognizer" },
+        { StateChangeReason::DETECTING_STARTED, "DetectingStarted" },
+        { StateChangeReason::READY_RESET, "ReadyReset" },
+        { StateChangeReason::CLICK_SINGLE_TAP, "ClickSingleTapComplete" },
+        { StateChangeReason::CLICK_DOUBLE_TAP_FIRST, "ClickDoubleTapFirstUp" },
+        { StateChangeReason::CLICK_DOUBLE_TAP_SECOND, "ClickDoubleTapSecondComplete" },
+        { StateChangeReason::CLICK_TIMEOUT, "ClickTapTimeout" },
+        { StateChangeReason::CLICK_MOVE_OUT_REGION, "ClickMoveOutResponseRegion" },
+        { StateChangeReason::CLICK_FINGER_COUNT_NOT_MATCH, "ClickFingerCountNotMatch" },
+        { StateChangeReason::LONG_PRESS_TIME_REACHED, "LongPressDurationReached" },
+        { StateChangeReason::LONG_PRESS_FINGER_UP, "LongPressFingerLiftBeforeTime" },
+        { StateChangeReason::LONG_PRESS_MOVE_EXCEED, "LongPressMoveExceedThreshold" },
+        { StateChangeReason::PAN_DISTANCE_EXCEED, "PanDistanceExceedThreshold" },
+        { StateChangeReason::PAN_DIRECTION_MATCH, "PanDirectionMatched" },
+        { StateChangeReason::PAN_FINGER_UP, "PanFingerLift" },
+        { StateChangeReason::PAN_BRIDGE_MODE, "PanBridgeModeAccept" },
+        { StateChangeReason::PINCH_DISTANCE_REACHED, "PinchDistanceReached" },
+        { StateChangeReason::PINCH_CONTINUOUS_ACCEPT, "PinchContinuousAccept" },
+        { StateChangeReason::PINCH_DISTANCE_CHANGE, "PinchDistanceChangeExceed" },
+        { StateChangeReason::PINCH_FINGER_COUNT_NOT_MATCH, "PinchFingerCountNotEnough" },
+        { StateChangeReason::ROTATION_ANGLE_REACHED, "RotationAngleReached" },
+        { StateChangeReason::ROTATION_ANGLE_CHANGE, "RotationAngleChangeExceed" },
+        { StateChangeReason::ROTATION_FINGER_COUNT_NOT_MATCH, "RotationFingerCountNotEnough" },
+        { StateChangeReason::SWIPE_SPEED_REACHED, "SwipeSpeedReached" },
+        { StateChangeReason::SWIPE_SPEED_EXCEED, "SwipeSpeedExceedThreshold" },
+        { StateChangeReason::SWIPE_DIRECTION_NOT_MATCH, "SwipeDirectionNotMatch" },
+        { StateChangeReason::EXCLUSIVE_ACTIVE_WIN, "ExclusiveActiveRecognizerWin" },
+        { StateChangeReason::EXCLUSIVE_OTHER_FAIL, "ExclusiveOtherRecognizerFail" },
+        { StateChangeReason::PARALLEL_ACCEPT, "ParallelRecognizerAccept" },
+        { StateChangeReason::PARALLEL_REJECT, "ParallelRecognizerReject" },
+        { StateChangeReason::SEQUENCED_STEP_COMPLETE, "SequencedStepComplete" },
+        { StateChangeReason::FORCE_CLEAN, "ForceCleanByManager" },
+        { StateChangeReason::USER_CANCEL, "UserTriggeredCancel" },
+        { StateChangeReason::SYSTEM_CANCEL, "SystemTriggeredCancel" },
+    };
+    for (const auto& [reason, expected] : reasonMap) {
+        EXPECT_EQ(TransStateChangeReason(reason), expected);
+    }
+}
+
+/**
+ * @tc.name: LogStateChangeTest001
+ * @tc.desc: Test LogStateChange covers all RefereeState transitions and StateChangeReason values
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, LogStateChangeTest001, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    recognizer->AttachFrameNode(frameNode);
+    const RefereeState states[] = {
+        RefereeState::READY, RefereeState::DETECTING, RefereeState::PENDING,
+        RefereeState::PENDING_BLOCKED, RefereeState::SUCCEED_BLOCKED,
+        RefereeState::SUCCEED, RefereeState::FAIL
+    };
+    for (auto oldState : states) {
+        for (auto newState : states) {
+            recognizer->LogStateChange(oldState, newState, StateChangeReason::UNKNOWN);
+        }
+    }
+    recognizer->LogStateChange(
+        RefereeState::DETECTING, RefereeState::PENDING, StateChangeReason::PENDING_WAITING);
+    recognizer->LogStateChange(
+        RefereeState::PENDING, RefereeState::SUCCEED_BLOCKED, StateChangeReason::BLOCKED_BY_OTHER);
+}
+
+/**
+ * @tc.name: NotifyManagerStateChangeTest001
+ * @tc.desc: Test NotifyManagerStateChange with null attached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, NotifyManagerStateChangeTest001, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    recognizer->NotifyManagerStateChange(RefereeState::PENDING);
+    EXPECT_EQ(recognizer->GetRefereeState(), RefereeState::READY);
+}
+
+/**
+ * @tc.name: NotifyManagerStateChangeTest002
+ * @tc.desc: Test NotifyManagerStateChange with valid pipeline
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, NotifyManagerStateChangeTest002, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    recognizer->AttachFrameNode(frameNode);
+    recognizer->NotifyManagerStateChange(RefereeState::PENDING);
+    EXPECT_EQ(recognizer->GetRefereeState(), RefereeState::READY);
+}
+
+/**
+ * @tc.name: OnPendingTest001
+ * @tc.desc: Test OnPending state transition from READY to PENDING
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, OnPendingTest001, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    recognizer->AttachFrameNode(frameNode);
+    recognizer->refereeState_ = RefereeState::DETECTING;
+
+    recognizer->OnPending();
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::PENDING);
+    EXPECT_EQ(recognizer->lastRefereeState_, RefereeState::DETECTING);
+}
+
+/**
+ * @tc.name: OnBlockedTest001
+ * @tc.desc: Test OnBlocked with disposal ACCEPT transitions to SUCCEED_BLOCKED
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, OnBlockedTest001, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    recognizer->AttachFrameNode(frameNode);
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+    recognizer->disposal_ = GestureDisposal::ACCEPT;
+
+    recognizer->OnBlocked();
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::SUCCEED_BLOCKED);
+    EXPECT_EQ(recognizer->lastRefereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: OnBlockedTest002
+ * @tc.desc: Test OnBlocked with disposal PENDING transitions to PENDING_BLOCKED
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, OnBlockedTest002, TestSize.Level1)
+{
+    auto recognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    recognizer->AttachFrameNode(frameNode);
+    recognizer->refereeState_ = RefereeState::PENDING;
+    recognizer->disposal_ = GestureDisposal::PENDING;
+
+    recognizer->OnBlocked();
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::PENDING_BLOCKED);
+    EXPECT_EQ(recognizer->lastRefereeState_, RefereeState::PENDING);
+}
 } // namespace OHOS::Ace::NG

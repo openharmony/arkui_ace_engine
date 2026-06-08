@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "base/memory/referenced.h"
@@ -49,7 +50,48 @@ struct DelayedTask {
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
-enum class CurrentCallbackState { READY, START, UPDATE, END, CANCEL};
+enum class CurrentCallbackState { READY, START, UPDATE, END, CANCEL };
+
+enum class StateChangeReason {
+    UNKNOWN,
+    ACCEPTED_BY_REFEREE,
+    REJECTED_BY_REFEREE,
+    PENDING_WAITING,
+    BLOCKED_BY_OTHER,
+    DETECTING_STARTED,
+    READY_RESET,
+    CLICK_SINGLE_TAP,
+    CLICK_DOUBLE_TAP_FIRST,
+    CLICK_DOUBLE_TAP_SECOND,
+    CLICK_TIMEOUT,
+    CLICK_MOVE_OUT_REGION,
+    CLICK_FINGER_COUNT_NOT_MATCH,
+    LONG_PRESS_TIME_REACHED,
+    LONG_PRESS_FINGER_UP,
+    LONG_PRESS_MOVE_EXCEED,
+    PAN_DISTANCE_EXCEED,
+    PAN_DIRECTION_MATCH,
+    PAN_FINGER_UP,
+    PAN_BRIDGE_MODE,
+    PINCH_DISTANCE_REACHED,
+    PINCH_CONTINUOUS_ACCEPT,
+    PINCH_DISTANCE_CHANGE,
+    PINCH_FINGER_COUNT_NOT_MATCH,
+    ROTATION_ANGLE_REACHED,
+    ROTATION_ANGLE_CHANGE,
+    ROTATION_FINGER_COUNT_NOT_MATCH,
+    SWIPE_SPEED_REACHED,
+    SWIPE_SPEED_EXCEED,
+    SWIPE_DIRECTION_NOT_MATCH,
+    EXCLUSIVE_ACTIVE_WIN,
+    EXCLUSIVE_OTHER_FAIL,
+    PARALLEL_ACCEPT,
+    PARALLEL_REJECT,
+    SEQUENCED_STEP_COMPLETE,
+    FORCE_CLEAN,
+    USER_CANCEL,
+    SYSTEM_CANCEL
+};
 
 inline std::string TransRefereeState(RefereeState state)
 {
@@ -59,6 +101,8 @@ inline std::string TransRefereeState(RefereeState state)
     }
     return std::string("State:").append(std::to_string(static_cast<int32_t>(state)));
 }
+
+std::string TransStateChangeReason(StateChangeReason reason);
 
 class FrameNode;
 
@@ -98,24 +142,8 @@ public:
     void OnRejectBridgeObj();
 
     // Called when request of handling gesture sequence is pending by gesture referee.
-    virtual void OnPending()
-    {
-        lastRefereeState_ = refereeState_;
-        refereeState_ = RefereeState::PENDING;
-    }
-
-    // Called when request of handling gesture sequence is blocked by gesture referee.
-    virtual void OnBlocked()
-    {
-        if (disposal_ == GestureDisposal::ACCEPT) {
-            lastRefereeState_ = refereeState_;
-            refereeState_ = RefereeState::SUCCEED_BLOCKED;
-        }
-        if (disposal_ == GestureDisposal::PENDING) {
-            lastRefereeState_ = refereeState_;
-            refereeState_ = RefereeState::PENDING_BLOCKED;
-        }
-    }
+    virtual void OnPending();
+    virtual void OnBlocked();
 
     // Reconcile the state from the given recognizer into this. The
     // implementation must check that the given recognizer type matches the
@@ -420,9 +448,18 @@ public:
 
     void ResetResponseLinkRecognizer();
 
+    void LogStateChange(RefereeState oldState, RefereeState newState, StateChangeReason reason);
+
+    CurrentCallbackState GetCurrentCallbackState() const
+    {
+        return currentCallbackState_;
+    }
+
     virtual void CheckCurrentFingers() const = 0;
 
     virtual void UpdateGestureReferee(const WeakPtr<NG::GestureReferee>& gestureReferee);
+
+    void NotifyManagerStateChange(RefereeState newState);
 
     // ===================== Pan-gesture-escape API ============================
     // The "escape" mechanism lets a recognizer that has just won the arena

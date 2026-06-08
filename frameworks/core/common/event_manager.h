@@ -50,6 +50,7 @@ class GestureDebugBoundaryManager;
 class SelectOverlayManager;
 class SmartGestureManager;
 class ResponseCtrl;
+class ActiveRecognizerManager;
 #ifdef RELAXED_INTERACTION_SUPPORT
 class RelaxedInteractionManager;
 #endif
@@ -488,10 +489,13 @@ public:
     {
         touchTimingCallback_ = nullptr;
     }
+    
+    RefPtr<NG::ActiveRecognizerManager> GetOrCreateActiveRecognizerManager();
     void ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback);
     void FlushRelaxedInteraction(std::function<void()> requestFrameCallback);
 
 private:
+    RefPtr<NG::ActiveRecognizerManager> activeRecognizerManager_;
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
     void GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,

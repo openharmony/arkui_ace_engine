@@ -168,6 +168,11 @@ void PanRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
         "PAN RACC, T: %{public}s, DIS x %{public}f, y %{public}f",
         node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
+    
+    StateChangeReason reason = IsBridgeMode() ? StateChangeReason::PAN_BRIDGE_MODE :
+                           StateChangeReason::PAN_DISTANCE_EXCEED;
+    LogStateChange(refereeState_, RefereeState::SUCCEED, reason);
+    
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     TouchEvent touchPoint = {};
@@ -204,6 +209,7 @@ void PanRecognizer::OnRejected()
 {
     // fix griditem drag interrupted by click while pull moving
     if (refereeState_ != RefereeState::SUCCEED) {
+        LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::REJECTED_BY_REFEREE);
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::FAIL;
     }
@@ -303,6 +309,8 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         if (refereeState_ == RefereeState::READY) {
             panVelocity_.Reset(event.id);
             UpdateTouchPointInVelocityTracker(event);
+            
+            LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
             lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::DETECTING;
         } else {
@@ -355,6 +363,8 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     pesudoTouchEvent.y = revertAxisValue.second;
     pesudoTouchEvent.sourceTool = event.sourceTool;
     panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, false);
+    
+    LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::DETECTING;
 }
@@ -409,6 +419,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                 pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
             }
             AddOverTimeTrace();
+            LogStateChange(refereeState_, RefereeState::READY, StateChangeReason::PAN_FINGER_UP);
             lastRefereeState_ = RefereeState::READY;
             refereeState_ = RefereeState::READY;
             if (currentFingers_ > 1) {
@@ -646,6 +657,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         // AxisEvent is single one.
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
+        LogStateChange(refereeState_, RefereeState::READY, StateChangeReason::SYSTEM_CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {

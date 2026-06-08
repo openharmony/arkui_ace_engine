@@ -65,6 +65,9 @@ void LongPressRecognizer::OnAccepted()
         auto onAccessibilityEventFunc = onAccessibilityEventFunc_;
         onAccessibilityEventFunc(AccessibilityEventType::LONG_PRESS);
     }
+    
+    LogStateChange(refereeState_, RefereeState::SUCCEED, StateChangeReason::LONG_PRESS_TIME_REACHED);
+    
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     if (!touchPoints_.empty() && touchPoints_.begin()->second.sourceType == SourceType::MOUSE) {
@@ -91,6 +94,9 @@ void LongPressRecognizer::OnRejected()
         return;
     }
     SendRejectMsg();
+    
+    LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::REJECTED_BY_REFEREE);
+    
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
@@ -170,6 +176,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             StartRepeatTimer();
             return;
         }
+        
+        LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
         if (useCatchMode_) {
@@ -239,6 +247,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (offset.GetDistance() > allowableMovement_) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "LongPress move over max threshold");
         extraInfo_ += "Reject: move over max threshold.";
+        LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::LONG_PRESS_MOVE_EXCEED);
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -261,15 +270,18 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
+        LogStateChange(refereeState_, RefereeState::READY, StateChangeReason::SYSTEM_CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
             "LongPressRecognizer touchPoints size not equal 0, not send cancel callback.");
         extraInfo_ += "Reject: received cancel and succeed.";
+        LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::SYSTEM_CANCEL);
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     } else {
         extraInfo_ += "Reject: received cancel but not succeed.";
+        LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::SYSTEM_CANCEL);
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }

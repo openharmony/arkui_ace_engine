@@ -29,7 +29,10 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/common/event_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -588,7 +591,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         }
         return;
     }
-
+    RegisterBasicRecognizers(innerRecognizers, touchId);
     auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
     RefPtr<NGGestureRecognizer> current;
     current = PackInnerRecognizer(
@@ -601,6 +604,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     auto userModifierRecognizers = modifierGestureHierarchy_;
     userRecognizers.splice(userRecognizers.end(), userModifierRecognizers);
     bool overMinRecognizerGroupLoopSize = userRecognizers.size() >= MIN_RECOGNIZER_GROUP_LOOP_SIZE;
+    RegisterBasicRecognizers(userRecognizers, touchId);
     for (auto const& recognizer : userRecognizers) {
         if (!recognizer) {
             continue;
@@ -620,7 +624,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         recognizer->SetGetEventTargetImpl(getEventTargetImpl);
         auto gestureMask = recognizer->GetPriorityMask();
         if (gestureMask == GestureMask::IgnoreInternal) {
-            // In ignore case, dropped the self inner recognizer and children recognizer.
             current = recognizer;
             continue;
         }
@@ -1914,5 +1917,30 @@ bool GestureEventHub::TriggerTouchEvent(const TouchEvent& point)
 {
     CHECK_NULL_RETURN(touchEventActuator_, false);
     return touchEventActuator_->HandleEvent(point);
+}
+
+void GestureEventHub::RegisterBasicRecognizers(
+    const std::list<RefPtr<NGGestureRecognizer>>& recognizers,
+    int32_t touchId)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto eventManager = pipelineContext->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto activeRecognizerManager = eventManager->GetOrCreateActiveRecognizerManager();
+    CHECK_NULL_VOID(activeRecognizerManager);
+    for (const auto& recognizer : recognizers) {
+        auto group = AceType::DynamicCast<NG::RecognizerGroup>(recognizer);
+        if (!group) {
+            activeRecognizerManager->RegisterRecognizer(recognizer, touchId);
+            continue;
+        }
+        if (group->IsRemainChildOnResetStatus()) {
+            auto childRecognizers = group->GetGroupRecognizer();
+            RegisterBasicRecognizers(childRecognizers, touchId);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

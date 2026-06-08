@@ -18,6 +18,24 @@
 namespace OHOS::Ace::NG {
 void NGGestureRecognizer::AboutToAccept() {}
 
+void NGGestureRecognizer::OnPending()
+{
+    lastRefereeState_ = refereeState_;
+    refereeState_ = RefereeState::PENDING;
+}
+
+void NGGestureRecognizer::OnBlocked()
+{
+    if (disposal_ == GestureDisposal::ACCEPT) {
+        lastRefereeState_ = refereeState_;
+        refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    }
+    if (disposal_ == GestureDisposal::PENDING) {
+        lastRefereeState_ = refereeState_;
+        refereeState_ = RefereeState::PENDING_BLOCKED;
+    }
+}
+
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
     (void)point;

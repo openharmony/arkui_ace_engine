@@ -72,6 +72,7 @@ void SwipeRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "SWIPE RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
+    LogStateChange(refereeState_, RefereeState::SUCCEED, StateChangeReason::SWIPE_SPEED_REACHED);
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     TouchEvent touchPoint = {};
@@ -92,6 +93,7 @@ void SwipeRecognizer::OnAccepted()
 
 void SwipeRecognizer::OnRejected()
 {
+    LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::REJECTED_BY_REFEREE);
     SendRejectMsg();
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
@@ -132,6 +134,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         touchDownTime_ = event.time;
+        LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
@@ -157,6 +160,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     axisOffset_.Reset();
     touchDownTime_ = event.time;
     time_ = event.time;
+    LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::DETECTING;
 }
@@ -361,6 +365,7 @@ void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
+        LogStateChange(refereeState_, RefereeState::READY, StateChangeReason::SYSTEM_CANCEL);
     }
 }
 
@@ -375,6 +380,7 @@ void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
+        LogStateChange(refereeState_, RefereeState::READY, StateChangeReason::SYSTEM_CANCEL);
     }
 }
 

@@ -22,7 +22,9 @@
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/manager/event/json_report.h"
+#include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#include "base/log/log.h"
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #endif
@@ -920,5 +922,106 @@ void NGGestureRecognizer::SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
 RefPtr<GestureInfo> NGGestureRecognizer::GetGestureInfo()
 {
     return gestureInfo_;
+}
+
+std::string TransStateChangeReason(StateChangeReason reason)
+{
+    static const std::unordered_map<StateChangeReason, std::string> reasonMap = {
+        { StateChangeReason::UNKNOWN, "Unknown" },
+        { StateChangeReason::ACCEPTED_BY_REFEREE, "AcceptedByReferee" },
+        { StateChangeReason::REJECTED_BY_REFEREE, "RejectedByReferee" },
+        { StateChangeReason::PENDING_WAITING, "PendingWaiting" },
+        { StateChangeReason::BLOCKED_BY_OTHER, "BlockedByOtherRecognizer" },
+        { StateChangeReason::DETECTING_STARTED, "DetectingStarted" },
+        { StateChangeReason::READY_RESET, "ReadyReset" },
+        { StateChangeReason::CLICK_SINGLE_TAP, "ClickSingleTapComplete" },
+        { StateChangeReason::CLICK_DOUBLE_TAP_FIRST, "ClickDoubleTapFirstUp" },
+        { StateChangeReason::CLICK_DOUBLE_TAP_SECOND, "ClickDoubleTapSecondComplete" },
+        { StateChangeReason::CLICK_TIMEOUT, "ClickTapTimeout" },
+        { StateChangeReason::CLICK_MOVE_OUT_REGION, "ClickMoveOutResponseRegion" },
+        { StateChangeReason::CLICK_FINGER_COUNT_NOT_MATCH, "ClickFingerCountNotMatch" },
+        { StateChangeReason::LONG_PRESS_TIME_REACHED, "LongPressDurationReached" },
+        { StateChangeReason::LONG_PRESS_FINGER_UP, "LongPressFingerLiftBeforeTime" },
+        { StateChangeReason::LONG_PRESS_MOVE_EXCEED, "LongPressMoveExceedThreshold" },
+        { StateChangeReason::PAN_DISTANCE_EXCEED, "PanDistanceExceedThreshold" },
+        { StateChangeReason::PAN_DIRECTION_MATCH, "PanDirectionMatched" },
+        { StateChangeReason::PAN_FINGER_UP, "PanFingerLift" },
+        { StateChangeReason::PAN_BRIDGE_MODE, "PanBridgeModeAccept" },
+        { StateChangeReason::PINCH_DISTANCE_REACHED, "PinchDistanceReached" },
+        { StateChangeReason::PINCH_CONTINUOUS_ACCEPT, "PinchContinuousAccept" },
+        { StateChangeReason::PINCH_DISTANCE_CHANGE, "PinchDistanceChangeExceed" },
+        { StateChangeReason::PINCH_FINGER_COUNT_NOT_MATCH, "PinchFingerCountNotEnough" },
+        { StateChangeReason::ROTATION_ANGLE_REACHED, "RotationAngleReached" },
+        { StateChangeReason::ROTATION_ANGLE_CHANGE, "RotationAngleChangeExceed" },
+        { StateChangeReason::ROTATION_FINGER_COUNT_NOT_MATCH, "RotationFingerCountNotEnough" },
+        { StateChangeReason::SWIPE_SPEED_REACHED, "SwipeSpeedReached" },
+        { StateChangeReason::SWIPE_SPEED_EXCEED, "SwipeSpeedExceedThreshold" },
+        { StateChangeReason::SWIPE_DIRECTION_NOT_MATCH, "SwipeDirectionNotMatch" },
+        { StateChangeReason::EXCLUSIVE_ACTIVE_WIN, "ExclusiveActiveRecognizerWin" },
+        { StateChangeReason::EXCLUSIVE_OTHER_FAIL, "ExclusiveOtherRecognizerFail" },
+        { StateChangeReason::PARALLEL_ACCEPT, "ParallelRecognizerAccept" },
+        { StateChangeReason::PARALLEL_REJECT, "ParallelRecognizerReject" },
+        { StateChangeReason::SEQUENCED_STEP_COMPLETE, "SequencedStepComplete" },
+        { StateChangeReason::FORCE_CLEAN, "ForceCleanByManager" },
+        { StateChangeReason::USER_CANCEL, "UserTriggeredCancel" },
+        { StateChangeReason::SYSTEM_CANCEL, "SystemTriggeredCancel" }
+    };
+    auto it = reasonMap.find(reason);
+    return it != reasonMap.end() ? it->second : "Unknown";
+}
+
+void NGGestureRecognizer::LogStateChange(RefereeState oldState, RefereeState newState, StateChangeReason reason)
+{
+    auto node = GetAttachedNode().Upgrade();
+    std::string nodeTag = node ? node->GetTag() : "Unknown";
+    std::string gestureType = AceType::TypeName(this);
+    std::string oldStateStr = TransRefereeState(oldState);
+    std::string newStateStr = TransRefereeState(newState);
+    std::string reasonStr = TransStateChangeReason(reason);
+    
+    TAG_LOGD(AceLogTag::ACE_GESTURE,
+        "%{public}s %{public}s recognizer from %{public}s to %{public}s, reason %{public}s",
+        nodeTag.c_str(),
+        gestureType.c_str(),
+        oldStateStr.c_str(),
+        newStateStr.c_str(),
+        reasonStr.c_str());
+}
+
+void NGGestureRecognizer::NotifyManagerStateChange(RefereeState newState)
+{
+    auto node = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto manager = eventManager->GetOrCreateActiveRecognizerManager();
+    CHECK_NULL_VOID(manager);
+    manager->UpdateRecognizerState(Claim(this), newState);
+}
+
+void NGGestureRecognizer::OnPending()
+{
+    LogStateChange(refereeState_, RefereeState::PENDING, StateChangeReason::PENDING_WAITING);
+    lastRefereeState_ = refereeState_;
+    refereeState_ = RefereeState::PENDING;
+    NotifyManagerStateChange(RefereeState::PENDING);
+}
+
+void NGGestureRecognizer::OnBlocked()
+{
+    if (disposal_ == GestureDisposal::ACCEPT) {
+        LogStateChange(refereeState_, RefereeState::SUCCEED_BLOCKED, StateChangeReason::BLOCKED_BY_OTHER);
+        lastRefereeState_ = refereeState_;
+        refereeState_ = RefereeState::SUCCEED_BLOCKED;
+        NotifyManagerStateChange(RefereeState::SUCCEED_BLOCKED);
+    }
+    if (disposal_ == GestureDisposal::PENDING) {
+        LogStateChange(refereeState_, RefereeState::PENDING_BLOCKED, StateChangeReason::BLOCKED_BY_OTHER);
+        lastRefereeState_ = refereeState_;
+        refereeState_ = RefereeState::PENDING_BLOCKED;
+        NotifyManagerStateChange(RefereeState::PENDING_BLOCKED);
+    }
 }
 } // namespace OHOS::Ace::NG

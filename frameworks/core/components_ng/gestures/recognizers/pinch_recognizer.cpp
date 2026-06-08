@@ -60,6 +60,9 @@ void PinchRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "PINCH RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+    StateChangeReason reason = isLastPinchFinished_ ? StateChangeReason::PINCH_DISTANCE_REACHED
+                                                     : StateChangeReason::PINCH_CONTINUOUS_ACCEPT;
+    LogStateChange(refereeState_, RefereeState::SUCCEED, reason);
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     isLastPinchFinished_ = false;
@@ -80,6 +83,7 @@ void PinchRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
+    LogStateChange(refereeState_, RefereeState::FAIL, StateChangeReason::REJECTED_BY_REFEREE);
     SendRejectMsg();
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
@@ -119,6 +123,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_ && refereeState_ != RefereeState::FAIL) {
         initialDev_ = ComputeAverageDeviation();
         pinchCenter_ = ComputePinchCenter();
+        LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
@@ -144,6 +149,7 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
             (IsCtrlBeingPressed(event) && event.sourceTool != SourceTool::TOUCHPAD))) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
+        LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
         lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
@@ -348,6 +354,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
+        LogStateChange(refereeState_, RefereeState::READY, StateChangeReason::SYSTEM_CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {

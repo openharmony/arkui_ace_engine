@@ -28,6 +28,7 @@
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
@@ -117,6 +118,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (!curAccessibilityHoverResults_.empty()) {
         FalsifyHoverCancelEventAndDispatch(touchPoint);
     }
+    
+    if (lastDownFingerNumber_ == 0 && touchPoint.type == TouchType::DOWN && !needAppend) {
+        auto activeRecognizerManager = GetOrCreateActiveRecognizerManager();
+        if (activeRecognizerManager) {
+            activeRecognizerManager->CheckAndCleanBeforeNewTouch(touchPoint.id);
+        }
+    }
+    
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -3497,5 +3506,13 @@ MouseFormat EventManager::GetCurrentMouseStyle()
 {
     CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
     return mouseStyleManager_->GetCurrentMouseStyle();
+}
+
+RefPtr<NG::ActiveRecognizerManager> EventManager::GetOrCreateActiveRecognizerManager()
+{
+    if (!activeRecognizerManager_) {
+        activeRecognizerManager_ = AceType::MakeRefPtr<NG::ActiveRecognizerManager>();
+    }
+    return activeRecognizerManager_;
 }
 } // namespace OHOS::Ace
