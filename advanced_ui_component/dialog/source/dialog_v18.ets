@@ -574,7 +574,9 @@ export struct SelectDialog {
               .focusBox({
                 margin: { value: -2, unit: LengthUnit.VP }
               })
+              .accessibilityChecked(this.selectedIndex === index)
               .accessibilityText(getAccessibilityText(this.getUIContext(), item.title, this.selectedIndex === index))
+              .accessibilityRole(AccessibilityRoleType.RADIO)
               .onClick(() => {
                 this.selectedIndex = index;
                 item.action && item.action();
@@ -1871,7 +1873,7 @@ function getAccessibilityText(context: UIContext, resource: ResourceStr, selecte
     } else {
       resourceString = resource ? context?.getHostContext()?.resourceManager.getStringSync(resource?.id) ?? '' : '';
     }
-    return selected ? `${selectText},${resourceString}` : resourceString;
+    return resourceString;
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
