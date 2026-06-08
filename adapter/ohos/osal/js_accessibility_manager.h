@@ -41,6 +41,7 @@ class NWebAccessibilityNodeInfo;
 namespace OHOS::Ace::NG {
     class TransitionalNodeInfo;
     struct WindowSceneInfo;
+    class VirtualAccessibilityNode;
 }
 
 namespace OHOS::Accessibility {
@@ -536,6 +537,20 @@ public:
     void GetCursorPosition(const int64_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
 
+    void UpdateAccessibilityElementInfoForVirtualNode(
+        const RefPtr<NG::FrameNode>& hostNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
+        const CommonProperty& commonProperty,
+        AccessibilityElementInfo& nodeInfo,
+        int64_t parentAccessibilityId);
+
+    void AddVirtualNodeChildrenToInfos(
+        std::list<AccessibilityElementInfo>& infos,
+        const RefPtr<NG::FrameNode>& hostNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
+        const CommonProperty& commonProperty,
+        int64_t virtualNodeAccessibilityId);
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -953,6 +968,12 @@ private:
 
     // Check if current pipeline context is form render
     bool IsFormRender();
+
+    bool SearchAccessibilityVirtualNode(int64_t elementId,
+        std::list<AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);
+    bool GetAllVirtualNodeElementId(std::list<AccessibilityElementInfo>& infos,
+        const CommonProperty& commonProperty,
+        const RefPtr<NG::FrameNode>& containerNode, AccessibilityElementInfo& parentNodeInfo);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

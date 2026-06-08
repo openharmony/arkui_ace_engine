@@ -24,11 +24,11 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "adapter/ohos/osal/accessibility/hover/accessibility_hover_virtual_node_utils.h"
 
 namespace OHOS::Ace::NG {
 
 class FrameNode;
-enum class AccessibilityHoverEventType;
 
 class PageEventController {
 public:
@@ -523,106 +523,6 @@ private:
 
     // FrameNode accessibility ID to container ID mapping
     std::unordered_map<int64_t, uint8_t> nodeToContainerMap_;
-};
-
-class VirtualAccessibilityNode : public CustomAccessibilityProperty {
-    DECLARE_ACE_TYPE(VirtualAccessibilityNode, CustomAccessibilityProperty);
-public:
-    VirtualAccessibilityNode() = default;
-    virtual ~VirtualAccessibilityNode() = default;
-
-    // Set node ID
-    void SetNodeId(int32_t nodeId)
-    {
-        nodeId_ = nodeId;
-    }
-
-    // Get node ID
-    int32_t GetNodeId() const
-    {
-        return nodeId_;
-    }
-
-    // Set layout rect
-    void SetRect(const NG::RectT<int32_t>& rect);
-
-    // Set layout rect by left, top, width, height
-    void SetRect(int32_t left, int32_t top, int32_t width, int32_t height);
-
-    // Get layout rect
-    const NG::RectT<int32_t>& GetRect() const;
-
-    // Get position and size
-    int32_t GetLeft() const { return rect_.Left(); }
-    int32_t GetTop() const { return rect_.Top(); }
-    int32_t GetWidth() const { return rect_.Width(); }
-    int32_t GetHeight() const { return rect_.Height(); }
-    int32_t GetRight() const { return rect_.Right(); }
-    int32_t GetBottom() const { return rect_.Bottom(); }
-
-    // Check whether the point is inside the node
-    bool ContainsPoint(int32_t x, int32_t y) const;
-
-    // Check whether this rect intersects with another
-    bool Intersects(const NG::RectT<int32_t>& other) const;
-
-    // Hit test: find virtual node by coordinates (returns the last matching child via right node)
-    RefPtr<VirtualAccessibilityNode> HitTest(int32_t x, int32_t y) const;
-
-    // Hit test with float coordinates
-    RefPtr<VirtualAccessibilityNode> HitTest(float x, float y) const;
-
-    // Hit test with PointF
-    RefPtr<VirtualAccessibilityNode> HitTest(const NG::PointF& point) const;
-
-    // Get global bounding rect (accounting for parent offset)
-    NG::RectT<int32_t> GetGlobalRect() const;
-
-    // Find node by coordinates (returns the last matching child via right node)
-    RefPtr<VirtualAccessibilityNode> FindNodeByPoint(int32_t x, int32_t y) const;
-
-    // Add child node
-    void AddChild(const RefPtr<VirtualAccessibilityNode>& child);
-
-    // Remove child node
-    void RemoveChild(const RefPtr<VirtualAccessibilityNode>& child);
-
-    // Clear all child nodes
-    void ClearChildren();
-
-    // Check whether the node has children
-    bool HasChildren() const;
-
-    // Get child count
-    size_t GetChildCount() const;
-
-    // Get child node at index
-    RefPtr<VirtualAccessibilityNode> GetChild(size_t index) const;
-
-    // Get all child nodes
-    const std::vector<RefPtr<VirtualAccessibilityNode>>& GetChildren() const;
-
-    // Get parent node
-    RefPtr<VirtualAccessibilityNode> GetParent() const;
-
-    // Find child node (depth-first search)
-    RefPtr<VirtualAccessibilityNode> FindChild(
-        const std::function<bool(const RefPtr<VirtualAccessibilityNode>&)>& predicate) const;
-
-    RefPtr<VirtualAccessibilityNode> FindNodeById(int32_t nodeId) const;
-
-    // Traverse all child nodes (depth-first)
-    void TraverseChildren(const std::function<void(const RefPtr<VirtualAccessibilityNode>&)>& visitor) const;
-
-    void OnAccessibilityHover(
-        const PointF& point, AccessibilityHoverEventType eventType, const RefPtr<FrameNode>& containerNode);
-
-private:
-    int32_t nodeId_ = -1;
-    NG::RectT<int32_t> rect_;
-    std::vector<RefPtr<VirtualAccessibilityNode>> children_;
-    WeakPtr<VirtualAccessibilityNode> parent_;
-    WeakPtr<VirtualAccessibilityNode> lastHovering_;
 };
 
 } // namespace OHOS::Ace::NG
