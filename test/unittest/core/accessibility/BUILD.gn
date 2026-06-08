@@ -57,7 +57,9 @@ ace_unittest("accessibility_test_ng") {
     "native_interface_accessibility_test.cpp",
     "node_uitls/accessibility_frame_node_utils_test.cpp",
     "node_uitls/accessibility_frame_node_utils_test_two.cpp",
+    "node_uitls/accessibility_frame_node_utils_test_three.cpp",
     "utils/accessibitlity_manager_utils_test.cpp",
+    "utils/accessibitlity_manager_utils_test_two.cpp",
     "utils/accessibitlity_property_utils_test.cpp",
   ]
   if (is_ohos_standard_system) {

@@ -117,6 +117,48 @@ class UINode;
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
+class CustomAccessibilityProperty : public virtual AceType {
+    DECLARE_ACE_TYPE(CustomAccessibilityProperty, AceType);
+
+public:
+    CustomAccessibilityProperty() = default;
+    ~CustomAccessibilityProperty() override = default;
+
+    void SetAccessibilityText(const std::string& text);
+    const std::string& GetAccessibilityText() const;
+
+    void SetAccessibilityLevel(const std::string& level);
+    const std::string& GetAccessibilityLevel() const;
+
+    void SetAccessibilityGroup(bool group);
+    bool GetAccessibilityGroup() const;
+
+    void SetRole(const std::string& role);
+    const std::string& GetRole() const;
+
+    void SetCheckable(bool checkable);
+    bool GetCheckable() const;
+
+    void SetChecked(bool checked);
+    bool GetChecked() const;
+
+    void SetEnabled(bool enabled);
+    bool GetEnabled() const;
+
+    void SetSelected(bool selected);
+    bool GetSelected() const;
+
+private:
+    std::string accessibilityText_;
+    std::string accessibilityLevel_;
+    bool accessibilityGroup_ = false;
+    std::string role_;
+    bool checkable_ = false;
+    bool checked_ = false;
+    bool isEnable_ = true;
+    bool isSelected_ = false;
+};
+
 class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType,
                                                public AccessibilityPropertyInnerFunction,
                                                public AccessibilityPropertyInterfaceFunction {
@@ -727,6 +769,24 @@ public:
         return NOT_SUPPORT;
     }
 
+    RefPtr<CustomAccessibilityProperty> CreateCustomAccessibilityProperty();
+    RefPtr<CustomAccessibilityProperty> GetCustomAccessibilityProperty() const;
+    void SetCustomAccessibilityProperty(const RefPtr<CustomAccessibilityProperty>& property);
+    void SetVirtualNodeTreeRoot(const RefPtr<CustomAccessibilityProperty>& root)
+    {
+        virtualNodeTreeRoot_ = root;
+    }
+
+    const RefPtr<CustomAccessibilityProperty>& GetVirtualNodeTreeRoot() const
+    {
+        return virtualNodeTreeRoot_;
+    }
+
+    bool HasVirtualNodeTreeRoot() const
+    {
+        return virtualNodeTreeRoot_ != nullptr;
+    }
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(const PointF& parentPoint, const RefPtr<FrameNode>& node,
@@ -856,6 +916,9 @@ protected:
     std::optional<bool> isHeaderOrFooter_;
     std::optional<AccessibilityActionOptions> accessibilityActionOptions_;
     std::optional<std::vector<AccessibilityCustomAction>> accessibilityCustomActions_;
+
+    RefPtr<CustomAccessibilityProperty> customAccessibilityProperty_;
+    RefPtr<CustomAccessibilityProperty> virtualNodeTreeRoot_;
 };
 } // namespace OHOS::Ace::NG
 

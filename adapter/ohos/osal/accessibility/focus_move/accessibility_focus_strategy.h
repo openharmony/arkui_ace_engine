@@ -122,6 +122,11 @@ public:
     {
         return false;
     }
+
+    virtual bool IsVirtualNode()
+    {
+        return false;
+    }
 };
 
 class AccessibilityFocusStrategy {

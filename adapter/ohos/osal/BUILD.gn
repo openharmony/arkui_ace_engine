@@ -190,6 +190,7 @@ template("ace_osal_ohos_source_set") {
           "accessibility/focus_move/accessibility_focus_move_osal_third.cpp",
           "accessibility/focus_move/accessibility_focus_strategy.cpp",
           "accessibility/focus_move/accessibility_focus_third_node_utils.cpp",
+          "accessibility/focus_move/accessibility_focus_virtual_node_utils.cpp",
           "js_accessibility_manager.cpp",
           "js_third_accessibility_hover_ng.cpp",
           "js_third_provider_interaction_operation.cpp",
