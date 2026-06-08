@@ -3346,6 +3346,10 @@ void SetForegroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetForegroundColorImpl(node, value);
+        return;
+    }
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_ResourceColor& resourceColor) {
             auto colorOpt = Converter::OptConvert<Color>(resourceColor);

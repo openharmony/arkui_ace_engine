@@ -789,7 +789,7 @@ void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
     }
     Color foregroundColor;
     RefPtr<ResourceObject> resourceObject;
-    if (!ParseJsColor(jsValue, foregroundColor, resourceObject)) {
+    if (!ParseJsColorForMaterial(jsValue, foregroundColor, resourceObject)) {
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {

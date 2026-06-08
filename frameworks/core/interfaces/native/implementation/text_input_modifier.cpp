@@ -200,7 +200,7 @@ void SetPlaceholderColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
+    auto convValue = Converter::OptConvertColorForMaterial(value);
     TextFieldModelStatic::SetPlaceholderColor(frameNode, convValue);
 }
 void SetTextOverflowImpl(Ark_NativePointer node,
@@ -346,7 +346,7 @@ void SetFontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
+    auto convValue = Converter::OptConvertColorForMaterial(value);
     TextFieldModelStatic::SetTextColor(frameNode, convValue);
 }
 void SetFontSizeImpl(Ark_NativePointer node,

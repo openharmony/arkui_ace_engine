@@ -70,7 +70,7 @@ template<>
 NG::IconOptions Convert(const Ark_IconOptions& src)
 {
     NG::IconOptions options;
-    auto iconColor = Converter::OptConvert<Color>(src.color);
+    auto iconColor = Converter::OptConvertColorForMaterial(&src.color);
     auto iconSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.size);
     auto iconSrc = Converter::OptConvert<Ark_Resource_Simple>(src.src);
     if (iconSrc) {
@@ -90,7 +90,7 @@ template<>
 SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
 {
     SearchButtonOptions buttonOptions;
-    buttonOptions.color = OptConvert<Color>(src.fontColor);
+    buttonOptions.color = OptConvertColorForMaterial(&src.fontColor);
     buttonOptions.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.fontSize);
     buttonOptions.autoDisable = OptConvert<bool>(src.autoDisable);
     return buttonOptions;
@@ -148,7 +148,7 @@ void SetFontColorImpl(Ark_NativePointer node, const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontColor = Converter::OptConvertPtr<Color>(value);
+    auto fontColor = Converter::OptConvertColorForMaterial(value);
     SearchModelStatic::SetTextColor(frameNode, fontColor);
 }
 void SetSearchIconImpl(Ark_NativePointer node, const Opt_Union_IconOptions_SymbolGlyphModifier* value)
@@ -233,7 +233,7 @@ void SetPlaceholderColorImpl(Ark_NativePointer node, const Opt_ResourceColor* va
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto placeHolderColor = Converter::OptConvertPtr<Color>(value);
+    auto placeHolderColor = Converter::OptConvertColorForMaterial(value);
     SearchModelStatic::SetPlaceholderColor(frameNode, placeHolderColor);
 }
 void SetPlaceholderFontImpl(Ark_NativePointer node, const Opt_arkui_component_units_Font* value)

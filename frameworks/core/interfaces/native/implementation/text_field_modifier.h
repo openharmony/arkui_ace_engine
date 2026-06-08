@@ -29,6 +29,7 @@ void SetBorderColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_Ed
 void SetBorderStyleImpl(Ark_NativePointer node, const Opt_Union_BorderStyle_EdgeStyles* value);
 void SetBorderRadiusImpl(Ark_NativePointer node, const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
 void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColorMetricsExt* value);
+void SetForegroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColoringStrategy* value);
 } // namespace TextFieldModifier
 } // namespace OHOS::Ace::NG::GeneratedModifier
 

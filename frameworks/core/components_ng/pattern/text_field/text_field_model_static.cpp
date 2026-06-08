@@ -359,6 +359,11 @@ void TextFieldModelStatic::SetTextColor(FrameNode* frameNode, const std::optiona
     }
 }
 
+void TextFieldModelStatic::UpdateTextColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, color, frameNode);
+}
+
 void TextFieldModelStatic::SetCaretPosition(FrameNode* frameNode, const std::optional<int32_t>& optValue)
 {
     CHECK_NULL_VOID(frameNode);

@@ -174,5 +174,26 @@ void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColo
     ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
     TextFieldModelStatic::SetBackgroundColor(frameNode, color);
 }
+void SetForegroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColoringStrategy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Converter::VisitUnionPtr(value,
+        [frameNode](const Ark_ResourceColor& resourceColor) {
+            auto colorOpt = Converter::OptConvertColorForMaterial(resourceColor);
+            TextFieldModelStatic::SetTextColor(frameNode, colorOpt);
+        },
+        [frameNode](const Ark_ColoringStrategy& colorStrategy) {
+            auto colorStrategyOpt = Converter::OptConvert<ForegroundColorStrategy>(colorStrategy);
+            if (colorStrategyOpt.has_value()) {
+                ViewAbstractModelStatic::SetForegroundColorStrategy(frameNode, colorStrategyOpt.value());
+                TextFieldModelStatic::UpdateTextColor(frameNode, Color::FOREGROUND);
+            } else {
+                TextFieldModelStatic::SetTextColor(frameNode, std::nullopt);
+            }
+        },
+        []() {}
+    );
+}
 } // namespace TextFieldModifier
 }
