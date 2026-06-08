@@ -3426,6 +3426,22 @@ void SetBackgroundImagePixelMapByPixelMapPtr(ArkUINodeHandle node, void* pixelMa
     }
 }
 
+void SetBackgroundImageDrawableDescriptor(ArkUINodeHandle node, void* newDrawableDescriptor, ArkUI_Int32 repeatIndex)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* drawableAddr = reinterpret_cast<DrawableDescriptor*>(newDrawableDescriptor);
+    CHECK_NULL_VOID(drawableAddr);
+    auto pixelMap = drawableAddr->GetPixelMap();
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { pixelMap });
+    auto repeat = static_cast<ImageRepeat>(repeatIndex);
+    if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
+}
+
 void ResetBackgroundImage(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11778,6 +11794,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getForegroundBlurStyle = GetForegroundBlurStyle,
         .setBackgroundImagePixelMap = SetBackgroundImagePixelMap,
         .setBackgroundImagePixelMapByPixelMapPtr = SetBackgroundImagePixelMapByPixelMapPtr,
+        .setBackgroundImageDrawableDescriptor = SetBackgroundImageDrawableDescriptor,
         .setLayoutRect = SetLayoutRect,
         .getLayoutRect = GetLayoutRect,
         .resetLayoutRect = ResetLayoutRect,
@@ -12304,6 +12321,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getForegroundBlurStyle = GetForegroundBlurStyle,
         .setBackgroundImagePixelMap = SetBackgroundImagePixelMap,
         .setBackgroundImagePixelMapByPixelMapPtr = SetBackgroundImagePixelMapByPixelMapPtr,
+        .setBackgroundImageDrawableDescriptor = SetBackgroundImageDrawableDescriptor,
         .setLayoutRect = SetLayoutRect,
         .getLayoutRect = GetLayoutRect,
         .resetLayoutRect = ResetLayoutRect,
