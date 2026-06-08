@@ -176,6 +176,10 @@ private:
         bool isNeedLoadPixelMap = true);
     void ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
         bool isNeedLoadPixelMap = true);
+    size_t AccumulateNodeContent(xmlNodePtr curNode, size_t& pos, std::string& allContent);
+    void HandlePTag(xmlNodePtr curNode, size_t& pos, size_t& childPos, std::string& allContent,
+        std::vector<SpanInfo>& spanInfos);
+
     void PrintSpanInfos(const std::vector<SpanInfo>& spanInfos);
     void AfterProcSpanInfos(std::vector<SpanInfo>& spanInfos);
     bool IsValidNode(const std::string& name);
