@@ -390,7 +390,7 @@ const Env = (envKey: keyof EnvTypeMap | SystemEnvKey): PropertyDecorator => {
     const storeProp = ObserveV2.ENV_PREFIX + varName;
     Reflect.defineProperty(proto, varName, {
       get() {
-        if (!EnvV2.isDirectQuerySystemEnvKey(envKeyId) && !(envKeyId in envFactoryMap)) {
+        if (!(envKeyId in envFactoryMap) && !(envKey instanceof SystemEnvKey)) {
           const message = `Unsupported key '${envKeyId}' in @Env.`;
           stateMgmtConsole.applicationError(message);
           throw new BusinessError(UNSUPPORTED_KEY_IN_ENV, message);
