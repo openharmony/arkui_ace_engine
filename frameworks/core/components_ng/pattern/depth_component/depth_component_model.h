@@ -22,7 +22,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components_ng/pattern/depth_component/depth_component_event_hub.h"
-#include "core/components_ng/pattern/depth_component/depth_component_pattern.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
@@ -31,6 +30,7 @@ class ACE_EXPORT DepthComponentModel {
 public:
     static void Create(const OHOS::Ace::DepthBackgroundSource& background);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const OHOS::Ace::DepthBackgroundSource& background);
+    static void SetBackgroundSource(FrameNode* frameNode, const OHOS::Ace::DepthBackgroundSource& background);
     static void SetDepthSpace(OHOS::Ace::DepthSpaceType depthSpace);
     static void SetDepthSpace(FrameNode* frameNode, OHOS::Ace::DepthSpaceType depthSpace);
     static void SetDepthMap(const ImageSourceInfo& depthMap);

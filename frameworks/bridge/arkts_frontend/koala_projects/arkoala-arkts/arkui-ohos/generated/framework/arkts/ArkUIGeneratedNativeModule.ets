@@ -805,9 +805,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DepthComponentAttribute_setLight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _DepthComponentAttribute_setBackgroundOffset(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _DepthComponentAttribute_setOnComplete(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _DepthComponentAttribute_setBackgroundScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _DepthComponentAttribute_setOnError(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _DistortionComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct

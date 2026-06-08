@@ -940,6 +940,14 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FontWeight>& dst, const Ark_Resource& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::DepthVector3>& dst, const Ark_DepthVector3& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::DepthVector4>& dst, const Ark_DepthVector4& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::DepthColorRGB>& dst, const Ark_DepthColorRGB& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::DepthSpaceType>& dst, const Ark_DepthSpaceType& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::DepthCameraParams>& dst, const Ark_DepthCameraParams& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::DepthLightParams>& dst, const Ark_DepthLightParams& src);
+    template<> void AssignCast(std::optional<OHOS::Ace::DepthBackgroundSource>& dst,
+        const Ark_Union_ResourceStr_image_PixelMap& src);
     template<> void AssignCast(std::optional<GestureFocusMode>& dst, const Ark_GestureFocusMode& src);
     template<> void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src);
     template<> void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src);

@@ -17,6 +17,7 @@
 
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/depth_component/depth_component_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,13 +36,18 @@ RefPtr<FrameNode> DepthComponentModel::CreateFrameNode(
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::DEPTH_COMPONENT_ETS_TAG, nodeId, []() {
         return AceType::MakeRefPtr<DepthComponentPattern>();
     });
-    auto pattern = frameNode->GetPattern<DepthComponentPattern>();
-    if (pattern) {
-        if (background.IsValid()) {
-            pattern->SetBackgroundSource(background);
-        }
-    }
+    SetBackgroundSource(AceType::RawPtr(frameNode), background);
     return frameNode;
+}
+
+void DepthComponentModel::SetBackgroundSource(FrameNode* frameNode, const OHOS::Ace::DepthBackgroundSource& background)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
+    CHECK_NULL_VOID(depthPattern);
+    if (background.IsValid()) {
+        depthPattern->SetBackgroundSource(background);
+    }
 }
 
 void DepthComponentModel::SetDepthSpace(OHOS::Ace::DepthSpaceType depthSpace)

@@ -29,6 +29,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
@@ -4133,6 +4134,118 @@ template<>
 void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageAlt& value)
 {
     dst = ImageSourceInfo();
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthVector3>& dst, const Ark_DepthVector3& src)
+{
+    OHOS::Ace::DepthVector3 result;
+    result.x = static_cast<float>(src.x);
+    result.y = static_cast<float>(src.y);
+    result.z = static_cast<float>(src.z);
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthVector4>& dst, const Ark_DepthVector4& src)
+{
+    OHOS::Ace::DepthVector4 result;
+    result.x = static_cast<float>(src.x);
+    result.y = static_cast<float>(src.y);
+    result.z = static_cast<float>(src.z);
+    result.w = static_cast<float>(src.w);
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthColorRGB>& dst, const Ark_DepthColorRGB& src)
+{
+    OHOS::Ace::DepthColorRGB result;
+    result.red = src.red;
+    result.green = src.green;
+    result.blue = src.blue;
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthSpaceType>& dst, const Ark_DepthSpaceType& src)
+{
+    switch (src) {
+        case ARK_DEPTH_SPACE_TYPE_INSTANCE:
+            dst = OHOS::Ace::DepthSpaceType::INSTANCE;
+            break;
+        case ARK_DEPTH_SPACE_TYPE_GLOBAL:
+            dst = OHOS::Ace::DepthSpaceType::GLOBAL;
+            break;
+        default:
+            LOGW("Unexpected Ark_DepthSpaceType value: %{public}d", static_cast<int>(src));
+            dst = OHOS::Ace::DepthSpaceType::INSTANCE;
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthCameraParams>& dst, const Ark_DepthCameraParams& src)
+{
+    OHOS::Ace::DepthCameraParams result;
+    auto position = Converter::OptConvert<OHOS::Ace::DepthVector3>(src.position);
+    if (position) {
+        result.position = *position;
+    }
+    auto quaternion = Converter::OptConvert<OHOS::Ace::DepthVector4>(src.quaternion);
+    if (quaternion) {
+        result.quaternion = *quaternion;
+    }
+    result.yFov = Converter::Convert<float>(src.yFov);
+    result.zNear = Converter::Convert<float>(src.zNear);
+    result.zFar = Converter::Convert<float>(src.zFar);
+    if (src.cameraBufferCrop.tag != INTEROP_TAG_UNDEFINED) {
+        const auto& cropSrc = src.cameraBufferCrop.value;
+        OHOS::Ace::CameraBufferCrop crop;
+        crop.bufferWidth = cropSrc.bufferWidth;
+        crop.bufferHeight = cropSrc.bufferHeight;
+        crop.cropOffset = { Converter::ArkValue<Ark_Int32>(cropSrc.cropOffset.x),
+                            Converter::ArkValue<Ark_Int32>(cropSrc.cropOffset.y) };
+        crop.cropScale = Converter::ArkValue<Ark_Float64>(cropSrc.cropScale);
+        result.cameraBufferCrop = crop;
+    }
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthLightParams>& dst, const Ark_DepthLightParams& src)
+{
+    OHOS::Ace::DepthLightParams result;
+    auto direction = Converter::OptConvert<OHOS::Ace::DepthVector3>(src.direction);
+    if (direction) {
+        result.direction = *direction;
+    }
+    auto color = Converter::OptConvert<OHOS::Ace::DepthColorRGB>(src.color);
+    if (color) {
+        result.color = *color;
+    }
+    result.intensity = Converter::Convert<float>(src.intensity);
+    dst = result;
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DepthBackgroundSource>& dst,
+    const Ark_Union_ResourceStr_image_PixelMap& src)
+{
+    Converter::VisitUnion(src,
+        [&dst](const Ark_ResourceStr& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            if (info) {
+                dst = OHOS::Ace::DepthBackgroundSource::CreateImage(*info);
+            }
+        },
+        [&dst](const Ark_image_PixelMap& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            if (info) {
+                dst = OHOS::Ace::DepthBackgroundSource::CreateImage(*info);
+            }
+        },
+        []() {});
 }
 
 template<>

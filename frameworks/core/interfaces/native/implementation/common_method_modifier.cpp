@@ -5119,12 +5119,19 @@ void SetSpatialEffectImpl(Ark_NativePointer node,
         return { static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z) };
     };
     SpatialEffectParams effectParams;
-    effectParams.position = DepthPosition {
-        .leftTop = toVec3(src.position.leftTop),
-        .rightTop = toVec3(src.position.rightTop),
-        .leftBottom = toVec3(src.position.leftBottom),
-        .rightBottom = toVec3(src.position.rightBottom),
-    };
+    Converter::VisitUnion(src.position,
+        [&effectParams, &toVec3](const Ark_SpatialPosition& pos) {
+            effectParams.position = DepthPosition {
+                .leftTop = toVec3(pos.leftTop),
+                .rightTop = toVec3(pos.rightTop),
+                .leftBottom = toVec3(pos.leftBottom),
+                .rightBottom = toVec3(pos.rightBottom),
+            };
+        },
+        [&effectParams](const Ark_Float64& depth) {
+            effectParams.depth = static_cast<float>(depth);
+        },
+        []() {});
     if (src.occlusionWeight.tag != INTEROP_TAG_UNDEFINED) {
         effectParams.occlusionWeight = static_cast<float>(src.occlusionWeight.value);
     }

@@ -21,13 +21,16 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/depth_component/depth_component_paint_method.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#endif
 
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
 #include <surface_utils.h>
@@ -84,7 +87,7 @@ void DepthComponentPattern::OnAttachToFrameNode()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetUsingContentRectForRenderFrame(true);
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
     renderContext->SetFrameGravity(Rosen::Gravity::RESIZE);
 #endif
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
@@ -148,7 +151,7 @@ void DepthComponentPattern::OnModifyDone()
         SetupBackgroundImageNode();
     }
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
     if (IsGltfBackground()) {
         // Clear 2.5D depth map state when switching to GLTF 3D mode
         lastLoadedDepthMapKey_.clear();
@@ -396,7 +399,7 @@ void DepthComponentPattern::OnPaint3D()
 #endif
 }
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
 void DepthComponentPattern::LoadDepthMap()
 {
     ACE_SCOPED_TRACE("DepthComponent::LoadDepthMap key=%s", depthMap_.GetKey().c_str());
