@@ -59,6 +59,13 @@ declare enum ScrollSource {
   SCROLLER_ANIMATION,
 }
 
+declare enum StickyStyle {
+  None = 0,
+  Header = 1,
+  Footer = 2,
+  Both = 3,
+}
+
 interface CommonAttribute {}
 interface BlankAttribute extends CommonAttribute {}
 interface ColumnAttribute extends CommonAttribute {}

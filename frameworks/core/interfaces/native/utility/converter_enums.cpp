@@ -1005,7 +1005,7 @@ void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src)
 }
 
 template<>
-void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
 {
     switch (src) {
         case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;

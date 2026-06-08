@@ -1105,7 +1105,7 @@ namespace Converter {
         std::optional<V2::ListItemGroupHeaderFooterStyle>& dst, const Ark_ListItemGroupHeaderFooterStyle& src);
     template<> void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& src);
     template<> void AssignCast(std::optional<V2::ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src);
-    template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src);
     template<> void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src);

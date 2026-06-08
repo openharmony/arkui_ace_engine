@@ -46,7 +46,8 @@ component_modules = [
   "lazy_column_layout",
   "toggle",
   "image_animator",
-  "date_picker"
+  "date_picker",
+  "lazy_grid_layout",
 ]
 
 if (!ace_engine_feature_wearable) {

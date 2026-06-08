@@ -127,7 +127,7 @@ ACE_FORCE_EXPORT std::optional<float> GetCrossAxisSize(const OptionalSizeF& size
 
 ACE_FORCE_EXPORT std::optional<float> GetMainAxisSize(const OptionalSizeF& size, Axis axis);
 
-void SetCrossAxisSize(float value, Axis axis, OptionalSizeF& size);
+ACE_FORCE_EXPORT void SetCrossAxisSize(float value, Axis axis, OptionalSizeF& size);
 
 void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
 

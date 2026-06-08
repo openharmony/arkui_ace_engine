@@ -4794,6 +4794,7 @@ struct ArkUINodeContainerModifier {
 };
 
 struct ArkUILazyGridLayoutModifier {
+    void (*create)();
     void (*setColumnsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap);
     void (*resetColumnsGap)(ArkUINodeHandle node);
     void (*setRowsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap);

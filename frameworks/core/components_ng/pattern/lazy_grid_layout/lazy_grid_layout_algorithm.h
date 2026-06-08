@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_GRID_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_GRID_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H
 
 #include <optional>
 #include "base/geometry/axis.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_info.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
 #include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -207,4 +207,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_GRID_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H

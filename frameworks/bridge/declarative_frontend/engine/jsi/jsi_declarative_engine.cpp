@@ -840,6 +840,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Toggle", "arkui.components.arktoggle" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
         { "LazyColumnLayout", "arkui.components.arklazycolumnlayout" },
+        { "LazyVGridLayout", "arkui.components.arklazygridlayout" },
         { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },
         { "ImageAnimator", "arkui.components.arkimageanimator" },
         { "DatePicker", "arkui.components.arkdatepicker" },
