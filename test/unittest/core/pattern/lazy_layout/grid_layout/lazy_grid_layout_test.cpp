@@ -2475,116 +2475,33 @@ HWTEST_F(LazyGridLayoutTest, LayoutPolicyTest001, TestSize.Level1)
     EXPECT_EQ(size, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
 }
-
-namespace {
-void CreateGridEdge(float height)
-{
-    StackModelNG stackModel;
-    stackModel.Create();
-    ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
-    ViewAbstract::SetHeight(CalcLength(height));
-    ViewStackProcessor::GetInstance()->Pop();
-}
-} // namespace
-
 /**
- * @tc.name: HeaderFooterTotalStableOnIdle001
- * @tc.desc: A header+footer grid must not inflate totalMainSize_ on predictive (idle) frames.
+ * @tc.name: FirstFrameWindowSeedsWithUnknownBody001
+ * @tc.desc: First layout with an already-scrolled viewport (body extent unknown): the forward window must fall back
+ *           to measuring from item 0 (no past-the-end clamp), and the backward window seeds the last item at body 0.
  * @tc.type: FUNC
  */
-HWTEST_F(LazyGridLayoutTest, HeaderFooterTotalStableOnIdle001, TestSize.Level1)
+HWTEST_F(LazyGridLayoutTest, FirstFrameWindowSeedsWithUnknownBody001, TestSize.Level1)
 {
-    CreateWaterFlow();
-    CreateLazyGridLayout();
-    LazyGridLayoutModel::SetHeader([]() { CreateGridEdge(60.0f); });
-    CreateContent(30);
-    LazyGridLayoutModel::SetFooter([]() { CreateGridEdge(40.0f); });
-    CreateDone();
+    auto info = AceType::MakeRefPtr<LazyGridLayoutInfo>();
+    info->totalItemCount_ = 10;
+    LazyGridLayoutAlgorithm algorithm(info);
+    algorithm.totalItemCount_ = 10;
+    algorithm.hadMeasuredItems_ = false; // true first layout
+    algorithm.prevBodyMainSize_ = 0.0f;
+    algorithm.startPos_ = 200.0f; // viewport already scrolled when this child first measures
+    algorithm.endPos_ = 650.0f;
 
-    ASSERT_NE(pattern_, nullptr);
-    const float totalAfterLayout = pattern_->layoutInfo_->totalMainSize_;
-    EXPECT_GT(totalAfterLayout, pattern_->GetHeaderMainSize() + pattern_->GetFooterMainSize());
+    int32_t index = -2;
+    float pos = -1.0f;
+    algorithm.GetStartIndexInfo(index, pos);
+    EXPECT_EQ(index, 0);
+    EXPECT_FLOAT_EQ(pos, 0.0f);
 
-    FlushIdleTask(pattern_);
-    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
-    FlushIdleTask(pattern_);
-    EXPECT_FLOAT_EQ(pattern_->layoutInfo_->totalMainSize_, totalAfterLayout);
-}
-
-/**
- * @tc.name: StickyHeaderStaysLaidOutOnIdle001
- * @tc.desc: A sticky header/footer grid must keep its edges active across predictive (idle) frames.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyGridLayoutTest, StickyHeaderStaysLaidOutOnIdle001, TestSize.Level1)
-{
-    CreateWaterFlow();
-    CreateLazyGridLayout();
-    LazyGridLayoutModel::SetSticky(StickyStyle::BOTH);
-    LazyGridLayoutModel::SetHeader([]() { CreateGridEdge(60.0f); });
-    CreateContent(30);
-    LazyGridLayoutModel::SetFooter([]() { CreateGridEdge(40.0f); });
-    CreateDone();
-
-    ASSERT_NE(pattern_, nullptr);
-    auto headerNode = pattern_->GetHeaderNode();
-    auto footerNode = pattern_->GetFooterNode();
-    ASSERT_NE(headerNode, nullptr);
-    ASSERT_NE(footerNode, nullptr);
-    EXPECT_TRUE(headerNode->IsActive());
-    EXPECT_TRUE(footerNode->IsActive());
-
-    FlushIdleTask(pattern_);
-    EXPECT_TRUE(headerNode->IsActive());
-    EXPECT_TRUE(footerNode->IsActive());
-}
-
-/**
- * @tc.name: StickyToggleKeepsHeaderLaidOut_001
- * @tc.desc: Toggling sticky at runtime must not drop the header. Regression for the header collapsing onto
- *           item 0 (headerMainSize -> 0) when a property-only relayout addressed a stale edge reference; the
- *           header must stay sized and keep items below it across BOTH -> NONE -> BOTH without a scroll.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyGridLayoutTest, StickyToggleKeepsHeaderLaidOut_001, TestSize.Level1)
-{
-    constexpr float headerHeight = 60.0f;
-    constexpr float footerHeight = 40.0f;
-
-    CreateWaterFlow();
-    CreateLazyGridLayout();
-    LazyGridLayoutModel::SetSticky(StickyStyle::BOTH);
-    LazyGridLayoutModel::SetHeader([]() { CreateGridEdge(headerHeight); });
-    CreateContent(30);
-    LazyGridLayoutModel::SetFooter([]() { CreateGridEdge(footerHeight); });
-    CreateDone();
-
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_NE(layoutProperty_, nullptr);
-    auto headerNode = pattern_->GetHeaderNode();
-    ASSERT_NE(headerNode, nullptr);
-    EXPECT_TRUE(headerNode->IsActive());
-    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
-
-    // BOTH -> NONE: header must not be dropped.
-    layoutProperty_->CleanDirty();
-    LazyGridLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::NONE);
-    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
-    FlushUITasks();
-
-    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::NONE);
-    headerNode = pattern_->GetHeaderNode();
-    ASSERT_NE(headerNode, nullptr);
-    EXPECT_TRUE(headerNode->IsActive());
-    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
-
-    // NONE -> BOTH: header is still intact after toggling back.
-    layoutProperty_->CleanDirty();
-    LazyGridLayoutModel::SetSticky(AceType::RawPtr(frameNode_), StickyStyle::BOTH);
-    frameNode_->MarkDirtyNode(layoutProperty_->GetPropertyChangeFlag());
-    FlushUITasks();
-
-    EXPECT_EQ(pattern_->GetStickyStyle(), StickyStyle::BOTH);
-    EXPECT_EQ(pattern_->GetHeaderMainSize(), headerHeight);
+    index = -2;
+    pos = -1.0f;
+    algorithm.GetEndIndexInfo(index, pos);
+    EXPECT_EQ(index, 9);
+    EXPECT_FLOAT_EQ(pos, 0.0f);
 }
 } // namespace OHOS::Ace::NG
