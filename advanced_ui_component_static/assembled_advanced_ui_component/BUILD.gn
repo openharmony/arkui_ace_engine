@@ -35,6 +35,7 @@ generate_static_abc("assembled_advanced_ets_abc") {
       "./@ohos.arkui.advanced.Filter.ets",
       "./@ohos.arkui.advanced.FilterV2.ets",
       "./@ohos.arkui.advanced.GridObjectSortComponent.ets",
+      "./@ohos.arkui.advanced.GridObjectSortComponentV2.ets",
       "./@ohos.arkui.advanced.ProgressButton.ets",
       "./@ohos.arkui.advanced.ProgressButtonV2.ets",
       "./@ohos.arkui.advanced.SelectTitleBar.ets",
