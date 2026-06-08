@@ -406,10 +406,9 @@ HWTEST_F(ScrollBarTestNg, OnCollectLongPressTarget, TestSize.Level1)
     std::list<RefPtr<TouchEventTarget>> result;
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
     ASSERT_NE(frameNode, nullptr);
-    auto targetComponent = AceType::MakeRefPtr<TargetComponent>();
     std::list<WeakPtr<NG::NGGestureRecognizer>> responseLinkResult;
     scrollBar->OnCollectLongPressTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+        coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
     EXPECT_EQ(scrollBar->longPressRecognizer_->coordinateOffset_.GetX(), 4.0f);
     EXPECT_EQ(scrollBar->longPressRecognizer_->coordinateOffset_.GetY(), 5.0f);
 }

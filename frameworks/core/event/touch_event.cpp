@@ -18,7 +18,7 @@
 #include "base/input_manager/input_manager.h"
 #include "base/utils/time_util.h"
 #include "core/common/ace_application_info.h"
-#include "core/components_ng/event/target_component.h"
+#include "core/components_ng/event/gesture_types.h"
 #include "core/event/mouse_event.h"
 #include "core/event/key_event.h"
 
@@ -906,18 +906,6 @@ RefPtr<GestureSnapshot> TouchEventTarget::Dump() const
     info->type = GetTypeName();
     info->id = reinterpret_cast<uintptr_t>(this);
     return info;
-}
-
-void TouchEventTarget::SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
-{
-    if (!targetComponent_) {
-        targetComponent_ = targetComponent;
-    }
-}
-
-RefPtr<NG::TargetComponent> TouchEventTarget::GetTargetComponent()
-{
-    return targetComponent_;
 }
 
 void TouchEventTarget::SetIsPostEventResult(bool isPostEventResult)

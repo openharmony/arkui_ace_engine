@@ -95,25 +95,25 @@ ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
     });
     scrollableEvent->SetBarCollectTouchTargetCallback(
         [weak = WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
             ResponseLinkResult& responseLinkResult) {
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self && self->vertical_ && self->horizontal_);
             self->vertical_->OnCollectTouchTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
             self->horizontal_->OnCollectTouchTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
         });
     scrollableEvent->SetBarCollectClickAndLongPressTargetCallback(
         [weak = WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
             ResponseLinkResult& responseLinkResult) {
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self && self->vertical_ && self->horizontal_);
             self->vertical_->OnCollectLongPressTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
             self->horizontal_->OnCollectLongPressTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
         });
 }
 

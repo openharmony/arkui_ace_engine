@@ -21,7 +21,7 @@
 #include "ui/event/touch_event.h"
 #include "ui/gestures/gesture_info.h"
 #include "core/components_ng/event/event_constants.h"
-#include "core/components_ng/event/target_component.h"
+#include "core/components_ng/event/gesture_types.h"
 
 namespace OHOS::Ace {
 
@@ -203,8 +203,6 @@ public:
     virtual void AttachFrameNode(const WeakPtr<NG::FrameNode>& node);
     WeakPtr<NG::FrameNode> GetAttachedNode() const;
     virtual RefPtr<GestureSnapshot> Dump() const;
-    ACE_FORCE_EXPORT void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent);
-    RefPtr<NG::TargetComponent> GetTargetComponent();
     void SetIsPostEventResult(bool isPostEventResult);
     bool IsPostEventResult() const;
 
@@ -221,7 +219,6 @@ protected:
     Offset subPipelineGlobalOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     std::string nodeName_ = "NULL";
-    RefPtr<NG::TargetComponent> targetComponent_;
     std::optional<TimeStamp> firstInputTime_;
     float viewScale_ = 1.0f;
     int32_t nodeId_ = -1;

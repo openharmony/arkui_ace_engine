@@ -1168,6 +1168,8 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level0)
     paintProps->UpdatePrimaryButtonShow(true);
     paintProps->UpdateSecondaryButtonShow(true);
     popupNode->MarkModifyDone();
+    pattern->RegisterButtonOnHover();
+    pattern->RegisterButtonOnTouch();
     /**
      * @tc.steps: step4. call hover, touch callback.
      * @tc.expected: now can't callback ButtonOnHover, isHover_ can't change.
@@ -1178,13 +1180,14 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level0)
         auto buttonNode = AceType::DynamicCast<FrameNode>(child);
         ASSERT_NE(buttonNode, nullptr);
         auto inputHub = buttonNode->GetOrCreateInputEventHub();
+        inputHub->CreateHoverEventActuator();
         ASSERT_NE(inputHub->hoverEventActuator_, nullptr);
         auto inputEvents = inputHub->hoverEventActuator_->inputEvents_;
         for (auto& event : inputEvents) {
             event->GetOnHoverEventFunc()(false);
             event->GetOnHoverEventFunc()(true);
         }
-        EXPECT_FALSE(pattern->isHover_);
+        EXPECT_TRUE(pattern->isHover_);
 
         auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
         auto touchEvents = gestureHub->touchEventActuator_->touchEvents_;

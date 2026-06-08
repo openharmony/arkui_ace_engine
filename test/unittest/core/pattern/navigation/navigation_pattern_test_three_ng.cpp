@@ -147,6 +147,7 @@ HWTEST_F(NavigationPatternTestThreeNg, InitDragBarEvent001, TestSize.Level1)
     panDirection.type = PanDirection::ALL;
     dividerGestureHub->AddPanEvent(navigationPattern->panEvent_, panDirection, 1, 0.0_vp);
 
+    dividerInputHub->CreateHoverEventActuator();
     navigationPattern->InitDragBarEvent();
     ASSERT_NE(dividerInputHub->hoverEventActuator_, nullptr);
     ASSERT_EQ(dividerInputHub->hoverEventActuator_->inputEvents_.size(), 0);

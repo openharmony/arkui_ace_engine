@@ -97,10 +97,9 @@ HWTEST_F(UICommonEventAccessorTest, setOnTouchTest, TestSize.Level1)
     TouchTestResult fresult;
     int32_t touchId = 0;
     const PointF localPoint;
-    const RefPtr<TargetComponent> targetC;
     ResponseLinkResult response;
 
-    hub->ProcessEventTouchTestHit(off, touchR, result, fresult, touchId, localPoint, targetC, response);
+    hub->ProcessEventTouchTestHit(off, touchR, result, fresult, touchId, localPoint, response);
     auto target = result.front();
     ASSERT_NE(target, nullptr);
     TouchEvent ev {};

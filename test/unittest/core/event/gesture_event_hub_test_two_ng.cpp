@@ -879,7 +879,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest034, TestSize.Level1)
     gestureEventHub->externalExclusiveRecognizer_.push_back(exclusiveRecognizer);
     gestureEventHub->externalParallelRecognizer_.push_back(parallelRecognizer);
     gestureEventHub->ProcessTouchTestHierarchy(
-        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr, responseLinkResult);
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, responseLinkResult);
     EXPECT_TRUE(finalResult.empty());
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1); // priority == GesturePriority::Low
     innerTargets.emplace_back(clickRecognizer);
@@ -907,7 +907,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest034, TestSize.Level1)
     eventHub->AttachHost(parentNode);
     gestureEventHub->gestureHierarchy_.emplace_back(recognizerGroup);
     gestureEventHub->ProcessTouchTestHierarchy(
-        COORDINATE_OFFSET, touchRestrict, innerTargets3, finalResult, TOUCH_ID, nullptr, responseLinkResult);
+        COORDINATE_OFFSET, touchRestrict, innerTargets3, finalResult, TOUCH_ID, responseLinkResult);
 }
 
 /**

@@ -101,7 +101,6 @@ class ExtensionHandler;
 class PaintWrapper;
 class GestureEventHub;
 class InputEventHub;
-class TargetComponent;
 struct DragPreviewOption;
 struct OptionsAfterApplied;
 class SamplerManager;
@@ -631,8 +630,6 @@ public:
     FocusType GetFocusType() const;
 
     void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
-
-    void AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
@@ -1507,11 +1504,6 @@ public:
 
     LayoutConstraintF GetLayoutConstraint() const;
 
-    WeakPtr<TargetComponent> GetTargetComponent() const
-    {
-        return targetComponent_;
-    }
-
     void SetExposeInnerGestureFlag(bool exposeInnerGestureFlag)
     {
         exposeInnerGestureFlag_ = exposeInnerGestureFlag;
@@ -1927,7 +1919,6 @@ private:
     RefPtr<GeometryNode> oldGeometryNode_;
     std::optional<bool> skipMeasureContent_;
     std::unique_ptr<FrameProxy> frameProxy_;
-    WeakPtr<TargetComponent> targetComponent_;
 
     bool needSyncRenderTree_ = false;
 

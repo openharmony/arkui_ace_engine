@@ -572,7 +572,8 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest005, TestSize.Level1)
     panGestureOption->SetDistance(10.0f);
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
     panRecognizer->SetMouseDistance(1.0f);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<NG::TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     auto judgeFunc1 = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
                      const std::list<WeakPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
         return GestureJudgeResult::REJECT;
@@ -581,9 +582,9 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest005, TestSize.Level1)
                      const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         return GestureJudgeResult::REJECT;
     };
-    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(judgeFunc1));
-    targetComponent->onGestureJudgeBegin_ = judgeFunc2;
-    panRecognizer->SetTargetComponent(targetComponent);
+    (void)judgeFunc2;
+    gestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(judgeFunc1));
+    panRecognizer->AttachFrameNode(frameNode);
     /**
      * @tc.steps: step2. TriggerGestureJudgeCallback with inputEventType::AXIS.
      * @tc.expected: step2. result equals.

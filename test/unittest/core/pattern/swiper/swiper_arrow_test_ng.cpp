@@ -1142,6 +1142,7 @@ HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack001, TestSize.Level1)
      * @tc.steps: step2 trigger hover event.
      */
     auto arrowInputEventHub = buttonNode->GetOrCreateInputEventHub();
+    arrowInputEventHub->CreateHoverEventActuator();
     auto actuatorHover = arrowInputEventHub->hoverEventActuator_;
     auto eventsHover = actuatorHover->inputEvents_;
     leftArrowPattern->isHover_ = false;

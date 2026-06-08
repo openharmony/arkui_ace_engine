@@ -613,8 +613,8 @@ HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfoTest003, TestSize.Level1)
     RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
     RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
     fingersRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
-    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
-    fingersRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+    uint32_t bitmap = SourceToolToBit(SourceTool::FINGER);
+    fingersRecognizer->gestureInfo_->SetAllowedTypesBitmap(bitmap);
 
     std::string result = fingersRecognizer->DumpGestureInfo();
     EXPECT_EQ(result, "allowedTypes: [1]");
@@ -630,8 +630,9 @@ HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfoTest004, TestSize.Level1)
     RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
     RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
     fingersRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
-    std::set<SourceTool> allowedTypes = { SourceTool::FINGER, SourceTool::PEN, SourceTool::MOUSE };
-    fingersRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+    uint32_t bitmap = SourceToolToBit(SourceTool::FINGER) | SourceToolToBit(SourceTool::PEN) |
+        SourceToolToBit(SourceTool::MOUSE);
+    fingersRecognizer->gestureInfo_->SetAllowedTypesBitmap(bitmap);
 
     std::string result = fingersRecognizer->DumpGestureInfo();
     EXPECT_EQ(result, "allowedTypes: [1, 2, 7]");

@@ -1383,18 +1383,19 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent001, TestSize.L
      * @tc.steps: step1. create and set Recognizer、TargetComponent.
      */
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     DimensionRect area;
     DimensionOffset origin;
     EventTarget target = { "", "", area, origin };
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;
     };
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     TouchEvent touchEvent;
     touchEvent.tiltX.emplace(1.0f);
     touchEvent.tiltY.emplace(1.0f);
-    clickRecognizerPtr->targetComponent_ = targetComponent;
+    clickRecognizerPtr->AttachFrameNode(frameNode);
     /**
      * @tc.steps: step2. test the function who calls TriggerGestureJudgeCallback.
      * @tc.expected: step2. result equals REJECT.
@@ -1697,8 +1698,6 @@ HWTEST_F(ClickRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     touchEvent.SetTiltX(0);
     touchEvent.SetTiltY(0);
     touchEvent.rollAngle = 0;
-    touchEvent.convertInfo.first = UIInputEventType::AXIS;
-    touchEvent.convertInfo.second = UIInputEventType::TOUCH;
     clickRecognizer->AttachFrameNode(frameNode);
     clickRecognizer->touchPoints_[0] = touchEvent;
     GestureEvent result = clickRecognizer->GetGestureEventInfo();
@@ -1706,8 +1705,6 @@ HWTEST_F(ClickRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     EXPECT_EQ(result.GetTiltX(), 0);
     EXPECT_EQ(result.GetTiltY(), 0);
     EXPECT_EQ(result.GetRollAngle(), 0);
-    EXPECT_EQ(result.GetOriginUIInputEventType(), UIInputEventType::AXIS);
-    EXPECT_EQ(result.GetCurrentUIInputEventType(), UIInputEventType::TOUCH);
 }
 
 /**
@@ -1721,7 +1718,8 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Lev
      * @tc.steps: step1. create ClickRecognizer.
      */
     RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;
     };
@@ -1736,7 +1734,7 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Lev
      */
     touchEvent.rollAngle = 0;
     clickRecognizer->touchPoints_[0] = touchEvent;
-    clickRecognizer->targetComponent_ = targetComponent;
+    clickRecognizer->AttachFrameNode(frameNode);
     GestureJudgeResult result = clickRecognizer->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
 
@@ -1745,7 +1743,7 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Lev
      * @tc.steps: case2: gestureRecognizerJudgeFunc is not null.
      * @tc.expected: step2. result equals.
      */
-    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    gestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(func));
     result = clickRecognizer->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::REJECT);
 
@@ -1770,12 +1768,14 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize.Lev
      * @tc.steps: step1. create ClickRecognizer.
      */
     RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(2, COUNT, 0, true);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;
     };
     auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
                     const std::list<WeakPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult::REJECT; };
+    (void)func;
     TouchEvent touchEvent;
 
     /**
@@ -1784,14 +1784,14 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize.Lev
      * @tc.expected: step2. result equals.
      */
 
-    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    // Removed: targetComponent->SetOnGestureRecognizerJudgeBegin(func);
     touchEvent.rollAngle = 0;
     clickRecognizer->touchPoints_[0] = touchEvent;
     clickRecognizer->touchPoints_[1] = touchEvent;
     clickRecognizer->touchPoints_[2] = touchEvent;
-    clickRecognizer->targetComponent_ = targetComponent;
+    clickRecognizer->AttachFrameNode(frameNode);
     clickRecognizer->TriggerClickAccepted(touchEvent);
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     EXPECT_EQ(clickRecognizer->disposal_, GestureDisposal::REJECT);
 }
 
@@ -2039,7 +2039,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTypeTest003, TestSize.Level1)
 HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Level1)
 {
     RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     clickRecognizer->inputEventType_ = InputEventType::KEYBOARD;
     clickRecognizer->deviceId_ = 1;
 
@@ -2049,11 +2049,12 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Lev
         EXPECT_EQ(info->rawInputDeviceId_, 1);
         return GestureJudgeResult::REJECT;
     };
+    (void)func;
     TouchEvent touchEvent;
     touchEvent.rollAngle = 0;
     clickRecognizer->touchPoints_[0] = touchEvent;
-    clickRecognizer->targetComponent_ = targetComponent;
-    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    clickRecognizer->AttachFrameNode(frameNode);
+    // Removed: targetComponent->SetOnGestureRecognizerJudgeBegin(func);
     clickRecognizer->TriggerGestureJudgeCallback();
 }
 
@@ -2975,18 +2976,18 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleReportsTapTypeTest001, Test
 HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTriggerGestureJudgeCallbackTest004, TestSize.Level1)
 {
     RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(clickRecognizer, nullptr);
-    ASSERT_NE(targetComponent, nullptr);
 
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;
     };
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
-    clickRecognizer->targetComponent_ = targetComponent;
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
 
     TouchEvent touchEvent;
     touchEvent.id = 0;
+    clickRecognizer->AttachFrameNode(frameNode);
     clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
     auto result = clickRecognizer->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::REJECT);

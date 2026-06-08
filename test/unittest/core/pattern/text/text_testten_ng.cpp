@@ -471,7 +471,9 @@ HWTEST_F(TextFieldTenPatternNg, HandleMouseRightButton001, TestSize.Level1)
     auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = host->GetPattern<TextPattern>();
     auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
-    inputHub->mouseEventActuator_->inputEvents_.clear();
+    if (inputHub->mouseEventActuator_) {
+        inputHub->mouseEventActuator_->inputEvents_.clear();
+    }
     pattern->mouseEventInitialized_ = false;
     pattern->InitMouseEvent();
 

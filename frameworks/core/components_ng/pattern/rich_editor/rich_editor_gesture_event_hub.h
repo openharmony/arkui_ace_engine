@@ -25,8 +25,7 @@ public:
     ~RichEditorGestureEventHub() override = default;
 
     RefPtr<NGGestureRecognizer> PackInnerRecognizer(const Offset& offset,
-        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId, int32_t originalId,
-        const RefPtr<TargetComponent>& targetComponent) override;
+        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId, int32_t originalId) override;
 
 private:
     void AddScrollGestureRecognizer(std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers);

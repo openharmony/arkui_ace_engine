@@ -754,6 +754,8 @@ HWTEST_F(TextTestNgEight, InitMouseEvent001, TestSize.Level1)
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     pattern->currentMouseStyle_ = MouseFormat::WEST;
     pattern->InitMouseEvent();
+    inputHub->CreateHoverEventActuator();
+    inputHub->CreateMouseEventActuator();
 
     bool isHover = true;
     inputHub->hoverEventActuator_->inputEvents_.front()->GetOnHoverEventFunc()(isHover);

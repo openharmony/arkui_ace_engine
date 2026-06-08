@@ -494,6 +494,7 @@ HWTEST_F(TextFieldPatternTestNine, InitCancelButtonMouseEvent001, TestSize.Level
     pattern_->InitCancelButtonMouseEvent();
     auto stackNode = cleanNodeResponseArea->GetFrameNode();
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
+    imageInputHub->CreateHoverEventActuator();
     HoverInfo hoverInfo;
     imageInputHub->hoverEventActuator_->inputEvents_.front()->onHoverEventCallback_(true, hoverInfo);
     EXPECT_TRUE(pattern_->isOnHover_);
@@ -545,6 +546,7 @@ HWTEST_F(TextFieldPatternTestNine, InitPasswordButtonMouseEvent001, TestSize.Lev
     imageTouchHub->touchEventActuator_->touchEvents_.clear();
     pattern_->InitPasswordButtonMouseEvent();
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
+    imageInputHub->CreateHoverEventActuator();
     HoverInfo hoverInfo;
     imageInputHub->hoverEventActuator_->inputEvents_.front()->onHoverEventCallback_(true, hoverInfo);
     EXPECT_TRUE(pattern_->isOnHover_);

@@ -15,7 +15,6 @@
 
 #include "core/components_ng/event/scrollable_event.h"
 
-#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -107,7 +106,7 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
 
 void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint,
-    const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    const RefPtr<FrameNode>& frameNode,
     ResponseLinkResult& responseLinkResult, int32_t touchId)
 {
     for (const auto& [axis, event] : scrollableEvents_) {
@@ -117,22 +116,22 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         if (event->GetEnabled()) {
             if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
                 event->BarCollectTouchTarget(
-                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                    coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
             } else if (event->InBarRectRegion(localPoint, touchRestrict.sourceType)) {
                 event->BarCollectLongPressTarget(
-                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                    coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
                 event->CollectScrollableTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode,
-                    targetComponent, responseLinkResult, touchId, touchRestrict.touchEvent.originalId);
+                    responseLinkResult, touchId, touchRestrict.touchEvent.originalId);
                 event->BarRectCollectTouchTarget(
-                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                    coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
             } else {
                 event->CollectScrollableTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode,
-                    targetComponent, responseLinkResult, touchId, touchRestrict.touchEvent.originalId);
+                    responseLinkResult, touchId, touchRestrict.touchEvent.originalId);
             }
         }
         bool clickJudge = event->ClickJudge(localPoint);
         if (event->GetEnabled() || clickJudge) {
-            InitClickRecognizer(coordinateOffset, getEventTargetImpl, frameNode, targetComponent, event, clickJudge,
+            InitClickRecognizer(coordinateOffset, getEventTargetImpl, frameNode, event, clickJudge,
                 localPoint, touchRestrict.sourceType);
             result.emplace_front(clickRecognizer_);
             responseLinkResult.emplace_back(clickRecognizer_);
@@ -143,7 +142,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
 
 void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, const RefPtr<ScrollableEvent>& event, bool clickJudge,
+    const RefPtr<ScrollableEvent>& event, bool clickJudge,
     const PointF& localPoint, SourceType source)
 {
     if (!clickRecognizer_) {
@@ -154,7 +153,6 @@ void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
     clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     clickRecognizer_->SetNodeId(frameNode->GetId());
     clickRecognizer_->AttachFrameNode(frameNode);
-    clickRecognizer_->SetTargetComponent(targetComponent);
     clickRecognizer_->SetIsSystemGesture(true);
     clickRecognizer_->SetRecognizerType(GestureTypeName::TAP_GESTURE);
     clickRecognizer_->SetSysGestureJudge([isHitTestBlock, clickJudge](const RefPtr<GestureInfo>& gestureInfo,
@@ -185,7 +183,7 @@ RefPtr<NGGestureRecognizer> GetOverrideRecognizer(const RefPtr<FrameNode>& frame
 
 void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult, int32_t touchId,
+    ResponseLinkResult& responseLinkResult, int32_t touchId,
     int32_t originalId)
 {
     if (auto superRecognizer = GetOverrideRecognizer(frameNode)) {
@@ -193,7 +191,7 @@ void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffs
         auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(superRecognizer);
         if (recognizerGroup) {
             auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
-            recognizerGroup->SetRecognizerInfoRecursively(offset, frameNode, targetComponent, getEventTargetImpl);
+            recognizerGroup->SetRecognizerInfoRecursively(offset, frameNode, getEventTargetImpl);
             recognizerGroup->CollectResponseLinkRecognizersRecursively(responseLinkResult);
             recognizerGroup->BeginReferee(touchId, originalId, true);
         } else {
@@ -201,7 +199,6 @@ void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffs
         }
         superRecognizer->SetNodeId(frameNode->GetId());
         superRecognizer->AttachFrameNode(frameNode);
-        superRecognizer->SetTargetComponent(targetComponent);
         superRecognizer->SetIsSystemGesture(true);
         superRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         superRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
@@ -210,7 +207,7 @@ void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffs
     if (scrollable_) {
         scrollable_->SetGetEventTargetImpl(getEventTargetImpl);
         scrollable_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        scrollable_->OnCollectTouchTarget(result, frameNode, targetComponent, responseLinkResult);
+        scrollable_->OnCollectTouchTarget(result, frameNode, responseLinkResult);
     }
 }
 } // namespace OHOS::Ace::NG

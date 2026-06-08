@@ -22,7 +22,6 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/gestures/gesture_event.h"
 
@@ -37,7 +36,7 @@ class ClickRecognizer;
 class GestureEventHub;
 
 using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const GetEventTargetImpl&, TouchTestResult&,
-    const RefPtr<FrameNode>&, const RefPtr<TargetComponent>&, ResponseLinkResult& responseLinkResult)>;
+    const RefPtr<FrameNode>&, ResponseLinkResult& responseLinkResult)>;
 using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
 using GetAnimateVelocityCallback = std::function<double()>;
 using ClickJudgeCallback = std::function<bool(const PointF&)>;
@@ -89,12 +88,12 @@ public:
     }
 
     void BarCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult)
     {
         if (barCollectTouchTarget_) {
             barCollectTouchTarget_(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
         }
     }
 
@@ -104,12 +103,12 @@ public:
     }
 
     void BarRectCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult)
     {
         if (barRectCollectTouchTarget_) {
             barRectCollectTouchTarget_(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
         }
     }
 
@@ -137,12 +136,12 @@ public:
     }
 
     void BarCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult)
     {
         if (barCollectLongPressTarget_) {
             barCollectLongPressTarget_(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
         }
     }
 
@@ -162,7 +161,7 @@ public:
     }
 
     void CollectScrollableTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult, int32_t touchId, int32_t originalId);
 
 private:
@@ -211,11 +210,11 @@ public:
 
     void CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint,
-        const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult, int32_t touchId);
 
     void InitClickRecognizer(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        const RefPtr<FrameNode>& frameNode,
         const RefPtr<ScrollableEvent>& event, bool clickJudge,
         const PointF& localPoint, SourceType source);
 

@@ -1984,12 +1984,11 @@ void Scrollable::StopAxisAnimation()
 }
 
 void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult)
 {
     if (panRecognizerNG_) {
         panRecognizerNG_->SetNodeId(frameNode->GetId());
         panRecognizerNG_->AttachFrameNode(frameNode);
-        panRecognizerNG_->SetTargetComponent(targetComponent);
         panRecognizerNG_->SetIsSystemGesture(true);
         panRecognizerNG_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         result.emplace_back(panRecognizerNG_);

@@ -509,10 +509,13 @@ void SwipeRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
 
 GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
 {
-    auto targetComponent = GetTargetComponent();
-    CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
-    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
-    auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, GestureJudgeResult::CONTINUE);
+
+    auto gestureRecognizerJudgeFunc = gestureHub->GetOnGestureRecognizerJudgeBegin();
+    auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
     if (!callback && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }

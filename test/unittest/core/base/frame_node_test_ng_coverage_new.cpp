@@ -205,11 +205,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegion01, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeAddJudgeToTargetComponent01
- * @tc.desc: Test the function AddJudgeToTargetComponent
+ * @tc.name: FrameNodeSetOnGestureJudgeNativeBegin01
+ * @tc.desc: Test the function SetOnGestureJudgeNativeBegin
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent01, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeSetOnGestureJudgeNativeBegin01, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -217,7 +217,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent01, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. call the function AddJudgeToTargetComponent.
+     * @tc.steps: step2. call the function SetOnGestureJudgeNativeBegin.
      */
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo,
@@ -225,17 +225,16 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent01, TestSize.Level1)
         return GestureJudgeResult(1);
     };
     gestureHub->SetOnGestureJudgeNativeBegin(gestureJudgeFunc);
-    RefPtr<TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
-    frameNode->AddJudgeToTargetComponent(targetComponent);
     EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(gestureHub, nullptr);
 }
 
 /**
- * @tc.name: FrameNodeAddJudgeToTargetComponent02
- * @tc.desc: Test the function AddJudgeToTargetComponent
+ * @tc.name: FrameNodeGestureEventHubNullCheck01
+ * @tc.desc: Test handling of null GestureEventHub
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent02, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeGestureEventHubNullCheck01, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -243,11 +242,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent02, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. call the function AddJudgeToTargetComponent.
+     * @tc.steps: step2. set gestureEventHub to nullptr and verify.
      */
     frameNode->GetEventHub<EventHub>()->gestureEventHub_ = nullptr;
-    RefPtr<TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
-    frameNode->AddJudgeToTargetComponent(targetComponent);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetEventHub<EventHub>()->gestureEventHub_, nullptr);
 }

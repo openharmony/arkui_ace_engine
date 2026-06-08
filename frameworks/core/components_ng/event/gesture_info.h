@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_INFO_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_INFO_H
 
-#include <set>
 #include <optional>
 
 #include "base/memory/ace_type.h"
@@ -24,6 +23,13 @@
 #include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
+
+inline constexpr uint32_t SourceToolToBit(SourceTool tool)
+{
+    return 1u << static_cast<uint32_t>(tool);
+}
+
+inline constexpr uint32_t AllowedTypesNone = 0u;
 
 class ACE_EXPORT GestureInfo : public virtual AceType {
     DECLARE_ACE_TYPE(GestureInfo, AceType);
@@ -38,7 +44,7 @@ public:
         : type_(type), recognizerType_(trueType), isSystemGesture_(isSystemGesture)
     {}
     explicit GestureInfo(std::string tag) : tag_(std::move(tag)) {}
-    explicit GestureInfo(std::set<SourceTool> allowedTypes) : allowedTypes_(std::move(allowedTypes)) {}
+    explicit GestureInfo(uint32_t allowedTypesBitmap) : allowedTypesBitmap_(allowedTypesBitmap) {}
     explicit GestureInfo(GestureTypeName type) : type_(type) {}
     explicit GestureInfo(bool isSystemGesture) : isSystemGesture_(isSystemGesture) {}
     ~GestureInfo() override
@@ -59,9 +65,9 @@ public:
         return tag_;
     }
 
-    const std::set<SourceTool>& GetAllowedTypes() const
+    uint32_t GetAllowedTypesBitmap() const
     {
-        return allowedTypes_;
+        return allowedTypesBitmap_;
     }
 
     GestureTypeName GetType() const
@@ -84,9 +90,9 @@ public:
         tag_ = std::move(tag);
     }
 
-    void SetAllowedTypes(std::set<SourceTool> allowedTypes)
+    void SetAllowedTypesBitmap(uint32_t bitmap)
     {
-        allowedTypes_ = std::move(allowedTypes);
+        allowedTypesBitmap_ = bitmap;
     }
 
     void SetType(GestureTypeName type)
@@ -156,7 +162,7 @@ public:
 
 private:
     std::optional<std::string> tag_;
-    std::set<SourceTool> allowedTypes_{};
+    uint32_t allowedTypesBitmap_ = AllowedTypesNone;
     GestureTypeName type_ = GestureTypeName::UNKNOWN;
     // used in onGestureRecognizerJudgeBegin
     GestureTypeName recognizerType_ = GestureTypeName::UNKNOWN;

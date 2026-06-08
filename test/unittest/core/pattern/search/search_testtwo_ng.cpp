@@ -916,14 +916,13 @@ HWTEST_F(SearchTestTwoNg, PackInnerRecognizerr001, TestSize.Level1)
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizers;
     int32_t touchId = 0;
     int32_t originalId = 0;
-    RefPtr<TargetComponent> targetComponent;
     searchgestureEventHub->innerParallelRecognizer_ = nullptr;
     searchgestureEventHub->CheckClickActuator();
     auto clickEventActuator = searchgestureEventHub->GetUserClickEventActuator();
     GestureEventFunc callback = [](GestureEvent& info) {};
     clickEventActuator->SetUserCallback(std::move(callback));
-    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
-    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
+    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId);
+    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId);
 }
 
 /**
@@ -2794,6 +2793,7 @@ HWTEST_F(SearchTestTwoNg, searchTriggerButtonMouseEventTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
     auto events = inputHub->hoverEventActuator_->inputEvents_;
     for (const auto& callback : events) {
         if (callback) {

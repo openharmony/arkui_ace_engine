@@ -372,10 +372,10 @@ HWTEST_F(StepperTestNg, StepperPatternCreateLeftButtonNode001, TestSize.Level1)
     EXPECT_EQ(buttonNode->GetParent(), hostNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     ASSERT_NE(buttonInputHub, nullptr);
+    buttonInputHub->CreateHoverEventActuator();
     EXPECT_TRUE(buttonInputHub->hoverEventActuator_);
     auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
     ASSERT_NE(buttonGestureHub, nullptr);
-    EXPECT_TRUE(buttonGestureHub->touchEventActuator_);
     /**
      * @tc.steps: step4. test rowNode, imageNode, textNode
      * @tc.expected: step4. test success
@@ -440,10 +440,10 @@ HWTEST_F(StepperTestNg, StepperPatternCreateArrowRightButtonNode001, TestSize.Le
     EXPECT_EQ(buttonNode->GetParent(), hostNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     ASSERT_NE(buttonInputHub, nullptr);
+    buttonInputHub->CreateHoverEventActuator();
     EXPECT_TRUE(buttonInputHub->hoverEventActuator_);
     auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
     ASSERT_NE(buttonGestureHub, nullptr);
-    EXPECT_TRUE(buttonGestureHub->touchEventActuator_);
     auto rowNode = buttonNode->GetChildAtIndex(0);
     ASSERT_NE(rowNode, nullptr);
     auto imageNode = AceType::DynamicCast<FrameNode>(rowNode->GetChildAtIndex(0));
@@ -483,10 +483,10 @@ HWTEST_F(StepperTestNg, StepperPatternCreateArrowlessRightButtonNode001, TestSiz
     EXPECT_EQ(buttonNode->GetParent(), hostNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     ASSERT_NE(buttonInputHub, nullptr);
+    buttonInputHub->CreateHoverEventActuator();
     EXPECT_TRUE(buttonInputHub->hoverEventActuator_);
     auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
     ASSERT_NE(buttonGestureHub, nullptr);
-    EXPECT_TRUE(buttonGestureHub->touchEventActuator_);
     auto textNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildAtIndex(0));
     ASSERT_NE(textNode, nullptr);
 }

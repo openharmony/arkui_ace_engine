@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_GESTURE_INFO_H
 
 #include <functional>
+#include <set>
 #include <string>
 
 #include "base/memory/ace_type.h"
@@ -201,10 +202,14 @@ public:
 
     void SetAllowedTypes(std::set<SourceTool> allowedTypes)
     {
+        uint32_t bitmap = AllowedTypesNone;
+        for (auto tool : allowedTypes) {
+            bitmap |= SourceToolToBit(tool);
+        }
         if (gestureInfo_) {
-            gestureInfo_->SetAllowedTypes(std::move(allowedTypes));
+            gestureInfo_->SetAllowedTypesBitmap(bitmap);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(allowedTypes);
+            gestureInfo_ = MakeRefPtr<GestureInfo>(bitmap);
         }
     }
 
@@ -219,7 +224,14 @@ public:
     std::set<SourceTool> GetAllowedTypes()
     {
         if (gestureInfo_) {
-            return gestureInfo_->GetAllowedTypes();
+            std::set<SourceTool> result;
+            uint32_t bitmap = gestureInfo_->GetAllowedTypesBitmap();
+            for (uint32_t i = 0; i < sizeof(uint32_t) * 8; ++i) {
+                if (bitmap & (1u << i)) {
+                    result.insert(static_cast<SourceTool>(i));
+                }
+            }
+            return result;
         }
         return {};
     }

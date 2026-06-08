@@ -590,10 +590,10 @@ void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFu
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
-    CHECK_NULL_VOID(targetComponent);
-    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
-    targetComponent->SetInnerNodeGestureRecognizerJudge(true);
+    auto gestureHub = swiperNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    gestureHub->SetInnerNodeGestureRecognizerJudge(true);
 }
 
 void TabsPattern::RecoverInnerOnGestureRecognizerJudgeBegin()
@@ -602,10 +602,10 @@ void TabsPattern::RecoverInnerOnGestureRecognizerJudgeBegin()
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
-    CHECK_NULL_VOID(targetComponent);
-    targetComponent->SetOnGestureRecognizerJudgeBegin(nullptr);
-    targetComponent->SetInnerNodeGestureRecognizerJudge(false);
+    auto gestureHub = swiperNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureRecognizerJudgeBegin(nullptr);
+    gestureHub->SetInnerNodeGestureRecognizerJudge(false);
 }
 
 ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()

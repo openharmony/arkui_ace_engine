@@ -94,7 +94,6 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest003, TestSize.Level1)
     std::string test = "test";
     int32_t nodeid = 1;
     auto nodePtr = SelectOverlayNode::GetFrameNode(test, nodeid);
-    auto component = AceType::MakeRefPtr<TargetComponent>();
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
     auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
@@ -107,7 +106,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest003, TestSize.Level1)
         EventTarget target;
         return target;
     };
-    excluRecognizer.SetRecognizerInfoRecursively(coordinateOffset, nodePtr, component, getEventTargetImpl);
+    excluRecognizer.SetRecognizerInfoRecursively(coordinateOffset, nodePtr, getEventTargetImpl);
     EXPECT_EQ(panDirection.type, PanDirection::VERTICAL);
 }
 
@@ -244,7 +243,6 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest008, TestSize.Level1)
     std::string test = "test";
     int32_t nodeid = 1;
     auto nodePtr = SelectOverlayNode::GetFrameNode(test, nodeid);
-    auto component = AceType::MakeRefPtr<TargetComponent>();
     GetEventTargetImpl getEventTargetImpl = []() -> std::optional<EventTarget> {
         EventTarget target;
         return target;
@@ -252,7 +250,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest008, TestSize.Level1)
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     excluRecognizer.recognizers_.clear();
     excluRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    excluRecognizer.SetRecognizerInfoRecursively(coordinateOffset, nodePtr, component, getEventTargetImpl);
+    excluRecognizer.SetRecognizerInfoRecursively(coordinateOffset, nodePtr, getEventTargetImpl);
     EXPECT_EQ(nodeid, 1);
 }
 
@@ -614,18 +612,16 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest020, TestSize.Level1)
     auto outerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(outerRecognizers);
 
     auto frameNode = FrameNode::CreateFrameNode("set_info", 202, AceType::MakeRefPtr<Pattern>());
-    auto targetComponent = AceType::MakeRefPtr<TargetComponent>();
     Offset coordinateOffset(3.0, 4.0);
     GetEventTargetImpl getEventTargetImpl = []() -> std::optional<EventTarget> {
         EventTarget target;
         return target;
     };
-    outerGroup->SetRecognizerInfoRecursively(coordinateOffset, frameNode, targetComponent, getEventTargetImpl);
+    outerGroup->SetRecognizerInfoRecursively(coordinateOffset, frameNode, getEventTargetImpl);
 
     EXPECT_EQ(innerClick->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_EQ(innerClick->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(innerClick->GetAttachedNode().Upgrade(), frameNode);
-    EXPECT_EQ(innerClick->GetTargetComponent(), targetComponent);
     EXPECT_TRUE(innerClick->GetEventTarget().has_value());
 
     auto clickWithoutNode = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);

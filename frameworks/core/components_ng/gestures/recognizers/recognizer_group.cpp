@@ -220,16 +220,15 @@ void RecognizerGroup::GroupAdjudicate(const RefPtr<NGGestureRecognizer>& recogni
 }
 
 void RecognizerGroup::SetRecognizerInfoRecursively(const Offset& coordinateOffset, const RefPtr<NG::FrameNode>& node,
-    const RefPtr<NG::TargetComponent>& targetComponent, const GetEventTargetImpl& getEventTargetImpl)
+    const GetEventTargetImpl& getEventTargetImpl)
 {
     for (const auto& item : recognizers_) {
         item->SetCoordinateOffset(coordinateOffset);
         item->AttachFrameNode(WeakPtr<FrameNode>(node));
-        item->SetTargetComponent(targetComponent);
         item->SetGetEventTargetImpl(getEventTargetImpl);
         auto group = AceType::DynamicCast<RecognizerGroup>(item);
         if (group) {
-            group->SetRecognizerInfoRecursively(coordinateOffset, node, targetComponent, getEventTargetImpl);
+            group->SetRecognizerInfoRecursively(coordinateOffset, node, getEventTargetImpl);
         }
     }
 }

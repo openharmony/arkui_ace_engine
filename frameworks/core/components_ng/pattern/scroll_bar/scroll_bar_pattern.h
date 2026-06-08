@@ -176,7 +176,7 @@ public:
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult, bool inBarRect = false);
 
     float GetMainOffset(const Offset& offset) const
@@ -297,10 +297,10 @@ public:
     void ScheduleCaretLongPress();
     void StartLongPressEventTimer();
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult);
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult);
     void AddScrollBarLayoutInfo();
 

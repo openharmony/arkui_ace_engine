@@ -1136,6 +1136,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
         item->isActive_ = true;
         const auto& inputEventHub = item->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
         inputEventHub->SetAxisEvent([&item](AxisInfo& info) {});
+        AxisTestResult axisTestResult;
+        inputEventHub->ProcessAxisTestHit(OffsetF(0.0f, 0.0f), axisTestResult, false);
+        ASSERT_NE(inputEventHub->axisEventActuator_, nullptr);
         ON_CALL((*item), CollectSelfAxisResult(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
                              testing::_, testing::_, testing::_))
             .WillByDefault(
