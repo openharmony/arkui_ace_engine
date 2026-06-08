@@ -24,6 +24,8 @@ build_component_ng("property_ng") {
     "gradient_property.cpp",
     "grid_property.cpp",
     "layout_constraint.cpp",
+    "layout_policy_measure_utils.cpp",
+    "layout_policy_property.cpp",
     "magic_layout_property.cpp",
     "measure_property.cpp",
     "measure_utils.cpp",

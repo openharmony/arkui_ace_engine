@@ -86,14 +86,12 @@ void ContainerPickerLayoutAlgorithm::HandleLayoutPolicy(LayoutWrapper* layoutWra
 
     // handle layout policy.
     auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value()) {
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        // when the main/cross axis is set matchParent, Update contentIdealSize
-        if (layoutPolicy->IsWidthMatch()) {
-            auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+    if (layoutPolicy.has_value() && layoutPolicy->IsWidthMatch()) {
+        auto widthLayoutPolicy = layoutPolicy->widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto layoutPolicySize =
+            ConstrainIdealSizeByLayoutPolicy(
                 contentConstraint, widthLayoutPolicy, LayoutCalPolicy::MATCH_PARENT, axis_);
-            contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
-        }
+        contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
     }
 }
 

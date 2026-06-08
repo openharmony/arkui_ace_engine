@@ -165,24 +165,10 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     auto layoutPolicy = swiperLayoutProperty->GetLayoutPolicyProperty();
-    auto isMainMatchParent = false;
-    auto isCrossMatchParent = false;
-    auto isCrossWrap = false;
-    if (layoutPolicy.has_value()) {
-        bool isHorizontal = axis_ == Axis::HORIZONTAL;
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        isMainMatchParent = (isHorizontal ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
-        isCrossMatchParent = (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
-        isCrossWrap = (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
-
-        // when the main/cross axis is set matchParent, Update contentIdealSize
-        if (isMainMatchParent || isCrossMatchParent) {
-            auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(contentConstraint,
-                widthLayoutPolicy, heightLayoutPolicy, axis_);
-            contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
-        }
-    }
+    auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis_);
+    auto isCrossMatchParent = axisLayoutPolicy.IsCrossAxisMatch();
+    auto isCrossWrap = axisLayoutPolicy.IsCrossAxisWrap();
+    ApplyMatchParentIdealSizeByLayoutPolicy(contentIdealSize, contentConstraint, layoutPolicy, axis_, true, true);
 
     auto mainSize = contentIdealSize.MainSize(axis_);
     if (mainSize.has_value()) {

@@ -276,25 +276,9 @@ void LazyWaterFlowLayoutAlgorithm::SetFrameSize(
         return;
     }
 
-    auto layoutPolicy = property->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value()) {
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
-            layoutConstraint.value(), widthLayoutPolicy, heightLayoutPolicy, Axis::VERTICAL);
-        contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
-        auto isMainWrap = heightLayoutPolicy == LayoutCalPolicy::WRAP_CONTENT;
-        auto isMainFix = heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
-                         heightLayoutPolicy == LayoutCalPolicy::NO_MATCH;
-        if (isMainWrap || isMainFix) {
-            contentIdealSize.SetMainSize(totalMainSize_, Axis::VERTICAL);
-            if (isMainWrap) {
-                contentIdealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-            }
-        }
-    } else {
-        contentIdealSize.SetMainSize(totalMainSize_, Axis::VERTICAL);
-    }
+    ApplyMainAxisExtentByLayoutPolicy(
+        contentIdealSize, layoutConstraint.value(),
+            property->GetLayoutPolicyProperty(), Axis::VERTICAL, totalMainSize_);
 
     AddPaddingToSize(padding, contentIdealSize);
     frameSize.UpdateIllegalSizeWithCheck(contentIdealSize);

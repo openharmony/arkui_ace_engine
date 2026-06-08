@@ -83,12 +83,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listItemGroupLayoutProperty);
     auto layoutPolicy = listItemGroupLayoutProperty->GetLayoutPolicyProperty();
-    auto isCrossWrap =
-        layoutPolicy.has_value() && ((axis_ == Axis::VERTICAL && layoutPolicy.value().IsWidthWrap()) ||
-                                        (axis_ == Axis::HORIZONTAL && layoutPolicy.value().IsHeightWrap()));
-    auto isCrossFix =
-        layoutPolicy.has_value() && ((axis_ == Axis::VERTICAL && layoutPolicy.value().IsWidthFix()) ||
-                                        (axis_ == Axis::HORIZONTAL && layoutPolicy.value().IsHeightFix()));
+    const auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis_);
+    auto isCrossWrap = axisLayoutPolicy.IsCrossAxisWrap();
+    auto isCrossFix = axisLayoutPolicy.IsCrossAxisFix();
 
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpaceWidth().value_or(layoutProperty->GetSpace().value_or(Dimension(0)));

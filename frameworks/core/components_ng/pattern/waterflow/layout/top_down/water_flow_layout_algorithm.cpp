@@ -99,17 +99,12 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    auto isMainWrap = false;
+    auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis);
     if (layoutPolicy.has_value()) {
-        auto isVertical = axis == Axis::VERTICAL;
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
-        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
-            layoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+            layoutProperty->GetLayoutConstraint().value(), layoutPolicy, axis);
         idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
-        if (isMainFix) {
+        if (axisLayoutPolicy.IsMainAxisFix()) {
             idealSize.SetMainSize(LayoutInfinity<float>(), axis);
         }
     }
@@ -118,7 +113,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         skipMeasure_ = true;
         return;
     }
-    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis)) || isMainWrap;
+    auto matchChildren = ShouldMatchChildrenByLayoutPolicy(GetMainAxisSize(idealSize, axis), layoutPolicy, axis);
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }

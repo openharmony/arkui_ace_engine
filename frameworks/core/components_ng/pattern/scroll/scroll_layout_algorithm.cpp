@@ -82,14 +82,11 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize = CreateIdealSize(constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_CONTENT);
     CalcContentOffset(layoutWrapper);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    auto isMainFix = false;
+    const auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis);
+    const auto isMainFix = axisLayoutPolicy.IsMainAxisFix();
     if (layoutPolicy.has_value()) {
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
-            constraint.value_or(LayoutConstraintF()), widthLayoutPolicy, heightLayoutPolicy, axis);
-        isMainFix = (axis == Axis::VERTICAL && layoutPolicy.value().IsHeightFix()) ||
-                    (axis == Axis::HORIZONTAL && layoutPolicy.value().IsWidthFix());
+            constraint.value_or(LayoutConstraintF()), layoutPolicy, axis);
         idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
     }
     auto padding = layoutProperty->CreatePaddingAndBorder();

@@ -57,25 +57,20 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     frameSize_ = CreateIdealSize(
         gridLayoutProperty->GetLayoutConstraint().value(), axis, gridLayoutProperty->GetMeasureType(), true);
     auto layoutPolicy = gridLayoutProperty->GetLayoutPolicyProperty();
-    auto isMainWrap = false;
+    auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis);
     if (layoutPolicy.has_value()) {
-        auto isVertical = axis == Axis::VERTICAL;
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
-        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
-        if (isMainFix) {
+        if (axisLayoutPolicy.IsMainAxisFix()) {
             frameSize_.SetMainSize(LayoutInfinity<float>(), axis);
         }
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
-            gridLayoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+            gridLayoutProperty->GetLayoutConstraint().value(), layoutPolicy, axis);
         frameSize_.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
     }
     if (NearZero(GetMainAxisSize(frameSize_, axis))) {
         TAG_LOGW(AceLogTag::ACE_GRID, "size of main axis value is 0, please check");
         return;
     }
-    bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(frameSize_, axis)) || isMainWrap;
+    bool matchChildren = ShouldMatchChildrenByLayoutPolicy(GetMainAxisSize(frameSize_, axis), layoutPolicy, axis);
     syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 info_.targetIndex_.has_value() || !NearEqual(info_.currentOffset_, info_.prevOffset_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);

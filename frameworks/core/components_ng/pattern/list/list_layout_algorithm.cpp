@@ -140,18 +140,12 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
 
     auto layoutPolicy = listLayoutProperty->GetLayoutPolicyProperty();
-    auto isCrossWrap = false;
-    auto isCrossFix = false;
-    auto isMainFix = false;
+    const auto axisLayoutPolicy = CreateAxisLayoutPolicy(layoutPolicy, axis_);
+    auto isCrossWrap = axisLayoutPolicy.IsCrossAxisWrap();
+    auto isCrossFix = axisLayoutPolicy.IsCrossAxisFix();
+    auto isMainFix = axisLayoutPolicy.IsMainAxisFix();
     if (layoutPolicy.has_value()) {
-        auto isVertical = axis_ == Axis::VERTICAL;
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
-        isCrossWrap = (isVertical ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
-        isCrossFix = (isVertical ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
-        auto layoutPolicySize =
-            ConstrainIdealSizeByLayoutPolicy(layoutConstraint, widthLayoutPolicy, heightLayoutPolicy, axis_);
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint, layoutPolicy, axis_);
         MinusPaddingToSize(padding, layoutPolicySize);
         contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
     }

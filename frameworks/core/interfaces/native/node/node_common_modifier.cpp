@@ -1294,6 +1294,32 @@ void SetWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI
     ViewAbstract::ResetLayoutPolicyProperty(frameNode, true);
 }
 
+void SetDimensionLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy, bool isWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutCalPolicy = static_cast<OHOS::Ace::LayoutCalPolicy>(layoutPolicy + NUM_1);
+    ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, isWidth);
+}
+
+void ResetDimensionLayoutPolicy(ArkUINodeHandle node, bool isWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetLayoutPolicyProperty(frameNode, isWidth);
+}
+
+ArkUI_Int32 GetDimensionLayoutPolicy(ArkUINodeHandle node, bool isWidth)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto layoutPolicy = ViewAbstract::GetLayoutPolicy(frameNode, isWidth);
+    if (layoutPolicy == LayoutCalPolicy::NO_MATCH) {
+        return ERROR_INT_CODE;
+    }
+    return static_cast<ArkUI_Int32>(layoutPolicy) - NUM_1;
+}
+
 void ResetWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1304,17 +1330,12 @@ void ResetWidth(ArkUINodeHandle node)
 
 void SetWidthLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto layoutCalPolicy = static_cast<OHOS::Ace::LayoutCalPolicy>(layoutPolicy + NUM_1);
-    ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, true);
+    SetDimensionLayoutPolicy(node, layoutPolicy, true);
 }
 
 void ResetWidthLayoutPolicy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetLayoutPolicyProperty(frameNode, true);
+    ResetDimensionLayoutPolicy(node, true);
 }
 
 void SetHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* heightResPtr)
@@ -1346,10 +1367,7 @@ void ResetHeight(ArkUINodeHandle node)
 
 void SetHeightLayoutPolicy(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto layoutCalPolicy = static_cast<OHOS::Ace::LayoutCalPolicy>(layoutPolicy + NUM_1);
-    ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutCalPolicy, false);
+    SetDimensionLayoutPolicy(node, layoutPolicy, false);
 }
 
 void AllowForceDark(ArkUINodeHandle node, ArkUI_Bool forceDarkAllowed)
@@ -1375,9 +1393,7 @@ ArkUI_Bool GetAllowForceDark(ArkUINodeHandle node)
 
 void ResetHeightLayoutPolicy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetLayoutPolicyProperty(frameNode, false);
+    ResetDimensionLayoutPolicy(node, false);
 }
 
 void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& topLeftResObj,
@@ -8245,13 +8261,7 @@ ArkUI_Float32 GetWidth(ArkUINodeHandle node, ArkUI_Int32 unit)
 
 ArkUI_Int32 GetWidthLayoutPolicy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    auto layoutPolicy = ViewAbstract::GetLayoutPolicy(frameNode, true);
-    if (layoutPolicy == LayoutCalPolicy::NO_MATCH) {
-        return ERROR_INT_CODE;
-    }
-    return static_cast<ArkUI_Int32>(layoutPolicy) - NUM_1;
+    return GetDimensionLayoutPolicy(node, true);
 }
 
 ArkUI_Float32 GetHeight(ArkUINodeHandle node, ArkUI_Int32 unit)
@@ -8263,13 +8273,7 @@ ArkUI_Float32 GetHeight(ArkUINodeHandle node, ArkUI_Int32 unit)
 
 ArkUI_Int32 GetHeightLayoutPolicy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    auto layoutPolicy = ViewAbstract::GetLayoutPolicy(frameNode, false);
-    if (layoutPolicy == LayoutCalPolicy::NO_MATCH) {
-        return ERROR_INT_CODE;
-    }
-    return static_cast<ArkUI_Int32>(layoutPolicy) - NUM_1;
+    return GetDimensionLayoutPolicy(node, false);
 }
 
 ArkUI_Uint32 GetBackgroundColor(ArkUINodeHandle node)
