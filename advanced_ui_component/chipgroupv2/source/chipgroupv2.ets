@@ -43,11 +43,15 @@ import { LengthMetrics, LengthUnit, ColorMetrics } from '@kit.ArkUI';
 import deviceInfo from '@ohos.deviceInfo';
 
 interface ChipGroupV2Theme {
-  itemStyle: ChipGroupV2ItemStyleConfig;
+  size: ChipV2Size | SizeT<LengthMetrics>;
+  backgroundColor: ResourceColor;
+  fontColor: ResourceColor;
+  selectedFontColor: ResourceColor;
+  selectedBackgroundColor: ResourceColor;
   chipGroupSpace: ChipGroupV2SpaceConfig;
   chipGroupPadding: ChipGroupV2PaddingConfig;
-  itemFillColor: ColorMetrics;
-  itemSelectedFillColor: ColorMetrics;
+  itemFillColor: ResourceColor;
+  itemSelectedFillColor: ResourceColor;
 }
 
 interface IconGroupSuffixTheme {
@@ -69,17 +73,15 @@ const noop = (selectedIndexes: Array<number>) => {
 const colorStops: ([string, number])[] = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]];
 
 const defaultTheme: ChipGroupV2Theme = {
-  itemStyle: {
-    size: ChipV2Size.NORMAL,
-    backgroundColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_button_normal')),
-    fontColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_text_primary')),
-    selectedFontColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_text_primary_contrary')),
-    selectedBackgroundColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_emphasize')),
-  },
+  size: ChipV2Size.NORMAL,
+  backgroundColor: $r('sys.color.ohos_id_color_button_normal'),
+  fontColor: $r('sys.color.ohos_id_color_text_primary'),
+  selectedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
+  selectedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
   chipGroupPadding: { top: 14, bottom: 14 },
-  itemFillColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_secondary')),
-  itemSelectedFillColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_text_primary_contrary'))
+  itemFillColor: $r('sys.color.ohos_id_color_secondary'),
+  itemSelectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary')
 }
 
 const iconGroupSuffixTheme: IconGroupSuffixTheme = {
@@ -152,6 +154,7 @@ export interface ChipGroupV2ItemStyleConfig {
   selectedFontColor?: ColorMetrics;
   selectedBackgroundColor?: ColorMetrics;
   backgroundSystemMaterial?: uiMaterial.Material;
+  selectedBackgroundSystemMaterial?: uiMaterial.Material;
 }
 
 @ObservedV2
@@ -162,6 +165,7 @@ export class ChipGroupV2ItemStyle {
   @Trace public selectedFontColor?: ColorMetrics;
   @Trace public selectedBackgroundColor?: ColorMetrics;
   @Trace public backgroundSystemMaterial?: uiMaterial.Material;
+  @Trace public selectedBackgroundSystemMaterial?: uiMaterial.Material;
 
   constructor(config: ChipGroupV2ItemStyleConfig) {
     this.size = config.size;
@@ -170,6 +174,7 @@ export class ChipGroupV2ItemStyle {
     this.selectedFontColor = config.selectedFontColor;
     this.selectedBackgroundColor = config.selectedBackgroundColor;
     this.backgroundSystemMaterial = config.backgroundSystemMaterial;
+    this.selectedBackgroundSystemMaterial = config.selectedBackgroundSystemMaterial;
   }
 }
 
@@ -368,16 +373,15 @@ export struct ChipGroupV2IconGroupSuffix {
 export struct ChipGroupV2 {
   @Require @Param items: ChipGroupV2Items;
   @Event $items?: Callback<ChipGroupV2Items> = undefined;
-  @Param itemStyle?: ChipGroupV2ItemStyle = defaultTheme.itemStyle;
-  @Param selectedIndexes?: Array<number> = [0];
+  @Param itemStyle?: ChipGroupV2ItemStyle = undefined;
+  @Param selectedIndexes?: Array<number> = undefined;
   @Event $selectedIndexes?: Callback<Array<number>> = undefined;
   @Param multiple?: boolean = false;
   @Param chipGroupSpace?: ChipGroupV2Space = defaultTheme.chipGroupSpace;
   @Param chipGroupPadding?: ChipGroupV2Padding = defaultTheme.chipGroupPadding;
-  @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
   @Event onChange?: Callback<Array<number>>;
   @BuilderParam suffix?: Callback<void>;
-  @Provider() chipSize: ChipV2Size | SizeT<LengthMetrics> = defaultTheme.itemStyle.size!;
+  @Provider() chipSize: ChipV2Size | SizeT<LengthMetrics> = defaultTheme.size;
   private scroller: Scroller = new Scroller();
   @Local selectedIndexesInternal: Array<number> | undefined = [0];
   @Local isReachEnd: boolean = this.scroller.isAtEnd();
@@ -390,7 +394,9 @@ export struct ChipGroupV2 {
 
   @Monitor('multiple')
   onMultipleChange() {
-    this.selectedIndexesOnChange();
+    if (this.selectedIndexes) {
+      this.selectedIndexesOnChange();
+    }
     this.selectedIndexesInternal = this.getSelectedIndexes();
   }
 
@@ -416,48 +422,54 @@ export struct ChipGroupV2 {
     if (this.itemStyle && this.itemStyle.size) {
       if (typeof this.itemStyle.size === 'object') {
         if (!this.itemStyle.size.width?.value || !this.itemStyle.size.height?.value || !this.itemStyle.size) {
-          return defaultTheme.itemStyle.size!;
+          return defaultTheme.size;
         }
       }
       return this.itemStyle.size;
     }
-    return defaultTheme.itemStyle.size!;
+    return defaultTheme.size;
   }
 
   private getFontColor(): ColorMetrics {
     if (this.itemStyle && this.itemStyle.fontColor) {
       return this.itemStyle.fontColor;
     }
-    return defaultTheme.itemStyle.fontColor!;
+    return ColorMetrics.resourceColor(defaultTheme.fontColor);
   }
 
   private getSelectedFontColor(): ColorMetrics {
     if (this.itemStyle && this.itemStyle.selectedFontColor) {
       return this.itemStyle.selectedFontColor;
     }
-    return defaultTheme.itemStyle.selectedFontColor!;
+    return ColorMetrics.resourceColor(defaultTheme.selectedFontColor);
   }
 
   private getFillColor(): ColorMetrics {
     if (this.itemStyle && this.itemStyle.fontColor) {
       return this.itemStyle.fontColor;
     }
-    return defaultTheme.itemFillColor;
+    return ColorMetrics.resourceColor(defaultTheme.itemFillColor);
   }
 
   private getSelectedFillColor(): ColorMetrics {
     if (this.itemStyle && this.itemStyle.selectedFontColor) {
       return this.itemStyle.selectedFontColor;
     }
-    return defaultTheme.itemSelectedFillColor;
+    return ColorMetrics.resourceColor(defaultTheme.itemSelectedFillColor);
   }
 
   private getBackgroundColor(): ColorMetrics {
-    return this.itemStyle?.backgroundColor ?? defaultTheme.itemStyle.backgroundColor!;
+    if (this.itemStyle?.backgroundColor) {
+      return this.itemStyle.backgroundColor;
+    }
+    return ColorMetrics.resourceColor(defaultTheme.backgroundColor);
   }
 
   private getSelectedBackgroundColor(): ColorMetrics {
-    return this.itemStyle?.selectedBackgroundColor ?? defaultTheme.itemStyle.selectedBackgroundColor!;
+    if (this.itemStyle?.selectedBackgroundColor) {
+      return this.itemStyle.selectedBackgroundColor;
+    }
+    return ColorMetrics.resourceColor(defaultTheme.selectedBackgroundColor);
   }
 
   private getSelectedIndexes(): Array<number> {
@@ -581,13 +593,14 @@ export struct ChipGroupV2 {
             enabled: true,
             activated: this.isSelected(index),
             backgroundColor: this.getBackgroundColor(),
-            backgroundSystemMaterial: createSubECMaterial(this.backgroundSystemMaterial),
             size: this.getChipSize(),
             activatedBackgroundColor: this.getSelectedBackgroundColor(),
             accessibilitySelectedType:
               this.multiple ? ChipV2AccessibilitySelectedType.CHECKED : ChipV2AccessibilitySelectedType.SELECTED,
             accessibilityDescription: chipItem.accessibilityDescription,
             accessibilityLevel: chipItem.accessibilityLevel,
+            backgroundSystemMaterial: createSubECMaterial(material),
+            activatedBackgroundSystemMaterial: resolveSystemMaterial(this.itemStyle?.selectedBackgroundSystemMaterial),
             onClicked: () => {
               if (this.isSelected(index)) {
                 if (!(!this.isMultiple())) {
@@ -633,15 +646,15 @@ export struct ChipGroupV2 {
       Stack() {
         Scroll(this.scroller) {
           if (deviceInfo.sdkApiVersion >= 26) {
-            if (enableEffectComponent(this.backgroundSystemMaterial)) {
+            if (enableEffectComponent(this.itemStyle?.backgroundSystemMaterial)) {
               EffectComponent() {
                 Row({ space: this.getChipGroupItemSpace() }) {
-                  this.ChipItemsBuilder(createSubECMaterial(this.backgroundSystemMaterial))
+                  this.ChipItemsBuilder(createSubECMaterial(this.itemStyle?.backgroundSystemMaterial))
                 }
               }
-              .systemMaterial(createECMaterial(this.backgroundSystemMaterial))
+              .systemMaterial(createECMaterial(this.itemStyle?.backgroundSystemMaterial))
             } else {
-              this.ChipItemsBuilder(this.backgroundSystemMaterial)
+              this.ChipItemsBuilder(this.itemStyle?.backgroundSystemMaterial)
             }
           } else {
             this.ChipItemsBuilder(undefined)
@@ -782,6 +795,15 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
   return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$', 'i'));
 }
 
+function resolveSystemMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
+  let info = uiMaterial.getMaterialInfo();
+  if (info.state === uiMaterial.MaterialState.DISABLE) {
+    return undefined;
+  }
+  return info.state === uiMaterial.MaterialState.ENABLE && !material ?
+    new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) : material;
+}
+
 function enableEffectComponent(material: uiMaterial.Material | undefined) {
   return false;
 }
@@ -791,7 +813,7 @@ function createECMaterial(material: uiMaterial.Material | undefined): uiMaterial
 }
 
 function createSubECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
-  return material;
+  return resolveSystemMaterial(material);
 }
 
 function lengthMetricsToLength(length: LengthMetrics): Length {
