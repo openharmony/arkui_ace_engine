@@ -1016,6 +1016,36 @@ HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsAllowAnimation004
+ * @tc.desc: Test node.IsAllowAnimation when enableRepeatAnimation is true and parent is List
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation004, TestSize.Level1)
+{
+    LazyForEachUtils::SetEnableRepeatAnimation(false);
+    auto listNode = CreateNode(V2::LIST_ETS_TAG);
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    listNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+    LazyForEachUtils::SetEnableRepeatAnimation(true);
+}
+
+/**
+ * @tc.name: IsAllowAnimation005
+ * @tc.desc: Test node.IsAllowAnimation when enableRepeatAnimation is false even if parent is List
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation005, TestSize.Level1)
+{
+    LazyForEachUtils::SetEnableRepeatAnimation(false);
+    auto gridNode = CreateNode(V2::LIST_ETS_TAG);
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    gridNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+    LazyForEachUtils::SetEnableRepeatAnimation(true);
+}
+
+/**
  * @tc.name: IsChildInAnimation001
  * @tc.desc: Test node.IsChildInAnimation
  * @tc.type: FUNC

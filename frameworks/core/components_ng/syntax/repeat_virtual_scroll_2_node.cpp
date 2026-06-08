@@ -24,6 +24,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -987,7 +988,7 @@ bool RepeatVirtualScroll2Node::IsAllowAnimation()
             "RepeatVirtualScroll2Node::IsAllowAnimation[id:%{public}d] - Parent FrameNode is nullptr", GetId());
         return false;
     }
-    return parent->GetTag() == V2::LIST_ETS_TAG;
+    return LazyForEachUtils::GetEnableRepeatAnimation() && parent->GetTag() == V2::LIST_ETS_TAG;
 }
 
 bool RepeatVirtualScroll2Node::IsChildInAnimation(uint32_t rid)

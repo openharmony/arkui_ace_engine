@@ -27,8 +27,14 @@ public:
 
     static bool GetEnableCustomComponentFreeze();
 
+    static void SetEnableRepeatAnimation(bool enableRepeatAnimation);
+
+    static bool GetEnableRepeatAnimation();
+
 private:
     static bool enableCustomComponentFreeze_;
+
+    static bool enableRepeatAnimation_;
 };
 
 } // namespace OHOS::Ace::NG
