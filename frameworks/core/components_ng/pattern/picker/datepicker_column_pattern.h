@@ -135,6 +135,7 @@ private:
     bool GetOptionItemCount(uint32_t& itemCounts) override;
     bool IsLanscape(uint32_t itemCount) override;
     void GetStartIndex(uint32_t& startIndex, uint32_t& totalCount);
+    void HandleDragHapticFeedback(int32_t dragDelta);
 
     std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     int32_t currentChildIndex_ = 0;

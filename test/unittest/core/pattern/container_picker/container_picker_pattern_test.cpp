@@ -2627,6 +2627,20 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_NormalizeDisplayed
 }
 
 /**
+ * @tc.name: ContainerPickerUtilsTest_NormalizeDisplayedItemCount002
+ * @tc.desc: Test NormalizeDisplayedItemCount keeps odd values and bumps even values in valid range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerUtilsTest_NormalizeDisplayedItemCount002, TestSize.Level1)
+{
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(3), 3);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(5), 5);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(7), 7);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(4), 5);
+    EXPECT_EQ(ContainerPickerUtils::NormalizeDisplayedItemCount(6), 7);
+}
+
+/**
  * @tc.name: ContainerPickerUtilsTest_ValidatePickerItemHeight001
  * @tc.desc: Test ValidatePickerItemHeight returns PICKER_ITEM_HEIGHT when out of range, returns input when in range
  * @tc.type: FUNC

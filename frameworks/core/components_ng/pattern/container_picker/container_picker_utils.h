@@ -85,7 +85,7 @@ public:
         if (count < kMinCount || count > kMaxCount) {
             return DEFAULT_DISPLAYED_ITEM_COUNT;
         }
-        if ((count & 1) == 0) {
+        if (count % kMinCount == 0) {
             count = std::min(kMaxCount, count + 1);
         }
         return count;

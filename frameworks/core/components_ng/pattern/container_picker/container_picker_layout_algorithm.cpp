@@ -330,16 +330,17 @@ void ContainerPickerLayoutAlgorithm::ResetOffscreenItemPosition(LayoutWrapper* l
 
 void ContainerPickerLayoutAlgorithm::RetainDisplayItems(bool atTop)
 {
-    if (itemPosition_.size() <= displayedItemCount_ + 1) {
+    const int32_t maxRetainCount = displayedItemCount_ + 1;
+    if (static_cast<int32_t>(itemPosition_.size()) <= maxRetainCount) {
         return;
     }
     // Retain displayedItemCount_ + 1 items at most.
     auto it = itemPosition_.begin();
     if (atTop) {
-        std::advance(it, displayedItemCount_ + 1);
+        std::advance(it, maxRetainCount);
         itemPosition_.erase(it, itemPosition_.end());
     } else {
-        std::advance(it, itemPosition_.size() - displayedItemCount_ - 1);
+        std::advance(it, static_cast<int32_t>(itemPosition_.size()) - maxRetainCount);
         itemPosition_.erase(itemPosition_.begin(), it);
     }
 }

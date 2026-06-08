@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 
+#include <cerrno>
+#include <climits>
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
@@ -664,7 +666,14 @@ void TimePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 std::string TimePickerColumnPattern::GetTimeUnitString(const std::string& timeValue,
     TimeUnitStyle timeStyle, MeasureFormatStyle formatStyle) const
 {
-    double time = std::stod(timeValue);
+    errno = 0;
+    char* endPtr = nullptr;
+    long long timeLong = std::strtoll(timeValue.c_str(), &endPtr, 10);
+    if (endPtr == timeValue.c_str() || *endPtr != '\0' || errno == ERANGE ||
+        timeLong < INT_MIN || timeLong > INT_MAX) {
+        return timeValue;
+    }
+    double time = static_cast<double>(timeLong);
     std::string unitString = Localization::GetInstance()->TimeUnitFormat(time, timeStyle, formatStyle);
     if (unitString.empty()) {
         return timeValue;
