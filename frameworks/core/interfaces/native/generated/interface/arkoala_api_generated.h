@@ -26992,7 +26992,7 @@ typedef struct GENERATED_ArkUIStackModifier {
     void (*setPointLight)(Ark_NativePointer node,
                           const Opt_PointLightStyle* value);
     void (*setSyncLoad)(Ark_NativePointer node,
-                        Ark_Boolean value);
+                        const Opt_Boolean* value);
 } GENERATED_ArkUIStackModifier;
 
 typedef struct GENERATED_ArkUISwiperModifier {
