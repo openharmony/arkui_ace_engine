@@ -1202,6 +1202,7 @@ private:
     void SetHandleExtScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetOverScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetIsReverseCallback(const RefPtr<Scrollable>& scrollable);
+    void SetIsRefreshScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable);
     void SetOnScrollEndRec(const RefPtr<Scrollable>& scrollable);
     void SetScrollEndCallback(const RefPtr<Scrollable>& scrollable);
