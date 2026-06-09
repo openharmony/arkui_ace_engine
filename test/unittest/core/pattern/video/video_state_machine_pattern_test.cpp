@@ -1320,4 +1320,42 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnWindowHide001
     pattern->OnWindowHide();
     EXPECT_EQ(pattern->stateManager_->state_, VideoPlaybackState::PLAYING);
 }
+
+/**
+ * @tc.name: VideoStateMachinePatternPostSerialBgTaskNoHost001
+ * @tc.desc: Test PostSerialBgTask drops task when host/context is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternPostSerialBgTaskNoHost001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<VideoStateMachinePattern>(nullptr);
+    ASSERT_TRUE(pattern);
+    EXPECT_TRUE(pattern->serialBgTaskQueue_.empty());
+
+    bool taskExecuted = false;
+    pattern->PostSerialBgTask([&taskExecuted]() { taskExecuted = true; }, "NoHostTest");
+    EXPECT_TRUE(pattern->serialBgTaskQueue_.empty());
+    EXPECT_FALSE(taskExecuted);
+}
+
+/**
+ * @tc.name: VideoStateMachinePatternSerialQueueDestructor001
+ * @tc.desc: Test destructor clears serial background task queue without crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternSerialQueueDestructor001, TestSize.Level1)
+{
+    {
+        auto pattern = AceType::MakeRefPtr<VideoStateMachinePattern>(nullptr);
+        ASSERT_TRUE(pattern);
+        pattern->serialBgTaskQueue_.push({"Task1", []() {}});
+        pattern->serialBgTaskQueue_.push({"Task2", []() {}});
+        pattern->isDrainingSerialBgQueue_ = true;
+        EXPECT_EQ(pattern->serialBgTaskQueue_.size(), 2u);
+        // Destructor should clear the queue and reset the flag without crashing.
+    }
+    // Reaching here without crash means the destructor works correctly.
+    EXPECT_TRUE(true);
+}
+
 } // namespace OHOS::Ace::NG

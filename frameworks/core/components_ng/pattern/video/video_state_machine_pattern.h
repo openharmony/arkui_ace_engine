@@ -15,6 +15,9 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_STATE_MACHINE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_STATE_MACHINE_PATTERN_H
+#include <mutex>
+#include <queue>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
@@ -496,6 +499,17 @@ private:
     // Error info for OnErrorStateEntered callback
     int32_t lastErrorCode_ = 0;
     std::string lastErrorMessage_;
+
+    // Serial background task queue to ensure media operations execute in order
+    struct SerialBgTask {
+        std::string name;
+        std::function<void()> task;
+    };
+    void PostSerialBgTask(std::function<void()> task, const std::string& name = "");
+    void DrainNextSerialBgTaskOnBg(const SingleTaskExecutor& bgTaskExecutor);
+    std::mutex serialBgQueueMutex_;
+    std::queue<SerialBgTask> serialBgTaskQueue_;
+    bool isDrainingSerialBgQueue_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoStateMachinePattern);
 };
