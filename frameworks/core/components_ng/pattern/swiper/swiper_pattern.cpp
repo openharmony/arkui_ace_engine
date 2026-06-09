@@ -4453,8 +4453,8 @@ void SwiperPattern::StopPropertyTranslateAnimation(
     };
     AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
     propertyUpdateCallback();
-    bool isSyncSuc = AnimationUtils::CloseImplicitCancelAnimation();
-    if (!isSyncSuc) {
+    auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus(nullptr, true);
+    if (status == CancelAnimationStatus::TASK_EXECUTION_FAILURE) {
         EventReport::ReportScrollableErrorEvent(
             "Swiper", ScrollableErrorType::STOP_ANIMATION_TIMEOUT, "Swiper stop propertyAni sync failed");
         ACE_SCOPED_TRACE("Swiper stop propertyAni sync failed");
@@ -4462,6 +4462,9 @@ void SwiperPattern::StopPropertyTranslateAnimation(
         // sync cancel animation failed, need to wait for the animation to finish completely
         syncCancelAniIsFailed_ = true;
         propertyAnimationIsRunning_ = true;
+        return;
+    } else if (status == CancelAnimationStatus::NODE_EXCEPTION) {
+        AnimationUtils::Animate(option, propertyUpdateCallback);
         return;
     }
     PropertyCancelAnimationFinish(isFinishAnimation, isBeforeCreateLayoutWrapper, isInterrupt);
