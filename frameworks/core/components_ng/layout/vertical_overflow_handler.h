@@ -111,11 +111,6 @@ public:
         return contentRect_;
     }
 
-    // Smart layout scale management
-    void RestoreScales(LayoutWrapper* layoutWrapper);
-    void SetSmartLayoutExecuted(bool executed);
-    bool WasSmartLayoutExecuted() const;
-
 private:
     float offsetToChildFrameBottom_ = 0.0f;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -127,8 +122,6 @@ private:
     bool hasParentAdjust_ = false;
     WeakPtr<FrameNode> frameNode_;
 
-    // Smart layout state
-    bool smartLayoutExecuted_ = false;
 };
 } // namespace OHOS::Ace::NG
 

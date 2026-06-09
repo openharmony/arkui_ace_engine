@@ -96,8 +96,6 @@ void SmartLayoutConstraints::AddCrossAxisAlignmentConstraint(SmartLayoutNode& pa
     auto& parentOffset = isRow ? parent.GetPosition().offsetY : parent.GetPosition().offsetX;
     auto& parentSize = isRow ? parent.GetSize().height : parent.GetSize().width;
 
-    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr >= 0.0);
-    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr <= 1.0);
     if (context.crossAxisAlign == SmartLayoutAlign::FLEX_START) {
         engine->Add(childOffset.expr == parentOffset.expr +
             childOffset.value * parent.GetScaleInfo().crossAxisSpaceScale.expr);
@@ -156,6 +154,8 @@ void SmartLayoutConstraints::AddColumnConstraints(SmartLayoutNode& parent)
 
     engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr >= 0.0);
     engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr <= 1.0);
+    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr >= 0.0);
+    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr <= 1.0);
 
     const auto& children = parent.GetChildren();
     for (size_t i = 0; i < children.size(); ++i) {
@@ -190,6 +190,8 @@ void SmartLayoutConstraints::AddRowConstraints(SmartLayoutNode& parent)
 
     engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr >= 0.0);
     engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr <= 1.0);
+    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr >= 0.0);
+    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr <= 1.0);
 
     const auto& children = parent.GetChildren();
     for (size_t i = 0; i < children.size(); ++i) {

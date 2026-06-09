@@ -47,9 +47,7 @@ SmartLayoutAlign ConvertFlexAlignToSmartLayoutAlign(FlexAlign flexAlign)
 
 SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* layoutWrapper)
 {
-    if (layoutWrapper == nullptr) {
-        return SmartLayoutType::UNKNOWN;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, SmartLayoutType::UNKNOWN);
     const auto& hostTag = layoutWrapper->GetHostTag();
     if (hostTag == V2::COLUMN_ETS_TAG) {
         return SmartLayoutType::COLUMN;
@@ -77,33 +75,30 @@ SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* la
     return SmartLayoutType::UNKNOWN;
 }
 
-void SmartLayoutAlgorithm::PerformSmartLayout(LayoutWrapper* layoutWrapper)
+bool SmartLayoutAlgorithm::PerformSmartLayout(LayoutWrapper* layoutWrapper)
 {
-    AceTraceBegin("PerformSmartLayout");
+    ACE_SCOPED_TRACE("PerformSmartLayout");
     auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
+    CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
     LOGD("SmartLayout: Detected layout %{public}s content overflow!!",
-        layoutWrapper ? layoutWrapper->GetHostTag().c_str() : "UNKNOWN");
-    ExecuteLayout(layoutWrapper, layoutType);
-    AceTraceEnd();
+        layoutWrapper->GetHostTag().c_str());
+    return ExecuteLayout(layoutWrapper, layoutType);
 }
 
-void SmartLayoutAlgorithm::ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayoutType layoutType)
+bool SmartLayoutAlgorithm::ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayoutType layoutType)
 {
-    if (layoutWrapper == nullptr || layoutType == SmartLayoutType::UNKNOWN) {
-        return;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
 
     auto* engine = SmartLayoutEngineLoader::GetInstance().GetEngine();
-    if (engine == nullptr) {
-        return;
-    }
+    CHECK_NULL_RETURN(engine, false);
 
     rootNode_ = engine->CreateRootNode();
-    CHECK_NULL_VOID(rootNode_);
+    CHECK_NULL_RETURN(rootNode_, false);
     rootNode_->SetLayoutType(layoutType);
 
     if (!InitializeLayoutContext(layoutWrapper)) {
-        return;
+        return false;
     }
     ProcessLayoutChildren(layoutWrapper);
 
@@ -115,17 +110,15 @@ void SmartLayoutAlgorithm::ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayo
     }
 
     if (!rootNode_->SolveLayout()) {
-        return;
+        return false;
     }
-    ApplyLayoutResults(layoutWrapper);
+    return ApplyLayoutResults(layoutWrapper);
 }
 
 std::vector<ChildLayoutInfo> SmartLayoutAlgorithm::CollectChildInfo(LayoutWrapper* layoutWrapper)
 {
     std::vector<ChildLayoutInfo> childInfos;
-    if (layoutWrapper == nullptr) {
-        return childInfos;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, childInfos);
 
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     for (const auto& child : children) {
@@ -148,6 +141,9 @@ std::vector<ChildLayoutInfo> SmartLayoutAlgorithm::CollectChildInfo(LayoutWrappe
         }
 
         info.isBlank = (child->GetHostTag() == V2::BLANK_ETS_TAG);
+        if (NearZero(info.width) || NearZero(info.height)) {
+            continue;
+        }
         childInfos.push_back(info);
     }
 
@@ -203,6 +199,14 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
     CHECK_NULL_VOID(childWrapper);
     auto hostNode = childWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
+    auto renderContext = hostNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = childWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (renderContext->HasPosition() || (layoutPolicy.has_value() && layoutPolicy->IsMatch())) {
+        return;
+    }
 
     int64_t nodeId = hostNode->GetId();
     auto it = nodeMap.find(nodeId);
@@ -216,62 +220,43 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
     CHECK_NULL_VOID(geoNode);
     OffsetF offset = CalculateOffsetWithMargin(*layoutNode, geoNode, boundingBoxOffsetX, boundingBoxOffsetY);
     geoNode->SetFrameOffset(offset);
+    renderContext->SetRenderPivot(0.0f, 0.0f);
+    hostNode->ForceSyncGeometryNode();
+    hostNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    renderContext->SetScale(static_cast<float>(sizeScale), static_cast<float>(sizeScale));
 
-    auto renderContext = hostNode->GetRenderContext();
-    if (renderContext != nullptr) {
-        if (renderContext->HasPosition()) {
-            return;
-        }
-        renderContext->SetRenderPivot(0.0f, 0.0f);
-        renderContext->SetScale(static_cast<float>(sizeScale), static_cast<float>(sizeScale));
-    }
-
-    hostNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    childWrapper->Layout();
-
-    LOGD("SmartLayout: Applied layout for child %{public}s: \
+    LOGD("SmartLayout: Applied layout for child %{public}s [%{public}s]: \
         offset=(%{public}f, %{public}f), size=(%{public}f, %{public}f)",
-        layoutNode->GetName().c_str(),
+        layoutNode->GetName().c_str(), hostNode->GetTag().c_str(),
         layoutNode->GetPosition().offsetX.value,
         layoutNode->GetPosition().offsetY.value,
         layoutNode->GetSize().width.value,
         layoutNode->GetSize().height.value);
 }
 
-void SmartLayoutAlgorithm::ApplyLayoutResults(LayoutWrapper* layoutWrapper)
+bool SmartLayoutAlgorithm::ApplyLayoutResults(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    CHECK_NULL_VOID(rootNode_);
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    CHECK_NULL_RETURN(rootNode_, false);
 
     const auto& children = rootNode_->GetChildren();
     if (children.empty()) {
-        return;
-    }
-
-    // Pre-sync all data once to avoid O(N²) SyncData calls
-    rootNode_->SyncData();
-    for (const auto& child : children) {
-        if (child != nullptr) {
-            child->SyncData();
-        }
+        return false;
     }
 
     // Pre-calculate bounding box offsets once
     auto [boundingBoxOffsetX, boundingBoxOffsetY] = CalculateBoundingBoxOffsets();
-
     auto nodeMap = BuildNodeIdMap(children);
     double sizeScale = rootNode_->GetScaleInfo().sizeScale.value;
-
     for (const auto& childWrapper : layoutWrapper->GetAllChildrenWithBuild(false)) {
         ApplyChildLayout(childWrapper, nodeMap, sizeScale, boundingBoxOffsetX, boundingBoxOffsetY);
     }
+    return true;
 }
 
 std::pair<double, double> SmartLayoutAlgorithm::CalculateBoundingBoxOffsets()
 {
-    if (rootNode_ == nullptr) {
-        return {0.0, 0.0};
-    }
+    CHECK_NULL_RETURN(rootNode_, (std::pair<double, double>{0.0, 0.0}));
 
     auto rect = rootNode_->GetChildrenBoundingBox();
     double offsetOfBoundingBoxX = (rootNode_->GetSize().width.value - rect.width) / 2 - rect.Left();
@@ -282,9 +267,7 @@ std::pair<double, double> SmartLayoutAlgorithm::CalculateBoundingBoxOffsets()
 
 bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
 {
-    if (layoutWrapper == nullptr) {
-        return false;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, false);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     if (children.empty()) {
         return false;

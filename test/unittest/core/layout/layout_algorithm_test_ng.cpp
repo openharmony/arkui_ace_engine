@@ -273,4 +273,38 @@ HWTEST_F(LayoutAlgorithmTestNg, HandleStackContentOverflowNonStackComponentTest0
     layoutAlgorithm->HandleStackContentOverflow(AceType::RawPtr(layoutWrapper));
     SUCCEED();
 }
+
+/**
+ * @tc.name: IsContentOverflowForSmartLayoutTest001
+ * @tc.desc: test overflow detection and safe-area disable for smart layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutAlgorithmTestNg, IsContentOverflowForSmartLayoutTest001, TestSize.Level0)
+{
+    auto algo = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto host = FrameNode::CreateFrameNode("Column", 200, AceType::MakeRefPtr<Pattern>());
+    host->GetGeometryNode()->SetFrameSize(SizeF(50.0f, 50.0f));
+    auto wrapper = AceType::MakeRefPtr<LayoutWrapperNode>(host, host->GetGeometryNode(), host->GetLayoutProperty());
+
+    auto overflowChild = FrameNode::CreateFrameNode("Text", 201, AceType::MakeRefPtr<Pattern>());
+    overflowChild->GetGeometryNode()->SetFrameSize(SizeF(80.0f, 80.0f));
+    overflowChild->MountToParent(host);
+    overflowChild->SetActive(true);
+    EXPECT_TRUE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(wrapper)));
+
+    auto safeHost = FrameNode::CreateFrameNode("Column", 202, AceType::MakeRefPtr<Pattern>());
+    safeHost->GetGeometryNode()->SetFrameSize(SizeF(50.0f, 50.0f));
+    auto safeWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(safeHost, safeHost->GetGeometryNode(),
+        safeHost->GetLayoutProperty());
+    auto safeChild = FrameNode::CreateFrameNode("Text", 203, AceType::MakeRefPtr<Pattern>());
+    safeChild->GetLayoutProperty()->UpdateSafeAreaExpandOpts({.type = SAFE_AREA_TYPE_ALL, .edges = SAFE_AREA_EDGE_ALL});
+    safeChild->GetGeometryNode()->SetFrameSize(SizeF(80.0f, 80.0f));
+    safeChild->MountToParent(safeHost);
+    safeChild->SetActive(true);
+    EXPECT_FALSE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(safeWrapper)));
+
+    host->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
+    EXPECT_FALSE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(wrapper)));
+    EXPECT_FALSE(algo->HandleContentOverflowWithSmartLayout(AceType::RawPtr(wrapper)));
+}
 } // namespace OHOS::Ace::NG
