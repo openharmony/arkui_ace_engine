@@ -802,6 +802,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     nullptr,
     createContainerPickerNode,
     createRichEditorNode,
+    nullptr,
     createArcListNode,
     createArcListItemNode,
     createArcScrollBarNode,
