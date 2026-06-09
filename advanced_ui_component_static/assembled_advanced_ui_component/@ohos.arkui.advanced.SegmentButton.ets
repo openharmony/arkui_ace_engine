@@ -169,7 +169,7 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   SEGMENT_FOCUS_STYLE_CUSTOMIZED: $r('sys.float.segment_focus_control')
 }
 
-interface Point {
+export interface Point {
   x: double,
   y: double
 }
@@ -205,7 +205,7 @@ export interface SegmentButtonIconTextItem {
 
 type DimensionNoPercentage = PX | VP | FP | LPX | Resource
 
-interface CommonSegmentButtonOptions {
+export interface CommonSegmentButtonOptions {
   fontColor?: ResourceColor,
   selectedFontColor?: ResourceColor,
   fontSize?: DimensionNoPercentage,
@@ -249,7 +249,7 @@ export interface CapsuleSegmentButtonOptions extends CapsuleSegmentButtonConstru
   type: 'capsule'
 }
 
-interface SegmentButtonItemOptionsConstructorOptions {
+export interface SegmentButtonItemOptionsConstructorOptions {
   icon?: ResourceStr,
   iconAccessibilityText?: ResourceStr,
   selectedIcon?: ResourceStr,
@@ -1024,7 +1024,7 @@ struct SegmentButtonItem {
 }
 
 @Observed
-class HoverColorProperty {
+export class HoverColorProperty {
   public hoverColor: ResourceColor = Color.Transparent
 }
 
@@ -1534,7 +1534,7 @@ struct SegmentButtonItemArrayComponent {
 }
 
 @Observed
-class ItemProperty {
+export class ItemProperty {
   public fontColor: ResourceColor = segmentButtonTheme.FONT_COLOR;
   public fontSize: DimensionNoPercentage = segmentButtonTheme.FONT_SIZE;
   public fontWeight: FontWeight = FontWeight.Regular;
@@ -2442,7 +2442,7 @@ function numberToShadowStyle(num: int): ShadowStyle {
   }
 }
 
-class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
+export class SegmentButtonLayoutAlgorithm extends CustomLayoutAlgorithm {
   selectedIndex: int = -1
   componentPadding: double = 0
   multiply: boolean = false
