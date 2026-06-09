@@ -1009,10 +1009,16 @@ export class CustomComponentContextImpl implements CustomComponentContext {
     getReusePool(): IReusePool | undefined {
         const comp = this.customComponent as Object as ExtendableComponent;
 
+        // If this component owns a pool, return it directly.
         if (comp.___reusePool !== undefined) {
             return comp.___reusePool as Object as IReusePool;
         }
-        return undefined;
+
+        // Otherwise walk the parent chain for the nearest ancestor pool
+        // that accepts this component's class and is still active.
+        const classKey = CustomComponentContextImpl.shortClassName_(comp);
+        const pool = comp.__getReusePoolForClass__Internal(classKey);
+        return pool as IReusePool | undefined;
     }
 
     registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType, inactive?: ActiveAndInactiveCallbackType): void {
