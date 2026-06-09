@@ -99,7 +99,7 @@ void GestureRecognizerTestNg::TearDownTestSuite()
 HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create Recognizer、TargetComponent.
+     * @tc.steps: step1. create Recognizer.
      */
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
@@ -114,11 +114,6 @@ HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.L
     RefPtr<SwipeRecognizer> swipeRecognizerPtr =
         AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
-
-    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
-        return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     /**
      * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
      * @tc.expected: step2. result equals CONTINUE.
@@ -143,27 +138,6 @@ HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.L
     swipeRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     result = swipeRecognizerPtr->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
-    /**
-     * @tc.steps: step3. targetComponent_ is not null, call TriggerGestureJudgeCallback function and compare result.
-     * @tc.expected: step3. result equals PREVENT.
-     */
-    clickRecognizerPtr->targetComponent_ = targetComponent;
-    EXPECT_EQ(clickRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
-
-    longPressRecognizerPtr->targetComponent_ = targetComponent;
-    EXPECT_EQ(longPressRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
-
-    panRecognizerPtr->targetComponent_ = targetComponent;
-    EXPECT_EQ(panRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
-
-    pinchRecognizerPtr->targetComponent_ = targetComponent;
-    EXPECT_EQ(pinchRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
-
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
-    EXPECT_EQ(rotationRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
-
-    swipeRecognizerPtr->targetComponent_ = targetComponent;
-    EXPECT_EQ(swipeRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
 }
 
 /**
@@ -178,11 +152,12 @@ HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.L
      */
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;
     };
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     /**
      * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
      * @tc.expected: step2. result equals CONTINUE.
@@ -192,7 +167,7 @@ HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.L
     rotationRecognizerPtr->inputEventType_ = InputEventType::AXIS;
     auto result = rotationRecognizerPtr->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
     EXPECT_EQ(rotationRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
     rotationRecognizerPtr->inputEventType_ = InputEventType::TOUCH_PAD;
     result = rotationRecognizerPtr->TriggerGestureJudgeCallback();
@@ -308,22 +283,16 @@ HWTEST_F(GestureRecognizerTestNg, TransformTest003, TestSize.Level1)
 HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     * @tc.steps: step1. create and set Recognizer.
      */
 
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
-    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
-        return GestureJudgeResult::REJECT;};
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     PanDirection panDirection;
     panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
     panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
-    panRecognizerPtr->targetComponent_ = targetComponent;
-    panRecognizerPtr->targetComponent_->node_ = frameNode;
     TouchEvent touchEvent;
     touchEvent.tiltX.emplace(1.0f);
     touchEvent.tiltY.emplace(1.0f);
@@ -335,6 +304,7 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest001,
     panRecognizerPtr->distanceMap_[SourceTool::UNKNOWN] = Dimension(0, DimensionUnit::PX);
     panRecognizerPtr->currentFingers_ = 1;
     panRecognizerPtr->fingers_ = 1;
+    panRecognizerPtr->AttachFrameNode(frameNode);
 
     /**
      * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
@@ -384,7 +354,6 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest002,
      */
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
@@ -392,9 +361,8 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest002,
     PanDirection panDirection;
     panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
     panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
-    panRecognizerPtr->targetComponent_ = targetComponent;
-    panRecognizerPtr->targetComponent_->node_ = frameNode;
+    guestureEventHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
+    panRecognizerPtr->AttachFrameNode(frameNode);
     TouchEvent touchEvent;
     touchEvent.tiltX.emplace(1.0f);
     touchEvent.tiltY.emplace(1.0f);
@@ -695,12 +663,6 @@ HWTEST_F(GestureRecognizerTestNg, TagGestureJudgeCallbackTest001, TestSize.Level
      */
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
-
-    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
-        gestureInfo->SetType(GestureTypeName::TAP_GESTURE);
-        return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     /**
      * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
      * @tc.expected: step2. result equals CONTINUE.
@@ -739,16 +701,13 @@ HWTEST_F(GestureRecognizerTestNg, LongPressGestureJudgeTest001, TestSize.Level1)
     ASSERT_NE(gestureHub, nullptr);
     gestureHub->SetOnGestureJudgeNativeBegin(gestureJudgeNativeFunc);
     gestureHub->SetOnGestureJudgeNativeBeginForMenu(gestureJudgeNativeFuncForMenu);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
-    ASSERT_NE(targetComponent, nullptr);
-    auto callbackNative = gestureHub->GetOnGestureJudgeNativeBeginCallback();
-    targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
+    longPressRecognizerPtr->AttachFrameNode(frameNode);
 
     /**
      * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
      * @tc.expected: step2. result equals REJECT.
      */
-    longPressRecognizerPtr->SetTargetComponent(targetComponent);
+    (void)longPressRecognizerPtr;
     auto result = longPressRecognizerPtr->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::REJECT);
 }
@@ -1307,11 +1266,11 @@ HWTEST_F(GestureRecognizerTestNg, ReconcileGestureInfoFromTest002, TestSize.Leve
 
     clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
     otherRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
-    std::set<SourceTool> allowedTypes = { SourceTool::FINGER, SourceTool::PEN };
-    otherRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+    uint32_t bitmap = SourceToolToBit(SourceTool::FINGER) | SourceToolToBit(SourceTool::PEN);
+    otherRecognizer->gestureInfo_->SetAllowedTypesBitmap(bitmap);
 
     clickRecognizer->ReconcileGestureInfoFrom(otherRecognizer);
-    EXPECT_EQ(clickRecognizer->gestureInfo_->GetAllowedTypes(), allowedTypes);
+    EXPECT_EQ(clickRecognizer->gestureInfo_->GetAllowedTypesBitmap(), bitmap);
 }
 
 /**
@@ -1553,8 +1512,8 @@ HWTEST_F(GestureRecognizerTestNg, IsAllowedTypeTest003, TestSize.Level1)
 {
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
-    std::set<SourceTool> allowedTypes = { SourceTool::FINGER, SourceTool::PEN };
-    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+    uint32_t bitmap = SourceToolToBit(SourceTool::FINGER) | SourceToolToBit(SourceTool::PEN);
+    clickRecognizer->gestureInfo_->SetAllowedTypesBitmap(bitmap);
 
     bool result = clickRecognizer->IsAllowedType(SourceTool::FINGER);
     EXPECT_TRUE(result);
@@ -1601,8 +1560,8 @@ HWTEST_F(GestureRecognizerTestNg, HandleEventWithNotAllowedTypeTest001, TestSize
 {
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
-    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
-    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+    uint32_t bitmap = SourceToolToBit(SourceTool::FINGER);
+    clickRecognizer->gestureInfo_->SetAllowedTypesBitmap(bitmap);
 
     TouchEvent event;
     event.id = 1;
@@ -1622,8 +1581,8 @@ HWTEST_F(GestureRecognizerTestNg, HandleEventWithNotAllowedTypeTest002, TestSize
 {
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
-    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
-    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+    uint32_t bitmap = SourceToolToBit(SourceTool::FINGER);
+    clickRecognizer->gestureInfo_->SetAllowedTypesBitmap(bitmap);
 
     TouchEvent event;
     event.id = 1;
@@ -1643,8 +1602,8 @@ HWTEST_F(GestureRecognizerTestNg, HandleAxisEventWithNotAllowedTypeTest001, Test
 {
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
-    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
-    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+    uint32_t bitmap = SourceToolToBit(SourceTool::FINGER);
+    clickRecognizer->gestureInfo_->SetAllowedTypesBitmap(bitmap);
 
     AxisEvent event;
     event.id = 1;
@@ -1664,8 +1623,8 @@ HWTEST_F(GestureRecognizerTestNg, HandleAxisEventWithNotAllowedTypeTest002, Test
 {
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
-    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
-    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+    uint32_t bitmap = SourceToolToBit(SourceTool::FINGER);
+    clickRecognizer->gestureInfo_->SetAllowedTypesBitmap(bitmap);
 
     AxisEvent event;
     event.id = 1;

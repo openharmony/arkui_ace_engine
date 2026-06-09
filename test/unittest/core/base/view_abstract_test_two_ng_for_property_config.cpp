@@ -66,6 +66,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest002, TestSize.L
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
     auto hoverEventActuator = inputHub->hoverEventActuator_;
     ASSERT_NE(hoverEventActuator, nullptr);
     auto Events = hoverEventActuator->inputEvents_;
@@ -114,6 +115,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddMouseEventForTipsTest001, TestSize.L
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateMouseEventActuator();
     auto mouseEventActuator = inputHub->mouseEventActuator_;
     ASSERT_NE(mouseEventActuator, nullptr);
     auto events = mouseEventActuator->inputEvents_;

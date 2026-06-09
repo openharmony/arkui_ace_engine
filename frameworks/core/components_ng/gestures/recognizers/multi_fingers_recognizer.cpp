@@ -206,21 +206,23 @@ std::string MultiFingersRecognizer::DumpGestureInfo() const
 {
     std::string infoStr;
     infoStr.append("allowedTypes: [");
-    std::set<SourceTool> allowedTypes = {};
+    uint32_t bitmap = AllowedTypesNone;
     if (gestureInfo_) {
-        allowedTypes = gestureInfo_->GetAllowedTypes();
+        bitmap = gestureInfo_->GetAllowedTypesBitmap();
     }
-    if (allowedTypes.empty()) {
+    if (bitmap == AllowedTypesNone) {
         infoStr.append("all]");
         return infoStr;
     }
 
-    auto it = allowedTypes.begin();
-    while (it != allowedTypes.end()) {
-        infoStr.append(std::to_string(static_cast<int32_t>(*it)));
-        it++;
-        if (it != allowedTypes.end()) {
-            infoStr.append(", ");
+    bool first = true;
+    for (uint32_t i = 0; i <= static_cast<uint32_t>(SourceTool::JOYSTICK); ++i) {
+        if (bitmap & (1u << i)) {
+            if (!first) {
+                infoStr.append(", ");
+            }
+            infoStr.append(std::to_string(i));
+            first = false;
         }
     }
     infoStr.append("]");

@@ -994,11 +994,12 @@ HWTEST_F(ViewAbstractTestNg, SetOnCoastingAxisEvent001, TestSize.Level1)
      * @tc.steps: step1. create framenode and check callback;
      * @tc.expected: callback is not null.
      */
-    OnCoastingAxisEventFunc onCoastingAxisEventFunc;
+    OnCoastingAxisEventFunc onCoastingAxisEventFunc = [](CoastingAxisInfo&) {};
     auto node = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(node, nullptr);
     auto eventHub = node->GetOrCreateInputEventHub();
     ViewAbstract::SetOnCoastingAxisEvent(AceType::RawPtr(node), std::move(onCoastingAxisEventFunc));
+    eventHub->CreateCoastingAxisEventActuator();
     auto& callback = eventHub->coastingAxisEventActuator_->userCallback_;
     EXPECT_NE(callback, nullptr);
 
@@ -1013,8 +1014,9 @@ HWTEST_F(ViewAbstractTestNg, SetOnCoastingAxisEvent001, TestSize.Level1)
      * @tc.steps: step3. Add callback again.
      * @tc.expected: callback is not null.
      */
-    OnCoastingAxisEventFunc onCoastingAxisEventFunc2;
+    OnCoastingAxisEventFunc onCoastingAxisEventFunc2 = [](CoastingAxisInfo&) {};
     ViewAbstract::SetOnCoastingAxisEvent(AceType::RawPtr(node), std::move(onCoastingAxisEventFunc2));
+    eventHub->CreateCoastingAxisEventActuator();
     EXPECT_NE(callback, nullptr);
     ViewStackProcessor::GetInstance()->instance = nullptr;
 }

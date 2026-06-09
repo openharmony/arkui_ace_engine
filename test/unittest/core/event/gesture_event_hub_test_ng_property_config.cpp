@@ -257,14 +257,14 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
      * @tc.expected: finalResult is empty
      */
     gestureEventHub->ProcessTouchTestHierarchy(
-        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr, responseLinkResult);
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, responseLinkResult);
     EXPECT_TRUE(finalResult.empty());
 
     auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1);
     innerTargets.emplace_back(clickRecognizer);
 
     gestureEventHub->ProcessTouchTestHierarchy(
-        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr, responseLinkResult);
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, responseLinkResult);
 }
 
 /**

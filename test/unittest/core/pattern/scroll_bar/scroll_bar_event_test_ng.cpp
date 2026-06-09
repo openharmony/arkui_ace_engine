@@ -454,7 +454,7 @@ HWTEST_F(ScrollBarEventTestNg, BarCollectTouchTarget001, TestSize.Level1)
     TouchTestResult result;
     ResponseLinkResult responseLinkResult;
     pattern_->scrollableEvent_->BarCollectTouchTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
+        coordinateOffset, getEventTargetImpl, result, frameNode_, responseLinkResult);
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(result.size(), 1);
@@ -479,7 +479,7 @@ HWTEST_F(ScrollBarEventTestNg, BarCollectTouchTarget002, TestSize.Level1)
     TouchTestResult result;
     ResponseLinkResult responseLinkResult;
     pattern_->scrollableEvent_->BarCollectTouchTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
+        coordinateOffset, getEventTargetImpl, result, frameNode_, responseLinkResult);
     EXPECT_EQ(result.size(), 1);
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
@@ -503,7 +503,7 @@ HWTEST_F(ScrollBarEventTestNg, BarCollectLongPressTarget001, TestSize.Level1)
     ResponseLinkResult responseLinkResult;
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     pattern_->scrollableEvent_->BarCollectLongPressTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
+        coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
     EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(result.size(), 2);

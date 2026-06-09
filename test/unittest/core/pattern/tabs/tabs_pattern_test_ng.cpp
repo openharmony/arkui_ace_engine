@@ -200,12 +200,12 @@ HWTEST_F(TabPatternTestNg, AddInnerOnGestureRecognizerJudgeBeginTest001, TestSiz
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
-    CHECK_NULL_VOID(targetComponent);
+    auto gestureHub = swiperNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
 
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc;
     tabsPattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
-    EXPECT_TRUE(targetComponent->isInnerNodeGestureRecognizerJudgeSet_);
+    EXPECT_TRUE(gestureHub->IsInnerNodeGestureRecognizerJudgeSet());
 }
 
 /**
@@ -224,12 +224,12 @@ HWTEST_F(TabPatternTestNg, RecoverInnerOnGestureRecognizerJudgeBeginTest001, Tes
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
-    CHECK_NULL_VOID(targetComponent);
+    auto gestureHub = swiperNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
 
-    targetComponent->isInnerNodeGestureRecognizerJudgeSet_ = true;
+    gestureHub->SetInnerNodeGestureRecognizerJudge(true);
     tabsPattern->RecoverInnerOnGestureRecognizerJudgeBegin();
-    EXPECT_FALSE(targetComponent->isInnerNodeGestureRecognizerJudgeSet_);
+    EXPECT_FALSE(gestureHub->IsInnerNodeGestureRecognizerJudgeSet());
 }
 
 /**

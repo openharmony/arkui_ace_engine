@@ -25,7 +25,6 @@
 #include <unordered_set>
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
-#include "core/components_ng/event/target_component.h"
 #if defined(OHOS_PLATFORM)
 #include <unistd.h>
 #endif
@@ -3824,35 +3823,6 @@ bool FrameNode::IsOutOfTouchTestRegion(
     return false;
 }
 
-void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent)
-{
-    CHECK_NULL_VOID(eventHub_);
-    auto gestureHub = eventHub_->GetGestureEventHub();
-    if (gestureHub) {
-        auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
-        targetComponent->SetOnGestureJudgeBegin(std::move(callback));
-        auto callbackNative = gestureHub->GetOnGestureJudgeNativeBeginCallback();
-        if (callbackNative) {
-            targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
-        }
-
-        if (!targetComponent->IsInnerNodeGestureRecognizerJudgeSet()) {
-            auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
-            targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
-        }
-
-        auto pattern = GetPattern();
-        if (pattern) {
-            if (GetExposeInnerGestureFlag()) {
-                auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
-                pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
-            } else {
-                pattern->RecoverInnerOnGestureRecognizerJudgeBegin();
-            }
-        }
-    }
-}
-
 void FrameNode::AddNodeToRegisterTouchTest()
 {
     auto context = GetContext();
@@ -3936,15 +3906,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             return HitTestResult::OUT_OF_REGION;
         }
     }
-
-    RefPtr<TargetComponent> targetComponent;
-    if (targetComponent_.Upgrade()) {
-        targetComponent = targetComponent_.Upgrade();
-    } else {
-        targetComponent = MakeRefPtr<TargetComponent>();
-        targetComponent_ = targetComponent;
-    }
-    targetComponent->SetNode(WeakClaim(this));
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -4077,7 +4038,19 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
 
-    AddJudgeToTargetComponent(targetComponent);
+    auto pattern = GetPattern();
+    if (pattern && eventHub_) {
+        auto gestureHub = eventHub_->GetGestureEventHub();
+        if (gestureHub) {
+            if (GetExposeInnerGestureFlag()) {
+                auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+                pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+            } else {
+                pattern->RecoverInnerOnGestureRecognizerJudgeBegin();
+            }
+        }
+    }
+
     AddNodeToRegisterTouchTest();
     RecordHitTestNodeInfo();
 
@@ -4122,7 +4095,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 ResponseLinkResult newComingResponseLinkTargets;
                 const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
                 preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets,
-                    finalResult, touchId, localPoint, targetComponent, newComingResponseLinkTargets);
+                    finalResult, touchId, localPoint, newComingResponseLinkTargets);
                 newComingTargets.swap(finalResult);
                 // Trigger onGestureCollectIntercept callback
                 auto intervention = gestureHub->TriggerOnGestureCollectIntercept(newComingTargets, responseLinkResult);
@@ -4173,12 +4146,6 @@ void FrameNode::TipsTouchTest(const PointF& globalPoint, const PointF& parentLoc
     auto defaultResponseRegion = renderContext_->GetPaintRectWithoutTransform();
     auto responseRegionList = GetResponseRegionList(defaultResponseRegion,
         static_cast<int32_t>(touchRestrict.sourceType), static_cast<int32_t>(touchRestrict.sourceTool));
-    RefPtr<TargetComponent> targetComponent = targetComponent_.Upgrade();
-    if (!targetComponent) {
-        targetComponent = MakeRefPtr<TargetComponent>();
-        targetComponent_ = targetComponent;
-    }
-    targetComponent->SetNode(WeakClaim(this));
     TouchTestResult newComingTargets;
     auto tmp = parentLocalPoint - paintRect.GetOffset();
     renderContext_->GetPointWithTransform(tmp);

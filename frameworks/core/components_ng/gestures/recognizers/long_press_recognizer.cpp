@@ -585,11 +585,14 @@ void LongPressRecognizer::PrintCurrentFingersInfo() const
 
 GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
 {
-    auto targetComponent = GetTargetComponent();
-    CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
-    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
-    auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    auto callbackNative = targetComponent->GetOnGestureJudgeNativeBeginCallback();
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, GestureJudgeResult::CONTINUE);
+
+    auto gestureRecognizerJudgeFunc = gestureHub->GetOnGestureRecognizerJudgeBegin();
+    auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
+    auto callbackNative = gestureHub->GetOnGestureJudgeNativeBeginCallback();
     if (!callback && !callbackNative && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }
@@ -646,9 +649,7 @@ void LongPressRecognizer::UpdateGestureEventInfo(std::shared_ptr<LongPressGestur
 
 RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()
 {
-    auto targetComponent = GetTargetComponent();
-    CHECK_NULL_RETURN(targetComponent, nullptr);
-    auto uiNode = targetComponent->GetUINode().Upgrade();
+    auto uiNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(uiNode, nullptr);
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_RETURN(frameNode, nullptr);

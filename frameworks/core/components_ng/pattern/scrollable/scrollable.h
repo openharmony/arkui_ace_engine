@@ -150,7 +150,7 @@ public:
     }
 
     void OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult);
 
     void SetDragTouchRestrict(const TouchRestrict& touchRestrict)
     {

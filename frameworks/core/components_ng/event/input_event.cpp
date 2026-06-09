@@ -21,17 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventHub) : inputEventHub_(inputEventHub)
-{
-    auto refInputEventHub = inputEventHub_.Upgrade();
-    CHECK_NULL_VOID(refInputEventHub);
-    auto frameNode = refInputEventHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto nodeId = frameNode->GetId();
-    ACE_UINODE_TRACE(nodeId);
-    axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
-    coastingAxisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
-}
+InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventHub) : inputEventHub_(inputEventHub) {}
 
 void InputEventActuator::OnCollectMouseEvent(
     const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
@@ -370,6 +360,13 @@ void InputEventActuator::OnCollectCoastingAxisEvent(AxisTestResult& onAxisResult
             (*userEvent)(info);
         }
     };
+    if (!coastingAxisEventTarget_) {
+        auto inputEventHub = inputEventHub_.Upgrade();
+        CHECK_NULL_VOID(inputEventHub);
+        auto frameNode = inputEventHub->GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        coastingAxisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    }
     coastingAxisEventTarget_->SetOnCoastingAxisCallback(onCoastingAxisCallback);
     onAxisResult.emplace_back(coastingAxisEventTarget_);
 }

@@ -1680,7 +1680,7 @@ HWTEST_F(GestureEventHubTestNg, MinRecognizerGroupLoopSizeTest001, TestSize.Leve
      * @tc.expected: result is false
      */
     auto result = gestureEventHub->ProcessTouchTestHit(
-        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, responseLinkResult);
     auto sizeOfResponseLinkResult = static_cast<int32_t>(responseLinkResult.size());
     EXPECT_FALSE(result);
     EXPECT_EQ(sizeOfResponseLinkResult, 3);
@@ -1774,7 +1774,7 @@ HWTEST_F(GestureEventHubTestNg, ProcessTouchTestHitSequence001, TestSize.Level1)
      * @tc.expected: result is false
      */
     auto result = scrollGestureEventHub->ProcessTouchTestHit(
-        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, responseLinkResult);
     EXPECT_FALSE(result);
     EXPECT_FALSE(panRecognizer->IsSystemGesture());
 }

@@ -217,7 +217,7 @@ HWTEST_F(GestureEventHubTestNg, ProcessTouchTestHit001, TestSize.Level1)
     innerTargets.emplace_back(recognizerGroup);
     gestureEventHub->redirectClick_=true;
     auto flag = gestureEventHub->ProcessTouchTestHit(
-        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF(), nullptr, responseLinkResult);
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, PointF(), responseLinkResult);
     EXPECT_FALSE(flag);
 }
 

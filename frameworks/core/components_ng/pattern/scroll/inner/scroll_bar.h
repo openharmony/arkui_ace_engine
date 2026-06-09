@@ -444,7 +444,7 @@ public:
         return autoAdjustScrollBarMargin_;
     }
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult, bool inBarRect = false);
     ACE_FORCE_EXPORT Color GetForegroundColor() const;
     void UpdateInnerScrollBarThemeValues(bool useInnerScrollBar);
@@ -486,7 +486,7 @@ public:
         scrollPageCallback_ = std::move(scrollPageCallback);
     }
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
         ResponseLinkResult& responseLinkResult);
     void InitLongPressEvent();
     void HandleLongPress(bool smooth);

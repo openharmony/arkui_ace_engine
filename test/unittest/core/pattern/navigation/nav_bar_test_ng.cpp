@@ -696,6 +696,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
     ASSERT_NE(lastMenuItemNode, nullptr);
     auto inputEventHub = lastMenuItemNode->GetOrCreateInputEventHub();
     ASSERT_NE(inputEventHub, nullptr);
+    inputEventHub->CreateHoverEventActuator();
     ASSERT_NE(inputEventHub->hoverEventActuator_, nullptr);
     ASSERT_FALSE(inputEventHub->hoverEventActuator_->inputEvents_.empty());
     for (const auto& hoverCallback : inputEventHub->hoverEventActuator_->inputEvents_) {

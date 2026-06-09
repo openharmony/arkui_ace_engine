@@ -85,6 +85,7 @@ HWTEST_F(InputEventTestNg, InputEventTest001, TestSize.Level1)
     inputEventHub->SetFrameNodeCommonOnMouseEvent(std::move(onMouse1));
     OnMouseEventFunc onMouse2 = onMouse;
     inputEventHub->SetMouseEvent(std::move(onMouse2));
+    inputEventHub->CreateMouseEventActuator();
 
     TouchTestResult Result;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -107,10 +108,12 @@ HWTEST_F(InputEventTestNg, InputEventTest002, TestSize.Level1)
     auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     inputEventHub->hoverEventActuator_ =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
-    OnHoverFunc onHoverEventFunc;
-    OnHoverFunc onHoverEventFunc2;
+    OnHoverFunc onHoverEventFunc = [](bool, HoverInfo& info) {};
+    OnHoverFunc onHoverEventFunc2 = [](bool, HoverInfo& info) {};
     inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
     inputEventHub->SetHoverEvent(std::move(onHoverEventFunc2));
+    inputEventHub->CreateHoverEventActuator();
+    ASSERT_NE(inputEventHub->hoverEventActuator_, nullptr);
 
     const OnHoverFunc onHover = [](bool, HoverInfo) {};
     OnHoverFunc onHover1 = onHover;
@@ -139,8 +142,9 @@ HWTEST_F(InputEventTestNg, InputEventTest003, TestSize.Level1)
     auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     inputEventHub->hoverEventActuator_ =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
-    OnHoverFunc onHoverEventFunc;
+    OnHoverFunc onHoverEventFunc = [](bool, HoverInfo& info) {};
     inputEventHub->SetHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->CreateHoverEventActuator();
 
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -161,10 +165,10 @@ HWTEST_F(InputEventTestNg, InputEventTest004, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     eventHub->AttachHost(frameNode);
     auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    inputEventHub->hoverEventActuator_ =
-        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
-    OnHoverFunc onHoverEventFunc;
+    OnHoverFunc onHoverEventFunc = [](bool, HoverInfo& info) {};
     inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->CreateHoverEventActuator();
+    ASSERT_NE(inputEventHub->hoverEventActuator_, nullptr);
 
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -213,6 +217,7 @@ HWTEST_F(InputEventTestNg, InputEventTest006, TestSize.Level1)
     inputEventHub->AddOnAxisEvent(onAxisEvent);
     inputEventHub->AddOnAxisEvent(nullptr);
     inputEventHub->axisEventActuator_->userCallback_ = onAxisEvent;
+    inputEventHub->CreateAxisEventActuator();
 
     AxisTestResult Result;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -266,6 +271,7 @@ HWTEST_F(InputEventTestNg, InputEventTest008, TestSize.Level1)
     auto onAxisEvent = AceType::MakeRefPtr<InputEvent>(std::move(onAxis));
     inputEventHub->AddOnAxisEvent(onAxisEvent);
     inputEventHub->AddOnAxisEvent(nullptr);
+    inputEventHub->CreateAxisEventActuator();
 
     AxisTestResult Result;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -321,6 +327,7 @@ HWTEST_F(InputEventTestNg, InputEventTest010, TestSize.Level1)
     mouseEvent1->SetTipsFollowCursor(true);
     inputEventHub->mouseEventActuator_->inputEvents_.clear();
     inputEventHub->AddOnMouseEvent(std::move(mouseEvent1));
+    inputEventHub->CreateMouseEventActuator();
     inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
     inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
     EXPECT_EQ(count, 1);
@@ -329,6 +336,7 @@ HWTEST_F(InputEventTestNg, InputEventTest010, TestSize.Level1)
     mouseEvent2->SetIstips(true);
     inputEventHub->mouseEventActuator_->inputEvents_.clear();
     inputEventHub->AddOnMouseEvent(std::move(mouseEvent2));
+    inputEventHub->CreateMouseEventActuator();
     inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
     inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
     EXPECT_EQ(count, 1);
@@ -337,12 +345,14 @@ HWTEST_F(InputEventTestNg, InputEventTest010, TestSize.Level1)
     mouseEvent3->SetTipsFollowCursor(true);
     inputEventHub->mouseEventActuator_->inputEvents_.clear();
     inputEventHub->AddOnMouseEvent(std::move(mouseEvent3));
+    inputEventHub->CreateMouseEventActuator();
     inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
     inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
     EXPECT_EQ(count, 1);
 
     inputEventHub->mouseEventActuator_->inputEvents_.clear();
     inputEventHub->AddOnMouseEvent(nullptr);
+    inputEventHub->CreateMouseEventActuator();
     inputEventHub->mouseEventActuator_->OnCollectMouseEventForTips(COORDINATE_OFFSET, getEventTargetImpl, result);
     inputEventHub->mouseEventActuator_->mouseEventTarget_->onMouseCallback_(mouse);
     EXPECT_EQ(count, 1);

@@ -257,9 +257,10 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent005, TestSize.Level1)
     auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = host->GetPattern<TextPattern>();
     auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
-    inputHub->mouseEventActuator_->inputEvents_.clear();
     pattern->mouseEventInitialized_ = false;
     pattern->InitMouseEvent();
+    inputHub->CreateMouseEventActuator();
+    ASSERT_NE(inputHub->mouseEventActuator_, nullptr);
     auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
 
     AISpan aiSpan1;
@@ -352,9 +353,10 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent006, TestSize.Level1)
      */
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 30 });
     auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
-    inputHub->mouseEventActuator_->inputEvents_.clear();
     pattern->mouseEventInitialized_ = false;
     pattern->InitMouseEvent();
+    inputHub->CreateMouseEventActuator();
+    ASSERT_NE(inputHub->mouseEventActuator_, nullptr);
     auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
     MouseInfo info;
     info.button_ = MouseButton::LEFT_BUTTON;

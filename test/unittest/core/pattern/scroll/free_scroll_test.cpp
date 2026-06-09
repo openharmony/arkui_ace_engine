@@ -193,7 +193,7 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
     ResponseLinkResult link;
     auto scrollHandler = pattern_->GetScrollableEvent();
     ASSERT_TRUE(scrollHandler);
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, link, 1, 1);
     EXPECT_EQ(link.size(), 1);
     EXPECT_EQ(*link.begin(), controller->freePanGesture_);
     EXPECT_EQ(*res.begin(), controller->freePanGesture_);
@@ -203,7 +203,7 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
     FlushUITasks(frameNode_);
     res.clear();
     link.clear();
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, link, 1, 1);
     EXPECT_EQ(link.size(), 1);
     EXPECT_EQ(*link.begin(), controller->freePanGesture_);
     EXPECT_EQ(*res.begin(), controller->freePanGesture_);
@@ -375,7 +375,7 @@ TEST_F(FreeScrollTest, ModeChange001)
     TouchTestResult res;
     ResponseLinkResult link;
     auto scrollHandler = pattern_->GetScrollableEvent();
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, link, 1, 1);
     EXPECT_EQ(link.size(), 1);
     EXPECT_EQ(*link.begin(), controller->freePanGesture_);
     EXPECT_EQ(*res.begin(), controller->freePanGesture_);
@@ -387,7 +387,7 @@ TEST_F(FreeScrollTest, ModeChange001)
     layoutProperty_->UpdateAxis(Axis::VERTICAL);
     pattern_->OnModifyDone();
     ASSERT_FALSE(pattern_->freeScroll_);
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, link, 1, 1);
     EXPECT_EQ(link.size(), 1);
     ASSERT_EQ(*link.begin(), scrollHandler->GetScrollable()->panRecognizerNG_);
 }
@@ -1233,13 +1233,13 @@ TEST_F(FreeScrollTest, ScrollBar004)
     ResponseLinkResult responseLinkResult;
     const auto& actuator = frameNode_->GetOrCreateGestureEventHub()->scrollableActuator_;
     ASSERT_EQ(actuator->scrollableEvents_.size(), 1);
-    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult, 1);
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, responseLinkResult, 1);
     EXPECT_EQ(responseLinkResult.size(), 2);
 
     localPoint = PointF(238, 10);
     result.clear();
     responseLinkResult.clear();
-    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult, 1);
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, responseLinkResult, 1);
     EXPECT_EQ(responseLinkResult.size(), 3);
     EXPECT_EQ(responseLinkResult.front(), pattern_->scrollBar2d_->vertical_->GetPanRecognizer());
 
@@ -1247,7 +1247,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     localPoint = PointF(10, 398);
     result.clear();
     responseLinkResult.clear();
-    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult, 1);
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, responseLinkResult, 1);
     EXPECT_EQ(responseLinkResult.size(), expectedRecognizerCount);
     EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_->GetPanRecognizer());
 
@@ -1255,7 +1255,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     restrict.sourceType = SourceType::MOUSE;
     result.clear();
     responseLinkResult.clear();
-    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult, 1);
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, responseLinkResult, 1);
     EXPECT_EQ(responseLinkResult.size(), expectedRecognizerCount);
     EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_->GetPanRecognizer());
 }

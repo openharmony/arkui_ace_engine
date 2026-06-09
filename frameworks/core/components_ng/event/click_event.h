@@ -23,7 +23,7 @@
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "ui/gestures/gesture_event.h"
-#include "core/components_ng/event/target_component.h"
+#include "core/components_ng/event/gesture_types.h"
 
 namespace OHOS::Ace {
 

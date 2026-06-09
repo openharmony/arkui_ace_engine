@@ -897,6 +897,7 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg016, TestSize.Level1)
     menuManager->menuMap_[targetId] = menu;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     auto inputHub = targetNode->GetOrCreateInputEventHub();
+    inputHub->CreateMouseEventActuator();
     auto mouseEventActuator_ = inputHub->mouseEventActuator_;
     auto Events = mouseEventActuator_->inputEvents_;
     MouseInfo mouseInfo;

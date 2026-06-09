@@ -1126,6 +1126,7 @@ HWTEST_F(TextTestNgNine, OnTextSelectionChange002, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
+    inputHub->CreateMouseEventActuator();
     EXPECT_TRUE(!inputHub->mouseEventActuator_->inputEvents_.empty());
     EXPECT_TRUE(!gestureEventHub->touchEventActuator_->touchEvents_.empty());
 

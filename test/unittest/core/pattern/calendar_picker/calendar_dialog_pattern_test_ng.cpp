@@ -1399,12 +1399,13 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest023, TestSize.Lev
     dialogPattern->SetHoverState(true);
     auto inputHub = calendarDialogNode->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateMouseEventActuator();
     ASSERT_NE(inputHub->mouseEventActuator_, nullptr);
     ASSERT_NE(inputHub->mouseEventActuator_->userCallback_, nullptr);
-    ASSERT_NE(inputHub->mouseEventActuator_->userCallback_->onMouseCallback_, nullptr);
+    ASSERT_NE(inputHub->mouseEventActuator_->userCallback_->GetOnMouseEventFunc(), nullptr);
 
     MouseInfo info;
-    inputHub->mouseEventActuator_->userCallback_->onMouseCallback_(info);
+    inputHub->mouseEventActuator_->userCallback_->GetOnMouseEventFunc()(info);
 }
 
 /**

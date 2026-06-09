@@ -879,7 +879,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
      */
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
-    OnMouseEventFunc onMouseEventFunc;
+    OnMouseEventFunc onMouseEventFunc = [](MouseInfo& info) {};
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
 
     auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -889,6 +889,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
     auto eventHub = node->GetOrCreateInputEventHub();
+    eventHub->CreateMouseEventActuator();
     auto& callback = eventHub->mouseEventActuator_->userCallback_;
     EXPECT_NE(callback, nullptr);
 
@@ -903,8 +904,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
      * @tc.steps: step3. Add callback again.
      * @tc.expected: callback is not null.
      */
-    OnMouseEventFunc onMouseEventFunc2;
+    OnMouseEventFunc onMouseEventFunc2 = [](MouseInfo& info) {};
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc2));
+    eventHub->CreateMouseEventActuator();
     ViewAbstract::SetFrameNodeCommonOnMouse(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onMouseEventFunc2));
     ViewAbstract::ClearJSFrameNodeOnMouse(AceType::RawPtr(FRAME_NODE_REGISTER));
     EXPECT_NE(callback, nullptr);
@@ -924,7 +926,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableAxisTest, TestSize.Level1)
      */
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
-    OnAxisEventFunc onAxisEventFunc;
+    OnAxisEventFunc onAxisEventFunc = [](AxisInfo&) {};
     ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc));
 
     auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -934,6 +936,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableAxisTest, TestSize.Level1)
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
     auto eventHub = node->GetOrCreateInputEventHub();
+    eventHub->CreateAxisEventActuator();
     auto& callback = eventHub->axisEventActuator_->userCallback_;
     EXPECT_NE(callback, nullptr);
 
@@ -948,8 +951,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableAxisTest, TestSize.Level1)
      * @tc.steps: step3. Add callback again.
      * @tc.expected: callback is not null.
      */
-    OnAxisEventFunc onAxisEventFunc2;
+    OnAxisEventFunc onAxisEventFunc2 = [](AxisInfo&) {};
     ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc2));
+    eventHub->CreateAxisEventActuator();
     EXPECT_NE(callback, nullptr);
     ViewStackProcessor::GetInstance()->instance = nullptr;
 }
@@ -967,7 +971,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableHoverTest, TestSize.Level1)
      */
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
-    OnHoverFunc onHoverEventFunc;
+    OnHoverFunc onHoverEventFunc = [](bool, HoverInfo& info) {};
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
 
     auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -977,6 +981,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableHoverTest, TestSize.Level1)
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
     auto eventHub = node->GetOrCreateInputEventHub();
+    eventHub->CreateHoverEventActuator();
     auto& callback = eventHub->hoverEventActuator_->userCallback_;
     EXPECT_NE(callback, nullptr);
 
@@ -991,8 +996,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableHoverTest, TestSize.Level1)
      * @tc.steps: step3. Add callback again.
      * @tc.expected: callback is not null.
      */
-    OnHoverFunc onHoverEventFunc2;
+    OnHoverFunc onHoverEventFunc2 = [](bool, HoverInfo& info) {};
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc2));
+    eventHub->CreateHoverEventActuator();
     EXPECT_NE(callback, nullptr);
     ViewStackProcessor::GetInstance()->instance = nullptr;
 }
@@ -1499,9 +1505,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseByFrameNodeTest, TestSize.L
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
-    OnMouseEventFunc onMouseEventFunc;
+    OnMouseEventFunc onMouseEventFunc = [](MouseInfo& info) {};
     ViewAbstract::SetOnMouse(AceType::RawPtr(node), std::move(onMouseEventFunc));
     auto eventHub = node->GetOrCreateInputEventHub();
+    eventHub->CreateMouseEventActuator();
     auto& callback = eventHub->mouseEventActuator_->userCallback_;
     EXPECT_NE(callback, nullptr);
 

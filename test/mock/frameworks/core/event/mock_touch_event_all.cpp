@@ -445,18 +445,6 @@ RefPtr<GestureSnapshot> TouchEventTarget::Dump() const
     return nullptr;
 }
 
-void TouchEventTarget::SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
-{
-    if (!targetComponent_) {
-        targetComponent_ = targetComponent;
-    }
-}
-
-RefPtr<NG::TargetComponent> TouchEventTarget::GetTargetComponent()
-{
-    return targetComponent_;
-}
-
 void TouchEventTarget::SetIsPostEventResult(bool isPostEventResult)
 {
     isPostEventResult_ = isPostEventResult;

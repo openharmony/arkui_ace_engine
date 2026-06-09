@@ -601,7 +601,7 @@ void ScrollBar::SetHoverEvent()
 }
 
 void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     ResponseLinkResult& responseLinkResult)
 {
     if (longPressRecognizer_ && isScrollable_ && scrollBarInteractive_) {
@@ -609,7 +609,6 @@ void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const 
         longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         longPressRecognizer_->SetNodeId(frameNode->GetId());
         longPressRecognizer_->AttachFrameNode(frameNode);
-        longPressRecognizer_->SetTargetComponent(targetComponent);
         longPressRecognizer_->SetIsSystemGesture(true);
         longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
         longPressRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
@@ -987,7 +986,7 @@ void ScrollBar::ProcessFrictionMotionStop()
 }
 
 void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     ResponseLinkResult& responseLinkResult, bool inBarRect)
 {
     if (panRecognizer_ && isScrollable_ && scrollBarInteractive_) {
@@ -995,7 +994,6 @@ void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetE
         panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         panRecognizer_->SetNodeId(frameNode->GetId());
         panRecognizer_->AttachFrameNode(frameNode);
-        panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
         panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         GestureJudgeFunc sysJudge = nullptr;

@@ -121,15 +121,6 @@ public:
         }
     }
 
-    void SetChildrenTargetComponent(const RefPtr<TargetComponent>& targetComponent)
-    {
-        for (const auto& child : recognizers_) {
-            if (child) {
-                child->SetTargetComponent(targetComponent);
-            }
-        }
-    }
-
     void ForceCleanRecognizer() override
     {
         for (const auto& child : recognizers_) {
@@ -192,7 +183,7 @@ public:
     virtual GestureMode GetGestureMode() const = 0;
 
     void SetRecognizerInfoRecursively(const Offset& coordinateOffset, const RefPtr<NG::FrameNode>& node,
-        const RefPtr<NG::TargetComponent>& targetComponent, const GetEventTargetImpl& getEventTargetImpl);
+        const GetEventTargetImpl& getEventTargetImpl);
 
     void AddHittedRecognizerType(std::map<std::string, std::list<TouchTestResultInfo>>& hittedRecognizerInfo);
 

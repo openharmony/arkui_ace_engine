@@ -733,6 +733,8 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest014, TestSize.Level0)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(patternlockTheme));
     pattern_->InitMouseEvent();
+    inputEventHub->CreateHoverEventActuator();
+    inputEventHub->CreateMouseEventActuator();
     ASSERT_FALSE(inputEventHub->hoverEventActuator_->inputEvents_.empty());
     ASSERT_FALSE(inputEventHub->mouseEventActuator_->inputEvents_.empty());
     /**

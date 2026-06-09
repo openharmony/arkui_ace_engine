@@ -192,6 +192,7 @@ HWTEST_F(GridAttrTestTwoNg, GridItemHoverEventTest001, TestSize.Level1)
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
     auto gridItemeventHub = gridItemNode->GetEventHub<GridItemEventHub>();
     auto gridItemInputHub = gridItemeventHub->GetOrCreateInputEventHub();
+    gridItemInputHub->CreateHoverEventActuator();
     auto HandleHoverEvent = gridItemInputHub->hoverEventActuator_->inputEvents_.back()->GetOnHoverEventFunc();
 
     /**

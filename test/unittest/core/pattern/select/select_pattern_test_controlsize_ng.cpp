@@ -602,6 +602,7 @@ HWTEST_F(SelectPatternTestControlSizeNg, SelectPatternExTest001, TestSize.Level1
     selectPattern->SetIsHover(bIsHover);
     selectPattern->RegisterOnHover();
     auto inputHub = selectNode->GetOrCreateInputEventHub();
+    inputHub->CreateHoverEventActuator();
     ASSERT_NE(inputHub->hoverEventActuator_, nullptr);
 }
 /**
@@ -623,6 +624,7 @@ HWTEST_F(SelectPatternTestControlSizeNg, SelectPatternExTest002, TestSize.Level1
     ASSERT_NE(selectPattern, nullptr);
     selectPattern->OnLanguageConfigurationUpdate();
     auto inputHub = selectNode->GetOrCreateInputEventHub();
+    inputHub->CreateHoverEventActuator();
     ASSERT_NE(inputHub->hoverEventActuator_, nullptr);
 }
 /**

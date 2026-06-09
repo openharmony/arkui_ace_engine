@@ -925,20 +925,15 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerHandleTouchMoveEventTest006
 HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     * @tc.steps: step1. create and set Recognizer.
      */
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
-    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
-        return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     TouchEvent touchEvent;
     touchEvent.tiltX.emplace(1.0f);
     touchEvent.tiltY.emplace(1.0f);
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
     /**
-     * @tc.steps: step2. test the function who calls TriggerGestureJudgeCallback.
+     * @tc.steps: step2. test the function who calls HandleTouchMoveEvent.
      * @tc.expected: step2. result equals REJECT.
      */
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
@@ -948,7 +943,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->activeFingers_.push_back(1);
     rotationRecognizerPtr->angle_ = 0;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizerPtr->disposal_, GestureDisposal::REJECT);
+    EXPECT_EQ(rotationRecognizerPtr->disposal_, GestureDisposal::ACCEPT);
 }
 
 /**
@@ -1451,14 +1446,15 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
 {
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     TouchEvent touchEvent;
     touchEvent.tiltX.emplace(1.0f);
     touchEvent.tiltY.emplace(1.0f);
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
 
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     rotationRecognizerPtr->currentFingers_ = 2;
@@ -1479,10 +1475,11 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
 {
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     TouchEvent touchEvent;
     touchEvent.id = 1;
     touchEvent.SetX(-100);
@@ -1491,7 +1488,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     touchEvent2.id = 2;
     touchEvent2.SetX(0);
     touchEvent2.SetY(0);
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
 
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     rotationRecognizerPtr->currentFingers_ = 2;
@@ -1534,10 +1531,11 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
 {
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     TouchEvent touchEvent;
     touchEvent.id = 1;
     touchEvent.SetX(-100);
@@ -1546,7 +1544,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     touchEvent2.id = 2;
     touchEvent2.SetX(0);
     touchEvent2.SetY(0);
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
 
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     rotationRecognizerPtr->currentFingers_ = 2;
@@ -1583,10 +1581,11 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
 {
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     TouchEvent touchEvent;
     touchEvent.id = 1;
     touchEvent.SetX(-100);
@@ -1595,7 +1594,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     touchEvent2.id = 2;
     touchEvent2.SetX(0);
     touchEvent2.SetY(0);
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
 
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->currentFingers_ = 2;
@@ -1638,12 +1637,13 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchCancelEvent001, TestSize.Level1)
     int32_t DEFAULT_ROTATION_FINGERS = 2;
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     TouchEvent touchEvent;
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
     rotationRecognizerPtr->refereeState_ = RefereeState::FAIL;
     rotationRecognizerPtr->activeFingers_.push_back(touchEvent.id);
     rotationRecognizerPtr->activeFingers_.push_back(1);
@@ -1670,12 +1670,13 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchCancelEvent002, TestSize.Level1)
 {
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     AxisEvent axisEvent;
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->HandleTouchCancelEvent(axisEvent);
     EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
@@ -1867,12 +1868,13 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
 {
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(2, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
 
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     rotationRecognizerPtr->fingers_ = 2;
     rotationRecognizerPtr->currentFingers_ = 2;
@@ -1913,12 +1915,13 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
 {
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(2, ROTATION_GESTURE_ANGLE);
-    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
-    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
 
-    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     rotationRecognizerPtr->fingers_ = 2;
     rotationRecognizerPtr->currentFingers_ = 2;

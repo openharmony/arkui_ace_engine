@@ -22,7 +22,7 @@
 #include <unordered_set>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/event/target_component.h"
+#include "core/components_ng/event/gesture_types.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"

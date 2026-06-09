@@ -128,14 +128,14 @@ void TextScrollBar2D::SetBarCollectTouchTargetCallback(const RefPtr<ScrollableEv
     CHECK_NULL_VOID(event);
     event->SetBarCollectTouchTargetCallback(
         [weak = WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
             ResponseLinkResult& responseLinkResult) {
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self && self->verticalBar_ && self->horizontalBar_);
             self->verticalBar_->OnCollectTouchTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
             self->horizontalBar_->OnCollectTouchTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
         });
 }
 
@@ -144,14 +144,14 @@ void TextScrollBar2D::SetBarCollectClickAndLongPressTargetCallback(const RefPtr<
     CHECK_NULL_VOID(event);
     event->SetBarCollectClickAndLongPressTargetCallback(
         [weak = WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
             ResponseLinkResult& responseLinkResult) {
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self && self->verticalBar_ && self->horizontalBar_);
             self->verticalBar_->OnCollectLongPressTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
             self->horizontalBar_->OnCollectLongPressTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+                coordinateOffset, getEventTargetImpl, result, frameNode, responseLinkResult);
         });
 }
 

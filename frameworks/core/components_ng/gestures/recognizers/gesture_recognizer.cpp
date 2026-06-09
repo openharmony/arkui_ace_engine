@@ -92,13 +92,12 @@ bool NGGestureRecognizer::CheckoutDownFingers(int32_t fingerId) const
 
 bool NGGestureRecognizer::IsAllowedType(SourceTool type)
 {
-    // allow all types by default
     if (!gestureInfo_) {
         return true;
     }
 
-    auto allowedTypes = gestureInfo_->GetAllowedTypes();
-    return allowedTypes.empty() || allowedTypes.find(type) != allowedTypes.end();
+    auto bitmap = gestureInfo_->GetAllowedTypesBitmap();
+    return bitmap == AllowedTypesNone || (bitmap & SourceToolToBit(type));
 }
 
 void NGGestureRecognizer::OnRejectBridgeObj()
@@ -511,7 +510,7 @@ void NGGestureRecognizer::ReconcileGestureInfoFrom(const RefPtr<NGGestureRecogni
     CHECK_NULL_VOID(recognizer);
     auto currGestureInfo = recognizer->GetGestureInfo();
     if (gestureInfo_ && currGestureInfo) {
-        gestureInfo_->SetAllowedTypes(currGestureInfo->GetAllowedTypes());
+        gestureInfo_->SetAllowedTypesBitmap(currGestureInfo->GetAllowedTypesBitmap());
     }
 }
 

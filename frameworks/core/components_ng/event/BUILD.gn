@@ -34,7 +34,6 @@ build_component_ng("event_ng") {
     "response_ctrl.cpp",
     "scrollable_event.cpp",
     "state_style_manager.cpp",
-    "target_component.cpp",
     "touch_event.cpp",
   ]
 

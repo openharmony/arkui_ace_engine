@@ -1144,6 +1144,8 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     EXPECT_TRUE(scrollPn);
     scrollPn->parent_ = mockPn;
     scrollPn->InitScrollBarMouseEvent();
+    auto scrollInputHub = scrollPn->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    scrollInputHub->CreateMouseEventActuator();
     // /**
     //  * @tc.steps: step2. Test HandleMouseEvent.
     //  * @tc.expect: info's GetButton is LEFT_BUTTON.
@@ -1151,8 +1153,7 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     MouseInfo info;
     info.SetAction(MouseAction::PRESS);
     info.SetButton(MouseButton::LEFT_BUTTON);
-    auto& inputEvents =
-        scrollPn->GetEventHub<EventHub>()->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
+    auto& inputEvents = scrollInputHub->mouseEventActuator_->inputEvents_;
     EXPECT_EQ(inputEvents.size(), 1);
     for (const auto& callback : inputEvents) {
         if (callback) {
