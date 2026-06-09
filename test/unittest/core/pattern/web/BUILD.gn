@@ -221,6 +221,8 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "webview:libnweb",
     "window_manager:libpip_ndk",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES"
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -359,6 +361,8 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
     "skia:skia_canvaskit",
     "webview:libnweb",
     "webview:libarkweb_utils",
+    "egl:libEGL",
+    "opengles:libGLES"
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -401,6 +405,8 @@ ohos_unittest("web_pattern_unit_test_ohos_part_one") {
     "skia:skia_canvaskit",
     "webview:libarkweb_utils",
     "webview:libnweb",
+    "egl:libEGL",
+    "opengles:libGLES"
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

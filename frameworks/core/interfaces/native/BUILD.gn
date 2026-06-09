@@ -306,6 +306,8 @@ template("ace_core_interfaces_native_node") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
       "runtime_core:ani",
+      "egl:libEGL",
+      "opengles:libGLES"
     ]
 
     if (current_os == "ohos") {
