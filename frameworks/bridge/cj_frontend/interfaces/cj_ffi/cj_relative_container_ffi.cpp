@@ -15,9 +15,23 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_relative_container_ffi.h"
 
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 
 using namespace OHOS::Ace;
+
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::RelativeContainerModelNG* GetRelativeContainerModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("RelativeContainer");
+    if (module == nullptr) {
+        LOGF_ABORT("Can't find relative container dynamic module");
+    }
+    return reinterpret_cast<NG::RelativeContainerModelNG*>(module->GetModel());
+}
+
+}
 
 namespace {
     constexpr int32_t LOCALIZED_BARRIER_DIRECTION_START = 4;
@@ -26,14 +40,14 @@ namespace {
 extern "C" {
     void FfiOHOSAceFrameworkRelativeContainerCreate()
     {
-        RelativeContainerModel::GetInstance()->Create();
+        GetRelativeContainerModel()->Create();
     }
 
     void FfiOHOSAceFrameworkReletiveContainerGuideLine(CGuideLineInfos guidelines)
     {
         std::vector<GuidelineInfo> guidelineInfos;
         if (guidelines.guideline == nullptr || guidelines.size == 0) {
-            RelativeContainerModel::GetInstance()->SetGuideline(guidelineInfos);
+            GetRelativeContainerModel()->SetGuideline(guidelineInfos);
             return;
         }
         
@@ -53,14 +67,14 @@ extern "C" {
             }
             guidelineInfos.emplace_back(guidelineInfoItem);
         }
-        RelativeContainerModel::GetInstance()->SetGuideline(guidelineInfos);
+        GetRelativeContainerModel()->SetGuideline(guidelineInfos);
     }
 
     void FfiOHOSAceFrameworkReletiveContainerBarrier(CBarrierInfos barriers)
     {
         std::vector<BarrierInfo> barrierInfos;
         if (barriers.barrier == nullptr || barriers.size == 0) {
-            RelativeContainerModel::GetInstance()->SetBarrier(barrierInfos);
+            GetRelativeContainerModel()->SetBarrier(barrierInfos);
             return;
         }
         for (int64_t i = 0; i < barriers.size; i++) {
@@ -75,14 +89,14 @@ extern "C" {
             }
             barrierInfos.emplace_back(barrierInfoItem);
         }
-        RelativeContainerModel::GetInstance()->SetBarrier(barrierInfos);
+        GetRelativeContainerModel()->SetBarrier(barrierInfos);
     }
 
     void FfiOHOSAceFrameworkReletiveContainerLocalizedBarrier(CLocalizedBarrierInfos barriers)
     {
         std::vector<BarrierInfo> barrierInfos;
         if (barriers.localizedBarrier == nullptr || barriers.size == 0) {
-            RelativeContainerModel::GetInstance()->SetBarrier(barrierInfos);
+            GetRelativeContainerModel()->SetBarrier(barrierInfos);
             return;
         }
         for (int64_t i = 0; i < barriers.size; i++) {
@@ -104,6 +118,6 @@ extern "C" {
             }
             barrierInfos.emplace_back(barrierInfoItem);
         }
-        RelativeContainerModel::GetInstance()->SetBarrier(barrierInfos);
+        GetRelativeContainerModel()->SetBarrier(barrierInfos);
     }
 }

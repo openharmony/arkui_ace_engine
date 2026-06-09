@@ -199,6 +199,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/rating/bridge/rating_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/relative_container/bridge/relative_container_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/bridge/search_static_modifier.cpp",
@@ -269,7 +270,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_drawing_painter.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_matrix2d.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_calendar_picker_modifier.cpp",
-    "$ace_root/test/mock/interfaces/mock_node_modifiers.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources

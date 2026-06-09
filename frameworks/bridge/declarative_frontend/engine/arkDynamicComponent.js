@@ -465,6 +465,20 @@ if (globalThis.PatternLock === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.RelativeContainer === undefined) {
+  globalThis.RelativeContainer = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('RelativeContainer');
+      let module = globalThis.requireNapi('arkui.components.arkrelativecontainer');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().relativeContainer.create(value);
+    },
+    name: 'JSRelativeContainer'
+  }
+}
+
+// @ts-ignore
 if (globalThis.WaterFlow === undefined) {
   globalThis.WaterFlow = {
     create: function(params) {

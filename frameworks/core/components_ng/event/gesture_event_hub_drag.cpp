@@ -39,7 +39,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
-#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
+#include "core/interfaces/native/node/node_relative_container_modifier.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -110,6 +110,17 @@ constexpr int32_t PASS_THROUGH_EVENT_ID = 100000;
 constexpr int32_t DRAG_START_SUCCESS_CODE = 0;
 constexpr int32_t INVALID_DRAG_RET = -1;
 constexpr float UNIT_SCALE = 1.0f;
+
+RefPtr<FrameNode> CreateRelativeContainerFrameNode(int32_t nodeId)
+{
+    auto nodeModifiers = NG::NodeModifier::GetRelativeContainerModifier();
+    CHECK_NULL_RETURN(nodeModifiers && nodeModifiers->createFrameNode, nullptr);
+    auto arkUINodeHandle = nodeModifiers->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return Referenced::Claim<FrameNode>(frameNode);
+}
 } // namespace
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
 
@@ -994,9 +1005,7 @@ void GestureEventHub::PrepareDragStartInfo(
     CHECK_NULL_VOID(dragDropManager);
     auto menuWrapperNode = dragDropManager->GetMenuWrapperNode();
     CalcPreviewPaintRect(menuWrapperNode, data, frameNode);
-    auto relativeContainerNode =
-        FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    auto relativeContainerNode = CreateRelativeContainerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_VOID(relativeContainerNode);
     data.relativeContainerNode = relativeContainerNode;
     auto relativeContainerLayoutProperty = relativeContainerNode->GetLayoutProperty();

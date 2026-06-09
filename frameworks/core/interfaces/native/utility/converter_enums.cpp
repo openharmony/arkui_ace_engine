@@ -1696,7 +1696,7 @@ ACE_FORCE_EXPORT void AssignCast(
 }
 
 template<>
-void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
 {
     switch (src) {
         case ARK_AXIS_VERTICAL: dst = LineDirection::VERTICAL; break;

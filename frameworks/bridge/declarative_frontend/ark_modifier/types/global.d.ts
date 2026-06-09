@@ -181,6 +181,10 @@ interface RatingComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface RelativeContainerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface RichEditorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/relative_container_model_impl.h"
+#include "core/components_ng/pattern/relative_container/bridge/relative_container_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -26,7 +24,7 @@ void RelativeContainerModelImpl::Create()
     std::list<RefPtr<Component>> children;
     RefPtr<OHOS::Ace::RelativeContainerComponent> component = AceType::MakeRefPtr<RelativeContainerComponent>(children);
     ViewStackProcessor::GetInstance()->Push(component);
-    JSInteractableView::SetFocusNode(true);
+    ViewAbstractModel::GetInstance()->SetFocusNode(true);
 }
 
 } // namespace OHOS::Ace::Framework

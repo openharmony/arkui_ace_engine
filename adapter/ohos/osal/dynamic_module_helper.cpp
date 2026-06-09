@@ -93,6 +93,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "QRCode", "qrcode" },
         { "Radio", "radio" },
         { "Rating", "rating" },
+        { "RelativeContainer", "relativecontainer" },
         { "Richeditor", "richeditor" },
         { "RowSplit", "linearsplit" },
         { "Search", "search" },
