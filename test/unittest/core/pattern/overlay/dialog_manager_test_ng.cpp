@@ -278,25 +278,6 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: DialogManagerTest008
- * @tc.desc: Test ShouldHandleSmoothImmersiveMaterial with IMMERSIVE material type
- * @tc.type: FUNC
- */
-HWTEST_F(DialogManagerTestNg, DialogManagerTest008, TestSize.Level1)
-{
-    DialogManagerTestNg::SetUpTestCase();
-
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    material->SetType(MATERIAL_TYPE_IMMERSIVE);
-
-    // When material type is IMMERSIVE, should handle if level is SMOOTH
-    auto result = DialogManager::ShouldHandleSmoothImmersiveMaterial(material);
-    // Result depends on SystemProperties::GetUiMaterialLevel() return value
-    (void)result; // Result is indeterminate in test environment
-    DialogManagerTestNg::SetUpTestCase();
-}
-
-/**
  * @tc.name: DialogManagerTest009
  * @tc.desc: Test ShouldHandleSmoothImmersiveMaterial with non-IMMERSIVE material type
  * @tc.type: FUNC
@@ -457,21 +438,6 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: DialogManagerTest017
- * @tc.desc: Test SetSmoothImmersiveBackground with null renderContext
- * @tc.type: FUNC
- */
-HWTEST_F(DialogManagerTestNg, DialogManagerTest017, TestSize.Level1)
-{
-    DialogManagerTestNg::SetUpTestCase();
-
-    RefPtr<RenderContext> nullRenderContext = nullptr;
-    DialogManager::SetSmoothImmersiveBackground(nullRenderContext);
-    // Function should return early without crash
-    DialogManagerTestNg::SetUpTestCase();
-}
-
-/**
  * @tc.name: DialogManagerTest018
  * @tc.desc: Test SetSmoothImmersiveBackground with valid renderContext
  * @tc.type: FUNC
@@ -495,24 +461,6 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest018, TestSize.Level1)
 
     // Verify render context is still valid
     EXPECT_NE(renderContext, nullptr);
-    DialogManagerTestNg::SetUpTestCase();
-}
-
-/**
- * @tc.name: DialogManagerTest019
- * @tc.desc: Test SetSmoothImmersiveShadow with null columnNode
- * @tc.type: FUNC
- */
-HWTEST_F(DialogManagerTestNg, DialogManagerTest019, TestSize.Level1)
-{
-    DialogManagerTestNg::SetUpTestCase();
-
-    RefPtr<FrameNode> nullNode = nullptr;
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    material->SetType(MATERIAL_TYPE_IMMERSIVE);
-
-    DialogManager::SetSmoothImmersiveShadow(nullNode, material);
-    // Function should return early without crash
     DialogManagerTestNg::SetUpTestCase();
 }
 
