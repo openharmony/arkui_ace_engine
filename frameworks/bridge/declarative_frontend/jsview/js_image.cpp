@@ -46,6 +46,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"

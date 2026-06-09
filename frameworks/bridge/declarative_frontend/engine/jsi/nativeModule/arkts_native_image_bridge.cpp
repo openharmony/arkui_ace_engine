@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/image/image_component.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/pipeline/base/constants.h"
