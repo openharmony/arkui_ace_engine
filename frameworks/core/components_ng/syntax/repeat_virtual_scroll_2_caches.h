@@ -216,6 +216,7 @@ public:
     std::string DumpUINode(const RefPtr<UINode>& node) const;
     std::string DumpUINodeCache() const;
     std::string DumpL1Rid4Index() const;
+    std::string GetL2ItemsDump();
 
     /**
      * return the index of given RID in L1

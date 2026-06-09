@@ -1588,6 +1588,23 @@ HWTEST_F(LazyForEachSyntaxTestNg, SetEnableSyncLoadTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetIsSyncLoadTest001
+ * @tc.desc: Test LazyForEachBuilder::SetIsSyncLoad with true value
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetIsSyncLoadTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->SetIsSyncLoad(true);
+    EXPECT_EQ(lazyForEachBuilder->isSyncLoad_, true);
+
+    lazyForEachBuilder->SetIsSyncLoad(false);
+    EXPECT_EQ(lazyForEachBuilder->isSyncLoad_, false);
+}
+
+/**
  * @tc.name: ReduceCacheCountTest001
  * @tc.desc: Test ReduceCacheCount with various conditions
  * @tc.type: FUNC

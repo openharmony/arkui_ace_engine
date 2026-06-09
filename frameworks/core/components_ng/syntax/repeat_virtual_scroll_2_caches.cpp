@@ -520,6 +520,24 @@ std::string RepeatVirtualScroll2Caches::DumpL1Rid4Index() const
     return result;
 }
 
+std::string RepeatVirtualScroll2Caches::GetL2ItemsDump()
+{
+    std::string cachedNodes;
+    ForEachCacheItem([&](RIDType rid, const CacheItem& cacheItem) {
+        CHECK_EQUAL_VOID(cacheItem->isL1_, true);
+        CHECK_NULL_VOID(cacheItem->node_);
+        cachedNodes.append("[")
+            .append(cacheItem->node_->GetTag())
+            .append(",")
+            .append(std::to_string(cacheItem->node_->GetId()))
+            .append(",")
+            .append(std::to_string(cacheItem->node_->GetAccessibilityId()))
+            .append("],");
+    });
+    cachedNodes = std::string("[").append(cachedNodes).append("]");
+    return cachedNodes;
+}
+
 void RepeatVirtualScroll2Caches::UpdateIsL1(const CacheItem& cacheItem, bool isL1, bool shouldTriggerRecycleOrReuse)
 {
     cacheItem->isL1_ = isL1;
