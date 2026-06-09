@@ -438,13 +438,13 @@ abstract class ViewPU extends PUV2ViewBase
 
     // Sync mode: no time limit, batch release
     if (!isProgressive) {
-      this.recycleManager_.purgeAllCachedRecycleNode();
+      this.recycleManager_.purgeAllCleanableRecycleNode();
       return true;
     }
 
     // Collect nodes need to release progressively
     if (shouldCollect) {
-      this.recycleManager_.preparePurgeAllCachedRecycleNodeProgressive();
+      this.recycleManager_.preparePurgeAllCleanableRecycleNodeProgressive();
     }
 
     // Progressive mode: with time limit, collect nodes only once

@@ -1445,6 +1445,9 @@ namespace OHOS::Ace::NG {
 
     int32_t LazyForEachBuilder::ReduceCacheCount(int32_t count)
     {
+        if (startShowCached_ || endShowCached_) {
+            return count;
+        }
         const int32_t maxCacheCount = 2;
         return count < maxCacheCount ? count : maxCacheCount;
     }

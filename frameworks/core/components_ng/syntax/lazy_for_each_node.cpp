@@ -538,7 +538,7 @@ void LazyForEachNode::DoSetActiveChildRange(
 
 bool LazyForEachNode::IsCachedCountReduced(int32_t cacheStart, int32_t cacheEnd)
 {
-    bool reduced = cacheStart > oldCacheStart_ || cacheEnd < oldCacheEnd_;
+    bool reduced = cacheStart < oldCacheStart_ || cacheEnd < oldCacheEnd_;
     oldCacheStart_ = cacheStart;
     oldCacheEnd_ = cacheEnd;
     return reduced;
