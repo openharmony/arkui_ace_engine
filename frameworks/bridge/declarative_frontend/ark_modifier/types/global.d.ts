@@ -71,6 +71,14 @@ interface BadgeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface BlankComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface DividerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface CalendarPickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

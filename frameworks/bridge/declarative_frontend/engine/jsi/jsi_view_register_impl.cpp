@@ -39,7 +39,6 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
-#include "bridge/declarative_frontend/jsview/js_blank.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
@@ -447,7 +446,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Scroll", JSScroll::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
-    { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
@@ -531,7 +529,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
-    { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },

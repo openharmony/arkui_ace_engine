@@ -265,7 +265,6 @@ template("declarative_js_engine_ark") {
       "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
       "nativeModule/arkts_native_api_impl_bridge.cpp",
-      "nativeModule/arkts_native_blank_bridge.cpp",
       "nativeModule/arkts_native_canvas_bridge.cpp",
       "nativeModule/arkts_native_column_bridge.cpp",
       "nativeModule/arkts_native_common_bridge.cpp",

@@ -7005,12 +7005,14 @@ struct ArkUIWebModifier {
 };
 
 struct ArkUIBlankModifier {
+    void (*createModel)();
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 value, void* blankRawPtr);
     void (*resetColor)(ArkUINodeHandle node);
     void (*setBlankHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
     void (*resetBlankHeight)(ArkUINodeHandle node);
     void (*setBlankMin)(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit);
     void (*resetBlankMin)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUICounterModifier {

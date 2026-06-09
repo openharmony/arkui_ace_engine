@@ -465,6 +465,20 @@ if (globalThis.PatternLock === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Blank === undefined) {
+  globalThis.Blank = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('Blank');
+      let module = globalThis.requireNapi('arkui.components.arkblank');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().blank.create(value);
+    },
+    name: 'JSBlank'
+  }
+}
+
+// @ts-ignore
 if (globalThis.RelativeContainer === undefined) {
   globalThis.RelativeContainer = {
     create: function(value) {

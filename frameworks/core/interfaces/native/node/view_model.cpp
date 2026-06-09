@@ -17,6 +17,7 @@
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/interfaces/native/node/blank_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
@@ -523,10 +524,9 @@ void* createGridItemNode(ArkUI_Int32 nodeId)
 
 void* createBlankNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = BlankModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetBlankModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createDividerNode(ArkUI_Int32 nodeId)

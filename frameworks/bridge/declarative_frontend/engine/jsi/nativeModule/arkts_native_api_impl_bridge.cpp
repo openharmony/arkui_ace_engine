@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #ifdef MODEL_COMPONENT_SUPPORTED
@@ -571,6 +570,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Select" },
         { "Panel" },
         { "RelativeContainer" },
+        {"Blank"},
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -633,8 +633,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTextAttributes(object, vm);
 
     RegisterStackAttributes(object, vm);
-
-    RegisterBlankAttributes(object, vm);
 
     RegisterSpanAttributes(object, vm);
 
@@ -3106,7 +3104,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     if (!isLiteSetRegistered) {
         RegisterArkUINativeModuleFormLite(object, vm);
     }
-    RegisterBlankAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
@@ -4405,24 +4402,6 @@ void ArkUINativeModule::RegisterRowAttributes(Local<panda::ObjectRef> object, Ec
     row->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetReverse"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetReverse));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "row"), row);
-}
-
-void ArkUINativeModule::RegisterBlankAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto blank = panda::ObjectRef::New(vm);
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetColor));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetColor));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlankHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetBlankHeight));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlankHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetBlankHeight));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlankMin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetBlankMin));
-    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlankMin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetBlankMin));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
 }
 
 void ArkUINativeModule::RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

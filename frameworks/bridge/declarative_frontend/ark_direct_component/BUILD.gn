@@ -149,6 +149,15 @@ ohos_abc("arkcounter") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkblank") {
+  sources = [ "./src/arkblank.ts" ]
+  output_name = "arkblank"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arkrelativecontainer") {
   sources = [ "./src/arkrelativecontainer.ts" ]
   output_name = "arkrelativecontainer"

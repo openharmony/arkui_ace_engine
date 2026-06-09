@@ -13,62 +13,31 @@
  * limitations under the License.
  */
 
-#include "base/log/log_wrapper.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/blank/blank_model_ng.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace BlankModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = BlankModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // BlankModifier
-namespace BlankInterfaceModifier {
-void SetBlankOptionsImpl(Ark_NativePointer node,
-                         const Opt_Union_F64_String* min)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto minDim = Converter::OptConvertPtr<Dimension>(min);
-    Validator::ValidateNonNegative(minDim);
-    Validator::ValidateNonPercent(minDim);
-    if (!minDim) {
-        minDim = Dimension(0.0, DimensionUnit::VP);
-    }
-    BlankModelNG::SetBlankMin(frameNode, *minDim);
-}
-} // BlankInterfaceModifier
-
-namespace BlankAttributeModifier {
-void SetColorImpl(Ark_NativePointer node,
-                  const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvertPtr<Color>(value);
-    if (color) {
-        BlankModelNG::SetColor(frameNode, color.value());
-    } else {
-        BlankModelNG::SetColor(frameNode, Color::TRANSPARENT);
-    }
-}
-} // BlankAttributeModifier
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIBlankModifier* GetBlankStaticModifier();
+#endif
 
 const GENERATED_ArkUIBlankModifier* GetBlankModifier()
 {
-    static const GENERATED_ArkUIBlankModifier ArkUIBlankModifierImpl {
-        BlankModifier::ConstructImpl,
-        BlankInterfaceModifier::SetBlankOptionsImpl,
-        BlankAttributeModifier::SetColorImpl,
-    };
-    return &ArkUIBlankModifierImpl;
+    static const GENERATED_ArkUIBlankModifier* cachedModifier = nullptr;
+
+    if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetBlankStaticModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Blank");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIBlankModifier*>(module->GetStaticModifier());
+#endif
+    }
+
+    return cachedModifier;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

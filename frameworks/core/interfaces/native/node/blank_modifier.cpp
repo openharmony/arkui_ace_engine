@@ -14,89 +14,30 @@
  */
 #include "core/interfaces/native/node/blank_modifier.h"
 
-#include "core/components_ng/pattern/blank/blank_model_ng.h"
-#include "core/components_ng/base/view_abstract.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
-void SetColor(ArkUINodeHandle node, ArkUI_Uint32 value, void* colorRawPtr)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    BlankModelNG::ResetResObj(frameNode, "blank.color");
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        BlankModelNG::SetColor(frameNode, colorResObj);
-    } else {
-        BlankModelNG::SetColor(frameNode, Color(value));
-    }
-}
-
-void ResetColor(ArkUINodeHandle node)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    BlankModelNG::ResetResObj(frameNode, "blank.color");
-    BlankModelNG::SetColor(frameNode, Color::TRANSPARENT);
-}
-
-void SetBlankHeight(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    BlankModelNG::SetHeight(frameNode, CalcDimension(heightValue, (DimensionUnit)heightUnit));
-}
-
-void ResetBlankHeight(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ClearWidthOrHeight(frameNode, false);
-}
-
-void SetBlankMin(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    BlankModelNG::SetBlankMin(frameNode, CalcDimension(minValue, (DimensionUnit)minUnit));
-}
-
-void ResetBlankMin(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    BlankModelNG::SetBlankMin(frameNode, CalcDimension(0.0, DimensionUnit::VP));
-}
-
 namespace NodeModifier {
 const ArkUIBlankModifier* GetBlankModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIBlankModifier modifier = {
-        .setColor = SetColor,
-        .resetColor = ResetColor,
-        .setBlankHeight = SetBlankHeight,
-        .resetBlankHeight = ResetBlankHeight,
-        .setBlankMin = SetBlankMin,
-        .resetBlankMin = ResetBlankMin,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const ArkUIBlankModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Blank");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIBlankModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIBlankModifier* GetCJUIBlankModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIBlankModifier modifier = {
-        .setColor = SetColor,
-        .resetColor = ResetColor,
-        .setBlankHeight = SetBlankHeight,
-        .resetBlankHeight = ResetBlankHeight,
-        .setBlankMin = SetBlankMin,
-        .resetBlankMin = ResetBlankMin,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const CJUIBlankModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Blank");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIBlankModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
 }
 }

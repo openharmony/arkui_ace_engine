@@ -102,6 +102,7 @@ foreach(item, arkui_modules) {
 # TODO: Unify arkui_modules and special_components arrays in future refactoring
 special_components = [
   "arkimagespan",
+  "arkblank",
   "arkgauge",
   "arkbadge",
   "arkgrid",

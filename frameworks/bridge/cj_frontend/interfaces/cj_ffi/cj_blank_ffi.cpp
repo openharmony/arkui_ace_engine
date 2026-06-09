@@ -16,22 +16,36 @@
 #include "cj_blank_ffi.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::BlankModelNG* GetBlankModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Blank");
+    if (module == nullptr) {
+        LOGF_ABORT("Can't find blank dynamic module");
+    }
+    return reinterpret_cast<NG::BlankModelNG*>(module->GetModel());
+}
+
+} // namespace OHOS::Ace
+
 extern "C" {
 void FfiOHOSAceFrameworkBlankCreate(double minSize, int32_t unit)
 {
     Dimension blankMin(minSize, static_cast<DimensionUnit>(unit));
-    BlankModel::GetInstance()->Create();
-    BlankModel::GetInstance()->SetBlankMin(blankMin);
+    GetBlankModel()->Create();
+    GetBlankModel()->SetBlankMin(blankMin);
 }
 void FfiOHOSAceFrameworkBlankHeight(double height, int32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetHeight(height, unit);
     Dimension value(height, static_cast<DimensionUnit>(unit));
-    BlankModel::GetInstance()->SetHeight(value);
+    GetBlankModel()->SetHeight(value);
 }
 }
