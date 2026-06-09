@@ -108,6 +108,7 @@ constexpr int32_t BUTTON_TYPE_NORMAL = 1;
 constexpr float EDGELIGHT_THICKNESS = 250.0f;
 constexpr float EDGELIGHT_LENGTH_RATIO = 0.4f;
 constexpr float EDGELIGHT_INTENSITY = 0.5f;
+constexpr float BUTTON_MIN_FONTSIZE = 9.0f;
 constexpr uint32_t EDGELIGHT_MOVING_TIME = 568;
 constexpr uint32_t HIGHLIGHT_ANIMATION_TIME = 220;
 constexpr uint32_t HIGHLIGHT_ANIMATION_DELAY_TIME = 305;
@@ -838,13 +839,12 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     CHECK_NULL_RETURN(titleRow, nullptr);
     auto titleRowProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(titleRowProps, nullptr);
-    titleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    titleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    titleProp->UpdateFontWeight(FontWeight::BOLD);
+    titleProp->UpdateTextAlign(TextAlign::CENTER);
     if (IsAlertDialog(dialogProperties)) {
-        titleProp->UpdateFontWeight(FontWeight::BOLD);
-        titleProp->UpdateTextAlign(TextAlign::CENTER);
         titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
-        titleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     }
     title->MountToParent(titleRow);
     title->MarkModifyDone();
@@ -869,6 +869,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     titleProp->UpdateContent(dialogProperties.subtitle);
     titleProp->UpdateFontSize(titleStyle.GetFontSize());
     titleProp->UpdateTextColor(titleStyle.GetTextColor());
+    titleProp->UpdateFontWeight(FontWeight::REGULAR);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         titleProp->UpdateAdaptMaxFontSize(titleStyle.GetFontSize());
         titleProp->UpdateAdaptMinFontSize(ADAPT_SUBTITLE_MIN_FONT_SIZE);
@@ -894,12 +895,11 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     ACE_UINODE_TRACE(subtitleRow);
     auto subtitleRowProps = subtitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(subtitleRowProps, nullptr);
-    subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    subtitleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    titleProp->UpdateTextAlign(TextAlign::CENTER);
     subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (IsAlertDialog(dialogProperties)) {
-        titleProp->UpdateTextAlign(TextAlign::CENTER);
         titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
-        subtitleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     }
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
@@ -1202,11 +1202,10 @@ void DialogPattern::UpdateDialogButtonProperty(
 {
     // update button padding
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
-    buttonProp->UpdateType(ButtonType::NORMAL);
+    buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
         buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
     }
-    buttonProp->UpdateBorderRadius(BorderRadiusProperty(dialogTheme_->GetButtonBorderRadius()));
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
     buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
@@ -1339,7 +1338,8 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize = dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize()
                                                                            : dialogTheme_->GetNormalButtonFontSize();
-    textProps->UpdateFontSize(buttonTextSize);
+    textProps->UpdateAdaptMaxFontSize(buttonTextSize);
+    textProps->UpdateAdaptMinFontSize(Dimension(BUTTON_MIN_FONTSIZE, DimensionUnit::FP));
 
     // update text color
     Color color;
