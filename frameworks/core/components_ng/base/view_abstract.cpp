@@ -2009,6 +2009,7 @@ void ViewAbstract::SetDashGap(const Dimension& value)
     BorderWidthProperty dashGap;
     dashGap.SetBorderWidth(value);
 
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_GAP);
     ACE_UPDATE_RENDER_CONTEXT(DashGap, dashGap);
 }
 
@@ -2017,6 +2018,7 @@ void ViewAbstract::SetDashGap(FrameNode *frameNode, const Dimension& value)
     BorderWidthProperty dashGap;
     dashGap.SetBorderWidth(value);
 
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_GAP, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
 }
 
@@ -2040,10 +2042,12 @@ void ViewAbstract::SetDashGap(const BorderWidthProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(dashGap, layoutDirection);
+            CheckNodeBorderDashGapLPX(frameNode, dashGap);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
         };
         pattern->AddResObj("border.dashGap", resObj, std::move(updateFunc));
     }
+    CheckBorderDashGapLPX(value);
     ACE_UPDATE_RENDER_CONTEXT(DashGap, value);
 }
 
@@ -2063,11 +2067,69 @@ void ViewAbstract::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& v
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(dashGap, layoutDirection);
+            CheckNodeBorderDashGapLPX(frameNode, dashGap);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
         };
         pattern->AddResObj("border.dashGap", resObj, std::move(updateFunc));
     }
+    CheckNodeBorderDashGapLPX(frameNode, value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, value, frameNode);
+}
+
+void ViewAbstract::CheckBorderDashGapLPX(const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderDashGapLPX(RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT, frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderDashGapLPX(FrameNode* frameNode, const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(
+            value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_GAP_RIGHT, frameNode);
+    }
 }
 
 void ViewAbstract::SetDashWidth(const Dimension& value)
@@ -2078,6 +2140,7 @@ void ViewAbstract::SetDashWidth(const Dimension& value)
     BorderWidthProperty dashWidth;
     dashWidth.SetBorderWidth(value);
 
+    ACE_CHECK_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_WIDTH);
     ACE_UPDATE_RENDER_CONTEXT(DashWidth, dashWidth);
 }
 
@@ -2086,6 +2149,7 @@ void ViewAbstract::SetDashWidth(FrameNode *frameNode, const Dimension& value)
     BorderWidthProperty dashWidth;
     dashWidth.SetBorderWidth(value);
 
+    ACE_CHECK_NODE_LPX_ATTRIBUTE(value, LpxAttribute::LPX_BORDER_DASH_WIDTH, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
 }
 
@@ -2109,10 +2173,12 @@ void ViewAbstract::SetDashWidth(const BorderWidthProperty& value)
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(dashWidth, layoutDirection);
+            CheckNodeBorderDashWidthLPX(frameNode, dashWidth);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
         };
         pattern->AddResObj("border.dashWidth", resObj, std::move(updateFunc));
     }
+    CheckBorderDashWidthLPX(value);
     ACE_UPDATE_RENDER_CONTEXT(DashWidth, value);
 }
 
@@ -2132,11 +2198,62 @@ void ViewAbstract::SetDashWidth(FrameNode *frameNode, const BorderWidthProperty&
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedEdgeWidths(dashWidth, layoutDirection);
+            CheckNodeBorderDashWidthLPX(frameNode, dashWidth);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
         };
         pattern->AddResObj("border.dashWidth", resObj, std::move(updateFunc));
     }
+    CheckNodeBorderDashWidthLPX(frameNode, value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, value, frameNode);
+}
+
+void ViewAbstract::CheckBorderDashWidthLPX(const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderDashWidthLPX(
+    RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT, frameNode);
+    }
+}
+
+void ViewAbstract::CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value)
+{
+    if (value.topDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.topDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_TOP, frameNode);
+    }
+    if (value.bottomDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.bottomDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_BOTTOM, frameNode);
+    }
+    if (value.leftDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.leftDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_LEFT, frameNode);
+    }
+    if (value.rightDimen.has_value()) {
+        ACE_CHECK_NODE_LPX_ATTRIBUTE(value.rightDimen.value(), LpxAttribute::LPX_BORDER_DASH_WIDTH_RIGHT, frameNode);
+    }
 }
 
 void ViewAbstract::SetOuterBorderRadius(const Dimension& value)

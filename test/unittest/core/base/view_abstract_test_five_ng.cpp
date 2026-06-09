@@ -1389,4 +1389,168 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxFrameNodeWidthHeight001, TestSize.Le
     ViewAbstract::SetHeight(frameNode, NG::CalcLength(vpDim));
     EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
 }
+/**
+ * @tc.name: ViewAbstractLpxDashGap001
+ * @tc.desc: Test SetDashGap(Dimension) with LPX unit registers LPX_BORDER_DASH_GAP attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashGap001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetDashGap(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetDashGap(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxDashGap002
+ * @tc.desc: Test SetDashGap(FrameNode*, Dimension) with LPX unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashGap002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetDashGap(frameNode, lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetDashGap(frameNode, vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxDashGap003
+ * @tc.desc: Test SetDashGap(BorderWidthProperty) with LPX edges registers per-edge attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashGap003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    NG::BorderWidthProperty lpxProp;
+    lpxProp.topDimen = lpxDim;
+    lpxProp.bottomDimen = lpxDim;
+    lpxProp.leftDimen = lpxDim;
+    lpxProp.rightDimen = lpxDim;
+    ViewAbstract::SetDashGap(lpxProp);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 4);
+
+    NG::BorderWidthProperty vpProp;
+    vpProp.topDimen = vpDim;
+    vpProp.bottomDimen = vpDim;
+    vpProp.leftDimen = vpDim;
+    vpProp.rightDimen = vpDim;
+    ViewAbstract::SetDashGap(vpProp);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxDashWidth001
+ * @tc.desc: Test SetDashWidth(Dimension) with LPX unit registers LPX_BORDER_DASH_WIDTH attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetDashWidth(lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetDashWidth(vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxDashWidth002
+ * @tc.desc: Test SetDashWidth(FrameNode*, Dimension) with LPX unit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    ViewAbstract::SetDashWidth(frameNode, lpxDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+
+    ViewAbstract::SetDashWidth(frameNode, vpDim);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxDashWidth003
+ * @tc.desc: Test SetDashWidth(BorderWidthProperty) with LPX edges registers per-edge attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+
+    NG::BorderWidthProperty lpxProp;
+    lpxProp.topDimen = lpxDim;
+    lpxProp.bottomDimen = lpxDim;
+    lpxProp.leftDimen = lpxDim;
+    lpxProp.rightDimen = lpxDim;
+    ViewAbstract::SetDashWidth(lpxProp);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 4);
+
+    NG::BorderWidthProperty vpProp;
+    vpProp.topDimen = vpDim;
+    vpProp.bottomDimen = vpDim;
+    vpProp.leftDimen = vpDim;
+    vpProp.rightDimen = vpDim;
+    ViewAbstract::SetDashWidth(vpProp);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
 } // namespace OHOS::Ace::NG
