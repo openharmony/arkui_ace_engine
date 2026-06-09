@@ -4830,8 +4830,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(toNavDestinationName);
     }
-    ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation",
-        fromComponentName, toComponentName);
+    PageTransitionReport(fromNavDestinationName, toNavDestinationName, fromComponentName, toComponentName);
     UiSessionManager::GetInstance()->OnRouterChange(toPathInfo.c_str(), "navigationPathChange");
     // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
@@ -5148,6 +5147,24 @@ void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth,
     if (depth >= PAGE_DEPTH) {
         EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
     }
+}
+
+void NavigationPattern::PageTransitionReport(const std::string& fromNavDestinationName,
+    const std::string& toNavDestinationName, const std::string& fromComponentName,
+    const std::string& toComponentName)
+{
+    PageTransitionInfo pageTransitionInfo;
+    pageTransitionInfo.fromPage = fromNavDestinationName;
+    pageTransitionInfo.toPage = toNavDestinationName;
+    pageTransitionInfo.mode = "navigation";
+    pageTransitionInfo.fromComponentName = fromComponentName;
+    pageTransitionInfo.toComponentName = toComponentName;
+    uint32_t windowId = 0;
+    auto context = PipelineContext::GetCurrentContext();
+    if (context) {
+        windowId = context->GetWindowId();
+    }
+    ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, windowId);
 }
 
 bool NavigationPattern::IsTopPrimaryNode(const RefPtr<NavDestinationGroupNode>& node)

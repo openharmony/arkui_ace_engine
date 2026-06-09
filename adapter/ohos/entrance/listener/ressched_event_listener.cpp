@@ -23,6 +23,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr char KEY_WINDOW_ID[] = "windowId";
+constexpr char KEY_PAGE_NAME[] = "pageName";
 constexpr int32_t DEFAULT_WINDOW_ID = -1;
 constexpr int32_t DEFAULT_CONTAINER_ID = -1;
 } // namespace
@@ -42,7 +43,7 @@ void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventVal
     }
 }
 
-void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, std::string> extInfo)
+void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, std::string>& extInfo)
 {
     auto it = extInfo.find(KEY_WINDOW_ID);
     CHECK_EQUAL_VOID(it, extInfo.end());
@@ -51,9 +52,20 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
 
     auto instanceId = GetContainerId(windowId);
     CHECK_EQUAL_VOID(instanceId, DEFAULT_CONTAINER_ID);
-
     auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
-    CHECK_NULL_VOID(context);
+    if (context == nullptr) {
+        LOGE("ResschedEventListener::OnComponentPreMake context is nullptr");
+        return;
+    }
+
+    auto pageNameIter = extInfo.find(KEY_PAGE_NAME);
+    CHECK_EQUAL_VOID(pageNameIter, extInfo.end());
+    auto pageName = pageNameIter->second;
+    auto curPageName = context->GetCurrentPageName();
+    if (curPageName.find(pageName) == std::string::npos) {
+        LOGE("ResschedEventListener::OnComponentPreMake current page not match");
+        return;
+    }
 
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

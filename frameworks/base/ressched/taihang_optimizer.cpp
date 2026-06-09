@@ -24,42 +24,7 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr int32_t DEFAULT_PAGENAME_SIZE = 2;
-constexpr int32_t PREMAKE_SWIPER_DELAY_MILLISECONDS = 1000;
 constexpr int32_t SWIPER = 1;
-
-void GetReplyBundleNameAndPages(const std::unordered_map<std::string, std::string>& reply,
-    std::unordered_map<std::string, std::vector<std::string>>& bundleNamePages)
-{
-    CHECK_EQUAL_VOID(reply.empty(), true);
-    bundleNamePages.clear();
-    for (auto it = reply.begin(); it != reply.end(); ++it) {
-        std::string second = it->second;
-        auto jsonObj = JsonUtil::ParseJsonString(second);
-        if (!jsonObj || !jsonObj->IsValid()) {
-            continue;
-        }
-        auto bundle = jsonObj->GetValue("bundleName");
-        auto page = jsonObj->GetValue("pageName");
-        if (!bundle || !page) {
-            continue;
-        }
-        auto bundleName = bundle->GetString();
-        auto pageName = page->GetString();
-        if (bundleName.empty() || pageName.empty()) {
-            continue;
-        }
-        auto iter = bundleNamePages.find(bundleName);
-        if (iter != bundleNamePages.end()) {
-            auto& pageNameList = iter->second;
-            pageNameList.push_back(pageName);
-        } else {
-            std::vector<std::string> pageList;
-            pageList.push_back(pageName);
-            bundleNamePages.emplace(bundleName, pageList);
-        }
-    }
-}
 } // namespace
 
 void TaihangOptimizer::Init()
@@ -75,7 +40,7 @@ void TaihangOptimizer::Init()
         auto swiperReportEnable = ResSchedReport::GetInstance().AppSwiperReportEnableCheck(payload, reply);
         if (swiperReportEnable) {
             std::unique_lock<std::shared_mutex> lock(optimizerRef->processWhiteListMutex_);
-            GetReplyBundleNameAndPages(reply, optimizerRef->bundleNameToPages_);
+            optimizerRef->ParseReplyPages(reply);
         }
         optimizerRef->SetEnable(swiperReportEnable);
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "TaihangOptimizer::Init swiper report enable : %{public}d",
@@ -99,25 +64,38 @@ void TaihangOptimizer::SetEnable(bool value)
     enable_ = value;
 }
 
-bool TaihangOptimizer::CheckSwiperPathValid(const std::string& bundleName, const std::string& pageName)
+void TaihangOptimizer::ParseReplyPages(const std::unordered_map<std::string, std::string>& reply)
 {
-    TAG_LOGD(AceLogTag::ACE_SWIPER,
-        "TaihangOptimizer::CheckSwiperPathValid bundleName = %{public}s, pageName = %{public}s",
-        bundleName.c_str(), pageName.c_str());
+    CHECK_EQUAL_VOID(reply.empty(), true);
+    auto pageIter = reply.find("pageNames");
+    CHECK_EQUAL_VOID(pageIter, reply.end());
+    std::string pages = pageIter->second;
+    auto jsonObj = JsonUtil::ParseJsonString(pages);
+    CHECK_EQUAL_VOID(jsonObj, nullptr);
+    if (!jsonObj->IsArray()) {
+        return;
+    }
+    int32_t size = jsonObj->GetArraySize();
+    for (int i = 0; i < size; i++) {
+        auto nameJson = jsonObj->GetArrayItem(i);
+        if (nameJson && nameJson->IsString()) {
+            auto name = nameJson->GetString();
+            pageNameSet_.insert(name);
+        }
+    }
+}
+
+bool TaihangOptimizer::CheckSwiperPageValid(const std::string& pageName)
+{
+    TAG_LOGD(AceLogTag::ACE_SWIPER, "TaihangOptimizer::CheckSwiperPageValid pageName: %{public}s", pageName.c_str());
     CHECK_EQUAL_RETURN(isInited_, false, false);
     CHECK_EQUAL_RETURN(enable_, false, false);
     std::shared_lock<std::shared_mutex> lock(processWhiteListMutex_);
-    CHECK_EQUAL_RETURN(bundleNameToPages_.empty(), true, false);
+    CHECK_EQUAL_RETURN(pageNameSet_.empty(), true, false);
     std::vector<std::string> pageNames;
     StringUtils::StringSplitter(pageName, ',', pageNames);
-    if (pageNames.size() < DEFAULT_PAGENAME_SIZE) {
-        return false;
-    }
-    auto it = bundleNameToPages_.find(bundleName);
-    CHECK_EQUAL_RETURN(it, bundleNameToPages_.end(), false);
-    auto pageNameList = it->second;
-    for (const auto& curPageName: pageNameList) {
-        if (curPageName == pageNames[1]) {
+    for (auto pageName : pageNames) {
+        if (pageNameSet_.find(pageName) != pageNameSet_.end()) {
             return true;
         }
     }
@@ -186,23 +164,21 @@ void TaihangOptimizer::HandleSwiperPreMake(const std::unordered_map<std::string,
 void TaihangOptimizer::PostSwiperPreMakeTask(RefPtr<NG::FrameNode>& node, int32_t index)
 {
     CHECK_NULL_VOID(node);
-    auto swiperPattern  =  node->GetPattern<NG::SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperController = swiperPattern->GetSwiperController();
-    CHECK_NULL_VOID(swiperController);
-    
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    taskExecutor->PostDelayedTask(
-        [weak = AceType::WeakClaim(AceType::RawPtr(swiperController)), index]() {
-            auto swiper = weak.Upgrade();
-            CHECK_NULL_VOID(swiper);
-            swiper->PreMakeItems({index});
+    taskExecutor->PostTask(
+        [weak = AceType::WeakClaim(AceType::RawPtr(node)), index]() {
+            auto curNode = weak.Upgrade();
+            CHECK_NULL_VOID(curNode);
+            auto swiperPattern = curNode->GetPattern<NG::SwiperPattern>();
+            CHECK_NULL_VOID(swiperPattern);
+            auto swiperController = swiperPattern->GetSwiperController();
+            CHECK_NULL_VOID(swiperController);
+            swiperController->PreMakeItems({index});
         },
-        TaskExecutor::TaskType::UI, PREMAKE_SWIPER_DELAY_MILLISECONDS, "ArkUIPreMakeThirdApp");
+        TaskExecutor::TaskType::UI, "ArkUIPreMakeThirdApp");
 }
 } // namespace OHOS::Ace

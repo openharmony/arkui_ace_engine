@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,14 +13,18 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-group("adapter_unittest") {
-  testonly = true
-  deps = [
-    "ohos/capability:capability_unittest",
-    "ohos/entrance:entrance_unittest",
-    "ohos/entrance/ui_session:ui_content_stub_unittest",
-    "ohos/osal/feature_manager:feature_manager_unittest",
-    "ohos/osal/system_properties:system_properties_unittest",
-    "ohos/entrance/listener:ressched_event_listener_test",
+config("mock_ressched_client_config") {
+  include_dirs = [
+    "$ace_root/test/mock/ohos_mock/resource_schedule_service/"
   ]
+}
+
+ohos_source_set("mock_ressched_client") {
+  testonly = true
+  sources = [
+    "$ace_root/test/mock/ohos_mock/resource_schedule_service/res_sched_client.cpp"
+  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  public_configs = [ ":mock_ressched_client_config" ]
+  external_deps = [ "c_utils:utils" ]
 }

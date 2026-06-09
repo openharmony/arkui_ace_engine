@@ -110,6 +110,11 @@ bool NavigationPattern::CustomizeExpandSafeArea()
     return false;
 }
 
+void NavigationPattern::PageTransitionReport(const std::string& fromNavDestinationName,
+    const std::string& toNavDestinationName, const std::string& fromComponentName,
+    const std::string& toComponentName)
+{}
+
 void NavigationPattern::FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst, bool isFromWindow)
 {
     (void)node;

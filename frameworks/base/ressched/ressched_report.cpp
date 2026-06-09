@@ -99,6 +99,7 @@ constexpr char TO_PAGE_INFO[] = "to_page";
 constexpr char TRANSITION_MODE[] = "transition_mode";
 constexpr char FROM_COMPONENT_NAME[] = "from_component_name";
 constexpr char TO_COMPONENT_NAME[] = "to_component_name";
+constexpr char WINDOW_ID[] = "window_id";
 constexpr char ABILITY_OR_PAGE_SWITCH_START[] = "ability_or_page_switch_start";
 constexpr char ABILITY_OR_PAGE_SWITCH_END[] = "ability_or_page_switch_end";
 #ifdef FFRT_EXISTS
@@ -678,21 +679,20 @@ void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)
     }
 }
 
-void ResSchedReport::HandlePageTransition(const std::string& fromPage,
-    const std::string& toPage, const std::string& mode,
-    const std::string& fromComponentName, const std::string& toComponentName)
+void ResSchedReport::HandlePageTransition(const PageTransitionInfo& pageTransitionInfo, const uint32_t windowId)
 {
-    if (fromPage.empty() && toPage.empty()) {
+    if (pageTransitionInfo.fromPage.empty() && pageTransitionInfo.toPage.empty()) {
         TAG_LOGD(AceLogTag::ACE_ROUTER, "rss report page transition empty info:%{public}s, %{public}s",
-            fromPage.c_str(), toPage.c_str());
+            pageTransitionInfo.fromPage.c_str(), pageTransitionInfo.toPage.c_str());
         return;
     }
     std::unordered_map<std::string, std::string> payload;
-    payload[FROM_PAGE_INFO] = fromPage;
-    payload[TO_PAGE_INFO] = toPage;
-    payload[TRANSITION_MODE] = mode;
-    payload[FROM_COMPONENT_NAME] = fromComponentName;
-    payload[TO_COMPONENT_NAME] = toComponentName;
+    payload[FROM_PAGE_INFO] = pageTransitionInfo.fromPage;
+    payload[TO_PAGE_INFO] = pageTransitionInfo.toPage;
+    payload[TRANSITION_MODE] = pageTransitionInfo.mode;
+    payload[FROM_COMPONENT_NAME] = pageTransitionInfo.fromComponentName;
+    payload[TO_COMPONENT_NAME] = pageTransitionInfo.toComponentName;
+    payload[WINDOW_ID] = std::to_string(windowId);
     LoadAceApplicationContext(payload);
     ResSchedDataReport(RES_TYPE_PAGE_TRANSITION, 0, payload);
 }

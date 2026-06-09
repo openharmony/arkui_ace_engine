@@ -1569,4 +1569,21 @@ HWTEST_F(NavigationPatternTestNineNg, UpdateMaskNodeVisibility002, TestSize.Leve
     auto visibility = property->GetVisibilityValue(VisibleType::VISIBLE);
     EXPECT_EQ(visibility, VisibleType::GONE);
 }
+
+/**
+ * @tc.name: PageTransitionReport001
+ * @tc.desc: Branch: context == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, PageTransitionReport001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext();
+    ASSERT_NE(context.pattern, nullptr);
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+
+    context.pattern->PageTransitionReport("fromPage", "toPage", "fromCompoent", "toComponent");
+    EXPECT_NE(context.pattern, nullptr);
+    MockPipelineContext::pipeline_ = pipeline_bak;
+}
 } // namespace OHOS::Ace::NG
