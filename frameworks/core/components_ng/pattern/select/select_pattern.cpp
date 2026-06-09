@@ -2311,7 +2311,9 @@ bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(selectRenderContext, false);
     auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_RETURN(selectPaintProperty, false);
-    if (!selectPaintProperty->HasBackgroundColor()) {
+    auto material = selectRenderContext->GetSystemMaterial();
+    if (!selectPaintProperty->HasBackgroundColor() &&
+        !(material && MaterialUtils::CheckMaterialValid(material->GetType()))) {
         selectRenderContext->UpdateBackgroundColor(selectTheme->GetButtonBackgroundColor());
         result = true;
     }
