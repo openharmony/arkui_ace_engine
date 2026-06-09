@@ -3644,6 +3644,7 @@
       OHOS::Ace::Kit::AbstractViewFactory::*;
       OHOS::Ace::Kit::AgingAdapationDialogUtil::*;
       OHOS::Ace::Kit::AnimationUtils::*;
+      OHOS::Ace::Kit::Badge::*;
       OHOS::Ace::Kit::BoxLayoutAlgorithm::*;
       OHOS::Ace::Kit::Column::*;
       OHOS::Ace::Kit::ContentModifier::*;
