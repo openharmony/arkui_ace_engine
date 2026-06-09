@@ -39,8 +39,9 @@
 #include "core/components_ng/pattern/button/bridge/button_custom_modifier.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_app_bar_node.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -54,6 +55,7 @@ constexpr int32_t FIRST_OVERLAY_INDEX = 1;
 constexpr double MENU_BAR_OFFSET = 8.0;
 
 namespace {
+
 OHOS::Ace::RefPtr<OHOS::Ace::NG::AppBarTheme> GetAppBarTheme()
 {
     auto pipeline = OHOS::Ace::PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -63,8 +65,7 @@ OHOS::Ace::RefPtr<OHOS::Ace::NG::AppBarTheme> GetAppBarTheme()
 
 OHOS::Ace::RefPtr<FrameNode> BuildDivider()
 {
-    auto divider = FrameNode::CreateFrameNode(
-        V2::DIVIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto divider = CreateDividerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     auto theme = GetAppBarTheme();
     CHECK_NULL_RETURN(theme, nullptr);
 

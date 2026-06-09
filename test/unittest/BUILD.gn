@@ -1807,6 +1807,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_swiper_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_tabs_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_tab_content_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_divider_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_flow_item_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_grid_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_hyperlink_modifier.cpp",

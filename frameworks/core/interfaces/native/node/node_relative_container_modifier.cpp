@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/node/node_relative_container_modifier.h"
+#include "ui/base/utils/utils.h"
 
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_parse_utils.h"

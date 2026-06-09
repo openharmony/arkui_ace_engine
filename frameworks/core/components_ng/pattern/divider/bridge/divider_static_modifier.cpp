@@ -1,0 +1,105 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "core/components/common/properties/color.h"
+#include "base/memory/ace_type.h"
+#include "core/components_ng/pattern/divider/divider_model_ng.h"
+#include "core/components_ng/pattern/divider/divider_model_ng_static.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace DividerModifier {
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
+{
+    auto frameNode = DividerModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+} // DividerModifier
+
+namespace DividerInterfaceModifier {
+void SetDividerOptionsImpl(Ark_NativePointer node)
+{
+    // Nothing to implement
+}
+} // DividerInterfaceModifier
+
+namespace DividerAttributeModifier {
+void SetVerticalImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue) {
+        DividerModelNG::SetVertical(frameNode, false);
+        return;
+    }
+    DividerModelNG::SetVertical(frameNode, *convValue);
+}
+
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvertPtr<Color>(value));
+}
+
+void SetStrokeWidthImpl(Ark_NativePointer node,
+                        const Opt_Union_F64_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonPercent(optValue);
+    if (!optValue) {
+        DividerModelNGStatic::StrokeWidth(frameNode, std::make_optional<Dimension>(1));
+        return;
+    }
+    DividerModelNGStatic::StrokeWidth(frameNode, optValue);
+}
+
+void SetLineCapImpl(Ark_NativePointer node,
+                    const Opt_LineCapStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<LineCap>(value);
+    if (!convValue) {
+        DividerModelNGStatic::LineCap(frameNode, std::make_optional<LineCap>(LineCap::BUTT));
+        return;
+    }
+    DividerModelNGStatic::LineCap(frameNode, convValue);
+}
+} // DividerAttributeModifier
+
+const GENERATED_ArkUIDividerModifier* GetDividerStaticModifier()
+{
+    static const GENERATED_ArkUIDividerModifier arkUIDividerModifierImpl {
+        DividerModifier::ConstructImpl,
+        DividerInterfaceModifier::SetDividerOptionsImpl,
+        DividerAttributeModifier::SetVerticalImpl,
+        DividerAttributeModifier::SetColorImpl,
+        DividerAttributeModifier::SetStrokeWidthImpl,
+        DividerAttributeModifier::SetLineCapImpl,
+    };
+    return &arkUIDividerModifierImpl;
+}
+
+} // namespace OHOS::Ace::NG::GeneratedModifier

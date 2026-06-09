@@ -18,6 +18,7 @@
 #include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/blank_modifier.h"
+#include "core/interfaces/native/node/divider_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
@@ -94,7 +95,6 @@
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
-#include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -531,10 +531,10 @@ void* createBlankNode(ArkUI_Int32 nodeId)
 
 void* createDividerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = DividerModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetDividerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createFrameNode, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)

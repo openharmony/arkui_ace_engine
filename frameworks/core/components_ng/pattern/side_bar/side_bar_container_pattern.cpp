@@ -41,8 +41,8 @@
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
@@ -94,6 +94,7 @@ constexpr static int32_t DEFAULT_DOUBLE_DRAG_REGION = 2;
 constexpr Dimension CLOSE_SIDEBAR_PAN_DISTANCE = 100.0_vp;
 const RefPtr<InterpolatingSpring> INTERPOLATING_SPRING_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 24.0f);
+
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -612,8 +613,7 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
 
     int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(dividerNodeId);
 
     auto dividerHub = dividerNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(dividerHub);

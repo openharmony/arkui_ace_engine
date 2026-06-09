@@ -40,7 +40,8 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -50,6 +51,7 @@
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -83,6 +85,7 @@ void ApplyBlurStyleColorModeForApi26(const RefPtr<FrameNode>& dialogNode, BlurSt
         }
     }
 }
+
 } // namespace
 
 bool CalendarDialogView::CheckOrientationChange()
@@ -947,8 +950,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(
 
 RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
 {
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(dividerNode, nullptr);
     RefPtr<CalendarTheme> theme = dividerNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);

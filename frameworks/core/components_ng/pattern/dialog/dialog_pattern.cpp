@@ -52,8 +52,8 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_model_ng.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -134,6 +134,7 @@ std::string GetBoolStr(bool isTure)
 {
     return isTure ? "True" : "False";
 }
+
 } // namespace
 
 void DialogPattern::OnModifyDone()
@@ -1264,8 +1265,7 @@ void DialogPattern::UpdateDialogButtonProperty(
 RefPtr<FrameNode> DialogPattern::CreateDivider(
     const Dimension& dividerLength, const Dimension& dividerWidth, const Color& color, const Dimension& space)
 {
-    auto dividerNode = FrameNode::CreateFrameNode(
-        V2::DIVIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto dividerNode = CreateDividerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(dividerNode, nullptr);
     auto dividerProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
     CHECK_NULL_RETURN(dividerProps, nullptr);

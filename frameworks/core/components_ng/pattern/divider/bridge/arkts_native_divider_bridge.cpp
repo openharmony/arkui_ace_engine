@@ -12,25 +12,92 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
+#include "core/components_ng/pattern/divider/bridge/arkts_native_divider_bridge.h"
+
 #include "ui/base/referenced.h"
 
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/divider/divider_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
+{
+    if (firstArg->IsNativePointer(vm)) {
+        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        nativeNode = reinterpret_cast<ArkUINodeHandle>(frameNode);
+        return true;
+    }
+    return false;
+}
+
+bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
+{
+    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+}
+} // namespace
+
+void DividerBridge::RegisterDividerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    const char* functionNames[] = {
+        "create", "setStrokeWidth", "resetStrokeWidth", "setLineCap", "resetLineCap", "setColor", "resetColor",
+        "setVertical", "resetVertical"
+    };
+    Local<JSValueRef> funcValues[] = {
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::Create),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::SetStrokeWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetStrokeWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::SetLineCap),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetLineCap),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::SetColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::SetVertical),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DividerBridge::ResetVertical),
+    };
+    auto divider = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "divider"), divider);
+}
+
+ArkUINativeModuleValue DividerBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    GetArkUINodeModifiers()->getDividerModifier()->createModel();
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue DividerBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     CalcDimension strokeWidth;
-    if (ArkTSUtils::ParseJsDimensionVpNG(vm, strokeWidthArg, strokeWidth, false) &&
-        strokeWidth.Value() >= 0) {
+
+    bool isJsView = IsJsView(nativeNodeArg, vm);
+    if (isJsView) {
+        auto theme = GetTheme<DividerTheme>();
+        CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+        CalcDimension strokeWidth = theme->GetStokeWidth();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            strokeWidth = 1.0_px;
+        }
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, strokeWidthArg, strokeWidth, false)) {
+            strokeWidth = 1.0_px;
+        }
+        GetArkUINodeModifiers()->getDividerModifier()->setDividerStrokeWidth(
+            nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (ArkTSUtils::ParseJsDimensionVpNG(vm, strokeWidthArg, strokeWidth, false) && strokeWidth.Value() >= 0) {
         GetArkUINodeModifiers()->getDividerModifier()->setDividerStrokeWidth(
             nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
     } else {
@@ -44,7 +111,8 @@ ArkUINativeModuleValue DividerBridge::ResetStrokeWidth(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerStrokeWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -55,7 +123,8 @@ ArkUINativeModuleValue DividerBridge::SetLineCap(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> lineCapArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (lineCapArg->IsNumber()) {
         int32_t lineCap = lineCapArg->Int32Value(vm);
         GetArkUINodeModifiers()->getDividerModifier()->setDividerLineCap(nativeNode, lineCap);
@@ -70,7 +139,8 @@ ArkUINativeModuleValue DividerBridge::ResetLineCap(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerLineCap(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -81,10 +151,18 @@ ArkUINativeModuleValue DividerBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCall
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     Color color;
     RefPtr<ResourceObject> dividerResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+
+    bool isJsView = IsJsView(nativeNodeArg, vm);
+    if (isJsView) {
+        auto theme = GetTheme<DividerTheme>();
+        CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+        color = theme->GetColor();
+    }
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, dividerResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(dividerResObj);
         GetArkUINodeModifiers()->getDividerModifier()->setDividerColor(nativeNode, color.GetValue(), colorRawPtr);
@@ -99,7 +177,8 @@ ArkUINativeModuleValue DividerBridge::ResetColor(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -110,7 +189,8 @@ ArkUINativeModuleValue DividerBridge::SetVertical(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> verticalArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (verticalArg->IsBoolean()) {
         bool value = verticalArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getDividerModifier()->setDividerVertical(nativeNode, value);
@@ -125,7 +205,8 @@ ArkUINativeModuleValue DividerBridge::ResetVertical(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nativeNodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getDividerModifier()->resetDividerVertical(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

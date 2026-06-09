@@ -479,6 +479,20 @@ if (globalThis.Blank === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Divider === undefined) {
+  globalThis.Divider = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Divider');
+      let module = globalThis.requireNapi('arkui.components.arkdivider');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().divider.create(params);
+    },
+    name: 'JSDivider'
+  }
+}
+
+// @ts-ignore
 if (globalThis.RelativeContainer === undefined) {
   globalThis.RelativeContainer = {
     create: function(value) {

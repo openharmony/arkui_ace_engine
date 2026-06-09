@@ -34,11 +34,11 @@
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -58,7 +58,6 @@ const char SEARCH_Field_ETS_TAG[] = "SearchField";
 const char SEARCH_ETS_TAG[] = "Search";
 const char BUTTON_ETS_TAG[] = "Button";
 const char TEXT_ETS_TAG[] = "Text";
-const char DIVIDER_ETS_TAG[] = "Divider";
 
 void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
 {
@@ -1237,8 +1236,7 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
     FREE_NODE_CHECK(parentNode, CreateDivider, parentNode, hasDividerNode);
     auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetDividerId();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(nodeId);
     CHECK_NULL_VOID(dividerNode);
 
     auto searchTheme = dividerNode->GetTheme<SearchTheme>(true);
@@ -2634,7 +2632,6 @@ void SearchModelNG::SetBackBorderRadius()
         (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
     radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
         (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
-
 
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
