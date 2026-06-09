@@ -236,23 +236,94 @@ int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, Ark
 
 ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
 {
-    CHECK_NULL_RETURN_WITH_MESSAGE(
-        env, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Napi environment is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(env, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Napi environment is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Failed to initialize native module");
     auto callback = [](const char* moduleName) -> bool {
-        const char* allowedModules[] = { "arkui.node", "arkui.modifier", "measure", "arkui.UIContext", "arkui.observer",
-            "arkui.inspector", "font", "arkui.uicontext", "arkui.components.arkgauge", "arkui.components.arkcheckbox",
-            "arkui.components.arkcheckboxgroup", "arkui.components.arkrating", "arkui.components.arkwaterflow",
-            "arkui.components.arkflowitem", "arkui.components.arkcalendarpicker", "arkui.components.arktimepicker",
-            "arkui.components.arkhyperlink", "arkui.components.arksearch", "arkui.components.arksymbolglyph",
-            "arkui.components.arkmarquee", "arkui.components.arkrowsplit", "arkui.components.arkcolumnsplit",
-            "arkui.components.arkfolderstack", "arkui.components.arkstepper", "arkui.components.arkstepperitem",
-            "arkui.components.arksidebarcontainer", "arkui.components.arkslider", "arkui.components.arkradio",
-            "arkui.components.arkmenu", "arkui.components.arkmenuitem", "arkui.components.arkmenuitemgroup",
-            "arkui.components.arkdatapanel", "arkui.components.arktextclock", "arkui.components.arkpatternlock",
-            "arkui.components.arkcounter", "arkui.components.arkqrcode", "arkui.components.arkalphabetindexer",
-            "arkui.components.arkricheditor", "arkui.components.selectioncontainer", "arkui.arktheme" };
+        const char* allowedModules[] = {
+            "arkui.node",
+            "arkui.modifier",
+            "measure",
+            "arkui.UIContext",
+            "arkui.observer",
+            "arkui.inspector",
+            "font",
+            "arkui.uicontext",
+            "arkui.components.arkgauge",
+            "arkui.components.arkcheckbox",
+            "arkui.components.arkcheckboxgroup",
+            "arkui.components.arkrating",
+            "arkui.components.arkwaterflow",
+            "arkui.components.arkflowitem",
+            "arkui.components.arkcalendarpicker",
+            "arkui.components.arktimepicker",
+            "arkui.components.arkhyperlink",
+            "arkui.components.arksearch",
+            "arkui.components.arksymbolglyph",
+            "arkui.components.arkmarquee",
+            "arkui.components.arkrowsplit",
+            "arkui.components.arkcolumnsplit",
+            "arkui.components.arkfolderstack",
+            "arkui.components.arkstepper",
+            "arkui.components.arkstepperitem",
+            "arkui.components.arksidebarcontainer",
+            "arkui.components.arkslider",
+            "arkui.components.arkradio",
+            "arkui.components.arkmenu",
+            "arkui.components.arkmenuitem",
+            "arkui.components.arkmenuitemgroup",
+            "arkui.components.arkdatapanel",
+            "arkui.components.arktextclock",
+            "arkui.components.arkpatternlock",
+            "arkui.components.arkcounter",
+            "arkui.components.arkqrcode",
+            "arkui.components.arkalphabetindexer",
+            "arkui.components.arkricheditor",
+            "arkui.components.selectioncontainer",
+            "arkui.arktheme",
+            "arkui.components.arktoggle",
+            "arkui.components.arktextinput",
+            "arkui.components.arktextarea",
+            "arkui.components.arkgrid",
+            "arkui.components.arkgriditem",
+            "arkui.components.arkbutton",
+            "arkui.components.arktoolbaritem",
+            "arkui.components.arklazygridlayout",
+            "arkui.components.arkloadingprogress",
+            "arkui.components.arkbadge",
+            "arkui.components.arkrefresh",
+            "arkui.components.arkblank",
+            "arkui.components.arkdivider",
+            "arkui.components.arkrelativecontainer",
+            "arkui.components.arkimagespan",
+            "arkui.components.arksymbolspan",
+            "arkui.components.arknavigator",
+            "arkui.components.arktabs",
+            "arkui.components.arktabcontent",
+            "arkui.components.arkswiper",
+            "arkui.components.arkswiperindicator",
+            "arkui.components.arkimageanimator",
+            "arkui.components.arkprogress",
+            "arkui.components.arktexttimer",
+            "arkui.components.arkcircle",
+            "arkui.components.arkellipse",
+            "arkui.components.arkline",
+            "arkui.components.arkpolyline",
+            "arkui.components.arkrect",
+            "arkui.components.arkshape",
+            "arkui.components.arkpolygon",
+            "arkui.components.arkpath",
+            "arkui.components.arkselect",
+            "arkui.components.arktextpicker",
+            "arkui.components.arkxcomponent",
+            "arkui.components.arkdatepicker",
+            "arkui.components.arkvideo",
+            "arkui.components.arkgridrow",
+            "arkui.components.arkgridcol",
+            "arkui.components.arkcanvas",
+            "arkui.components.arkpanel",
+            "arkui.components.arkgridcontainer",
+        };
         for (const char* allowedModule : allowedModules) {
             if (std::strcmp(moduleName, allowedModule) == 0) {
                 return true;
@@ -264,9 +335,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
     // so there is no need for synchronization or thread-safety mechanisms.
     static std::once_flag set_callback_flag;
     static napi_status ret = napi_ok;
-    std::call_once(set_callback_flag, [callback]() {
-        ret = napi_set_module_validate_callback(callback);
-    });
+    std::call_once(set_callback_flag, [callback]() { ret = napi_set_module_validate_callback(callback); });
     if (ret != napi_ok) {
         LOGE("fail to set module validate callback");
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to set module validate callback");
