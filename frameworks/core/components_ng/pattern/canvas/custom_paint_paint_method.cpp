@@ -17,6 +17,7 @@
 #include "core/common/container.h"
 
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 #include <unistd.h>
 
@@ -28,7 +29,9 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/common/statistic_event_reporter.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/render/drawing.h"
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT

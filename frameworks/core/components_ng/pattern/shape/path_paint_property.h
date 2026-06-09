@@ -19,6 +19,7 @@
 #include <string>
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"

@@ -19,6 +19,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/video/video_state_machine_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 

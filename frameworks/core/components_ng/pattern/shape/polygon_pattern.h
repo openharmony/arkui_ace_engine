@@ -16,12 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_PATTERN_H
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/polygon_paint_method.h"
-#include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
 
 namespace OHOS::Ace::NG {

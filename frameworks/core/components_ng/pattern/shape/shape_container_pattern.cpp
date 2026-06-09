@@ -16,9 +16,23 @@
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_container_paint_method.h"
 
 namespace OHOS::Ace::NG {
+ShapeContainerPattern::ShapeContainerPattern() = default;
+ShapeContainerPattern::~ShapeContainerPattern() = default;
+
+RefPtr<LayoutAlgorithm> ShapeContainerPattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<ShapeContainerLayoutAlgorithm>();
+}
+
+RefPtr<PaintProperty> ShapeContainerPattern::CreatePaintProperty()
+{
+    return MakeRefPtr<ShapeContainerPaintProperty>();
+}
+
 bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {

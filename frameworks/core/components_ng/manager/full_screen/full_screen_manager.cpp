@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"

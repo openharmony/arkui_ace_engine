@@ -17,8 +17,10 @@
 
 #include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/layout/drawing_layout_utils.h"
+#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -23,6 +23,8 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/path_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 

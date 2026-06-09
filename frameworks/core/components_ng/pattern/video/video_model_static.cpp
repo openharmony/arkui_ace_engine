@@ -17,8 +17,11 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/video/video_event_hub.h"
+#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 

@@ -16,9 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_PATTERN_H
 
-#include "base/memory/referenced.h"
-#include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/rect_paint_method.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
