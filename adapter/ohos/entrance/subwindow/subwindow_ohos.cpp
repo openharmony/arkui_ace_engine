@@ -236,8 +236,7 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
     CHECK_NULL_RETURN(parentContainer, size);
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "inputDisplayId: %{public}d", displayId);
     if (parentContainer->IsNeedModifySize()) {
-        auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
-        finalDisplayId = DEFAULT_DISPLAY_ID;
+        auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
         if (!display) {
             TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "failed to GetVisibleAreaDisplayInfoById");
             return size;
