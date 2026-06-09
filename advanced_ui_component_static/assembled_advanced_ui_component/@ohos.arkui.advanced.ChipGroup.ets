@@ -789,6 +789,11 @@ export struct ChipGroup {
         return `${this.refreshCnt}_${index}`;
       });
     }
+    .padding({
+      left: this.getChipGroupStartSpace(),
+      right: this.getChipGroupEndSpace()
+    } as Padding)
+    .constraintSize({ minWidth: '100%' })
   }
 
   build(): void {
@@ -798,12 +803,10 @@ export struct ChipGroup {
           if (deviceInfo.sdkApiVersion >= 26) {
             if (enableEffectComponent(this.backgroundSystemMaterial)) {
               EffectComponent() {
-                Row({ space: this.getChipGroupItemSpace() } as RowOptions) {
-                  this.ChipItemsBuilder({
-                    backgroundSystemMaterial: createSubECMaterial(this.getBackgroundSystemMaterial()),
-                    activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
-                  })
-                }
+                this.ChipItemsBuilder({
+                  backgroundSystemMaterial: createSubECMaterial(this.getBackgroundSystemMaterial()),
+                  activatedBackgroundSystemMaterial: this.getSelectedBackgroundSystemMaterial()
+                })
               }
               .systemMaterial(createECMaterial(this.getBackgroundSystemMaterial()))
             } else {
@@ -816,11 +819,6 @@ export struct ChipGroup {
             this.ChipItemsBuilder({})
           }
         }
-        .padding({
-          left: this.getChipGroupStartSpace(),
-          right: this.getChipGroupEndSpace()
-        } as Padding)
-        .constraintSize({ minWidth: '100%' })
         .scrollable(ScrollDirection.Horizontal)
         .scrollBar(BarState.Off)
         .align(Alignment.Start)
