@@ -357,11 +357,12 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
             if (triggerFrom == MiscServices::Trigger::IME_APP) {
                 client->NotifyKeyboardClosedByUser();
             }
-            if (clientSessionId != -1) {
-                TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo Get SessionId=%{public}d", clientSessionId);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo Get SessionId=%{public}d", clientSessionId);
+            auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(client);
+            if (clientSessionId == -1 || (textFieldPattern && clientSessionId == textFieldPattern->GetSessionId())) {
+                client->NotifyKeyboardClosed();
                 return;
             }
-            client->NotifyKeyboardClosed();
         };
         PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }
