@@ -15184,6 +15184,102 @@ HWTEST_F(NativeNodeTest, FocusRequest_NullNode, TestSize.Level1)
     EXPECT_EQ(result, ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT);
 }
 
+HWTEST_F(NativeNodeTest, FocusClear_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_FocusClear(nullptr);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_FocusActivate(nullptr, true, false);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_ActiveTrue_AutoInactiveTrue, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusActivate(&mockContext, true, true);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_ActiveTrue_AutoInactiveFalse, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusActivate(&mockContext, true, false);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_ActiveFalse_AutoInactiveTrue, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusActivate(&mockContext, false, true);
+}
+
+HWTEST_F(NativeNodeTest, FocusActivate_ActiveFalse_AutoInactiveFalse, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusActivate(&mockContext, false, false);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetAutoTransfer_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_FocusSetAutoTransfer(nullptr, true);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetAutoTransfer_True, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetAutoTransfer(&mockContext, true);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetAutoTransfer_False, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetAutoTransfer(&mockContext, false);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetKeyProcessingMode_NullUiContext, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    OH_ArkUI_FocusSetKeyProcessingMode(nullptr, ARKUI_KEY_PROCESSING_MODE_FOCUS_NAVIGATION);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetKeyProcessingMode_FocusNavigation, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetKeyProcessingMode(&mockContext, ARKUI_KEY_PROCESSING_MODE_FOCUS_NAVIGATION);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetKeyProcessingMode_FocusAncestorEvent, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetKeyProcessingMode(&mockContext, ARKUI_KEY_PROCESSING_MODE_FOCUS_ANCESTOR_EVENT);
+}
+
+HWTEST_F(NativeNodeTest, FocusSetKeyProcessingMode_InvalidMode, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_Context mockContext;
+    mockContext.id = 1;
+    OH_ArkUI_FocusSetKeyProcessingMode(&mockContext, static_cast<ArkUI_KeyProcessingMode>(99));
+}
+
 HWTEST_F(NativeNodeTest, VisibleAreaEventOptions_GetMeasureFromViewport_NullOption, TestSize.Level1)
 {
     auto result = OH_ArkUI_VisibleAreaEventOptions_GetMeasureFromViewport(nullptr);
