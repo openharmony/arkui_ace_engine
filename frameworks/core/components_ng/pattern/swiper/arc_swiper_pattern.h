@@ -59,14 +59,14 @@ private:
     };
 
     struct AnimationParam {
-        AnimationOption option;
-        RefPtr<FrameNode> frameNode;
-        AnimationType type;
-        float scaleValue;
-        float opacityValue;
-        float blurValue;
-        Color backColor;
-        OffsetF offset;
+        AnimationOption option = AnimationOption();
+        RefPtr<FrameNode> frameNode = nullptr;
+        AnimationType type = AnimationType::TYPE_SCALE;
+        float scaleValue = 0.0f;
+        float opacityValue = 0.0f;
+        float blurValue = 0.0f;
+        Color backColor = Color();
+        OffsetF offset = OffsetF();
     };
 
     enum AnimationFinishType {
