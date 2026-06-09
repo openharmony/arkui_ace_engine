@@ -1559,22 +1559,47 @@ void ScrollablePattern::InitScrollBarGestureEvent()
     CHECK_NULL_VOID(gestureHub);
     auto inputHub = GetInputHub();
     CHECK_NULL_VOID(inputHub);
+    RegisterScrollBarInputEvents(gestureHub, inputHub);
+    InitScrollBarCallbacks();
+}
+
+void ScrollablePattern::RegisterScrollBarInputEvents(
+    const RefPtr<GestureEventHub>& gestureHub, const RefPtr<InputEventHub>& inputHub)
+{
     scrollBar_->SetGestureEvent();
     scrollBar_->SetMouseEvent();
     scrollBar_->SetHoverEvent();
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
     inputHub->AddOnHoverEvent(scrollBar_->GetHoverEvent());
+}
+
+void ScrollablePattern::InitScrollBarCallbacks()
+{
     CHECK_NULL_VOID(scrollableEvent_);
+    SetInBarRegionCallback();
+    SetBarCollectTargetCallback();
+    SetInBarRectRegionCallback();
+}
+
+void ScrollablePattern::SetInBarRegionCallback()
+{
     scrollableEvent_->SetInBarRegionCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_RETURN(scrollBar, false);
+            if (!scrollBar->GetScrollBarInteractive()) {
+                return false;
+            }
             if (source == SourceType::MOUSE) {
                 return scrollBar->InBarHoverRegion(Point(point.GetX(), point.GetY()));
             }
             return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
         });
+}
+
+void ScrollablePattern::SetBarCollectTargetCallback()
+{
     scrollableEvent_->SetBarCollectTouchTargetCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
             const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
@@ -1595,10 +1620,17 @@ void ScrollablePattern::InitScrollBarGestureEvent()
             OnCollectClickTarget(
                 coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
+}
+
+void ScrollablePattern::SetInBarRectRegionCallback()
+{
     scrollableEvent_->SetInBarRectRegionCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_RETURN(scrollBar, false);
+            if (!scrollBar->GetScrollBarInteractive()) {
+                return false;
+            }
             return scrollBar->InBarRectRegion(Point(point.GetX(), point.GetY()));
         });
 }
@@ -1686,6 +1718,11 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
     auto displayMode = property->GetScrollBarMode().value_or(DisplayMode::AUTO);
     SetScrollBar(displayMode);
     if (scrollBar_) {
+        auto barHeight = property->GetScrollBarHeight();
+        if (barHeight) {
+            scrollBar_->SetScrollBarHeight(barHeight.value());
+            scrollBar_->FlushBarWidth();
+        }
         auto barWidth = property->GetScrollBarWidth();
         if (barWidth) {
             scrollBar_->SetActiveWidth(barWidth.value());
@@ -3993,6 +4030,7 @@ void ScrollablePattern::HandleClickEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(GetScrollBar());
+    CHECK_NULL_VOID(scrollBar_->GetScrollBarInteractive());
     Point point(locationInfo_.GetX(), locationInfo_.GetY());
     bool reverse = false;
     if (scrollBar_->AnalysisUpOrDown(point, reverse) && isMousePressed_) {
@@ -4755,19 +4793,34 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
-    if (paintProperty) {
-        auto barColor = paintProperty->GetScrollBarColor();
-        if (barColor) {
-            scrollBar_->SetForegroundColor(barColor.value(), isRoundScroll_);
-            return;
-        }
-    }
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
-    scrollBar_->SetForegroundColor(theme->GetForegroundColor(), isRoundScroll_);
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor(), isRoundScroll_);
+    if (isRoundScroll_) {
+        if (paintProperty) {
+            auto barColor = paintProperty->GetScrollBarColor();
+            if (barColor) {
+                scrollBar_->SetForegroundColor(barColor.value(), true);
+            } else {
+                scrollBar_->SetForegroundColor(theme->GetArcForegroundColor(), true);
+            }
+        } else {
+            scrollBar_->SetForegroundColor(theme->GetArcForegroundColor(), true);
+        }
+    } else {
+        if (paintProperty) {
+            auto barColor = paintProperty->GetScrollBarColor();
+            if (barColor) {
+                scrollBar_->SetForegroundColor(barColor.value(), false);
+            } else {
+                scrollBar_->SetForegroundColor(theme->GetForegroundColor(), false);
+            }
+        } else {
+            scrollBar_->SetForegroundColor(theme->GetForegroundColor(), false);
+        }
+    }
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     if (paintProperty) {
         paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);

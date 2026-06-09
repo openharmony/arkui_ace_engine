@@ -1056,6 +1056,7 @@ HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
     scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollPn->parent_ = mockPn;
     scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    scrollPn->scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
     scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->isMousePressed_ = true;
@@ -1099,6 +1100,7 @@ HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
     scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollPn->parent_ = mockPn;
     scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    scrollPn->scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
     scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->scrollBar_->InitLongPressEvent();

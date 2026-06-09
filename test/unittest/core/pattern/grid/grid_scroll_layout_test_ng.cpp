@@ -586,6 +586,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier003, TestSize.Level1)
      */
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
     pattern_->scrollBar_->SetScrollable(true);
+    pattern_->scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
     auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
     EXPECT_TRUE(pattern_->scrollBar_->NeedPaint());
     pattern_->CreateScrollBarOverlayModifier();
@@ -634,6 +635,7 @@ HWTEST_F(GridScrollLayoutTestNg, PaintEdgeEffect001, TestSize.Level1)
      */
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
     pattern_->scrollBar_->SetScrollable(true);
+    pattern_->scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
     auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
     auto paintProperty = pattern_->CreatePaintProperty();
     PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);

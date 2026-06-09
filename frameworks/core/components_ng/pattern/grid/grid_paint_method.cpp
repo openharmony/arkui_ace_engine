@@ -56,7 +56,9 @@ void GridPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
-    OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
+    scrollBarOverlayModifier->SetNeedPaintTrack(scrollBar->GetUseInnerScrollBar());
+    scrollBarOverlayModifier->SetTrackRect(scrollBar->GetTrackRect());
+    scrollBarOverlayModifier->SetTrackColor(scrollBar->GetBackgroundColor());
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);

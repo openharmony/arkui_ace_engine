@@ -758,6 +758,11 @@ public:
     }
 
     void InitScrollBarGestureEvent();
+    void RegisterScrollBarInputEvents(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<InputEventHub>& inputHub);
+    void InitScrollBarCallbacks();
+    void SetInBarRegionCallback();
+    void SetBarCollectTargetCallback();
+    void SetInBarRectRegionCallback();
 
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent();

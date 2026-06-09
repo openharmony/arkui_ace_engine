@@ -33,6 +33,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/native_error_message_macros.h"
@@ -8016,6 +8017,41 @@ const ArkUI_AttributeItem* GetEnableScrollWithMouse(ArkUI_NodeHandle node)
     auto value =
         GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getEnableScrollWithMouse(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
+int32_t SetScrollBarHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (!node || actualSize < 0 || !fullImpl) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].f32, 0.0f)) {
+        fullImpl->getNodeModifiers()->getScrollableModifier()->resetScrollBarHeight(node->uiNodeHandle);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getScrollableModifier()->setScrollBarHeight(node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetScrollBarHeight(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return;
+    }
+    fullImpl->getNodeModifiers()->getScrollableModifier()->resetScrollBarHeight(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetScrollBarHeight(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return nullptr;
+    }
+    g_numberValues[0].f32 =
+        fullImpl->getNodeModifiers()->getScrollableModifier()->getScrollBarHeight(node->uiNodeHandle);
     return &g_attributeItem;
 }
 
@@ -22090,7 +22126,8 @@ int32_t SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging, SetScrollPage,
         SetScrollBy, SetScrollFling, SetScrollFadingEdge, nullptr, SetContentStartOffset, SetContentEndOffset,
         SetFlingSpeedLimit, SetScrollContentClip, SetScrollBackToTop, SetScrollBarMargin, SetMaxZoomScale,
-        SetMinZoomScale, SetZoomScale, SetEnableBouncesZoom, SetEnableScrollWithMouse, SetAutoAdjustScrollBarMargin };
+        SetMinZoomScale, SetZoomScale, SetEnableBouncesZoom, SetEnableScrollWithMouse, SetAutoAdjustScrollBarMargin,
+        SetScrollBarHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -22103,9 +22140,10 @@ const ArkUI_AttributeItem* GetScrollAttribute(ArkUI_NodeHandle node, int32_t sub
     static Getter* getters[] = { GetScrollScrollBar, GetScrollScrollBarWidth, GetScrollScrollBarColor,
         GetScrollScrollable, GetScrollEdgeEffect, GetScrollEnableScrollInteraction, GetScrollFriction,
         GetScrollScrollSnap, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging, nullptr,
-        nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize, GetContentStartOffset, GetContentEndOffset,
-        GetFlingSpeedLimit, GetScrollContentClip, GetScrollBackToTop, GetScrollBarMargin, GetMaxZoomScale,
-        GetMinZoomScale, GetZoomScale, GetEnableBouncesZoom, GetEnableScrollWithMouse, GetAutoAdjustScrollBarMargin };
+        nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize, GetContentStartOffset,
+        GetContentEndOffset, GetFlingSpeedLimit, GetScrollContentClip, GetScrollBackToTop, GetScrollBarMargin,
+        GetMaxZoomScale, GetMinZoomScale, GetZoomScale, GetEnableBouncesZoom, GetEnableScrollWithMouse,
+        GetAutoAdjustScrollBarMargin, GetScrollBarHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -22119,9 +22157,10 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetScrollScrollBar, ResetScrollScrollBarWidth, ResetScrollScrollBarColor,
         ResetScrollScrollable, ResetScrollEdgeEffect, ResetScrollEnableScrollInteraction, ResetScrollFriction,
         ResetScrollScrollSnap, ResetScrollNestedScroll, ResetScrollTo, ResetScrollEdge, ResetScrollEnablePaging,
-        nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr, ResetContentStartOffset, ResetContentEndOffset,
-        ResetFlingSpeedLimit, ResetScrollContentClip, ResetScrollBackToTop, ResetScrollBarMargin, ResetMaxZoomScale,
-        ResetMinZoomScale, ResetZoomScale, ResetEnableBouncesZoom, ResetEnableScrollWithMouse, ResetAutoAdjustScrollBarMargin };
+        nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr, ResetContentStartOffset,
+        ResetContentEndOffset, ResetFlingSpeedLimit, ResetScrollContentClip, ResetScrollBackToTop, ResetScrollBarMargin,
+        ResetMaxZoomScale, ResetMinZoomScale, ResetZoomScale, ResetEnableBouncesZoom, ResetEnableScrollWithMouse,
+        ResetAutoAdjustScrollBarMargin, ResetScrollBarHeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

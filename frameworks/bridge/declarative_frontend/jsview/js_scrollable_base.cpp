@@ -15,7 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
@@ -116,6 +118,29 @@ void JSScrollableBase::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
 #endif
 }
 
+void JSScrollableBase::SetScrollBarHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension parsedValue;
+    RefPtr<ResourceObject> resObj;
+    auto args = info[0];
+    if (!args->IsObject() ||
+        !JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(args), parsedValue, resObj) ||
+        LessNotEqual(parsedValue.Value(), 0.0)) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        NG::ScrollableModelNG::ResetScrollBarHeight(frameNode);
+        return;
+    }
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    NG::ScrollableModelNG::SetScrollBarHeight(
+        frameNode, std::make_optional(Dimension(parsedValue.Value(), parsedValue.Unit())));
+    NG::ScrollableModelNG::CreateWithResourceObjScrollBarHeight(frameNode, resObj);
+}
+
 void JSScrollableBase::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -126,6 +151,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
+    JSClass<JSScrollableBase>::StaticMethod("scrollBarHeight", &JSScrollableBase::SetScrollBarHeight, opt);
     JSClass<JSScrollableBase>::StaticMethod("scrollBarMargin", &JSScrollableBase::SetScrollBarMargin);
     JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
     JSClass<JSScrollableBase>::StaticMethod("enableScrollWithMouse", &JSScrollableBase::JSEnableScrollWithMouse);

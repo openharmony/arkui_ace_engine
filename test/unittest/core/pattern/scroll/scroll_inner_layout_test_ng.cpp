@@ -30,20 +30,15 @@ const Point BELOW_ACTIVE_BAR_POINT = Point(238.f, 300.f);
 
 class ScrollInnerLayoutTestNg : public ScrollTestNg {
 private:
-    void VerifyDrawScrollBar(bool needDraw);
+    void VerifyDrawScrollBar(int32_t drawRoundRectTimes);
 };
 
-void ScrollInnerLayoutTestNg::VerifyDrawScrollBar(bool needDraw)
+void ScrollInnerLayoutTestNg::VerifyDrawScrollBar(int32_t drawRoundRectTimes)
 {
     Testing::MockCanvas canvas;
-    // if has barWidth and barHeight, need draw scrollBar
-    if (needDraw) {
-        EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
-        EXPECT_CALL(canvas, AttachBrush).WillOnce(ReturnRef(canvas));
-        EXPECT_CALL(canvas, DetachBrush).WillOnce(ReturnRef(canvas));
-    } else {
-        EXPECT_CALL(canvas, DrawRoundRect(_)).Times(0);
-    }
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(drawRoundRectTimes);
+    ON_CALL(canvas, AttachBrush).WillByDefault(ReturnRef(canvas));
+    ON_CALL(canvas, DetachBrush).WillByDefault(ReturnRef(canvas));
     DrawingContext drawingContext = { canvas, WIDTH, HEIGHT };
     FlushUITasks();
     auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
@@ -64,14 +59,14 @@ HWTEST_F(ScrollInnerLayoutTestNg, DrawScrollBar001, TestSize.Level1)
     CreateScroll();
     CreateContent();
     CreateScrollDone();
-    VerifyDrawScrollBar(true);
+    VerifyDrawScrollBar(2);
 
     /**
      * @tc.steps: step2. No barWidth
-     * @tc.expected: No Draw ScrollBar
+     * @tc.expected: Draw scrollBar
      */
     scrollBar_->SetNormalWidth(Dimension(0));
-    VerifyDrawScrollBar(false);
+    VerifyDrawScrollBar(1);
 
     /**
      * @tc.steps: step3. No barHeight
@@ -80,7 +75,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, DrawScrollBar001, TestSize.Level1)
     scrollBar_->SetNormalWidth(Dimension(10.f));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(0));
     FlushUITasks();
-    VerifyDrawScrollBar(false);
+    VerifyDrawScrollBar(1);
 }
 
 /**
@@ -99,7 +94,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, AdaptAnimation001, TestSize.Level1)
      * @tc.expected: The ScrollBar height self-adapt
      */
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(2);
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(4);
     EXPECT_CALL(canvas, AttachBrush).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush).WillRepeatedly(ReturnRef(canvas));
     DrawingContext drawingContext = { canvas, WIDTH, HEIGHT };
@@ -749,6 +744,78 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetRectTrickRegionHeight001
+ * @tc.desc: Test scrollbar minimum height adapts to small scrollbar region
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeight001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    const double length = 300.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(length, length);
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->SetMinHeight(Dimension(48.0));
+    scrollBar_->scrollBarMargin_.reset();
+    scrollBar_->autoAdjustScrollBarMargin_.reset();
+
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, 3000.0, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->barRegionSize_, 300.0);
+    EXPECT_EQ(scrollBar_->barRect_.Height(), 300.0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 48.0);
+
+    Size smallRegionSizeView = Size(100.0, 100.0);
+    scrollBar_->SetRectTrickRegion(offsetView, smallRegionSizeView, offsetView, 1000.0, 0);
+    scrollBar_->SetBarRegion(offsetView, smallRegionSizeView);
+    EXPECT_EQ(scrollBar_->barRegionSize_, 100.0);
+    EXPECT_EQ(scrollBar_->barRect_.Height(), 100.0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 20.0);
+
+    Size tinyRegionSizeView = Size(30.0, 30.0);
+    scrollBar_->SetRectTrickRegion(offsetView, tinyRegionSizeView, offsetView, 300.0, 0);
+    scrollBar_->SetBarRegion(offsetView, tinyRegionSizeView);
+    EXPECT_EQ(scrollBar_->barRegionSize_, 30.0);
+    EXPECT_EQ(scrollBar_->barRect_.Height(), 30.0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 8.0);
+}
+
+/**
+ * @tc.name: SetRectTrickRegionHeight002
+ * @tc.desc: Test scrollBarHeight controls inner scrollbar track length
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeight002, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(300.0, 300.0);
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->scrollBarMargin_.reset();
+    scrollBar_->autoAdjustScrollBarMargin_.reset();
+    scrollBar_->SetScrollBarHeight(Dimension(37.0));
+
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, 3000.0, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->barRegionSize_, 37.0);
+    EXPECT_EQ(scrollBar_->trackRect_.Height(), 37.0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 8.0);
+
+    scrollBar_->SetScrollBarHeight(Dimension(5.0));
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, 3000.0, 0);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+    EXPECT_EQ(scrollBar_->barRegionSize_, 8.0);
+    EXPECT_EQ(scrollBar_->trackRect_.Height(), 8.0);
+    EXPECT_EQ(scrollBar_->activeRect_.Height(), 8.0);
+}
+
+/**
  * @tc.name: SetRectTrickRegion002
  * @tc.desc: Test SetRectTrickRegion
  * @tc.type: FUNC
@@ -809,6 +876,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion002, TestSize.Level1)
 HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion003, TestSize.Level1)
 {
     constexpr double distance = 10.0;
+    constexpr double layeredStartMargin = 40.0;
     CalcDimension padding(distance);
     CreateScroll();
     ViewAbstractModelNG model;
@@ -829,12 +897,14 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion003, TestSize.Level1)
     scrollBarMargin.start_ = Dimension();
     scrollBarMargin.end_ = Dimension();
     scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->SetScrollBarStartMargin(Dimension(layeredStartMargin));
     scrollBar_->normalWidthUpdate_ = false;
     scrollBar_->positionModeUpdate_ = false;
     scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
-    EXPECT_EQ(scrollBar_->GetActiveRect().Top(), totalDistance);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Top(), layeredStartMargin);
     EXPECT_EQ(
-        scrollBar_->GetActiveRect().Bottom(), totalDistance + (HEIGHT - totalDistance * 2) * HEIGHT / estimatedHeight);
+        scrollBar_->GetActiveRect().Bottom(),
+        layeredStartMargin + (HEIGHT - layeredStartMargin - totalDistance) * HEIGHT / estimatedHeight);
 
     scrollBar_->scrollBarMargin_ = scrollBarMargin;
     scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
