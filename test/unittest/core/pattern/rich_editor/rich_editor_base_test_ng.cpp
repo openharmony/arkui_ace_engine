@@ -2135,10 +2135,16 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorGetTextLength001, TestSize.Level0)
  */
 HWTEST_F(RichEditorBaseTestNg, ReportShiftAndDirectionEvent001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Initialize RichEditor node
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. Set shiftFlag_ to true
+     */
     richEditorPattern->shiftFlag_ = true;
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_SHIFT_LEFT;

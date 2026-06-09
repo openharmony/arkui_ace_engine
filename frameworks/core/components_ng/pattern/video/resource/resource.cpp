@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/video/resource/resource.h"
+#include "core/common/platform_res_register.h"
 
 namespace OHOS::Ace {
 

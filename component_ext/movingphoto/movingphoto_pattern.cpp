@@ -21,6 +21,7 @@
 #include "movingphoto_utils.h"
 
 #include "base/image/pixel_map.h"
+#include "base/resource/data_provider_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"

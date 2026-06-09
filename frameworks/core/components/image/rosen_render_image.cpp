@@ -24,6 +24,7 @@
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #endif
 
+#include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "core/components/text_overlay/text_overlay_component.h"
