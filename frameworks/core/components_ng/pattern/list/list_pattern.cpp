@@ -693,7 +693,7 @@ bool ListPattern::UpdateStartListItemIndex()
                            (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
         startArea = startGroupInfo.area;
         startItemIndexInGroup = startGroupInfo.indexInGroup;
-        if (startFlagChanged && GetScrollSource() != SCROLL_FROM_NONE) {
+        if (startFlagChanged) {
             VisibleContentInfo endGroupInfo = GetEndListItemIndex(startPattern);
             int32_t endItemIndexInGroup = endGroupInfo.indexInGroup;
             startNode->OnAccessibilityEvent(
@@ -732,7 +732,7 @@ bool ListPattern::UpdateEndListItemIndex()
                          (endInfo_.indexInGroup != endGroupInfo.indexInGroup);
         endArea = endGroupInfo.area;
         endItemIndexInGroup = endGroupInfo.indexInGroup;
-        if (endFlagChanged && GetScrollSource() != SCROLL_FROM_NONE) {
+        if (endFlagChanged) {
             VisibleContentInfo startGroupInfo = GetStartListItemIndex(endPattern);
             int32_t startItemIndexInGroup = startGroupInfo.indexInGroup;
             endWrapper->GetHostNode()->OnAccessibilityEvent(
@@ -770,7 +770,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     auto onJSFrameNodeScrollIndex = listEventHub->GetJSFrameNodeOnListScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
     FireOnScrollIndex(indexChanged, onJSFrameNodeScrollIndex);
-    if ((startIndexChanged_ || endIndexChanged_) && GetScrollSource() != SCROLL_FROM_NONE) {
+    if (startIndexChanged_ || endIndexChanged_) {
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, startIndex_, endIndex_);
     }
     OnScrollVisibleContentChange(listEventHub, indexChanged);
