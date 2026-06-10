@@ -26,14 +26,9 @@
 #include "core/components/common/layout/constants.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 
-namespace OHOS::Ace {
-class PixelMap;
-}
-
 namespace OHOS::Ace::NG {
 
 using OHOS::Ace::ForceSplitMode;
-using CreateSnapshotCallback = std::function<RefPtr<OHOS::Ace::PixelMap>(RefPtr<FrameNode>)>;
 
 class ForceSplitManager : public virtual AceType {
     DECLARE_ACE_TYPE(ForceSplitManager, AceType);
@@ -119,6 +114,7 @@ public:
     void RemoveForceSplitStateListener(int32_t nodeId);
     void NotifyForceSplitStateChange();
     void OnForceSplitEnableChange();
+    void ChangeForceSplitModeTo(ForceSplitMode mode);
 
     bool HasRelatedPage() const
     {
@@ -155,15 +151,7 @@ public:
     {
         return splitRatio_;
     }
-    void SetCurrentModeSplitRatio(float ratio)
-    {
-        if (mode_ == ForceSplitMode::WIDE_SPLIT) {
-            wideSplitRatio_ = ratio;
-        } else if (mode_ == ForceSplitMode::SQUARE_SPLIT) {
-            squareSplitRatio_ = ratio;
-        }
-    }
-    void SetSplitRatioDirectly(float ratio);
+    void SetDragStoppedRatio(float ratio);
     void SetWideSplitIsDraggable(bool isDraggable)
     {
         wideSplitIsDraggable_ = isDraggable;
@@ -194,9 +182,10 @@ public:
         temporarySplitRatio_ = std::nullopt;
     }
     float FindNearestSnapRatio(float currentRatio) const;
-    void UpdateForceSplitRatio();
     void AddForceSplitRatioListener(int32_t nodeId, std::function<void(float)>&& listener);
     void RemoveForceSplitRatioListener(int32_t nodeId);
+    void AddIsDraggableChangeListener(int32_t nodeId, std::function<void(bool isDraggable)>&& listener);
+    void RemoveIsDraggableChangeListener(int32_t nodeId);
 
     void SetBehaviorMode(ForceSplitBehaviorMode mode)
     {
@@ -219,12 +208,11 @@ public:
     bool CanPushPageToPrimary() const;
     bool IsTransitionShouldMovePageToPrimary(const std::string& from, const std::string& to) const;
 
-    void SetCreateSnapshotCallback(CreateSnapshotCallback&& callback)
-    {
-        createSnapshotCallback_ = std::move(callback);
-    }
     RefPtr<FrameNode> CreateDragMaskNode();
-    void UpdateDragMaskNodeContent(const RefPtr<FrameNode>& maskNode, RefPtr<FrameNode> contentNode);
+    ForceSplitMode GetForceSplitMode() const
+    {
+        return mode_;
+    }
 
 private:
     bool IsTopFullScreenPage();
@@ -235,7 +223,10 @@ private:
     void FlushArkUIHook();
     float CalcCurrentSplitRatio();
     void OnForceSplitRatioUpdate(float ratio);
-    RefPtr<OHOS::Ace::PixelMap> CreateSnapshot(RefPtr<FrameNode> node);
+    void NotifyWindowFirstTimeDraggableRatioIfNeeded(float ratio);
+    void NotifyWindowDraggableRatioChangeIfNeeded(float ratio);
+    bool IsDraggable(ForceSplitMode mode);
+    void NotifyIsDraggableChange(bool isDraggable);
 
     WeakPtr<PipelineContext> pipeline_;
     bool hasSetForceSplitConfig_ = false;
@@ -246,19 +237,22 @@ private:
     std::unordered_set<std::string> fullScreenPages_;
     std::string homePageName_;
     std::string relatedPageName_;
-    std::optional<float> wideSplitRatio_;
-    std::optional<float> squareSplitRatio_;
     bool wideSplitIsDraggable_ = false;
+    std::optional<float> wideSplitRatio_;
     bool squareSplitIsDraggable_ = false;
+    std::optional<float> squareSplitRatio_;
     bool isForceSplitDragging_ = false;
     std::optional<float> temporarySplitRatio_;
     float splitRatio_;
+    std::optional<float> preWideSplitWindowNotifyRatio_;
+    std::optional<float> preSquareSplitWindowNotifyRatio_;
     ForceSplitMode mode_;
     ForceSplitBehaviorMode behaviorMode_ = ForceSplitBehaviorMode::NAVIGATION;
     std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs_;
     std::unordered_set<std::string> transPages_;
     std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
     std::unordered_map<int32_t, std::function<void(float)>> forceSplitRatioListeners_;
+    std::unordered_map<int32_t, std::function<void(bool isDraggable)>> isDraggableListeners_;
     int32_t appIconId_ = 0;
     // for navigation force split, we need disable forcesplit before router transition.
     bool disableNavForceSplitInternal_ = false;
@@ -270,7 +264,6 @@ private:
     std::optional<Color> splitDividerColorLight_;
     std::optional<Color> splitDividerColorDark_;
     std::optional<ForceSplitMode> delayedMode_;
-    CreateSnapshotCallback createSnapshotCallback_;
 };
 } // namespace OHOS::Ace::NG
 

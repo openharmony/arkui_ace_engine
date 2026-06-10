@@ -131,6 +131,8 @@ constexpr int32_t ROTATION_270 = 270;
 
 constexpr uint32_t BAR_ITEM_MARGIN_NUM = 2;
 
+constexpr Dimension DEFAULT_DRAG_BAR_HOT_ZONE = 12.0_vp;
+
 enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,

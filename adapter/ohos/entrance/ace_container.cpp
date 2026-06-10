@@ -84,7 +84,6 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_luminance_sampling_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -415,23 +414,6 @@ void InitNavigationManagerCallback(const RefPtr<NG::PipelineContext>& context)
         NG::LuminanceSamplingHelper::UnRegisterSamplingCallback(node);
     };
     navMgr->SetUnregisterColorPickerCallback(std::move(unregisterCallback));
-}
-
-void InitForceSplitManagerCallback(const RefPtr<NG::PipelineContext>& context)
-{
-    CHECK_NULL_VOID(context);
-    auto forceSplitMgr = context->GetForceSplitManager();
-    CHECK_NULL_VOID(forceSplitMgr);
-    auto createSnapshotCallback = [](RefPtr<NG::FrameNode> node) -> RefPtr<OHOS::Ace::PixelMap> {
-        NG::SnapshotOptions options;
-        auto result = NG::ComponentSnapshot::GetSync(node, options);
-        if (result.first != ERROR_CODE_NO_ERROR) {
-            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Failed to get snapshot, errorCode:%{public}d", result.first);
-            return nullptr;
-        }
-        return OHOS::Ace::PixelMap::Create(result.second);
-    };
-    forceSplitMgr->SetCreateSnapshotCallback(std::move(createSnapshotCallback));
 }
 
 std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
@@ -3098,7 +3080,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         auto newPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
         if (newPipeline) {
             InitNavigationManagerCallback(newPipeline);
-            InitForceSplitManagerCallback(newPipeline);
         }
     } else {
         taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI, "ArkUIInitThemeManager");

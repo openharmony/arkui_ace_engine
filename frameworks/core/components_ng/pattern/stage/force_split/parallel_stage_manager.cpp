@@ -665,14 +665,12 @@ bool ParallelStageManager::GetPageNumberExcludeRelatedOrPlaceHolderPage(int32_t&
     CHECK_NULL_RETURN(lastPage, false);
     auto lastPattern = lastPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(lastPattern, false);
-    pageNumber = static_cast<int32_t>(children.size());
-    if (stagePattern->HasDividerNode()) {
-        pageNumber--;
-    }
+    pageNumber = static_cast<int32_t>(children.size()) - stagePattern->GetNonPageChildrenSize();
     auto type = lastPattern->GetPageType();
     if (type == RouterPageType::PLACEHOLDER_PAGE || type == RouterPageType::RELATED_PAGE) {
         pageNumber--;
     }
+    pageNumber = std::max(0, pageNumber);
     return true;
 }
 
@@ -881,13 +879,15 @@ bool ParallelStageManager::CleanPageStackInSplitMode(const RefPtr<ParallelStageP
     }
 
     bool preHasHomePage = GetHomePage() != nullptr;
-    bool hasDivider = stagePattern->HasDividerNode();
+    int32_t nonPageChildrenSize = stagePattern->GetNonPageChildrenSize();
     auto popSize = pageNumber - 1;
     for (int32_t count = 0; count < popSize; ++count) {
         RefPtr<FrameNode> pageNode = nullptr;
-        if (hasDivider) {
-            // skip divider node
-            pageNode = AceType::DynamicCast<FrameNode>(*(++children.begin()));
+        if (nonPageChildrenSize > 0 && nonPageChildrenSize < children.size()) {
+            // skip non-page node
+            auto iter = children.begin();
+            std::advance(iter, nonPageChildrenSize);
+            pageNode = AceType::DynamicCast<FrameNode>(*iter);
         } else {
             pageNode = AceType::DynamicCast<FrameNode>(children.front());
         }
@@ -1369,12 +1369,8 @@ bool ParallelStageManager::IsEmptyInSplitMode()
 {
     CHECK_NULL_RETURN(stageNode_, true);
     auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(stageNode_->GetPattern());
-    CHECK_NULL_RETURN(stageNode_, true);
-    auto dividerNode = stagePattern->GetDividerNode();
-    if (stageNode_->GetChildIndex(dividerNode) >= 0) {
-        return stageNode_->GetChildren().size() <= 1;
-    }
-    return stageNode_->GetChildren().empty();
+    CHECK_NULL_RETURN(stagePattern, true);
+    return static_cast<int32_t>(stageNode_->GetChildren().size()) <= stagePattern->GetNonPageChildrenSize();
 }
 
 void ParallelStageManager::RemoveSecondaryPagesOfPrimaryPage()
@@ -2900,16 +2896,28 @@ void ParallelStageManager::SetRouterDividerVisible(bool visible)
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_VOID(stagePattern);
     auto dividerNode = stagePattern->GetDividerNode();
-    CHECK_NULL_VOID(dividerNode);
-    auto layoutProperty = dividerNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
+    auto dragBarNode = stagePattern->GetOrCreateDragBarNode();
     auto targetVisible = visible ? VisibleType::VISIBLE : VisibleType::INVISIBLE;
+    do {
+        CHECK_NULL_BREAK(dividerNode);
+        auto layoutProperty = dividerNode->GetLayoutProperty();
+        CHECK_NULL_BREAK(layoutProperty);
+        if (layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == targetVisible) {
+            break;
+        }
+        // Divider stays mounted and still occupies layout space during animation; only visibility changes.
+        layoutProperty->UpdateVisibility(targetVisible, false, false);
+        dividerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } while (false);
+    CHECK_NULL_VOID(dragBarNode);
+    auto layoutProperty = dragBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == targetVisible) {
         return;
     }
-    // Divider stays mounted and still occupies layout space during animation; only visibility changes.
+    // DragBar stays mounted and still occupies layout space during animation; only visibility changes.
     layoutProperty->UpdateVisibility(targetVisible, false, false);
-    dividerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    dragBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ParallelStageManager::OnRouterPagesSplitFinish(
