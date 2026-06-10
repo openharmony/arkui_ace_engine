@@ -45,7 +45,6 @@
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
-#include "rich_editor/rich_editor_module.h"
 #include "text_based_modifier/text_based_modifier_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
@@ -1110,11 +1109,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Shape_Transfer_PixelMap",
             "lC{@ohos.multimedia.image.image.PixelMap}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
-        },
-        ani_native_function {
-            "_RichEditor_Transfer_PixelMap",
-            "C{@ohos.multimedia.image.image.PixelMap}:l",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::RichEditorTransferPixelMap)
         },
         ani_native_function {
             "_PersistentStorage_Get",
