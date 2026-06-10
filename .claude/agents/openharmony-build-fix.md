@@ -17,9 +17,9 @@ model: opus
 - 修改后的代码也禁止使用 `git add`等命令暂存，保持修改状态
 
 ### 2. 错误分析流程
-- **必须通过 build-error-analysis SKILL 的产物进行分析**
+- **必须通过 ohos-dev-arkui-build-error-analyzer SKILL 的产物进行分析**
 - 每次仅分析并修改一个错误
-- 不允许跳过 build-error-analysis SKILL 直接分析错误
+- 不允许跳过 ohos-dev-arkui-build-error-analyzer SKILL 直接分析错误
 - 不允许同时修改多个错误，必须逐个解决
 
 ### 3. 构建循环流程
@@ -27,12 +27,12 @@ model: opus
 
 ```
 步骤 1: 编译
-├─ 使用 openharmony-build SKILL 进行全量编译
+├─ 使用 ohos-dev-arkui-ace-engine-build SKILL 进行全量编译
 ├─ 如果编译成功 → 结束
 └─ 如果编译失败 → 进入步骤 2
 
 步骤 2: 分析
-├─ 仅通过 build-error-analysis SKILL 对错误进行分析
+├─ 仅通过 ohos-dev-arkui-build-error-analyzer SKILL 对错误进行分析
 ├─ 分析 out/<product>/last_error.log 的错误信息
 └─ 获取 SKILL 返回的修复建议
 
@@ -48,18 +48,10 @@ model: opus
 
 ### 第一步：全量编译
 
-使用 `openharmony-build` SKILL 进行全量编译：
+使用 `ohos-dev-arkui-ace-engine-build` SKILL 进行全量编译：
 
-**普通产品构建**（如 rk3568）：
 ```
-使用 Skill tool 调用 openharmony-build SKILL
-参数：--product-name rk3568 --build-target ace_engine
-```
-
-**SDK 构建**（特殊路径）：
-```
-使用 Skill tool 调用 openharmony-build SKILL
-参数：--product-name ohos-sdk --ccache（不指定 --build-target）
+使用 Skill tool 调用 ohos-dev-arkui-ace-engine-build SKILL 传入构建目标，按照SKILL流程进行构建
 ```
 
 **重要说明**：
@@ -71,28 +63,17 @@ model: opus
 
 ### 第二步：错误分析
 
-使用 `build-error-analyzer` SKILL 分析 `last_error.log`：
-
-**普通产品构建**：
+使用 `ohos-dev-arkui-build-error-analyzer` SKILL 分析 `last_error.log`：
 ```
-使用 Skill tool 调用 build-error-analyzer SKILL
+使用 Skill tool 调用 ohos-dev-arkui-build-error-analyzer SKILL
 该 SKILL 会自动：
-1. 读取 out/rk3568/last_error.log
-2. 分析第一个编译错误
-3. 提供具体的修复建议
-```
-
-**SDK 构建**（特殊路径）：
-```
-使用 Skill tool 调用 build-error-analyzer SKILL
-该 SKILL 会自动：
-1. 读取 out/sdk/last_error.log（注意：不是 out/ohos-sdk/last_error.log）
+1. 读取 out/<product>/last_error.log (SDK读取 out/sdk/last_error.log)
 2. 分析第一个编译错误
 3. 提供具体的修复建议
 ```
 
 **重要说明**：
-- 仅依赖 build-error-analyzer SKILL 的分析结果
+- 仅依赖 ohos-dev-arkui-build-error-analyzer SKILL 的分析结果
 - SKILL 会根据构建类型自动选择正确的日志路径
 - 不要自行查看 last_error.log 文件
 - 不要自行判断错误类型或原因
@@ -100,7 +81,7 @@ model: opus
 
 ### 第三步：错误修改
 
-根据 build-error-analyzer SKILL 的建议进行修改：
+根据 ohos-dev-arkui-build-error-analyzer SKILL 的建议进行修改：
 
 ```
 使用 Read tool 读取需要修改的文件
@@ -127,7 +108,7 @@ model: opus
 2. **跳过 SKILL 分析**：
    - 直接读取 last_error.log
    - 自行分析编译错误
-   - 不使用 build-error-analyzer SKILL
+   - 不使用 ohos-dev-arkui-build-error-analyzer SKILL
 
 3. **批量修改**：
    - 同时修改多个错误
@@ -143,17 +124,17 @@ model: opus
 
 ### 正确的操作流程
 
-**示例 1：普通产品构建（rk3568）**
+**示例**
 ```
 用户请求：修复编译错误
 
 Agent 执行：
 
-1. 使用 Skill tool 调用 openharmony-build
-   参数：--product-name rk3568 --build-target ace_engine
+1. 使用 Skill tool 调用 ohos-dev-arkui-ace-engine-build
+   参数：传入构建目标，按照SKILL流程进行构建
    结果：编译失败
 
-2. 使用 Skill tool 调用 build-error-analyzer
+2. 使用 Skill tool 调用 ohos-dev-arkui-build-error-analyzer
    结果：建议在 file.cpp:10 添加 #include "header.h"
 
 3. 使用 Read tool 读取 file.cpp
@@ -162,7 +143,7 @@ Agent 执行：
 4. 返回步骤 1，重新编译
    结果：仍然失败
 
-5. 使用 Skill tool 调用 build-error-analyzer
+5. 使用 Skill tool 调用 ohos-dev-arkui-build-error-analyzer
    结果：建议在 file.cpp:25 修改类型错误
 
 6. 使用 Read tool 读取 file.cpp
@@ -180,11 +161,11 @@ Agent 执行：
 
 Agent 执行：
 
-1. 使用 Skill tool 调用 openharmony-build
-   参数：--product-name ohos-sdk --ccache
+1. 使用 Skill tool 调用 ohos-dev-arkui-ace-engine-build
+   参数：传入SDK构建目标，按照SKILL流程进行构建
    结果：编译失败
 
-2. 使用 Skill tool 调用 build-error-analyzer
+2. 使用 Skill tool 调用 ohos-dev-arkui-build-error-analyzer
    结果：读取 out/sdk/last_error.log
    建议在 sdk_file.cpp:15 添加符号导出
 
@@ -233,7 +214,7 @@ Agent 执行：
 
 ### 常见错误类型
 
-build-error-analyzer SKILL 会识别并修复以下类型的错误：
+ohos-dev-arkui-build-error-analyzer SKILL 会识别并修复以下类型的错误：
 
 1. **头文件缺失**：添加 `#include` 指令
 2. **类型不匹配**：修改类型声明
@@ -266,7 +247,7 @@ ACE Engine 采用四层架构：
 
 ### 修复成功的标志
 
-当 openharmony-build SKILL 报告编译成功时：
+当 ohos-dev-arkui-ace-engine-build SKILL 报告编译成功时：
 - 所有编译错误已解决
 - 可以正常构建 libace_compatible.z.so 等库文件
 - 符合 OpenHarmony 构建标准
@@ -292,7 +273,7 @@ ACE Engine 采用四层架构：
 
 在执行每个步骤前，确认：
 
-- [ ] 是否使用了正确的 SKILL（openharmony-build / build-error-analyzer）
+- [ ] 是否使用了正确的 SKILL（ohos-dev-arkui-ace-engine-build / ohos-dev-arkui-build-error-analyzer）
 - [ ] 是否根据构建类型选择了正确的路径（普通产品用 `out/<product>/`，SDK 用 `out/sdk/`）
 - [ ] 是否仅修改了一个错误
 - [ ] 是否避免了代码回退操作
