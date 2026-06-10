@@ -24,7 +24,7 @@ import { UIUtils } from '../../utils';
 import { uiUtils } from '../../base/uiUtilsImpl';
 import { FactoryInternal } from '../../base/iFactoryInternal';
 
-export class InterfaceProxyHandler implements reflect.InvocationHandler, IObservedObject, ISubscribedWatches, JsonSerializable {
+export class InterfaceProxyHandler implements reflect.InvocationHandler, IObservedObject, ISubscribedWatches, JsonReplacer {
     private __meta: IMutableStateMeta | undefined;
     private __keyedMeta: IMutableKeyedStateMeta | undefined;
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
@@ -32,7 +32,7 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     private _target: Object;
     private isAPI_: boolean;
     private readonly skipSymbol: string = '__observeInterfaceProxy_skipsymbol_Internal';
-    private static readonly TO_JSON_METHOD: string = 'toJSON';
+    private static readonly TO_JSON_METHOD: string = 'jsonReplacer';
     constructor(target: Object, allowDeep: boolean, isAPI: boolean) {
         this._target = target;
         this.allowDeep_ = allowDeep;
@@ -58,11 +58,11 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     public shouldAddRef(): boolean {
         return OBSERVE.renderingComponent > 0;
     }
-    public override toJSON(): string {
-        return JSON.stringify(this.toJSONObject());
+    public override jsonReplacer(): Record<string, Any> {
+        return this.toJSONObject();
     }
-    public toJSONObject(): Record<string, Object> {
-        const result: Record<string, Object> = {};
+    public toJSONObject(): Record<string, Any> {
+        const result: Record<string, Any> = {};
         const targetType = Class.of(this._target);
         const visited = new Set<string>();
         const getterPrefix = '%%get-';
@@ -151,7 +151,7 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     }
     invoke(target: Object, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
         if (method.getName() === InterfaceProxyHandler.TO_JSON_METHOD) {
-            return this.toJSON();
+            return this.jsonReplacer();
         }
         return method.invoke(this._target, args);
     }
