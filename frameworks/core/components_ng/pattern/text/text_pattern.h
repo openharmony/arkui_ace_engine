@@ -319,6 +319,7 @@ public:
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void HandleSelectionChange(int32_t start, int32_t end);
     CopyOptions GetCopyOptions() const;
+    bool IsTextInSelectionContainer() const;
     bool CheckClickedOnSpanOrText(RectF textContentRect, const Offset& localLocation);
     void SetSpanItemChildren(const std::list<RefPtr<SpanItem>>& spans);
     void SetSpanStringMode(bool isSpanStringMode);
@@ -488,7 +489,8 @@ public:
         jsTextControllerBinder_ = std::move(bindFunc);
     }
 protected:
-    virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
+    virtual RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay();
+    virtual RefPtr<TextSelectOverlay> GetSelectOverlay() const;
     int32_t GetClickedSpanPosition();
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();
@@ -629,7 +631,6 @@ protected:
     std::map<std::pair<TextSpanType, TextResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     friend class TextContentModifier;
-    friend class TextSelectionChild;
     struct SubComponentInfoEx {
         std::optional<AISpan> aiSpan;
         WeakPtr<SpanItem> span;
@@ -653,8 +654,6 @@ protected:
     int32_t placeholderCount_ = 0;
     float baselineOffset_ = 0.0f;
     bool enabled_ = true;
-    RefPtr<TextSelectionChild> selectionChild_;
-    bool directlyCreatedByTextModel_ = false;
     bool contChange_ = false;
     bool aiSpanHoverEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
@@ -693,6 +692,7 @@ private:
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void ActSetSelection(int32_t start, int32_t end);
+    void RecordSelectedChildAndNotifyChange();
     virtual bool IsShowHandle();
     void InitUrlMouseEvent();
     void InitUrlTouchEvent();
@@ -741,6 +741,7 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     ACE_FORCE_EXPORT void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ProcessOverlayAfterLayout();
+    void FlushContainerOverlayAfterLayout();
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void ProcessSpanString();
@@ -786,6 +787,14 @@ private:
     void GetPaintOffsetWithoutTransform(OffsetF& paintOffset);
     bool IsTriggerParentToScroll();
     bool HasScrollableParent();
+    bool HasOrUpdateRenderTransform(bool needCreate = false);
+    void DisableSelectMenu();
+    void UpdateAISelectMenu();
+    bool IsCurrentMenuVisibile();
+    bool IsHandleDragging();
+    bool IsClickAtHandle(const GestureEvent& info);
+    bool IsTouchAtHandle(const TouchEventInfo& info);
+    bool IsShowMouseMenu();
     void ContentChangeByDetaching(PipelineContext*) override;
     void HighlightDisappearAnimation();
     void HighlightAppearAnimation();
@@ -803,6 +812,7 @@ private:
     RefPtr<PreviewMenuController> previewController_;
     RefPtr<TextController> textController_;
     RefPtr<TextSelectOverlay> selectOverlay_;
+    RefPtr<TextSelectionChild> selectionChild_;
     std::vector<int32_t> placeholderIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
@@ -830,6 +840,7 @@ private:
     int32_t clickedSpanPosition_ = -1;
     int32_t dragRecordSize_ = -1;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
+    Color selectedBackgroundColor_;
     // params for ai/url entity dragging
     // left mouse click(lastLeftMouseClickStyle_ = true) ==> dragging(isTryEntityDragging_ = true)
     MouseFormat lastLeftMouseClickStyle_ = MouseFormat::DEFAULT;
@@ -846,7 +857,8 @@ private:
     bool hasSpanStringLongPressEvent_ = false;
     bool isEnableHapticFeedback_ = true;
     bool hapticFeedbackFlagByUser_ = false;
-    Color selectedBackgroundColor_;
+    bool directlyCreatedByTextModel_ = false;
+    bool isContainerOverlayDirtyAfterLayout_ = false;
     bool mouseUpAndDownPointChange_ = false;
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
@@ -865,6 +877,7 @@ private:
     bool hasLpxUnitStyle_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
     friend class OneStepDragController;
+    friend class TextSelectionChild;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
 
     // ----- multi thread state variables -----

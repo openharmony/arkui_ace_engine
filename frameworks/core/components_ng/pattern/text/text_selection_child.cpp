@@ -18,13 +18,13 @@
 #include <algorithm>
 
 #include "base/geometry/offset.h"
-#include "base/geometry/transform_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_content_overlay/select_overlay_holder.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -32,55 +32,6 @@ int32_t GetSelectableTextLength(const RefPtr<TextPattern>& pattern)
 {
     CHECK_NULL_RETURN(pattern, 0);
     return static_cast<int32_t>(pattern->GetTextForDisplay().length()) + pattern->GetPlaceholderCount();
-}
-
-RectF ConvertRectToTargetNode(const RefPtr<FrameNode>& sourceNode, const RectF& rect,
-    const RefPtr<FrameNode>& targetNode)
-{
-    CHECK_NULL_RETURN(sourceNode, {});
-    CHECK_NULL_RETURN(targetNode, {});
-    auto leftTop = sourceNode->ConvertPoint(rect.GetOffset(), targetNode);
-    auto rightTop = sourceNode->ConvertPoint({ rect.Right(), rect.Top() }, targetNode);
-    auto leftBottom = sourceNode->ConvertPoint({ rect.Left(), rect.Bottom() }, targetNode);
-    auto rightBottom = sourceNode->ConvertPoint({ rect.Right(), rect.Bottom() }, targetNode);
-    auto left = std::min({ leftTop.GetX(), rightTop.GetX(), leftBottom.GetX(), rightBottom.GetX() });
-    auto right = std::max({ leftTop.GetX(), rightTop.GetX(), leftBottom.GetX(), rightBottom.GetX() });
-    auto top = std::min({ leftTop.GetY(), rightTop.GetY(), leftBottom.GetY(), rightBottom.GetY() });
-    auto bottom = std::max({ leftTop.GetY(), rightTop.GetY(), leftBottom.GetY(), rightBottom.GetY() });
-    return { left, top, right - left, bottom - top };
-}
-
-bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context)
-{
-    auto transformMatrix = context->GetTransformMatrix();
-    CHECK_NULL_RETURN(transformMatrix, false);
-    const int32_t xIndex = 0;
-    const int32_t yIndex = 1;
-    const int32_t zIndex = 2;
-    const int32_t wIndex = 3;
-    DecomposedTransform transform;
-    TransformUtil::DecomposeTransform(transform, transformMatrix.value());
-    if (!NearZero(transform.translate[zIndex])) {
-        return true;
-    }
-    Quaternion quaternionIdentity(0.0f, 0.0f, 0.0f, 1.0f);
-    if (transform.quaternion != quaternionIdentity) {
-        return true;
-    }
-    if (!NearEqual(transform.scale[xIndex], 1.0f) || !NearEqual(transform.scale[yIndex], 1.0f) ||
-        !NearEqual(transform.scale[zIndex], 1.0f)) {
-        return true;
-    }
-    Vector3F skewIdentity(0.0f, 0.0f, 0.0f);
-    Vector3F skewVector(transform.skew[xIndex], transform.skew[yIndex], transform.skew[zIndex]);
-    if (!(skewVector == skewIdentity)) {
-        return true;
-    }
-    if (!NearZero(transform.perspective[xIndex]) || !NearZero(transform.perspective[yIndex]) ||
-        !NearZero(transform.perspective[zIndex]) || !NearEqual(transform.perspective[wIndex], 1.0f)) {
-        return true;
-    }
-    return false;
 }
 } // namespace
 
@@ -121,13 +72,13 @@ std::optional<RectF> TextSelectionChild::GetSecondHandleRect()
     return selector.secondHandle;
 }
 
-RectF TextSelectionChild::GetSelectionArea(const RefPtr<FrameNode>& targetNode, SelectRectsType pos)
+RectF TextSelectionChild::GetSelectionArea(SelectRectsType pos, SelectionAreaResultType& resultType)
 {
+    resultType = SelectionAreaResultType::NONE;
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, {});
-    CHECK_NULL_RETURN(targetNode, {});
     auto selector = pattern->GetTextSelector();
     if (selector.SelectNothing()) {
         return {};
@@ -136,36 +87,38 @@ RectF TextSelectionChild::GetSelectionArea(const RefPtr<FrameNode>& targetNode, 
     if (boxes.empty()) {
         return {};
     }
-
     if (pos == SelectRectsType::LEFT_TOP_POINT) {
-        auto box = boxes.front();
-        box.SetSize({ 0.0f, 0.0f });
-        box.SetOffset(box.GetOffset() + pattern->GetTextRect().GetOffset());
-        return ConvertRectToTargetNode(host, box, targetNode);
-    }
-    if (pos == SelectRectsType::RIGHT_BOTTOM_POINT) {
-        auto box = boxes.back();
-        box.SetRect({ box.Right(), box.Bottom() }, { 0.0f, 0.0f });
-        box.SetOffset(box.GetOffset() + pattern->GetTextRect().GetOffset());
-        return ConvertRectToTargetNode(host, box, targetNode);
+        boxes.erase(std::next(boxes.begin()), boxes.end());
+        boxes.front().SetSize({ 0.0f, 0.0f });
+    } else if (pos == SelectRectsType::RIGHT_BOTTOM_POINT) {
+        boxes.erase(boxes.begin(), std::prev(boxes.end()));
+        boxes.front().SetRect({ boxes.front().Right(), boxes.front().Bottom() }, { 0.0f, 0.0f });
     }
 
-    RectF selectionArea;
-    bool hasArea = false;
+    auto textPaintOffset = GetChildPaintOffsetWithoutTransform();
+    auto contentRect = pattern->GetTextContentRect();
     auto textRect = pattern->GetTextRect();
-    for (auto box : boxes) {
-        if (box.IsEmpty()) {
-            continue;
-        }
-        box.SetOffset(box.GetOffset() + textRect.GetOffset());
-        auto areaInTarget = ConvertRectToTargetNode(host, box, targetNode);
-        if (areaInTarget.IsEmpty()) {
-            continue;
-        }
-        selectionArea = hasArea ? selectionArea.CombineRectT(areaInTarget) : areaInTarget;
-        hasArea = true;
+    auto textContentRect = pattern->GetTextContentRect(true);
+    auto selectionArea = BaseTextSelectGeometryUtils::MergeSelectedBoxes(boxes, contentRect, textRect, textPaintOffset);
+    RectF visibleContentRect;
+    if (GetRenderClipValue() || LessOrEqual(textContentRect.Height(), contentRect.Height()) ||
+        !GetClipHandleViewPortForChild(host, visibleContentRect)) {
+        visibleContentRect = RectF(contentRect.GetOffset() + textPaintOffset, contentRect.GetSize());
+        visibleContentRect = BaseTextSelectGeometryUtils::GetVisibleRect(host, visibleContentRect);
     }
-    return hasArea ? selectionArea : RectF();
+    auto intersectRect = selectionArea.IntersectRectT(visibleContentRect);
+    intersectRect.SetWidth(std::max(intersectRect.Width(), 0.0f));
+    intersectRect.SetHeight(std::max(intersectRect.Height(), 0.0f));
+    if (pos == SelectRectsType::ALL_LINES && intersectRect.IsEmpty()) {
+        resultType = SelectionAreaResultType::CLIPPED_OUT;
+        return {};
+    }
+    if (childHasTransform_) {
+        intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
+        BaseTextSelectGeometryUtils::GetGlobalRectWithTransform(host, childHasTransform_, intersectRect);
+    }
+    resultType = SelectionAreaResultType::VISIBLE_AREA;
+    return intersectRect;
 }
 
 SelectionIndexRange TextSelectionChild::GetSelectionIndexes() const
@@ -206,14 +159,28 @@ Offset TextSelectionChild::GetMovingHandleReferenceOffset(const OffsetF& point) 
 
 bool TextSelectionChild::GetRenderClipValue() const
 {
-    auto defaultClip = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE);
     auto pattern = pattern_.Upgrade();
+    auto defaultClip = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE);
     CHECK_NULL_RETURN(pattern, defaultClip);
     auto host = pattern->GetHost();
-    CHECK_NULL_RETURN(host, defaultClip);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, defaultClip);
-    return renderContext->GetClipEdge().value_or(defaultClip);
+    return BaseTextSelectGeometryUtils::GetRenderClipValue(host, defaultClip);
+}
+
+bool TextSelectionChild::GetClipHandleViewPortForChild(const RefPtr<FrameNode>& host, RectF& rect)
+{
+    CHECK_NULL_RETURN(host, false);
+    if (BaseTextSelectGeometryUtils::HasUnsupportedTransform(host, false)) {
+        return false;
+    }
+    RectF contentRect;
+    if (!BaseTextSelectGeometryUtils::GetFrameNodeContentRect(host, contentRect)) {
+        return false;
+    }
+    contentRect.SetOffset(contentRect.GetOffset() + host->GetPaintRectWithTransform().GetOffset());
+    CHECK_NULL_RETURN(BaseTextSelectGeometryUtils::CalculateClippedRect(host, contentRect), false);
+    BaseTextSelectGeometryUtils::UpdateClipHandleViewPort(host, GetRenderClipValue(), contentRect);
+    rect = contentRect;
+    return true;
 }
 
 void TextSelectionChild::SelectTextByIndex(int32_t startIndex, int32_t endIndex)
@@ -409,42 +376,7 @@ bool TextSelectionChild::CheckChildHasTransformAttr() const
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
     auto host = pattern->GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto hasTransform = false;
-    VectorF scaleIdentity(1.0f, 1.0f);
-    Vector5F rotateIdentity(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-    while (host) {
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            break;
-        }
-        if (renderContext->HasMotionPath()) {
-            hasTransform = true;
-            break;
-        }
-        auto rotateVector = renderContext->GetTransformRotate();
-        if (rotateVector.has_value() && !(rotateIdentity == rotateVector.value())) {
-            hasTransform = true;
-            break;
-        }
-        auto scaleVector = renderContext->GetTransformScale();
-        if (scaleVector.has_value() && !(scaleIdentity == scaleVector.value())) {
-            hasTransform = true;
-            break;
-        }
-        auto translate = renderContext->GetTransformTranslate();
-        if (translate && !NearZero(translate->z.Value())) {
-            hasTransform = true;
-            break;
-        }
-        if (CheckHasTransformMatrix(renderContext)) {
-            hasTransform = true;
-            break;
-        }
-        host = host->GetAncestorNodeOfFrame(true);
-    }
-    return hasTransform;
+    return BaseTextSelectGeometryUtils::HasTransformAttr(host);
 }
 
 bool TextSelectionChild::HasOrUpdateRenderTransform()

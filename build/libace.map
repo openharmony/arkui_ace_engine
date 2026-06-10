@@ -2130,7 +2130,8 @@
       "OHOS::Ace::NG::TextPattern::GetSelectedRects(int, int)";
       "OHOS::Ace::NG::TextPattern::GetSelectedSpanText(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>>, int, int, bool, bool, bool) const";
       "OHOS::Ace::NG::TextPattern::GetSelectedText(int, int, bool, bool, bool) const";
-      "OHOS::Ace::NG::TextPattern::GetSelectOverlay()";
+      "OHOS::Ace::NG::TextPattern::GetOrCreateSelectOverlay()";
+      "OHOS::Ace::NG::TextPattern::GetSelectOverlay() const";
       "OHOS::Ace::NG::TextPattern::GetShowSelect() const";
       "OHOS::Ace::NG::TextPattern::GetSpansInfo(int, int, OHOS::Ace::GetSpansMethod)";
       "OHOS::Ace::NG::TextPattern::GetSpanStringMode() const";

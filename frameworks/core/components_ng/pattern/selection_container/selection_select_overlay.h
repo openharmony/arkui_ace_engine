@@ -56,6 +56,7 @@ public:
     void OnResetTextSelection() override;
     std::optional<Color> GetHandleColor() override;
     std::optional<CopyOptions> ResolveCopyOptionForSelectedText() const;
+    void UpdateAISelectMenu();
 
 protected:
     RectF GetSelectAreaFromRects(SelectRectsType pos) override;
@@ -84,8 +85,6 @@ private:
     bool CheckAndAdjustHandleWithContent(const RectF& visibleContentRect, RectF& paintRect);
     bool GetRenderClipValue() const;
     RectF GetSelectAreaFromHandleFallback();
-    RectF GetContainerVisibleRect(
-        const RefPtr<FrameNode>& containerNode, const RefPtr<FrameNode>& overlayRoot);
     void HandleOnAskCelia();
     bool IsAskCeliaSupported() const;
     OffsetF GetHotPaintOffset();

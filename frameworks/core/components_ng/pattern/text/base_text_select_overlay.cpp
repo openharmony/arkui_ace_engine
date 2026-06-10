@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_animation_utils.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -282,28 +283,7 @@ void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlay
 
 RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect)
 {
-    CHECK_NULL_RETURN(node, visibleRect);
-    auto parentNode = node->GetAncestorNodeOfFrame(true);
-    CHECK_NULL_RETURN(parentNode, visibleRect);
-    if (parentNode->GetTag() == V2::PAGE_ETS_TAG) {
-        return visibleRect;
-    }
-    auto intersectRect = visibleRect;
-    auto scrollablePattern = AceType::DynamicCast<NestableScrollContainer>(parentNode->GetPattern());
-    auto geometryNode = parentNode->GetGeometryNode();
-    if (scrollablePattern && geometryNode) {
-        RectF parentViewPort;
-        if (!GetFrameNodeContentRect(parentNode, parentViewPort)) {
-            return RectF(0, 0, 0, 0);
-        }
-        parentViewPort += parentNode->GetTransformRelativeOffset();
-        if (parentViewPort.IsIntersectWith(visibleRect)) {
-            intersectRect = parentViewPort.IntersectRectT(visibleRect);
-        } else {
-            return RectF(0, 0, 0, 0);
-        }
-    }
-    return GetVisibleRect(parentNode, intersectRect);
+    return BaseTextSelectGeometryUtils::GetVisibleRect(node, visibleRect);
 }
 
 void BaseTextSelectOverlay::RemoveSelectionHoldCallback()
@@ -365,31 +345,7 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect(bool isGlobal)
 RectF BaseTextSelectOverlay::MergeSelectedBoxes(
     const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset)
 {
-    if (boxes.empty()) {
-        return RectF();
-    }
-    auto frontRect = boxes.front();
-    auto backRect = boxes.back();
-    float selectAreaRight = frontRect.Right();
-    float selectAreaLeft = frontRect.Left();
-    if (boxes.size() != 1) {
-        std::unordered_map<float, RectF> selectLineRect;
-        for (const auto& box : boxes) {
-            auto combineLineRect = box;
-            auto top = box.Top();
-            if (selectLineRect.find(top) == selectLineRect.end()) {
-                selectLineRect.insert({ top, combineLineRect });
-            } else {
-                combineLineRect = combineLineRect.CombineRectT(selectLineRect[top]);
-                selectLineRect.insert({ top, combineLineRect });
-            }
-            selectAreaRight = std::max(selectAreaRight, combineLineRect.Right());
-            selectAreaLeft = std::min(selectAreaLeft, combineLineRect.Left());
-        }
-    }
-    return { selectAreaLeft + textRect.GetX() + paintOffset.GetX(),
-        frontRect.GetY() + textRect.GetY() + paintOffset.GetY(), selectAreaRight - selectAreaLeft,
-        backRect.Bottom() - frontRect.Top() };
+    return BaseTextSelectGeometryUtils::MergeSelectedBoxes(boxes, contentRect, textRect, paintOffset);
 }
 
 void BaseTextSelectOverlay::SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect)
@@ -485,58 +441,24 @@ RectF BaseTextSelectOverlay::GetVisibleContentRectWithTransform(float epsilon)
 
 void BaseTextSelectOverlay::GetGlobalPointsWithTransform(std::vector<OffsetF>& points)
 {
-    CHECK_NULL_VOID(hasTransform_);
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
-    auto parent = pattern->GetHost();
-    std::vector<PointF> convertPoints;
-    auto pointConverter = [](const OffsetF& offset) { return PointF(offset.GetX(), offset.GetY()); };
-    std::transform(points.begin(), points.end(), std::back_inserter(convertPoints), pointConverter);
-    while (parent) {
-        if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            break;
-        }
-        auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto paintOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
-        for (auto& pointElement : convertPoints) {
-            pointElement = pointElement + paintOffset;
-            renderContext->GetPointTransform(pointElement);
-        }
-        parent = parent->GetAncestorNodeOfFrame(true);
-    }
-    points.clear();
-    auto offsetConverter = [](const PointF& point) { return OffsetF(point.GetX(), point.GetY()); };
-    std::transform(convertPoints.begin(), convertPoints.end(), std::back_inserter(points), offsetConverter);
+    auto host = pattern->GetHost();
+    BaseTextSelectGeometryUtils::GetGlobalPointsWithTransform(host, hasTransform_, points);
 }
 
 void BaseTextSelectOverlay::GetGlobalRectWithTransform(RectF& localRect)
 {
-    CHECK_NULL_VOID(hasTransform_);
-    auto rectVertex = GetGlobalRectVertexWithTransform(localRect);
-    auto compareOffsetX = [](const OffsetF& offset1, const OffsetF& offset2) {
-        return LessNotEqual(offset1.GetX(), offset2.GetX());
-    };
-    auto minMaxX = std::minmax_element(rectVertex.begin(), rectVertex.end(), compareOffsetX);
-    auto compareOffsetY = [](const OffsetF& offset1, const OffsetF& offset2) {
-        return LessNotEqual(offset1.GetY(), offset2.GetY());
-    };
-    auto minMaxY = std::minmax_element(rectVertex.begin(), rectVertex.end(), compareOffsetY);
-    localRect.SetOffset(OffsetF(minMaxX.first->GetX(), minMaxY.first->GetY()));
-    localRect.SetSize(
-        SizeF(minMaxX.second->GetX() - minMaxX.first->GetX(), minMaxY.second->GetY() - minMaxY.first->GetY()));
+    auto pattern = GetPattern<Pattern>();
+    auto host = pattern ? pattern->GetHost() : nullptr;
+    BaseTextSelectGeometryUtils::GetGlobalRectWithTransform(host, hasTransform_, localRect);
 }
 
 std::vector<OffsetF> BaseTextSelectOverlay::GetGlobalRectVertexWithTransform(const RectF& rect, float extendValue)
 {
-    std::vector<OffsetF> rectVertices = {
-        OffsetF(rect.Left() - extendValue, rect.Top() - extendValue),
-        OffsetF(rect.Right() + extendValue, rect.Top() - extendValue),
-        OffsetF(rect.Left() - extendValue, rect.Bottom() + extendValue),
-        OffsetF(rect.Right() + extendValue, rect.Bottom() + extendValue)
-    };
-    GetGlobalPointsWithTransform(rectVertices);
-    return rectVertices;
+    auto pattern = GetPattern<Pattern>();
+    auto host = pattern ? pattern->GetHost() : nullptr;
+    return BaseTextSelectGeometryUtils::GetGlobalRectVertexWithTransform(host, hasTransform_, rect, extendValue);
 }
 
 void BaseTextSelectOverlay::GetLocalPointWithTransform(OffsetF& localPoint)
@@ -968,61 +890,13 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform(bool checkScale)
 {
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, false);
-    auto parent = pattern->GetHost();
-    CHECK_NULL_RETURN(parent, false);
-    while (parent) {
-        auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            return false;
-        }
-        if (renderContext->HasMotionPath()) {
-            return true;
-        }
-        auto rotateVector = renderContext->GetTransformRotate();
-        if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
-            !(NearZero(rotateVector->x) && NearZero(rotateVector->y) && NearZero(rotateVector->z))) {
-            return true;
-        }
-        if (CheckUnsupportedTransformMatrix(renderContext, checkScale)) {
-            return true;
-        }
-        auto translate = renderContext->GetTransformTranslate();
-        if (translate && !NearZero(translate->z.Value())) {
-            return true;
-        }
-        if (checkScale) {
-            auto scale = renderContext->GetTransformScale();
-            if (scale && (!NearEqual(scale->x, 1.0f) || !NearEqual(scale->y, 1.0f))) {
-                return true;
-            }
-        }
-        parent = parent->GetAncestorNodeOfFrame(true);
-    }
-    return false;
+    auto host = pattern->GetHost();
+    return BaseTextSelectGeometryUtils::HasUnsupportedTransform(host, checkScale);
 }
 
 bool BaseTextSelectOverlay::CheckUnsupportedTransformMatrix(const RefPtr<RenderContext> context, bool checkScale)
 {
-    auto transformMatrix = context->GetTransformMatrix();
-    if (!transformMatrix) {
-        return false;
-    }
-    DecomposedTransform transform;
-    TransformUtil::DecomposeTransform(transform, transformMatrix.value());
-    Quaternion identity(0.0f, 0.0f, 0.0f, 1.0f);
-    const int32_t zTranslateIndex = 2;
-    if (transform.quaternion != identity || !NearZero(transform.translate[zTranslateIndex])) {
-        return true;
-    }
-    if (checkScale) {
-        for (const auto& scalValue : transform.scale) {
-            if (!NearEqual(scalValue, 1.0f)) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return BaseTextSelectGeometryUtils::CheckUnsupportedTransformMatrix(context, checkScale);
 }
 
 bool BaseTextSelectOverlay::CheckSwitchToMode(HandleLevelMode mode)
@@ -1111,78 +985,7 @@ bool BaseTextSelectOverlay::CheckHasTransformAttr()
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto host = pattern->GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto hasTransform = false;
-    VectorF scaleIdentity(1.0f, 1.0f);
-    Vector5F rotateIdentity(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-    while (host) {
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            break;
-        }
-        if (renderContext->HasMotionPath()) {
-            hasTransform = true;
-            break;
-        }
-        // has rotate.
-        auto rotateVector = renderContext->GetTransformRotate();
-        if (rotateVector.has_value() && !(rotateIdentity == rotateVector.value())) {
-            hasTransform = true;
-            break;
-        }
-        // has scale.
-        auto scaleVector = renderContext->GetTransformScale();
-        if (scaleVector.has_value() && !(scaleIdentity == scaleVector.value())) {
-            hasTransform = true;
-            break;
-        }
-        // has z translate.
-        auto translate = renderContext->GetTransformTranslate();
-        if (translate && !NearZero(translate->z.Value())) {
-            hasTransform = true;
-            break;
-        }
-        if (CheckHasTransformMatrix(renderContext)) {
-            hasTransform = true;
-            break;
-        }
-        host = host->GetAncestorNodeOfFrame(true);
-    }
-    return hasTransform;
-}
-
-bool BaseTextSelectOverlay::CheckHasTransformMatrix(const RefPtr<RenderContext>& context)
-{
-    auto transformMatrix = context->GetTransformMatrix();
-    CHECK_NULL_RETURN(transformMatrix, false);
-    const int32_t xIndex = 0;
-    const int32_t yIndex = 1;
-    const int32_t zIndex = 2;
-    const int32_t wIndex = 3;
-    DecomposedTransform transform;
-    TransformUtil::DecomposeTransform(transform, transformMatrix.value());
-    if (!NearZero(transform.translate[zIndex])) {
-        return true;
-    }
-    Quaternion quaternionIdentity(0.0f, 0.0f, 0.0f, 1.0f);
-    if (transform.quaternion != quaternionIdentity) {
-        return true;
-    }
-    Vector3F scaleIdentity(1.0f, 1.0f, 1.0f);
-    Vector3F scaleVector(transform.scale[xIndex], transform.scale[yIndex], transform.scale[zIndex]);
-    if (!(scaleVector == scaleIdentity)) {
-        return true;
-    }
-    Vector3F skewIdentity(0.0f, 0.0f, 0.0f);
-    Vector3F skewVector(transform.skew[xIndex], transform.skew[yIndex], transform.skew[zIndex]);
-    if (!(skewVector == skewIdentity)) {
-        return true;
-    }
-    Vector4F perspectiveIdentity(0.0f, 0.0f, 0.0f, 1.0f);
-    Vector4F perspectiveVector(transform.perspective[xIndex], transform.perspective[yIndex],
-        transform.perspective[zIndex], transform.perspective[wIndex]);
-    return !(perspectiveVector == perspectiveIdentity);
+    return BaseTextSelectGeometryUtils::HasTransformAttr(host);
 }
 
 bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
@@ -1206,40 +1009,12 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
 bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
 {
     auto host = GetOwner();
-    CHECK_NULL_RETURN(host, false);
-    auto parent = host->GetAncestorNodeOfFrame(true);
-    while (parent) {
-        RectF parentContentRect;
-        if (!GetFrameNodeContentRect(parent, parentContentRect)) {
-            return false;
-        }
-        auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        if (renderContext->GetClipEdge().value_or(false)) {
-            contentRect = contentRect.Constrain(parentContentRect);
-        }
-        contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
-        parent = parent->GetAncestorNodeOfFrame(true);
-    }
-    return true;
+    return BaseTextSelectGeometryUtils::CalculateClippedRect(host, contentRect);
 }
 
 bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& contentRect)
 {
-    CHECK_NULL_RETURN(node, false);
-    if (GetScrollableClipContentRect(node, contentRect)) {
-        return true;
-    }
-    auto geometryNode = node->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    if (geometryNode->GetContent()) {
-        contentRect = geometryNode->GetContentRect();
-    } else {
-        contentRect = RectF(OffsetF(0.0f, 0.0f), renderContext->GetPaintRectWithoutTransform().GetSize());
-    }
-    return true;
+    return BaseTextSelectGeometryUtils::GetFrameNodeContentRect(node, contentRect);
 }
 
 void BaseTextSelectOverlay::MarkOverlayDirty()
@@ -1453,51 +1228,12 @@ void BaseTextSelectOverlay::HandleOnShare()
 std::pair<ContentClipMode, std::optional<ContentClip>> BaseTextSelectOverlay::GetScrollableClipInfo(
     const RefPtr<FrameNode>& node)
 {
-    auto props = DynamicCast<ScrollablePaintProperty>(node->GetPaintProperty<PaintProperty>());
-    CHECK_NULL_RETURN(props, std::make_pair(ContentClipMode::DEFAULT, std::nullopt));
-    auto clip = props->GetContentClip();
-    CHECK_NULL_RETURN(clip, std::make_pair(ContentClipMode::DEFAULT, std::nullopt));
-    auto mode = clip->first;
-    if (mode == ContentClipMode::DEFAULT) {
-        if (node->GetTag() == V2::GRID_ETS_TAG || node->GetTag() == V2::SCROLL_ETS_TAG) {
-            mode = ContentClipMode::BOUNDARY;
-        } else if (node->GetTag() == V2::LIST_ETS_TAG || node->GetTag() == V2::WATERFLOW_ETS_TAG) {
-            mode = ContentClipMode::CONTENT_ONLY;
-        }
-    }
-    return std::make_pair(mode, clip);
+    return BaseTextSelectGeometryUtils::GetScrollableClipInfo(node);
 }
 
 bool BaseTextSelectOverlay::GetScrollableClipContentRect(const RefPtr<FrameNode>& node, RectF& rect)
 {
-    auto clipInfo = GetScrollableClipInfo(node);
-    auto geo = node->GetGeometryNode();
-    CHECK_NULL_RETURN(geo, false);
-    switch (clipInfo.first) {
-        case ContentClipMode::SAFE_AREA:
-        case ContentClipMode::CONTENT_ONLY: {
-            rect = geo->GetPaddingRect();
-            rect.SetOffset(rect.GetOffset() - geo->GetFrameOffset());
-            return true;
-        }
-        case ContentClipMode::BOUNDARY: {
-            rect = geo->GetFrameRect();
-            rect.SetOffset({ 0.0f, 0.0f });
-            return true;
-        }
-        case ContentClipMode::CUSTOM: {
-            auto contentClip = clipInfo.second;
-            CHECK_NULL_RETURN(contentClip, false);
-            auto shapeRect = contentClip->second;
-            CHECK_NULL_RETURN(shapeRect, false);
-            auto clipOffset = shapeRect->GetOffset();
-            rect = RectF(clipOffset.GetX().ConvertToPx(), clipOffset.GetY().ConvertToPx(),
-                shapeRect->GetWidth().ConvertToPx(), shapeRect->GetHeight().ConvertToPx());
-            return true;
-        }
-        default:
-            return false;
-    }
+    return BaseTextSelectGeometryUtils::GetScrollableClipContentRect(node, rect);
 }
 
 bool BaseTextSelectOverlay::CheckHandleIsInSafeAreaPadding(const RefPtr<FrameNode>& node, const RectF& handle)

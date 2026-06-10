@@ -1225,7 +1225,7 @@ HWTEST_F(TextTwelveTestNg, TextSelectOverlayOnHandleGlobalTouchEvent, TestSize.L
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    textPattern->GetSelectOverlay();
+    textPattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textPattern->selectOverlay_, nullptr);
 
     /**

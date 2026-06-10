@@ -555,7 +555,7 @@ HWTEST_F(TextTestNgSix, IsSupportMenuShare001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->IsSupportMenuShare(), false);
@@ -573,7 +573,7 @@ HWTEST_F(TextTestNgSix, CheckHandleIsVisibleWithTransform001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     OffsetF startPoint(0, 0);
@@ -612,7 +612,7 @@ HWTEST_F(TextTestNgSix, IsPointsInRegion001, TestSize.Level1)
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     std::vector<PointF> points;
@@ -641,7 +641,7 @@ HWTEST_F(TextTestNgSix, CheckHandleCanPaintInHost001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     ASSERT_NE(frameNode->GetGeometryNode(), nullptr);
 
@@ -676,7 +676,7 @@ HWTEST_F(TextTestNgSix, IsTouchAtHandle001, TestSize.Level1)
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     ASSERT_NE(manager, nullptr);
@@ -725,7 +725,7 @@ HWTEST_F(TextTestNgSix, CheckSwitchToMode001, TestSize.Level1)
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->CheckSwitchToMode(HandleLevelMode::OVERLAY), true);
@@ -1040,7 +1040,7 @@ HWTEST_F(TextTestNgSix, OnHandleLevelModeChanged001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->OnAncestorNodeChanged(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
@@ -1074,7 +1074,7 @@ HWTEST_F(TextTestNgSix, OnHandleLevelModeChanged002, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->OnAncestorNodeChanged(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
@@ -1339,7 +1339,7 @@ HWTEST_F(TextTestNgSix, GetVisibleRect001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     auto parentPattern = AceType::MakeRefPtr<MockNestableScrollContainer>();
     ASSERT_NE(parentPattern, nullptr);
@@ -1380,7 +1380,7 @@ HWTEST_F(TextTestNgSix, GetLocalPointsWithTransform001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->hasTransform_ = true;
@@ -1412,7 +1412,7 @@ HWTEST_F(TextTestNgSix, GetAncestorNodeViewPort001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     auto parentPattern1 = AceType::MakeRefPtr<TextPattern>();
@@ -1437,7 +1437,7 @@ HWTEST_F(TextTestNgSix, IsAcceptResetSelectionEvent001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     EXPECT_EQ(textSelectOverlay->IsAcceptResetSelectionEvent(SourceType::MOUSE, TouchType::DOWN), true);
@@ -1460,7 +1460,7 @@ HWTEST_F(TextTestNgSix, RevertLocalPointWithTransform001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
 
     auto parentPattern1 = AceType::MakeRefPtr<TextPattern>();
@@ -1490,7 +1490,7 @@ HWTEST_F(TextTestNgSix, HasUnsupportedTransform001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->GetSelectOverlay();
+    auto textSelectOverlay = pattern->GetOrCreateSelectOverlay();
     ASSERT_NE(textSelectOverlay, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);

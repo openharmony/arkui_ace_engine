@@ -214,6 +214,21 @@ public:
         selectAllHandled_ = true;
     }
 
+    void DisableMenu() override
+    {
+        menuDisabled_ = true;
+    }
+
+    void UpdateAISelectMenu() override
+    {
+        aiSelectMenuUpdated_ = true;
+    }
+
+    bool IsCurrentMenuVisibile() override
+    {
+        return menuVisible_;
+    }
+
     CopyOptions GetCopyOption() const override
     {
         return copyOption_;
@@ -461,6 +476,9 @@ private:
     bool isBindMenu_ = false;
     bool holdCallbackSet_ = false;
     bool oldSelectedTypeSaved_ = false;
+    bool menuDisabled_ = false;
+    bool aiSelectMenuUpdated_ = false;
+    bool menuVisible_ = false;
     bool enableHapticFeedback_ = false;
     CopyOptions copyOption_ = CopyOptions::InApp;
     std::optional<Color> selectedBackgroundColor_;

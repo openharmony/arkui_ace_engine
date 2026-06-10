@@ -154,6 +154,75 @@ void SelectionContainerPattern::HideMenu(bool noAnimation, bool showSubMenu)
     overlay->HideMenu(noAnimation, showSubMenu);
 }
 
+void SelectionContainerPattern::DisableMenu()
+{
+    auto overlay = GetOrCreateSelectionSelectOverlay();
+    CHECK_NULL_VOID(overlay);
+    overlay->DisableMenu();
+}
+
+void SelectionContainerPattern::UpdateAISelectMenu()
+{
+    auto overlay = GetOrCreateSelectionSelectOverlay();
+    CHECK_NULL_VOID(overlay);
+    overlay->UpdateAISelectMenu();
+}
+
+bool SelectionContainerPattern::IsCurrentMenuVisibile()
+{
+    auto overlay = GetOrCreateSelectionSelectOverlay();
+    CHECK_NULL_RETURN(overlay, false);
+    return overlay->IsCurrentMenuVisibile();
+}
+
+bool SelectionContainerPattern::GetIsHandleDragging()
+{
+    CHECK_NULL_RETURN(selectionSelectOverlay_, false);
+    return selectionSelectOverlay_->GetIsHandleDragging();
+}
+
+bool SelectionContainerPattern::IsClickAtHandle(const GestureEvent& info)
+{
+    CHECK_NULL_RETURN(selectionSelectOverlay_, false);
+    return selectionSelectOverlay_->IsClickAtHandle(info);
+}
+
+bool SelectionContainerPattern::IsTouchAtHandle(const TouchEventInfo& info)
+{
+    CHECK_NULL_RETURN(selectionSelectOverlay_, false);
+    return selectionSelectOverlay_->IsTouchAtHandle(info);
+}
+
+void SelectionContainerPattern::UpdateAllHandlesOffset()
+{
+    CHECK_NULL_VOID(selectionSelectOverlay_);
+    selectionSelectOverlay_->UpdateAllHandlesOffset();
+}
+
+void SelectionContainerPattern::UpdateViewPort()
+{
+    CHECK_NULL_VOID(selectionSelectOverlay_);
+    selectionSelectOverlay_->UpdateViewPort();
+}
+
+void SelectionContainerPattern::MarkOverlayDirty()
+{
+    CHECK_NULL_VOID(selectionSelectOverlay_);
+    selectionSelectOverlay_->MarkOverlayDirty();
+}
+
+bool SelectionContainerPattern::IsShowMouseMenu()
+{
+    CHECK_NULL_RETURN(selectionSelectOverlay_, false);
+    return selectionSelectOverlay_->IsShowMouseMenu();
+}
+
+void SelectionContainerPattern::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type)
+{
+    CHECK_NULL_VOID(selectionSelectOverlay_);
+    selectionSelectOverlay_->UpdateMenuOnWindowSizeChanged(type);
+}
+
 void SelectionContainerPattern::SetMouseMenuOffset(const OffsetF& offset)
 {
     auto overlay = GetOrCreateSelectionSelectOverlay();
@@ -398,19 +467,51 @@ void SelectionContainerPattern::HandleOnCopy()
     bool containerAllowed = FireOnWillCopy(data.clipboardText);
     if (!containerAllowed) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy blocked by container onWillCopy");
+        overlay->HideMenu(true);
+        return;
     }
 
-    if (containerAllowed) {
-        WriteClipboard(data.clipboardText, data.mergedSpanString, data.hasSpanString, copyOption);
-    }
+    WriteClipboard(data.clipboardText, data.mergedSpanString, data.hasSpanString, copyOption);
     overlay->HideMenu(true);
 
     for (const auto& item : data.allowedChildren) {
         item.child->FireOnCopy(item.payload.plainText);
     }
-    if (containerAllowed) {
-        FireOnCopy(data.clipboardText);
+    FireOnCopy(data.clipboardText);
+}
+
+void SelectionContainerPattern::HandleOnCopyFromAI(const RefPtr<SelectionContainerChild>& child)
+{
+    CHECK_NULL_VOID(child);
+    auto copyPayload = child->GetSelectionCopyPayload();
+    if (copyPayload.plainText.empty()) {
+        return;
     }
+    auto copyOption = child->GetCopyOption();
+    if (copyOption == CopyOptions::None) {
+        return;
+    }
+    // 1. Child OnWillCopy
+    if (!child->FireOnWillCopy(copyPayload.plainText)) {
+        return;
+    }
+    // 2. Container OnWillCopy
+    if (!FireOnWillCopy(copyPayload.plainText)) {
+        return;
+    }
+    // 3. Write clipboard
+    bool hasSpanString = copyPayload.spanString != nullptr;
+    auto mergedSpanString = AceType::MakeRefPtr<MutableSpanString>(u"");
+    if (hasSpanString) {
+        mergedSpanString->AppendSpanString(copyPayload.spanString);
+    } else {
+        mergedSpanString->AppendSpanString(
+            AceType::MakeRefPtr<SpanString>(copyPayload.plainText));
+    }
+    WriteClipboard(copyPayload.plainText, mergedSpanString, hasSpanString, copyOption);
+    // 4. Child OnCopy + Container OnCopy
+    child->FireOnCopy(copyPayload.plainText);
+    FireOnCopy(copyPayload.plainText);
 }
 
 void SelectionContainerPattern::WriteClipboard(const std::u16string& clipboardText,

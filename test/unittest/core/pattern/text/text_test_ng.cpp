@@ -458,7 +458,7 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     pattern->textSelector_.Update(0, TEXT_SIZE_INT);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. call OnHandleMoveDone when SelectOverlay is off.
@@ -812,7 +812,7 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
     textLayoutProperty->UpdateContent("Hello World");
     textPattern->textSelector_.baseOffset = 0;
     textPattern->textSelector_.destinationOffset = 3;
-    ASSERT_NE(textPattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(textPattern->GetOrCreateSelectOverlay(), nullptr);
     textPattern->selectOverlay_->isTriggerParentToScroll_ = true;
     textPattern->OnModifyDone();
     EXPECT_EQ(StringUtils::Str16ToStr8(textPattern->textForDisplay_), "Hello World");
@@ -954,7 +954,7 @@ HWTEST_F(TextTestNg, SetTextSelection001, TestSize.Level1)
     int32_t end = 1;
     OHOS::Ace::SelectionOptions options;
     pattern->SetSelectionFlag(start, end, options);
-    EXPECT_NE(pattern->GetSelectOverlay(), nullptr);
+    EXPECT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 }
 
 /**
@@ -1082,7 +1082,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo001, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. call OnUpdateSelectOverlayInfo with default values.
@@ -1117,7 +1117,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo002, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set isUsingMouse to true.
@@ -1153,7 +1153,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo003, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set isUsingMouse to true and isShowAskCeliaInRightClick to true.
@@ -1186,7 +1186,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo004, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set isSingleHandle to true.
@@ -1218,7 +1218,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo005, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set isHandleLineShow to false.
@@ -1250,7 +1250,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo006, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set mouseMenuOffset.
@@ -1284,7 +1284,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo007, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set handleLevelMode to EMBED.
@@ -1316,7 +1316,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo008, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set enableSubWindowMenu to true.
@@ -1348,7 +1348,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo009, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. call OnUpdateSelectOverlayInfo.
@@ -1382,7 +1382,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo010, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. call OnUpdateSelectOverlayInfo with different requestCode values.
@@ -1411,7 +1411,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo011, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set multiple flags to true.
@@ -1457,7 +1457,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo012, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set isUsingMouse to false explicitly.
@@ -1494,7 +1494,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo013, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. set isUsingMouse to true.
@@ -1531,7 +1531,7 @@ HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo014, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. create overlayInfo with initial values.
@@ -2134,7 +2134,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_StartScroll, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with START_SCROLL.
@@ -2159,7 +2159,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_EndScroll, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with END_SCROLL.
@@ -2184,7 +2184,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_StartAnimation, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with START_ANIMATION.
@@ -2209,7 +2209,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_GeometryChange, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with GEOMETRY_CHANGE.
@@ -2234,7 +2234,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_TransformChange, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with TRANSFORM_CHANGE.
@@ -2259,7 +2259,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_TransitionStart, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with TRANSITION_START.
@@ -2284,7 +2284,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_ContentClipChange, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with CONTENT_CLIP_CHANGE.
@@ -2309,7 +2309,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_MultipleFlags, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with combined flags.
@@ -2336,7 +2336,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_NoneFlag, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with INFO_NONE.
@@ -2361,7 +2361,7 @@ HWTEST_F(TextTestNg, OnAncestorNodeChanged_AllFlags, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     ASSERT_NE(pattern, nullptr);
-    ASSERT_NE(pattern->GetSelectOverlay(), nullptr);
+    ASSERT_NE(pattern->GetOrCreateSelectOverlay(), nullptr);
 
     /**
      * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with CHANGE_ALL.
