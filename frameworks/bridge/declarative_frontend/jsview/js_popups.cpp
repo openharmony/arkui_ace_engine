@@ -17,6 +17,7 @@
 #include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -2420,6 +2421,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
                 info.GetExecutionContext());
             ParseEnableSafeArea(info[NUM_SECOND], contentCoverParam);
         } else if (info[NUM_SECOND]->IsNumber()) {
+            ACE_ENGINE_HISTOGRAM_BOOLEAN("CommonMethod.bindContentCover.ModalTransition", 1);
             auto transitionNumber = info[NUM_SECOND]->ToNumber<int32_t>();
             if (transitionNumber >= TRANSITION_NUM_ZERO && transitionNumber <= TRANSITION_NUM_TWO) {
                 modalStyle.modalTransition = static_cast<NG::ModalTransition>(transitionNumber);

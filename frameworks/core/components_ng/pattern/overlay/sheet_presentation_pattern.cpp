@@ -19,6 +19,7 @@
 #include "core/components_ng/syntax/with_theme_node.h"
 
 #include "base/geometry/dimension.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
@@ -584,6 +585,7 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
 
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.systemMaterial) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("bindSheet.SheetOptions.systemMaterial", 1);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
     }
 }
@@ -1300,6 +1302,7 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
     auto sheetEdgeLightMode = GetSheetEdgeLightMode();
     if (SheetEdgeLightBase::CheckIfNeedShowEdgeLight(sheetEdgeLightMode, sheetType) && isTransitionIn &&
         isFirstTransition) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("bindSheet.SheetOptions.edgeLightMode", 1);
         SheetEdgeLightBase::SetSheetEdgeLightTransitionPreShow(host);
         AnimationOption optionEdgeLight = SheetEdgeLightBase::GetSheetEdgeLightAnimatePreShowOption();
         const std::function<void()> event = SheetEdgeLightBase::GetSheetEdgeLightAnimateEvent(host);

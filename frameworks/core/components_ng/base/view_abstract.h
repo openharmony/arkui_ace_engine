@@ -1259,6 +1259,7 @@ private:
     static void ResetImmersiveShadowToDefault(
         const RefPtr<Pattern>& pattern, const RefPtr<RenderContext>& renderContext);
     static void RegisterTransparencyListener(const RefPtr<FrameNode>& frameNode);
+    static void HistogramImmersiveOptions(const ImmersiveMaterialConfig& config);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

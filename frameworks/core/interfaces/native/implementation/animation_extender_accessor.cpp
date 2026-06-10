@@ -90,6 +90,7 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
     auto animationInterfaceName = GetAnimationInterfaceName(interface);
     CHECK_NULL_VOID(animationInterfaceName);
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
+        HistogramInfiniteAnimationEvent(interface);
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
                 "keyframeAnimateTo iteration is infinite, remember to stop it. total duration:%{public}d",
@@ -149,6 +150,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
 {
     auto triggerId = pipelineContext->GetInstanceId();
     ACE_SCOPED_TRACE("%s, instanceId:%d, finish cnt:%d", option.ToString().c_str(), triggerId, count.value_or(-1));
+    PrintAnimationInfo(
+        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
     NG::ScopedViewStackProcessor scopedProcessor;
     AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
@@ -495,6 +498,8 @@ void AnimateToImmediatelyImplImpl(Ark_VMContext vmContext,
         std::function<void()> onFinishEvent = GetContainerScopedSyncInvoker(*onFinish, currentId);
         option.SetOnFinishEvent(onFinishEvent);
     }
+    option.SetAnimationInterface(
+        immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
 
     ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, immediately);
 }
@@ -546,6 +551,9 @@ void KeyframeAnimationImplImpl(Ark_VMContext vmContext,
     }
     option.SetDuration(totalDuration);
     option.SetCurve(Curves::EASE_IN_OUT);
+    PrintAnimationInfo(option, AnimationInterface::KEYFRAME_ANIMATE_TO, count);
+    option.SetAnimationInterface(AnimationInterface::KEYFRAME_ANIMATE_TO);
+    NG::ScopedViewStackProcessor scopedProcessor;
     StartKeyframeAnimation(pipelineContext, option, parsedKeyframes, count);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }

@@ -33,6 +33,11 @@ ohos_shared_library("animator_ani") {
     "runtime_core:ani",
     "runtime_core:ani_helpers",
   ]
+  defines = []
+  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+  }
   part_name = "ace_engine"
   subsystem_name = "arkui"
   output_extension = "so"

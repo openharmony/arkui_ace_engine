@@ -604,6 +604,7 @@ template("declarative_js_engine") {
 
     if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
       external_deps += [ "api_metrics:histogrammanager" ]
+      defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
 
     if (defined(config.form_components_support) &&
@@ -1087,6 +1088,7 @@ template("declarative_js_engine_ng") {
 
     if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
       external_deps += [ "api_metrics:histogrammanager" ]
+      defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {

@@ -28,6 +28,7 @@
 #include "interop_js/hybridgref_napi.h"
 #include "napi/kits/animator/animator_option.h"
 
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
@@ -831,6 +832,9 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     // create animator and construct animatorResult
     auto option = std::make_shared<Napi::AnimatorOption>();
     ParseAnimatorOption(env, aniOption, option);
+    if (option->iterations == ANIMATION_REPEAT_INFINITE && option->duration == 0) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("@ohos.animator.create", 1);
+    }
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] option is %{public}s", option->ToString().c_str());
     auto animator = CREATE_ANIMATOR("ohos.animator");
     animator->AttachSchedulerOnContainer();
@@ -864,6 +868,9 @@ static void ANIReset(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     ani_vm* vm = GetAniVm(env);
     CHECK_NULL_VOID(vm);
     ParseAnimatorOption(env, options, option);
+    if (option->iterations == ANIMATION_REPEAT_INFINITE && option->duration == 0) {
+        ACE_ENGINE_HISTOGRAM_BOOLEAN("@ohos.animator.reset", 1);
+    }
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();

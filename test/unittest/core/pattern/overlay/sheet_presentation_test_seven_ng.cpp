@@ -30,6 +30,7 @@
 
 #include "core/common/ace_engine.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
@@ -1690,4 +1691,106 @@ HWTEST_F(SheetPresentationTestSevenNg, UpdatePopupInfoAndRemeasure002, TestSize.
 
     SheetPresentationTestSevenNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: SetSheetRenderMaterial_SystemMaterial
+ * @tc.desc: Test SetSheetRenderMaterial when sheetStyle has systemMaterial set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSevenNg, SetSheetRenderMaterial_SystemMaterial, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create sheet node with systemMaterial in sheetStyle.
+     * @tc.steps: step2. Call SetSheetRenderMaterial.
+     * @tc.expected: step2. No crash, systemMaterial is set on renderContext.
+     */
+    SheetPresentationTestSevenNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    sheetStyle.systemMaterial = material;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->SetSheetRenderMaterial();
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    ASSERT_NE(resultMaterial, nullptr);
+    EXPECT_EQ(resultMaterial->GetType(), static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+
+    SheetPresentationTestSevenNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetRenderMaterial_NoSystemMaterial
+ * @tc.desc: Test SetSheetRenderMaterial when sheetStyle has no systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSevenNg, SetSheetRenderMaterial_NoSystemMaterial, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create sheet node without systemMaterial in sheetStyle.
+     * @tc.steps: step2. Call SetSheetRenderMaterial.
+     * @tc.expected: step2. No crash, no systemMaterial set on renderContext.
+     */
+    SheetPresentationTestSevenNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 102, AceType::MakeRefPtr<SheetPresentationPattern>(202, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SheetStyle sheetStyle;
+    sheetStyle.systemMaterial = nullptr;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    sheetPattern->SetSheetRenderMaterial();
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSystemMaterial(), nullptr);
+
+    SheetPresentationTestSevenNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SheetTransitionForOverlay_EdgeLightMode
+ * @tc.desc: Test SheetTransitionForOverlay with edgeLightMode set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSevenNg, SheetTransitionForOverlay_EdgeLightMode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create sheet node with edgeLightMode set.
+     * @tc.steps: step2. Call SheetTransitionForOverlay with isTransitionIn=true, isFirstTransition=true.
+     * @tc.expected: step2. No crash, function returns normally.
+     */
+    SheetPresentationTestSevenNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->sheetEdgeLightMode_ = EdgeLightMode::EDGELIGHT_ENABLED;
+    sheetPattern->SheetTransitionForOverlay(true, true);
+    EXPECT_EQ(sheetPattern->GetSheetEdgeLightMode(), EdgeLightMode::EDGELIGHT_ENABLED);
+    SheetPresentationTestSevenNg::TearDownTestCase();
+}
+
 } // namespace OHOS::Ace::NG
