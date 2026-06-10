@@ -1303,7 +1303,8 @@ public:
         isNeedCallbackAreaChange_ = needChange;
     }
 
-    uint32_t ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params);
+    std::pair<uint32_t, std::string> ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params,
+        const sptr<IRemoteObject>& remoteObj, int32_t nodeId = -1);
     void OnDumpBindAICaller(const std::vector<std::string>& params) const;
     bool GetIsRequestFrame() const;
 

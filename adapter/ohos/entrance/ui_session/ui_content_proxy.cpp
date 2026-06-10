@@ -980,17 +980,27 @@ int32_t UIContentServiceProxy::GetImagesById(
 }
 
 int32_t UIContentServiceProxy::ExeAppAIFunction(
-    const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
+    const std::string& funcName, const std::string& params, const sptr<IRemoteObject>& remoteObj, int32_t nodeId,
+    const std::function<void(uint32_t, std::string)>& finishCallback)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("ExeAppAIFunction write interface token failed");
         return FAILED;
     }
-    if (!data.WriteString(funcName) || !data.WriteString(params)) {
+    bool hasRemoteObj = remoteObj != nullptr;
+    if (!data.WriteString(funcName) || !data.WriteString(params) || !data.WriteBool(hasRemoteObj)) {
         LOGW("ExeAppAIFunction write data failed");
+        return FAILED;
+    }
+    if (hasRemoteObj && !data.WriteRemoteObject(remoteObj)) {
+        LOGW("ExeAppAIFunction write remoteObj failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(nodeId)) {
+        LOGW("ExeAppAIFunction write nodeId failed");
         return FAILED;
     }
     if (report_ == nullptr) {

@@ -24,6 +24,8 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceProxy : public IRemoteProxy<IUiContentService> {
 public:
+    using IUiContentService::ExeAppAIFunction;
+
     explicit UIContentServiceProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IUiContentService>(impl) {};
     virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
         ParamConfig config = ParamConfig(), int32_t timeout = DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS) override;
@@ -85,8 +87,8 @@ public:
         const std::function<void(std::string, int32_t, bool)>& eventCallback,
         InteractionParamConfig config = InteractionParamConfig()) override;
     virtual int32_t ExeAppAIFunction(
-        const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
-        override;
+        const std::string& funcName, const std::string& params, const sptr<IRemoteObject>& remoteObj, int32_t nodeId,
+        const std::function<void(uint32_t, std::string)>& finishCallback) override;
     virtual int32_t RegisterContentChangeCallback(const ContentChangeConfig& config,
         const std::function<void(ChangeType type, const std::string& simpleTree)> callback) override;
     virtual int32_t UnregisterContentChangeCallback() override;

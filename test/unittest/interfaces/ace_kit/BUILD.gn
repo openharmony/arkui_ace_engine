@@ -198,6 +198,7 @@ ohos_unittest("ace_kit_test") {
 
   include_dirs = [
     "$ace_root/interfaces/inner_api/ace_kit/src/",
+    "$ace_root/test/mock/ohos_mock/ipc_single",
   ]
 
   deps = [

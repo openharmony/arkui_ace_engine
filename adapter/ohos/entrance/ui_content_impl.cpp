@@ -6711,16 +6711,18 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
 void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     auto exeAppAIFunctionCallback = [weakTaskExecutor = taskExecutor](
-        const std::string& funcName, const std::string& params) -> uint32_t {
+        const std::string& funcName, const std::string& params, const sptr<IRemoteObject>& remoteObj,
+        int32_t nodeId) ->
+        std::pair<uint32_t, std::string> {
         static constexpr uint32_t AI_CALL_ENV_INVALID = 4;
         auto taskExecutor = weakTaskExecutor.Upgrade();
-        CHECK_NULL_RETURN(taskExecutor, AI_CALL_ENV_INVALID);
-        uint32_t result = AI_CALL_ENV_INVALID;
+        CHECK_NULL_RETURN(taskExecutor, std::make_pair(AI_CALL_ENV_INVALID, ""));
+        std::pair<uint32_t, std::string> result = { AI_CALL_ENV_INVALID, "" };
         taskExecutor->PostSyncTask(
-            [funcName, params, &result]() {
+            [funcName, params, remoteObj, nodeId, &result]() {
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
-                result = pipeline->ExeAppAIFunctionCallback(funcName, params);
+                result = pipeline->ExeAppAIFunctionCallback(funcName, params, remoteObj, nodeId);
             },
             TaskExecutor::TaskType::UI, "UiSessionExeAppAIFunction");
         return result;

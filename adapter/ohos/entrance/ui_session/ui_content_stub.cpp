@@ -526,7 +526,20 @@ int32_t UiContentStub::ExeAppAIFunctionInner(MessageParcel& data, MessageParcel&
 {
     std::string funcName = data.ReadString();
     std::string params = data.ReadString();
-    reply.WriteInt32(ExeAppAIFunction(funcName, params, nullptr));
+    sptr<IRemoteObject> remoteObj = nullptr;
+    bool hasRemoteObj = data.ReadBool();
+    if (hasRemoteObj) {
+        remoteObj = data.ReadRemoteObject();
+        if (remoteObj == nullptr) {
+            LOGW("ExeAppAIFunction read remoteObj failed");
+            reply.WriteInt32(FAILED);
+            return FAILED;
+        }
+    }
+    int32_t nodeId = data.ReadInt32();
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    UiSessionManager::GetInstance()->SaveProcessId("ExeAppAIFunction", processId);
+    reply.WriteInt32(ExeAppAIFunction(funcName, params, remoteObj, nodeId, nullptr));
     return NO_ERROR;
 }
 

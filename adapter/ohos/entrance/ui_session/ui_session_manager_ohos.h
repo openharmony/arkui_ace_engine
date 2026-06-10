@@ -121,10 +121,10 @@ public:
     void SendCommand(const std::string& command) override;
     void SaveSendCommandFunction(SendCommandFunction&& function) override;
     void SaveRelaxedCommandFunction(RelaxedCommandFunction&& function) override;
-    void RegisterPipeLineExeAppAIFunction(
-        std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) override;
-    void ExeAppAIFunction(const std::string& funcName, const std::string& params) override;
-    void SendExeAppAIFunctionResult(uint32_t result) override;
+    void RegisterPipeLineExeAppAIFunction(ExeAppAIFunctionFunction&& callback) override;
+    void ExeAppAIFunction(const std::string& funcName, const std::string& params,
+        const sptr<IRemoteObject>& remoteObj, int32_t nodeId = -1) override;
+    void SendExeAppAIFunctionResult(uint32_t result, const std::string& data) override;
     void RegisterContentChangeCallback(const ContentChangeConfig& config) override;
     void UnregisterContentChangeCallback() override;
     void ReportContentChangeEvent(ChangeType type, const std::string& simpleTree) override;

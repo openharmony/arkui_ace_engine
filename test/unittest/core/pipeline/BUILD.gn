@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("pipeline_context_test_ng") {
   type = "pipeline"
   module_name = "Pipeline"
+  include_dirs = [ "$ace_root/test/mock/ohos_mock/ipc_single" ]
   sources = [
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/log/log_wrapper.cpp",

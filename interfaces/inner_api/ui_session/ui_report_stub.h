@@ -254,8 +254,8 @@ public:
         MultiImageQueryErrorCode arkUIErrorCode) override;
     void SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
             std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode) override;
-    void RegisterExeAppAIFunction(const std::function<void(uint32_t)>& finishCallback);
-    void SendExeAppAIFunctionResult(uint32_t result) override;
+    void RegisterExeAppAIFunction(const std::function<void(uint32_t, std::string)>& finishCallback);
+    void SendExeAppAIFunctionResult(uint32_t result, const std::string& data) override;
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
     void RegisterContentChangeCallback(
         const std::function<void(ChangeType type, const std::string& simpleTree)> callback);
@@ -294,7 +294,7 @@ private:
         MultiImageQueryErrorCode)> getImagesByIdArkUIFinishCallback_;
     std::function<void(int32_t, const std::map<int32_t, std::map<int32_t, std::shared_ptr<Media::PixelMap>>>&,
         MultiImageQueryErrorCode)> getImagesByIdArkWebFinishCallback_;
-    std::function<void(uint32_t)> exeAppAIFunctionCallback_;
+    std::function<void(uint32_t, std::string)> exeAppAIFunctionCallback_;
     std::function<void(ChangeType type, const std::string& simpleTree)> contentChangeCallback_;
     std::function<void(std::vector<std::string>)> getStateMgmtInfoCallback_;
 

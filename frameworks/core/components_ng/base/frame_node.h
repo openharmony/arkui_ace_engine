@@ -1488,10 +1488,12 @@ public:
      * @description: this callback triggered by ai assistant by ui_session proxy.
      * @param funcName function name of the target function.
      * @param params params for target function in json format.
-     * @return check ai function call success or not:
+     * @param remoteObj remote object.
+     * @return pair containing result code and result data:
      * 0 means success, 1 means aiCallerHelper_ is null, 2 means functionName not found
      */
-    uint32_t CallAIFunction(const std::string& functionName, const std::string& params);
+    std::pair<uint32_t, std::string> CallAIFunction(const std::string& functionName, const std::string& params,
+        const sptr<IRemoteObject>& remoteObj);
 
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
 

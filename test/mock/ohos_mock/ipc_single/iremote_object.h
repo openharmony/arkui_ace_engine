@@ -16,14 +16,31 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_TEST_MOCK_MOCK_IREMOTE_OBJECT_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_TEST_MOCK_MOCK_IREMOTE_OBJECT_H
 
-#include "refbase.h"
 #include <string>
+
+#include "refbase.h"
 
 namespace OHOS {
 class IRemoteObject {
 public:
     explicit IRemoteObject(const std::u16string& descriptor = std::u16string()) {}
     virtual ~IRemoteObject() = default;
+
+    void IncStrongRef(const void* objectId = nullptr)
+    {
+        (void)objectId;
+    }
+
+    void DecStrongRef(const void* objectId = nullptr)
+    {
+        (void)objectId;
+    }
+
+    bool AttemptIncStrongRef(const void* objectId = nullptr)
+    {
+        (void)objectId;
+        return true;
+    }
 
     class DeathRecipient {
     public:
@@ -41,6 +58,22 @@ public:
         DeathRecipient() = default;
         virtual ~DeathRecipient() = default;
 
+        void IncStrongRef(const void* objectId = nullptr)
+        {
+            (void)objectId;
+        }
+
+        void DecStrongRef(const void* objectId = nullptr)
+        {
+            (void)objectId;
+        }
+
+        bool AttemptIncStrongRef(const void* objectId = nullptr)
+        {
+            (void)objectId;
+            return true;
+        }
+
         /**
          * @brief Called to perform subsequent operations when a death notification of the remote object is received.
          * @param object Indicates the IRemoteObject pointer object.
@@ -49,6 +82,18 @@ public:
          */
         virtual void OnRemoteDied(const wptr<IRemoteObject> &object) = 0;
     };
+
+    bool AddDeathRecipient(const sptr<DeathRecipient>& recipient)
+    {
+        (void)recipient;
+        return true;
+    }
+
+    bool RemoveDeathRecipient(const sptr<DeathRecipient>& recipient)
+    {
+        (void)recipient;
+        return true;
+    }
 };
 }
 

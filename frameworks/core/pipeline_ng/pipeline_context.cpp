@@ -237,16 +237,50 @@ RefPtr<NG::UINode> GetAtomicServiceDumpNode(const RefPtr<NG::FrameNode>& dumpBeg
     return nullptr;
 }
 
+constexpr uint32_t AI_CALL_NODE_INVALID = 3;
+constexpr uint32_t AI_CALL_NODE_AMBIGUOUS = 5;
+
+std::vector<RefPtr<NG::FrameNode>> CollectCandidateNavDestinationNodes(const std::list<RefPtr<NG::FrameNode>>& navNodes)
+{
+    std::vector<RefPtr<NG::FrameNode>> result;
+    for (const auto& node : navNodes) {
+        CHECK_NULL_CONTINUE(node);
+        if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            result.emplace_back(node);
+        }
+    }
+    return result;
+}
+
+std::string BuildExeAppAIFunctionAmbiguousData(
+    const std::string& funcName, const std::vector<RefPtr<NG::FrameNode>>& candidateNodes)
+{
+    auto root = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(root, "");
+    root->Put("funcName", funcName.c_str());
+    auto candidateNodeIds = JsonUtil::CreateArray();
+    CHECK_NULL_RETURN(candidateNodeIds, root->ToString());
+    for (const auto& node : candidateNodes) {
+        CHECK_NULL_CONTINUE(node);
+        auto nodeId = JsonUtil::ParseJsonString(std::to_string(node->GetId()));
+        CHECK_NULL_CONTINUE(nodeId);
+        candidateNodeIds->PutRef(std::move(nodeId));
+    }
+    root->PutRef("candidateNodeIds", std::move(candidateNodeIds));
+    return root->ToString();
+}
+
 class TestAICaller : public AICallerHelper {
 public:
     TestAICaller() = default;
     ~TestAICaller() override = default;
-    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    std::pair<bool, std::string> onAIFunctionCaller(const std::string& funcName, const std::string& params,
+        const sptr<IRemoteObject>& remoteObj) override
     {
         if (funcName.compare("Success") == 0) {
-            return true;
+            return { true, "success" };
         }
-        return false;
+        return { false, "" };
     }
 };
 } // namespace
@@ -7819,16 +7853,27 @@ bool PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
     return ret;
 }
 
-uint32_t PipelineContext::ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params)
+std::pair<uint32_t, std::string> PipelineContext::ExeAppAIFunctionCallback(const std::string& funcName,
+    const std::string& params, const sptr<IRemoteObject>& remoteObj, int32_t nodeId)
 {
-    static constexpr uint32_t AI_CALL_NODE_INVALID = 3;
     std::list<RefPtr<NG::FrameNode>> navNodes;
-    CHECK_NULL_RETURN(rootNode_, AI_CALL_NODE_INVALID);
+    CHECK_NULL_RETURN(rootNode_, std::make_pair(AI_CALL_NODE_INVALID, ""));
     rootNode_->FindTopNavDestination(navNodes);
-    CHECK_NULL_RETURN(!navNodes.empty(), AI_CALL_NODE_INVALID);
-    auto topNavNode = navNodes.back();
-    CHECK_NULL_RETURN(topNavNode, AI_CALL_NODE_INVALID);
-    return topNavNode->CallAIFunction(funcName, params);
+    auto candidateNodes = CollectCandidateNavDestinationNodes(navNodes);
+    CHECK_NULL_RETURN(!candidateNodes.empty(), std::make_pair(AI_CALL_NODE_INVALID, ""));
+    if (nodeId != -1) {
+        for (const auto& node : candidateNodes) {
+            CHECK_NULL_CONTINUE(node);
+            if (node->GetId() == nodeId) {
+                return node->CallAIFunction(funcName, params, remoteObj);
+            }
+        }
+        return { AI_CALL_NODE_INVALID, "" };
+    }
+    if (candidateNodes.size() > 1) {
+        return { AI_CALL_NODE_AMBIGUOUS, BuildExeAppAIFunctionAmbiguousData(funcName, candidateNodes) };
+    }
+    return candidateNodes.front()->CallAIFunction(funcName, params, remoteObj);
 }
 
 void PipelineContext::OnDumpBindAICaller(const std::vector<std::string>& params) const
