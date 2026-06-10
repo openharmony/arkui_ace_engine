@@ -51,6 +51,7 @@ public:
     ~VideoStateMachinePattern() override;
 
     void OnControllerDestroyed();
+    void SetVideoControllerAsync(const RefPtr<VideoControllerAsync>& videoControllerAsync);
 
     bool IsEnableMatchParent() override
     {

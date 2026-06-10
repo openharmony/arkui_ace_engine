@@ -1137,6 +1137,9 @@ typedef struct Opt_VerticalAlignParam Opt_VerticalAlignParam;
 typedef struct VideoControllerPeer VideoControllerPeer;
 typedef struct VideoControllerPeer* Ark_VideoController;
 typedef struct Opt_VideoController Opt_VideoController;
+typedef struct VideoControllerAsyncPeer VideoControllerAsyncPeer;
+typedef struct VideoControllerAsyncPeer* Ark_VideoControllerAsync;
+typedef struct Opt_VideoControllerAsync Opt_VideoControllerAsync;
 typedef struct Ark_VP Ark_VP;
 typedef struct Opt_VP Opt_VP;
 typedef struct WantPeer WantPeer;
@@ -10118,6 +10121,10 @@ typedef struct Opt_VideoController {
     Ark_Tag tag;
     Ark_VideoController value;
 } Opt_VideoController;
+typedef struct Opt_VideoControllerAsync {
+    Ark_Tag tag;
+    Ark_VideoControllerAsync value;
+} Opt_VideoControllerAsync;
 typedef struct Ark_VP {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -21132,6 +21139,7 @@ typedef struct Ark_VideoOptions {
     Opt_Union_F64_String_PlaybackSpeed currentProgressRate;
     Opt_Union_String_image_PixelMap_Resource previewUri;
     Opt_VideoController controller;
+    Opt_VideoControllerAsync controllerAsync;
     Opt_ImageAIOptions imageAIOptions;
     Opt_PosterOptions posterOptions;
 } Ark_VideoOptions;
@@ -32378,6 +32386,34 @@ typedef struct GENERATED_ArkUIVideoControllerAccessor {
     void (*reset)(Ark_VideoController peer);
 } GENERATED_ArkUIVideoControllerAccessor;
 
+typedef struct GENERATED_ArkUIVideoControllerAsyncAccessor {
+    void (*destroyPeer)(Ark_VideoControllerAsync peer);
+    Ark_VideoControllerAsync (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*start)(Ark_VMContext vmContext,
+                  Ark_AsyncWorkerPtr asyncWorker,
+                  Ark_VideoControllerAsync peer,
+                  const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*pause)(Ark_VMContext vmContext,
+                  Ark_AsyncWorkerPtr asyncWorker,
+                  Ark_VideoControllerAsync peer,
+                  const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*stop)(Ark_VMContext vmContext,
+                 Ark_AsyncWorkerPtr asyncWorker,
+                 Ark_VideoControllerAsync peer,
+                 const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*requestFullscreen)(Ark_VideoControllerAsync peer,
+                              Ark_Boolean value);
+    void (*exitFullscreen)(Ark_VideoControllerAsync peer);
+    void (*setCurrentTime)(Ark_VideoControllerAsync peer,
+                           Ark_Float64 value,
+                           const Opt_SeekMode* seekMode);
+    void (*reset)(Ark_VMContext vmContext,
+                  Ark_AsyncWorkerPtr asyncWorker,
+                  Ark_VideoControllerAsync peer,
+                  const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+} GENERATED_ArkUIVideoControllerAsyncAccessor;
+
 typedef struct GENERATED_ArkUIWebContextMenuParamAccessor {
     void (*destroyPeer)(Ark_WebContextMenuParam peer);
     Ark_WebContextMenuParam (*construct)();
@@ -32868,6 +32904,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUrlStyleAccessor* (*getUrlStyleAccessor)();
     const GENERATED_ArkUIVerifyPinHandlerAccessor* (*getVerifyPinHandlerAccessor)();
     const GENERATED_ArkUIVideoControllerAccessor* (*getVideoControllerAccessor)();
+    const GENERATED_ArkUIVideoControllerAsyncAccessor* (*getVideoControllerAsyncAccessor)();
     const GENERATED_ArkUIWebContextMenuParamAccessor* (*getWebContextMenuParamAccessor)();
     const GENERATED_ArkUIWebContextMenuResultAccessor* (*getWebContextMenuResultAccessor)();
     const GENERATED_ArkUIWebKeyboardControllerAccessor* (*getWebKeyboardControllerAccessor)();

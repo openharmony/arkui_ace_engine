@@ -20,7 +20,10 @@
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_static.h"
 #include "core/interfaces/native/implementation/content_transition_effect_peer_impl.h"
+#include "core/interfaces/native/implementation/video_controller_async_peer_impl.h"
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
+#include "core/components_ng/pattern/video/video_state_machine_pattern.h"
+#include "core/components_ng/pattern/video/video_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -39,6 +42,7 @@ struct VideoOptions {
     double currentProgressRate;
     ImageSourceInfo previewSourceInfo;
     RefPtr<VideoControllerV2> videoController;
+    RefPtr<VideoControllerAsync> videoControllerAsync;
     bool showFirstFrame;
     ContentTransitionType contentTransitionType;
 };
@@ -94,13 +98,27 @@ VideoOptions Convert(const Ark_VideoOptions& src)
     options.previewSourceInfo = Converter::OptConvert<ImageSourceInfo>(src.previewUri)
         .value_or(ImageSourceInfo("", "", ""));
 
-    // controller
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_VideoController>(src.controller);
-    CHECK_NULL_RETURN(abstPeerPtrOpt, options);
-    auto peerImplPtr = abstPeerPtrOpt.value();
-    CHECK_NULL_RETURN(peerImplPtr, options);
-    peerImplPtr->SetInstanceId(OHOS::Ace::Container::CurrentId());
-    options.videoController = peerImplPtr->GetController();
+    // controllerAsync (priority over controller)
+    auto asyncPeerPtrOpt = Converter::OptConvert<Ark_VideoControllerAsync>(src.controllerAsync);
+    if (asyncPeerPtrOpt) {
+        auto asyncPeerImplPtr = asyncPeerPtrOpt.value();
+        if (asyncPeerImplPtr) {
+            asyncPeerImplPtr->SetInstanceId(OHOS::Ace::Container::CurrentId());
+            options.videoControllerAsync = asyncPeerImplPtr->GetController();
+        }
+    }
+
+    // controller (only if controllerAsync is not set)
+    if (!options.videoControllerAsync) {
+        auto abstPeerPtrOpt = Converter::OptConvert<Ark_VideoController>(src.controller);
+        if (abstPeerPtrOpt) {
+            auto peerImplPtr = abstPeerPtrOpt.value();
+            if (peerImplPtr) {
+                peerImplPtr->SetInstanceId(OHOS::Ace::Container::CurrentId());
+                options.videoController = peerImplPtr->GetController();
+            }
+        }
+    }
 
     // posterOptions
     options.showFirstFrame = false;
@@ -152,14 +170,64 @@ void SetVideoOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto options = Converter::Convert<VideoOptions>(*value);
+
+    auto currentPattern = frameNode->GetPattern();
+    bool isCurrentAsync = AceType::InstanceOf<VideoStateMachinePattern>(currentPattern);
+    auto videoNode = AceType::DynamicCast<VideoNode>(frameNode);
+
+    if (options.videoControllerAsync) {
+        // Must use async mode (VideoStateMachinePattern)
+        if (videoNode && !isCurrentAsync) {
+            // sync -> async: ReplacePattern and recreate control bar
+            auto oldControllerRow = videoNode->GetControllerRow();
+            if (oldControllerRow) {
+                videoNode->RemoveChild(oldControllerRow);
+            }
+            auto newPattern = AceType::MakeRefPtr<VideoStateMachinePattern>(options.videoControllerAsync);
+            videoNode->ReplacePattern(newPattern);
+            auto controllerRowNode = newPattern->CreateControlBar(-1);
+            if (controllerRowNode) {
+                videoNode->AddChild(controllerRowNode);
+            }
+        } else if (videoNode && isCurrentAsync) {
+            // async -> async: Update controller only
+            auto stateMachinePattern = AceType::DynamicCast<VideoStateMachinePattern>(currentPattern);
+            if (stateMachinePattern) {
+                stateMachinePattern->SetVideoControllerAsync(options.videoControllerAsync);
+            }
+        }
+    } else {
+        // No async controller, must use sync mode (VideoPattern)
+        if (videoNode && isCurrentAsync) {
+            // async -> sync: ReplacePattern back and recreate control bar
+            auto oldControllerRow = videoNode->GetControllerRow();
+            if (oldControllerRow) {
+                videoNode->RemoveChild(oldControllerRow);
+            }
+            auto oldPattern = AceType::DynamicCast<VideoStateMachinePattern>(currentPattern);
+            if (oldPattern) {
+                oldPattern->OnControllerDestroyed();
+            }
+            auto newPattern = VideoModelStatic::CreateVideoStaticPattern(options.videoController);
+            videoNode->ReplacePattern(newPattern);
+            auto videoPattern = AceType::DynamicCast<VideoPattern>(newPattern);
+            if (videoPattern) {
+                auto controllerRowNode = videoPattern->CreateControlBar(-1);
+                if (controllerRowNode) {
+                    videoNode->AddChild(controllerRowNode);
+                }
+            }
+        } else if (options.videoController) {
+            // sync -> sync
+            VideoModelStatic::SetVideoController(frameNode, options.videoController);
+        }
+    }
+
     VideoModelStatic::SetSrc(frameNode, options.src, options.bundleNameSrc, options.moduleNameSrc);
     VideoModelStatic::SetProgressRate(frameNode, options.currentProgressRate);
     VideoModelStatic::SetPosterSourceInfo(frameNode, options.previewSourceInfo);
     VideoModelStatic::SetShowFirstFrame(frameNode, options.showFirstFrame);
     VideoModelStatic::SetContentTransition(frameNode, options.contentTransitionType);
-    if (options.videoController) {
-        VideoModelStatic::SetVideoController(frameNode, options.videoController);
-    }
 }
 } // VideoInterfaceModifier
 namespace VideoAttributeModifier {
