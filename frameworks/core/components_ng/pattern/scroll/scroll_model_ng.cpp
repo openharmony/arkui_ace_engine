@@ -534,7 +534,11 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
     if (axis == Axis::FREE || pattern->GetAxis() == Axis::FREE) {
         return; // calling SetAxis would disrupt the axisChanged signal in ::OnModifyDone and initialization of FreeScroll
     }
-    pattern->SetAxis(axis);
+    bool axisChanged = axis != pattern->GetAxis();
+    if (axisChanged) {
+        pattern->SetAxis(axis);
+        pattern->ResetPosition();
+    }
 }
 
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
