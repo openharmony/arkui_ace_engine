@@ -1213,6 +1213,15 @@ public:
         return isThreadSafeNode_;
     }
 
+    // Returns true if this node was created in an isolated thread (dc/card scenario).
+    // The flag is determined at construction time from ContainerScope::IsIsolatedThread()
+    // and is immutable for the node's entire lifecycle.
+    // Used for IsolatedThread consistency validation between nodes and pipelines.
+    bool IsIsolatedThread() const
+    {
+        return isIsolatedThread_;
+    }
+
     bool IsFree() const
     {
         return isFree_;
@@ -1400,6 +1409,11 @@ private:
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool isThreadSafeNode_ = false;
+    // Indicates whether this node was created in an isolated (dc/card) thread.
+    // Set at construction from ContainerScope::IsIsolatedThread() and never changes afterwards.
+    // Used for IsolatedThread consistency validation: node should operate on pipeline
+    // with matching IsolatedThread identity to avoid cross-domain routing issues.
+    bool isIsolatedThread_ = false;
     bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
     bool isRunningPendingUnsafeTask_ = false;
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;

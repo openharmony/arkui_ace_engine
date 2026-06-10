@@ -324,6 +324,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+    // Snapshot the thread's isolated state at pipeline creation time.
+    // This determines the pipeline's IsolatedThread identity for its entire lifecycle.
+    isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -358,6 +361,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+    // Snapshot the thread's isolated state at pipeline creation time.
+    isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
 
 PipelineContext::PipelineContext()
@@ -387,6 +392,8 @@ PipelineContext::PipelineContext()
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+    // Snapshot the thread's isolated state at pipeline creation time.
+    isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
 
 bool PipelineContext::GetIsRequestVsync()
@@ -547,6 +554,13 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
     if (!CheckThreadSafe()) {
         LOGW("AddDirtyPropertyNode doesn't run on UI thread!");
     }
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (dirtyNode && isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
+        LOGW("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
+        LogBacktrace();
+    }
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -558,6 +572,13 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     if (!dirtyNode) {
         LOGW("dirtyNode invalid");
         return;
+    }
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
+        LOGW("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
+        LogBacktrace();
     }
     auto customNode = DynamicCast<CustomNode>(dirtyNode);
     if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
@@ -582,6 +603,13 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     if (IsDestroyed()) {
         LOGW("Cannot add dirty layout node as the pipeline context is destroyed.");
         return;
+    }
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
+        LOGW("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
+        LogBacktrace();
     }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
@@ -642,6 +670,13 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
         LOGW("Cannot add dirty render node as the pipeline context is destroyed.");
         return;
     }
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
+        LOGW("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
+        LogBacktrace();
+    }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
@@ -669,6 +704,13 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
 {
+    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    if (node && isIsolatedThread_ != node->IsIsolatedThread()) {
+        LOGW("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+            "node=%{public}d isolated=%{public}d",
+            GetInstanceId(), isIsolatedThread_, node->GetId(), node->IsIsolatedThread());
+        LogBacktrace();
+    }
     dirtyFreezeNode_.emplace_back(WeakClaim(node));
     hasIdleTasks_ = true;
     RequestFrame();

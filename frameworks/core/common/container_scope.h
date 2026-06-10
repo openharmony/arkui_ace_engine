@@ -107,6 +107,10 @@ public:
     // RecentActiveId, RecentForegroundId, DefaultId) check isIsolatedThread_ internally
     // and return thread-local values when true.
     static void MarkIsolatedThread();
+    // Query whether current thread is marked as isolated (dc/card scenario).
+    // Returns true only after MarkIsolatedThread() has been called on this thread.
+    // Used by UINode and PipelineContext at construction to snapshot their IsolatedThread identity.
+    static bool IsIsolatedThread();
     static void AddLocal(int32_t id);
     static void RemoveLocal(int32_t id);
     static void ResetIsolatedThread();

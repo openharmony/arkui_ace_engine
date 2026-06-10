@@ -120,6 +120,11 @@ void ContainerScope::CheckIdChange(int32_t id)
 
 void ContainerScope::MarkIsolatedThread() {}
 
+bool ContainerScope::IsIsolatedThread()
+{
+    return false;
+}
+
 void ContainerScope::AddLocal(int32_t id)
 {
     (void)id;
