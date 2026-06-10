@@ -28,6 +28,7 @@ ace_unittest("video_test_ng") {
     "video_state_machine_pattern_test.cpp",
     "video_state_machine_pattern_test_two.cpp",
     "video_state_machine_pattern_test_extra.cpp",
+    "video_state_machine_pattern_test_supplement.cpp",
     "video_state_manager_test.cpp",
     "video_resource_test_ng.cpp",
   ]

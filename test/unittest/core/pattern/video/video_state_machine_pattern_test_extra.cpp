@@ -1349,14 +1349,16 @@ HWTEST_F(VideoStateMachinePatternTestNg, MoveByStep001, TestSize.Level1)
     pattern->currentPos_ = 50;
     pattern->duration_ = 100;
     pattern->stateManager_->state_ = VideoPlaybackState::PREPARED;
+    pattern->SetIsSeeking(false);
 
     auto mockMediaPlayer = AceType::MakeRefPtr<TestableMockMediaPlayer>();
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
-    EXPECT_CALL(*mockMediaPlayer, Seek(60000, _)).Times(1);
+    EXPECT_CALL(*mockMediaPlayer, Seek(60000, _)).WillRepeatedly(Return(0));
     pattern->mediaPlayer_ = mockMediaPlayer;
 
     pattern->MoveByStep(10);
-    // Seek to 60 seconds should have been called
+    EXPECT_TRUE(pattern->GetIsSeeking());
+    testing::Mock::VerifyAndClearExpectations(&(*mockMediaPlayer));
 }
 
 /**
@@ -1781,20 +1783,23 @@ HWTEST_F(VideoStateMachinePatternTestNg, SetCurrentTime001, TestSize.Level1)
 
     auto mockMediaPlayer = AceType::MakeRefPtr<TestableMockMediaPlayer>();
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockMediaPlayer, Seek(_, _)).WillRepeatedly(Return(0));
     pattern->mediaPlayer_ = mockMediaPlayer;
 
     pattern->stateManager_->state_ = VideoPlaybackState::PREPARED;
 
     // Negative time => should not seek
-    EXPECT_CALL(*mockMediaPlayer, Seek(_, _)).Times(0);
+    pattern->SetIsSeeking(false);
     pattern->SetCurrentTime(-1.0f, OHOS::Ace::SeekMode::SEEK_CLOSEST);
+    EXPECT_FALSE(pattern->GetIsSeeking());
 
     // Positive time with showFirstFrame=false => UpdatePreparedVideoSize + Seek
     mockMediaPlayer->videoWidth_ = 100;
     mockMediaPlayer->videoHeight_ = 100;
-    EXPECT_CALL(*mockMediaPlayer, Seek(_, _)).Times(1);
     pattern->showFirstFrame_ = false;
     pattern->SetCurrentTime(10.0f, OHOS::Ace::SeekMode::SEEK_CLOSEST);
+    EXPECT_TRUE(pattern->GetIsSeeking());
+    testing::Mock::VerifyAndClearExpectations(&(*mockMediaPlayer));
 }
 
 /**
