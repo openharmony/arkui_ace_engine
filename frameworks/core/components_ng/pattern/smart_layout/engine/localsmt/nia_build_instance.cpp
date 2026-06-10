@@ -214,7 +214,7 @@ bool ClauseContainsUnitLiteralDirect(const std::vector<int>& clauseLits,
         return false;
     }
     for (int litIdx : clauseLits) {
-        if (unitLit[litIdx + static_cast<int>(numLits)]) {
+        if (unitLit[litIdx + static_cast<int>(numLits)] != 0) {
             return true;
         }
     }
@@ -289,11 +289,10 @@ bool IsSameCls(const std::vector<int>& cl1, const std::vector<int>& cl2)
 {
     if (cl1.size() != cl2.size()) {
         return false;
-    } else {
-        for (size_t lIdx = 0; lIdx < cl1.size(); lIdx++) {
-            if (cl1[lIdx] != cl2[lIdx]) {
-                return false;
-            }
+    }
+    for (size_t lIdx = 0; lIdx < cl1.size(); lIdx++) {
+        if (cl1[lIdx] != cl2[lIdx]) {
+            return false;
         }
     }
     return true;
@@ -1327,7 +1326,8 @@ void LsSolver::Resolution()
     bool isImprove = true;
     while (isImprove) {
         isImprove = false;
-        for (uint64_t boolVarIdx : boolVarVec) {
+        for (int currBoolVarId : boolVarVec) {
+            uint64_t boolVarIdx = static_cast<uint64_t>(currBoolVarId);
             if (vars[boolVarIdx].isDelete) {
                 continue;
             }
@@ -1599,7 +1599,7 @@ void LsSolver::DetermineLitAppear()
     litsInCls->Clear();
 
     for (int litIndex : originalOrder) {
-        if (localAppear[litIndex]) {
+        if (localAppear[litIndex] != 0) {
             litsInCls->InsertElement(litIndex);
             secondAppear[litIndex] = 1;
         }
@@ -1607,7 +1607,7 @@ void LsSolver::DetermineLitAppear()
 
     size_t localAppearSize = localAppear.size();
     for (size_t idx = 0; idx < localAppearSize; ++idx) {
-        if (localAppear[idx] && !secondAppear[idx]) {
+        if (localAppear[idx] != 0 && !secondAppear[idx]) {
             litsInCls->InsertElement(idx);
         }
     }
@@ -1659,7 +1659,7 @@ bool LsSolver::CompareLitByCoffVars(const Lit& x, const Lit& y) const
 }
 
 
-bool LsSolver::CompareLit(const Lit& x, const Lit& y, bool isQuick)
+bool LsSolver::CompareLit(const Lit& x, const Lit& y, bool isQuick) const
 {
     if (x.isEqual != y.isEqual) {
         return x.isEqual < y.isEqual;

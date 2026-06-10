@@ -1019,6 +1019,27 @@ HWTEST_F(SmartLayoutLocalSmtTest, SmartLayoutLocalSmtTest_DetermineLitAppear, Te
 }
 
 /**
+ * @tc.name: SmartLayoutLocalSmtTest_DetermineLitAppear_ClauseOnly
+ * @tc.desc: Lit only in clauses is tracked via localAppear != 0 second pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutLocalSmtTest, SmartLayoutLocalSmtTest_DetermineLitAppear_ClauseOnly, TestSize.Level1)
+{
+    LsSolver solver;
+    solver.numLits = 5;
+    solver.lits.resize(solver.numLits + ADDITIONAL_LEN);
+    solver.litAppear.resize(solver.numLits + ADDITIONAL_LEN, 0);
+    solver.litsInCls = new Array(static_cast<int>(solver.numLits));
+    solver.litsInCls->InsertElement(1);
+    solver.clauses.push_back(Clause{ { 1, 3 } });
+    solver.DetermineLitAppear();
+    EXPECT_TRUE(solver.litAppear[3]);
+    EXPECT_TRUE(solver.litsInCls->IsInArray(3));
+    delete solver.litsInCls;
+    solver.litsInCls = nullptr;
+}
+
+/**
  * @tc.name: SmartLayoutLocalSmtTest_Coverage_PrepareComponents
  * @tc.desc: Test PrepareComponents.
  * @tc.type: FUNC
@@ -1285,6 +1306,8 @@ HWTEST_F(SmartLayoutLocalSmtTest, SmartLayoutLocalSmtTest_Coverage_CompareLit, T
     y.coffVars.push_back(CoffVar(0, RationNum(1)));
     y.key = RationNum(0);
     EXPECT_TRUE(solver.CompareLit(x, y, true));
+    const LsSolver& constSolver = solver;
+    EXPECT_TRUE(constSolver.CompareLit(x, y, true));
 
     Lit a, b;
     a.coffVars.push_back(CoffVar(0, RationNum(1)));
