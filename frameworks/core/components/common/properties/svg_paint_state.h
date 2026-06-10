@@ -20,7 +20,7 @@
 #include "core/components/common/properties/animatable_double.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/color.h"
-#include "frameworks/core/components/common/properties/decoration.h"
+#include "frameworks/core/components/common/properties/gradient.h"
 #include "frameworks/core/components/common/properties/paint_state.h"
 #include "frameworks/core/components/common/properties/text_style.h"
 

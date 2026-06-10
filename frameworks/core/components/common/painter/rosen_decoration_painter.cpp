@@ -30,6 +30,7 @@
 #endif
 
 #include "core/common/container.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/painter/border_image_painter.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/base/constants.h"

@@ -36,6 +36,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/blur_style_option.h"
 #include "interfaces/native/native_error_message_macros.h"
 
 namespace OHOS::Ace::NodeModel {

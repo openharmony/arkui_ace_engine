@@ -15,6 +15,7 @@
 
 #include "core/components/navigation_bar/navigation_bar_component_v2.h"
 
+#include "core/components/common/properties/decoration.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/navigation_bar/navigation_bar_element.h"

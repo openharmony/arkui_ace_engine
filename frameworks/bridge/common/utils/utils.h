@@ -45,8 +45,9 @@
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/clip_path.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/gradient.h"
 #include "core/components/common/properties/text_style.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 

@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/animation/scheduler.h"
 #include "core/components/texttimer/texttimer_controller.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_algorithm.h"

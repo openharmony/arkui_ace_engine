@@ -35,6 +35,7 @@
 
 namespace OHOS::Ace {
 
+class Decoration;
 using OnSetAttributeFunc = std::function<void()>;
 using OnSetStyleFinishedFunc = std::function<void()>;
 using CachePseudoClassStyleFunc = std::function<void(std::pair<std::string, std::string>)>;
@@ -157,10 +158,7 @@ public:
         return backDecoration_;
     }
 
-    void SetBackDecoration(const RefPtr<Decoration>& backDecoration)
-    {
-        backDecoration_ = backDecoration;
-    }
+    ACE_FORCE_EXPORT void SetBackDecoration(const RefPtr<Decoration>& backDecoration);
 
     const RefPtr<Decoration>& GetFrontDecoration() const
     {

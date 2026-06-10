@@ -22,7 +22,6 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/cj_frontend/cppview/offscreen_rendering_context.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {

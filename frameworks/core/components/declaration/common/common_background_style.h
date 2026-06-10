@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_COMMON_COMMON_BACKGROUND_STYLE_H
 
 #include "core/components/common/properties/border_image.h"
+#include "core/components/common/properties/gradient.h"
 #include "core/components/declaration/common/style.h"
 
 namespace OHOS::Ace {

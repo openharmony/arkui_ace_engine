@@ -21,6 +21,7 @@
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/input_option.h"
 #include "core/components/declaration/common/declaration.h"
 #include "compatible/components/input/input_declaration.h"

@@ -23,6 +23,8 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/drawing.h"
+#include "interfaces/inner_api/ace_kit/include/ui/animation/cubic_curve.h"
+#include "interfaces/inner_api/ace_kit/include/ui/animation/curves.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {

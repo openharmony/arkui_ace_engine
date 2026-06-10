@@ -21,7 +21,7 @@
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/clip_path.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/background_image.h"
 
 namespace OHOS::Ace {
 

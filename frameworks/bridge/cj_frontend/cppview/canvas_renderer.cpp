@@ -26,6 +26,7 @@
 #include "bridge/cj_frontend/cppview/canvas_image_data.h"
 #include "bridge/cj_frontend/cppview/canvas_pattern.h"
 #include "bridge/cj_frontend/cppview/render_image.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/pipeline/base/constants.h"
 

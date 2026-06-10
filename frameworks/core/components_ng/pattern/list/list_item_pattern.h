@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/animation/animator.h"
 #include "core/animation/spring_motion.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/list/list_item_theme.h"

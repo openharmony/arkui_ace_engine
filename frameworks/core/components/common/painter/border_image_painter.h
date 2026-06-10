@@ -23,16 +23,22 @@
 #include "include/core/SkPaint.h"
 #endif
 
+#include "base/geometry/offset.h"
+#include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/decoration.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif
 
 
 namespace OHOS::Ace {
+class Border;
+class BorderImage;
+class Decoration;
+class Gradient;
+
 class BorderImagePainter : public virtual AceType {
     DECLARE_ACE_TYPE(BorderImagePainter, AceType);
 public:

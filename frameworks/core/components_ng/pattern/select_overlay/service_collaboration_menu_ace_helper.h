@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SERVICE_COLLABORATION_MENU_ACE_HELPER
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"

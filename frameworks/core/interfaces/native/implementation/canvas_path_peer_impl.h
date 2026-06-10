@@ -15,9 +15,12 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H
 
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/pipeline/pipeline_base.h"
+
+namespace OHOS::Ace {
+class CanvasPath2D;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class CanvasPathPeerImpl : public OHOS::Ace::Referenced {
