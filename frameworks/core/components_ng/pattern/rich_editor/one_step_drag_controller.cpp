@@ -59,10 +59,16 @@ void OneStepDragParam::BindContextMenu(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(frameNode);
     auto resType = ResponseType::LONG_PRESS;
     auto menuParam = GetMenuParam(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    auto originFlag = layoutProperty ? layoutProperty->GetPropertyChangeFlag() : PROPERTY_UPDATE_NORMAL;
     ViewStackProcessor::GetInstance()->Push(frameNode);
     ViewAbstractModel::GetInstance()->BindContextMenu(resType, menuBuilder, menuParam, previewBuilder);
     ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
     ViewStackProcessor::GetInstance()->Finish();
+    if (spanType_ == TextSpanType::IMAGE && layoutProperty) {
+        layoutProperty->CleanDirty();
+        layoutProperty->UpdatePropertyChangeFlag(originFlag);
+    }
 #endif
 }
 

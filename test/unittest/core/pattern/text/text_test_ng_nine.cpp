@@ -1458,6 +1458,9 @@ HWTEST_F(TextTestNgNine, HandleClickAISpanEvent, TestSize.Level1)
  */
 HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create a Text node and initialize the controller used by selection menu.
+     */
     auto textFrameNode =
         FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
@@ -1466,7 +1469,10 @@ HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
     pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     auto textController = pattern->GetTextController();
     textController->CloseSelectionMenu();
-    
+
+    /**
+     * @tc.steps: step2. Prepare preview menu builder and appear/disappear callbacks.
+     */
     int32_t callBack1 = 0;
     int32_t callBack2 = 0;
     int32_t callBack3 = 0;
@@ -1483,10 +1489,20 @@ HWTEST_F(TextTestNgNine, BindPreviewMenu001, TestSize.Level1)
         return;
     };
     SelectMenuParam menuParam;
+
+    /**
+     * @tc.steps: step3. Bind preview menu for TEXT span type.
+     * @tc.expected: step3. OneStepDragController is created, but no image or placeholder drag param is created.
+     */
     pattern->BindPreviewMenu(TextSpanType::TEXT, buildFunc,
         { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_FALSE(static_cast<bool>(pattern->oneStepDragController_->imageDragParam_));
     EXPECT_FALSE(static_cast<bool>(pattern->oneStepDragController_->placeholderDragParam_));
+
+    /**
+     * @tc.steps: step4. Bind preview menu for IMAGE span type.
+     * @tc.expected: step4. Image drag param is created and placeholder drag param remains empty.
+     */
     pattern->BindPreviewMenu(TextSpanType::IMAGE, buildFunc,
         { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_TRUE(static_cast<bool>(pattern->oneStepDragController_));
