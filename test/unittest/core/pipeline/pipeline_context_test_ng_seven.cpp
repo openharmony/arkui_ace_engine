@@ -1657,12 +1657,13 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest072, TestSize.Level1
     auto overlayChild = FrameNode::CreateFrameNode(
         V2::TOAST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(overlayChild, nullptr);
+    overlayChild->SetActive(true);
     rootNode->AddChild(overlayChild);
     auto overlayChildrenArray = JsonUtil::CreateArray();
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     ParamConfig config;
-    bool result = context_->ProcessOverlayChildrenDumpInfo(
-        rootNode, overlayChildrenArray, subWindowOverlayArray, true, config);
+    bool result = context_->ProcessOverlayChildrenDumpInfo(rootNode, overlayChildrenArray, subWindowOverlayArray,
+        true, config, DEFAULT_NODE_OPACITY);
     EXPECT_TRUE(result);
 }
 
@@ -1680,12 +1681,13 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest073, TestSize.Level1
     auto overlayChild = FrameNode::CreateFrameNode(
         V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(overlayChild, nullptr);
+    overlayChild->SetActive(true);
     rootNode->AddChild(overlayChild);
     auto overlayChildrenArray = JsonUtil::CreateArray();
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     ParamConfig config;
-    bool result = context_->ProcessOverlayChildrenDumpInfo(
-        rootNode, overlayChildrenArray, subWindowOverlayArray, false, config);
+    bool result = context_->ProcessOverlayChildrenDumpInfo(rootNode, overlayChildrenArray, subWindowOverlayArray,
+        false, config, DEFAULT_NODE_OPACITY);
     EXPECT_TRUE(result);
 }
 
@@ -1707,8 +1709,8 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest074, TestSize.Level1
     auto overlayChildrenArray = JsonUtil::CreateArray();
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     ParamConfig config;
-    bool result = context_->ProcessOverlayChildrenDumpInfo(
-        rootNode, overlayChildrenArray, subWindowOverlayArray, false, config);
+    bool result = context_->ProcessOverlayChildrenDumpInfo(rootNode, overlayChildrenArray, subWindowOverlayArray,
+        false, config, DEFAULT_NODE_OPACITY);
     EXPECT_FALSE(result);
 }
 
@@ -1726,8 +1728,8 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest075, TestSize.Level1
     auto overlayChildrenArray = JsonUtil::CreateArray();
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     ParamConfig config;
-    bool result = context_->ProcessOverlayChildrenDumpInfo(
-        rootNode, overlayChildrenArray, subWindowOverlayArray, false, config);
+    bool result = context_->ProcessOverlayChildrenDumpInfo(rootNode, overlayChildrenArray, subWindowOverlayArray,
+        false, config, DEFAULT_NODE_OPACITY);
     EXPECT_FALSE(result);
 }
 
@@ -1766,6 +1768,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest077, TestSize.Level1
     auto overlayChild = FrameNode::CreateFrameNode(
         V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(overlayChild, nullptr);
+    overlayChild->SetActive(true);
     startNode->AddChild(overlayChild);
     auto root = JsonUtil::CreateSharedPtrJson(true);
     ParamConfig config;

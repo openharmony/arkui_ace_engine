@@ -121,6 +121,7 @@ struct InteractionEventBindingInfo  {
 class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
+constexpr double DEFAULT_NODE_OPACITY = 1.0;
 
 enum class UINodeType {
     FRAME_NODE,
@@ -373,7 +374,8 @@ public:
     void DumpSimplifyTreeNode(std::shared_ptr<JsonValue>& current, ParamConfig config);
     void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current,
         bool onlyNeedVisible, ParamConfig config = ParamConfig(),
-        std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr);
+        std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr,
+        double parentFinalOpacity = DEFAULT_NODE_OPACITY);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -1356,9 +1358,17 @@ protected:
     int32_t selectionContainerId_ = 0;
     int32_t subtreeIgnoreCount_ = 0;
     std::list<RefPtr<FrameNode>> adoptedChildren_;
+
 private:
+    struct RectCullingState;
+
     void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
-        ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker);
+        ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker,
+        double parentFinalOpacity, const RectCullingState& rectCullingState);
+    RectCullingState CreateRectCullingState(bool onlyNeedVisible, ParamConfig config);
+    RectCullingState CreateChildRectCullingState(const RectCullingState& rectCullingState);
+    bool IsCulledByRect(const RectCullingState& rectCullingState, bool hasInspectableChildren);
+    bool HasInspectableChildrenForRectCulling(ParamConfig config);
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);

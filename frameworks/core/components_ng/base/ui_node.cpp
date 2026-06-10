@@ -14,12 +14,14 @@
  */
 #include "core/components_ng/base/ui_node.h"
 
+#include <optional>
 #include <queue>
 
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "base/utils/feature_param.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
@@ -37,6 +39,23 @@
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace::NG {
+
+struct UINode::RectCullingState {
+    bool enabled = false;
+    std::optional<RectF> viewportRect;
+    std::optional<RectF> clipRect;
+};
+
+namespace {
+double GetNodeOpacityValue(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_NODE_OPACITY);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, DEFAULT_NODE_OPACITY);
+    return renderContext->GetOpacityValue(DEFAULT_NODE_OPACITY);
+}
+} // namespace
 
 std::atomic<int64_t> currentAccessibilityId_ = 0;
 const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
@@ -1480,8 +1499,100 @@ void UINode::DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& current
     DumpSimplifyInfoOnlyForParamConfig(current, config);
 }
 
+UINode::RectCullingState UINode::CreateRectCullingState(bool onlyNeedVisible, ParamConfig config)
+{
+    RectCullingState state;
+    if (!onlyNeedVisible || !config.rectCulling) {
+        return state;
+    }
+
+    auto current = Claim(this);
+    for (auto node = current; node; node = node->GetParent()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        if (!frameNode) {
+            continue;
+        }
+        auto nodeRect = frameNode->GetTransformRectRelativeToWindow();
+        state.viewportRect = nodeRect;
+        if (node == current) {
+            continue;
+        }
+        auto renderContext = frameNode->GetRenderContext();
+        if (!renderContext || !renderContext->GetClipEdge().value_or(false)) {
+            continue;
+        }
+        if (state.clipRect.has_value()) {
+            nodeRect = nodeRect.Constrain(state.clipRect.value());
+        }
+        state.clipRect = nodeRect;
+    }
+    state.enabled = state.viewportRect.has_value();
+    return state;
+}
+
+UINode::RectCullingState UINode::CreateChildRectCullingState(const RectCullingState& rectCullingState)
+{
+    auto childState = rectCullingState;
+    if (!rectCullingState.enabled) {
+        return childState;
+    }
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(Claim(this));
+    CHECK_NULL_RETURN(frameNode, childState);
+    auto renderContext = frameNode->GetRenderContext();
+    if (!renderContext || !renderContext->GetClipEdge().value_or(false)) {
+        return childState;
+    }
+
+    auto clipRect = frameNode->GetTransformRectRelativeToWindow();
+    if (childState.clipRect.has_value()) {
+        clipRect = clipRect.Constrain(childState.clipRect.value());
+    }
+    childState.clipRect = clipRect;
+    return childState;
+}
+
+bool UINode::HasInspectableChildrenForRectCulling(ParamConfig config)
+{
+    auto nodeChildren = GetChildren(true);
+    if (!nodeChildren.empty() || !disappearingChildren_.empty()) {
+        return true;
+    }
+    if (!config.cacheNodes) {
+        return false;
+    }
+    if (GetTag() != V2::JS_LAZY_FOR_EACH_ETS_TAG && GetTag() != V2::JS_REPEAT_ETS_TAG) {
+        return false;
+    }
+    return !GetChildrenForInspector(true).empty();
+}
+
+bool UINode::IsCulledByRect(const RectCullingState& rectCullingState, bool hasInspectableChildren)
+{
+    if (!rectCullingState.enabled) {
+        return false;
+    }
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(Claim(this));
+    CHECK_NULL_RETURN(frameNode, false);
+    auto nodeRect = frameNode->GetTransformRectRelativeToWindow();
+    if (rectCullingState.clipRect.has_value()) {
+        if (!nodeRect.IsInnerIntersectWith(rectCullingState.clipRect.value())) {
+            return !hasInspectableChildren;
+        }
+    }
+    if (!rectCullingState.viewportRect.has_value()) {
+        return false;
+    }
+    if (nodeRect.IsInnerIntersectWith(rectCullingState.viewportRect.value())) {
+        return false;
+    }
+    return !hasInspectableChildren;
+}
+
 void UINode::DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current,
-    bool onlyNeedVisible, ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker)
+    bool onlyNeedVisible, ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker,
+    double parentFinalOpacity, const RectCullingState& rectCullingState)
 {
     auto [needDump, justDumpSubTree] = dumpChecker(Claim(this));
     CHECK_EQUAL_VOID(needDump, false);
@@ -1489,59 +1600,126 @@ void UINode::DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr
     if (onlyNeedVisible && !IsVisibleAndActive()) {
         return;
     }
+    auto currentFinalOpacity = parentFinalOpacity;
+    if (!NearZero(config.minOpacity)) {
+        currentFinalOpacity *= GetNodeOpacityValue(Claim(this));
+    }
+    if (!NearZero(config.minOpacity) && LessNotEqual(currentFinalOpacity, config.minOpacity)) {
+        return;
+    }
 
     if (justDumpSubTree) {
         dumpChecker = [](const RefPtr<UINode>&) { return std::make_pair(true, false); };
     }
 
-    DumpSimplifyTreeBase(current);
     auto nodeChildren = GetChildren(true);
-    DumpSimplifyInfoWithParamConfig(current, config);
     std::list<RefPtr<UINode>> cacheChildren;
     if (GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || GetTag() == V2::JS_REPEAT_ETS_TAG) {
         cacheChildren = GetChildrenForInspector(true);
     }
     bool hasChildren =
         !nodeChildren.empty() || !disappearingChildren_.empty() || (config.cacheNodes && !cacheChildren.empty());
+    if (IsCulledByRect(rectCullingState, hasChildren)) {
+        return;
+    }
+
+    std::unique_ptr<JsonValue> array;
+    bool hasDumpedChildren = false;
     if (hasChildren) {
-        auto array = JsonUtil::CreateArray();
+        const auto childDepth = depth + 1;
+        auto childRectCullingState = CreateChildRectCullingState(rectCullingState);
+        array = JsonUtil::CreateArray();
         if (config.cacheNodes && !cacheChildren.empty()) {
             for (const auto& item : cacheChildren) {
                 CHECK_NULL_CONTINUE(item);
                 auto [dumpChild, _] = dumpChecker(item);
                 CHECK_NULL_CONTINUE(dumpChild);
+                if (!NearZero(config.minOpacity) &&
+                    LessNotEqual(currentFinalOpacity * GetNodeOpacityValue(item), config.minOpacity)) {
+                    continue;
+                }
+                if (childRectCullingState.enabled && item->IsCulledByRect(childRectCullingState,
+                    item->HasInspectableChildrenForRectCulling(config))) {
+                    continue;
+                }
                 auto child = JsonUtil::CreateSharedPtrJson();
-                item->DumpSimplifyTreeWithParamConfigInner(depth + 1, child, false, config, dumpChecker);
+                item->DumpSimplifyTreeWithParamConfigInner(
+                    childDepth, child, false, config, dumpChecker, currentFinalOpacity, childRectCullingState);
+                if (!child->Contains("$type")) {
+                    continue;
+                }
                 array->PutRef(std::move(child));
+                hasDumpedChildren = true;
             }
         } else {
             for (const auto& item : nodeChildren) {
                 auto [dumpChild, _] = dumpChecker(item);
                 CHECK_NULL_CONTINUE(dumpChild);
+                if (!NearZero(config.minOpacity) &&
+                    LessNotEqual(currentFinalOpacity * GetNodeOpacityValue(item), config.minOpacity)) {
+                    continue;
+                }
+                if (childRectCullingState.enabled && item->IsCulledByRect(childRectCullingState,
+                    item->HasInspectableChildrenForRectCulling(config))) {
+                    continue;
+                }
                 auto child = JsonUtil::CreateSharedPtrJson();
-                item->DumpSimplifyTreeWithParamConfigInner(depth + 1, child, onlyNeedVisible, config, dumpChecker);
+                item->DumpSimplifyTreeWithParamConfigInner(childDepth, child, onlyNeedVisible, config, dumpChecker,
+                    currentFinalOpacity, childRectCullingState);
+                if (!child->Contains("$type")) {
+                    continue;
+                }
                 array->PutRef(std::move(child));
+                hasDumpedChildren = true;
             }
         }
         for (const auto& [item, index, branch] : disappearingChildren_) {
             auto [dumpChild, _] = dumpChecker(item);
             CHECK_NULL_CONTINUE(dumpChild);
+            if (!NearZero(config.minOpacity) &&
+                LessNotEqual(currentFinalOpacity * GetNodeOpacityValue(item), config.minOpacity)) {
+                continue;
+            }
+            if (childRectCullingState.enabled && item->IsCulledByRect(childRectCullingState,
+                item->HasInspectableChildrenForRectCulling(config))) {
+                continue;
+            }
             auto child = JsonUtil::CreateSharedPtrJson();
-            item->DumpSimplifyTreeWithParamConfigInner(depth + 1, child, onlyNeedVisible, config, dumpChecker);
+            item->DumpSimplifyTreeWithParamConfigInner(childDepth, child, onlyNeedVisible, config, dumpChecker,
+                currentFinalOpacity, childRectCullingState);
+            if (!child->Contains("$type")) {
+                continue;
+            }
             array->PutRef(std::move(child));
+            hasDumpedChildren = true;
         }
+    }
+    if (IsCulledByRect(rectCullingState, hasDumpedChildren)) {
+        return;
+    }
+
+    DumpSimplifyTreeBase(current);
+    DumpSimplifyInfoWithParamConfig(current, config);
+    if (hasChildren) {
         current->PutRef("$children", std::move(array));
     }
 }
 
 void UINode::DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
-    ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker)
+    ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker,
+    double parentFinalOpacity)
 {
     if (!dumpChecker) {
         dumpChecker = [](const RefPtr<UINode>&) { return std::make_pair(true, false); };
     }
 
-    DumpSimplifyTreeWithParamConfigInner(depth, current, onlyNeedVisible, config, dumpChecker);
+    if (!onlyNeedVisible) {
+        config.minOpacity = 0.0f;
+        config.rectCulling = false;
+    }
+    auto rectCullingState = CreateRectCullingState(onlyNeedVisible, config);
+    DumpSimplifyTreeWithParamConfigInner(
+        depth, current, onlyNeedVisible, config, dumpChecker, parentFinalOpacity, rectCullingState);
 }
 
 void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current)

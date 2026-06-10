@@ -15,6 +15,9 @@
 
 #include "ui_sa_service.h"
 
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <sys/time.h>
 
@@ -35,7 +38,15 @@ const std::string UI_SA_PATH = "/data/service/el1/public/ui_sa/";
 constexpr char WEB_INTERFACE_REQUEST_DOM_TREE[] = "RequestArkWebDomTree";
 constexpr size_t BITS_UINT32 = sizeof(uint32_t) * 8;
 constexpr int32_t PARAMS_OFFSET = 1;
-constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 6;
+constexpr size_t GET_VISIBLE_INTERACTION_INFO_INDEX = 1;
+constexpr size_t GET_VISIBLE_ACCESSIBILITY_INFO_INDEX = 2;
+constexpr size_t GET_VISIBLE_CACHE_NODES_INDEX = 3;
+constexpr size_t GET_VISIBLE_WITH_WEB_INDEX = 4;
+constexpr size_t GET_VISIBLE_WITH_UI_EXTENSION_INDEX = 5;
+constexpr size_t GET_VISIBLE_RECT_CULLING_INDEX = 6;
+constexpr size_t GET_VISIBLE_MIN_OPACITY_INDEX = 7;
+constexpr size_t SIMPLIFYTREE_WITH_PARAMCONFIG = GET_VISIBLE_WITH_UI_EXTENSION_INDEX + 1;
+constexpr size_t SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG = GET_VISIBLE_MIN_OPACITY_INDEX + 1;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
 constexpr int32_t START_WEB_VIEW_TRANSLATE = 2;
@@ -45,6 +56,7 @@ constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
 constexpr int32_t GET_STATE_MGMT_INFO_PARAMS = 4;
 constexpr int32_t GET_SPECIFIED_CONTENT_OFFSETS_PARAMS = 3;
 constexpr int32_t HIGHLIGHT_SPECIFIED_CONTENT_PARAMS = 3;
+constexpr double PERCENT_VALUE = 100.0;
 
 std::string GetCurrentTimestampStr()
 {
@@ -84,6 +96,34 @@ uint32_t ParseComponentChangeEventMask(std::vector<std::string> params)
         mask |= (1 << bit);
     }
     return mask;
+}
+
+bool StringToDouble(const std::string& value, double& result)
+{
+    errno = 0;
+    char* parseEnd = nullptr;
+    double parseResult = std::strtod(value.c_str(), &parseEnd);
+    if (parseEnd == value.c_str() || errno == ERANGE) {
+        return false;
+    }
+    if (std::strcmp(parseEnd, "%") == 0) {
+        result = parseResult / PERCENT_VALUE;
+        return true;
+    }
+    if (std::strcmp(parseEnd, "") == 0) {
+        result = parseResult;
+        return true;
+    }
+    return false;
+}
+
+float ParseMinOpacityParam(const std::string& param)
+{
+    double minOpacity = 0.0;
+    if (!StringToDouble(param, minOpacity)) {
+        return 0.0f;
+    }
+    return static_cast<float>(minOpacity);
 }
 
 ContentChangeConfig ParseContentChangeConfig(const std::vector<std::string>& params, bool toFile)
@@ -257,10 +297,20 @@ void UiSaService::HandleGetVisibleInspectorTree(sptr<IUiContentService> service,
             LOGI("[GetVisibleInspectorTree] tree is saved to %{public}s", filePath.c_str());
         }
     };
-    if (params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
-        service->GetVisibleInspectorTree(
-            visibleInspectorTreeCallBack, { params[1] == "true", params[2] == "true", params[3] == "true",
-                                              params[4] == "true", params[5] == "true" });
+    if (params.size() >= SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG) {
+        service->GetVisibleInspectorTree(visibleInspectorTreeCallBack,
+            { params[GET_VISIBLE_INTERACTION_INFO_INDEX] == "true",
+                params[GET_VISIBLE_ACCESSIBILITY_INFO_INDEX] == "true",
+                params[GET_VISIBLE_CACHE_NODES_INDEX] == "true", params[GET_VISIBLE_WITH_WEB_INDEX] == "true",
+                params[GET_VISIBLE_WITH_UI_EXTENSION_INDEX] == "true",
+                params[GET_VISIBLE_RECT_CULLING_INDEX] == "true",
+                ParseMinOpacityParam(params[GET_VISIBLE_MIN_OPACITY_INDEX]) });
+    } else if (params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
+        service->GetVisibleInspectorTree(visibleInspectorTreeCallBack,
+            { params[GET_VISIBLE_INTERACTION_INFO_INDEX] == "true",
+                params[GET_VISIBLE_ACCESSIBILITY_INFO_INDEX] == "true",
+                params[GET_VISIBLE_CACHE_NODES_INDEX] == "true", params[GET_VISIBLE_WITH_WEB_INDEX] == "true",
+                params[GET_VISIBLE_WITH_UI_EXTENSION_INDEX] == "true" });
     } else {
         service->GetVisibleInspectorTree(visibleInspectorTreeCallBack);
     }

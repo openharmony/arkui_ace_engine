@@ -145,12 +145,14 @@ void UINode::DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current)
 }
 
 void UINode::DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
-    ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker)
+    ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker,
+    double parentFinalOpacity)
 {
     (void)depth;
     (void)onlyNeedVisible;
     (void)config;
     (void)dumpChecker;
+    (void)parentFinalOpacity;
     if (!current) {
         return;
     }
