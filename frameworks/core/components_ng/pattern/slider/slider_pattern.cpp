@@ -2266,6 +2266,7 @@ void SliderPattern::StopParticleEffect()
     CHECK_NULL_VOID(context);
     std::list<NG::ParticleOption> emptyOptions;
     context->UpdateParticleOptionArray(emptyOptions);
+    context->ResetParticleOptionArray();
 }
 
 RefPtr<AccessibilityProperty> SliderPattern::CreateAccessibilityProperty()
@@ -3673,11 +3674,6 @@ void SliderPattern::CreateParticleFrameNode()
         
         ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, PARTICLE_NODE_ZINDEX, particleFrameNode_);
     }
-    
-    auto particleRC = particleFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(particleRC);
-    std::list<NG::ParticleOption> emptyOptions;
-    particleRC->UpdateParticleOptionArray(emptyOptions);
 }
 
 void SliderPattern::UpdateSelectedTrackFrameNode()
@@ -3765,15 +3761,6 @@ void SliderPattern::UpdateSelectedTrackFrameNode()
     ViewAbstract::SetIlluminatedBorderWidth(AceType::RawPtr(selectedTrackFrameNode_), Dimension(1, DimensionUnit::PX));
 }
 
-void SliderPattern::UpdateParticleFrameNode()
-{
-    CHECK_NULL_VOID(particleFrameNode_);
-    auto particleRC = particleFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(particleRC);
-    std::list<NG::ParticleOption> emptyOptions;
-    particleRC->UpdateParticleOptionArray(emptyOptions);
-}
-
 void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, float blockRadius)
 {
     auto host = GetHost();
@@ -3796,7 +3783,6 @@ void SliderPattern::UpdateMaterialNodePosition(float centerX, float centerY, flo
     UpdateMaterialFrameNode(dragPointNode_, blockDiameter, pointNodeX, pointNodeY, blockRadius);
     
     UpdateSelectedTrackFrameNode();
-    UpdateParticleFrameNode();
 }
 
 void SliderPattern::UpdateMaterialFrameNode(const RefPtr<FrameNode>& frameNode,
@@ -3937,8 +3923,8 @@ void SliderPattern::HideMaterialNodes()
     CHECK_NULL_VOID(host);
     
     if (IsHighGradeMaterial() && selectedTrackFrameNode_) {
-        host->RemoveChild(selectedTrackFrameNode_);
         StopParticleEffect();
+        host->RemoveChild(selectedTrackFrameNode_);
     }
     if (dragFrameNode_) {
         host->RemoveChild(dragFrameNode_);
