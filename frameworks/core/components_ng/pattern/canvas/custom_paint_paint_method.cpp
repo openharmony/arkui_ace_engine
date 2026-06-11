@@ -1521,11 +1521,11 @@ void CustomPaintPaintMethod::ApplyFontWeightVariations(Rosen::TextStyle& txtStyl
 {
 #ifdef ENABLE_STANDARD_INPUT
     auto pipelineContext = context_.Upgrade();
-    if (pipelineContext) {
-        auto instanceId = pipelineContext->GetInstanceId();
-        auto fontWeightScale = Platform::AceContainer::GetFontWeightScaleFromConfig(instanceId);
-        Constants::SetFontWeightVariations(txtStyle, fontWeightScale, textStyle);
+    CHECK_NULL_VOID(pipelineContext);
+    if (!fontWeightScale_.has_value()) {
+        fontWeightScale_ = Platform::AceContainer::GetFontWeightScaleFromConfig(pipelineContext->GetInstanceId());
     }
+    Constants::SetFontWeightVariations(txtStyle, fontWeightScale_.value(), textStyle);
 #endif
 }
 

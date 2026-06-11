@@ -100,6 +100,7 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     FireOnModifierUpdateFunc();
     recordingCanvas->Scale(1.0, 1.0);
     FlushTask();
+    fontWeightScale_.reset();
     if (!contentModifier_) {
         ACE_SCOPED_TRACE("Canvas[%d] contentModifier is NULL", GetId());
         TAG_LOGE(AceLogTag::ACE_CANVAS, "Canvas[%{public}d] contentModifier is NULL", GetId());

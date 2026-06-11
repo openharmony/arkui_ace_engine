@@ -37,8 +37,12 @@
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
+#include "core/components_ng/pattern/canvas/canvas_render_context.h"
+#include "core/components_ng/pattern/canvas/canvas_render_context_deferred.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #undef private
 #undef protected
 
@@ -934,5 +938,77 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo031, Te
 
     // Verify that lineDash size is 0 (empty)
     EXPECT_EQ(paintMethod->state_.strokeState.GetLineDash().lineDash.size(), 0);
+}
+
+/**
+ * @tc.name: CanvasPaintMethodUpdateContentModifierTest001
+ * @tc.desc: Test the function 'UpdateContentModifier' of the class 'CanvasPaintMethod' when NeedRender is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasPaintMethodUpdateContentModifierTest001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(host);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, host);
+    ASSERT_TRUE(paintMethod);
+    auto geometryNode = host->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(200.0f, 300.0f));
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    auto canvasRenderContext = AceType::MakeRefPtr<CanvasRenderContextDeferred>();
+    paintMethod->SetCanvasRenderContext(canvasRenderContext);
+
+    bool onModifierCalled = false;
+    paintMethod->SetOnModifierUpdateFunc([&onModifierCalled]() { onModifierCalled = true; });
+    const float fontWeightScale = 1.5;
+    paintMethod->fontWeightScale_ = fontWeightScale;
+
+    PaintWrapper paintWrapper(host->GetRenderContext(), geometryNode,
+        host->GetPaintProperty<PaintProperty>());
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    EXPECT_FALSE(onModifierCalled);
+    EXPECT_FLOAT_EQ(paintMethod->fontWeightScale_.value_or(0), fontWeightScale);
+}
+
+/**
+ * @tc.name: CanvasPaintMethodUpdateContentModifierTest002
+ * @tc.desc: Test the function 'UpdateContentModifier' of the class 'CanvasPaintMethod' on normal path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasPaintMethodUpdateContentModifierTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(host);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, host);
+    ASSERT_TRUE(paintMethod);
+    auto geometryNode = host->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(200.0f, 300.0f));
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    auto canvasRenderContext = AceType::MakeRefPtr<CanvasRenderContextDeferred>();
+    paintMethod->SetCanvasRenderContext(canvasRenderContext);
+    canvasRenderContext->PushTask([](CanvasPaintMethod& method) {});
+
+    bool onModifierCalled = false;
+    paintMethod->SetOnModifierUpdateFunc([&onModifierCalled]() { onModifierCalled = true; });
+    const float fontWeightScale = 1.5;
+    paintMethod->fontWeightScale_ = fontWeightScale;
+
+    PaintWrapper paintWrapper(host->GetRenderContext(), geometryNode,
+        host->GetPaintProperty<PaintProperty>());
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    auto pixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
+    EXPECT_EQ(paintMethod->lastLayoutSize_.Width(), pixelGridRoundSize.Width());
+    EXPECT_EQ(paintMethod->lastLayoutSize_.Height(), pixelGridRoundSize.Height());
+    EXPECT_TRUE(onModifierCalled);
+    EXPECT_FALSE(paintMethod->fontWeightScale_.has_value());
 }
 } // namespace OHOS::Ace::NG
