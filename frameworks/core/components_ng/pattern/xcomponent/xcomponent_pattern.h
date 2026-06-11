@@ -529,6 +529,7 @@ private:
 #endif
 
     void AddLayoutTask();
+    void applyBackGroundColor();
 
     void UpdateSdrRatioIfNeed();
 

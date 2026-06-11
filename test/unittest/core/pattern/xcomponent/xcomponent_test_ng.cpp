@@ -1389,11 +1389,13 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
      */
     auto xComponentController = std::make_shared<XComponentControllerNG>();
     XComponentModelNG xComponent;
-    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_NODE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.Create(
+        XCOMPONENT_ID, XCOMPONENT_NODE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
     xComponent.SetDetachCallback(std::move(onDetach));
 
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode =
+        AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
 
     /**
@@ -1414,7 +1416,8 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
     EXPECT_FALSE(onDetachKey == CHECK_KEY);
 
     onDetachKey.clear();
-    XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_SURFACE_TYPE_VALUE);
+    XComponentModelNG::SetXComponentType(
+        Referenced::RawPtr(frameNode), XCOMPONENT_SURFACE_TYPE_VALUE);
     xComponent.SetDetachCallback(std::move(onDetach));
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_EQ(onDetachKey, CHECK_KEY);
