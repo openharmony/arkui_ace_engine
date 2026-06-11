@@ -805,6 +805,11 @@ export class ChipGroup extends ViewPU {
   ChipItemsBuilder(options, parent = null) {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create({ space: this.getChipGroupItemSpace() });
+      Row.padding({
+        left: this.getChipGroupStartSpace(),
+        right: this.getChipGroupEndSpace(),
+      });
+      Row.constraintSize({ minWidth: '100%' });
     }, Row);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       ForEach.create();
@@ -896,11 +901,6 @@ export class ChipGroup extends ViewPU {
     }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Scroll.create(this.scroller);
-      Scroll.padding({
-        left: this.getChipGroupStartSpace(),
-        right: this.getChipGroupEndSpace(),
-      });
-      Scroll.constraintSize({ minWidth: '100%' });
       Scroll.scrollable(ScrollDirection.Horizontal);
       Scroll.scrollBar(BarState.Off);
       Scroll.align(Alignment.Start);
@@ -922,16 +922,12 @@ export class ChipGroup extends ViewPU {
                   EffectComponent.create();
                   EffectComponent.systemMaterial(createECMaterial(this.getBackgroundSystemMaterial()));
                 }, EffectComponent);
-                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                  Row.create({ space: this.getChipGroupItemSpace() });
-                }, Row);
                 this.ChipItemsBuilder.bind(this)(
                   makeBuilderParameterProxy('ChipItemsBuilder', {
                     backgroundSystemMaterial: () => createSubECMaterial(this.getBackgroundSystemMaterial()),
                     activatedBackgroundSystemMaterial: () => this.getSelectedBackgroundSystemMaterial(),
                   })
                 );
-                Row.pop();
                 EffectComponent.pop();
               });
             } else {
