@@ -2410,15 +2410,22 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
 
 RectF TextPattern::CalcAIEntityRectWithHandles()
 {
-    if (textSelector_.firstHandle.Top() == textSelector_.secondHandle.Top()) {
-        return textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
+    auto selectOverlay = GetSelectOverlay();
+    CHECK_NULL_RETURN(selectOverlay, {});
+    auto paintOffset = selectOverlay->GetPaintOffsetWithoutTransform();
+    auto firstHandleLocal = textSelector_.firstHandle;
+    firstHandleLocal.SetOffset(firstHandleLocal.GetOffset() - paintOffset);
+    auto secondHandleLocal = textSelector_.secondHandle;
+    secondHandleLocal.SetOffset(secondHandleLocal.GetOffset() - paintOffset);
+    if (firstHandleLocal.Top() == secondHandleLocal.Top()) {
+        return selectOverlay->ConvertToGlobalRectWithTransform(firstHandleLocal.CombineRectT(secondHandleLocal));
     }
-    auto top = std::min(textSelector_.firstHandle.Top(), textSelector_.secondHandle.Top());
-    auto bottom = std::max(textSelector_.firstHandle.Bottom(), textSelector_.secondHandle.Bottom());
-    auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
-    auto left = textContentGlobalOffset.GetX();
-    auto right = textContentGlobalOffset.GetX() + contentRect_.Width();
-    return RectT(left, top, right - left, bottom - top);
+    auto top = std::min(firstHandleLocal.Top(), secondHandleLocal.Top());
+    auto bottom = std::max(firstHandleLocal.Bottom(), secondHandleLocal.Bottom());
+    auto left = contentRect_.GetX();
+    RectF aiRectLocal = RectT(left, top, contentRect_.Width(), bottom - top);
+    aiRectLocal = aiRectLocal.IntersectRectT(contentRect_);
+    return selectOverlay->ConvertToGlobalRectWithTransform(aiRectLocal);
 }
 
 std::pair<bool, bool> TextPattern::GetCopyAndSelectable()
@@ -4596,6 +4603,12 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     return host->GetPaintRectOffsetNG(false, true) - rootOffset;
+}
+
+OffsetF TextPattern::ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset)
+{
+    CHECK_NULL_RETURN(selectOverlay_, localOffset + GetParentGlobalOffset());
+    return selectOverlay_->ConvertToGlobalOffsetWithTransform(localOffset);
 }
 
 void TextPattern::CreateHandles()
@@ -8394,17 +8407,20 @@ void TextPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInf
 
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode)
 {
+    auto selectOverlay = GetOrCreateSelectOverlay();
+    CHECK_NULL_VOID(selectOverlay);
     auto touchOffset = event.GetGlobalLocation();
+    if (selectOverlay->HasRenderTransform()) {
+        auto localOffset = ConvertGlobalToLocalOffset(touchOffset);
+        auto paintOffset = selectOverlay->GetPaintOffsetWithoutTransform();
+        touchOffset = Offset(localOffset.GetX() + paintOffset.GetX(), localOffset.GetY() + paintOffset.GetY());
+    }
     auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
     bool isChangeFirstHandle = isFirst ? (!textSelector_.StartGreaterDest()) : textSelector_.StartGreaterDest();
     if (isChangeFirstHandle) {
         ChangeFirstHandleHeight(touchOffset, currentHandle);
-    } else {
-        auto selectOverlay = GetOrCreateSelectOverlay();
-        CHECK_NULL_VOID(selectOverlay);
-        if (!selectOverlay->ChangeSecondHandleHeight(event, isOverlayMode)) {
-            ChangeSecondHandleHeight(touchOffset, currentHandle);
-        }
+    } else if (!selectOverlay->ChangeSecondHandleHeight(event, isOverlayMode)) {
+        ChangeSecondHandleHeight(touchOffset, currentHandle);
     }
 }
 

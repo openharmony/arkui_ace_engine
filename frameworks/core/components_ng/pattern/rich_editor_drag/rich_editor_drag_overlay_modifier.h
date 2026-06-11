@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace::NG {
 class TextDragPattern;
+struct SelectPositionInfo;
 
 class RichEditorDragOverlayModifier : public TextDragOverlayModifier {
     DECLARE_ACE_TYPE(RichEditorDragOverlayModifier, TextDragOverlayModifier);
@@ -125,6 +126,11 @@ public:
         isDragShadowNeeded_ = isDragShadowNeeded;
     }
 
+    void SetDragScaleXY(const std::pair<float, float>& scaleXY)
+    {
+        dragScaleXY_ = scaleXY;
+    }
+
 private:
     void PaintImage(DrawingContext& context);
     void PaintImageNode(DrawingContext& context, const RefPtr<FrameNode>& imageNode,
@@ -135,7 +141,7 @@ private:
         RefPtr<RichEditorPattern> richEditorPattern);
     void PaintSelBackground(RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
         RefPtr<RichEditorPattern> richEditorPattern);
-    void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool isFirstHandle, float startX, float startY);
+    void PaintHandle(RSCanvas& canvas, bool isFirstHandle, const SelectPositionInfo& selectPosition);
     void PaintHandleRing(RSCanvas& canvas);
     void PaintHandleHold(RSCanvas& canvas, const RectF& handleRect, const OffsetF& startPoint,
         const OffsetF& endPoint);
@@ -155,6 +161,7 @@ private:
     RefPtr<PropertyInt> selectedColor_;
     std::optional<Color> dragBackgroundColor_;
     bool isDragShadowNeeded_ = true;
+    std::pair<float, float> dragScaleXY_ = { 1.0f, 1.0f };
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

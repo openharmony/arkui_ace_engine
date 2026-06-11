@@ -522,6 +522,30 @@ void BaseTextSelectOverlay::GetLocalRectWithTransform(RectF& rect)
     rect.SetSize(SizeF(minMaxX.second->GetX() - minMaxX.first->GetX(), minMaxY.second->GetY() - minMaxY.first->GetY()));
 }
 
+void BaseTextSelectOverlay::RevertLocalRectWithTransform(RectF& rect)
+{
+    CHECK_NULL_VOID(hasTransform_);
+    std::vector<OffsetF> rectVertices = {
+        OffsetF(rect.Left(), rect.Top()),
+        OffsetF(rect.Right(), rect.Top()),
+        OffsetF(rect.Left(), rect.Bottom()),
+        OffsetF(rect.Right(), rect.Bottom())
+    };
+    for (auto& vertex : rectVertices) {
+        RevertLocalPointWithTransform(vertex);
+    }
+    auto compareOffsetX = [](const OffsetF& offset1, const OffsetF& offset2) {
+        return LessNotEqual(offset1.GetX(), offset2.GetX());
+    };
+    auto minMaxX = std::minmax_element(rectVertices.begin(), rectVertices.end(), compareOffsetX);
+    auto compareOffsetY = [](const OffsetF& offset1, const OffsetF& offset2) {
+        return LessNotEqual(offset1.GetY(), offset2.GetY());
+    };
+    auto minMaxY = std::minmax_element(rectVertices.begin(), rectVertices.end(), compareOffsetY);
+    rect.SetOffset(OffsetF(minMaxX.first->GetX(), minMaxY.first->GetY()));
+    rect.SetSize(SizeF(minMaxX.second->GetX() - minMaxX.first->GetX(), minMaxY.second->GetY() - minMaxY.first->GetY()));
+}
+
 void BaseTextSelectOverlay::RevertLocalPointWithTransform(OffsetF& point)
 {
     CHECK_NULL_VOID(hasTransform_);
@@ -577,6 +601,53 @@ OffsetF BaseTextSelectOverlay::GetPaintOffsetWithoutTransform()
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     return offset;
+}
+
+OffsetF BaseTextSelectOverlay::ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset)
+{
+    if (!HasRenderTransform()) {
+        auto paintOffset = GetPaintOffsetWithoutTransform();
+        return localOffset + paintOffset;
+    }
+    std::vector<OffsetF> points = { localOffset };
+    GetGlobalPointsWithTransform(points);
+    CHECK_NULL_RETURN(!points.empty(), localOffset);
+    return OffsetF(points[0].GetX(), points[0].GetY());
+}
+
+OffsetF BaseTextSelectOverlay::ConvertToLocalOffsetWithTransform(const OffsetF& globalOffset)
+{
+    if (!HasRenderTransform()) {
+        auto paintOffset = GetPaintOffsetWithoutTransform();
+        return globalOffset - paintOffset;
+    }
+    auto localPoint = globalOffset;
+    RevertLocalPointWithTransform(localPoint);
+    return localPoint;
+}
+
+RectF BaseTextSelectOverlay::ConvertToGlobalRectWithTransform(const RectF& localRect)
+{
+    auto resultRect = localRect;
+    if (!HasRenderTransform()) {
+        auto paintOffset = GetPaintOffsetWithoutTransform();
+        resultRect.SetOffset(localRect.GetOffset() + paintOffset);
+        return resultRect;
+    }
+    GetGlobalRectWithTransform(resultRect);
+    return resultRect;
+}
+
+RectF BaseTextSelectOverlay::ConvertToLocalRectWithTransform(const RectF& globalRect)
+{
+    auto resultRect = globalRect;
+    if (!HasRenderTransform()) {
+        auto paintOffset = GetPaintOffsetWithoutTransform();
+        resultRect.SetOffset(globalRect.GetOffset() - paintOffset);
+        return resultRect;
+    }
+    RevertLocalRectWithTransform(resultRect);
+    return resultRect;
 }
 
 void BaseTextSelectOverlay::UpdateTransformFlag()

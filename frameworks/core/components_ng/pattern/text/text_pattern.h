@@ -200,6 +200,7 @@ public:
     float GetLineHeight() const override;
     std::vector<RectF> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
+    virtual OffsetF ConvertToGlobalOffsetWithTransform(const OffsetF& localOffset);
     const RefPtr<FrameNode>& MoveDragNode() override;
     const RefPtr<Paragraph>& GetDragParagraph() const override;
     bool CloseKeyboard(bool /* forceClose */) override;

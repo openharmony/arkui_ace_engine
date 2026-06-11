@@ -60,28 +60,32 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CreateDragNode width=%{public}f, height=%{public}f", frameWidth, frameHeight);
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
     dragNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(size);
-    dragPattern->SetDragNodeScale(dragContext);
+    dragPattern->SetDragNodeScale(dragContext, hostNode);
     return dragNode;
 }
 
 OffsetF RichEditorDragPattern::ConvertToGlobalOffset(const OffsetF& localOffset, const OffsetF& parentGlobalOffset)
 {
     auto globalOffset = localOffset + parentGlobalOffset;
-    auto richEditor = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(richEditor && richEditor->HasRenderTransform(), globalOffset);
-    auto dragOffset = OffsetF(TEXT_DRAG_OFFSET.ConvertToPx(), TEXT_DRAG_OFFSET.ConvertToPx());
-    auto oriLocalOffset = localOffset + dragOffset;
-    return richEditor->ConvertToGlobalOffsetWithTransform(oriLocalOffset) - dragOffset;
+    auto textPattern = DynamicCast<TextPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, globalOffset);
+    return textPattern->ConvertToGlobalOffsetWithTransform(localOffset);
 }
 
-void RichEditorDragPattern::SetDragNodeScale(const RefPtr<RenderContext>& dragContext)
+void RichEditorDragPattern::SetDragNodeScale(
+    const RefPtr<RenderContext>& dragContext, const RefPtr<FrameNode>& hostNode)
 {
     CHECK_NULL_VOID(dragContext);
-    auto richEditor = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_VOID(richEditor && richEditor->HasRenderTransform());
-    auto scale = richEditor->GetHostScale();
+    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_VOID(TextBase::HasRenderTransform(hostNode));
+    auto hostPattern = hostNode->GetPattern<TextDragBase>();
+    auto textPattern = DynamicCast<TextPattern>(hostPattern);
+    CHECK_NULL_VOID(textPattern);
+    auto scale = textPattern->GetHostScale(hostNode);
     dragContext->UpdateTransformCenter(DimensionOffset(Offset(0.0, 0.0)));
     dragContext->SetScale(scale.x, scale.y);
+    CHECK_NULL_VOID(info_);
+    info_->scaleXY = { scale.x, scale.y };
 }
 
 void RichEditorDragPattern::AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes)
