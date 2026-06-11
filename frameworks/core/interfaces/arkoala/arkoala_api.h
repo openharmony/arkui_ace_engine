@@ -4141,8 +4141,11 @@ struct ArkUIButtonModifier {
     void (*setButtonBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
     void (*resetButtonBackgroundColor)(ArkUINodeHandle node);
+    void (*setButtonBorderRadiusWithOne)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setButtonBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
+    void (*setButtonLocalizedBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*resetButtonBorderRadius)(ArkUINodeHandle node);
+    void (*resetButtonBorderRadiusJS)(ArkUINodeHandle node);
     void (*setButtonFontWeightEnum)(ArkUINodeHandle node, ArkUI_Int32 fontWeight);
     void (*setButtonSize)(ArkUINodeHandle node, ArkUI_CharPtr widthValue, ArkUI_Int32 widthUnit,
         ArkUI_CharPtr heightValue, ArkUI_Int32 heightUnit);
@@ -7023,20 +7026,34 @@ struct ArkUIMenuItemGroupModifier {
 };
 
 struct ArkUIToggleModifier {
+    void (*create)(ArkUI_Int32 toggleType, ArkUI_Bool isOn);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId, ArkUI_Int32 toggleType, ArkUI_Bool isOn);
+    void (*setOnChangeEvent)(void* callback);
     void (*setToggleSelectedColor)(ArkUINodeHandle node, ArkUI_Uint32 selectedColor);
+    void (*setToggleSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 selectedColor, ArkUI_VoidPtr colorRawPtr);
+    void (*setToggleSelectedColorPtrByJs)(ArkUINodeHandle node, ArkUI_Uint32 selectedColor, ArkUI_VoidPtr colorRawPtr);
     void (*resetToggleSelectedColor)(ArkUINodeHandle node);
     void (*setToggleSwitchPointColor)(ArkUINodeHandle node, ArkUI_Uint32 switchPointColor);
+    void (*setToggleSwitchPointColorPtr)(
+        ArkUINodeHandle node, ArkUI_Uint32 switchPointColor, ArkUI_VoidPtr colorRawPtr);
+    void (*setToggleSwitchPointColorPtrByJs)(
+        ArkUINodeHandle node, ArkUI_Uint32 switchPointColor, ArkUI_VoidPtr colorRawPtr);
     void (*resetToggleSwitchPointColor)(ArkUINodeHandle node);
+    void (*resetToggleSwitchPointColorByJs)(ArkUINodeHandle node);
     void (*setToggleHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetToggleHeight)(ArkUINodeHandle node);
+    void (*setToggleWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setToggleResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
     void (*resetToggleResponseRegion)(ArkUINodeHandle node);
     void (*setTogglePadding)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Uint32 length);
+    void (*setTogglePaddingByJs)(
+        ArkUINodeHandle node, const struct ArkUIPaddingType* oldPaddings, const struct ArkUIPaddingType* newPaddings);
     void (*resetTogglePadding)(ArkUINodeHandle node);
     void (*setToggleBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*setToggleBackgroundColorWithColorSpace)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
+    void (*setToggleBackgroundColorWithColorSpace)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
+    void (*setToggleBackgroundColorByJs)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* colorRawPtr, ArkUI_Bool flag);
     void (*resetToggleBackgroundColor)(ArkUINodeHandle node);
     void (*setToggleHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetToggleHoverEffect)(ArkUINodeHandle node);
@@ -7046,25 +7063,25 @@ struct ArkUIToggleModifier {
     void (*resetToggleIsOn)(ArkUINodeHandle node);
     ArkUI_Int32 (*getToggleIsOn)(ArkUINodeHandle node);
     void (*setTogglePointRadius)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setTogglePointRadiusPtr)(
+        ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, ArkUI_VoidPtr radiusRawPtr);
     void (*resetTogglePointRadius)(ArkUINodeHandle node);
     void (*setToggleUnselectedColor)(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor);
+    void (*setToggleUnselectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor, ArkUI_VoidPtr colorRawPtr);
+    void (*setToggleUnselectedColorPtrByJs)(
+        ArkUINodeHandle node, ArkUI_Uint32 unselectedColor, ArkUI_VoidPtr colorRawPtr);
     void (*resetToggleUnselectedColor)(ArkUINodeHandle node);
     void (*setToggleTrackBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setToggleTrackBorderRadiusPtr)(
+        ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, ArkUI_VoidPtr radiusRawPtr);
     void (*resetToggleTrackBorderRadius)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getToggleUnselectedColor)(ArkUINodeHandle node);
     void (*setToggleState)(ArkUINodeHandle node, ArkUI_Bool isOn);
     void (*setToggleOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetToggleOnChange)(ArkUINodeHandle node);
     void (*setIsUserSetMargin)(ArkUINodeHandle node);
-    void (*setToggleSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 selectedColor, ArkUI_VoidPtr colorRawPtr);
-    void (*setToggleSwitchPointColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 switchPointColor,
-        ArkUI_VoidPtr colorRawPtr);
-    void (*setTogglePointRadiusPtr)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
-        ArkUI_VoidPtr radiusRawPtr);
-    void (*setToggleUnselectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor, ArkUI_VoidPtr colorRawPtr);
-    void (*setToggleTrackBorderRadiusPtr)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
-        ArkUI_VoidPtr radiusRawPtr);
     ArkUI_Bool (*getToggleState)(ArkUINodeHandle node);
+    void (*pop)();
 };
 
 struct ArkUINavigationModifier {

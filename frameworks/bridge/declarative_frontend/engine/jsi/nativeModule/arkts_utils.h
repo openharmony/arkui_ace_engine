@@ -569,6 +569,11 @@ public:
     static NG::BorderColorProperty GetBorderColor(const CommonColor& commonColor);
     static bool ParseCommonMarginOrPaddingCorner(
         EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension);
+    static void SetToggleBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void ParseToggleParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Params& params);
+    static void SetButtonBorderRadiusByJs(
+        const EcmaVM* vm, ArkUINodeHandle& nativeNode, const Local<JSValueRef>& value);
+    static void SetRenderStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length);
 
     template<typename T>
     static T GetPropertyValue(

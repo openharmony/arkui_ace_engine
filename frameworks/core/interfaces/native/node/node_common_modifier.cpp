@@ -52,7 +52,6 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/grid_property.h"
@@ -63,6 +62,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
+#include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/interfaces/native/node/node_common_modifier_multi_thread.h"
 #include "core/interfaces/native/node/view_model.h"
@@ -9961,7 +9961,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
         eventReceiver(nodeHandle, isOn);
     };
     if (frameNode->GetTag() == V2::SWITCH_ETS_TAG) {
-        ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+        auto toggleModifier = GetArkUINodeModifiers()->getToggleModifier();
+        CHECK_NULL_VOID(toggleModifier);
+        toggleModifier->setToggleOnChange(node, reinterpret_cast<void*>(&onChange));
     } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
         auto checkboxModifier = GetArkUINodeModifiers()->getCheckboxModifier();
         CHECK_NULL_VOID(checkboxModifier);

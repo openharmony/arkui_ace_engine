@@ -889,7 +889,10 @@
       "OHOS::Ace::NG::ArkTSUtils::parseShadowRadiusWithResObj(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, std::__h::optional<OHOS::Ace::NG::NodeInfo> const&)";
       "OHOS::Ace::NG::ArkTSUtils::parseTextShadowRadiusWithResObj(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, std::__h::optional<OHOS::Ace::NG::NodeInfo> const&)";
       "OHOS::Ace::NG::ArkTSUtils::parseShadowType(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
+      "OHOS::Ace::NG::ArkTSUtils::SetButtonBorderRadiusByJs(panda::ecmascript::EcmaVM const*, _ArkUINode*&, panda::Local<panda::JSValueRef> const&)";
       "OHOS::Ace::NG::ArkTSUtils::SetSymbolOptionApply(panda::ecmascript::EcmaVM*, std::__h::function<void (OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>&, panda::Local<panda::JSValueRef>)";
+      "OHOS::Ace::NG::ArkTSUtils::SetRenderStrategy(panda::JsiRuntimeCallInfo*, unsigned int)";
+      "OHOS::Ace::NG::ArkTSUtils::SetToggleBorderRadius(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::ArkTSUtils::UnwrapNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(OHOS::Ace::NG::RectT<float>&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::CalcHandleLevelMode(OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::RectT<float> const&)";
@@ -1524,6 +1527,7 @@
       "OHOS::Ace::NG::NGGestureRecognizer::SetGestureGroup(OHOS::Ace::WeakPtr<OHOS::Ace::NG::NGGestureRecognizer> const&)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::NodeAnimatableProperty(float const&, std::__h::function<void (float const&)>&&)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::Set(float const&)";
+      "OHOS::Ace::NG::NodeModifier::GetCheckboxCustomModifier()";
       "OHOS::Ace::NG::OverlayManager::AvoidCustomKeyboard(int, float)";
       "OHOS::Ace::NG::OverlayManager::BindKeyboard(std::__h::function<void ()> const&, int)";
       "OHOS::Ace::NG::OverlayManager::BindKeyboardWithNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, int)";
@@ -1706,6 +1710,7 @@
       "OHOS::Ace::NG::RecognizerGroup::AddChildren(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>>> const&)";
       "OHOS::Ace::NG::RenderContext::GetHost() const";
       "OHOS::Ace::NG::RichEditorDragPattern::CreateDragNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>>>&, OHOS::Ace::NG::TextDragInfo const&)";
+      "OHOS::Ace::NG::RosenEffectConverter::ConvertToFrostedGlassFilter(OHOS::Ace::FrostedGlassParam const&, float)";
       "OHOS::Ace::NG::RosenRenderContext::SetHDRColorHeadRoom(float)";
       "OHOS::Ace::NG::SafeAreaManager::GetKeyboardOffset(bool) const";
       "OHOS::Ace::NG::SafeAreaManager::GetSafeAreaWithoutProcess() const";
@@ -3797,6 +3802,8 @@
       OHOS::Ace::NG::StageManager::*;
       OHOS::Ace::NG::SwiperPattern::IsAtEnd*;
       OHOS::Ace::NG::SwiperPattern::IsAtStart*;
+      OHOS::Ace::NG::ToggleButtonPattern::*;
+      OHOS::Ace::NG::ToggleButtonModelNG::*;
       OHOS::Ace::NG::UIExtensionAdapter::*;
       OHOS::Ace::NG::UIExtensionStatic::*;
       OHOS::Ace::NG::UINode::*;
@@ -3907,7 +3914,6 @@
       OHOS::Ace::Theme::*;
       OHOS::Ace::ThemeConstants::*;
       OHOS::Ace::TimePickerModel::*;
-      OHOS::Ace::ToggleModel::*;
       OHOS::Ace::TokenColors::*;
       OHOS::Ace::TouchEventInfo::*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
@@ -4198,6 +4204,7 @@
       vtable?for?OHOS::Ace::NG::TextFieldController;
       vtable?for?OHOS::Ace::NG::TextLayoutProperty;
       vtable?for?OHOS::Ace::NG::TimePickerModelNG;
+      vtable?for?OHOS::Ace::NG::ToggleButtonPattern;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
       vtable?for?OHOS::Ace::NG::ViewAbstractModelNG;
       vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
@@ -4333,6 +4340,7 @@
       VTT?for?OHOS::Ace::NG::TextOverlayModifier;
       VTT?for?OHOS::Ace::NG::TextPaintMethod;
       VTT?for?OHOS::Ace::NG::TextSelectOverlay;
+      VTT?for?OHOS::Ace::NG::ToggleButtonPattern;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::WrapLayoutAlgorithm;

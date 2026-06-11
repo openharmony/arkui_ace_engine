@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,10 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_toggle_ffi.h"
 
 #include "cj_lambda.h"
+
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_button_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
@@ -28,6 +30,19 @@ using namespace OHOS::Ace::Framework;
 namespace {
 const std::vector<ToggleType> TOGGOLE_TYPES = { ToggleType::CHECKBOX, ToggleType::SWITCH, ToggleType::BUTTON };
 int32_t toggleType_ = 1;
+
+NG::ToggleModelNG* GetToggleModel()
+{
+    static NG::ToggleModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Toggle");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find toggle dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::ToggleModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
 } // namespace
 
 extern "C" {
@@ -38,7 +53,7 @@ void FfiOHOSAceFrameworkToggleCreate(int type, bool isOn)
         return;
     }
     toggleType_ = type;
-    ToggleModel::GetInstance()->Create(NG::ToggleType(type), isOn);
+    GetToggleModel()->Create(NG::ToggleType(type), isOn);
 }
 
 void FfiOHOSAceFrameworkToggleWidth(double width, int32_t unit)
@@ -78,24 +93,24 @@ void FfiOHOSAceFrameworkTogglePadding(double left, int32_t leftUnit, double top,
 
 void FfiOHOSAceFrameworkToggleSelectedColor(uint32_t color)
 {
-    ToggleModel::GetInstance()->SetSelectedColor(Color(color));
+    GetToggleModel()->SetSelectedColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkToggleResetSelectedColor()
 {
     std::optional<Color> selectedColor;
-    ToggleModel::GetInstance()->SetSelectedColor(selectedColor);
+    GetToggleModel()->SetSelectedColor(selectedColor);
 }
 
 void FfiOHOSAceFrameworkToggleSwitchPointColor(uint32_t color)
 {
-    ToggleModel::GetInstance()->SetSwitchPointColor(Color(color));
+    GetToggleModel()->SetSwitchPointColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkToggleResetSwitchPointColor()
 {
     std::optional<Color> switchPointColor;
-    ToggleModel::GetInstance()->SetSwitchPointColor(switchPointColor);
+    GetToggleModel()->SetSwitchPointColor(switchPointColor);
 }
 
 void FfiOHOSAceFrameworkToggleOnChange(void (*callback)(bool isOn))
@@ -104,26 +119,26 @@ void FfiOHOSAceFrameworkToggleOnChange(void (*callback)(bool isOn))
     auto onChange = [lambda](bool isOn) {
         lambda(isOn);
     };
-    ToggleModel::GetInstance()->OnChange(std::move(onChange));
+    GetToggleModel()->OnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkTogglePop()
 {
-    ToggleModel::GetInstance()->Pop();
+    GetToggleModel()->Pop();
 }
 
 void FfiToggleSetResponseRegion(CJResponseRegion value)
 {
     std::vector<DimensionRect> result;
     ParseCJResponseRegion(value, result);
-    ToggleModel::GetInstance()->SetResponseRegion(result);
+    GetToggleModel()->SetResponseRegion(result);
 }
 
 void FfiToggleSetResponseRegionArray(VectorStringPtr vecContent)
 {
     std::vector<DimensionRect> result;
     ParseVectorStringPtr(vecContent, result);
-    ToggleModel::GetInstance()->SetResponseRegion(result);
+    GetToggleModel()->SetResponseRegion(result);
 }
 
 void FfiOHOSAceFrameworkToggleSwitchStyle(
@@ -133,21 +148,21 @@ void FfiOHOSAceFrameworkToggleSwitchStyle(
     double trackBorderRadius)
 {
     Dimension pointRadiusValue = Dimension(pointRadius, DimensionUnit::VP);
-    ToggleModel::GetInstance()->SetPointRadius(pointRadiusValue);
-    ToggleModel::GetInstance()->SetUnselectedColor(Color(unselectedColor));
-    ToggleModel::GetInstance()->SetSwitchPointColor(Color(pointColor));
+    GetToggleModel()->SetPointRadius(pointRadiusValue);
+    GetToggleModel()->SetUnselectedColor(Color(unselectedColor));
+    GetToggleModel()->SetSwitchPointColor(Color(pointColor));
     Dimension trackBorderRadiusValue = Dimension(trackBorderRadius, DimensionUnit::VP);
-    ToggleModel::GetInstance()->SetTrackBorderRadius(trackBorderRadiusValue);
+    GetToggleModel()->SetTrackBorderRadius(trackBorderRadiusValue);
 }
 
 void FfiOHOSAceFrameworkToggleBackgroundColor(uint32_t color)
 {
-    ToggleModel::GetInstance()->SetBackgroundColor(Color(color), true);
+    GetToggleModel()->SetBackgroundColor(Color(color), true);
 }
 
 void FfiOHOSAceFrameworkToggleHoverEffect(int32_t value)
 {
-    ToggleModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(value));
+    GetToggleModel()->SetHoverEffect(static_cast<HoverEffectType>(value));
 }
 
 void FfiOHOSAceFrameworkToggleRadius(double radius, int32_t unit)

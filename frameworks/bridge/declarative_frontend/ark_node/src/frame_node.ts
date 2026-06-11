@@ -1516,7 +1516,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Toggle', (context: UIContext, options?: object): FrameNode => {
       return new TypedFrameNode(context, 'Toggle', (node: NodePtr, type: ModifierType): ArkToggleComponent => {
-        return new ArkToggleComponent(node, type);
+        getUINativeModule().loadNativeModule('Toggle');
+        let module = globalThis.requireNapi('arkui.components.arktoggle');
+        return module.createComponent(node, type);
       }, options);
     }],
   ]
@@ -1701,7 +1703,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkToggleComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Toggle');
+      let module = globalThis.requireNapi('arkui.components.arktoggle');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Column', (node: FrameNode): ArkColumnComponent => {

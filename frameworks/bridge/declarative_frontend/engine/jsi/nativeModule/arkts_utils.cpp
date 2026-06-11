@@ -35,6 +35,7 @@
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
+#include "frameworks/core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
@@ -180,6 +181,38 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
             menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");
             menuOptionsParam.symbolId = menuOptionsParam.symbolId.value_or(0);
             break;
+    }
+}
+
+void GetBorderRadiusByLengthMetrics(const EcmaVM* vm, const Local<panda::ObjectRef>& obj,
+    const std::string& propertyName, std::optional<CalcDimension>& radius)
+{
+    CalcDimension result;
+    auto propertyValue = ArkTSUtils::GetProperty(vm, obj, propertyName);
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, propertyValue, result)) {
+        radius = result;
+    }
+}
+
+void GetNormalBorderRadius(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName,
+    std::optional<CalcDimension>& radius)
+{
+    CalcDimension result;
+    auto propertyValue = ArkTSUtils::GetProperty(vm, obj, propertyName);
+    if (ArkTSUtils::ParseJsDimensionVp(vm, propertyValue, result, false)) {
+        radius = result;
+    }
+}
+
+void PushBorderRadiusVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32>& options)
+{
+    options.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
+    } else {
+        options.push_back(0);
+        options.push_back(0);
     }
 }
 }
@@ -5485,6 +5518,105 @@ bool ArkTSUtils::ParseCommonMarginOrPaddingCorner(
             commonCalcDimension.left, commonCalcDimension.right);
     }
     return false;
+}
+
+void ArkTSUtils::SetToggleBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    JSCallbackInfo info = JSCallbackInfo(runtimeCallInfo);
+    JSViewAbstract::JsBorderRadius(info);
+}
+
+void ArkTSUtils::ParseToggleParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Params& params)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    CHECK_EQUAL_VOID(params.nodeType != ARKUI_TOGGLE, true);
+    ArkUI_Toggle_Params* toggleParams = (ArkUI_Toggle_Params*)(&params);
+    toggleParams->toggleType = ToggleType::SWITCH;
+    toggleParams->isOn = false;
+    CHECK_EQUAL_VOID(runtimeCallInfo->GetArgsNumber() != NUM_3, true);
+    Local<JSValueRef> paramsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (!paramsArg->IsNull() && paramsArg->IsObject(vm)) {
+        auto obj = Local<panda::ObjectRef>(paramsArg);
+        auto typeStr = panda::StringRef::NewFromUtf8(vm, "type");
+        auto isOnStr = panda::StringRef::NewFromUtf8(vm, "isOn");
+        auto typeArg = obj->Get(vm, typeStr);
+        auto isOnArg = obj->Get(vm, isOnStr);
+        CHECK_EQUAL_VOID(typeArg.IsEmpty(), true);
+        CHECK_EQUAL_VOID(isOnArg.IsEmpty(), true);
+        if (!typeArg->IsNull() && !typeArg->IsUndefined() && typeArg->IsNumber()) {
+            toggleParams->toggleType = static_cast<ToggleType>(typeArg->Int32Value(vm));
+        }
+        if (!isOnArg->IsNull() && !isOnArg->IsUndefined() && isOnArg->IsBoolean()) {
+            toggleParams->isOn = isOnArg->ToBoolean(vm)->Value();
+        }
+    }
+}
+
+void ArkTSUtils::SetButtonBorderRadiusByJs(
+    const EcmaVM* vm, ArkUINodeHandle& nativeNode, const Local<JSValueRef>& value)
+{
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    CalcDimension radius;
+    if (ParseJsDimensionVp(vm, value, radius, false)) {
+        buttonModifier->setButtonBorderRadiusWithOne(nativeNode, radius.Value(), static_cast<int32_t>(radius.Unit()));
+        return;
+    } else if (value->IsObject(vm)) {
+        auto obj = value->ToObject(vm);
+        auto typeArg = GetProperty(vm, obj, "type");
+        int32_t type = typeArg->IsNumber() ? typeArg->ToNumber(vm)->Int32Value(vm) : UNKNOWN_RESOURCE_TYPE;
+        if (type == UNKNOWN_RESOURCE_TYPE) {
+            std::optional<CalcDimension> radiusTopLeft;
+            std::optional<CalcDimension> radiusTopRight;
+            std::optional<CalcDimension> radiusBottomLeft;
+            std::optional<CalcDimension> radiusBottomRight;
+            bool hasLocalizedRadius = HasProperty(vm, obj, "topStart") || HasProperty(vm, obj, "topEnd") ||
+                                      HasProperty(vm, obj, "bottomStart") || HasProperty(vm, obj, "bottomEnd");
+            if (hasLocalizedRadius) {
+                GetBorderRadiusByLengthMetrics(vm, obj, "topStart", radiusTopLeft);
+                GetBorderRadiusByLengthMetrics(vm, obj, "topEnd", radiusTopRight);
+                GetBorderRadiusByLengthMetrics(vm, obj, "bottomStart", radiusBottomLeft);
+                GetBorderRadiusByLengthMetrics(vm, obj, "bottomEnd", radiusBottomRight);
+            } else {
+                GetNormalBorderRadius(vm, obj, "topLeft", radiusTopLeft);
+                GetNormalBorderRadius(vm, obj, "topRight", radiusTopRight);
+                GetNormalBorderRadius(vm, obj, "bottomLeft", radiusBottomLeft);
+                GetNormalBorderRadius(vm, obj, "bottomRight", radiusBottomRight);
+            }
+            std::vector<ArkUI_Float32> options;
+            PushBorderRadiusVector(radiusTopLeft, options);
+            PushBorderRadiusVector(radiusTopRight, options);
+            PushBorderRadiusVector(radiusBottomLeft, options);
+            PushBorderRadiusVector(radiusBottomRight, options);
+            if (hasLocalizedRadius) {
+                buttonModifier->setButtonLocalizedBorderRadius(nativeNode, options.data(), options.size());
+            } else {
+                buttonModifier->setButtonBorderRadius(nativeNode, options.data(), options.size());
+            }
+            return;
+        }
+    }
+    buttonModifier->resetButtonBorderRadiusJS(nativeNode);
+}
+
+void ArkTSUtils::SetRenderStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber < length) {
+        return;
+    }
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(length - 1);
+    if (thirdArg->IsNumber()) {
+        ViewAbstractModel::GetInstance()->SetRenderStrategy(
+            static_cast<RenderStrategy>(thirdArg->ToNumber(vm)->Int32Value(vm)));
+    } else {
+        ViewAbstractModel::GetInstance()->SetRenderStrategy(RenderStrategy::FAST);
+    }
 }
 
 #ifdef PIXEL_MAP_SUPPORTED

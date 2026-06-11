@@ -18,6 +18,7 @@
 
 #include <array>
 #include <memory>
+#include "interfaces/inner_api/ace_kit/include/ui/base/macros.h"
 
 namespace OHOS::Rosen {
 class RSNGFilterBase;
@@ -39,7 +40,7 @@ struct FrostedGlassParam;
 namespace OHOS::Ace::NG {
 class RosenEffectConverter {
 public:
-    static std::shared_ptr<Rosen::RSNGFilterBase> ConvertToFrostedGlassFilter(
+    ACE_FORCE_EXPORT static std::shared_ptr<Rosen::RSNGFilterBase> ConvertToFrostedGlassFilter(
         const FrostedGlassParam& param, float oneVpValue);
     static Rosen::Vector2f ConvertToVector2f(const std::array<float, 2>& arr);
     static Rosen::Vector3f ConvertToVector3f(const std::array<float, 3>& arr);

@@ -835,6 +835,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "SymbolGlyph", "arkui.components.arksymbolglyph" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "Toggle", "arkui.components.arktoggle" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
         { "LazyColumnLayout", "arkui.components.arklazycolumnlayout" },
         { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },

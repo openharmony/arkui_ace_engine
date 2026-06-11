@@ -773,6 +773,23 @@ void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Di
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius, frameNode);
 }
 
+void ButtonModelNG::SetLocalizedBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopStart,
+    const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
+    const std::optional<Dimension>& radiusBottomEnd)
+{
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopStart, LpxAttribute::LPX_TOP_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusTopEnd, LpxAttribute::LPX_TOP_RIGHT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomStart, LpxAttribute::LPX_BOTTOM_LEFT_BORDER_RADIUS, frameNode);
+    ACE_CHECK_OPTIONAL_NODE_LPX_ATTRIBUTE(radiusBottomEnd, LpxAttribute::LPX_BOTTOM_RIGHT_BORDER_RADIUS, frameNode);
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopStart = radiusTopStart;
+    borderRadius.radiusTopEnd = radiusTopEnd;
+    borderRadius.radiusBottomStart = radiusBottomStart;
+    borderRadius.radiusBottomEnd = radiusBottomEnd;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius, frameNode);
+}
+
 void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1011,6 +1028,11 @@ void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 void ButtonModelNG::ResetBorderRadius()
 {
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ButtonLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE);
+}
+
+void ButtonModelNG::ResetBorderRadius(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ButtonLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE, frameNode);
 }
 
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)

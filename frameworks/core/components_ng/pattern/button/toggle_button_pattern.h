@@ -26,7 +26,7 @@
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 
 namespace OHOS::Ace::NG {
-class ToggleButtonPattern : public ButtonPattern {
+class ACE_FORCE_EXPORT ToggleButtonPattern : public ButtonPattern {
     DECLARE_ACE_TYPE(ToggleButtonPattern, ButtonPattern);
 
 public:

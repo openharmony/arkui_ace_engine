@@ -67,3 +67,12 @@ ohos_abc("arkqrcode") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
+
+ohos_abc("arktoggle") {
+  sources = [ "./src/arktoggle.ts" ]
+  output_name = "arktoggle"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

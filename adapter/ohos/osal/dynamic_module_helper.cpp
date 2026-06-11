@@ -100,6 +100,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "MenuItem", "menu" },
         { "MenuItemGroup", "menu" },
         { "LazyColumnLayout", "lazycolumnlayout" },
+        { "Toggle", "toggle" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

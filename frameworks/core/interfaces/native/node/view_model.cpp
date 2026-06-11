@@ -94,6 +94,7 @@
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG::ViewModel {
@@ -142,20 +143,20 @@ void* createImageNode(ArkUI_Int32 nodeId)
 
 void* createToggleNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, NG::ToggleType::SWITCH, false);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto* modifier = NG::NodeModifier::GetToggleModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(
+        nodeId, static_cast<ArkUI_Int32>(ToggleType::SWITCH), static_cast<ArkUI_Bool>(false));
 }
 
 void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     auto toggleParams = static_cast<const ArkUI_Toggle_Params*>(&params);
     CHECK_NULL_RETURN(toggleParams, nullptr);
-    auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, toggleParams->toggleType, toggleParams->isOn);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto* modifier = NG::NodeModifier::GetToggleModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(
+        nodeId, static_cast<ArkUI_Int32>(toggleParams->toggleType), static_cast<ArkUI_Bool>(toggleParams->isOn));
 }
 
 void* createLoadingProgress(ArkUI_Int32 nodeId)
