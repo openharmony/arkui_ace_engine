@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/navigator_model_impl.h"
+#include "core/components_ng/pattern/navigator/navigator_model_impl.h"
 
 #include "core/components/box/box_component.h"
 #include "core/components/navigator/navigator_component.h"

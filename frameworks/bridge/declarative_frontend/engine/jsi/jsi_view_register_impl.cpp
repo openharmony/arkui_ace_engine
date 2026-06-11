@@ -92,7 +92,6 @@
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
-#include "bridge/declarative_frontend/jsview/js_navigator.h"
 #include "bridge/declarative_frontend/jsview/js_navrouter.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "bridge/declarative_frontend/jsview/js_page_transition.h"
@@ -540,7 +539,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "NativeNavPathStack", JSNavPathStack::JSBind },
-    { "Navigator", JSNavigator::JSBind },
     { "NavRouter", JSNavRouter::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },

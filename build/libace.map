@@ -1051,6 +1051,8 @@
       "OHOS::Ace::NG::CommonBridge::SetBackgroundColor(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::ResetBackgroundColor(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::ParseOuterBorderWidth(panda::JsiRuntimeCallInfo*, panda::ecmascript::EcmaVM*, std::__h::vector<float, std::__h::allocator<float>>&, bool)";
+      "OHOS::Ace::NG::CommonBridge::SetHeight(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::CommonBridge::SetSize(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode(int)";
       "OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy(OHOS::Ace::NG::LayoutConstraintT<float> const&, OHOS::Ace::LayoutCalPolicy, OHOS::Ace::LayoutCalPolicy, OHOS::Ace::Axis)";
       "OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy(OHOS::Ace::NG::LayoutConstraintT<float> const&, std::__h::optional<OHOS::Ace::NG::LayoutPolicyProperty> const&, OHOS::Ace::Axis)";
@@ -4351,6 +4353,7 @@
       vtable?for?OHOS::Ace::HyperlinkComponent;
       vtable?for?OHOS::Ace::ImageComponent;
       vtable?for?OHOS::Ace::IndexerComponent;
+      vtable?for?OHOS::Ace::NavigatorComponent;
       vtable?for?OHOS::Ace::IndexerListComponent;
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       vtable?for?OHOS::Ace::LayeredDrawableDescriptor;
@@ -4506,6 +4509,7 @@
       VTT?for?OHOS::Ace::HyperlinkComponent;
       VTT?for?OHOS::Ace::ImageComponent;
       VTT?for?OHOS::Ace::IndexerComponent;
+      VTT?for?OHOS::Ace::NavigatorComponent;
       VTT?for?OHOS::Ace::IndexerListComponent;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::LayeredDrawableDescriptor;

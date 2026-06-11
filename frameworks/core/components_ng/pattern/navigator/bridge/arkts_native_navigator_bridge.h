@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_NAVIGATOR_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_NAVIGATOR_BRIDGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_BRIDGE_ARKTS_NATIVE_NAVIGATOR_BRIDGE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_BRIDGE_ARKTS_NATIVE_NAVIGATOR_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 class NavigatorBridge : public CommonBridge {
 public:
+    static void RegisterNavigatorAttributes(panda::Local<panda::ObjectRef> object, panda::ecmascript::EcmaVM* vm);
     static ArkUINativeModuleValue ResetTarget(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTarget(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetType(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -30,7 +31,14 @@ public:
     static ArkUINativeModuleValue SetActive(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetParams(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetParams(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
+private:
+    static ArkUINativeModuleValue SetSizeDimension(
+        panda::ecmascript::EcmaVM* vm, panda::Local<panda::JSValueRef> jsValue, bool isWidth);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_STEPPER_ITEM_BRIDGE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_BRIDGE_ARKTS_NATIVE_NAVIGATOR_BRIDGE_H

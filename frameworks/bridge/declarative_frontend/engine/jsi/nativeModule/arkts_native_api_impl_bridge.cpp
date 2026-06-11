@@ -45,7 +45,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.h"
@@ -553,6 +552,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "CalendarPickerDialog" },
 #endif
         { "Hyperlink" },
+        { "Navigator" },
         { "SymbolGlyph" },
         {"Richeditor"},
         { "LoadingProgress" },
@@ -1617,7 +1617,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterNavigationAttributes(object, vm);
     RegisterImageAttributes(object, vm);
     RegisterNavRouterAttributes(object, vm);
-    RegisterNavigatorAttributes(object, vm);
     RegisterNodeContainerAttributes(object, vm);
     RegisterRenderNodeAttributes(object, vm);
     RegisterFrameNodeAttributes(object, vm);
@@ -2289,28 +2288,6 @@ void ArkUINativeModule::RegisterNavRouterAttributes(Local<panda::ObjectRef> obje
     navRouter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnStateChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavRouterBridge::ResetOnStateChange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navRouter"), navRouter);
-}
-
-void ArkUINativeModule::RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto navigator = panda::ObjectRef::New(vm);
-    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTarget"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetTarget));
-    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTarget"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetTarget));
-    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetType));
-    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetType));
-    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActive"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetActive));
-    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActive"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetActive));
-    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setParams"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::SetParams));
-    navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetParams"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetParams));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigator"), navigator);
 }
 
 void ArkUINativeModule::RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

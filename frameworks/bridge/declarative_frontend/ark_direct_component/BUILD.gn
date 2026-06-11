@@ -156,6 +156,15 @@ ohos_abc("arklazygridlayout") {
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
+ }
+
+ohos_abc("arknavigator") {
+  sources = [ "./src/arknavigator.ts" ]
+  output_name = "arknavigator"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }
 
 ohos_abc("arkrefresh") {
