@@ -8948,7 +8948,8 @@ template RefPtr<ProgressAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<ProgressAccessibilityProperty>() const;
 template RefPtr<RadioAccessibilityProperty> FrameNode::GetAccessibilityProperty<RadioAccessibilityProperty>() const;
 template RefPtr<RatingAccessibilityProperty> FrameNode::GetAccessibilityProperty<RatingAccessibilityProperty>() const;
-template RefPtr<RefreshAccessibilityProperty> FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<RefreshAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
 template RefPtr<RichEditorAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<RichEditorAccessibilityProperty>() const;
 template RefPtr<ScrollAccessibilityProperty> FrameNode::GetAccessibilityProperty<ScrollAccessibilityProperty>() const;

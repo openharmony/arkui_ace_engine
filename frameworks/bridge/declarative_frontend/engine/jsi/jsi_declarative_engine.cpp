@@ -828,6 +828,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Rating", "arkui.components.arkrating" },
         { "Richeditor", "arkui.components.arkricheditor" },
         { "SymbolSpan", "arkui.components.arksymbolspan" },
+        { "Refresh", "arkui.components.arkrefresh" },
         { "RowSplit", "arkui.components.arkrowsplit" },
         { "Search", "arkui.components.arksearch" },
         { "Sidebar", "arkui.components.arksidebarcontainer" },

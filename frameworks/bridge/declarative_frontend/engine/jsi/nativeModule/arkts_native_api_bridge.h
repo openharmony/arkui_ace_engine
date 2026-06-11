@@ -91,7 +91,6 @@ private:
     static void RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterBadgeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

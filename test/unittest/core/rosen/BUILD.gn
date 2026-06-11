@@ -55,6 +55,7 @@ ohos_source_set("rosen_render_context_test_mock") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/test/mock/adapter/ohos/osal/mock_dynamic_module_helper.cpp",
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_theme_utils.cpp",
     "$ace_root/test/unittest/core/rosen/mock_animated_image.cpp",

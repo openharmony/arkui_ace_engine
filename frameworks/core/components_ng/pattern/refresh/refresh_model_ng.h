@@ -74,6 +74,7 @@ public:
     static void ResetOnOffsetChange(FrameNode* frameNode);
     static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
     static void SetRefreshOffset(FrameNode* frameNode, const Dimension& offset);
+    static void SetIndicatorOffset(FrameNode* frameNode, const Dimension& indicatorOffset);
     static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);
     static void SetPullUpToCancelRefresh(FrameNode* frameNode, bool isPullUpToCancelRefresh);
     static void SetMaxPullDownDistance(FrameNode* frameNode, const std::optional<float>& maxDistance);
@@ -87,6 +88,11 @@ public:
     static void SetStepOffsetChange(FrameNode* frameNode, OffsetStepChangeEvent&& changeEvent);
     static void CreateWithResourceObjRefreshOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateWithResourceObjMaxPullDownDistance(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetFriction(FrameNode* frameNode, int32_t friction);
+    static void SetIsCustomBuilderExist(FrameNode* frameNode, bool isCustomBuilderExist);
+    static void ResetLoadingText(FrameNode* frameNode);
+    static void SetLoadingText(FrameNode* frameNode, const std::string& loadingText);
+    static void CreateWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 

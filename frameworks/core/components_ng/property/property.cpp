@@ -16,7 +16,7 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag)
+ACE_FORCE_EXPORT bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag)
 {
     return ((propertyChangeFlag & PROPERTY_UPDATE_RENDER) == PROPERTY_UPDATE_RENDER) ||
            ((propertyChangeFlag & PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST) == PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);

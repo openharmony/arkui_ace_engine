@@ -122,6 +122,15 @@ ohos_abc("arklazygridlayout") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkrefresh") {
+  sources = [ "./src/arkrefresh.ts" ]
+  output_name = "arkrefresh"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arktextpicker") {
   sources = [ "./src/arktextpicker.ts" ]
   output_name = "arktextpicker"

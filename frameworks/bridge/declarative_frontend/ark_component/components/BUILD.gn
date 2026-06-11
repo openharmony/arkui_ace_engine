@@ -112,6 +112,7 @@ special_components = [
   "arkimageanimator",
   "arkdatepicker",
   "arklazygridlayout",
+  "arkrefresh",
   "arktextpicker",
 ]
 

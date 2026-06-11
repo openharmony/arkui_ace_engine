@@ -47,7 +47,7 @@ inline bool CheckNeedMakePropertyDiff(PropertyChangeFlag flag)
     return (flag & PROPERTY_UPDATE_DIFF) == PROPERTY_UPDATE_DIFF;
 }
 
-bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag);
+ACE_FORCE_EXPORT bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag);
 

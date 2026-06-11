@@ -225,6 +225,20 @@ if (globalThis.Marquee === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Refresh === undefined) {
+  globalThis.Refresh = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Refresh');
+      let module = globalThis.requireNapi('arkui.components.arkrefresh');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().refresh.create(params);
+    },
+    name: 'JSRefresh'
+  }
+}
+
+// @ts-ignore
 if (globalThis.Radio === undefined) {
   globalThis.Radio = {
     create: function(params) {
