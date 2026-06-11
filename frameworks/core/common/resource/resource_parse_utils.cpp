@@ -518,6 +518,10 @@ bool ResourceParseUtilsBase::ParseResStringObj(const std::vector<ResourceObjectP
         auto pluralStr = resourceWrapper->GetPluralStringByName(param.value.value(), count);
         ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
         result = pluralStr;
+    } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
+        result = std::to_string(resourceWrapper->GetDoubleByName(param.value.value()));
+    } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+        result = std::to_string(resourceWrapper->GetIntByName(param.value.value()));
     } else {
         return false;
     }
@@ -812,10 +816,29 @@ bool ResourceParseUtilsBase::ParseResResource(const RefPtr<ResourceObject>& resO
     if (type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
-    resIdNum = resIdNum == UNKNOWN_RESOURCE_ID ? 0 : resIdNum;
-
-    auto resourceWrapper = CreateResourceWrapper();
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     CHECK_NULL_RETURN(resourceWrapper, false);
+    if (resIdNum == UNKNOWN_RESOURCE_ID) {
+        auto params = resObj->GetParams();
+        if (params.empty()) {
+            return false;
+        }
+        auto param = params[0];
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetStringByName(param.value.value());
+            return StringUtils::StringToCalcDimensionNG(value, result, false);
+        }
+        if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = std::to_string(resourceWrapper->GetIntByName(param.value.value()));
+            StringUtils::StringToDimensionWithUnitNG(value, result);
+            return true;
+        }
+        if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
+            result = resourceWrapper->GetDimensionByName(param.value.value());
+            return true;
+        }
+        return false;
+    }
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resIdNum);
         return StringUtils::StringToCalcDimensionNG(value, result, false);
@@ -825,7 +848,6 @@ bool ResourceParseUtilsBase::ParseResResource(const RefPtr<ResourceObject>& resO
         StringUtils::StringToDimensionWithUnitNG(value, result);
         return true;
     }
-
     if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDimension(resIdNum);
         return true;

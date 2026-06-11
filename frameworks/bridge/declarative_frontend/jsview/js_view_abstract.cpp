@@ -7725,9 +7725,9 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
             ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
             result = pluralStr;
         } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
-            result = std::to_string(resourceWrapper->GetDouble(static_cast<uint32_t>(resIdNum)));
+            result = std::to_string(resourceWrapper->GetDoubleByName(param->ToString()));
         } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            result = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum)));
+            result = std::to_string(resourceWrapper->GetIntByName(param->ToString()));
         } else {
             return false;
         }

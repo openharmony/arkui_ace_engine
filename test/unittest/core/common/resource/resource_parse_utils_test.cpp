@@ -40,6 +40,92 @@ extern std::string GetReplaceContentStr(
     int pos, const std::string& type, const std::vector<ResourceObjectParams> params, int32_t containCount);
 extern void ReplaceHolder(std::string& originStr, const std::vector<ResourceObjectParams> params, int32_t containCount);
 
+namespace {
+constexpr int32_t RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID = 246810;
+constexpr char RESOURCE_PARSE_UTILS_STRING_NAME[] = "test.resource.string.by_name";
+constexpr char RESOURCE_PARSE_UTILS_INTEGER_NAME[] = "test.resource.integer.by_name";
+constexpr char RESOURCE_PARSE_UTILS_DOUBLE_NAME[] = "test.resource.double.by_name";
+constexpr char RESOURCE_PARSE_UTILS_DIMENSION_NAME[] = "test.resource.dimension.by_name";
+constexpr double RESOURCE_DIMENSION_VALUE = 10.0f;
+constexpr int32_t RESOURCE_INT_VALUE = 10;
+constexpr double RESOURCE_DOUBLE_VALUE = 10.5f;
+
+class ByNameAwareResourceAdapter final : public ResourceAdapter {
+    DECLARE_ACE_TYPE(ByNameAwareResourceAdapter, ResourceAdapter);
+
+public:
+    Color GetColor(uint32_t /*resId*/) override
+    {
+        return Color();
+    }
+
+    Dimension GetDimension(uint32_t /*resId*/) override
+    {
+        return Dimension(1.0, DimensionUnit::PX);
+    }
+
+    Dimension GetDimensionByName(const std::string& resName) override
+    {
+        if (resName == RESOURCE_PARSE_UTILS_DIMENSION_NAME) {
+            return Dimension(RESOURCE_DIMENSION_VALUE, DimensionUnit::VP);
+        }
+        return Dimension();
+    }
+
+    std::string GetString(uint32_t /*resId*/) override
+    {
+        return "1px";
+    }
+
+    std::string GetStringByName(const std::string& resName) override
+    {
+        if (resName == RESOURCE_PARSE_UTILS_STRING_NAME) {
+            return "24vp";
+        }
+        return "";
+    }
+
+    std::vector<std::string> GetStringArray(uint32_t /*resId*/) const override
+    {
+        return {};
+    }
+
+    double GetDouble(uint32_t /*resId*/) override
+    {
+        return -1.0;
+    }
+
+    double GetDoubleByName(const std::string& resName) override
+    {
+        if (resName == RESOURCE_PARSE_UTILS_DOUBLE_NAME) {
+            return RESOURCE_DOUBLE_VALUE;
+        }
+        return 0.0;
+    }
+
+    int32_t GetInt(uint32_t /*resId*/) override
+    {
+        return 1;
+    }
+
+    int32_t GetIntByName(const std::string& resName) override
+    {
+        if (resName == RESOURCE_PARSE_UTILS_INTEGER_NAME) {
+            return RESOURCE_INT_VALUE;
+        }
+        return 0;
+    }
+};
+
+RefPtr<ResourceObject> CreateByNameResourceObject(const std::string& name, ResourceType type)
+{
+    std::vector<ResourceObjectParams> params;
+    params.emplace_back(ResourceObjectParams { .value = name, .type = ResourceObjectParamType::STRING });
+    return AceType::MakeRefPtr<ResourceObject>(
+        -1, static_cast<int32_t>(type), params, "", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+}
+} // namespace
+
 /**
  * @tc.name: ResourceParseUtilsTest001
  * @tc.desc: Test resourceParseUtils.
@@ -2425,5 +2511,67 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest068, TestSize.Level1)
     
     result = GetReplaceContentStr(0, "f", params, 0);
     EXPECT_NE(result, "45.670000"); // Double to string conversion may have precision
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest074
+ * @tc.desc: Test ParseResString uses by-name branches for FLOAT and INTEGER resources.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest074, TestSize.Level1)
+{
+    auto oldResourceDecoupling = g_isResourceDecoupling;
+    g_isResourceDecoupling = true;
+
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+    RefPtr<ResourceAdapter> resourceAdapter = AceType::MakeRefPtr<ByNameAwareResourceAdapter>();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID, resourceAdapter);
+
+    std::string result;
+    auto floatResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_DOUBLE_NAME, ResourceType::FLOAT);
+    EXPECT_TRUE(ResourceParseUtils::ParseResString(floatResObj, result));
+    EXPECT_EQ(result, "10.500000");
+
+    result.clear();
+    auto intResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_INTEGER_NAME, ResourceType::INTEGER);
+    EXPECT_TRUE(ResourceParseUtils::ParseResString(intResObj, result));
+    EXPECT_EQ(result, "10");
+
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+    g_isResourceDecoupling = oldResourceDecoupling;
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest075
+ * @tc.desc: Test ParseResResource uses by-name branches when resource id is -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest075, TestSize.Level1)
+{
+    auto oldResourceDecoupling = g_isResourceDecoupling;
+    g_isResourceDecoupling = true;
+
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+    RefPtr<ResourceAdapter> resourceAdapter = AceType::MakeRefPtr<ByNameAwareResourceAdapter>();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID, resourceAdapter);
+
+    CalcDimension result;
+    auto stringResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_STRING_NAME, ResourceType::STRING);
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(stringResObj, result));
+    EXPECT_EQ(result.Value(), 24.0);
+    EXPECT_EQ(result.Unit(), DimensionUnit::VP);
+
+    auto intResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_INTEGER_NAME, ResourceType::INTEGER);
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(intResObj, result));
+    EXPECT_EQ(result.Value(), 10.0);
+    EXPECT_EQ(result.Unit(), DimensionUnit::PX);
+
+    auto floatResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_DIMENSION_NAME, ResourceType::FLOAT);
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(floatResObj, result));
+    EXPECT_EQ(result.Value(), 10.0);
+    EXPECT_EQ(result.Unit(), DimensionUnit::VP);
+
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+    g_isResourceDecoupling = oldResourceDecoupling;
 }
 } // namespace OHOS::Ace
