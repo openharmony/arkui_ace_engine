@@ -19,6 +19,7 @@
 #include <list>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -41,9 +42,17 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
+namespace OHOS::Rosen::Drawing {
+class Canvas;
+class Font;
+struct FontMetrics;
+class TextBlob;
+}
+
 namespace OHOS::Ace {
 
 class SpanStringBase;
+class Offset;
 
 class HtmlToSpan {
 public:
@@ -95,6 +104,7 @@ private:
         TEXT,
         ANCHOR,
         DEFAULT,
+        LIST_ITEM,
     };
 
     struct SpanInfo {
@@ -195,12 +205,35 @@ private:
     void ToAnchorSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
     std::string CleanTextSpaces(const std::string& text);
 
+    void ToUnorderedListSpan(xmlNodePtr node, size_t& pos, size_t& childPos, std::string& allContent,
+        std::vector<SpanInfo>& spanInfos);
+    void ToOrderedListSpan(xmlNodePtr node, size_t& pos, size_t& childPos, std::string& allContent,
+        std::vector<SpanInfo>& spanInfos);
+    void ToListItemSpan(xmlNodePtr node, size_t& pos, size_t& childPos, std::string& allContent,
+        std::vector<SpanInfo>& spanInfos);
+    
+#ifndef ACE_UNITTEST
+    using RSFont = Rosen::Drawing::Font;
+    static void DrawListItemMarker(const NG::DrawingContext& context,
+        std::shared_ptr<Rosen::Drawing::TextBlob> textBlob, const Offset& offset, const Color& textColor);
+    static double CalculateBaselineY(double top, double bottom, double textHeight, double ascent);
+    static Offset CalculateTextOffset(const RSFont& font, const std::string& leadingText,
+        const Rosen::Drawing::FontMetrics& metrics, const NG::LeadingMarginSpanOptions& options);
+    static std::pair<double, Color> GetDefaultTextSizeAndColor();
+    static void DrawLeadingMargin(NG::DrawingContext& context, const NG::LeadingMarginSpanOptions& options,
+        int32_t indentLevel, bool isOrdered, int32_t itemNumber);
+#endif
+
     std::string GetHtmlContent(xmlNodePtr node);
     RefPtr<MutableSpanString> GenerateSpans(const std::string& allContent, const std::vector<SpanInfo>& spanInfos);
     std::vector<SpanInfo> spanInfos_;
     int32_t smallDepth_ = 0;
+    int32_t listDepth_ = 0;
+    std::vector<int32_t> orderedListCounters_;
+    std::vector<bool> isOrderedStack_;
     static constexpr double PT_TO_PX = 1.3;
     static constexpr double ROUND_TO_INT = 0.5;
+    static constexpr uint32_t DEFAULT_TEXT_COLOR = 0xE5000000;
 };
 } // namespace OHOS::Ace
 
