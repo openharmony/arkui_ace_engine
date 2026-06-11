@@ -124,6 +124,8 @@ void WebPatternWebTest::TearDownTestCase() {}
 void WebPatternWebTest::SetUp()
 {
     MockPipelineContext::SetUp();
+    // Reset the browser engine version to system default to avoid engine switches in some tests affecting later cases.
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::SYSTEM_DEFAULT);
 }
 void WebPatternWebTest::TearDown()
 {
