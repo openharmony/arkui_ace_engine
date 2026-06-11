@@ -433,7 +433,7 @@ public:
                 partFrameNodeChildren_[index] = child;
             }
             return child;
-        } else if (!itor->second->IsActive() && !isCache && EnableCachePredictNodes()) {
+        } else if (itor->second && (itor->second->IsActive() == isCache) && EnableCachePredictNodes()) {
             // Re-acquire the node when entering the viewport.
             // Pending analysis scenarios: cachedItems_ erase, but not notify partFrameNodeChildren_.
             auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
