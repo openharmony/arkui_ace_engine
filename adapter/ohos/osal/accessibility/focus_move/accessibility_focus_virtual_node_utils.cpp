@@ -18,6 +18,9 @@
 #include "frameworks/core/accessibility/accessibility_manager.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr const char* ACCESSIBILITY_FOCUS_ACTION = "accessibilityFocus";
+}
 
 bool VirtualAccessibilityNodeRulesCheckNode::GetPropText(Accessibility::PropValue& value)
 {
@@ -30,8 +33,6 @@ bool VirtualAccessibilityNodeRulesCheckNode::GetPropText(Accessibility::PropValu
 
 bool VirtualAccessibilityNodeRulesCheckNode::GetPropHintText(Accessibility::PropValue& value)
 {
-    auto node = weakNode_.Upgrade();
-    CHECK_NULL_RETURN(node, false);
     value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = "";
     return true;
@@ -39,8 +40,6 @@ bool VirtualAccessibilityNodeRulesCheckNode::GetPropHintText(Accessibility::Prop
 
 bool VirtualAccessibilityNodeRulesCheckNode::GetPropDesc(Accessibility::PropValue& value)
 {
-    auto node = weakNode_.Upgrade();
-    CHECK_NULL_RETURN(node, false);
     value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = "";
     return true;
@@ -51,7 +50,7 @@ bool VirtualAccessibilityNodeRulesCheckNode::GetPropAccessibilityText(Accessibil
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
     value.valueType = Accessibility::ValueType::STRING;
-    value.valueStr = "";
+    value.valueStr = node->GetAccessibilityText();
     return true;
 }
 
@@ -103,10 +102,7 @@ bool VirtualAccessibilityNodeRulesCheckNode::GetPropChildrenCount(Accessibility:
 bool VirtualAccessibilityNodeRulesCheckNode::GetPropActionNames(Accessibility::PropValue& value)
 {
     value.valueType = Accessibility::ValueType::ARRAY;
-    auto node = weakNode_.Upgrade();
-    CHECK_NULL_RETURN(node, false);
-    std::string accessibilityFocusStr = "accessibilityFocus";
-    value.valueArray.insert(accessibilityFocusStr);
+    value.valueArray.insert(ACCESSIBILITY_FOCUS_ACTION);
     return true;
 }
 

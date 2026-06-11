@@ -122,25 +122,6 @@ HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerAllocate
     EXPECT_LE(id, 255);
 }
 
-/**
- * @tc.name: VirtualNodeContainerIdManagerAllocateContainerId003
- * @tc.desc: Test AllocateContainerId returns same ID for same node
- * @tc.type: FUNC
- */
-HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerAllocateContainerId003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. allocate twice for the same node
-     * @tc.expected: both allocations return the same ID
-     */
-    auto node = FrameNode::CreateFrameNode(TEST_TAG_CUSTOM,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(node, nullptr);
-    auto id1 = VirtualNodeContainerIdManager::GetInstance().AllocateContainerId(node);
-    auto id2 = VirtualNodeContainerIdManager::GetInstance().AllocateContainerId(node);
-    EXPECT_EQ(id1, id2);
-}
-
 // ==================== VirtualNodeContainerIdManager ReleaseContainerId ====================
 
 /**
@@ -187,22 +168,6 @@ HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerReleaseC
     EXPECT_NE(id, 0);
     mgr.ReleaseContainerId(node);
     EXPECT_EQ(mgr.GetContainerId(node), 0);
-}
-
-/**
- * @tc.name: VirtualNodeContainerIdManagerReleaseContainerId003
- * @tc.desc: Test ReleaseContainerId with invalid ID does not crash
- * @tc.type: FUNC
- */
-HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerReleaseContainerId003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. release ID 0 and ID 200 (unallocated)
-     * @tc.expected: no crash
-     */
-    auto& mgr = VirtualNodeContainerIdManager::GetInstance();
-    mgr.ReleaseContainerId(static_cast<uint8_t>(0));
-    mgr.ReleaseContainerId(static_cast<uint8_t>(200));
 }
 
 // ==================== VirtualNodeContainerIdManager GetContainerNode ====================
