@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ import { StateUpdateLoop } from './stateUpdateLoop';
 import { ObservedObjectRegistry, StateMgmtDFX } from '../tools/stateMgmtDFX';
 import { ElementInfo } from '../utils';
 
-class MutableStateMetaBase {
+export class MutableStateMetaBase {
     public readonly info_: string;
 
     constructor(info: string) {

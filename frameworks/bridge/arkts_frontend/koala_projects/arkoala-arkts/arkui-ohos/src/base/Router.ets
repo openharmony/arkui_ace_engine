@@ -81,7 +81,7 @@ export interface RouterTransitionState {
     route?: RouteType
 }
 
-class VisiblePage {
+export class VisiblePage {
     @memo
     page: UserViewBuilder
     url: string

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -724,7 +724,7 @@ function createInstance<T extends ExtendableComponent, T_Options>(
     return new CustomDelegate<T, T_Options>(uiContext, factory(), style);
 }
 
-interface OptionsCallback<T_Options> {
+export interface OptionsCallback<T_Options> {
     __initializeStruct(
         initializers?: T_Options,
         /** @memo */
@@ -736,7 +736,7 @@ interface OptionsCallback<T_Options> {
     ): void {}
 }
 
-interface HasCommonMethod {
+export interface HasCommonMethod {
     __applyStyles(instance: CommonMethod): void;
     readonly __hasCommonMethod: boolean;
 }
@@ -832,7 +832,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
 
 }
 
-interface ReusableLifeCycle<T_Options> {
+export interface ReusableLifeCycle<T_Options> {
     resetStateVarsOnReuse(params?: T_Options): void
     aboutToReuse(params: ReuseObject): void;
 }
@@ -864,7 +864,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
 
 }
 
-interface ReusableV2LifeCycle<T_Options> {
+export interface ReusableV2LifeCycle<T_Options> {
     resetStateVarsOnReuse(params?: T_Options): void
     aboutToReuse(): void;
 }

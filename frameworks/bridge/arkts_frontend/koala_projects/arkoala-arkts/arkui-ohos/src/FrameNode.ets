@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1048,7 +1048,7 @@ export class FrameNode implements MaterializedBase {
         FrameNodeExtender.applyAttributesFinish(this);
     }
 }
-class ImmutableFrameNode extends FrameNode {
+export class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {
         super(uiContext, undefined, type, ptr);
     }
@@ -1453,7 +1453,7 @@ export class FrameNodeUtils {
     }
 }
 
-abstract class TypedFrameNode<T> extends FrameNode {
+export abstract class TypedFrameNode<T> extends FrameNode {
     attribute_: T | undefined = undefined;
     attrCreator_: (node: FrameNode, type: ModifierType) => T
     type_: string = "";
