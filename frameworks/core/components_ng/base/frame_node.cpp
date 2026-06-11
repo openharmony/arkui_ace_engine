@@ -6090,7 +6090,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             ACE_LAYOUT_TRACE_END()
             return;
         }
-        if (CheckIfHasMeasured()) {
+        if (SystemProperties::GetSkipSecondaryMeasuredEnabled() && CheckIfHasMeasured()) {
             ACE_SCOPED_TRACE(
                 "SkipMeasure [%s][self:%d] reason:AlreadyMeasuredInCurrentFrame", tag_.c_str(), nodeId_);
             ACE_LAYOUT_TRACE_END()
