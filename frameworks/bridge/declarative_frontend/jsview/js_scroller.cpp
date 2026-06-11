@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 
 #include "base/geometry/axis.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -29,6 +30,23 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
+
+#define SCROLLABLE_SCROLLER "Scrollable.Scroller."
+
+enum class ScrollerErrorCode {
+    SUCCESS = 0,
+    FLING_SCROLLER_NULL,
+    FLING_CONTROLLER_NULL,
+    FLING_ARGS_INVALID,
+    FLING_VELOCITY_INVALID,
+    SCROLL_TO_NOT_OVER_NOT_STAY,
+    SCROLL_TO_NOT_OVER_CAN_STAY,
+    SCROLL_TO_CAN_OVER_NOT_STAY,
+    SCROLL_TO_CAN_OVER_CAN_STAY,
+    CURRENT_OFFSET_SCROLLER_NULL,
+    CURRENT_OFFSET_CONTROLLER_NULL,
+    END,
+};
 
 constexpr AlignDeclaration::Edge EDGE_TABLE[] = {
     AlignDeclaration::Edge::TOP,
@@ -183,6 +201,10 @@ void JSScrollerBinding::ScrollTo(const JSCallbackInfo& args)
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
     scrollController->SetCanStayOverScroll(canStayOverScroll);
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth, canOverScroll);
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "ScrollTo",
+        (canOverScroll ? 2 : 0) + (canStayOverScroll ? 1 : 0) + // 2 : bit1, 1 : bit0
+            static_cast<int32_t>(ScrollerErrorCode::SCROLL_TO_NOT_OVER_NOT_STAY),
+        static_cast<int32_t>(ScrollerErrorCode::SCROLL_TO_CAN_OVER_CAN_STAY));
 }
 
 bool JSScrollerBinding::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
@@ -244,25 +266,40 @@ void JSScrollerBinding::Fling(const JSCallbackInfo& args)
 {
     JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
+        ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "Fling",
+            static_cast<int32_t>(ScrollerErrorCode::FLING_SCROLLER_NULL),
+            static_cast<int32_t>(ScrollerErrorCode::FLING_VELOCITY_INVALID));
         return;
     }
     auto scrollController = jsScroller->GetController().Upgrade();
     if (!scrollController) {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "Fling",
+            static_cast<int32_t>(ScrollerErrorCode::FLING_CONTROLLER_NULL),
+            static_cast<int32_t>(ScrollerErrorCode::FLING_VELOCITY_INVALID));
         return;
     }
     double flingVelocity = 0.0;
     if (!args[0]->IsNumber()) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "The parameter check failed.");
+        ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "Fling",
+            static_cast<int32_t>(ScrollerErrorCode::FLING_ARGS_INVALID),
+            static_cast<int32_t>(ScrollerErrorCode::FLING_VELOCITY_INVALID));
         return;
     }
     flingVelocity = args[0]->ToNumber<double>();
     if (NearZero(flingVelocity)) {
+        ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "Fling",
+            static_cast<int32_t>(ScrollerErrorCode::FLING_VELOCITY_INVALID),
+            static_cast<int32_t>(ScrollerErrorCode::FLING_VELOCITY_INVALID));
         return;
     }
     ContainerScope scope(jsScroller->GetInstanceId());
     flingVelocity = Dimension(flingVelocity, DimensionUnit::VP).ConvertToPx();
     scrollController->Fling(flingVelocity);
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "Fling",
+        static_cast<int32_t>(ScrollerErrorCode::SUCCESS),
+        static_cast<int32_t>(ScrollerErrorCode::FLING_VELOCITY_INVALID));
 }
 
 void JSScrollerBinding::ScrollToIndex(const JSCallbackInfo& args)
@@ -334,12 +371,21 @@ void JSScrollerBinding::ScrollPage(const JSCallbackInfo& args)
 
 void JSScrollerBinding::CurrentOffset(const JSCallbackInfo& args)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLER "CurrentOffset", 1);
     JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
+        ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "CurrentOffset",
+            static_cast<int32_t>(ScrollerErrorCode::CURRENT_OFFSET_SCROLLER_NULL),
+            static_cast<int32_t>(ScrollerErrorCode::CURRENT_OFFSET_CONTROLLER_NULL));
         return;
     }
     auto scrollController = jsScroller->GetController().Upgrade();
-    CHECK_NULL_VOID(scrollController);
+    if (scrollController == nullptr) {
+        ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLER "CurrentOffset",
+            static_cast<int32_t>(ScrollerErrorCode::CURRENT_OFFSET_CONTROLLER_NULL),
+            static_cast<int32_t>(ScrollerErrorCode::CURRENT_OFFSET_CONTROLLER_NULL));
+        return;
+    }
     auto retObj = JSRef<JSObject>::New();
     ContainerScope scope(jsScroller->GetInstanceId());
     auto offset = scrollController->GetCurrentOffset();

@@ -76,4 +76,8 @@ build_component_ng("base_ng") {
   } else {
     sources += [ "navigation_register.cpp" ]
   }
+
+  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+  }
 }

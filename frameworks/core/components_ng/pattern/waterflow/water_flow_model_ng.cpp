@@ -17,6 +17,7 @@
 
 #include <string>
 #include "base/geometry/dimension.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -30,6 +31,8 @@
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
+
+#define SCROLLABLE_WATERFLOW_ATTRIBUTE "Scrollable.WaterFlowAttribute."
 
 void WaterFlowModelNG::Create()
 {
@@ -222,6 +225,11 @@ void WaterFlowModelNG::SetLayoutDirection(FlexDirection value)
 
 void WaterFlowModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetNestedScroll",
+        static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
+        static_cast<int32_t>(nestedOpt.backward) +
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_PARALLEL_PARALLEL));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
@@ -231,6 +239,7 @@ void WaterFlowModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 
 void WaterFlowModelNG::SetScrollEnabled(bool scrollEnabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetScrollEnabled", scrollEnabled);
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollEnabled, scrollEnabled);
 }
 
@@ -266,11 +275,13 @@ void WaterFlowModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrame
 
 void WaterFlowModelNG::SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     ScrollableModelNG::SetOnScroll(std::move(onScroll));
 }
 
 void WaterFlowModelNG::SetOnScroll(FrameNode* frameNode, std::function<void(Dimension, ScrollState)>&& onScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     ScrollableModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
 
@@ -296,6 +307,7 @@ void WaterFlowModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&&
 
 void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetOnScrollIndex", onScrollIndex ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
@@ -305,6 +317,7 @@ void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 
 void WaterFlowModelNG::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetOnScrollIndex", onScrollIndex ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -313,6 +326,7 @@ void WaterFlowModelNG::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& 
 
 void WaterFlowModelNG::SetFriction(double friction)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetFriction", 1);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
@@ -322,6 +336,10 @@ void WaterFlowModelNG::SetFriction(double friction)
 
 void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetCachedCount",
+        (show ? static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_SHOW) :
+               static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE)),
+        static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE));
     int32_t count = value;
     if (SystemProperties::IsWhiteBlockEnabled()) {
         count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
@@ -357,6 +375,10 @@ int32_t WaterFlowModelNG::GetCachedCount(FrameNode* frameNode)
 
 void WaterFlowModelNG::SetShowCached(FrameNode* frameNode, bool show)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetCachedCount",
+        (show ? static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_SHOW) :
+               static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE)),
+        static_cast<int32_t>(ScrollableErrorCode::CACHE_COUNT_FALSE));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show, frameNode);
 }
 
@@ -369,6 +391,10 @@ int32_t WaterFlowModelNG::GetShowCached(FrameNode* frameNode)
 
 void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(edge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
@@ -436,11 +462,13 @@ float WaterFlowModelNG::GetScrollBarWidth(FrameNode* frameNode)
 
 void WaterFlowModelNG::SetSyncLoad(bool syncLoad)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetSyncLoad", syncLoad);
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad);
 }
 
 void WaterFlowModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetSyncLoad", syncLoad);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad, frameNode);
 }
 
@@ -513,6 +541,7 @@ void WaterFlowModelNG::SetRowsTemplate(FrameNode* frameNode, const std::string& 
 
 void WaterFlowModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetScrollEnabled", scrollEnabled);
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
 }
@@ -624,6 +653,11 @@ void WaterFlowModelNG::SetLayoutDirection(FrameNode* frameNode, const std::optio
 
 void WaterFlowModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetNestedScroll",
+        static_cast<int32_t>(nestedOpt.forward) * 4 + // 4 : NestedScrollMode enum size
+        static_cast<int32_t>(nestedOpt.backward) +
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_SELF_ONLY_SELF_ONLY),
+        static_cast<int32_t>(ScrollableErrorCode::NESTED_SCROLL_PARALLEL_PARALLEL));
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
@@ -632,6 +666,7 @@ void WaterFlowModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollO
 
 void WaterFlowModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>& friction)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetFriction", 1);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
@@ -691,6 +726,10 @@ NestedScrollOptions WaterFlowModelNG::GetNestedScroll(FrameNode* frameNode)
 void WaterFlowModelNG::SetEdgeEffect(
     FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
+    ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_WATERFLOW_ATTRIBUTE "SetEdgeEffect",
+        static_cast<int32_t>(edge) - static_cast<int32_t>(EffectEdge::START) +
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_START),
+        static_cast<int32_t>(ScrollableErrorCode::EFFECT_EDGE_ALL));
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 float WaterFlowModelNG::GetFriction(FrameNode* frameNode)

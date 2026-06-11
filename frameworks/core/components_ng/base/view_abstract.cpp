@@ -18,6 +18,7 @@
 #include <functional>
 #include <unordered_map>
 #include "base/log/log_wrapper.h"
+#include "base/hiviewdfx/histogram_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/flex_property.h"
@@ -81,6 +82,8 @@
 #include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
+
+#define SCROLLABLE_IMPERATIVE_ATTRIBUTE "Imperative.ScrollableAttribute."
 
 namespace {
 enum class WidthBreakpoint { WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL };
@@ -11510,6 +11513,7 @@ void ViewAbstract::ClearJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode)
 
 void ViewAbstract::SetJSFrameNodeOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onWillScroll)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_IMPERATIVE_ATTRIBUTE "SetOnWillScroll", onWillScroll ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -11565,6 +11569,8 @@ void ViewAbstract::ClearJSFrameNodeOnListScrollIndex(FrameNode* frameNode)
 void ViewAbstract::SetJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode,
     OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
+    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_IMPERATIVE_ATTRIBUTE "SetOnScrollVisibleContentChange",
+        onScrollVisibleContentChange ? 1 : 0);
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);

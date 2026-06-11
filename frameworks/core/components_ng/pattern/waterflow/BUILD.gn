@@ -66,4 +66,9 @@ build_component_ng("waterflow_pattern_ng") {
       "$ace_root/interfaces/inner_api/ui_session:ui_session",
     ]
   }
+
+  external_deps = []
+  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+  }
 }
