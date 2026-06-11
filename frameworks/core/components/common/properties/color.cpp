@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
 namespace {

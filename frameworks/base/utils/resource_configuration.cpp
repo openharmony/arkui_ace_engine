@@ -15,6 +15,7 @@
 
 #include "base/utils/resource_configuration.h"
 
+#include "base/json/json_util.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

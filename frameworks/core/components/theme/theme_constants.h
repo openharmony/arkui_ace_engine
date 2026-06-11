@@ -16,20 +16,25 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_CONSTANTS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_CONSTANTS_H
 
+#include <memory>
 #include <unordered_map>
 
 #include "base/geometry/dimension.h"
-#include "base/image/pixel_map.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/radius.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_style.h"
+
+namespace OHOS::Media {
+class PixelMap;
+}
+
 namespace OHOS::Ace {
+
+enum class ColorScheme : int32_t;
 
 class ACE_FORCE_EXPORT ThemeConstants : public AceType {
     DECLARE_ACE_TYPE(ThemeConstants, AceType);

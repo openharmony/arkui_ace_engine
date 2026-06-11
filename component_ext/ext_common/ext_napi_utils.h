@@ -22,6 +22,7 @@
 #include "napi/native_node_api.h"
 
 #include "ui/base/macros.h"
+#include "base/json/json_util.h"
 #include "frameworks/core/components/common/properties/color.h"
 #include "frameworks/core/components/theme/theme_constants.h"
 
