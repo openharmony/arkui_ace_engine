@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/state_style_manager.h"
 
 #include "core/common/event_manager.h"
 #include "core/gestures/drag_event.h"
@@ -1347,4 +1348,34 @@ void EventHub::FireLayoutNDKCallback(const PipelineContext* pipeline)
         },
         TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
 }
+bool KeyboardShortcut::IsEqualTrigger(const KeyboardShortcut& other)
+{
+    return (keys == other.keys) && (value == other.value);
+}
+
+void EventHub::SetNDKDrawCompletedCallback(std::function<void()>&& callback)
+{
+    ndkDrawCompletedCallback_ = std::move(callback);
+}
+
+void EventHub::SetNDKLayoutCallback(std::function<void()>&& callback)
+{
+    ndkLayoutCallback_ = std::move(callback);
+}
+
+bool EventHub::HasNDKDrawCompletedCallback()
+{
+    return !!ndkDrawCompletedCallback_;
+}
+
+void EventHub::SetCompensateOnSizeChangeEvent(bool compensateOnSizeChangeEvent)
+{
+    compensateOnSizeChangeEvent_ = compensateOnSizeChangeEvent;
+}
+
+bool EventHub::IsCompensateOnSizeChangeEvent() const
+{
+    return compensateOnSizeChangeEvent_;
+}
+
 } // namespace OHOS::Ace::NG

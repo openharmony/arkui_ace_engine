@@ -361,4 +361,42 @@ bool Container::IsCurrentUseNewPipeline()
     auto container = Current();
     return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
 }
+
+void Container::SetUseNewPipeline()
+{
+    useNewPipeline_ = true;
+}
+
+bool Container::IsInSubContainer()
+{
+    auto container = Current();
+    CHECK_NULL_RETURN(container, false);
+    return container->IsSubContainer();
+}
+
+bool Container::LessThanAPITargetVersion(PlatformVersion version)
+{
+    auto container = CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    return container->GetApiTargetVersion() < static_cast<int32_t>(version);
+}
+
+bool Container::GreatOrEqualAPITargetVersion(PlatformVersion version)
+{
+    auto container = CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    return container->GetApiTargetVersion() >= static_cast<int32_t>(version);
+}
+
+int32_t Container::GetCurrentApiTargetVersion()
+{
+    auto container = CurrentSafely();
+    CHECK_NULL_RETURN(container, 0);
+    return container->GetApiTargetVersion();
+}
+
+int32_t Container::GetApiTargetVersion() const
+{
+    return apiTargetVersion_;
+}
 } // namespace OHOS::Ace

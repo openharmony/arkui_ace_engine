@@ -135,20 +135,14 @@ struct ScrollInfo {
     Dimension dx;
     Dimension dy;
 
-    bool operator==(const ScrollInfo& scrollInfo) const
-    {
-        return dx == scrollInfo.dx && dy == scrollInfo.dy;
-    }
+    bool operator==(const ScrollInfo& scrollInfo) const;
 };
 
 struct ScrollFrameInfo {
     Dimension offset;
     ScrollState state;
 
-    bool operator==(const ScrollFrameInfo& scrollInfo) const
-    {
-        return offset == scrollInfo.offset && state == scrollInfo.state;
-    }
+    bool operator==(const ScrollFrameInfo& scrollInfo) const;
 };
 
 struct ScrollSnapOptions {
@@ -162,25 +156,13 @@ struct NestedScrollOptions {
     NestedScrollMode forward;
     NestedScrollMode backward;
 
-    bool NeedParent() const
-    {
-        return forward != NestedScrollMode::SELF_ONLY || backward != NestedScrollMode::SELF_ONLY;
-    }
+    bool NeedParent() const;
 
-    bool NeedParent(bool forward) const
-    {
-        return forward ? this->forward != NestedScrollMode::SELF_ONLY : backward != NestedScrollMode::SELF_ONLY;
-    }
+    bool NeedParent(bool forward) const;
 
-    bool operator==(const NestedScrollOptions& other) const
-    {
-        return forward == other.forward && backward == other.backward;
-    }
+    bool operator==(const NestedScrollOptions& other) const;
 
-    bool operator!=(const NestedScrollOptions& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const NestedScrollOptions& other) const;
 
     std::string ToString() const;
 
@@ -200,20 +182,11 @@ struct ScrollBarMargin {
     Dimension start_;
     Dimension end_;
 
-    bool operator==(const ScrollBarMargin& other) const
-    {
-        return this->start_ == other.start_ && this->end_ == other.end_;
-    }
+    bool operator==(const ScrollBarMargin& other) const;
 
-    bool operator!=(const ScrollBarMargin& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const ScrollBarMargin& other) const;
 
-    std::string ToString() const
-    {
-        return "ScrollBarMargin start: " + start_.ToString() + ", end: " + end_.ToString();
-    }
+    std::string ToString() const;
 };
 
 struct ListItemIndex {

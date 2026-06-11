@@ -72,86 +72,29 @@ public:
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
-    const std::optional<LayoutConstraintF>& GetLayoutConstraint() const
-    {
-        return layoutConstraint_;
-    }
-
-    const std::optional<LayoutConstraintF>& GetContentLayoutConstraint() const
-    {
-        return contentConstraint_;
-    }
-
-    const std::optional<LayoutConstraintF>& GetParentLayoutConstraint() const
-    {
-        return parentLayoutConstraint_;
-    }
-
-    MagicItemProperty& GetMagicItemProperty()
-    {
-        return magicItemProperty_;
-    }
-
-    const std::unique_ptr<PaddingProperty>& GetPaddingProperty() const
-    {
-        return padding_;
-    }
-
-    const std::unique_ptr<PaddingProperty>& GetSafeAreaPaddingProperty() const
-    {
-        return safeAreaPadding_;
-    }
-
-    const std::unique_ptr<MarginProperty>& GetMarginProperty() const
-    {
-        return margin_;
-    }
-
-    const std::unique_ptr<BorderWidthProperty>& GetBorderWidthProperty() const
-    {
-        return borderWidth_;
-    }
-
-    const std::unique_ptr<BorderWidthProperty>& GetOuterBorderWidthProperty() const
-    {
-        return outerBorderWidth_;
-    }
-
-    const std::unique_ptr<PositionProperty>& GetPositionProperty() const
-    {
-        return positionProperty_;
-    }
-
-    const std::unique_ptr<MeasureProperty>& GetCalcLayoutConstraint() const
-    {
-        return calcLayoutConstraint_;
-    }
-
-    const std::unique_ptr<FlexItemProperty>& GetFlexItemProperty() const
-    {
-        return flexItemProperty_;
-    }
+    const std::optional<LayoutConstraintF>& GetLayoutConstraint() const;
+    const std::optional<LayoutConstraintF>& GetContentLayoutConstraint() const;
+    const std::optional<LayoutConstraintF>& GetParentLayoutConstraint() const;
+    MagicItemProperty& GetMagicItemProperty();
+    const std::unique_ptr<PaddingProperty>& GetPaddingProperty() const;
+    const std::unique_ptr<PaddingProperty>& GetSafeAreaPaddingProperty() const;
+    const std::unique_ptr<MarginProperty>& GetMarginProperty() const;
+    const std::unique_ptr<BorderWidthProperty>& GetBorderWidthProperty() const;
+    const std::unique_ptr<BorderWidthProperty>& GetOuterBorderWidthProperty() const;
+    const std::unique_ptr<PositionProperty>& GetPositionProperty() const;
+    const std::unique_ptr<MeasureProperty>& GetCalcLayoutConstraint() const;
+    const std::unique_ptr<FlexItemProperty>& GetFlexItemProperty() const;
 
     TextDirection GetLayoutDirection() const;
 
     TextDirection GetNonAutoLayoutDirection() const;
 
-    uint32_t GetBackgroundIgnoresLayoutSafeAreaEdges() const
-    {
-        return backgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
-    }
-
-    uint32_t GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges() const
-    {
-        return localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
-    }
+    uint32_t GetBackgroundIgnoresLayoutSafeAreaEdges() const;
+    uint32_t GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges() const;
     
     RefPtr<GeometryTransition> GetGeometryTransition() const;
 
-    MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
-    {
-        return measureType_.value_or(defaultType);
-    }
+    MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const;
 
     void LocalizedPaddingOrMarginChange(const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding);
     void UpdatePadding(const PaddingProperty& value);
@@ -176,14 +119,8 @@ public:
 
     void UpdateChainWeight(const ChainWeightPair& value);
 
-    void UpdatePixelRound(uint16_t value)
-    {
-        pixelRoundFlag_ = value;
-    }
-
-    uint16_t GetPixelRound() const {
-        return pixelRoundFlag_;
-    }
+    void UpdatePixelRound(uint16_t value);
+    uint16_t GetPixelRound() const;
 
     void UpdateLayoutDirection(TextDirection value);
     void UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value);
@@ -195,10 +132,7 @@ public:
 
     void SetGeometryTransitionInfo(const std::string& id,
         bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
-    std::tuple<std::string, bool, bool> GetGeometryTransitionInfo() const
-    {
-        return geometryTransitionInfo_;
-    }
+    std::tuple<std::string, bool, bool> GetGeometryTransitionInfo() const;
 
     void UpdateAspectRatio(float ratio);
     void ResetAspectRatio();
@@ -209,29 +143,15 @@ public:
     bool HasFixedWidth(bool checkPercent = true) const;
     bool HasFixedHeight(bool checkPercent = true) const;
 
-    void UpdateMeasureType(MeasureType measureType)
-    {
-        if (measureType_ == measureType) {
-            return;
-        }
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
-        measureType_ = measureType;
-    }
+    void UpdateMeasureType(MeasureType measureType);
 
     // user defined max, min, self size.
     void UpdateCalcLayoutProperty(const MeasureProperty& constraint);
 
     void UpdateUserDefinedIdealSize(const CalcSize& value);
 
-    void MarkUserDefinedHeightConfigured()
-    {
-        userDefinedHeightConfigured_ = true;
-    }
-
-    bool HasUserDefinedHeightConfig() const
-    {
-        return userDefinedHeightConfigured_;
-    }
+    void MarkUserDefinedHeightConfigured();
+    bool HasUserDefinedHeightConfig() const;
 
     void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth);
 
@@ -255,10 +175,7 @@ public:
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
-    void UpdateParentLayoutConstraint(const LayoutConstraintF& parentConstraint)
-    {
-        parentLayoutConstraint_ = parentConstraint;
-    }
+    void UpdateParentLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void UpdateMarginSelfIdealSize(const SizeF& value);
 
@@ -297,26 +214,9 @@ public:
 
     bool UpdateGridOffset(const RefPtr<FrameNode>& host);
 
-    void SetLayoutRect(const NG::RectF& rect)
-    {
-        if (layoutRect_ != rect) {
-            propertyChangeFlag_ |= PROPERTY_UPDATE_MEASURE_SELF;
-            layoutRect_ = rect;
-        }
-    }
-
-    void ResetLayoutRect()
-    {
-        if (layoutRect_) {
-            propertyChangeFlag_ |= PROPERTY_UPDATE_MEASURE_SELF;
-            layoutRect_.reset();
-        }
-    }
-
-    std::optional<NG::RectF> GetLayoutRect() const
-    {
-        return layoutRect_;
-    }
+    void SetLayoutRect(const NG::RectF& rect);
+    void ResetLayoutRect();
+    std::optional<NG::RectF> GetLayoutRect() const;
 
     void BuildGridProperty(const RefPtr<FrameNode>& host);
 
@@ -346,24 +246,15 @@ public:
 public:
     void UpdateVisibility(const VisibleType& value, bool allowTransition = false, bool isUserSet = false);
     void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false, bool isUserSet = false);
-    bool IsUserSetVisibility()
-    {
-        return isUserSetVisibility_;
-    }
+    bool IsUserSetVisibility();
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty);
 
-    const std::unique_ptr<SafeAreaInsets>& GetSafeAreaInsets() const
-    {
-        return safeAreaInsets_;
-    }
+    const std::unique_ptr<SafeAreaInsets>& GetSafeAreaInsets() const;
 
     void UpdateSafeAreaInsets(const SafeAreaInsets& safeArea);
 
-    const std::unique_ptr<SafeAreaExpandOpts>& GetSafeAreaExpandOpts() const
-    {
-        return safeAreaExpandOpts_;
-    }
+    const std::unique_ptr<SafeAreaExpandOpts>& GetSafeAreaExpandOpts() const;
 
     void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
 
@@ -371,35 +262,12 @@ public:
 
     bool IsExpandConstraintNeeded();
 
-    const std::unique_ptr<IgnoreLayoutSafeAreaOpts>& GetIgnoreLayoutSafeAreaOpts() const
-    {
-        return ignoreLayoutSafeAreaOpts_;
-    }
-
-    bool IsIgnoreOptsValid() const
-    {
-        return ignoreLayoutSafeAreaOpts_ && ignoreLayoutSafeAreaOpts_->NeedIgnoreLayoutSafeArea();
-    }
-
-    bool IsUsingPosition() const
-    {
-        return usingPosition_;
-    }
-
-    void SetUsingPosition(bool usingPosition)
-    {
-        usingPosition_ = usingPosition;
-    }
-
-    void SetIsOverlayNode(bool isOverlayNode)
-    {
-        isOverlayNode_ = isOverlayNode;
-    }
-
-    bool IsOverlayNode() const
-    {
-        return isOverlayNode_;
-    }
+    const std::unique_ptr<IgnoreLayoutSafeAreaOpts>& GetIgnoreLayoutSafeAreaOpts() const;
+    bool IsIgnoreOptsValid() const;
+    bool IsUsingPosition() const;
+    void SetUsingPosition(bool usingPosition);
+    void SetIsOverlayNode(bool isOverlayNode);
+    bool IsOverlayNode() const;
 
     void SetOverlayOffset(
         const std::optional<Dimension>& overlayOffsetX, const std::optional<Dimension>& overlayOffsetY);
@@ -418,45 +286,14 @@ public:
     PaddingPropertyF GetOrCreateSafeAreaPadding(bool forceReCreate = false);
     PaddingPropertyF GetOrCreateSafeAreaPaddingInner(RefPtr<FrameNode>& host, bool forceReCreate = false);
 
-    void UpdateNeedPositionLocalizedEdges(bool needPositionLocalizedEdges)
-    {
-        needPositionLocalizedEdges_ = needPositionLocalizedEdges;
-    }
-
-    bool IsPositionLocalizedEdges() const
-    {
-        return needPositionLocalizedEdges_;
-    }
-
-    void UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges)
-    {
-        needOffsetLocalizedEdges_ = needOffsetLocalizedEdges;
-    }
-
-    bool IsOffsetLocalizedEdges() const
-    {
-        return needOffsetLocalizedEdges_;
-    }
-
-    void ResetMarkAnchorStart()
-    {
-        markAnchorStart_.reset();
-    }
-
-    void UpdateMarkAnchorStart(const Dimension& markAnchorStart)
-    {
-        markAnchorStart_ = markAnchorStart;
-    }
-
-    void SetNeedLazyLayout(bool value)
-    {
-        needLazyLayout_ = true;
-    }
-
-    bool GetNeedLazyLayout() const
-    {
-        return needLazyLayout_;
-    }
+    void UpdateNeedPositionLocalizedEdges(bool needPositionLocalizedEdges);
+    bool IsPositionLocalizedEdges() const;
+    void UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges);
+    bool IsOffsetLocalizedEdges() const;
+    void ResetMarkAnchorStart();
+    void UpdateMarkAnchorStart(const Dimension& markAnchorStart);
+    void SetNeedLazyLayout(bool value);
+    bool GetNeedLazyLayout() const;
 
     void ConstraintViewPosRef(ViewPosReference& viewPosRef);
 

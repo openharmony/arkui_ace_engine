@@ -26,6 +26,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"

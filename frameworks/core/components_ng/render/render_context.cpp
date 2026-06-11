@@ -415,4 +415,139 @@ void RenderContext::ResetParticleOptionArray()
 {
     return propParticleOptionArray_.reset();
 }
+
+const RefPtr<OneCenterTransitionOptionType>& RenderContext::GetOneCenterTransitionOption()
+{
+    return oneCenterTransition_;
+}
+
+void RenderContext::UpdateOneCenterTransitionOption(const RefPtr<OneCenterTransitionOptionType>& value)
+{
+    oneCenterTransition_ = value;
+}
+
+bool RenderContext::HasTransitionOutAnimation() const
+{
+    return false;
+}
+
+bool RenderContext::HasDisappearTransition() const
+{
+    return false;
+}
+
+bool RenderContext::IsSynced() const
+{
+    return isSynced_;
+}
+
+void RenderContext::SetIsModalRootNode(bool isModalRootNode)
+{
+    isModalRootNode_ = isModalRootNode;
+}
+
+void RenderContext::SetIsNeedRebuildRSTree(bool isNeedRebuildRSTree)
+{
+    isNeedRebuildRSTree_ = isNeedRebuildRSTree;
+}
+
+std::optional<BlurStyleOption> RenderContext::GetBackBlurStyle() const
+{
+    return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
+}
+
+std::optional<Dimension> RenderContext::GetBackBlurRadius() const
+{
+    return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
+}
+
+std::optional<EffectOption> RenderContext::GetBackgroundEffect() const
+{
+    return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
+}
+
+std::optional<BlurOption> RenderContext::GetBackdropBlurOption() const
+{
+    return GetBackground() ? GetBackground()->propBackdropBlurOption : std::nullopt;
+}
+
+std::optional<BlurStyleOption> RenderContext::GetFrontBlurStyle() const
+{
+    return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
+}
+
+std::optional<Dimension> RenderContext::GetFrontBlurRadius() const
+{
+    return GetForeground() ? GetForeground()->propBlurRadius : std::nullopt;
+}
+
+void RenderContext::SetNeedAnimateFlag(bool isNeedAnimate)
+{
+    isNeedAnimate_ = isNeedAnimate;
+}
+
+void RenderContext::SetIsFree(bool isFree)
+{
+    isFree_ = isFree;
+}
+
+RectF RenderContext::GetPaintRectWithTransform()
+{
+    return {};
+}
+
+std::pair<RectF, bool> RenderContext::GetPaintRectWithTranslate()
+{
+    return {};
+}
+
+Matrix4 RenderContext::GetLocalTransformMatrix()
+{
+    return Matrix4();
+}
+
+Matrix4 RenderContext::GetMatrixWithTransformRotate()
+{
+    return {};
+}
+
+RectF RenderContext::GetPaintRectWithoutTransform()
+{
+    return {};
+}
+
+RectF RenderContext::GetPaintRectWithTransformWithoutDegree()
+{
+    return {};
+}
+
+RectF RenderContext::GetPropertyOfPosition()
+{
+    return {};
+}
+
+OffsetF RenderContext::GetShowingTranslateProperty()
+{
+    return OffsetF();
+}
+
+OffsetF RenderContext::GetTranslateXYProperty()
+{
+    return OffsetF();
+}
+
+int32_t RenderContext::CalcExpectedFrameRate(const std::string& scene, float speed)
+{
+    return 0;
+}
+
+bool RenderContext::IsUniRenderEnabled()
+{
+    return true;
+}
+
+bool RenderContext::DoTextureExport(uint64_t /* surfaceId */)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

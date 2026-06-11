@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
-#include "base/geometry/dimension_offset.h"
 #include "base/geometry/shape.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"

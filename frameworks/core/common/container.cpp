@@ -511,4 +511,93 @@ int32_t Container::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
 {
     return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
 }
+
+bool Container::GreatOrEqualAPITargetVersion(PlatformVersion version)
+{
+    auto container = Current();
+    if (!container) {
+        auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+        return apiTargetVersion >= static_cast<int32_t>(version);
+    }
+    auto apiTargetVersion = container->GetApiTargetVersion();
+    return apiTargetVersion >= static_cast<int32_t>(version);
+}
+
+int32_t Container::GetCurrentApiTargetVersion()
+{
+    auto container = Current();
+    if (!container) {
+        return AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+    }
+    return container->GetApiTargetVersion();
+}
+
+bool Container::LessThanAPITargetVersion(PlatformVersion version)
+{
+    auto container = Current();
+    CHECK_NULL_RETURN(container, false);
+    auto apiTargetVersion = container->GetApiTargetVersion();
+    return apiTargetVersion < static_cast<int32_t>(version);
+}
+
+void Container::SetCurrentUsePartialUpdate(bool useIt)
+{
+    auto container = Current();
+    if (container) {
+        container->usePartialUpdate_ = useIt;
+    }
+}
+
+bool Container::IsCurrentUsePartialUpdate()
+{
+    auto container = Current();
+    return container ? container->usePartialUpdate_ : false;
+}
+
+bool Container::IsInFormContainer()
+{
+    auto container = Current();
+    return container ? container->isFRSCardContainer_ : false;
+}
+
+bool Container::IsInSubContainer()
+{
+    auto container = Current();
+    return container ? container->IsSubContainer() : false;
+}
+
+void Container::SetUseNewPipeline()
+{
+    useNewPipeline_ = true;
+}
+
+void Container::SetUsePartialUpdate()
+{
+    usePartialUpdate_ = true;
+}
+
+bool Container::IsUseNewPipeline() const
+{
+    return useNewPipeline_;
+}
+
+int32_t Container::GetApiTargetVersion() const
+{
+    return apiTargetVersion_;
+}
+
+void Container::SetApiTargetVersion(int32_t apiTargetVersion)
+{
+    apiTargetVersion_ = apiTargetVersion % 1000;
+}
+
+int64_t Container::GetCreateTime() const
+{
+    return createTime_;
+}
+
+void Container::SetCreateTime(int64_t time)
+{
+    createTime_ = time;
+}
 } // namespace OHOS::Ace

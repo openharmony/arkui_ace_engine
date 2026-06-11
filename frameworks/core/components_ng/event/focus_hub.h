@@ -182,16 +182,7 @@ public:
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
     }
-    FocusPattern(const FocusPattern& focusPattern)
-    {
-        focusType_ = focusPattern.GetFocusType();
-        focusable_ = focusPattern.GetFocusable();
-        styleType_ = focusPattern.GetStyleType();
-        if (focusPattern.GetFocusPaintParams()) {
-            SetFocusPaintParams(*focusPattern.GetFocusPaintParams());
-        }
-        isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
-    }
+    FocusPattern(const FocusPattern& focusPattern);
     ~FocusPattern() override = default;
 
     FocusType GetFocusType() const
@@ -303,28 +294,8 @@ public:
     explicit FocusHub(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE, bool focusable = false)
         : FocusState(frameNode, type), FocusEventHandler(), focusable_(focusable)
     {}
-    explicit FocusHub(const WeakPtr<EventHub>& eventHub, const FocusPattern& focusPattern)
-        : FocusState(eventHub), FocusEventHandler()
-    {
-        focusable_ = focusPattern.GetFocusable();
-        focusType_ = focusPattern.GetFocusType();
-        focusStyleType_ = focusPattern.GetStyleType();
-        if (focusPattern.GetFocusPaintParams()) {
-            SetFocusPaintParamsPtr(focusPattern.GetFocusPaintParams());
-        }
-        isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
-    }
-    explicit FocusHub(const WeakPtr<FrameNode>& frameNode, const FocusPattern& focusPattern)
-        : FocusState(frameNode), FocusEventHandler()
-    {
-        focusable_ = focusPattern.GetFocusable();
-        focusType_ = focusPattern.GetFocusType();
-        focusStyleType_ = focusPattern.GetStyleType();
-        if (focusPattern.GetFocusPaintParams()) {
-            SetFocusPaintParamsPtr(focusPattern.GetFocusPaintParams());
-        }
-        isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
-    }
+    explicit FocusHub(const WeakPtr<EventHub>& eventHub, const FocusPattern& focusPattern);
+    explicit FocusHub(const WeakPtr<FrameNode>& frameNode, const FocusPattern& focusPattern);
     ~FocusHub() override = default;
 
     static constexpr int32_t SCROLL_TO_HEAD = -1;
@@ -344,25 +315,7 @@ public:
         return blurReason_;
     }
 
-    void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
-    {
-        CHECK_NULL_VOID(paramsPtr);
-        if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
-        }
-        if (paramsPtr->HasPaintRect()) {
-            focusPaintParamsPtr_->SetPaintRect(paramsPtr->GetPaintRect());
-        }
-        if (paramsPtr->HasPaintColor()) {
-            focusPaintParamsPtr_->SetPaintColor(paramsPtr->GetPaintColor());
-        }
-        if (paramsPtr->HasPaintWidth()) {
-            focusPaintParamsPtr_->SetPaintWidth(paramsPtr->GetPaintWidth());
-        }
-        if (paramsPtr->HasFocusPadding()) {
-            focusPaintParamsPtr_->SetFocusPadding(paramsPtr->GetFocusPadding());
-        }
-    }
+    void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr);
 
     bool HasPaintRect() const
     {
@@ -579,17 +532,7 @@ public:
     void DumpFocusUie();
     void DumpFocusUieInJson(std::unique_ptr<JsonValue>& json);
 
-    void SetFocusType(FocusType type)
-    {
-        if (focusType_ != type && type == FocusType::DISABLE) {
-            RemoveSelf(BlurReason::FOCUS_SWITCH);
-        }
-        focusType_ = type;
-
-        if (IsImplicitFocusableScope() && focusDepend_ == FocusDependence::CHILD) {
-            focusDepend_ = FocusDependence::AUTO;
-        }
-    }
+    void SetFocusType(FocusType type);
     FocusType GetFocusType() const
     {
         return focusType_;
@@ -599,52 +542,28 @@ public:
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->tabIndex_ : 0;
     }
-    void SetTabIndex(int32_t tabIndex)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->tabIndex_ = tabIndex;
-    }
+    void SetTabIndex(int32_t tabIndex);
 
     bool IsDefaultFocus() const
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->isDefaultFocus_ : false;
     }
 
-    void SetIsDefaultFocus(bool isDefaultFocus)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->isDefaultFocus_ = isDefaultFocus;
-    }
+    void SetIsDefaultFocus(bool isDefaultFocus);
 
     bool IsDefaultGroupFocus() const
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->isDefaultGroupFocus_ : false;
     }
 
-    void SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->isDefaultGroupFocus_ = isDefaultGroupFocus;
-    }
+    void SetIsDefaultGroupFocus(bool isDefaultGroupFocus);
 
     WeakPtr<FocusHub> GetDefaultFocusNode() const
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->defaultFocusNode_ : nullptr;
     }
 
-    void SetDefaultFocusNode(const WeakPtr<FocusHub>& node)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->defaultFocusNode_ = node;
-    }
+    void SetDefaultFocusNode(const WeakPtr<FocusHub>& node);
 
     std::optional<bool> IsFocusOnTouch() const
     {
@@ -653,26 +572,14 @@ public:
 
     void SetIsFocusOnTouch(bool isFocusOnTouch);
 
-    void SetIsDefaultHasFocused(bool isDefaultHasFocused)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->isDefaultHasFocused_ = isDefaultHasFocused;
-    }
+    void SetIsDefaultHasFocused(bool isDefaultHasFocused);
 
     bool IsDefaultHasFocused() const
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->isDefaultHasFocused_ : false;
     }
 
-    void SetIsDefaultGroupHasFocused(bool isDefaultGroupHasFocused)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->isDefaultGroupHasFocused_ = isDefaultGroupHasFocused;
-    }
+    void SetIsDefaultGroupHasFocused(bool isDefaultGroupHasFocused);
 
     bool IsDefaultGroupHasFocused() const
     {
@@ -732,14 +639,7 @@ public:
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_VERTICAL) == 0;
     }
 
-    static inline bool IsFocusStepForward(FocusStep step, bool isRtl = false)
-    {
-        bool isForward = (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
-        if (isRtl && (step == FocusStep::RIGHT || step == FocusStep::LEFT)) {
-            isForward = !isForward;
-        }
-        return isForward;
-    }
+    static bool IsFocusStepForward(FocusStep step, bool isRtl = false);
 
     static inline bool IsFocusStepTab(FocusStep step)
     {

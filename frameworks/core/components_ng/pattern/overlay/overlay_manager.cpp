@@ -219,6 +219,253 @@ OverlayManager::~OverlayManager()
     detachedProxyMap_.clear();
 }
 
+bool OverlayManager::HasPopupInfo(int32_t targetId) const
+{
+    return popupMap_.find(targetId) != popupMap_.end();
+}
+
+void OverlayManager::SetDismissDialogId(int32_t id)
+{
+    dismissDialogId_ = id;
+}
+
+int32_t OverlayManager::GetDismissDialogId() const
+{
+    return dismissDialogId_;
+}
+
+std::unordered_map<int32_t, RefPtr<FrameNode>> OverlayManager::GetDialogMap()
+{
+    return dialogMap_;
+}
+
+void OverlayManager::SetSubWindowId(int32_t subWindowId)
+{
+    subWindowId_ = subWindowId;
+}
+
+int32_t OverlayManager::GetSubwindowId()
+{
+    return subWindowId_;
+}
+
+void OverlayManager::SetMaskNodeId(int32_t dialogId, int32_t maskId)
+{
+    maskNodeIdMap_[dialogId] = maskId;
+}
+
+void OverlayManager::RegisterOnHideDialog(std::function<void()> callback)
+{
+    onHideDialogCallback_ = callback;
+}
+
+void OverlayManager::SetBackPressEvent(std::function<bool()> event)
+{
+    backPressEvent_ = event;
+}
+
+bool OverlayManager::GetHasPixelMap()
+{
+    return hasPixelMap_;
+}
+
+void OverlayManager::SetHasPixelMap(bool hasPixelMap)
+{
+    hasPixelMap_ = hasPixelMap;
+}
+
+bool OverlayManager::GetHasDragPixelMap() const
+{
+    return hasDragPixelMap_;
+}
+
+void OverlayManager::SetHasDragPixelMap(bool hasDragPixelMap)
+{
+    hasDragPixelMap_ = hasDragPixelMap;
+}
+
+bool OverlayManager::GetHasGatherNode()
+{
+    return hasGatherNode_;
+}
+
+RefPtr<FrameNode> OverlayManager::GetPixelMapNode()
+{
+    return pixmapColumnNodeWeak_.Upgrade();
+}
+
+bool OverlayManager::GetHasFilter()
+{
+    return hasFilter_;
+}
+
+void OverlayManager::SetHasFilter(bool hasFilter)
+{
+    hasFilter_ = hasFilter;
+}
+
+bool OverlayManager::GetHasEvent()
+{
+    return hasEvent_;
+}
+
+void OverlayManager::SetHasEvent(bool hasEvent)
+{
+    hasEvent_ = hasEvent;
+}
+
+bool OverlayManager::GetIsOnAnimation()
+{
+    return isOnAnimation_;
+}
+
+void OverlayManager::SetIsOnAnimation(bool isOnAnimation)
+{
+    isOnAnimation_ = isOnAnimation;
+}
+
+void OverlayManager::SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+{
+    filterColumnNodeWeak_ = columnNode;
+}
+
+RefPtr<FrameNode> OverlayManager::GetFilterColumnNode() const
+{
+    return filterColumnNodeWeak_.Upgrade();
+}
+
+void OverlayManager::SetContextMenuDragHideFinished(bool isContextMenuDragHideFinished)
+{
+    isContextMenuDragHideFinished_ = isContextMenuDragHideFinished;
+}
+
+bool OverlayManager::IsContextMenuDragHideFinished() const
+{
+    return isContextMenuDragHideFinished_ == true;
+}
+
+bool OverlayManager::IsOriginDragMoveVector() const
+{
+    return dragMoveVector_.NonOffset() && lastDragMoveVector_.NonOffset();
+}
+
+bool OverlayManager::IsUpdateDragMoveVector() const
+{
+    return !GetUpdateDragMoveVector().NonOffset() && !lastDragMoveVector_.NonOffset();
+}
+
+OffsetF OverlayManager::GetUpdateDragMoveVector() const
+{
+    return dragMoveVector_ - lastDragMoveVector_;
+}
+
+bool OverlayManager::IsModalEmpty() const
+{
+    return modalStack_.empty();
+}
+
+void OverlayManager::SetDismissTarget(const DismissTarget& dismissTarget)
+{
+    dismissTarget_ = dismissTarget;
+}
+
+void OverlayManager::SetDismissSheet(int32_t sheetId)
+{
+    dismissSheetId_ = sheetId;
+}
+
+int32_t OverlayManager::GetDismissSheet() const
+{
+    return dismissSheetId_;
+}
+
+std::unordered_map<SheetKey, WeakPtr<FrameNode>, SheetKeyHash> OverlayManager::GetSheetMap()
+{
+    return sheetMap_;
+}
+
+void OverlayManager::SetFilterActive(bool actived)
+{
+    hasFilterActived = actived;
+}
+
+void OverlayManager::SetDismissPopupId(int32_t targetId)
+{
+    dismissPopupId_ = targetId;
+}
+
+RefPtr<FrameNode> OverlayManager::GetGatherNode() const
+{
+    return gatherNodeWeak_.Upgrade();
+}
+
+void OverlayManager::SetDragNodeCopy(const RefPtr<FrameNode>& dragNodeCopy)
+{
+    dragNodeCopyWeak_ = dragNodeCopy;
+}
+
+RefPtr<FrameNode> OverlayManager::GetDragNodeCopy()
+{
+    return dragNodeCopyWeak_.Upgrade();
+}
+
+const std::vector<GatherNodeChildInfo>& OverlayManager::GetGatherNodeChildrenInfo()
+{
+    return gatherNodeChildrenInfo_;
+}
+
+RefPtr<FrameNode> OverlayManager::GetOverlayNode()
+{
+    return overlayNode_;
+}
+
+void OverlayManager::SetIsAttachToCustomNode(bool isAttachToCustomNode)
+{
+    isAttachToCustomNode_ = isAttachToCustomNode;
+}
+
+std::optional<OverlayManagerInfo> OverlayManager::GetOverlayManagerOptions()
+{
+    return overlayInfo_;
+}
+
+const std::set<WeakPtr<UINode>>& OverlayManager::GetwindowScenes()
+{
+    return windowSceneSet_;
+}
+
+CancelableCallback<void()>& OverlayManager::GetPreviewFilterTask()
+{
+    return previewFilterTask_;
+}
+
+void OverlayManager::SetOnSheetMiniDragStartCallback(std::function<void()>&& onSheetMiniDragStart)
+{
+    onSheetMiniDragStart_ = std::move(onSheetMiniDragStart);
+}
+
+std::function<void()> OverlayManager::GetOnSheetMiniDragStartCallback()
+{
+    return onSheetMiniDragStart_;
+}
+
+void OverlayManager::SetOnSheetMiniDragResumeCallback(std::function<void()>&& onSheetMiniDragResume)
+{
+    onSheetMiniDragResume_ = std::move(onSheetMiniDragResume);
+}
+
+std::function<void()> OverlayManager::GetOnSheetMiniDragResumeCallback()
+{
+    return onSheetMiniDragResume_;
+}
+
+void OverlayManager::CleanViewContextMap(int32_t instanceId, int32_t sheetContentId)
+{
+    if (cleanViewContextMapCallback_) {
+        cleanViewContextMapCallback_(instanceId, sheetContentId);
+    }
+}
+
 bool OverlayManager::CheckMenuManager()
 {
     if (menuManager_) {

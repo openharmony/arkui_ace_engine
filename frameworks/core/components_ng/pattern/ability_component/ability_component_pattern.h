@@ -25,7 +25,6 @@
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "frameworks/core/components_ng/property/property.h"
-#include "frameworks/core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 

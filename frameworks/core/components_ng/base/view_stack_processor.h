@@ -29,7 +29,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
-#include "core/components_ng/event/state_style_manager.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/element_register.h"
 
