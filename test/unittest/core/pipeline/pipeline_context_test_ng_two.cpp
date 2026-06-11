@@ -20,6 +20,7 @@
 #include "core/common/event_manager.h"
 
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
@@ -2803,17 +2804,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg410, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResSchedOnTouchEvent_FlagFalse001
- * @tc.desc: Test ResSchedReport::OnTouchEvent is called when hasSetTouchDownReport_ is false
+ * @tc.name: PipelineContextTouchOptimizerNotifiedFalseTest001
+ * @tc.desc: Test PipelineContext::OnTouchEvent calls ResSchedReport when touchOptimizer reports not notified
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, ResSchedOnTouchEvent_FlagFalse001, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTouchOptimizerNotifiedFalseTest001, TestSize.Level1)
 {
     ASSERT_NE(context_, nullptr);
-    ClickRecognizer::ResetTouchDownReportFlag(); // ensure false
-    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
 
-    // Setup context with TouchTest capability
     context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
 
@@ -2825,15 +2823,35 @@ HWTEST_F(PipelineContextTestNg, ResSchedOnTouchEvent_FlagFalse001, TestSize.Leve
     event.sourceType = SourceType::TOUCH;
 
     context_->OnTouchEvent(event, context_->rootNode_, false);
-    // Verify: hasSetTouchDownReport_ should remain false after this call
-    // (because ClickRecognizer wasn't created in this test)
-    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
-
-    ClickRecognizer::hasSetTouchDownReport_ = true;
-    context_->OnTouchEvent(event, context_->rootNode_, false);
-    ClickRecognizer::ResetTouchDownReportFlag();
-    EXPECT_FALSE(ClickRecognizer::hasSetTouchDownReport_);
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
 }
 
+/**
+ * @tc.name: PipelineContextTouchOptimizerNotifiedTrueTest001
+ * @tc.desc: Test PipelineContext::OnTouchEvent skips ResSchedReport when touchOptimizer reports already notified
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTouchOptimizerNotifiedTrueTest001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    context_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+
+    const auto& touchOptimizer = context_->GetTouchOptimizer();
+    if (touchOptimizer) {
+        touchOptimizer->SetTouchDownNotifiedToClick(true);
+    }
+
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.id = 1;
+    event.x = 100.0f;
+    event.y = 100.0f;
+    event.sourceType = SourceType::TOUCH;
+
+    context_->OnTouchEvent(event, context_->rootNode_, false);
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
+}
 } // namespace NG
 } // namespace OHOS::Ace

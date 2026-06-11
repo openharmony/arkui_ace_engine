@@ -3689,7 +3689,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
         eventManager_->ClearHitTestInfoRecord(scalePoint);
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
-        if (!ClickRecognizer::hasSetTouchDownReport_) {
+        if (!touchOptimizer_->IsTouchDownNotifiedTOClick()) {
             ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
         }
         if (!touchRestrict.childTouchTestList.empty()) {
