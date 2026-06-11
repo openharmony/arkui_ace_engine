@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <limits>
+
 #include "gtest/gtest.h"
 
 #include "core/components_ng/event/event_hub.h"
@@ -42,6 +44,7 @@ namespace {
 const int32_t TEST_INSTANCE_ID = 100;
 constexpr char TEST_NODE_TAG[] = "test";
 constexpr double TEST_SCROLL_DISTANCE = 96.0;
+constexpr float TEST_NODE_SIZE = 100.0f;
 
 class TestScrollablePattern : public Pattern {
     DECLARE_ACE_TYPE(TestScrollablePattern, Pattern);
@@ -84,6 +87,28 @@ RefPtr<FrameNode> CreatePrimaryActionNode(bool enabled = true)
     SmartGestureShortcutConfig config { SmartGestureShortcutAction::PRIMARY, enabled, false };
     node->GetOrCreateSmartGestureProperty()->SetSmartGestureShortcut(config);
     return node;
+}
+
+RefPtr<FrameNode> CreatePrimaryActionNodeWithPattern(const RefPtr<Pattern>& pattern, bool enabled = true)
+{
+    auto node = CreateNode(pattern);
+    SmartGestureShortcutConfig config { SmartGestureShortcutAction::PRIMARY, enabled, false };
+    node->GetOrCreateSmartGestureProperty()->SetSmartGestureShortcut(config);
+    return node;
+}
+
+void MakeNodeActiveAndVisible(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    node->onMainTree_ = true;
+    node->GetGeometryNode()->SetFrameSize(SizeF(TEST_NODE_SIZE, TEST_NODE_SIZE));
+    MockPipelineContext::GetCurrent()->onShow_ = true;
+}
+
+void MakeNodeClickable(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    node->GetOrCreateGestureEventHub()->SetCommonClickEvent([](GestureEvent&) {});
 }
 
 ScrollingConfig CreateDistanceScrollingConfig()
@@ -597,6 +622,60 @@ HWTEST_F(SmartGestureManagerTestNg, ExecuteProposal_NoneAction, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ExecuteSelectProposal_ActiveClickableNode
+ * @tc.desc: ExecuteSelectProposal updates selected node when target node is active and clickable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ExecuteSelectProposal_ActiveClickableNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+
+    auto result = manager_->ExecuteSelectProposal(node);
+
+    ASSERT_TRUE(result);
+    ASSERT_NE(manager_->selectedNode_.Upgrade(), nullptr);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade()->GetId(), node->GetId());
+}
+
+/**
+ * @tc.name: ExecuteSelectProposal_NotClickable
+ * @tc.desc: ExecuteSelectProposal returns false and does not select node when target node is not clickable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ExecuteSelectProposal_NotClickable, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    manager_->AddPrimaryActionNode(node);
+
+    auto result = manager_->ExecuteSelectProposal(node);
+
+    EXPECT_FALSE(result);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: ExecuteSelectProposal_InactiveNode
+ * @tc.desc: ExecuteSelectProposal returns false and does not select node when target node is not active.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ExecuteSelectProposal_InactiveNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode(false);
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+
+    auto result = manager_->ExecuteSelectProposal(node);
+
+    EXPECT_FALSE(result);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
  * @tc.name: ExecuteClickProposal_NullSelectedNode
  * @tc.desc: ExecuteClickProposal establishes selection when no node is currently selected.
  * @tc.type: FUNC
@@ -723,6 +802,100 @@ HWTEST_F(SmartGestureManagerTestNg, RefreshSelectedNodeState_ClearsInvalid, Test
 HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ClickWithNullNode, TestSize.Level1)
 {
     SmartGestureProposal proposal(SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP);
+    auto result = manager_->ValidateProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_ScrollWithNegativeCount
+ * @tc.desc: ValidateProposal returns false for SCROLL type when scrolling count is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ScrollWithNegativeCount, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.count = -1;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+
+    auto result = manager_->ValidateProposal(proposal);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_ScrollWithNegativeDistance
+ * @tc.desc: ValidateProposal returns false for SCROLL type when scrolling distance is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ScrollWithNegativeDistance, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.distance = -1.0;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+
+    auto result = manager_->ValidateProposal(proposal);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_ScrollWithInfiniteDistance
+ * @tc.desc: ValidateProposal returns false for SCROLL type when scrolling distance is infinite.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ScrollWithInfiniteDistance, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.distance = std::numeric_limits<double>::infinity();
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+
+    auto result = manager_->ValidateProposal(proposal);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_ScrollWithNanDistance
+ * @tc.desc: ValidateProposal returns false for SCROLL type when scrolling distance is NaN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ScrollWithNanDistance, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.distance = std::numeric_limits<double>::quiet_NaN();
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+
+    auto result = manager_->ValidateProposal(proposal);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_ScrollWithZeroCountAndDistance
+ * @tc.desc: ValidateProposal returns true for SCROLL type when count and distance are zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ScrollWithZeroCountAndDistance, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.count = 0;
+    config.distance = 0.0;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
     auto result = manager_->ValidateProposal(proposal);
     EXPECT_FALSE(result);
 }
