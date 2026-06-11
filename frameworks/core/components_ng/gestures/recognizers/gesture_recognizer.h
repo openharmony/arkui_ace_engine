@@ -105,6 +105,7 @@ inline std::string TransRefereeState(RefereeState state)
 std::string TransStateChangeReason(StateChangeReason reason);
 
 class FrameNode;
+using GestureEventWithRefereeState = std::function<void(RefereeState state)>;
 
 class ACE_FORCE_EXPORT NGGestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget);
@@ -257,6 +258,18 @@ public:
     {
         if (onReject_ && *onReject_) {
             (*onReject_)();
+        }
+    }
+
+    void SetOnPending(const GestureEventWithRefereeState& onPending)
+    {
+        onPending_ = std::make_unique<GestureEventWithRefereeState>(onPending);
+    }
+
+    inline void SendPendingMsg()
+    {
+        if (onPending_ && *onPending_) {
+            (*onPending_)(refereeState_);
         }
     }
 
@@ -557,6 +570,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionCancel_;
     // triggered when the recongnizer is rejected
     std::unique_ptr<GestureEventNoParameter> onReject_;
+    std::unique_ptr<GestureEventWithRefereeState> onPending_;
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;

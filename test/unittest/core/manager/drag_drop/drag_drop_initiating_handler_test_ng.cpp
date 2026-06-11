@@ -636,4 +636,39 @@ HWTEST_F(DragDropInitiatingHandlerTestNg, NotifyPreviewLongPressOnActionCancelTe
     EXPECT_NE(dragDropInitiatingHandler->initiatingFlow_, nullptr);
 }
 
+/**
+ * @tc.name: NotifyLongPressOnPendingTest001
+ * @tc.desc: Test NotifyLongPressOnPending function when initiatingFlow_ is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingHandlerTestNg, NotifyLongPressOnPendingTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto dragDropInitiatingHandler = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
+    ASSERT_NE(dragDropInitiatingHandler, nullptr);
+    EXPECT_NE(dragDropInitiatingHandler->initiatingFlow_, nullptr);
+
+    dragDropInitiatingHandler->NotifyLongPressOnPending();
+    EXPECT_NE(dragDropInitiatingHandler->initiatingFlow_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyLongPressOnPendingTest002
+ * @tc.desc: Test NotifyLongPressOnPending function when initiatingFlow_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingHandlerTestNg, NotifyLongPressOnPendingTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto dragDropInitiatingHandler = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
+    ASSERT_NE(dragDropInitiatingHandler, nullptr);
+
+    dragDropInitiatingHandler->initiatingFlow_ = nullptr;
+    dragDropInitiatingHandler->NotifyLongPressOnPending();
+    EXPECT_EQ(dragDropInitiatingHandler->initiatingFlow_, nullptr);
+}
 } // namespace OHOS::Ace::NG

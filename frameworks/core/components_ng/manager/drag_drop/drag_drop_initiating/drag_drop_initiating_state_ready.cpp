@@ -143,4 +143,20 @@ void DragDropInitiatingStateReady::HandleSequenceOnActionCancel(const GestureEve
     CHECK_NULL_VOID(machine);
     machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
+
+void DragDropInitiatingStateReady::HandleLongPressOnPending()
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger longPress onPending");
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (manager->IsGatherWithMenu() || !params.hasGatherNode) {
+        return;
+    }
+    manager->RemoveGatherNodeWithAnimation();
+}
 } // namespace OHOS::Ace::NG

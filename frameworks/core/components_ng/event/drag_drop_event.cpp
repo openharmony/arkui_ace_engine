@@ -179,6 +179,14 @@ void DragDropEventActuator::InitLongPressAction()
             CHECK_NULL_VOID(handler);
             handler->NotifyLongPressOnAction(info);
         });
+    longPressRecognizer_->SetOnPending(
+        [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](RefereeState state) {
+            auto handler = weakHandler.Upgrade();
+            CHECK_NULL_VOID(handler);
+            if (state == RefereeState::SUCCEED_BLOCKED) {
+                handler->NotifyLongPressOnPending();
+            }
+        });
     previewLongPressRecognizer_->SetOnAction(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
             auto handler = weakHandler.Upgrade();
