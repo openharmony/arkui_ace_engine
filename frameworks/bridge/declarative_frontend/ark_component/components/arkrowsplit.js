@@ -92,7 +92,7 @@ class JSRowSplit extends JSContainerBase {
     __Common__.onAppear(value);
   }
   static onDetach(value) {
-    __Common__.onAttach(value);
+    __Common__.onDetach(value);
   }
   static onDisAppear(value) {
     __Common__.onDisAppear(value);
