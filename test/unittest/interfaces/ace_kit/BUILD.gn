@@ -137,7 +137,7 @@ ohos_source_set("ace_kit_mock") {
 
 ohos_unittest("ace_kit_test") {
   module_out_path = interface_test_output_path
-
+  testonly = true
   defines = [ "USE_ARK_ENGINE" ]
 
   sources = [

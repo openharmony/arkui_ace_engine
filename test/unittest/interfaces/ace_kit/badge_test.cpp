@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/view/components/badge.h"
 #include "ui/base/ace_type.h"
