@@ -29,6 +29,8 @@ constexpr int MD = 2;
 constexpr int LG = 3;
 constexpr int XL = 4;
 constexpr int XXL = 5;
+constexpr int32_t VALUE_ARG_INDEX = 1;
+constexpr int32_t MIN_ARGS_WITH_VALUE = 2;
 
 Local<JSValueRef> GetObjectProperty(EcmaVM* vm, const Local<panda::ObjectRef>& object, const char* name)
 {
@@ -208,8 +210,8 @@ RefPtr<V2::GridContainerSize> ParseSpansNG(EcmaVM* vm, const Local<JSValueRef>& 
 
 void GridColBridge::RegisterGridColAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
-    const char* functionNames[] = { "create", "offset", "setSpan", "resetSpan", "setGridColOffset", "resetGridColOffset",
-        "setOrder", "resetOrder" };
+    const char* functionNames[] = { "create", "offset", "setSpan", "resetSpan", "setGridColOffset",
+        "resetGridColOffset", "setOrder", "resetOrder" };
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::Create),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::Offset),
@@ -256,11 +258,11 @@ ArkUINativeModuleValue GridColBridge::Offset(ArkUIRuntimeCallInfo* runtimeCallIn
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    if (runtimeCallInfo->GetArgsNumber() < 2) {
+    if (runtimeCallInfo->GetArgsNumber() < MIN_ARGS_WITH_VALUE) {
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
     ArkUINodeHandle nativeNode = nullptr;
     if (!GetNativeNode(nativeNode, firstArg, vm)) {
         return panda::JSValueRef::Undefined(vm);
@@ -310,10 +312,10 @@ ArkUINativeModuleValue GridColBridge::SetSpan(ArkUIRuntimeCallInfo* runtimeCallI
     }
     int32_t containerSizeArray[MAX_NUMBER_BREAKPOINT];
     if (IsJsView(firstArg, vm)) {
-        if (runtimeCallInfo->GetArgsNumber() < 2) {
+        if (runtimeCallInfo->GetArgsNumber() < MIN_ARGS_WITH_VALUE) {
             return panda::JSValueRef::Undefined(vm);
         }
-        Local<JSValueRef> spanArg = runtimeCallInfo->GetCallArgRef(1);
+        Local<JSValueRef> spanArg = runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX);
         auto span = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)
                         ? ParseGridContainerSize(vm, spanArg, NG::DEFAULT_SPAN_NUMBER)
                         : ParseSpansNG(vm, spanArg);
@@ -354,10 +356,10 @@ ArkUINativeModuleValue GridColBridge::SetOrder(ArkUIRuntimeCallInfo* runtimeCall
     }
     int32_t containerSizeArray[MAX_NUMBER_BREAKPOINT];
     if (IsJsView(firstArg, vm)) {
-        if (runtimeCallInfo->GetArgsNumber() < 2) {
+        if (runtimeCallInfo->GetArgsNumber() < MIN_ARGS_WITH_VALUE) {
             return panda::JSValueRef::Undefined(vm);
         }
-        auto order = ParseGridContainerSize(vm, runtimeCallInfo->GetCallArgRef(1), 0);
+        auto order = ParseGridContainerSize(vm, runtimeCallInfo->GetCallArgRef(VALUE_ARG_INDEX), 0);
         containerSizeArray[XS] = order->xs;
         containerSizeArray[SM] = order->sm;
         containerSizeArray[MD] = order->md;

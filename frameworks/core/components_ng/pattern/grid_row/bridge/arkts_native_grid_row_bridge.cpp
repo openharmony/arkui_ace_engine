@@ -361,8 +361,8 @@ V2::GridRowDirection ParseDirection(EcmaVM* vm, const Local<JSValueRef>& jsValue
 void GridRowBridge::RegisterGridRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     const char* functionNames[] = { "create", "setHeight", "setAlignItems", "resetAlignItems", "setDirection",
-        "resetDirection", "setBreakpoints", "resetBreakpoints", "setColumns", "resetColumns", "setGutter", "resetGutter",
-        "setOnBreakpointChange", "resetOnBreakpointChange" };
+        "resetDirection", "setBreakpoints", "resetBreakpoints", "setColumns", "resetColumns", "setGutter",
+        "resetGutter", "setOnBreakpointChange", "resetOnBreakpointChange" };
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::Create),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetHeight),
