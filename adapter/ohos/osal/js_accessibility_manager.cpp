@@ -6140,6 +6140,23 @@ void JsAccessibilityManager::WebInteractionOperation::FocusMoveSearchWithConditi
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
+void JsAccessibilityManager::WebInteractionOperation::UpdateCustomAccessibilityProperty(
+    const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsAccessibilityManager::WebInteractionOperation::AddAccessibilityVirtualNode(
+    const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsAccessibilityManager::WebInteractionOperation::RemoveAccessibilityVirtualNode(
+    const int64_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
 void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
     const int64_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
@@ -8493,6 +8510,23 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithConditio
             jsAccessibilityManager->FocusMoveSearchWithCondition(elementInfo, param, requestId, callback, windowId);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityFocusMoveSearchWithCondition");
+}
+
+void JsAccessibilityManager::JsInteractionOperation::UpdateCustomAccessibilityProperty(
+    const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsAccessibilityManager::JsInteractionOperation::AddAccessibilityVirtualNode(
+    const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+    const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
+}
+
+void JsAccessibilityManager::JsInteractionOperation::RemoveAccessibilityVirtualNode(
+    const int64_t elementId, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
+{
 }
 
 void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info)

@@ -21,7 +21,9 @@
 #include "core/accessibility/third_accessibility_manager.h"
 #include "js_accessibility_manager.h"
 
-
+namespace OHOS::Ace::NG {
+class CustomAccessibilityProperty;
+}
 namespace OHOS::Ace::Framework {
 struct NodeConfig {
     OHOS::Ace::NG::OffsetF offset;
@@ -77,6 +79,16 @@ public:
     void SetBelongTreeId(const int32_t treeId) override;
     void FocusMoveSearchWithCondition(const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
         const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
+
+    void UpdateCustomAccessibilityProperty(
+        const int64_t elementId, const AccessibilityVirtualNode& accessibilityVirtualNode,
+        const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+    void AddAccessibilityVirtualNode(
+        const int64_t elementId, const std::vector<AccessibilityVirtualNode>& nodes,
+        const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+    void RemoveAccessibilityVirtualNode(const int64_t elementId,
+        const int32_t requestId, AccessibilityElementOperatorCallback& callback) override;
+
     int32_t SendAccessibilityAsyncEvent(
         const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
         void (*callback)(int32_t errorCode)) override;
