@@ -3371,8 +3371,20 @@ void NavigationPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& input
     inputHub->AddOnHoverEvent(hoverEvent_);
 }
 
+void NavigationPattern::UpdateRealNavBarWidth()
+{
+    auto navBarNode = GetNavBarNodeOrHomeDestination();
+    CHECK_NULL_VOID(navBarNode);
+    auto geoNode = navBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geoNode);
+    realNavBarWidth_ = geoNode->GetFrameSize().Width();
+}
+
 void NavigationPattern::HandleDragStart()
 {
+    if (NearEqual(realNavBarWidth_, DEFAULT_NAV_BAR_WIDTH.ConvertToPx())) {
+        UpdateRealNavBarWidth();
+    }
     preNavBarWidth_ = realNavBarWidth_;
     if (!isDividerDraggable_) {
         return;

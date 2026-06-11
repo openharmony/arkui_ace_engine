@@ -816,6 +816,7 @@ private:
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
+    void UpdateRealNavBarWidth();
     void OnHover(bool isHover);
     float GetPaintRectHeight(const RefPtr<FrameNode>& node)
     {
