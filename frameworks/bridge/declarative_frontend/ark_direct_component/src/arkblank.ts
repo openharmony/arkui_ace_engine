@@ -117,6 +117,7 @@ class JSBlank extends JSViewAbstract {
   }
 
   static height(value: any): void {
+    JSViewAbstract.height(value);
     getUINativeModule().blank.setBlankHeight(true, value);
   }
 

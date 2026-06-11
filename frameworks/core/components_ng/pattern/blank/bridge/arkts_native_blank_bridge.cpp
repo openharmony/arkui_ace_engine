@@ -151,6 +151,15 @@ ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtime
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
     std::string calcStr;
+    bool isJsView = IsJsView(nodeArg, vm);
+    if (isJsView) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height, heightResObj)) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+        GetArkUINodeModifiers()->getBlankModifier()->setBlankHeight(
+            nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height, heightResObj)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
     } else {
