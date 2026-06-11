@@ -13,6 +13,146 @@
 | 状态 | Approved |
 | 复杂度 | 标准 + 安全/性能专项 |
 
+## InnerAPI 规格
+
+### 源码基线
+
+本节固化系统 SA 使用的 Uisession InnerAPI 规格。接口声明以 `interfaces/inner_api/ui_session/ui_content_service_interface.h` 为准；proxy/stub 行为以 `adapter/ohos/entrance/ui_session/ui_content_proxy.cpp`、`adapter/ohos/entrance/ui_session/ui_content_stub.cpp` 和 `adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp` 为准。
+
+| 源码位置 | 规格依据 |
+|----------|----------|
+| `interfaces/inner_api/ui_session/ui_content_service_interface.h:38` | `PageTranslateTextCallback` 回调类型 |
+| `interfaces/inner_api/ui_session/ui_content_service_interface.h:41` | 翻译请求和译文等待默认 timeout：5000ms |
+| `interfaces/inner_api/ui_session/ui_content_service_interface.h:43` | `TranslateContentScope` bitmask 定义 |
+| `interfaces/inner_api/ui_session/ui_content_service_interface.h:419` | `GetPageTranslateText` / `StartPageTranslate` / `EndPageTranslate` / `ResetPageTranslate` / `SendPageTranslateResult` / `GetCurrentAbilityLanguageInfo` 声明 |
+| `interfaces/inner_api/ui_session/ui_content_service_interface.h:458` | `ReportService::SEND_PAGE_TEXT` transaction |
+| `interfaces/inner_api/ui_session/ui_content_service_interface.h:579` | `ReportService::SendPageText` 回调上报 |
+| `interfaces/inner_api/ui_session/ui_content_errors.h:24` | 统一返回码 `NO_ERROR`、`FAILED`、`REPLY_ERROR`、`PARAM_INVALID`、`LAST_UNFINISH` |
+
+### 类型定义
+
+```cpp
+using PageTranslateTextCallback = std::function<void(int32_t nodeId, const std::string& text, int64_t version)>;
+
+enum class TranslateContentScope : int32_t {
+    ARKWEB_ONLY = 1 << 0,
+    ARKUI_ONLY = 1 << 1,
+    XCOMPONENT = 1 << 2,
+    CANVAS_NODE = 1 << 3,
+    ARKUI_ARKWEB = static_cast<int32_t>(ARKUI_ONLY) | static_cast<int32_t>(ARKWEB_ONLY),
+    PAGE_ALL = static_cast<int32_t>(ARKUI_ARKWEB) | static_cast<int32_t>(XCOMPONENT) |
+               static_cast<int32_t>(CANVAS_NODE),
+};
+```
+
+| 类型/字段 | 说明 |
+|-----------|------|
+| `PageTranslateTextCallback` | SA 侧通过 `UIContentServiceProxy` 注册的页面文本回调。UI 侧通过 `ReportService::SendPageText` 上报后，由 `UiReportStub` 分发给该回调 |
+| `nodeId` | UI 侧稳定翻译节点 ID。`nodeId < 0` 是控制/哨兵记录，SA 不得作为可翻译节点回填 |
+| `text` | 待翻译原文。日志和 dump 不得打印正文；可打印长度或安全摘要 |
+| `version` | 节点文本版本。SA 回填译文必须带回同一 version，UI 侧按 nodeId/version 校验 |
+| `ARKWEB_ONLY` | 仅处理 ArkWeb/WebPattern，沿用现有脚本注入提取和回填 |
+| `ARKUI_ONLY` | 仅处理 ArkUI 原生文本展示类节点 |
+| `ARKUI_ARKWEB` | 当前推荐页面内容范围，同时处理 ArkUI 原生节点和 ArkWeb |
+| `XCOMPONENT` / `CANVAS_NODE` | 当前阶段仅作为已知保留 bit，可解析但不触发处理 |
+| `PAGE_ALL` | 当前所有已定义 bit 的并集；包含保留 bit |
+
+scope 非法规则：`scope == 0` 或包含未定义 bit 时返回 `PARAM_INVALID`，不得注册 callback、不得进入连续翻译状态、不得产生文本上报。`request` 不是 JSON object 时，按兼容模式把整个字符串作为 `extraData`，scope 使用默认 `ARKUI_ARKWEB`。
+
+### IUiContentService 接口
+
+```cpp
+virtual int32_t GetPageTranslateText(
+    const std::string& request, const PageTranslateTextCallback& eventCallback) = 0;
+
+virtual int32_t StartPageTranslate(
+    const std::string& request, const PageTranslateTextCallback& eventCallback) = 0;
+
+virtual int32_t EndPageTranslate() = 0;
+
+virtual int32_t ResetPageTranslate(int32_t nodeId = -1) = 0;
+
+virtual int32_t SendPageTranslateResult(const std::string& result) = 0;
+
+virtual int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region) = 0;
+```
+
+| 接口 | IPC 行为 | 参数 | 返回值 | 结果/副作用 |
+|------|----------|------|--------|-------------|
+| `GetPageTranslateText` | 同步 `SendRequest` 接收受理结果；文本通过 `PageTranslateTextCallback` 异步返回 | `request` 为 JSON object 或兼容字符串；`eventCallback` 不可为空 | `NO_ERROR` 表示请求已受理；`PARAM_INVALID` 表示 callback 为空或 scope 非法；`FAILED` 表示未连接/写 parcel 失败；`LAST_UNFINISH` 表示已有未完成页面翻译回调；`REPLY_ERROR` 表示 IPC 发送失败 | 获取当前快照，不开启连续监听，不遗留 translate active、版本缓存或 pending 状态 |
+| `StartPageTranslate` | 同步 `SendRequest` 接收受理结果；初始快照和后续增量通过同一 callback 返回 | 同 `GetPageTranslateText` | 同 `GetPageTranslateText` | 进入连续翻译状态，保存 scope，先上报当前节点，Start 到 End/SA death 期间上报新增和内容变化节点 |
+| `EndPageTranslate` | 异步控制 IPC | 无 | `NO_ERROR` / `FAILED` / `REPLY_ERROR` | 停止连续翻译，注销页面翻译 callback，恢复原文展示；Web 分支走现有 End/Reset 路径 |
+| `ResetPageTranslate` | 异步控制 IPC | `nodeId >= 0` 表示恢复指定节点；默认 `-1` 表示恢复全部 | `NO_ERROR` / `FAILED` / `REPLY_ERROR` | 清理对应 ArkUI 临时译文；全量 reset 同时覆盖 Web 现有 reset 行为 |
+| `SendPageTranslateResult` | 异步 IPC | `result` 为单对象、顶层数组或 `{"results":[...]}` JSON 字符串 | `NO_ERROR` / `FAILED` / `REPLY_ERROR` | UI 侧解析并逐条按 nodeId/version 回填；单条失败不阻塞同批其他结果；成功写入 IPC 后取消可解析 nodeId/version 的译文等待 watchdog |
+| `GetCurrentAbilityLanguageInfo` | 同步 IPC，从 reply 直接读取结果 | `language`、`region` 为输出引用 | 远端结果码；`NO_ERROR` 时输出字段有效 | 返回当前 Ability/UIContent 实例已生效的语言和地区，不注册 report callback，不改变翻译会话状态 |
+
+### 请求与结果 JSON
+
+`GetPageTranslateText` 和 `StartPageTranslate` 的 `request` 推荐格式：
+
+```json
+{
+  "scope": 3,
+  "extraData": "{}"
+}
+```
+
+| 字段 | 类型 | 必选 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `scope` | number | 否 | `ARKUI_ARKWEB` (`3`) | 处理范围 bitmask。未知 bit 或 0 非法 |
+| `extraData` | string | 否 | `""` | 透传给 ArkWeb 旧脚本注入链路的扩展参数；ArkUI 原生节点不依赖该字段 |
+
+`SendPageTranslateResult` 支持三种格式：
+
+```json
+{
+  "nodeId": 1001,
+  "version": 7,
+  "translatedText": "已翻译文本"
+}
+```
+
+```json
+[
+  { "nodeId": 1001, "version": 7, "translatedText": "标题译文" },
+  { "nodeId": 1002, "version": 3, "text": "按钮译文" }
+]
+```
+
+```json
+{
+  "results": [
+    { "nodeId": 1001, "version": 7, "translatedText": "标题译文" },
+    { "nodeId": 1002, "version": 3, "translatedText": "按钮译文" }
+  ]
+}
+```
+
+| 字段 | 类型 | 必选 | 说明 |
+|------|------|------|------|
+| `nodeId` | number | 是 | 回填目标节点 ID，必须来自本次或连续翻译期间 UI 上报的 `nodeId` |
+| `version` | number | 是 | 回填目标版本；版本不匹配时该条结果忽略 |
+| `translatedText` | string | 是，优先 | 译文文本。若包含 `\\uXXXX` 字面量，UI 侧回填前解码为 UTF-8 |
+| `text` | string | 否 | `translatedText` 的兼容别名，仅当 `translatedText` 为空时读取 |
+| `results` | array | 批量格式必选 | 单次 IPC 批量回填多节点，验证不得用多次单条发送替代 |
+
+### ReportService 回调
+
+```cpp
+virtual void SendPageText(int32_t nodeId, const std::string& text, int64_t version) = 0;
+```
+
+| 字段 | 说明 |
+|------|------|
+| `nodeId >= 0` | 一条可翻译文本节点记录，SA 可根据 `text` 发起翻译，并在回填时带回同一 `nodeId/version` |
+| `nodeId == -1 && text == "empty"` | 本次请求范围内没有可翻译文本的空结果哨兵 |
+| `nodeId == -1 && text == ""` | 单次快照中用于表示 Web 异步收集结束的完成记录；SA 不得回填 |
+| `version` | ArkUI 原生节点必须使用真实版本；ArkWeb 兼容路径可为 `0` |
+
+### 兼容接口
+
+现有 Web-only InnerAPI 保留：`GetWebViewTranslateText`、`StartWebViewTranslate`、`EndWebViewTranslate`、`ResetTranslateTextAll`、`ResetTranslateText`、`SendTranslateResult` 不废弃、不改变语义。新统一接口在 `ARKWEB_ONLY` 或 `ARKUI_ARKWEB` scope 下覆盖 Web 能力，但 Web 内容仍通过现有脚本注入实现。
+
 ## 本次变更范围（Delta）
 
 | 类型 | 内容 | 说明 |

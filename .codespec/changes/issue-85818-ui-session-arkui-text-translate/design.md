@@ -239,6 +239,16 @@ sequenceDiagram
   CCM-->>SM: Report nodeId text version
 ```
 
+启动期流程说明：
+
+1. `UIContentImpl` 在启动初始化阶段调用 `InitUISessionManagerCallbacks`，将统一翻译相关 callback 保存到 `UiSessionManagerOhos`，并保存 `TaskExecutor` 弱引用作为后续切 UI 线程入口。
+2. 系统 SA 通过 `UIContentServiceProxy::StartPageTranslate(request, callback)` 发起 IPC 调用，proxy 先在本进程 `UiReportStub` 注册 `PageTranslateTextCallback`，再通过 `START_PAGE_TRANSLATE` transaction 发送 request。
+3. UI 进程侧 `UiContentStub::StartPageTranslateInner` 收到 `START_PAGE_TRANSLATE` 请求后读取 request，记录调用方进程到 translate process map，并调用 `UIContentServiceStubImpl::StartPageTranslate`。
+4. `UIContentServiceStubImpl::StartPageTranslate` 不直接访问 UI 树，只转发到 `UiSessionManagerOhos::StartPageTranslate(request)`。
+5. `UiSessionManagerOhos` 解析 scope/extraData，校验非法 bit；校验通过后保存当前连续翻译 scope 和 started 状态，并通过当前 `UiTranslateManagerImpl::PostToUI` 投递 UI 线程任务。
+6. UI 线程任务从当前 `PipelineContext` 获取 `ContentChangeManager`，`UiTranslateManagerImpl::StartPageTranslate(scope, extraData)` 根据 scope 分发：ArkWeb 分支复用 WebPattern 脚本注入链路，ArkUI 分支调用 `ContentChangeManager::StartTextTranslateReport` 并上报当前可翻译节点快照。
+7. `ContentChangeManager` 只向 `UiSessionManagerOhos::SendPageTextToAI(nodeId, text, version)` 上报 nodeId/text/version，后者通过保存的 report remote 调用 `ReportService::SendPageText`，最终由 SA 侧 `UiReportStub` 触发 callback。
+
 ## 时序设计
 
 ```mermaid
@@ -270,6 +280,19 @@ sequenceDiagram
   Stub->>Mgr: Dispatch result
   Mgr->>Text: Apply temporary translated display
 ```
+
+连续翻译主流程说明：
+
+1. UI_SA 调用 `UIContentServiceProxy::StartPageTranslate(request, callback)`，request 中 `scope` 指定 `ARKUI_ONLY`、`ARKWEB_ONLY` 或 `ARKUI_ARKWEB`；proxy 校验 callback 和 request，并在 `UiReportStub::RegisterPageTranslateTextCallback` 中登记回调。
+2. `UIContentServiceProxy` 调用 `UiReportStub::PostPageTranslateCallbackRemoveTask` 投递请求超时任务，然后通过 `START_PAGE_TRANSLATE` IPC 发送到 UI 进程。
+3. `UiContentStub::StartPageTranslateInner` 收到请求后读取 request，保存调用方进程 ID，调用 `UIContentServiceStubImpl::StartPageTranslate`，再进入 `UiSessionManagerOhos::StartPageTranslate`。
+4. `UiSessionManagerOhos` 调用 `ParsePageTranslateRequest` 解析 scope 和 extraData；scope 非法时返回 `PARAM_INVALID`，合法时保存连续翻译状态，并通过 `UiTranslateManagerImpl::PostToUI` 切到 UI 线程。
+5. `UiTranslateManagerImpl::StartPageTranslate` 按 scope 分发。ArkWeb 分支对 `PageTranslateNode` 中的 WebPattern 调用 `GetTranslateText(extraData, callback, true)`，继续走现有脚本注入；ArkUI 分支调用 `ContentChangeManager::StartTextTranslateReport` 和 `ReportCurrentTranslateTextNodes` 收集当前节点。
+6. WebPattern 或 `ContentChangeManager` 上报文本时调用 `UiSessionManagerOhos::SendPageTextToAI(nodeId, text, version)`，`UiReportProxy::SendPageText` 通过 `SEND_PAGE_TEXT` transaction 把 nodeId/text/version 发送到 SA 侧 `UiReportStub`，由 `PageTranslateTextCallback` 返回给 UI_SA。
+7. UI_SA 翻译后调用 `UIContentServiceProxy::SendPageTranslateResult(result)`。result 可为单对象、数组或 `{"results":[...]}`；proxy 通过 `SEND_PAGE_TRANSLATE_RESULT` 异步 IPC 发送，并取消可解析 nodeId/version 对应的译文等待 watchdog。
+8. `UiContentStub::SendPageTranslateResultInner` 将 result 转发给 `UiSessionManagerOhos::SendPageTranslateResult`，manager 切 UI 线程调用 `UiTranslateManagerImpl::SendPageTranslateResult`。
+9. `UiTranslateManagerImpl` 解析每条译文，Web 节点调用 WebPattern 现有回填路径；ArkUI 节点调用 `ContentChangeManager::ApplyTranslateResult(nodeId, translatedText, version)`，由 Text/RichEditor/TextInput placeholder 对应 Pattern 临时使用译文参与布局和绘制，不修改原始属性。
+10. UI_SA 调用 `EndPageTranslate` 或 SA 死亡时，`UiSessionManagerOhos` 清理 started/scope 状态，`UiTranslateManagerImpl::EndPageTranslate` 停止 ArkUI 增量上报并恢复原文，ArkWeb 分支复用现有 End/Reset 路径。
 
 ### Host Preview 验证时序
 
@@ -310,6 +333,16 @@ sequenceDiagram
   Script->>CLI: inspector business simpleTree
   CLI->>Tree: GetVisibleInspectorTree
 ```
+
+Host Preview 验证流程说明：
+
+1. 验证脚本调用 `PreviewerCLI remoteRequest`，通过 `business=pageTranslate` 和 `method=getText/start/sendResult/reset/end` 选择统一翻译模拟能力，不新增正式产品接口。
+2. `PreviewerCLI` 把参数传给 Previewer `JsAppImpl`，`JsAppImpl` 根据 method 组装 request/result，并调用 preview 环境的 `UiSessionManagerPreview`。
+3. `UiSessionManagerPreview::GetPageTranslateText` 或 `StartPageTranslate` 解析 scope 后，通过 preview `UiTranslateManagerImpl::PostToUI` 切到 UI 线程，调用 `ContentChangeManager::ReportCurrentTranslateTextNodes` 或 `StartTextTranslateReport` 收集 ArkUI 文本节点。
+4. preview manager 在 host 内部收集 `SendPageTextToAI(nodeId, text, version)` 结果并返回 JSON 给脚本，脚本断言 nodeId、text、version 与固定 Demo 文本和 `simpleTree` 中的真实节点一致。
+5. 脚本调用 `remoteRequest pageTranslate/sendResult` 时，`UiSessionManagerPreview::SendPageTranslateResult` 转发给 preview `UiTranslateManagerImpl`，最终进入与真机一致的 `ContentChangeManager::ApplyTranslateResult` 和 Pattern 临时译文布局路径。
+6. 脚本通过点击新页面、滚动 List repeat 行触发新文本节点上树和实际绘制，再调用 `collect` 获取连续翻译增量，验证 Start 后新增节点和内容变化会上报。
+7. 脚本调用 `reset`、`end` 和 `simulateTimeoutCleanup` 验证恢复路径；再通过 `PreviewerCLI inspector --business simpleTree` 调 `GetVisibleInspectorTree`，确认临时译文字段清理或在展示译文时输出 `translated` DFX 字段。
 
 ## 数据模型设计
 
