@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async_binding.h"
 
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
-#include "base/memory/referenced.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/common/container.h"
+#include "core/interfaces/native/node/video_modifier.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -53,265 +53,135 @@ napi_value CreateErrorValue(napi_env env, const std::string& reason)
     return error;
 }
 
-} // namespace
-
-void JSVideoControllerAsync::JSBind(BindingTarget globalObj)
+void PostAsyncPromiseResult(napi_env env, napi_deferred deferred, const RefPtr<TaskExecutor>& taskExecutor,
+    const std::string& taskName, bool success, const std::string& reason = "")
 {
-    JSClass<JSVideoControllerAsync>::Declare("VideoControllerAsync");
-    JSClass<JSVideoControllerAsync>::CustomMethod("start", &JSVideoControllerAsync::StartAsync);
-    JSClass<JSVideoControllerAsync>::CustomMethod("pause", &JSVideoControllerAsync::PauseAsync);
-    JSClass<JSVideoControllerAsync>::CustomMethod("stop", &JSVideoControllerAsync::StopAsync);
-    JSClass<JSVideoControllerAsync>::CustomMethod("setCurrentTime", &JSVideoControllerAsync::SetCurrentTime);
-    JSClass<JSVideoControllerAsync>::CustomMethod("requestFullscreen", &JSVideoControllerAsync::RequestFullscreen);
-    JSClass<JSVideoControllerAsync>::CustomMethod("exitFullscreen", &JSVideoControllerAsync::ExitFullscreen);
-    JSClass<JSVideoControllerAsync>::CustomMethod("reset", &JSVideoControllerAsync::ResetAsync);
-    JSClass<JSVideoControllerAsync>::Bind(globalObj, JSVideoControllerAsync::Constructor, JSVideoControllerAsync::Destructor);
+    taskExecutor->PostTask(
+        [env, deferred, success, reason]() {
+            napi_handle_scope scope = nullptr;
+            auto status = napi_open_handle_scope(env, &scope);
+            if (status != napi_ok) {
+                return;
+            }
+            napi_value result = nullptr;
+            if (success) {
+                napi_get_null(env, &result);
+                napi_resolve_deferred(env, deferred, result);
+            } else {
+                napi_value error = CreateErrorValue(env, reason);
+                napi_reject_deferred(env, deferred, error);
+            }
+            napi_close_handle_scope(env, scope);
+        },
+        TaskExecutor::TaskType::JS, taskName);
 }
 
-void JSVideoControllerAsync::Constructor(const JSCallbackInfo& args)
+template<typename CallbackBuilder>
+void ResolveAsyncPromise(const JSCallbackInfo& args, const RefPtr<VideoControllerAsync>& controller,
+    const std::string& taskName, CallbackBuilder&& builder)
 {
-    auto videoControllerAsync = Referenced::MakeRefPtr<JSVideoControllerAsync>();
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    auto taskExecutor = Container::CurrentTaskExecutorSafely();
+    CHECK_NULL_VOID(taskExecutor);
+
+    napi_deferred deferred = nullptr;
+    napi_value promise = nullptr;
+    napi_create_promise(env, &deferred, &promise);
+
+    if (controller) {
+        auto callback = [env, deferred, taskExecutor, taskName](bool success, const std::string& reason) {
+            PostAsyncPromiseResult(env, deferred, taskExecutor, taskName, success, reason);
+        };
+        builder(controller, std::move(callback));
+    } else {
+        PostAsyncPromiseResult(env, deferred, taskExecutor, taskName, true);
+    }
+
+    ReturnPromise(args, promise);
+}
+
+} // namespace
+
+void JSVideoControllerAsyncBinding::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSVideoControllerAsync>::Declare("VideoControllerAsync");
+    JSClass<JSVideoControllerAsync>::CustomMethod("start", &JSVideoControllerAsyncBinding::StartAsync);
+    JSClass<JSVideoControllerAsync>::CustomMethod("pause", &JSVideoControllerAsyncBinding::PauseAsync);
+    JSClass<JSVideoControllerAsync>::CustomMethod("stop", &JSVideoControllerAsyncBinding::StopAsync);
+    JSClass<JSVideoControllerAsync>::CustomMethod("setCurrentTime", &JSVideoControllerAsyncBinding::SetCurrentTime);
+    JSClass<JSVideoControllerAsync>::CustomMethod(
+        "requestFullscreen", &JSVideoControllerAsyncBinding::RequestFullscreen);
+    JSClass<JSVideoControllerAsync>::CustomMethod("exitFullscreen", &JSVideoControllerAsyncBinding::ExitFullscreen);
+    JSClass<JSVideoControllerAsync>::CustomMethod("reset", &JSVideoControllerAsyncBinding::ResetAsync);
+    JSClass<JSVideoControllerAsync>::Bind(
+        globalObj, JSVideoControllerAsyncBinding::Constructor, JSVideoControllerAsyncBinding::Destructor);
+}
+
+void JSVideoControllerAsyncBinding::Constructor(const JSCallbackInfo& args)
+{
+    auto videoControllerAsync = Referenced::MakeRefPtr<JSVideoControllerAsyncBinding>();
     videoControllerAsync->IncRefCount();
-    WeakPtr<NG::VideoStateMachinePattern> emptyPattern;
-    RefPtr<VideoControllerAsync> controller = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
+    RefPtr<VideoControllerAsync> controller = AceType::Claim(reinterpret_cast<VideoControllerAsync*>(
+        NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->create()));
+    controller->DecRefCount();
     videoControllerAsync->SetController(controller);
     args.SetReturnValue(Referenced::RawPtr(videoControllerAsync));
 }
 
-void JSVideoControllerAsync::Destructor(JSVideoControllerAsync* videoControllerAsync)
+void JSVideoControllerAsyncBinding::Destructor(JSVideoControllerAsync* videoControllerAsync)
 {
     if (videoControllerAsync) {
         const auto& controller = videoControllerAsync->GetController();
         videoControllerAsync->DecRefCount();
         if (controller) {
-            controller->ClearPattern();
+            controller->Clear();
         }
     }
 }
 
-void JSVideoControllerAsync::StartAsync(const JSCallbackInfo& args)
+void JSVideoControllerAsyncBinding::StartAsync(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-    auto taskExecutor = Container::CurrentTaskExecutorSafely();
-    CHECK_NULL_VOID(taskExecutor);
-
-    napi_deferred deferred = nullptr;
-    napi_value promise = nullptr;
-    napi_create_promise(env, &deferred, &promise);
-
-    if (videoControllerAsync_) {
-        auto callback = [env, deferred, taskExecutor](bool success, const std::string& reason) {
-            taskExecutor->PostTask(
-                [env, deferred, success, reason]() {
-                    napi_handle_scope scope = nullptr;
-                    auto status = napi_open_handle_scope(env, &scope);
-                    if (status != napi_ok) {
-                        return;
-                    }
-                    napi_value result = nullptr;
-                    if (success) {
-                        napi_get_null(env, &result);
-                        napi_resolve_deferred(env, deferred, result);
-                    } else {
-                        napi_value error = CreateErrorValue(env, reason);
-                        napi_reject_deferred(env, deferred, error);
-                    }
-                    napi_close_handle_scope(env, scope);
-                },
-                TaskExecutor::TaskType::JS, "ArkUIVideoStartResolve");
-        };
-        videoControllerAsync_->Start(std::move(callback));
-    } else {
-        taskExecutor->PostTask(
-            [env, deferred]() {
-                napi_handle_scope scope = nullptr;
-                auto status = napi_open_handle_scope(env, &scope);
-                if (status == napi_ok) {
-                    napi_value result = nullptr;
-                    napi_get_null(env, &result);
-                    napi_resolve_deferred(env, deferred, result);
-                    napi_close_handle_scope(env, scope);
-                }
-            },
-            TaskExecutor::TaskType::JS, "ArkUIVideoStartResolve");
-    }
-
-    ReturnPromise(args, promise);
+    ContainerScope scope(GetInstanceId());
+    ResolveAsyncPromise(args, GetController(), "ArkUIVideoStartResolve",
+        [](const RefPtr<VideoControllerAsync>& controller, VideoControllerAsync::AsyncCommandCallback&& callback) {
+            NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->start(AceType::RawPtr(controller), &callback);
+        });
 }
 
-void JSVideoControllerAsync::PauseAsync(const JSCallbackInfo& args)
+void JSVideoControllerAsyncBinding::PauseAsync(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-    auto taskExecutor = Container::CurrentTaskExecutorSafely();
-    CHECK_NULL_VOID(taskExecutor);
-
-    napi_deferred deferred = nullptr;
-    napi_value promise = nullptr;
-    napi_create_promise(env, &deferred, &promise);
-
-    if (videoControllerAsync_) {
-        auto callback = [env, deferred, taskExecutor](bool success, const std::string& reason) {
-            taskExecutor->PostTask(
-                [env, deferred, success, reason]() {
-                    napi_handle_scope scope = nullptr;
-                    auto status = napi_open_handle_scope(env, &scope);
-                    if (status != napi_ok) {
-                        return;
-                    }
-                    napi_value result = nullptr;
-                    if (success) {
-                        napi_get_null(env, &result);
-                        napi_resolve_deferred(env, deferred, result);
-                    } else {
-                        napi_value error = CreateErrorValue(env, reason);
-                        napi_reject_deferred(env, deferred, error);
-                    }
-                    napi_close_handle_scope(env, scope);
-                },
-                TaskExecutor::TaskType::JS, "ArkUIVideoPauseResolve");
-        };
-        videoControllerAsync_->Pause(std::move(callback));
-    } else {
-        taskExecutor->PostTask(
-            [env, deferred]() {
-                napi_handle_scope scope = nullptr;
-                auto status = napi_open_handle_scope(env, &scope);
-                if (status == napi_ok) {
-                    napi_value result = nullptr;
-                    napi_get_null(env, &result);
-                    napi_resolve_deferred(env, deferred, result);
-                    napi_close_handle_scope(env, scope);
-                }
-            },
-            TaskExecutor::TaskType::JS, "ArkUIVideoPauseResolve");
-    }
-
-    ReturnPromise(args, promise);
+    ContainerScope scope(GetInstanceId());
+    ResolveAsyncPromise(args, GetController(), "ArkUIVideoPauseResolve",
+        [](const RefPtr<VideoControllerAsync>& controller, VideoControllerAsync::AsyncCommandCallback&& callback) {
+            NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->pause(AceType::RawPtr(controller), &callback);
+        });
 }
 
-void JSVideoControllerAsync::StopAsync(const JSCallbackInfo& args)
+void JSVideoControllerAsyncBinding::StopAsync(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-    auto taskExecutor = Container::CurrentTaskExecutorSafely();
-    CHECK_NULL_VOID(taskExecutor);
-
-    napi_deferred deferred = nullptr;
-    napi_value promise = nullptr;
-    napi_create_promise(env, &deferred, &promise);
-
-    if (videoControllerAsync_) {
-        auto callback = [env, deferred, taskExecutor](bool success, const std::string& reason) {
-            taskExecutor->PostTask(
-                [env, deferred, success, reason]() {
-                    napi_handle_scope scope = nullptr;
-                    auto status = napi_open_handle_scope(env, &scope);
-                    if (status != napi_ok) {
-                        return;
-                    }
-                    napi_value result = nullptr;
-                    if (success) {
-                        napi_get_null(env, &result);
-                        napi_resolve_deferred(env, deferred, result);
-                    } else {
-                        napi_value error = CreateErrorValue(env, reason);
-                        napi_reject_deferred(env, deferred, error);
-                    }
-                    napi_close_handle_scope(env, scope);
-                },
-                TaskExecutor::TaskType::JS, "ArkUIVideoStopResolve");
-        };
-        videoControllerAsync_->Stop(std::move(callback));
-    } else {
-        taskExecutor->PostTask(
-            [env, deferred]() {
-                napi_handle_scope scope = nullptr;
-                auto status = napi_open_handle_scope(env, &scope);
-                if (status == napi_ok) {
-                    napi_value result = nullptr;
-                    napi_get_null(env, &result);
-                    napi_resolve_deferred(env, deferred, result);
-                    napi_close_handle_scope(env, scope);
-                }
-            },
-            TaskExecutor::TaskType::JS, "ArkUIVideoStopResolve");
-    }
-
-    ReturnPromise(args, promise);
+    ContainerScope scope(GetInstanceId());
+    ResolveAsyncPromise(args, GetController(), "ArkUIVideoStopResolve",
+        [](const RefPtr<VideoControllerAsync>& controller, VideoControllerAsync::AsyncCommandCallback&& callback) {
+            NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->stop(AceType::RawPtr(controller), &callback);
+        });
 }
 
-void JSVideoControllerAsync::ResetAsync(const JSCallbackInfo& args)
+void JSVideoControllerAsyncBinding::ResetAsync(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-    auto taskExecutor = Container::CurrentTaskExecutorSafely();
-    CHECK_NULL_VOID(taskExecutor);
-
-    napi_deferred deferred = nullptr;
-    napi_value promise = nullptr;
-    napi_create_promise(env, &deferred, &promise);
-
-    if (videoControllerAsync_) {
-        auto callback = [env, deferred, taskExecutor](bool success, const std::string& reason) {
-            taskExecutor->PostTask(
-                [env, deferred, success, reason]() {
-                    napi_handle_scope scope = nullptr;
-                    auto status = napi_open_handle_scope(env, &scope);
-                    if (status != napi_ok) {
-                        return;
-                    }
-                    napi_value result = nullptr;
-                    if (success) {
-                        napi_get_null(env, &result);
-                        napi_resolve_deferred(env, deferred, result);
-                    } else {
-                        napi_value error = CreateErrorValue(env, reason);
-                        napi_reject_deferred(env, deferred, error);
-                    }
-                    napi_close_handle_scope(env, scope);
-                },
-                TaskExecutor::TaskType::JS, "ArkUIVideoResetResolve");
-        };
-        videoControllerAsync_->Reset(std::move(callback));
-    } else {
-        taskExecutor->PostTask(
-            [env, deferred]() {
-                napi_handle_scope scope = nullptr;
-                auto status = napi_open_handle_scope(env, &scope);
-                if (status == napi_ok) {
-                    napi_value result = nullptr;
-                    napi_get_null(env, &result);
-                    napi_resolve_deferred(env, deferred, result);
-                    napi_close_handle_scope(env, scope);
-                }
-            },
-            TaskExecutor::TaskType::JS, "ArkUIVideoResetResolve");
-    }
-
-    ReturnPromise(args, promise);
+    ContainerScope scope(GetInstanceId());
+    ResolveAsyncPromise(args, GetController(), "ArkUIVideoResetResolve",
+        [](const RefPtr<VideoControllerAsync>& controller, VideoControllerAsync::AsyncCommandCallback&& callback) {
+            NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->reset(AceType::RawPtr(controller), &callback);
+        });
 }
 
-void JSVideoControllerAsync::SetCurrentTime(const JSCallbackInfo& args)
+void JSVideoControllerAsyncBinding::SetCurrentTime(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(GetInstanceId());
     float value = 0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], value)) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "JSVideoControllerAsync set current time with invalid params");
@@ -323,30 +193,35 @@ void JSVideoControllerAsync::SetCurrentTime(const JSCallbackInfo& args)
         seekMode = SEEK_MODE[args[1]->ToNumber<int32_t>()];
     }
 
-    if (videoControllerAsync_) {
-        videoControllerAsync_->SeekTo(value, seekMode);
+    const auto& controller = GetController();
+    if (controller) {
+        NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->seekTo(
+            AceType::RawPtr(controller), value, static_cast<int32_t>(seekMode));
     }
 }
 
-void JSVideoControllerAsync::RequestFullscreen(const JSCallbackInfo& args)
+void JSVideoControllerAsyncBinding::RequestFullscreen(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(GetInstanceId());
     bool landscape = true;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], landscape)) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "JSVideoControllerAsync request full screen with invalid params");
         return;
     }
 
-    if (videoControllerAsync_) {
-        videoControllerAsync_->RequestFullscreen(landscape);
+    const auto& controller = GetController();
+    if (controller) {
+        NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->requestFullscreen(
+            AceType::RawPtr(controller), landscape);
     }
 }
 
-void JSVideoControllerAsync::ExitFullscreen(const JSCallbackInfo& args)
+void JSVideoControllerAsyncBinding::ExitFullscreen(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
-    if (videoControllerAsync_) {
-        videoControllerAsync_->ExitFullscreen();
+    ContainerScope scope(GetInstanceId());
+    const auto& controller = GetController();
+    if (controller) {
+        NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->exitFullscreen(AceType::RawPtr(controller));
     }
 }
 

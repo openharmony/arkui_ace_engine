@@ -504,6 +504,9 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
       "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
+    if (enable_player_framework) {
+      deps += [ "$ace_root/frameworks/core/components_ng/render:ace_core_components_video_resource_ng_$platform" ]
+    }
 
     deps += [
       "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
@@ -1093,6 +1096,9 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
       "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
+    if (enable_player_framework) {
+      deps += [ "$ace_root/frameworks/core/components_ng/render:ace_core_components_video_resource_ng_$platform" ]
+    }
 
     deps += [ "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform" ]
 

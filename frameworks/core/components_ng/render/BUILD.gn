@@ -14,6 +14,18 @@
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
+if (enable_player_framework) {
+  build_component_ng("video_resource_ng") {
+    sources = [
+      "resource/ext_surface.cpp",
+      "resource/ext_texture.cpp",
+      "resource/player.cpp",
+      "resource/resource.cpp",
+      "resource/texture.cpp",
+    ]
+  }
+}
+
 build_component_ng("render_ng") {
   sources = [
     "adapter/animated_image.cpp",

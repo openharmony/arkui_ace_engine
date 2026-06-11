@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_RESOURCE_TEXTURE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_RESOURCE_TEXTURE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_RESOURCE_TEXTURE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_RESOURCE_TEXTURE_H
 
 #include "core/common/platform_res_register.h"
-#include "core/components_ng/pattern/video/resource/resource.h"
+#include "core/components_ng/render/resource/resource.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -47,4 +47,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_RESOURCE_TEXTURE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_RESOURCE_TEXTURE_H

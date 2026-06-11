@@ -25,11 +25,11 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/platform_res_register.h"
-#include "core/components_ng/pattern/video/resource/ext_surface.h"
-#include "core/components_ng/pattern/video/resource/ext_texture.h"
-#include "core/components_ng/pattern/video/resource/player.h"
-#include "core/components_ng/pattern/video/resource/resource.h"
-#include "core/components_ng/pattern/video/resource/texture.h"
+#include "core/components_ng/render/resource/ext_surface.h"
+#include "core/components_ng/render/resource/ext_texture.h"
+#include "core/components_ng/render/resource/player.h"
+#include "core/components_ng/render/resource/resource.h"
+#include "core/components_ng/render/resource/texture.h"
 
 using namespace testing;
 using namespace testing::ext;

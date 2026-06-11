@@ -17,7 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIDEO_CONTROLLER_H
 
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings.h"
+#include "frameworks/core/common/container_consts.h"
 #include "core/components_ng/pattern/video/video_controller_v2.h"
 
 namespace OHOS::Ace::Framework {
@@ -26,18 +26,6 @@ class JSVideoController : public Referenced {
 public:
     JSVideoController() = default;
     ~JSVideoController() override = default;
-
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSVideoController* scroller);
-
-    void Start(const JSCallbackInfo& args);
-    void Pause(const JSCallbackInfo& args);
-    void Stop(const JSCallbackInfo& args);
-    void SetCurrentTime(const JSCallbackInfo& args);
-    void RequestFullscreen(const JSCallbackInfo& args);
-    void ExitFullscreen(const JSCallbackInfo& args);
-    void Reset(const JSCallbackInfo& args);
 
     RefPtr<VideoControllerV2> GetController() const
     {
@@ -52,6 +40,11 @@ public:
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
     }
 
 private:
