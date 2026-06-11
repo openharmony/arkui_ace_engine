@@ -530,7 +530,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 
     runtime_->SetEmbedderData(this);
     runtime_->RegisterUncaughtExceptionHandler(JsiBaseUtils::ReportJsErrorEvent);
-
 #if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
@@ -1611,6 +1610,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         nativeEngine_ = nativeArkEngine;
         arkRuntime->SetNativeEngine(nativeArkEngine);
     }
+    RegisterContainerScopeFunc();
     engineInstance_->SetInstanceId(instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
 #if defined(PREVIEW)
@@ -1719,6 +1719,13 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         EvaluateAbcFile(arkRuntime, NG::GetSystemPath("jsEnumStyle.abc"));
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
+}
+
+void JsiDeclarativeEngine::RegisterContainerScopeFunc()
+{
+    nativeEngine_->SetGetContainerScopeIdFunc(ContainerScope::CurrentId);
+    nativeEngine_->SetInitContainerScopeFunc(ContainerScope::UpdateCurrent);
+    nativeEngine_->SetFinishContainerScopeFunc(ContainerScope::RestoreCurrent);
 }
 
 #ifdef OHOS_PLATFORM

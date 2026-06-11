@@ -94,6 +94,10 @@ public:
     static uint32_t ContainerCount();
 
     static void UpdateCurrent(int32_t id);
+    // Restore currentId_ to default undefined value (-1).
+    // Used as FinishContainerScopeFunc callback via NAPI engine, where the int32_t parameter
+    // matches the ContainerScopeCallback typedef but is intentionally unused.
+    static void RestoreCurrent(int32_t id);
     static void UpdateLocalCurrent(int32_t id);
     static void UpdateSingleton(int32_t id);
     static void UpdateRecentActive(int32_t id);

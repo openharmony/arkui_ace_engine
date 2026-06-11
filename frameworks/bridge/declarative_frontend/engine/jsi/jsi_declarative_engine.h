@@ -564,6 +564,7 @@ private:
     void RegisterInitWorkerFunc();
     void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
+    void RegisterContainerScopeFunc();
     bool ExecuteAbc(const std::string& fileName);
     bool ExecuteCardAbc(const std::string& fileName, int64_t cardId);
     bool ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
