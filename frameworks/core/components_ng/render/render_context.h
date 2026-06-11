@@ -970,6 +970,11 @@ public:
 
     virtual void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) {}
 
+    virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnLastGradientTypeUpdate(const NG::GradientType& value) {}
+
     virtual void UpdateRadiusGradientBlur(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void ResetRadiusGradientBlur() {}
 protected:
@@ -1045,11 +1050,6 @@ protected:
     virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
 
     virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) {}
-
-    virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
-    virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
-    virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
-    virtual void OnLastGradientTypeUpdate(const NG::GradientType& value) {}
 
     virtual void OnFrontBrightnessUpdate(const Dimension& value) {}
     virtual void OnFrontGrayScaleUpdate(const Dimension& value) {}

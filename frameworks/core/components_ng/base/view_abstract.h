@@ -1190,6 +1190,18 @@ public:
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();
 
+    static std::function<void()> GetOuterBorderWidthFuncForLPX(const Dimension& value);
+    static std::function<void()> GetOuterBorderWidthFuncForLPX(const BorderWidthProperty& value);
+
+    static std::function<void()> GetOuterBorderRadiusFuncForLPX(const Dimension& value);
+    static std::function<void()> GetOuterBorderRadiusFuncForLPX(const BorderRadiusProperty& value);
+
+    static std::function<void()> GetClipShapeFuncForLPX(const RefPtr<BasicShape>& basicShape);
+
+    static std::function<void()> GetMaskShapeFuncForLPX(const RefPtr<BasicShape>& basicShape);
+
+    static std::function<void()> GetPixelStretchEffectFuncForLPX(PixStretchEffectOption option);
+
     static void SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void ClearJSFrameNodeOnReachStart(FrameNode* frameNode);
     static void SetJSFrameNodeOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
