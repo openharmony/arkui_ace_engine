@@ -61,7 +61,7 @@ export interface IExtendableComponent {
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
     queryRouterPageInfo(): uiObserver.RouterPageInfo;
     findCustomValueByKey(key: int32): Any | undefined;
-    findSystemEnvValueByKey(key: string): Any | undefined;
+    findWritableSystemEnvValueByKey(key: string): Any | undefined;
     registerOnCustomEnvUpdateCallback(callback: (key: int32, value: Any) => void): void;
     registerOnSystemEnvUpdateCallback(callback: (key: string, value: Any) => void): void;
     getDialogController(): promptAction.DialogController | undefined;
@@ -132,10 +132,12 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private ownedStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
     private envPropertySet: Set<IEnvVariable> = new Set<IEnvVariable>();
     private envInstanceId: int32 | undefined;
-    private simpleEnvCallbackSets_: Map<string, Set<(value: Any) => void>> = new Map<string, Set<(value: Any) => void>>();
-    private simpleEnvDispatchFuncs_: Map<string, (value: Any) => void> = new Map<string, (value: Any) => void>();
-    private simpleEnvUnregisterFuncs_: Map<string, () => void> = new Map<string, () => void>();
     protected memopt_: int32 = 0;
+    private readonlyEnvDispatchFuncs_: Map<string, (value: Any) => void> = new Map<string, (value: Any) => void>();
+    private readonlyEnvUnregisterFuncs_: Map<string, () => void> = new Map<string, () => void>();
+    private customEnvCallbackMap_: Map<int32, Set<(key: int32, value: Any) => void>> = new Map<int32, Set<(key: int32, value: Any) => void>>();
+    private systemEnvCallbacksMap_: Map<string, Set<(value: Any) => void>> = new Map<string, Set<(value: Any) => void>>();
+    private hasRegisteredWritableEnvCallback_: boolean = false;
 
     private __activeFunc__Internal?: ActiveAndInactiveCallbackType;
     private __inactiveFunc__Internal?: ActiveAndInactiveCallbackType;
@@ -155,6 +157,79 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.useSharedStorage_ = useSharedStorage;
         this.backLocalStorage_ = storage;
         this.parent_ = ExtendableComponent.current as (ExtendableComponent | undefined);
+    }
+
+    __findWritableSystemEnvValueByKey__Internal(key: string): Any {
+        return this.findWritableSystemEnvValueByKey(key);
+    }
+
+    __addSystemEnvValueCallback__Internal(key: string, callback: (value: Any) => void): void {
+        let callbackSet = this.systemEnvCallbacksMap_.get(key);
+        if (callbackSet === undefined) {
+            callbackSet = new Set<(value: Any) => void>();
+            this.systemEnvCallbacksMap_.set(key, callbackSet);
+        }
+        callbackSet.add(callback);
+    }
+
+    __registerWritableEnvUpdateCallback__Internal(callback: (key: string, value: Any) => void): void {
+        this.registerOnSystemEnvUpdateCallback(callback);
+        this.hasRegisteredWritableEnvCallback_ = true;
+    }
+
+    __removeSystemEnvValueCallback__Internal(key: string, callback: (value: Any) => void): boolean {
+        const callbackSet = this.systemEnvCallbacksMap_.get(key);
+        if (callbackSet !== undefined) {
+            callbackSet.delete(callback);
+            if (callbackSet.size === 0) {
+                this.systemEnvCallbacksMap_.delete(key);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    __getSystemEnvValueCallbacks__Internal(key: string): Set<(value: Any) => void> | undefined  {
+        return this.systemEnvCallbacksMap_.get(key);
+    }
+
+    __getSystemEnvCallbacksMap__Internal(): Map<string, Set<(value: Any) => void>>  {
+        return this.systemEnvCallbacksMap_;
+    }
+
+    __getHasRegisteredWritableEnvCallback__Internal(): boolean  {
+        return this.hasRegisteredWritableEnvCallback_;
+    }
+
+    __updateCustomEnvVarValue__Internal(internalId: int32, callback: (key: int32, value: Any) => void): void {
+        if (!this.customEnvCallbackMap_.has(internalId)) {
+            this.customEnvCallbackMap_.set(internalId, new Set<(key: int32, value: Any) => void>());
+        }
+        this.customEnvCallbackMap_.get(internalId)!.add(callback);
+    }
+
+    __getCustomEnvCallbackMap__Internal(): Map<int32, Set<(key: int32, value: Any) => void>> {
+        return this.customEnvCallbackMap_;
+    }
+
+    __removeCustomEnvCallback__Internal(internalId: int32, callback: (key: int32, value: Any) => void): boolean {
+        const callbackSubMap = this.customEnvCallbackMap_.get(internalId);
+        if (callbackSubMap !== undefined) {
+            callbackSubMap.delete(callback);
+            if (callbackSubMap.size === 0) {
+                this.customEnvCallbackMap_.delete(internalId);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    __findCustomEnvValueByKey__Internal(key: int32): Any {
+        return this.findCustomValueByKey(key);
+    }
+
+    __registerCustomEnvUpdateCallback__Internal(callback: (key: int32, value: Any) => void): void {
+        this.registerOnCustomEnvUpdateCallback(callback);
     }
 
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void {
@@ -386,58 +461,33 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         return this.delegate_;
     }
 
-    __addSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean {
-        let callbackSet = this.simpleEnvCallbackSets_.get(envKey);
-        if (callbackSet === undefined) {
-            callbackSet = new Set<(value: Any) => void>();
-            this.simpleEnvCallbackSets_.set(envKey, callbackSet);
-        }
-        callbackSet.add(callback);
-        return callbackSet.size === 1;
+    __setReadonlyEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void {
+        this.readonlyEnvDispatchFuncs_.set(envKey, dispatchFunc);
     }
  
-    __getSimpleEnvCallbackSet__Internal(envKey: string): (Set<(value: Any) => void>) | undefined {
-        return this.simpleEnvCallbackSets_.get(envKey);
-    } 
- 
-    __removeSimpleEnvCallback__Internal(envKey: string, callback: (value: Any) => void): boolean {
-        const callbackSet = this.simpleEnvCallbackSets_.get(envKey);
-        if (callbackSet !== undefined) {
-            callbackSet.delete(callback);
-            if (callbackSet.size === 0) {
-                this.simpleEnvCallbackSets_.delete(envKey);
-                return true;
-            }
-        }
-        return false;
-    }
- 
-    __setSimpleEnvDispatchFunc__Internal(envKey: string, dispatchFunc: (value: Any) => void): void {
-        this.simpleEnvDispatchFuncs_.set(envKey, dispatchFunc);
-    }
- 
-    __getAndClearSimpleEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined {
-        const dispatchFunc = this.simpleEnvDispatchFuncs_.get(envKey);
-        this.simpleEnvDispatchFuncs_.delete(envKey);
+    __getAndClearReadonlyEnvDispatchFunc__Internal(envKey: string): ((value: Any) => void) | undefined {
+        const dispatchFunc = this.readonlyEnvDispatchFuncs_.get(envKey);
+        this.readonlyEnvDispatchFuncs_.delete(envKey);
         return dispatchFunc;
     }
  
-    __getSimpleEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void> {
-        return this.simpleEnvDispatchFuncs_;
+    __getReadonlyEnvDispatchFuncs__Internal(): Map<string, (value: Any) => void> {
+        return this.readonlyEnvDispatchFuncs_;
     }
 
-    __setSimpleEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void {
-        this.simpleEnvUnregisterFuncs_.set(envKey, unregisterFunc);
+    __setReadonlyEnvUnregisterFunc__Internal(envKey: string, unregisterFunc: () => void): void {
+        this.readonlyEnvUnregisterFuncs_.set(envKey, unregisterFunc);
     }
 
-    __getSimpleEnvUnregisterFuncs__Internal(): Map<string, () => void> {
-        return this.simpleEnvUnregisterFuncs_;
+    __getReadonlyEnvUnregisterFuncs__Internal(): Map<string, () => void> {
+        return this.readonlyEnvUnregisterFuncs_;
     }
  
-    __clearAllSimpleEnvRegistrations__Internal(): void {
-        this.simpleEnvCallbackSets_.clear();
-        this.simpleEnvDispatchFuncs_.clear();
-        this.simpleEnvUnregisterFuncs_.clear();
+    __clearAllEnvRegistrations__Internal(): void {
+        this.customEnvCallbackMap_.clear();
+        this.systemEnvCallbacksMap_.clear();
+        this.readonlyEnvDispatchFuncs_.clear();
+        this.readonlyEnvUnregisterFuncs_.clear();
     }    
 
     __getDelegate__Internal<T extends ExtendableComponent, T_Options>(): CustomDelegate<T, T_Options> | undefined {
@@ -474,8 +524,8 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     findCustomValueByKey(key: int32): Any | undefined {
         return this.delegate_!.findCustomValueByKey(key);
     }
-    findSystemEnvValueByKey(key: string): Any | undefined {
-        return this.delegate_!.findSystemEnvValueByKey(key);
+    findWritableSystemEnvValueByKey(key: string): Any | undefined {
+        return this.delegate_!.findWritableSystemEnvValueByKey(key);
     }
     registerOnCustomEnvUpdateCallback(callback: (key: int32, value: Any) => void): void {
         this.delegate_!.registerOnCustomEnvUpdateCallback(callback);
