@@ -404,6 +404,7 @@ void ScrollBarPattern::InitScrollBarGestureEvent()
 void ScrollBarPattern::RegisterScrollBarOverDragEventTask()
 {
     CHECK_NULL_VOID(scrollBar_);
+    CHECK_NULL_VOID(scrollBarProxy_);
     if (scrollBarProxy_->IsFreeScroll()) {
         auto overScrollWithDelta = [weak = WeakClaim(this)](double delta) {
             auto pattern = weak.Upgrade();
