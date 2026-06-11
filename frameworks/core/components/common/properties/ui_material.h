@@ -104,6 +104,9 @@ public:
         const std::shared_ptr<ImmersiveOptions>& options, const RefPtr<NG::FrameNode>& node);
     static std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig(
         const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode);
+    // Get material config with component scale adjustment (for drag scenario)
+    static std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfigWithScale(
+        const std::shared_ptr<ImmersiveOptions>& options, const RefPtr<NG::FrameNode>& node, float componentScale);
     static bool GetUiMaterialFilter(
         const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter);
     static Shadow GetImmersiveShadow(float dipScale);

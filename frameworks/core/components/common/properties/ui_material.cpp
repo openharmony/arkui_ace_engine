@@ -298,6 +298,31 @@ ColorMode MaterialUtils::GetNodeColorMode(const RefPtr<NG::FrameNode>& node)
     return colorMode;
 }
 
+std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfigWithScale(
+    const std::shared_ptr<ImmersiveOptions>& options, const RefPtr<NG::FrameNode>& node, float componentScale)
+{
+    if (!options || !node) {
+        return std::nullopt;
+    }
+    auto pipeline = node->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto colorMode = GetNodeColorMode(node);
+
+    // Get base dipScale and adjust by component scale
+    float baseDipScale = pipeline->GetDipScale();
+    // Ensure componentScale is valid
+    if (componentScale <= 0.0f || NearZero(componentScale)) {
+        componentScale = 1.0f;
+    }
+    // When component is scaled (componentScale != 1.0), the graphic side applies transform matrix
+    // to material effects, causing blur radius to be compressed/stretched.
+    // To compensate: we divide dipScale by componentScale (inverse scaling).
+    // Example: scale=0.5 means 2x larger dipScale to compensate for 0.5x compression.
+    float adjustedDipScale = baseDipScale / componentScale;
+
+    return GetImmersiveMaterialConfig(options, adjustedDipScale, colorMode);
+}
+
 bool MaterialUtils::ValidColorInvert(const std::shared_ptr<ImmersiveOptions>& options, UiMaterialLevel systemLevel,
     UiMaterialTransparency systemTransparency)
 {
