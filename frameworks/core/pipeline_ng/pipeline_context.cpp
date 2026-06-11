@@ -18,6 +18,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 
+#include <cmath>
 #include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/event_manager.h"
@@ -146,7 +147,19 @@ constexpr int32_t USED_JSON_PARAM = 4;
 constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
 constexpr int32_t RATIO_OF_VSYNC_PERIOD = 2;
 constexpr int32_t MAX_DVSYNC_TIME_USE_COUNT = 5;
-constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 6;
+constexpr size_t DUMP_PARAM_DEFAULT_START_INDEX = 2;
+constexpr size_t DUMP_PARAM_VISIBLE_INFO_START_INDEX = 1;
+constexpr size_t DUMP_PARAM_INTERACTION_INFO_OFFSET = 0;
+constexpr size_t DUMP_PARAM_ACCESSIBILITY_INFO_OFFSET = 1;
+constexpr size_t DUMP_PARAM_CACHE_NODES_OFFSET = 2;
+constexpr size_t DUMP_PARAM_WITH_WEB_OFFSET = 3;
+constexpr size_t DUMP_PARAM_WITH_UI_EXTENSION_OFFSET = 4;
+constexpr size_t DUMP_PARAM_RECT_CULLING_OFFSET = 5;
+constexpr size_t DUMP_PARAM_MIN_OPACITY_OFFSET = 6;
+constexpr size_t SIMPLIFYTREE_WITH_PARAMCONFIG =
+    DUMP_PARAM_DEFAULT_START_INDEX + DUMP_PARAM_WITH_WEB_OFFSET + 1;
+constexpr size_t SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG =
+    DUMP_PARAM_VISIBLE_INFO_START_INDEX + DUMP_PARAM_MIN_OPACITY_OFFSET + 1;
 constexpr int32_t OVERLAY_ID = -10000;
 #ifndef IS_RELEASE_VERSION
 constexpr int32_t SINGLE_FRAME_TIME_MICROSEC = 16600;
@@ -187,21 +200,105 @@ int32_t GetDepthFromParams(const std::vector<std::string>& params)
     return depth;
 }
 
+ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params, size_t startIndex);
+
 ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params)
 {
+    return ParseDumpParamConfig(params, DUMP_PARAM_DEFAULT_START_INDEX);
+}
+
+bool ParseBoolParam(const std::string& param)
+{
+    return param == "1" || param == "true";
+}
+
+float NormalizeMinOpacity(float minOpacity)
+{
+    if (!std::isfinite(minOpacity)) {
+        return 0.0f;
+    }
+    if (GreatNotEqual(minOpacity, 1.0f)) {
+        return 1.0f;
+    }
+    if (LessNotEqual(minOpacity, 0.0f)) {
+        return 0.0f;
+    }
+    return minOpacity;
+}
+
+float ParseMinOpacityParam(const std::string& param)
+{
+    double minOpacity = 0.0;
+    if (!StringUtils::StringToDouble(param, minOpacity)) {
+        return 0.0f;
+    }
+    return static_cast<float>(minOpacity);
+}
+
+double GetNodeOpacityValue(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_NODE_OPACITY);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, DEFAULT_NODE_OPACITY);
+    return renderContext->GetOpacityValue(DEFAULT_NODE_OPACITY);
+}
+
+ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params, size_t startIndex)
+{
     ParamConfig config;
-    if (params.size() < SIMPLIFYTREE_WITH_PARAMCONFIG) {
+    if (params.size() <= startIndex) {
         return config;
     }
-    config.interactionInfo = (params[2] == "1");
-    config.accessibilityInfo = (params[3] == "1");
-    config.cacheNodes = (params[4] == "1");
-    config.withWeb = (params[5] == "1");
-    config.withUIExtension = (params.size() > SIMPLIFYTREE_WITH_PARAMCONFIG) && (params[6] == "1");
+    config.interactionInfo = ParseBoolParam(params[startIndex + DUMP_PARAM_INTERACTION_INFO_OFFSET]);
+    const auto accessibilityInfoIndex = startIndex + DUMP_PARAM_ACCESSIBILITY_INFO_OFFSET;
+    if (params.size() > accessibilityInfoIndex) {
+        config.accessibilityInfo = ParseBoolParam(params[accessibilityInfoIndex]);
+    }
+    const auto cacheNodesIndex = startIndex + DUMP_PARAM_CACHE_NODES_OFFSET;
+    if (params.size() > cacheNodesIndex) {
+        config.cacheNodes = ParseBoolParam(params[cacheNodesIndex]);
+    }
+    const auto withWebIndex = startIndex + DUMP_PARAM_WITH_WEB_OFFSET;
+    if (params.size() > withWebIndex) {
+        config.withWeb = ParseBoolParam(params[withWebIndex]);
+    }
+    const auto withUIExtensionIndex = startIndex + DUMP_PARAM_WITH_UI_EXTENSION_OFFSET;
+    if (params.size() > withUIExtensionIndex) {
+        config.withUIExtension = ParseBoolParam(params[withUIExtensionIndex]);
+    }
+    const auto rectCullingIndex = startIndex + DUMP_PARAM_RECT_CULLING_OFFSET;
+    if (params.size() > rectCullingIndex && params[rectCullingIndex] != PID_FLAG) {
+        config.rectCulling = ParseBoolParam(params[rectCullingIndex]);
+    }
+    const auto minOpacityIndex = startIndex + DUMP_PARAM_MIN_OPACITY_OFFSET;
+    if (params.size() > minOpacityIndex && params[rectCullingIndex] != PID_FLAG &&
+        params[minOpacityIndex] != PID_FLAG) {
+        config.minOpacity = ParseMinOpacityParam(params[minOpacityIndex]);
+    }
     return config;
 }
 
- void AddJsonChild(std::shared_ptr<JsonValue> parentJson, std::shared_ptr<JsonValue> childJson)
+double GetAncestorOpacityBeforeNode(const RefPtr<UINode>& node)
+{
+    double opacity = DEFAULT_NODE_OPACITY;
+    for (auto parent = node ? node->GetParent() : nullptr; parent; parent = parent->GetParent()) {
+        opacity *= GetNodeOpacityValue(parent);
+    }
+    return opacity;
+}
+
+bool HasDumpedJsonContent(const std::shared_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    if (json->Contains("$type")) {
+        return true;
+    }
+    auto children = json->GetValue("$children");
+    return children && children->IsArray() && children->GetArraySize() > 0;
+}
+
+void AddJsonChild(std::shared_ptr<JsonValue> parentJson, std::shared_ptr<JsonValue> childJson)
 {
     CHECK_NULL_VOID(parentJson && childJson);
     if (!parentJson->Contains("$children")) {
@@ -4365,9 +4462,15 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoFromTopPageNodeWithWeb") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        RefPtr<NG::FrameNode> atomicServiceNode = nullptr;
         auto rootChildren = rootNode_->GetChildren();
         auto config = ParamConfig{true, true, true, true};
+        DumpVisibleInspectorTree(root, config);
+        DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-visibleInfoWithModifiedParam" &&
+               params.size() >= SIMPLIFYTREE_WITH_EXTENDED_PARAMCONFIG) {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
+        auto config = ParseDumpParamConfig(params, DUMP_PARAM_VISIBLE_INFO_START_INDEX);
         DumpVisibleInspectorTree(root, config);
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
@@ -7050,16 +7153,23 @@ bool PipelineContext::IsTagInOverlay(const std::string& tag) const
 
 bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
     std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& subWindowOverlayArray,
-    bool isInSubWindow, ParamConfig config) const
+    bool isInSubWindow, ParamConfig config, double rootNodeFinalOpacity) const
 {
     auto childNodes = rootNode->GetChildren();
     bool hasOverlay = false;
     for (const auto& child : childNodes) {
         auto tag = child->GetTag();
         if (IsTagInOverlay(tag)) {
-            hasOverlay = true;
+            if (!NearZero(config.minOpacity) &&
+                LessNotEqual(rootNodeFinalOpacity * GetNodeOpacityValue(child), config.minOpacity)) {
+                continue;
+            }
             auto eachOverlayContent = JsonUtil::CreateSharedPtrJson();
-            child->DumpSimplifyTreeWithParamConfig(0, eachOverlayContent, true, config);
+            child->DumpSimplifyTreeWithParamConfig(0, eachOverlayContent, true, config, nullptr, rootNodeFinalOpacity);
+            if (!eachOverlayContent->Contains("$type")) {
+                continue;
+            }
+            hasOverlay = true;
             if (isInSubWindow) {
                 subWindowOverlayArray->Put(eachOverlayContent);
             } else {
@@ -7070,10 +7180,17 @@ bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& ro
     return hasOverlay;
 }
 
-void PipelineContext::GetComponentOverlayInspector(
-    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config, bool isInSubWindow) const
+void PipelineContext::GetComponentOverlayInspector(std::shared_ptr<JsonValue>& root,
+    RefPtr<NG::FrameNode> startNode, ParamConfig config, bool isInSubWindow, double parentFinalOpacity) const
 {
     CHECK_NULL_VOID(startNode);
+    auto startNodeFinalOpacity = parentFinalOpacity;
+    if (!NearZero(config.minOpacity)) {
+        startNodeFinalOpacity *= GetNodeOpacityValue(startNode);
+    }
+    if (!NearZero(config.minOpacity) && LessNotEqual(startNodeFinalOpacity, config.minOpacity)) {
+        return;
+    }
     auto subRoot = JsonUtil::CreateSharedPtrJson(true);
     if (isInSubWindow) {
         startNode->DumpSimplifyTreeBase(subRoot);
@@ -7090,7 +7207,8 @@ void PipelineContext::GetComponentOverlayInspector(
     // value of subWindow
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     bool hasOverlay =
-        ProcessOverlayChildrenDumpInfo(startNode, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config);
+        ProcessOverlayChildrenDumpInfo(
+            startNode, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config, startNodeFinalOpacity);
 
     if (isInSubWindow) {
         subRoot->PutRef("$children", std::move(subWindowOverlayArray));
@@ -7109,11 +7227,11 @@ void PipelineContext::GetComponentOverlayInspector(
     GetOverlayInfo(hasOverlay, root, overlayContent, overlayChildrenArray, overlayArray);
 }
 
-void PipelineContext::GetOverlayInspector(
-    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const
+void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
+    ParamConfig config, double parentFinalOpacity) const
 {
     // component overlay
-    GetComponentOverlayInspector(root, startNode, config, false);
+    GetComponentOverlayInspector(root, startNode, config, false, parentFinalOpacity);
     // sub-window overlay
     auto subContainerIds = SubwindowManager::GetInstance()->GetAllSubContainerId(Container::CurrentId());
     for (auto& containerId : subContainerIds) {
@@ -7135,8 +7253,18 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> s
         if (navNode == nullptr) {
             continue;
         }
+        auto navNodeParentFinalOpacity = DEFAULT_NODE_OPACITY;
+        if (!NearZero(config.minOpacity)) {
+            navNodeParentFinalOpacity = GetAncestorOpacityBeforeNode(navNode);
+            if (LessNotEqual(navNodeParentFinalOpacity * GetNodeOpacityValue(navNode), config.minOpacity)) {
+                continue;
+            }
+        }
         auto navNodeJson = JsonUtil::CreateSharedPtrJson();
-        navNode->DumpSimplifyTreeWithParamConfig(0, navNodeJson, true, config);
+        navNode->DumpSimplifyTreeWithParamConfig(0, navNodeJson, true, config, nullptr, navNodeParentFinalOpacity);
+        if (!navNodeJson->Contains("$type")) {
+            continue;
+        }
         childrenJson->Put(navNodeJson);
     }
 }
@@ -7165,6 +7293,11 @@ void PipelineContext::DumpSimplifyTreeJsonEntrance(
 
 void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const
 {
+    config.minOpacity = NormalizeMinOpacity(config.minOpacity);
+    CHECK_NULL_VOID(rootNode_);
+    if (!NearZero(config.minOpacity) && LessNotEqual(GetNodeOpacityValue(rootNode_), config.minOpacity)) {
+        return;
+    }
     auto containerModalNode = GetContainerModalNode();
     auto containerModalDumpNode = GetContainerModalDumpRootNode(containerModalNode);
     auto dumpBeginNode = containerModalDumpNode ? containerModalDumpNode : rootNode_;
@@ -7172,12 +7305,20 @@ void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJ
     // pseudoRootJson deals with containerModal case, containerModalStack will be the actual root.
     std::shared_ptr<JsonValue> pseudoRootJson = rootJson;
     std::shared_ptr<JsonValue> containerModalTitleJson = nullptr;
+    bool addContainerModalTitleJson = true;
     if (dumpBeginNode != rootNode_) {
         // ContainerModal case
         containerModalTitleJson = JsonUtil::CreateSharedPtrJson();
         // In this case, ContainerModalPattern can not be nullptr
         auto titleRow = GetContainerModalNode()->GetPattern<NG::ContainerModalPattern>()->GetCustomTitleRow();
-        if (titleRow) {
+        auto titleRowBelowMinOpacity = false;
+        if (titleRow && !NearZero(config.minOpacity)) {
+            auto titleRowParentFinalOpacity = GetAncestorOpacityBeforeNode(titleRow);
+            titleRowBelowMinOpacity =
+                LessNotEqual(titleRowParentFinalOpacity * GetNodeOpacityValue(titleRow), config.minOpacity);
+        }
+        addContainerModalTitleJson = !titleRowBelowMinOpacity;
+        if (titleRow && !titleRowBelowMinOpacity) {
             DumpSimplifyTreeJsonEntrance(containerModalTitleJson, titleRow, config);
         }
         pseudoRootJson = JsonUtil::CreateSharedPtrJson();
@@ -7185,30 +7326,58 @@ void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJ
         rootNode_->DumpSimplifyTreeBase(rootJson);
         rootNode_->DumpSimplifyInfoWithParamConfig(rootJson, config);
     }
-    GetOverlayInspector(pseudoRootJson, dumpBeginNode, config);
+    auto dumpBeginParentFinalOpacity = DEFAULT_NODE_OPACITY;
+    if (!NearZero(config.minOpacity)) {
+        dumpBeginParentFinalOpacity = GetAncestorOpacityBeforeNode(dumpBeginNode);
+    }
+    GetOverlayInspector(pseudoRootJson, dumpBeginNode, config, dumpBeginParentFinalOpacity);
     if (atomicServiceDumpNode) {
         auto atomicRootJson = JsonUtil::CreateSharedPtrJson(true);
         auto atomicMenuBarJson = JsonUtil::CreateSharedPtrJson(true);
         auto atomicServiceRoot = AceType::DynamicCast<FrameNode>(
             overlayManager_->FindChildNodeByKey(atomicServiceDumpNode, "AtomicServiceContainerId"));
-        if (atomicServiceRoot) {
-            // dump component-overlay only, sub-window overlay has been dumped in rootJson
-            GetComponentOverlayInspector(atomicRootJson, atomicServiceRoot, config, false);
-            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, config);
-            AddJsonChild(pseudoRootJson, atomicRootJson);
+        auto atomicServiceRootParentFinalOpacity = DEFAULT_NODE_OPACITY;
+        auto atomicServiceRootBelowMinOpacity = false;
+        if (atomicServiceRoot && !NearZero(config.minOpacity)) {
+            atomicServiceRootParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceRoot);
+            atomicServiceRootBelowMinOpacity = LessNotEqual(
+                atomicServiceRootParentFinalOpacity * GetNodeOpacityValue(atomicServiceRoot), config.minOpacity);
         }
-        auto atomicServiceMenuBar = AceType::DynamicCast<FrameNode>(
-            overlayManager_->FindChildNodeByKey(atomicServiceRoot, "AtomicServiceMenubarRowId"));
-        if (atomicServiceMenuBar) {
-            DumpSimplifyTreeJsonEntrance(atomicMenuBarJson, atomicServiceMenuBar, config);
-            AddJsonChild(atomicRootJson, atomicMenuBarJson);
+        if (atomicServiceRoot && !atomicServiceRootBelowMinOpacity) {
+            // dump component-overlay only, sub-window overlay has been dumped in rootJson
+            GetComponentOverlayInspector(atomicRootJson, atomicServiceRoot, config, false,
+                atomicServiceRootParentFinalOpacity);
+            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, config);
+            if (!config.rectCulling || HasDumpedJsonContent(atomicRootJson)) {
+                AddJsonChild(pseudoRootJson, atomicRootJson);
+            }
+            auto atomicServiceMenuBar = AceType::DynamicCast<FrameNode>(
+                overlayManager_->FindChildNodeByKey(atomicServiceRoot, "AtomicServiceMenubarRowId"));
+            auto atomicServiceMenuBarBelowMinOpacity = false;
+            if (atomicServiceMenuBar && !NearZero(config.minOpacity)) {
+                auto menuBarParentFinalOpacity = GetAncestorOpacityBeforeNode(atomicServiceMenuBar);
+                atomicServiceMenuBarBelowMinOpacity =
+                    LessNotEqual(menuBarParentFinalOpacity * GetNodeOpacityValue(atomicServiceMenuBar),
+                        config.minOpacity);
+            }
+            if (atomicServiceMenuBar && !atomicServiceMenuBarBelowMinOpacity) {
+                DumpSimplifyTreeJsonEntrance(atomicMenuBarJson, atomicServiceMenuBar, config);
+                if (!config.rectCulling || HasDumpedJsonContent(atomicMenuBarJson)) {
+                    AddJsonChild(atomicRootJson, atomicMenuBarJson);
+                }
+            }
         }
     } else {
         DumpSimplifyTreeJsonEntrance(pseudoRootJson, dumpBeginNode, config);
     }
     if (pseudoRootJson != rootJson) {
-        AddJsonChild(rootJson, containerModalTitleJson);
-        AddJsonChild(rootJson, pseudoRootJson);
+        if (addContainerModalTitleJson &&
+            (!config.rectCulling || HasDumpedJsonContent(containerModalTitleJson))) {
+            AddJsonChild(rootJson, containerModalTitleJson);
+        }
+        if (!config.rectCulling || HasDumpedJsonContent(pseudoRootJson)) {
+            AddJsonChild(rootJson, pseudoRootJson);
+        }
     }
 }
 
@@ -7228,8 +7397,10 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
         }
     };
     ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
-                     "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
-        onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
+                     "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]"
+                     "[config.rectCulling:%d][config.minOpacity:%f]",
+        onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb,
+        config.rectCulling, config.minOpacity);
     if (onlyNeedVisible) {
         DumpVisibleInspectorTree(root, config);
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");

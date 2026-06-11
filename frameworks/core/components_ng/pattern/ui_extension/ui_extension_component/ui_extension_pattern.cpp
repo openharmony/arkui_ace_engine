@@ -2147,6 +2147,8 @@ void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>&
     params.push_back(config.cacheNodes ? "1" : "0");
     params.push_back(config.withWeb ? "1" : "0");
     params.push_back(config.withUIExtension ? "1" : "0");
+    params.push_back(config.rectCulling ? "1" : "0");
+    params.push_back(std::to_string(config.minOpacity));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!container->IsUIExtensionWindow()) {

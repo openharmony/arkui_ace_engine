@@ -16,14 +16,16 @@
 #include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 
 namespace OHOS::Ace {
-GetInspectorTreeConfigImpl::GetInspectorTreeConfigImpl(
-    bool interactionInfo, bool accessibilityInfo, bool cacheNodes, bool withWeb, bool withUIExtension)
+GetInspectorTreeConfigImpl::GetInspectorTreeConfigImpl(bool interactionInfo, bool accessibilityInfo, bool cacheNodes,
+    bool withWeb, bool withUIExtension, bool rectCulling, float minOpacity)
 {
     config_.interactionInfo = interactionInfo;
     config_.accessibilityInfo = accessibilityInfo;
     config_.cacheNodes = cacheNodes;
     config_.withWeb = withWeb;
     config_.withUIExtension = withUIExtension;
+    config_.rectCulling = rectCulling;
+    config_.minOpacity = minOpacity;
 }
 GetInspectorTreeConfigImpl::GetInspectorTreeConfigImpl(const ParamConfig& config)
 {
@@ -32,6 +34,8 @@ GetInspectorTreeConfigImpl::GetInspectorTreeConfigImpl(const ParamConfig& config
     config_.cacheNodes = config.cacheNodes;
     config_.withWeb = config.withWeb;
     config_.withUIExtension = config.withUIExtension;
+    config_.rectCulling = config.rectCulling;
+    config_.minOpacity = config.minOpacity;
 }
 bool GetInspectorTreeConfigImpl::Marshalling(Parcel& parcel) const
 {
@@ -50,6 +54,12 @@ bool GetInspectorTreeConfigImpl::Marshalling(Parcel& parcel) const
     if (!parcel.WriteBool(config_.withUIExtension)) {
         return false;
     }
+    if (!parcel.WriteBool(config_.rectCulling)) {
+        return false;
+    }
+    if (!parcel.WriteFloat(config_.minOpacity)) {
+        return false;
+    }
     return true;
 }
 GetInspectorTreeConfigImpl* GetInspectorTreeConfigImpl::Unmarshalling(Parcel& parcel)
@@ -59,6 +69,8 @@ GetInspectorTreeConfigImpl* GetInspectorTreeConfigImpl::Unmarshalling(Parcel& pa
     bool cacheNodes = false;
     bool withWeb = false;
     bool withUIExtension = false;
+    bool rectCulling = false;
+    float minOpacity = 0.0f;
     if (!parcel.ReadBool(interactionInfo)) {
         return nullptr;
     }
@@ -74,8 +86,15 @@ GetInspectorTreeConfigImpl* GetInspectorTreeConfigImpl::Unmarshalling(Parcel& pa
     if (!parcel.ReadBool(withUIExtension)) {
         return nullptr;
     }
+    if (!parcel.ReadBool(rectCulling)) {
+        return nullptr;
+    }
+    if (!parcel.ReadFloat(minOpacity)) {
+        return nullptr;
+    }
     GetInspectorTreeConfigImpl* configImpl =
-        new GetInspectorTreeConfigImpl(interactionInfo, accessibilityInfo, cacheNodes, withWeb, withUIExtension);
+        new GetInspectorTreeConfigImpl(
+            interactionInfo, accessibilityInfo, cacheNodes, withWeb, withUIExtension, rectCulling, minOpacity);
     return configImpl;
 }
 ParamConfig GetInspectorTreeConfigImpl::GetConfig() const

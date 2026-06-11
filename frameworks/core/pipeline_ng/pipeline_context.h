@@ -1109,7 +1109,7 @@ public:
     bool IsTagInOverlay(const std::string& tag) const;
 
     void GetComponentOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
-        ParamConfig config, bool isInSubWindow) const;
+        ParamConfig config, bool isInSubWindow, double parentFinalOpacity = 1.0) const;
 
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
 
@@ -1440,10 +1440,10 @@ private:
 
     bool ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
         std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& subWindowOverlayArray,
-        bool isInSubWindow, ParamConfig config) const;
+        bool isInSubWindow, ParamConfig config, double rootNodeFinalOpacity) const;
 
-    void GetOverlayInspector(
-        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
+    void GetOverlayInspector(std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config,
+        double parentFinalOpacity = 1.0) const;
 
     void DumpSimplifyTreeJsonEntrance(
         std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
