@@ -591,6 +591,52 @@ RefPtr<FrameNode> SheetPresentationPattern::GetParentSkipEffectComponent(const R
     return parentNode;
 }
 
+void SheetPresentationPattern::SetSheetCloseIconMaterial()
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
+    ImmersiveOptions options;
+    options.style = UiMaterialStyle::ULTRA_THIN;
+    options.applyShadow = true;
+    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+        options.colorInvert = true;
+        options.interactive = true;
+        LightEffectOptions lightEffectOptions;
+        options.lightEffectOptions = lightEffectOptions;
+    }
+    material->SetImmersiveOptions(options);
+
+    auto sheetCloseIcon = GetSheetCloseIcon();
+    CHECK_NULL_VOID(sheetCloseIcon);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
+    CHECK_NULL_VOID(sheetTheme);
+    auto closeIconSymbolColor = sheetTheme->GetCloseIconSymbolColor();
+    closeIconSymbolColor.SetPlaceholder(ColorPlaceholder::ICON_PRIMARY);
+    auto iconSymbol = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
+    CHECK_NULL_VOID(iconSymbol);
+    auto symbolLayoutProperty = iconSymbol->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolLayoutProperty);
+    symbolLayoutProperty->UpdateSymbolColorList({closeIconSymbolColor});
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), AceType::RawPtr(material));
+}
+
+void SheetPresentationPattern::ClearSheetCloseIconMaterial()
+{
+    auto sheetCloseIcon = GetSheetCloseIcon();
+    CHECK_NULL_VOID(sheetCloseIcon);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetCloseIcon), nullptr);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
+    CHECK_NULL_VOID(sheetTheme);
+    auto renderContext = sheetCloseIcon->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
+}
+
 void SheetPresentationPattern::SetSheetRenderMaterial()
 {
     auto host = GetHost();
@@ -607,6 +653,7 @@ void SheetPresentationPattern::SetSheetRenderMaterial()
         } else {
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(sheetStyle.systemMaterial));
         }
+        SetSheetCloseIconMaterial();
     }
 }
 
@@ -640,6 +687,7 @@ void SheetPresentationPattern::ClearSheetRenderMaterial()
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (!sheetStyle.systemMaterial) {
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), nullptr);
+        ClearSheetCloseIconMaterial();
     }
 }
 
