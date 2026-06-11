@@ -6122,6 +6122,71 @@ HWTEST_F(WebModelTestNg, SetScrollbarLayoutPolicy002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableFullscreenVideoOverlay001
+ * @tc.desc: Test WebModelNG::SetEnableFullscreenVideoOverlay(bool) via ViewStackProcessor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableFullscreenVideoOverlay001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableFullscreenVideoOverlay(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckFullScreenVideoOverlay(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableFullscreenVideoOverlay002
+ * @tc.desc: Test WebModelNG::SetEnableFullscreenVideoOverlay(FrameNode*, bool) static overload
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableFullscreenVideoOverlay002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableFullscreenVideoOverlay(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckFullScreenVideoOverlay(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetOnFullScreenVideoOverlayEnterFunction001
+ * @tc.desc: Test WebModelNG::SetOnFullScreenVideoOverlayEnterFunction() callback storage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnFullScreenVideoOverlayEnterFunction001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    WebModelNG webModelNG;
+    auto enterFunction = [&callCount](const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    webModelNG.SetOnFullScreenVideoOverlayEnterFunction(std::move(enterFunction));
+    auto callback = webPattern->GetOnFullScreenVideoOverlayEnterCallback();
+    ASSERT_TRUE(callback);
+    callback(std::make_shared<BaseEventInfo>("test"));
+    EXPECT_EQ(callCount, 1);
+#endif
+}
+
+/**
  * @tc.name: SetInputMethodAttachedId001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -6175,6 +6240,50 @@ HWTEST_F(WebModelTestNg, SetInputMethodAttachedId002, TestSize.Level1)
     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
     webEventHub->FireOnInputMethodAttachedEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableFullscreenVideoOverlay003
+ * @tc.desc: Test WebModelNG::SetEnableFullscreenVideoOverlay(false) via ViewStackProcessor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableFullscreenVideoOverlay003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableFullscreenVideoOverlay(false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckFullScreenVideoOverlay(false), true);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableFullscreenVideoOverlay004
+ * @tc.desc: Test WebModelNG::SetEnableFullscreenVideoOverlay(FrameNode*, false) static overload
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableFullscreenVideoOverlay004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableFullscreenVideoOverlay(AccessibilityManager::RawPtr(frameNode), false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckFullScreenVideoOverlay(false), true);
 #endif
 }
 } // namespace OHOS::Ace::NG

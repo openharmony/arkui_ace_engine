@@ -6655,6 +6655,8 @@ struct ArkUIWebModifier {
     void (*resetOnInputMethodAttached)(ArkUINodeHandle node);
     void (*setKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetKeyboardAppearance)(ArkUINodeHandle node);
+    void (*setEnableFullscreenVideoOverlay)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableFullscreenVideoOverlay)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

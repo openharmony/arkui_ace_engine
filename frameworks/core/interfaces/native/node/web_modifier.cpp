@@ -82,6 +82,7 @@ const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.
 constexpr bool DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED = true;
 constexpr bool DEFAULT_NATIVE_MEDIA_PLAYER_ENABLED = false;
 constexpr bool DEFAULT_NATIVE_MEDIA_PLAYER_SHOULDOVERLAY = false;
+constexpr bool DEFAULT_FULL_SCREEN_VIDEO_OVERLAY_ENABLED = false;
 } // namespace
 
 void SetJavaScriptAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -2754,6 +2755,20 @@ void ResetOnInputMethodAttached(ArkUINodeHandle node)
     WebModelNG::SetInputMethodAttachedId(frameNode, nullptr);
 }
 
+void SetEnableFullscreenVideoOverlay(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableFullscreenVideoOverlay(frameNode, value);
+}
+
+void ResetEnableFullscreenVideoOverlay(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableFullscreenVideoOverlay(frameNode, DEFAULT_FULL_SCREEN_VIDEO_OVERLAY_ENABLED);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -3013,6 +3028,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
         .setOnInputMethodAttached = SetOnInputMethodAttached,
         .resetOnInputMethodAttached = ResetOnInputMethodAttached,
+        .setEnableFullscreenVideoOverlay = SetEnableFullscreenVideoOverlay,
+        .resetEnableFullscreenVideoOverlay = ResetEnableFullscreenVideoOverlay,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3276,6 +3293,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetScrollbarLayoutPolicy = ResetScrollbarLayoutPolicy,
         .setOnInputMethodAttached = SetOnInputMethodAttached,
         .resetOnInputMethodAttached = ResetOnInputMethodAttached,
+        .setEnableFullscreenVideoOverlay = SetEnableFullscreenVideoOverlay,
+        .resetEnableFullscreenVideoOverlay = ResetEnableFullscreenVideoOverlay,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

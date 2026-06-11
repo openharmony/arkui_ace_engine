@@ -289,6 +289,15 @@ void SetWebOptionsImpl(Ark_NativePointer node,
             WebAttributeModifier::DefaultPermissionClipboard(std::move(callback), weakNode, instanceId, info);
         };
         WebModelStatic::SetPermissionClipboard(frameNode, std::move(requestPermissionsFromUserCallback));
+        auto fullScreenVideoOverlayEnterCallback =
+            [callback = std::move(controller->defaultOnFullScreenVideoOverlayEnterFunc),
+             weakNode = AceType::WeakClaim(frameNode),
+             instanceId = Container::CurrentId()](const BaseEventInfo* info) {
+            WebAttributeModifier::DefaultOnFullScreenVideoOverlayEnter(
+                std::move(callback), weakNode, instanceId, info);
+        };
+        WebModelStatic::SetOnFullScreenVideoOverlayEnter(frameNode,
+            std::move(fullScreenVideoOverlayEnterCallback));
         /* This controller is only used to pass the hook function for initializing the webviewController.
          * After passing, the corresponding memory needs to be released.
          */
@@ -2532,6 +2541,21 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node, const Opt_WebKeyboardAppe
 #endif // WEB_SUPPORTED
 }
 
+void SetEnableFullscreenVideoOverlayImpl(Ark_NativePointer node,
+                                         const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::SetEnableFullscreenVideoOverlay(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                     const Opt_String* tag,
                                     const Opt_String* type)
@@ -3313,6 +3337,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetAiSessionOptionsImpl,
         WebAttributeModifier::SetKeyboardAppearanceImpl,
         WebAttributeModifier::SetOnInputmethodAttachedImpl,
+        WebAttributeModifier::SetEnableFullscreenVideoOverlayImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
         WebAttributeModifier::SetEnableScrollDirectionalLockImpl,

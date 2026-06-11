@@ -1778,6 +1778,20 @@ class WebKeyboardAppearanceModifier extends ModifierWithKey<WebKeyboardAppearanc
   }
 }
 
+class WebEnableFullscreenVideoOverlayModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableFullscreenVideoOverlayModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableFullscreenVideoOverlay(node);
+    } else {
+      getUINativeModule().web.setEnableFullscreenVideoOverlay(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2018,6 +2032,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   mediaPlayGestureAccess(access: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebMediaPlayGestureAccessModifier.identity, WebMediaPlayGestureAccessModifier, access);
+    return this;
+  }
+  enableFullscreenVideoOverlay(enabled: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableFullscreenVideoOverlayModifier.identity, WebEnableFullscreenVideoOverlayModifier, enabled);
     return this;
   }
   onSearchResultReceive(callback: (event?: { activeMatchOrdinal: number; numberOfMatches: number; isDoneCounting: boolean; } | undefined) => void): this {

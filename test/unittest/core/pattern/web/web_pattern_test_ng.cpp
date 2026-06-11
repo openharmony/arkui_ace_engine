@@ -363,6 +363,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnWebDataUpdate();
     webpattern.OnJsEnabledUpdate(true);
     webpattern.OnMediaPlayGestureAccessUpdate(true);
+    webpattern.OnFullScreenVideoOverlayUpdate(true);
     webpattern.OnFileAccessEnabledUpdate(true);
     webpattern.OnOnLineImageAccessEnabledUpdate(true);
     webpattern.OnDomStorageAccessEnabledUpdate(true);
@@ -421,6 +422,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnWebDataUpdate();
     webPattern->OnJsEnabledUpdate(true);
     webPattern->OnMediaPlayGestureAccessUpdate(true);
+    webPattern->OnFullScreenVideoOverlayUpdate(true);
     webPattern->OnFileAccessEnabledUpdate(true);
     webPattern->OnOnLineImageAccessEnabledUpdate(true);
     webPattern->OnDomStorageAccessEnabledUpdate(true);

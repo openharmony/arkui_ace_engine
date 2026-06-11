@@ -19301,6 +19301,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebMediaPlayGestureAccessModifier.identity, WebMediaPlayGestureAccessModifier, access);
     return this;
   }
+  enableFullscreenVideoOverlay(enabled) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableFullscreenVideoOverlayModifier.identity, WebEnableFullscreenVideoOverlayModifier, enabled);
+    return this;
+  }
   onSearchResultReceive(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnSearchResultReceiveModifier.identity, WebOnSearchResultReceiveModifier, callback);
     return this;
@@ -20406,6 +20410,20 @@ class WebOnlineImageAccessModifier extends ModifierWithKey {
   }
 }
 WebOnlineImageAccessModifier.identity = Symbol('webOnlineImageAccessModifier');
+
+class WebEnableFullscreenVideoOverlayModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableFullscreenVideoOverlay(node);
+    } else {
+      getUINativeModule().web.setEnableFullscreenVideoOverlay(node, this.value);
+    }
+  }
+}
+WebEnableFullscreenVideoOverlayModifier.identity = Symbol('webEnableFullscreenVideoOverlayModifier');
 
 class WebMediaPlayGestureAccessModifier extends ModifierWithKey {
   constructor (value) {

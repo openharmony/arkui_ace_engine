@@ -107,6 +107,7 @@ public:
     static void OnSearchResultReceive(const JSCallbackInfo& args);
     static void MediaPlayGestureAccess(bool isNeedGestureAccess);
     static void OnKeyEvent(const JSCallbackInfo& args);
+    static void EnableFullscreenVideoOverlay(bool enable);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);

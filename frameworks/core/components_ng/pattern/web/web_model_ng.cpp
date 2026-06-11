@@ -320,6 +320,13 @@ void WebModelNG::SetMediaPlayGestureAccess(bool isNeedGestureAccess)
     webPattern->UpdateMediaPlayGestureAccess(isNeedGestureAccess);
 }
 
+void WebModelNG::SetEnableFullscreenVideoOverlay(bool enable)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateFullScreenVideoOverlay(enable);
+}
+
 void WebModelNG::SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -1329,6 +1336,15 @@ void WebModelNG::SetWebNativeMessageConnectFunction(
     CHECK_NULL_VOID(webPattern);
 
     webPattern->SetWebNativeMessageConnectCallback(std::move(jsCallback));
+}
+
+void WebModelNG::SetOnFullScreenVideoOverlayEnterFunction(
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->SetOnFullScreenVideoOverlayEnterCallback(std::move(jsCallback));
 }
 
 void WebModelNG::SetWebNativeMessageDisconnectFunction(
@@ -2981,5 +2997,12 @@ void WebModelNG::SetInputMethodAttachedId(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnInputMethodAttachedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetEnableFullscreenVideoOverlay(FrameNode* frameNode, bool enable)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateFullScreenVideoOverlay(enable);
 }
 } // namespace OHOS::Ace::NG

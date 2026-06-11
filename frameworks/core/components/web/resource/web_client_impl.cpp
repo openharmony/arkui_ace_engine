@@ -331,6 +331,22 @@ void WebClientImpl::OnFullScreenEnterWithVideoSize(
     delegate->OnFullScreenEnter(handler, videoNaturalWidth, videoNaturalHeight);
 }
 
+void WebClientImpl::OnFullScreenOverlayEnter(const char* media_info)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnFullScreenVideoOverlayEnter(media_info);
+}
+
+void WebClientImpl::OnVideoStatusChanged(const int action, const std::map<std::string, std::string>& param)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnVideoStatusChanged(action, param);
+}
+
 void WebClientImpl::OnGeolocationHide()
 {
     auto delegate = webDelegate_.Upgrade();

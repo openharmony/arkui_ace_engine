@@ -31,6 +31,46 @@ namespace OHOS::Ace::Framework::CommonUtils {
     JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info);
     bool SetBaseGestureEventInfo(JSRef<JSObject> obj, const std::shared_ptr<BaseGestureEvent>& info);
     JSRef<JSObject> CreateFingerInfosObject(const std::shared_ptr<BaseGestureEvent>& info, JSRef<JSObject>& obj);
+    // execCtx is captured by value (JsiExecutionContext is a trivially-copyable wrapper around EcmaVM*).
+    // The PostTask targets TaskType::JS, which is drained before engine shutdown.
+    // JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK provides a runtime null guard on the vm pointer.
+    template<typename... Args>
+    std::function<void(Args...)> WrapJsCallback(const JSCallbackInfo& args, const JSRef<JSFunc>& jsFunc,
+        const WeakPtr<NG::FrameNode>& node, std::string funcName)
+    {
+        auto wrappedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), jsFunc);
+        auto execCtx = args.GetExecutionContext();
+
+        return [execCtx, func = std::move(wrappedFunc), node, funcName](Args... callbackArgs) {
+            auto webNode = node.Upgrade();
+            CHECK_NULL_VOID(webNode);
+            auto instanceId = webNode->GetInstanceId();
+            auto executor = Container::CurrentTaskExecutorSafely();
+            CHECK_NULL_VOID(executor);
+
+            executor->PostTask(
+                [execCtx, func, instanceId, callbackArgs...]() {
+                    ContainerScope scope(instanceId);
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    std::vector<JSRef<JSVal>> jsArgs;
+                    (jsArgs.push_back(JSRef<JSVal>::Make(ToJSValue(callbackArgs))), ...);
+
+                    func->ExecuteJS(static_cast<int>(jsArgs.size()), jsArgs.data());
+                },
+                TaskExecutor::TaskType::JS, funcName);
+        };
+    }
+
+    template<typename... Args>
+    void BindListenerFuncIfPresent(const JSRef<JSObject>& listener, const char* propName,
+        std::function<void(Args...)>& target, const JSCallbackInfo& args,
+        const WeakPtr<NG::FrameNode>& webNode, const char* logName)
+    {
+        auto func = listener->GetProperty(propName);
+        if (func->IsFunction()) {
+            target = WrapJsCallback<Args...>(args, JSRef<JSFunc>::Cast(func), webNode, logName);
+        }
+    }
 } // namespace OHOS::Ace::Framework::CommonUtils
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_COMMON_UTILS_H
