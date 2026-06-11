@@ -29,7 +29,6 @@
 #include "core/components_ng/render/drawing.h"
 #endif
 
-#include "core/components/common/properties/decoration.h"
 #include "compatible/components/text_field/render_text_field.h"
 
 namespace OHOS::Rosen {
@@ -40,6 +39,7 @@ struct TextStyle;
 namespace OHOS::Ace {
 
 class Component;
+class Decoration;
 
 class RosenRenderTextField final : public RenderTextField {
     DECLARE_ACE_TYPE(RosenRenderTextField, RenderTextField);

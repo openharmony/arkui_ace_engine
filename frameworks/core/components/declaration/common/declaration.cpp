@@ -16,6 +16,7 @@
 #include "core/components/declaration/common/declaration.h"
 
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/declaration/common/common_background_style.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -138,6 +139,11 @@ Declaration::Declaration()
 }
 
 Declaration::~Declaration() = default;
+
+void Declaration::SetBackDecoration(const RefPtr<Decoration>& backDecoration)
+{
+    backDecoration_ = backDecoration;
+}
 
 void Declaration::Init()
 {

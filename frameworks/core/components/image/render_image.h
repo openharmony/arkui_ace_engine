@@ -23,7 +23,6 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/gestures/long_press_recognizer.h"

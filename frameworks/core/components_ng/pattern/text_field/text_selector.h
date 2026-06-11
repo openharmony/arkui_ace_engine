@@ -22,7 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/haptic_feedback_mode.h"
 
 // avoid windows build error about macro defined in wincon.h
 #ifdef DOUBLE_CLICK

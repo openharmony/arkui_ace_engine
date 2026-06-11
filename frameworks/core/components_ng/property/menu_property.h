@@ -17,7 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MENU_PROPERTY_H
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/haptic_feedback_mode.h"
+#include "core/components/common/properties/modal_mode.h"
+#include "core/components/common/properties/menu_preview_animation_options.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/event/gesture_event_hub.h"

@@ -15,6 +15,7 @@
 
 #include "compatible/components/tab_bar/tab_bar_component.h"
 
+#include "core/components/common/properties/decoration.h"
 #include "compatible/components/tab_bar/render_tab_bar.h"
 #include "compatible/components/tab_bar/tab_bar_element.h"
 

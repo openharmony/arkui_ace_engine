@@ -301,6 +301,9 @@ HWTEST_F(RichEditorStyleTestNg, TestRichEditorHandleSelectFontStyleWrapper001, T
     ASSERT_NE(richEditorPattern, nullptr);
     TextStyle spanStyle;
     KeyCode code = KeyCode::KEY_UNKNOWN;
+    /**
+     * @tc.steps: step2. test HandleSelectFontStyleWrapper
+     */
     richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
     EXPECT_EQ(spanStyle.GetFontWeight(), FontWeight::NORMAL);
 }
@@ -323,6 +326,9 @@ HWTEST_F(RichEditorStyleTestNg, TestRichEditorHandleSelectFontStyle001, TestSize
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
     richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     KeyCode code = KeyCode::KEY_UNKNOWN;
+    /**
+     * @tc.steps: step2. test HandleSelectFontStyle
+     */
     richEditorPattern->HandleSelectFontStyle(code);
     EXPECT_EQ(richEditorPattern->caretTwinkling_, true);
 }

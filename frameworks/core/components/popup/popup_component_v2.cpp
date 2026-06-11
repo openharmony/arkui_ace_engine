@@ -17,6 +17,7 @@
 
 #include "core/components/button/button_component.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/popup/popup_element_v2.h"

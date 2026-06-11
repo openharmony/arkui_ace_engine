@@ -22,6 +22,7 @@
 #include "core/components/box/box_component_helper.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/coverage/coverage_component.h"

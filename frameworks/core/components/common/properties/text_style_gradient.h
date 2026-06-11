@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TEXT_STYLE_GRADIENT_H
 #include "ui/base/ace_type.h"
 #include "core/components_ng/property/gradient_property.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/gradient.h"
  
 #define ACE_DEFINE_TEXT_STYLE_GRADIENT_OPTIONAL_TYPE()                        \
     RefPtr<OptGradient> propGradient;                                         \

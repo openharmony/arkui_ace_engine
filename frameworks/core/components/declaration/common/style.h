@@ -24,7 +24,7 @@
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/tween_option.h"

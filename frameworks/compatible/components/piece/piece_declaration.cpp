@@ -15,6 +15,7 @@
 
 #include "compatible/components/piece/piece_declaration.h"
 
+#include "core/components/common/properties/decoration.h"
 #include "core/components/declaration/common/declaration_constants.h"
 #include "bridge/common/utils/utils.h"
 

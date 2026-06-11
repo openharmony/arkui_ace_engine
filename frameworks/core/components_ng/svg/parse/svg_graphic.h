@@ -19,7 +19,7 @@
 #include "include/core/SkMaskFilter.h"
 
 #include "base/utils/utils.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/gradient.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/drawing.h"
 

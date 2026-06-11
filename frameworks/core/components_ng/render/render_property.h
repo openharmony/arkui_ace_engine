@@ -28,7 +28,7 @@
 #include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/sys_options.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/shadow.h"

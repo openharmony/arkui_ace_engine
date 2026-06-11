@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 
+#include "interfaces/inner_api/ace_kit/include/ui/animation/cubic_curve.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect_impl.h"
 

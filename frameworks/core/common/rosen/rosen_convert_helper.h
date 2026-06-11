@@ -18,7 +18,7 @@
 
 #include "core/common/rosen/rosen_enums.h"
 #include "core/components/common/properties/blur_parameter.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
 
 namespace OHOS::Ace {
 MATERIAL_BLUR_STYLE GetRosenBlurStyleValue(const BlurStyleOption& option);

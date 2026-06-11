@@ -15,6 +15,7 @@
 
 #include "core/components/common/properties/text_style.h"
 
+#include "base/log/log_wrapper.h"
 #include "ui/base/utils/utils.h"
 
 #include "core/components_ng/base/inspector_filter.h"

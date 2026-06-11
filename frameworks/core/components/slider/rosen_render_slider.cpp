@@ -15,6 +15,7 @@
 
 #include "core/components/slider/rosen_render_slider.h"
 
+#include "core/components/common/properties/decoration.h"
 #include "core/components/tip/render_tip.h"
 #include "core/components/tip/tip_component.h"
 #include "core/pipeline/base/rosen_render_context.h"

@@ -25,6 +25,7 @@
 #include "core/common/text_field_manager.h"
 #include "core/components/box/render_box_base.h"
 #include "core/components/calendar/rosen_render_calendar.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/painter/rosen_scroll_bar_painter.h"
 #include "core/components/font/constants_converter.h"

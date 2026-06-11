@@ -18,7 +18,6 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/box/render_box.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
 #include "compatible/components/tab_bar/tab_bar_indicator_component.h"

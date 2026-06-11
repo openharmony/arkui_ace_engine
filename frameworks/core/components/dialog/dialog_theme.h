@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"

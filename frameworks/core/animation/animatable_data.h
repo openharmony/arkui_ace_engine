@@ -18,8 +18,9 @@
 
 #include "base/geometry/dimension.h"
 #include "core/animation/animatable.h"
+#include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace {

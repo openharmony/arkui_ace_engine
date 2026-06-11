@@ -17,6 +17,7 @@
 
 #include "core/components/box/box_element.h"
 #include "core/components/box/render_box.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 
@@ -28,6 +29,52 @@ RefPtr<Element> BoxComponent::CreateElement()
 RefPtr<RenderNode> BoxComponent::CreateRenderNode()
 {
     return RenderBox::Create();
+}
+
+RefPtr<Decoration> BoxComponent::GetBackDecoration() const
+{
+    return backDecoration_;
+}
+
+RefPtr<Decoration> BoxComponent::GetFrontDecoration() const
+{
+    return frontDecoration_;
+}
+
+void BoxComponent::SetBackDecoration(const RefPtr<Decoration>& decoration)
+{
+    backDecoration_ = decoration;
+    SetDecorationUpdateFlag(true);
+}
+
+void BoxComponent::SetFrontDecoration(const RefPtr<Decoration>& decoration)
+{
+    frontDecoration_ = decoration;
+    SetDecorationUpdateFlag(true);
+}
+
+const Color& BoxComponent::GetColor() const
+{
+    if (backDecoration_) {
+        return backDecoration_->GetBackgroundColor();
+    }
+    return Color::TRANSPARENT;
+}
+
+void BoxComponent::SetColor(const Color& color, const AnimationOption& option)
+{
+    if (!backDecoration_) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    backDecoration_->SetBackgroundColor(color, option);
+}
+
+void BoxComponent::SetColor(const AnimatableColor& color)
+{
+    if (!backDecoration_) {
+        backDecoration_ = AceType::MakeRefPtr<Decoration>();
+    }
+    backDecoration_->SetBackgroundColor(color);
 }
 
 } // namespace OHOS::Ace
