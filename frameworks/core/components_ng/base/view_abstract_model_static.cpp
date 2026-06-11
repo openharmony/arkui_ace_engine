@@ -101,6 +101,19 @@ NG::OffsetF UpdateMenuPostion(
     }
     return menuPosition;
 }
+
+const std::function<void()> EMPTY_CALLBACK = {};
+
+bool CheckDimensionUseLPX(const Dimension& dim)
+{
+    return dim.Unit() == DimensionUnit::LPX;
+}
+
+bool CheckDimensionUseLPX(const std::optional<Dimension>& dim)
+{
+    return dim.has_value() && dim.value().Unit() == DimensionUnit::LPX;
+}
+
 } // namespace
 
 void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
@@ -1928,10 +1941,16 @@ void ViewAbstractModelStatic::SetPixelStretchEffect(FrameNode* frameNode,
     const std::optional<PixStretchEffectOption>& option)
 {
     if (option.has_value()) {
+        auto lpxUpdateFunc = ViewAbstract::GetPixelStretchEffectFuncForLPX(option.value());
+        if (CheckDimensionUseLPX(option.value().left) || CheckDimensionUseLPX(option.value().top) ||
+            CheckDimensionUseLPX(option.value().right) || CheckDimensionUseLPX(option.value().bottom)) {
+            ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_PIXEL_STRETCH_EFFECT, lpxUpdateFunc, frameNode);
+        }
         ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option.value(), frameNode);
     } else {
         auto target = frameNode->GetRenderContext();
         ACE_RESET_NODE_RENDER_CONTEXT(target, PixelStretchEffect, frameNode);
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_PIXEL_STRETCH_EFFECT, EMPTY_CALLBACK, frameNode);
     }
 }
 
@@ -1979,11 +1998,23 @@ void ViewAbstractModelStatic::SetOnGestureRecognizerJudgeBegin(
 
 void ViewAbstractModelStatic::SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
 {
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = ViewAbstract::GetOuterBorderWidthFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.topDimen) ||
+        CheckDimensionUseLPX(value.rightDimen) || CheckDimensionUseLPX(value.bottomDimen)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc, frameNode);
+    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, value, frameNode);
 }
 
 void ViewAbstractModelStatic::SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value)
 {
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = ViewAbstract::GetOuterBorderRadiusFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc, frameNode);
+    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, value, frameNode);
 }
 

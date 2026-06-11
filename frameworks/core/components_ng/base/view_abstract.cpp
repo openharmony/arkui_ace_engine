@@ -121,6 +121,18 @@ std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec
     return res;
 }
 
+const std::function<void()> EMPTY_CALLBACK = {};
+
+bool CheckDimensionUseLPX(const Dimension& dim)
+{
+    return dim.Unit() == DimensionUnit::LPX;
+}
+
+bool CheckDimensionUseLPX(const std::optional<Dimension>& dim)
+{
+    return dim.has_value() && dim.value().Unit() == DimensionUnit::LPX;
+}
+
 } // namespace
 
 void ViewAbstract::RemoveResObj(const std::string& key)
@@ -1083,6 +1095,21 @@ void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, co
     }
 }
 
+std::function<void()> ViewAbstract::GetPixelStretchEffectFuncForLPX(PixStretchEffectOption option)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), option]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnPixelStretchEffectUpdate(option);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1111,6 +1138,13 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
         };
         pattern->AddResObj("pixelStretchEffect", resObj, std::move(updateFunc));
     }
+
+    auto lpxUpdateFunc = GetPixelStretchEffectFuncForLPX(option);
+    if (CheckDimensionUseLPX(option.left) || CheckDimensionUseLPX(option.top) || CheckDimensionUseLPX(option.right) ||
+        CheckDimensionUseLPX(option.bottom)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_PIXEL_STRETCH_EFFECT, lpxUpdateFunc);
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
 }
 
@@ -2257,6 +2291,36 @@ void ViewAbstract::CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const Borde
     }
 }
 
+std::function<void()> ViewAbstract::GetOuterBorderRadiusFuncForLPX(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(value);
+        borderRadius.multiValued = false;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, borderRadius, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnOuterBorderRadiusUpdate(borderRadius);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetOuterBorderRadiusFuncForLPX(const BorderRadiusProperty& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [frameNode, value]() {
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, value, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnOuterBorderRadiusUpdate(value);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2265,6 +2329,11 @@ void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
+
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetOuterBorderRadiusFuncForLPX(value);
+    ACE_CHECK_LPX_UPDATE_CALLBACK(value, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc);
+
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, borderRadius);
 }
 
@@ -2273,6 +2342,11 @@ void ViewAbstract::SetOuterBorderRadius(FrameNode* frameNode, const Dimension& v
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
+
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = GetOuterBorderRadiusFuncForLPX(value);
+    ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(value, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc, frameNode);
+
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, borderRadius, frameNode);
 }
 
@@ -2298,6 +2372,14 @@ void ViewAbstract::SetOuterBorderRadius(const BorderRadiusProperty& value)
         };
         pattern->AddResObj("outerBorderRadius", resObj, std::move(updateFunc));
     }
+
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetOuterBorderRadiusFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc);
+    }
+
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, value);
 }
 
@@ -2319,6 +2401,14 @@ void ViewAbstract::SetOuterBorderRadius(FrameNode* frameNode, const BorderRadius
         };
         pattern->AddResObj("outerBorderRadius", resObj, std::move(updateFunc));
     }
+
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_RADIUS, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = GetOuterBorderRadiusFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_RADIUS, lpxUpdateFunc, frameNode);
+    }
+
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, value, frameNode);
 }
 
@@ -2381,6 +2471,40 @@ void ViewAbstract::SetOuterBorderColor(FrameNode* frameNode, const BorderColorPr
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderColor, value, frameNode);
 }
 
+std::function<void()> ViewAbstract::GetOuterBorderWidthFuncForLPX(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        BorderWidthProperty borderWidth;
+        if (Negative(value.Value())) {
+            borderWidth.SetBorderWidth(Dimension(0));
+        } else {
+            borderWidth.SetBorderWidth(value);
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, borderWidth, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnOuterBorderWidthUpdate(borderWidth);
+    };
+    return updateFunc;
+}
+
+std::function<void()> ViewAbstract::GetOuterBorderWidthFuncForLPX(const BorderWidthProperty& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), value]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, value, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnOuterBorderWidthUpdate(value);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetOuterBorderWidth(const Dimension& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2392,6 +2516,11 @@ void ViewAbstract::SetOuterBorderWidth(const Dimension& value)
     } else {
         borderWidth.SetBorderWidth(value);
     }
+
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetOuterBorderWidthFuncForLPX(value);
+    ACE_CHECK_LPX_UPDATE_CALLBACK(value, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc);
+
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, borderWidth);
 }
 
@@ -2403,6 +2532,9 @@ void ViewAbstract::SetOuterBorderWidth(FrameNode* frameNode, const Dimension& va
     } else {
         borderWidth.SetBorderWidth(value);
     }
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = GetOuterBorderWidthFuncForLPX(value);
+    ACE_CHECK_NODE_LPX_UPDATE_CALLBACK(value, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, borderWidth, frameNode);
 }
 
@@ -2428,6 +2560,12 @@ void ViewAbstract::SetOuterBorderWidth(const BorderWidthProperty& value)
         };
         pattern->AddResObj("outerBorderWidth", resObj, std::move(updateFunc));
     }
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetOuterBorderWidthFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.topDimen) ||
+        CheckDimensionUseLPX(value.rightDimen) || CheckDimensionUseLPX(value.bottomDimen)) {
+        ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc);
+    }
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, value);
 }
 
@@ -2448,6 +2586,12 @@ void ViewAbstract::SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthPr
             frameNode->MarkDirtyNode();
         };
         pattern->AddResObj("outerBorderWidth", resObj, std::move(updateFunc));
+    }
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_OUTER_BORDER_WIDTH, EMPTY_CALLBACK, frameNode);
+    auto lpxUpdateFunc = GetOuterBorderWidthFuncForLPX(value);
+    if (CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.topDimen) ||
+        CheckDimensionUseLPX(value.rightDimen) || CheckDimensionUseLPX(value.bottomDimen)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_OUTER_BORDER_WIDTH, lpxUpdateFunc, frameNode);
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, value, frameNode);
 }
@@ -5462,6 +5606,22 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
+std::function<void()> GetSweepGradientFuncForLPX(const NG::Gradient& gradient)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), gradient]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnLastGradientTypeUpdate(NG::GradientType::SWEEP);
+        context->OnSweepGradientUpdate(gradient);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5489,6 +5649,22 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
     }
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
+}
+
+std::function<void()> GetRadialGradientFuncForLPX(const NG::Gradient& gradient)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), gradient]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnLastGradientTypeUpdate(NG::GradientType::RADIAL);
+        context->OnRadialGradientUpdate(gradient);
+    };
+    return updateFunc;
 }
 
 void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
@@ -5744,6 +5920,24 @@ void ViewAbstract::SetChainedTransition(
     }
 }
 
+std::function<void()> ViewAbstract::GetClipShapeFuncForLPX(const RefPtr<BasicShape>& basicShape)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), basicShape]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto target = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(target);
+        if (target->GetClipEdge().has_value()) {
+            target->UpdateClipEdge(false);
+            target->OnClipEdgeUpdate(false);
+        }
+        target->UpdateClipShape(basicShape);
+        target->OnClipShapeUpdate(basicShape);
+    };
+    return updateFunc;
+}
+
 void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -5781,6 +5975,13 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
         }
         target->UpdateClipShape(basicShape);
     }
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_CLIP_SHAPE, EMPTY_CALLBACK);
+    auto lpxUpdateFunc = GetClipShapeFuncForLPX(basicShape);
+    if (basicShape) {
+        if (CheckDimensionUseLPX(basicShape->GetWidth()) || CheckDimensionUseLPX(basicShape->GetHeight())) {
+            ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_CLIP_SHAPE, lpxUpdateFunc);
+        }
+    }
 }
 
 void ViewAbstract::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
@@ -5816,6 +6017,13 @@ void ViewAbstract::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& 
         }
         target->UpdateClipShape(basicShape);
     }
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_CLIP_SHAPE, EMPTY_CALLBACK,frameNode);
+    if (basicShape) {
+        auto lpxUpdateFunc = GetClipShapeFuncForLPX(basicShape);
+        if (CheckDimensionUseLPX(basicShape->GetWidth()) || CheckDimensionUseLPX(basicShape->GetHeight())) {
+            ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_CLIP_SHAPE, lpxUpdateFunc);
+        }
+    }
 }
 
 void ViewAbstract::SetClipEdge(bool isClip)
@@ -5835,6 +6043,7 @@ void ViewAbstract::SetClipEdge(bool isClip)
             }
             target->ResetClipShape();
             target->OnClipShapeUpdate(nullptr);
+            ACE_SET_LPX_UPDATE_CALLBACK(false,LpxAttribute::LPX_CLIP_SHAPE, EMPTY_CALLBACK);
         }
         target->UpdateClipEdge(isClip);
     }
@@ -5853,9 +6062,29 @@ void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
             }
             target->ResetClipShape();
             target->OnClipShapeUpdate(nullptr);
+            ACE_SET_NODE_LPX_UPDATE_CALLBACK(false,LpxAttribute::LPX_CLIP_SHAPE, EMPTY_CALLBACK, frameNode);
         }
         target->UpdateClipEdge(isClip);
     }
+}
+
+std::function<void()> ViewAbstract::GetMaskShapeFuncForLPX(const RefPtr<BasicShape>& basicShape)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode), basicShape]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto target = frameNode->GetRenderContext();
+        if (target) {
+            if (target->HasProgressMask()) {
+                target->ResetProgressMask();
+                target->OnProgressMaskUpdate(nullptr);
+            }
+            target->UpdateClipMask(basicShape);
+            target->OnClipMaskUpdate(basicShape);
+        }
+    };
+    return updateFunc;
 }
 
 void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
@@ -5894,6 +6123,14 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
         }
         target->UpdateClipMask(basicShape);
     }
+
+    ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_MASK_SHAPE, EMPTY_CALLBACK);
+    if (basicShape) {
+        auto lpxUpdateFunc = GetMaskShapeFuncForLPX(basicShape);
+        if (CheckDimensionUseLPX(basicShape->GetWidth()) || CheckDimensionUseLPX(basicShape->GetHeight())) {
+            ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_MASK_SHAPE, lpxUpdateFunc);
+        }
+    }
 }
 
 void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
@@ -5931,6 +6168,7 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
         if (target->HasClipMask()) {
             target->ResetClipMask();
             target->OnClipMaskUpdate(nullptr);
+            ACE_SET_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_MASK_SHAPE, EMPTY_CALLBACK);
         }
         target->UpdateProgressMask(progress);
     }
@@ -6751,6 +6989,14 @@ void ViewAbstract::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basic
         }
         target->UpdateClipMask(basicShape);
     }
+
+    ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_MASK_SHAPE, EMPTY_CALLBACK,frameNode);
+    if(basicShape) {
+        auto lpxUpdateFunc = GetMaskShapeFuncForLPX(basicShape);
+        if (CheckDimensionUseLPX(basicShape->GetWidth()) || CheckDimensionUseLPX(basicShape->GetHeight())) {
+            ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_MASK_SHAPE, lpxUpdateFunc,frameNode);
+        }
+    }
 }
 
 void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress)
@@ -6782,6 +7028,7 @@ void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMa
         if (target->HasClipMask()) {
             target->ResetClipMask();
             target->OnClipMaskUpdate(nullptr);
+            ACE_SET_NODE_LPX_UPDATE_CALLBACK(false, LpxAttribute::LPX_MASK_SHAPE, EMPTY_CALLBACK,frameNode);
         }
         target->UpdateProgressMask(progress);
     }
@@ -7961,6 +8208,13 @@ void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectO
         };
         pattern->AddResObj("pixelStretchEffect", resObj, std::move(updateFunc));
     }
+
+    auto lpxUpdateFunc = GetPixelStretchEffectFuncForLPX(option);
+    if (CheckDimensionUseLPX(option.left) || CheckDimensionUseLPX(option.top) || CheckDimensionUseLPX(option.right) ||
+        CheckDimensionUseLPX(option.bottom)) {
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_PIXEL_STRETCH_EFFECT, lpxUpdateFunc, frameNode);
+    }
+
     ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
 }
 
