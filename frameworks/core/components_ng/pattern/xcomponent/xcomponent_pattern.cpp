@@ -342,15 +342,7 @@ void XComponentPattern::Initialize()
 void XComponentPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
-    if (type_ == XComponentType::SURFACE) {
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-        auto bkColor = renderContext->GetBackgroundColor().value_or(Color::BLACK);
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(
-            (bkColor.GetAlpha() < UINT8_MAX) ? Color::TRANSPARENT : bkColor);
-    }
+    CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     SendStatisticEvent(host, statisticEventTypes_);
     auto leakType = GetLeakType();
@@ -360,6 +352,9 @@ void XComponentPattern::OnAttachToMainTree()
     isOnTree_ = true;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
+    }
+    if (type_ == XComponentType::SURFACE) {
+        applyBackGroundColor();
     }
     CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -691,6 +686,11 @@ void XComponentPattern::OnModifyDone()
     if (handlingSurfaceRenderContext_ != renderContextForSurface_) {
         return;
     }
+    applyBackGroundColor();
+}
+
+void XComponentPattern::applyBackGroundColor()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
