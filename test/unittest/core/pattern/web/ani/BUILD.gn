@@ -786,6 +786,8 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
     "window_manager:libwm",
+    "egl:libEGL",
+    "opengles:libGLES"
   ]
   if (defined(global_parts_info.inputmethod_imf)) {
     external_deps += [ "imf:inputmethod_client" ]
