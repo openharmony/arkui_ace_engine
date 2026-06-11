@@ -138,7 +138,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition003, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 120.0f);
@@ -163,7 +163,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition004, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 80.0f);
@@ -189,7 +189,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition005, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 300.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 80.0f);
@@ -214,7 +214,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition006, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 100.0f);
@@ -239,7 +239,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition007, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(400.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 200.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 120.0f);
@@ -264,7 +264,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition008, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 99.9f, 300.0f, 200.1f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 90.0f);
@@ -290,7 +290,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition009, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 101.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 100.5f);
@@ -315,7 +315,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition010, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 250.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 90.0f);
@@ -340,7 +340,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition011, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 200.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 0.0f);
@@ -366,7 +366,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition012, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(0.0f, 0.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 120.0f);
@@ -391,7 +391,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition013, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 0.0f, 0.0f, 0.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 0.0f);
@@ -413,7 +413,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition014, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 200.0f);
@@ -438,7 +438,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition015, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 10.0f);
@@ -464,7 +464,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition016, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(300.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 120.0f);
@@ -542,7 +542,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition017, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(50.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 120.0f);
@@ -567,7 +567,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition018, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 100.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 100.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 0.0f);
@@ -593,7 +593,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition019, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 201.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 99.0f);
@@ -618,7 +618,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition020, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(-50.0f, -100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, -80.0f);
@@ -642,7 +642,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition021, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(300.0f, 200.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 100.0f);
@@ -667,7 +667,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition022, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(100.0f, 50.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(20.0f, 50.0f, 300.0f, 100.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(20.0f, 40.0f);
@@ -692,7 +692,7 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition023, T
     auto geometryNode = menuFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SizeF extensionMenuSize(200.0f, 300.0f);
-    geometryNode->SetMarginFrameSize(extensionMenuSize);
+    geometryNode->SetFrameSize(extensionMenuSize);
     RectF selectMenuPaintRect(0.0f, 100.0f, 300.0f, 200.0f);
     menuPattern_->SetSelectMenuPaintRect(selectMenuPaintRect);
     OffsetF menuPosition(50.0f, 99.999f);
