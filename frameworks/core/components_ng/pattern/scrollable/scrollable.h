@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLLABLE_NG_H
 
 #include <functional>
+#include <unordered_set>
 
 #include "base/geometry/dimension.h"
 #include "base/thread/cancelable_callback.h"
@@ -165,6 +166,12 @@ public:
         if (panRecognizerNG_) {
             panRecognizerNG_->SetIsAllowMouse(isAllowMouse);
         }
+    }
+
+    void SetEscapeModeForScroll(const std::unordered_set<int32_t>& fingerIds)
+    {
+        CHECK_NULL_VOID(panRecognizerNG_);
+        panRecognizerNG_->SetEscapeModeForPan(fingerIds);
     }
 
     void SetScrollEndCallback(const ScrollEventCallback& scrollEndCallback)
