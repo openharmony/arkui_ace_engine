@@ -69,6 +69,9 @@ const char VALID_COMPENSATION_ANGLE_JSON[] =
 const char INVALID_COMPENSATION_ANGLE_JSON[] = "invalid_json";
 const char MISSING_ANGLE_KEY_JSON[] = R"({"otherKey":{"1":90}})";
 const char EMPTY_COMPENSATION_ANGLE_JSON[] = "";
+const char FEATURE_MANAGER_COMPENSATION_ANGLE_JSON[] =
+    R"({"xcomponentCompensationAngle":{"1":0,"2":90,"3":180,"4":270}})";
+const char NON_OBJECT_COMPENSATION_ANGLE_JSON[] = R"({"xcomponentCompensationAngle":90})";
 } // namespace
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -80,9 +83,11 @@ class XComponentTestSetRateRange : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void TearDown() override {}
+    void SetUp() override;
+    void TearDown() override;
 protected:
     static RefPtr<FrameNode> CreateXComponentNode();
+    static void ResetCompensationAngleState();
 };
 
 RefPtr<FrameNode> XComponentTestSetRateRange::CreateXComponentNode()
@@ -102,6 +107,26 @@ void XComponentTestSetRateRange::SetUpTestSuite()
 void XComponentTestSetRateRange::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+}
+
+void XComponentTestSetRateRange::SetUp()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    ResetCompensationAngleState();
+#endif
+}
+
+void XComponentTestSetRateRange::TearDown()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    ResetCompensationAngleState();
+#endif
+}
+
+void XComponentTestSetRateRange::ResetCompensationAngleState()
+{
+    XComponentPattern::compensationAngleFromFeatureManager_.clear();
+    XComponentPattern::compensationAngleFlag_.store(false, std::memory_order_release);
 }
 
 /**
@@ -297,6 +322,49 @@ HWTEST_F(XComponentTestSetRateRange, GetXComponentCompensationAngleEmptyInputTes
         GTEST_SKIP() << "GetXComponentCompensationAngle is not available in current build.";
     }
     auto angleConfig = GetXComponentCompensationAngle(EMPTY_COMPENSATION_ANGLE_JSON);
+    EXPECT_EQ(angleConfig, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetXComponentCompensationAngleCachedFeatureManagerValueTest
+ * @tc.desc: Test GetXComponentCompensationAngle uses cached feature manager json when cache is initialized
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestSetRateRange, GetXComponentCompensationAngleCachedFeatureManagerValueTest, TestSize.Level1)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (GetXComponentCompensationAngle == nullptr) {
+        GTEST_SKIP() << "GetXComponentCompensationAngle is not available in current build.";
+    }
+    XComponentPattern::compensationAngleFromFeatureManager_ = FEATURE_MANAGER_COMPENSATION_ANGLE_JSON;
+    XComponentPattern::compensationAngleFlag_.store(true, std::memory_order_release);
+
+    auto angleConfig = GetXComponentCompensationAngle(INVALID_COMPENSATION_ANGLE_JSON);
+
+    ASSERT_NE(angleConfig, nullptr);
+    EXPECT_EQ(angleConfig->GetInt(DISPLAY_MODE_FULL, DEFAULT_JSON_INT_VALUE), ROTATION_VALUE_0);
+    EXPECT_EQ(angleConfig->GetInt(DISPLAY_MODE_MAIN, DEFAULT_JSON_INT_VALUE), ROTATION_VALUE_90);
+    EXPECT_EQ(angleConfig->GetInt(DISPLAY_MODE_SUB, DEFAULT_JSON_INT_VALUE), ROTATION_VALUE_180);
+    EXPECT_EQ(angleConfig->GetInt(DISPLAY_MODE_COORDINATION, DEFAULT_JSON_INT_VALUE), ROTATION_VALUE_270);
+#endif
+}
+
+/**
+ * @tc.name: GetXComponentCompensationAngleNonObjectValueTest
+ * @tc.desc: Test GetXComponentCompensationAngle returns null when compensation angle config is not an object
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestSetRateRange, GetXComponentCompensationAngleNonObjectValueTest, TestSize.Level1)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (GetXComponentCompensationAngle == nullptr) {
+        GTEST_SKIP() << "GetXComponentCompensationAngle is not available in current build.";
+    }
+    XComponentPattern::compensationAngleFlag_.store(true, std::memory_order_release);
+
+    auto angleConfig = GetXComponentCompensationAngle(NON_OBJECT_COMPENSATION_ANGLE_JSON);
+
     EXPECT_EQ(angleConfig, nullptr);
 #endif
 }
