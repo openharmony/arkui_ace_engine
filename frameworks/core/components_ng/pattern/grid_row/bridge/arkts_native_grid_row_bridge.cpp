@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid_row/bridge/arkts_native_grid_row_bridge.h"
 
+#include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
@@ -523,7 +525,7 @@ ArkUINativeModuleValue GridRowBridge::SetBreakpoints(ArkUIRuntimeCallInfo* runti
         return panda::JSValueRef::Undefined(vm);
     }
     auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);
-    auto length = arrayVal->Length(vm);
+    auto length = ArkTSUtils::GetArrayLength(vm, arrayVal);
     if (length <= 0 || length > (MAX_NUMBER_BREAKPOINT - 1)) {
         GetArkUINodeModifiers()->getGridRowModifier()->setBreakpoints(
             nativeNode, reference, pointValues.data(), pointStr.data(), size);
@@ -652,20 +654,32 @@ ArkUINativeModuleValue GridRowBridge::SetOnBreakpointChange(ArkUIRuntimeCallInfo
     auto frameNode = GetFrameNode(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
-        GetArkUINodeModifiers()->getGridRowModifier()->resetOnBreakpointChange(nativeNode);
+        if (!isJsView) {
+            GetArkUINodeModifiers()->getGridRowModifier()->resetOnBreakpointChange(nativeNode);
+        }
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&)> callback = [vm, frameNode, isJsView,
+        execCtx = Framework::JsiExecutionContext(vm),
         func = panda::CopyableGlobal(vm, func)](const std::string& changeStr) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, changeStr.c_str()) };
-        auto result = func->Call(vm, func.ToLocal(), params, 1);
+        auto invokeCallback = [&]() {
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, changeStr.c_str()) };
+            auto result = func->Call(vm, func.ToLocal(), params, 1);
+            if (isJsView) {
+                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            }
+        };
         if (isJsView) {
-            ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("GridRow.onBreakpointChange");
+            invokeCallback();
+            return;
         }
+        panda::LocalScope pandaScope(vm);
+        invokeCallback();
     };
     GetArkUINodeModifiers()->getGridRowModifier()->setOnBreakpointChange(
         nativeNode, reinterpret_cast<void*>(&callback));

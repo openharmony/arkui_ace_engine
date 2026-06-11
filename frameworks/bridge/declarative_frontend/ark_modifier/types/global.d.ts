@@ -120,6 +120,13 @@ interface GaugeComponentModule {
 interface NavigatorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
+interface GridRowComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface GridColComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
 
 interface SwiperComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;

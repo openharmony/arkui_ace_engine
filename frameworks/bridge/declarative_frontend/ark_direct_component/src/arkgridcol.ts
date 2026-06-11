@@ -140,7 +140,10 @@ class JSGridCol extends JSContainerBase {
     getUINativeModule().gridCol.create(params);
   }
   static span(value: any): void {
-    setColumnOption(true, value, 'setSpan', 'resetSpan');
+    if (arguments.length < 1) {
+      return;
+    }
+    getUINativeModule().gridCol.setSpan(true, value);
   }
   static offset(value: any): void {
     if (arguments.length < 1) {
@@ -150,7 +153,7 @@ class JSGridCol extends JSContainerBase {
       const xVal = value.x;
       const yVal = value.y;
       if (xVal !== undefined || yVal !== undefined) {
-        __Common__.offset(value);
+        JSViewAbstract.offset(value);
         return;
       }
     }
@@ -171,7 +174,10 @@ class JSGridCol extends JSContainerBase {
     getUINativeModule().gridCol.offset(true, value);
   }
   static order(value: any): void {
-    setColumnOption(true, value, 'setOrder', 'resetOrder');
+    if (arguments.length < 1) {
+      return;
+    }
+    getUINativeModule().gridCol.setOrder(true, value);
   }
   static attributeModifier(modifier: any): void {
     attributeModifierFunc.call(this, modifier, (nativePtr: any) => createComponent(nativePtr),

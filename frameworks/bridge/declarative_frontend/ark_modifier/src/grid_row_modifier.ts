@@ -14,7 +14,7 @@
  */
 
 class LazyArkGridRowComponent extends ArkComponent {
-  static module: any | undefined = undefined;
+  static module: GridRowComponentModule | undefined = undefined;
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
