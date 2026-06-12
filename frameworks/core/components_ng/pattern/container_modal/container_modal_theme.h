@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 

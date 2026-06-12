@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 namespace OHOS::Ace {
 namespace {
 constexpr uint64_t FOCUS_COLOR = 125830265;

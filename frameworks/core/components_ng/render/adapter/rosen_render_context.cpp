@@ -57,6 +57,7 @@
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/ace_engine.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"

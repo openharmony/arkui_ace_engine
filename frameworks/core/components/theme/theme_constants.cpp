@@ -16,6 +16,9 @@
 #include "core/components/theme/theme_constants.h"
 
 #include "base/resource/ace_res_config.h"
+#include "base/resource/asset_manager.h"
+#include "base/utils/resource_configuration.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -58,6 +61,111 @@ bool IsGlobalResource(uint32_t resId)
 }
 
 } // namespace
+
+ThemeConstants::ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter) : resAdapter_(resourceAdapter) {}
+
+ThemeConstants::~ThemeConstants() = default;
+
+void ThemeConstants::InitResource(const ResourceInfo& resourceInfo)
+{
+    if (resAdapter_) {
+        resAdapter_->Init(resourceInfo);
+    }
+}
+
+void ThemeConstants::UpdateConfig(const ResourceConfiguration& config)
+{
+    if (resAdapter_) {
+        resAdapter_->UpdateConfig(config);
+    }
+}
+
+RefPtr<ThemeStyle> ThemeConstants::GetThemeStyle() const
+{
+    return currentThemeStyle_;
+}
+
+bool ThemeConstants::HasCustomStyle(uint32_t key) const
+{
+    return customStyleMap_.find(key) != customStyleMap_.end();
+}
+
+void ThemeConstants::UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName)
+{
+    if (resAdapter_) {
+        resAdapter_->UpdateResourceManager(bundleName, moduleName);
+    }
+}
+
+void ThemeConstants::UpdateResourceAdapter(const RefPtr<ResourceAdapter>& adapter)
+{
+    resAdapter_ = adapter;
+}
+
+uint32_t ThemeConstants::GetResourceLimitKeys() const
+{
+    CHECK_NULL_RETURN(resAdapter_, 0);
+    return resAdapter_->GetResourceLimitKeys();
+}
+
+RefPtr<ResourceAdapter> ThemeConstants::GetResourceAdapter()
+{
+    return resAdapter_;
+}
+
+bool ThemeConstants::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetRawFileData(rawFile, len, dest);
+}
+
+bool ThemeConstants::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetRawFileData(rawFile, len, dest, bundleName, moduleName);
+}
+
+template<class T>
+bool ThemeConstants::GetMediaResource(T& resId, std::ostream& dest) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetResource(resId, dest);
+}
+
+template<class T>
+bool ThemeConstants::GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetMediaData(resId, len, dest);
+}
+
+template<class T>
+bool ThemeConstants::GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetMediaData(resId, len, dest, bundleName, moduleName);
+}
+
+template bool ThemeConstants::GetMediaResource<uint32_t>(uint32_t&, std::ostream&) const;
+template bool ThemeConstants::GetMediaResource<std::string>(std::string&, std::ostream&) const;
+template bool ThemeConstants::GetMediaData<uint32_t>(uint32_t&, size_t&, std::unique_ptr<uint8_t[]>&);
+template bool ThemeConstants::GetMediaData<std::string>(std::string&, size_t&, std::unique_ptr<uint8_t[]>&);
+template bool ThemeConstants::GetMediaData<uint32_t>(uint32_t&, size_t&, std::unique_ptr<uint8_t[]>&,
+    const std::string&, const std::string&);
+template bool ThemeConstants::GetMediaData<std::string>(std::string&, size_t&, std::unique_ptr<uint8_t[]>&,
+    const std::string&, const std::string&);
 
 void ThemeConstants::InitDeviceType()
 {
