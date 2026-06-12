@@ -33,10 +33,11 @@ const std::string DEFAULT_BUNDLE_NAME = "";
 const std::string DEFAULT_MODULE_NAME = "";
 } // namespace
 
-ResourceErrorInfo::ResourceErrorInfo(int32_t nodeId, std::string sourceKey, std::string sourceTag, std::string nodeTag,
-    int64_t errorTime, int32_t state)
-    : nodeId(nodeId), sourceKey(std::move(sourceKey)), sourceTag(std::move(sourceTag)),
-      nodeTag(std::move(nodeTag)), errorTime(errorTime), state(state) {}
+ResourceErrorInfo::ResourceErrorInfo(
+    int32_t nodeId, std::string sourceKey, std::string sourceTag, std::string nodeTag, int64_t errorTime, int32_t state)
+    : nodeId(nodeId), sourceKey(std::move(sourceKey)), sourceTag(std::move(sourceTag)), nodeTag(std::move(nodeTag)),
+      errorTime(errorTime), state(state)
+{}
 
 ResourceManager::ResourceManager() = default;
 
@@ -73,7 +74,8 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr
     return resourceAdapter;
 }
 
-std::string ResourceManager::MakeCacheKey(const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
+std::string ResourceManager::MakeCacheKey(
+    const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
 {
     if (bundleName.empty() && moduleName.empty()) {
         return std::to_string(instanceId);
@@ -81,8 +83,8 @@ std::string ResourceManager::MakeCacheKey(const std::string& bundleName, const s
     return bundleName + "." + moduleName + "." + std::to_string(instanceId);
 }
 
-void ResourceManager::AddResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
-    RefPtr<ResourceAdapter>& resourceAdapter, bool replace)
+void ResourceManager::AddResourceAdapter(const std::string& bundleName, const std::string& moduleName,
+    int32_t instanceId, RefPtr<ResourceAdapter>& resourceAdapter, bool replace)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     if (bundleName.empty() && moduleName.empty()) {
@@ -97,8 +99,8 @@ void ResourceManager::AddResourceAdapter(const std::string& bundleName, const st
     }
 }
 
-void ResourceManager::UpdateMainResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
-    RefPtr<ResourceAdapter>& resourceAdapter)
+void ResourceManager::UpdateMainResourceAdapter(const std::string& bundleName, const std::string& moduleName,
+    int32_t instanceId, RefPtr<ResourceAdapter>& resourceAdapter)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     auto defaultKey = MakeCacheKey("", "", instanceId);
@@ -107,7 +109,8 @@ void ResourceManager::UpdateMainResourceAdapter(const std::string& bundleName, c
     resourceAdapters_[defaultKey] = resourceAdapter;
 }
 
-bool ResourceManager::IsResourceAdapterRecord(const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
+bool ResourceManager::IsResourceAdapterRecord(
+    const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     auto key = MakeCacheKey(bundleName, moduleName, instanceId);
@@ -202,7 +205,8 @@ void ResourceManager::UpdateColorMode(
     }
 }
 
-void ResourceManager::RemoveResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
+void ResourceManager::RemoveResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     std::string key = MakeCacheKey(bundleName, moduleName, instanceId);
@@ -234,11 +238,10 @@ void ResourceManager::DumpResLoadError()
 
     DumpLog::GetInstance().Print("ResourceLoadErrorTimes: " + std::to_string(resLoadErrorSize));
     for (const auto& nodeError : resourceErrorList_) {
-        DumpLog::GetInstance().Print(1, "Node: " + std::to_string(nodeError.nodeId) +
-            ", nodeTag: " + nodeError.nodeTag + ", sourceKey: " + nodeError.sourceKey +
-            ", sourceTag: " + nodeError.sourceTag +
-            ", errorCode: " + std::to_string(nodeError.state) + ", errorTime: " +
-            ConvertTimestampToStr(nodeError.errorTime));
+        DumpLog::GetInstance().Print(
+            1, "Node: " + std::to_string(nodeError.nodeId) + ", nodeTag: " + nodeError.nodeTag +
+                   ", sourceKey: " + nodeError.sourceKey + ", sourceTag: " + nodeError.sourceTag + ", errorCode: " +
+                   std::to_string(nodeError.state) + ", errorTime: " + ConvertTimestampToStr(nodeError.errorTime));
     }
 }
 
