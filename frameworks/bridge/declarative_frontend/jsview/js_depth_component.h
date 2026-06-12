@@ -38,7 +38,7 @@ private:
     static OHOS::Ace::DepthBackgroundSource ParseBackgroundSource(const JSRef<JSVal>& imageInfo);
     static bool IsGltfSource(const std::string& src);
     static bool SetOhosPath(const std::string& uri, std::string& ohosPath);
-    static void ParseAndSetDepthSpace(const JSRef<JSVal>& optionsValue);
+    static void ParseAndSetOptions(const JSRef<JSVal>& optionsValue);
     static OHOS::Ace::CropOffset ParseCropOffset(const JSRef<JSVal>& offsetValue);
     static OHOS::Ace::CameraBufferCrop ParseCameraBufferCrop(const JSRef<JSVal>& cropValue);
     static OHOS::Ace::DepthVector3 ParseVector3(const JSRef<JSVal>& vectorValue);

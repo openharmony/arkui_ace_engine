@@ -49,8 +49,6 @@ constexpr uint32_t SURFACE_QUEUE_SIZE = 5;
 constexpr uint32_t DEFAULT_DEPTH_BACKGROUND_COLOR = 0x00000000;
 constexpr uint32_t SURFACE_STRIDE_ALIGNMENT = 8;
 constexpr float DEFAULT_SCALE = 1.0f;
-constexpr float DEFAULT_WIDTH_SCALE = 1.0f;
-constexpr float DEFAULT_HEIGHT_SCALE = 1.0f;
 constexpr uint32_t ROTATE_90 = 90;
 constexpr uint32_t ROTATE_180 = 180;
 constexpr uint32_t ROTATE_270 = 270;
@@ -578,29 +576,46 @@ void DepthComponentPattern::TransferLightParams(const std::shared_ptr<OHOS::Rose
 void DepthComponentPattern::TransferImageMatrix(const std::shared_ptr<OHOS::Rosen::RSDepthNode>& rsDepthNode)
 {
     CHECK_NULL_VOID(rsDepthNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
     OHOS::Rosen::Matrix3f matrix;
-    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-    if (depthLayoutProperty) {
-        auto cameraParams = depthLayoutProperty->GetCameraParams();
-        if (cameraParams.has_value() && cameraParams->cameraBufferCrop.has_value()) {
-            const auto& crop = cameraParams->cameraBufferCrop.value();
-            float scale = (1.0 / crop.cropScale);
-            float offsetX = crop.cropOffset.x;
-            float offsetY = crop.cropOffset.y;
-            float vals[] = { scale, 0.0f, -scale * offsetX,
-                             0.0f,  scale, -scale * offsetY,
-                             0.0f,  0.0f,  1.0f };
-            auto* data = matrix.GetData();
-            for (size_t i = 0; i < NUM_9; i++) {
-                data[i] = vals[i];
-            }
-        }
-    }
+    IsGltfBackground() ? Get3DImageMatrix(matrix) : Get2DImageMatrix(matrix);
     rsDepthNode->SetDepthImageMatrix(matrix);
     PropagateCropToChildren();
+}
+
+void DepthComponentPattern::Get2DImageMatrix(OHOS::Rosen::Matrix3f& matrix)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
+    CHECK_NULL_VOID(depthLayoutProperty);
+    auto cameraParams = depthLayoutProperty->GetCameraParams();
+    if (cameraParams.has_value() && cameraParams->cameraBufferCrop.has_value()) {
+        const auto& crop = cameraParams->cameraBufferCrop.value();
+        if (NearZero(crop.cropScale)) {
+            return;
+        }
+        float scale = (1.0 / crop.cropScale);
+        float offsetX = crop.cropOffset.x;
+        float offsetY = crop.cropOffset.y;
+        float vals[] = { scale, 0.0f, -scale * offsetX, 0.0f, scale, -scale * offsetY, 0.0f, 0.0f, 1.0f };
+        auto* data = matrix.GetData();
+        for (size_t i = 0; i < NUM_9; i++) {
+            data[i] = vals[i];
+        }
+    }
+}
+
+void DepthComponentPattern::Get3DImageMatrix(OHOS::Rosen::Matrix3f& matrix)
+{
+    if (NearZero(render3DScale_)) {
+        return;
+    }
+    float scale = (1.0 / render3DScale_);
+    float vals[] = { scale, 0.0f, 0.0f, 0.0f, scale, 0.0f, 0.0f, 0.0f, 1.0f };
+    auto* data = matrix.GetData();
+    for (size_t i = 0; i < NUM_9; i++) {
+        data[i] = vals[i];
+    }
 }
 
 void DepthComponentPattern::PropagateCropToChildren()
@@ -796,8 +811,8 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
 
 void DepthComponentPattern::CreateCustomNativeWindows(float width, float height)
 {
-    ACE_SCOPED_TRACE("DepthComponent::CreateCustomNativeWindows width=%.1f height=%.1f current=%zu", width, height,
-        nativeWindows_.size());
+    ACE_SCOPED_TRACE("DepthComponent::CreateCustomNativeWindows width=%.1f height=%.1f current=%zu scale=%.1f",
+        width, height, nativeWindows_.size(), render3DScale_);
     if (nativeWindows_.size() == DEPTH_COMPONENT_NATIVE_WINDOW_COUNT) {
         return;
     }
@@ -826,8 +841,8 @@ void DepthComponentPattern::CreateCustomNativeWindows(float width, float height)
         surface->SetQueueSize(SURFACE_QUEUE_SIZE);
         surface->SetUserData("SURFACE_STRIDE_ALIGNMENT", std::to_string(SURFACE_STRIDE_ALIGNMENT));
         surface->SetUserData("SURFACE_FORMAT", std::to_string(OHOS::GRAPHIC_PIXEL_FMT_RGBA_8888));
-        surface->SetUserData("SURFACE_WIDTH", std::to_string(static_cast<uint32_t>(width)));
-        surface->SetUserData("SURFACE_HEIGHT", std::to_string(static_cast<uint32_t>(height)));
+        surface->SetUserData("SURFACE_WIDTH", std::to_string(static_cast<uint32_t>(width * render3DScale_)));
+        surface->SetUserData("SURFACE_HEIGHT", std::to_string(static_cast<uint32_t>(height * render3DScale_)));
         auto* nativeWindow = CreateNativeWindowFromSurface(&surface);
         if (index == 0) {
             surfaceNode->SetIsDepthBackground(true);
@@ -847,11 +862,11 @@ void DepthComponentPattern::CreateCustomNativeWindows(float width, float height)
 Render3D::WindowChangeInfo DepthComponentPattern::GetWindowChangeInfos(float width, float height) const
 {
     Render3D::WindowChangeInfo info;
-    info.width = width;
-    info.height = height;
+    info.width = static_cast<uint32_t>(width * render3DScale_);
+    info.height = static_cast<uint32_t>(height * render3DScale_);
     info.scale = DEFAULT_SCALE;
-    info.widthScale = DEFAULT_WIDTH_SCALE;
-    info.heightScale = DEFAULT_HEIGHT_SCALE;
+    info.widthScale = DEFAULT_SCALE;
+    info.heightScale = DEFAULT_SCALE;
     info.surfaceType = Render3D::SurfaceType::SURFACE_WINDOW;
     info.backgroundColor = DEFAULT_DEPTH_BACKGROUND_COLOR;
     info.transformType = rotation_;
@@ -861,15 +876,15 @@ Render3D::WindowChangeInfo DepthComponentPattern::GetWindowChangeInfos(float wid
 
 void DepthComponentPattern::UpdateWindowChangeSize(bool recreateWindow)
 {
-    ACE_SCOPED_TRACE(
-        "DepthComponent::UpdateWindowChangeSize width=%.1f height=%.1f", width3d_, height3d_);
+    ACE_SCOPED_TRACE("DepthComponent::UpdateWindowChangeSize width=%.1f height=%.1f scale=%.1f",
+        width3d_, height3d_, render3DScale_);
     for (size_t index = 0; index < windowChangeInfos_.size(); ++index) {
         auto& info = windowChangeInfos_[index];
-        info.width = width3d_;
-        info.height = height3d_;
+        info.width = static_cast<uint32_t>(width3d_ * render3DScale_);
+        info.height = static_cast<uint32_t>(height3d_ * render3DScale_);
         info.scale = DEFAULT_SCALE;
-        info.widthScale = DEFAULT_WIDTH_SCALE;
-        info.heightScale = DEFAULT_HEIGHT_SCALE;
+        info.widthScale = DEFAULT_SCALE;
+        info.heightScale = DEFAULT_SCALE;
         info.recreateWindow = recreateWindow;
         info.surfaceType = Render3D::SurfaceType::SURFACE_WINDOW;
         info.transformType = rotation_;
@@ -877,8 +892,10 @@ void DepthComponentPattern::UpdateWindowChangeSize(bool recreateWindow)
         info.customNativeWin = index < nativeWindows_.size() ? nativeWindows_[index] : nullptr;
         if (index < nativeSurfaces_.size() && nativeSurfaces_[index]) {
             nativeSurfaces_[index]->SetTransformHint(RotationToTransform(rotation_));
-            nativeSurfaces_[index]->SetUserData("SURFACE_WIDTH", std::to_string(static_cast<uint32_t>(width3d_)));
-            nativeSurfaces_[index]->SetUserData("SURFACE_HEIGHT", std::to_string(static_cast<uint32_t>(height3d_)));
+            nativeSurfaces_[index]->SetUserData("SURFACE_WIDTH",
+                std::to_string(static_cast<uint32_t>(width3d_ * render3DScale_)));
+            nativeSurfaces_[index]->SetUserData("SURFACE_HEIGHT",
+                std::to_string(static_cast<uint32_t>(height3d_ * render3DScale_)));
         }
         nativeSurfaceNodes_[index]->SetBounds(offsetX_, offsetY_, width3d_, height3d_);
         nativeSurfaceNodes_[index]->SetFrame(offsetX_, offsetY_, width3d_, height3d_);
@@ -887,7 +904,8 @@ void DepthComponentPattern::UpdateWindowChangeSize(bool recreateWindow)
 
 bool DepthComponentPattern::NeedUpdateWindowInfo()
 {
-    return !(nativeWindowSetUp_ && NearEqual(lastWidth3d_, width3d_) && NearEqual(lastHeight3d_, height3d_));
+    return !(nativeWindowSetUp_ && NearEqual(lastWidth3d_, width3d_) && NearEqual(lastHeight3d_, height3d_)
+        && NearEqual(lastRender3DScale_, render3DScale_));
 }
 
 void DepthComponentPattern::UpdateWindowInfo()
@@ -901,6 +919,7 @@ void DepthComponentPattern::UpdateWindowInfo()
     nativeWindowSetUp_ = true;
     lastWidth3d_ = width3d_;
     lastHeight3d_ = height3d_;
+    lastRender3DScale_ = render3DScale_;
 }
 
 void DepthComponentPattern::MarkRender3D()
