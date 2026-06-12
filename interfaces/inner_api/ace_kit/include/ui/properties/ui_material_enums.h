@@ -31,7 +31,20 @@ enum class UiMaterialStyle: int32_t {
     REGULAR = 2,
     THICK = 3,
     ULTRA_THICK = 4,
-    MAX = ULTRA_THICK,
+
+    ULTRA_THIN_EC = 5,
+    THIN_EC = 6,
+    REGULAR_EC = 7,
+    THICK_EC = 8,
+    ULTRA_THICK_EC = 9,
+
+    ULTRA_THIN_EC_SUB = 10,
+    THIN_EC_SUB = 11,
+    REGULAR_EC_SUB = 12,
+    THICK_EC_SUB = 13,
+    ULTRA_THICK_EC_SUB = 14,
+
+    MAX = ULTRA_THICK_EC_SUB,
 };
 
 enum class UiMaterialLevel: int32_t {

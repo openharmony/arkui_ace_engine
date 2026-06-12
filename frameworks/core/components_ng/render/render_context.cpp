@@ -58,14 +58,28 @@ std::string MaterialTypeToString(int32_t type)
 
 std::string ImmersiveStyleToString(UiMaterialStyle style)
 {
-    static const std::string ImmersiveStyles[] = { "ImmersiveStyle.ULTRA_THIN",
+    static const std::string ImmersiveStyles[] = {
+        "ImmersiveStyle.ULTRA_THIN",
         "ImmersiveStyle.THIN",
         "ImmersiveStyle.REGULAR",
         "ImmersiveStyle.THICK",
-        "ImmersiveStyle.ULTRA_THICK" };
+        "ImmersiveStyle.ULTRA_THICK",
+
+        "ImmersiveStyle.ULTRA_THIN_EC",
+        "ImmersiveStyle.THIN_EC",
+        "ImmersiveStyle.REGULAR_EC",
+        "ImmersiveStyle.THICK_EC",
+        "ImmersiveStyle.ULTRA_THICK_EC",
+
+        "ImmersiveStyle.ULTRA_THIN_EC_SUB",
+        "ImmersiveStyle.THIN_EC_SUB",
+        "ImmersiveStyle.REGULAR_EC_SUB",
+        "ImmersiveStyle.THICK_EC_SUB",
+        "ImmersiveStyle.ULTRA_THICK_EC_SUB",
+    };
     auto index = static_cast<int32_t>(style);
     if (index >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN) &&
-        index <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK)) {
+        index <= static_cast<int32_t>(UiMaterialStyle::MAX)) {
         return ImmersiveStyles[index];
     }
     return ImmersiveStyles[static_cast<int32_t>(UiMaterialStyle::REGULAR)];

@@ -29,6 +29,7 @@
 namespace OHOS::Rosen {
 class Filter;
 class RSNGFilterBase;
+class RSNGShaderBase;
 }
 
 namespace OHOS::Ace {
@@ -109,6 +110,10 @@ public:
         const std::shared_ptr<ImmersiveOptions>& options, const RefPtr<NG::FrameNode>& node, float componentScale);
     static bool GetUiMaterialFilter(
         const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter);
+    static bool GetUiMaterialFilterEC(
+        const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter);
+    static bool GetUiMaterialShaderECSub(
+        const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader);
     static Shadow GetImmersiveShadow(float dipScale);
     static Shadow GetImmersiveEmptyShadow();
     static bool GetGlobalMaterialLevel(UiMaterialLevel& result);

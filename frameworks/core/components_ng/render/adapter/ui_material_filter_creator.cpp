@@ -17,6 +17,7 @@
 
 #include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
 #include "render_service_client/core/ui_effect/property/include/rs_ui_filter_to_para.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_shader_base.h"
 #include "render_service_client/core/ui_effect/filter/include/filter.h"
 #include "ui/properties/ui_material_structs.h"
 
@@ -26,6 +27,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t UI_MATERIAL_STYLES_COUNT = 5;
+
 constexpr FrostedGlassParam Gentle_Regular_Transparency3_Light {
     .blurParams = { 12.0f, 6.0f },
     .weightsEmboss = {},
@@ -745,6 +748,47 @@ std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMater
     glassFilter->Setter<Rosen::FrostedGlassMaterialColorTag>(rsColor);
     return filter;
 #endif
+}
+
+std::shared_ptr<Rosen::RSNGFilterBase> UiMaterialFilterCreator::ConvertToUiMaterialECFilter(
+    const ImmersiveMaterialConfig& params)
+{
+    int32_t style = static_cast<int32_t>(params.key.style);
+    ImmersiveMaterialConfig newConfig = params;
+    newConfig.key.style = static_cast<UiMaterialStyle>(style % UI_MATERIAL_STYLES_COUNT);
+
+    std::shared_ptr<Rosen::RSNGFilterBase> filter;
+    if (!MaterialUtils::GetUiMaterialFilterEC(newConfig, filter)) {
+        auto iter = MATERIAL_PARAM_MAP.find(newConfig.key);
+        if (iter == MATERIAL_PARAM_MAP.end()) {
+            return nullptr;
+        }
+        filter = RosenEffectConverter::ConvertToFrostedGlassFilterEC(*(iter->second), newConfig.dipScale);
+    }
+    return filter;
+}
+std::shared_ptr<Rosen::RSNGShaderBase> UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(
+    const ImmersiveMaterialConfig& params)
+{
+    int32_t style = static_cast<int32_t>(params.key.style);
+    ImmersiveMaterialConfig newConfig = params;
+    newConfig.key.style = static_cast<UiMaterialStyle>(style % UI_MATERIAL_STYLES_COUNT);
+
+    std::shared_ptr<Rosen::RSNGShaderBase> shader;
+    if (!MaterialUtils::GetUiMaterialShaderECSub(newConfig, shader)) {
+        auto iter = MATERIAL_PARAM_MAP.find(newConfig.key);
+        if (iter == MATERIAL_PARAM_MAP.end()) {
+            return nullptr;
+        }
+        shader = RosenEffectConverter::ConvertToRSNGFrostedGlassEffectECSub(*(iter->second), newConfig.dipScale);
+    }
+    auto glassEffect = std::static_pointer_cast<Rosen::RSNGFrostedGlassEffect>(shader);
+    CHECK_NULL_RETURN(glassEffect, nullptr);
+    auto& materialColor = newConfig.materialColor;
+    Rosen::Vector4f rsColor { materialColor.GetRed() / 255.0f, materialColor.GetGreen() / 255.0f,
+        materialColor.GetBlue() / 255.0f, materialColor.GetAlpha() / 255.0f };
+    glassEffect->Setter<Rosen::FrostedGlassEffectMaterialColorTag>(rsColor);
+    return shader;
 }
 
 std::shared_ptr<OHOS::Rosen::Filter> UiMaterialFilterCreator::CreateRosenFilter(

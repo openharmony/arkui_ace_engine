@@ -46,6 +46,8 @@ private:
     static napi_value JSGetImmersiveLevel(napi_env env, napi_callback_info info);
     static napi_value JSGetMaterialInfo(napi_env env, napi_callback_info info);
     static napi_value JSGetEmpty(napi_env env, napi_callback_info info);
+    static napi_value JSConvertToECMaterial(napi_env env, napi_callback_info info);
+    static napi_value JSConvertToECSubMaterial(napi_env env, napi_callback_info info);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
     static int32_t GetCInt32(napi_value value, napi_env env);
     static napi_valuetype GetValueType(napi_env env, napi_value value);
@@ -55,6 +57,9 @@ private:
     static UiMaterial* WrapMaterialObject(napi_env env, napi_value jsThis, int32_t materialType);
     static UiMaterial* WrapImmersiveMaterialObject(napi_env env, napi_value jsThis, const ImmersiveOptions& options);
     static ImmersiveOptions ParseImmersiveOptions(napi_env env, napi_value value);
+
+    static void ConvertToImmersiveOptionsEC(ImmersiveOptions& options);
+    static void ConvertToImmersiveOptionsECSub(ImmersiveOptions& options);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_UI_MATERIAL_NAPI_H

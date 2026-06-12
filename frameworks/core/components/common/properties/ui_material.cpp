@@ -42,10 +42,20 @@ using GetEnableMaterialFunc = bool (*)();
 struct MaterialFilterStruct {
     std::shared_ptr<Rosen::RSNGFilterBase> filter;
 };
+struct MaterialFilterECStruct {
+    std::shared_ptr<Rosen::RSNGFilterBase> filter;
+};
+struct MaterialShaderECSubStruct {
+    std::shared_ptr<Rosen::RSNGShaderBase> shader;
+};
 
 #ifndef _WIN32
 const char UI_MATERIAL_FUNC_CREATE_UI_MATERIAL[] = "CreateUiMaterialFilter";
 const char UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL[] = "ReleaseUiMaterialFilter";
+const char UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC[] = "CreateUiMaterialFilterEC";
+const char UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC[] = "ReleaseUiMaterialFilterEC";
+const char UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC_SUB[] = "CreateUiMaterialShaderECSub";
+const char UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC_SUB[] = "ReleaseUiMaterialShaderECSub";
 const char UI_MATERIAL_FUNC_GET_ENABLE_COLOR_INVERT[] = "GetEnableColorInvert";
 const char UI_MATERIAL_FUNC_GET_GLOBAL_LEVEL[] = "GetGlobalMaterialLevel";
 const char UI_MATERIAL_FUNC_GET_ENABLE_MATERIAL[] = "IsSystemMaterialSupported";
@@ -346,8 +356,11 @@ bool MaterialUtils::ValidColorInvert(const std::shared_ptr<ImmersiveOptions>& op
     if (enableFunc) {
         return enableFunc(static_cast<int32_t>(options->style), static_cast<int32_t>(systemTransparency)) != 0;
     }
-    if ((options->style == UiMaterialStyle::ULTRA_THIN && IsTransparencyThin(systemTransparency)) ||
-        (options->style == UiMaterialStyle::THIN && IsTransparencyThin(systemTransparency))) {
+    bool status =
+        (options->style == UiMaterialStyle::ULTRA_THIN || options->style == UiMaterialStyle::THIN ||
+            options->style == UiMaterialStyle::ULTRA_THIN_EC || options->style == UiMaterialStyle::THIN_EC ||
+            options->style == UiMaterialStyle::ULTRA_THIN_EC_SUB || options->style == UiMaterialStyle::THIN_EC_SUB);
+    if (status && IsTransparencyThin(systemTransparency)) {
         return true;
     }
     return false;
@@ -381,6 +394,76 @@ bool MaterialUtils::GetUiMaterialFilter(
             return true;
         }
         filter = filterStruct->filter;
+        releaseFunc(filterStructVoid);
+        return true;
+    }
+    return false;
+}
+
+bool MaterialUtils::GetUiMaterialFilterEC(
+    const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter)
+{
+    if (params.key.level != UiMaterialLevel::EXQUISITE) {
+        return false;
+    }
+    static CreateMaterialFilterFunc createFunc = nullptr;
+    static ReleaseMaterialFilterFunc releaseFunc = nullptr;
+#ifndef _WIN32
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        auto handle = GetMaterialLib();
+        CHECK_NULL_VOID(handle);
+        createFunc =
+            reinterpret_cast<CreateMaterialFilterFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC));
+        releaseFunc =
+            reinterpret_cast<ReleaseMaterialFilterFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC));
+    });
+#endif
+    if (createFunc && releaseFunc) {
+        auto arkParam = ConvertToArkUIMaterialKeyParams(params);
+        auto filterStructVoid = createFunc(&arkParam);
+        auto filterStruct = reinterpret_cast<MaterialFilterECStruct*>(filterStructVoid);
+        if (!filterStruct) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "not find param, (%{public}d, %{public}d, %{public}d)",
+                arkParam.style, arkParam.transparency, arkParam.colorMode);
+            return true;
+        }
+        filter = filterStruct->filter;
+        releaseFunc(filterStructVoid);
+        return true;
+    }
+    return false;
+}
+
+bool MaterialUtils::GetUiMaterialShaderECSub(
+    const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader)
+{
+    if (params.key.level != UiMaterialLevel::EXQUISITE) {
+        return false;
+    }
+    static CreateMaterialFilterFunc createFunc = nullptr;
+    static ReleaseMaterialFilterFunc releaseFunc = nullptr;
+#ifndef _WIN32
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        auto handle = GetMaterialLib();
+        CHECK_NULL_VOID(handle);
+        createFunc =
+            reinterpret_cast<CreateMaterialFilterFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_CREATE_UI_MATERIAL_EC_SUB));
+        releaseFunc =
+            reinterpret_cast<ReleaseMaterialFilterFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_RELEASE_UI_MATERIAL_EC_SUB));
+    });
+#endif
+    if (createFunc && releaseFunc) {
+        auto arkParam = ConvertToArkUIMaterialKeyParams(params);
+        auto filterStructVoid = createFunc(&arkParam);
+        auto filterStruct = reinterpret_cast<MaterialShaderECSubStruct*>(filterStructVoid);
+        if (!filterStruct) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "not find param, (%{public}d, %{public}d, %{public}d)",
+                arkParam.style, arkParam.transparency, arkParam.colorMode);
+            return true;
+        }
+        shader = filterStruct->shader;
         releaseFunc(filterStructVoid);
         return true;
     }
