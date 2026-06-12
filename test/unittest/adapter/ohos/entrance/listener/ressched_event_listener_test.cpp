@@ -14,7 +14,10 @@
  */
 
 #include "gtest/gtest.h"
+#defind private public
+#define protected public
 #include "adapter/ohos/entrance/listener/ressched_event_listener.h"
+#include "base/utils/string_utils.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -48,58 +51,236 @@ public:
 };
 
 /**
- * @tc.name: OnReceiveEvent001
- * @tc.desc: Test OnReceiveEvent when conext is nullptr return early
+ * @tc.name: OnComponentPreMake001
+ * @tc.desc: Test OnComponentPreMake with componentType is not exist return early
  * @tc.type: FUNC
  */
 HWTEST_F(ResschedEventListenerTest, OnComponentPreMake001, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    EXPECT_EQ(extInfo.find("componentType"), extInfo.end());
+}
+
+/**
+ * @tc.name: OnComponentPreMake002
+ * @tc.desc: Test OnComponentPreMake with componentType is not number return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake002, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "errorType";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto componentTypeStr = extInfo.find("componentType")->second;
+    EXPECT_FALSE(StringUtils::IsNumber(componentTypeStr));
+}
+
+/**
+ * @tc.name: OnComponentPreMake003
+ * @tc.desc: Test OnComponentPreMake with index is not exist return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake003, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto componentTypeStr = extInfo.find("componentType")->second;
+    EXPECT_TRUE(StringUtils::IsNumber(componentTypeStr));
+    EXPECT_EQ(extInfo.find("index"), extInfo.end());
+}
+
+/**
+ * @tc.name: OnComponentPreMake004
+ * @tc.desc: Test OnComponentPreMake with index is not number return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake004, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "errorIndex";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto indexStr = extInfo.find("index")->second;
+    EXPECT_FALSE(StringUtils::IsNumber(indexStr));
+}
+
+/**
+ * @tc.name: OnComponentPreMake005
+ * @tc.desc: Test OnComponentPreMake with path is not exist return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake005, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto indexStr = extInfo.find("index")->second;
+    EXPECT_TRUE(StringUtils::IsNumber(indexStr));
+    EXPECT_EQ(extInfo.find("path"), extInfo.end());
+}
+
+/**
+ * @tc.name: OnComponentPreMake006
+ * @tc.desc: Test OnComponentPreMake with path is empty return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake006, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    extInfo["path"] = "";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto path = extInfo.find("path")->second;
+    EXPECT_TRUE(path.empty());
+}
+
+/**
+ * @tc.name: OnComponentPreMake007
+ * @tc.desc: Test OnComponentPreMake with path length exceeds the limit return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake007, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    std::ostringstream result;
+    for (int i = 0; i <= 12; i++) {
+        result << "/root/stage[0]/page[0]/JsView[0]/Navigation[0]/NavigationContent[1]/NavDestination[0]";
+    }
+    extInfo["path"] = result.str();
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto pathStr = extInfo.find("path")->second;
+    EXPECT_TRUE(pathStr.size() > 1024);
+}
+
+/**
+ * @tc.name: OnComponentPreMake008
+ * @tc.desc: Test OnComponentPreMake with pageName is not exist return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake008, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    extInfo["path"] = "/root/stage[0]/page[0]/JsView[0]/Navigation[0]/NavigationContent[1]/NavDestination[0]";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    EXPECT_EQ(extInfo.find("pageName"), extInfo.end());
+}
+
+/**
+ * @tc.name: OnComponentPreMake009
+ * @tc.desc: Test OnComponentPreMake with windowId is not exist return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake009, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    extInfo["path"] = "/root/stage[0]/page[0]/JsView[0]/Navigation[0]/NavigationContent[1]/NavDestination[0]";
+    extInfo["pageName"] = "test://helloPage";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto pageNameStr = extInfo.find("pageName")->second;
+    EXPECT_FALSE(pageNameStr.empty());
+    EXPECT_EQ(extInfo.find("windowId"), extInfo.end());
+}
+
+/**
+ * @tc.name: OnComponentPreMake010
+ * @tc.desc: Test OnComponentPreMake with windowId is not number return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake010, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    extInfo["path"] = "/root/stage[0]/page[0]/JsView[0]/Navigation[0]/NavigationContent[1]/NavDestination[0]";
+    extInfo["pageName"] = "test://helloPage";
+    extInfo["windowId"] = "errorWindowId";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto windowIdStr = extInfo.find("windowId")->second;
+    EXPECT_FALSE(StringUtils::IsNumber(windowIdStr));
+}
+
+/**
+ * @tc.name: OnComponentPreMake011
+ * @tc.desc: Test OnComponentPreMake with windowId is default value return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake011, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    extInfo["path"] = "/root/stage[0]/page[0]/JsView[0]/Navigation[0]/NavigationContent[1]/NavDestination[0]";
+    extInfo["pageName"] = "test://helloPage";
+    extInfo["windowId"] = "0";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto windowIdStr = extInfo.find("windowId")->second;
+    EXPECT_EQ(StringUtils::StringToInt(windowIdStr), 0);
+}
+
+/**
+ * @tc.name: OnComponentPreMake012
+ * @tc.desc: Test OnComponentPreMake with containerId is default value return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake012, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    extInfo["path"] = "/root/stage[0]/page[0]/JsView[0]/Navigation[0]/NavigationContent[1]/NavDestination[0]";
+    extInfo["pageName"] = "test://helloPage";
+    extInfo["windowId"] = "1";
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
+    auto windowIdStr = extInfo.find("windowId")->second;
+    EXPECT_EQ(StringUtils::StringToInt(windowIdStr), 1);
+}
+
+/**
+ * @tc.name: OnComponentPreMake013
+ * @tc.desc: Test OnComponentPreMake with context is nullptr return early
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake013, TestSize.Level1)
 {
     RefPtr<NG::MockPipelineContext> pipeline_bak = NG::MockPipelineContext::pipeline_;
     NG::MockPipelineContext::pipeline_ = nullptr;
 
     std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    extInfo["path"] = "/root/stage[0]/page[0]/JsView[0]/Navigation[0]/NavigationContent[1]/NavDestination[0]";
+    extInfo["pageName"] = "test://helloPage";
     extInfo["windowId"] = "10";
-    extInfo["pageName"] = "pageName";
-    uint32_t swiperType = 21;
-    uint32_t value = 0;
-
-    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, value, extInfo);
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
     EXPECT_FALSE(extInfo.empty());
 
     NG::MockPipelineContext::pipeline_ = pipeline_bak;
 }
 
 /**
- * @tc.name: OnReceiveEvent002
- * @tc.desc: Test OnReceiveEvent when pageName page not match
+ * @tc.name: OnComponentPreMake014
+ * @tc.desc: Test OnComponentPreMake with curPageName is empty return early
  * @tc.type: FUNC
  */
-HWTEST_F(ResschedEventListenerTest, OnReceiveEvent002, TestSize.Level1)
+HWTEST_F(ResschedEventListenerTest, OnComponentPreMake014, TestSize.Level1)
 {
     std::unordered_map<std::string, std::string> extInfo;
+    extInfo["componentType"] = "1";
+    extInfo["index"] = "1";
+    extInfo["path"] = "/root/stage[0]/page[0]/JsView[0]/Navigation[0]/NavigationContent[1]/NavDestination[0]";
+    extInfo["pageName"] = "test://helloPage";
     extInfo["windowId"] = "10";
-    extInfo["pageName"] = "pageName";
-    uint32_t swiperType = 21;
-    uint32_t value = 0;
-
-    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, value, extInfo);
-    EXPECT_FALSE(extInfo.empty());
-}
-
-/**
- * @tc.name: OnReceiveEvent003
- * @tc.desc: Test OnReceiveEvent when pageName page match
- * @tc.type: FUNC
- */
-HWTEST_F(ResschedEventListenerTest, OnReceiveEvent003, TestSize.Level1)
-{
-    std::unordered_map<std::string, std::string> extInfo;
-    extInfo["windowId"] = "10";
-    extInfo["pageName"] = "";
-    uint32_t swiperType = 21;
-    uint32_t value = 0;
-
-    ResschedEventListener::GetInstance()->OnReceiveEvent(swiperType, value, extInfo);
+    ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
     EXPECT_FALSE(extInfo.empty());
 }
 }

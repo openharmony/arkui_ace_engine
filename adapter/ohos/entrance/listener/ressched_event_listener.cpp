@@ -24,8 +24,72 @@ namespace OHOS::Ace {
 namespace {
 constexpr char KEY_WINDOW_ID[] = "windowId";
 constexpr char KEY_PAGE_NAME[] = "pageName";
-constexpr int32_t DEFAULT_WINDOW_ID = -1;
+constexpr char KEY_PATH[] = "path";
+constexpr char KEY_INDEX[] = "index";
+constexpr char KEY_COMPONENT_TYPE[] = "componentType";
+constexpr int32_t DEFAULT_WINDOW_ID = 0;
 constexpr int32_t DEFAULT_CONTAINER_ID = -1;
+constexpr int32_t MAX_PATH_LENGTH = 1024;
+
+bool CheckPath(std::unordered_map<std::string, std::string>& extInfo)
+{
+    CHECK_EQUAL_RETURN(extInfo.find(KEY_PATH), extInfo.end(), false);
+    auto pathStr = extInfo.find(KEY_PATH)->second;
+    return !pathStr.empty() && pathStr.size() < MAX_PATH_LENGTH;
+}
+
+bool CheckWindowId(std::unordered_map<std::string, std::string>& extInfo)
+{
+    CHECK_EQUAL_RETURN(extInfo.find(KEY_WINDOW_ID), extInfo.end(), false);
+    auto windowIdStr = extInfo.find(KEY_WINDOW_ID)->second;
+    CHECK_EQUAL_RETURN(StringUtils::IsNumber(windowIdStr), false, false);
+    int32_t windowId = StringUtils::StringToInt(windowIdStr, DEFAULT_WINDOW_ID);
+    CHECK_EQUAL_RETURN(windowId, DEFAULT_WINDOW_ID, false);
+    return true;
+}
+
+bool CheckNumber(std::unordered_map<std::string, std::string>& extInfo, const char* parameterKey)
+{
+    CHECK_EQUAL_RETURN(extInfo.find(parameterKey), extInfo.end(), false);
+    return StringUtils::IsNumber(extInfo.find(parameterKey)->second);
+}
+
+bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo)
+{
+    if (!CheckNumber(extInfo, KEY_COMPONENT_TYPE)) {
+        LOGE("CheckParameterValid parameter component type is invalid");
+        return false;
+    }
+    if (!CheckNumber(extInfo, KEY_INDEX)) {
+        LOGE("CheckParameterValid parameter index is invalid");
+        return false;
+    }
+    if (!CheckPath(extInfo)) {
+        LOGE("CheckParameterValid parameter path is invalid");
+        return false;
+    }
+    if (extInfo.find(KEY_PAGE_NAME) == extInfo.end()) {
+        LOGE("CheckParameterValid parameter pageName is invalid");
+        return false;
+    }
+    if (!CheckWindowId(extInfo)) {
+        LOGE("CheckParameterValid parameter windowId is invalid");
+        return false;
+    }
+    return true;
+}
+
+bool CheckPageName(std::string& pageName, std::string& curPageName)
+{
+    std::vector<std::string> splits;
+    StringUtils::StringSplitter(curPageName, ',', splits);
+    for (auto split : splits) {
+        if (pageName == split) {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace
 
 sptr<ResschedEventListener> ResschedEventListener::GetInstance()
@@ -37,7 +101,7 @@ sptr<ResschedEventListener> ResschedEventListener::GetInstance()
 void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
     std::unordered_map<std::string, std::string> extInfo)
 {
-    LOGD("ResschedEventListener::OnReceiveEvent eventType: %{public}d", eventType);
+    LOGD("OnReceiveEvent eventType: %{public}d", eventType);
     if (eventType == ResourceSchedule::ResType::EventType::EVENT_COMPONENT_PREMAKE) {
         OnComponentPreMake(extInfo);
     }
@@ -45,25 +109,25 @@ void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventVal
 
 void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, std::string>& extInfo)
 {
-    auto it = extInfo.find(KEY_WINDOW_ID);
-    CHECK_EQUAL_VOID(it, extInfo.end());
-    int32_t windowId = StringUtils::StringToInt(it->second, DEFAULT_WINDOW_ID);
-    CHECK_EQUAL_VOID(windowId, DEFAULT_WINDOW_ID);
-
-    auto instanceId = GetContainerId(windowId);
-    CHECK_EQUAL_VOID(instanceId, DEFAULT_CONTAINER_ID);
+    if (!CheckParameterValid(extInfo)) {
+        return;
+    }
+    int32_t windowId = StringUtils::StringToInt(extInfo.find(KEY_WINDOW_ID)->second);
+    int32_t instanceId = GetContainerId(windowId);
+    if (instanceId == DEFAULT_CONTAINER_ID) {
+        LOGE("OnComponentPreMake windowId not registered");
+        return;
+    }
     auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
     if (context == nullptr) {
-        LOGE("ResschedEventListener::OnComponentPreMake context is nullptr");
+        LOGE("OnComponentPreMake windowId is incorrect, context is nullptr");
         return;
     }
 
-    auto pageNameIter = extInfo.find(KEY_PAGE_NAME);
-    CHECK_EQUAL_VOID(pageNameIter, extInfo.end());
-    auto pageName = pageNameIter->second;
+    auto pageName = extInfo.find(KEY_PAGE_NAME)->second;
     auto curPageName = context->GetCurrentPageName();
-    if (curPageName.find(pageName) == std::string::npos) {
-        LOGE("ResschedEventListener::OnComponentPreMake current page not match");
+    if (!CheckPageName(pageName, curPageName)) {
+        LOGE("OnComponentPreMake page name does not match");
         return;
     }
 
