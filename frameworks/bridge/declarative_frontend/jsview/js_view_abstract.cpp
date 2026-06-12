@@ -1842,6 +1842,7 @@ RefPtr<ResourceObject> JSViewAbstract::GetResourceObjectWithId(const JSRef<JSObj
 RefPtr<ResourceObject> JSViewAbstract::GetResourceObject(const JSRef<JSObject>& jsObj)
 {
     bool hasGetterOnId = false;
+    hasGetterOnId = jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID));
     return GetResourceObjectInternal(jsObj, hasGetterOnId);
 }
 
