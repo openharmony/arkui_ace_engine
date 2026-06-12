@@ -406,7 +406,6 @@ const Env = (envKey: keyof EnvTypeMap | SystemEnvKey): PropertyDecorator => {
         if (!this[storeProp]) {
           // first init env value
           stateMgmtConsole.debug(`Env get first register EnvValue key ${envKeyId} varName ${varName} in ${this.debugInfo__()}`);
-          this.__registerUpdateInstanceForEnvFunc__Internal(this.__updateForEnvValue__Internal.bind(this));
           if (EnvV2.isDirectQuerySystemEnvKey(envKeyId)) {
             this[storeProp] = this.findEnvValueByKey(envKeyId);
           } else {
