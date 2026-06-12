@@ -130,6 +130,10 @@ ohos_shared_library("arkoala_native_ani") {
   if (defined(enable_standard_input) && enable_standard_input) {
     external_deps += [ "imf:extra_config_ani" ]
   }
+  if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+  }
   configs = [ "$ace_root:ace_config" ]
   defines = []
   if (pixel_map_support) {
