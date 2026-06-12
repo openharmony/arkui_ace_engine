@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components/common/properties/radius.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
