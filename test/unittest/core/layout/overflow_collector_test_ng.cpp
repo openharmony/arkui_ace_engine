@@ -169,4 +169,31 @@ HWTEST_F(OverflowCollectorTestNg, OverflowCollectorMultipleChildrenTest, TestSiz
     EXPECT_EQ(result.Height(), 90);
     EXPECT_TRUE(collector.Result().totalChildFrameRect.has_value());
 }
+
+/**
+ * @tc.name: OverflowCollectorUseFrameRectTest
+ * @tc.desc: Test AccumulateFromWrapper uses GetFrameRect when useFrameRect is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowCollectorTestNg, OverflowCollectorUseFrameRectTest, TestSize.Level0)
+{
+    auto frameNode = FrameNode::CreateFrameNode("test", 6, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    child->SetActive(true);
+    auto geometryNode = child->GetGeometryNode();
+    MarginPropertyF margin { .left = 10.0f, .right = 10.0f, .top = 10.0f, .bottom = 10.0f };
+    geometryNode->UpdateMargin(margin);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
+
+    OverflowCollector marginCollector(false);
+    marginCollector.AccumulateFromWrapper(child);
+    EXPECT_TRUE(marginCollector.Result().totalChildFrameRect.has_value());
+    EXPECT_EQ(marginCollector.Result().totalChildFrameRect.value(), RectF(0.0f, 0.0f, 120.0f, 120.0f));
+
+    OverflowCollector frameCollector(false, true);
+    frameCollector.AccumulateFromWrapper(child);
+    EXPECT_TRUE(frameCollector.Result().totalChildFrameRect.has_value());
+    EXPECT_EQ(frameCollector.Result().totalChildFrameRect.value(), RectF(10.0f, 10.0f, 100.0f, 100.0f));
+}
 } // namespace OHOS::Ace::NG

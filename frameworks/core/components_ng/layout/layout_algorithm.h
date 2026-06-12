@@ -40,7 +40,8 @@ struct OverflowCollectResult {
 };
 class OverflowCollector {
 public:
-    explicit OverflowCollector(bool earlyBreakWhenDisabled) : earlyBreakWhenDisabled_(earlyBreakWhenDisabled) {}
+    explicit OverflowCollector(bool earlyBreakWhenDisabled, bool useFrameRect = false)
+        : earlyBreakWhenDisabled_(earlyBreakWhenDisabled), useFrameRect_(useFrameRect) {}
 
     void AccumulateFromWrapper(const RefPtr<LayoutWrapper>& child);
 
@@ -48,6 +49,7 @@ public:
     bool Stopped() const {return stop_;}
 private:
     bool earlyBreakWhenDisabled_ = false;
+    bool useFrameRect_ = false;
     bool stop_ = false;
     OverflowCollectResult overflowCollectResult_;
 };
@@ -64,7 +66,7 @@ public:
     }
     bool ShouldDoOverflowWork();
     static OverflowCollectResult CollectOverflowFromFrameNode(
-        FrameNode* hostNode, bool earlyBreakWhenDisabled);
+        FrameNode* hostNode, bool earlyBreakWhenDisabled, bool useFrameRect = false);
 
     void SetHeightPercentSensitive(LayoutWrapper *layoutWrapper, bool value = true);
     void SetWidthPercentSensitive(LayoutWrapper *layoutWrapper, bool value = true);
@@ -118,8 +120,11 @@ public:
         return postponeForIgnore_;
     }
     void HandleContentOverflow(LayoutWrapper* layoutWrapper);
+    bool HandleContentOverflowWithSmartLayout(LayoutWrapper* layoutWrapper);
     void HandleStackContentOverflow(LayoutWrapper* layoutWrapper);
     bool IsContentOverflow(LayoutWrapper* layoutWrapper, OverflowCollector& collector);
+    bool IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper);
+    void TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper);
 
 protected:
     virtual void OnReset() {}
