@@ -29,6 +29,7 @@
 
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components/web/web_full_screen_video_overlay_handler.h"
+#include "core/components/web/web_full_screen_video_overlay_handler_bridge.h"
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
@@ -56,7 +57,6 @@
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "base/web/webview/interfaces/kits/nativecommon/full_screen_video_overlay_handler_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier {
 
@@ -435,9 +435,9 @@ void DefaultOnShowFileSelector(const std::function<void(void*, void*, std::funct
     callback(paramPeer, resultPeer, std::move(releaseFunc));
 }
 
-NWeb::FullScreenVideoOverlayHandlerVTable CreateFullScreenVideoOverlayHandlerVTable()
+FullScreenVideoOverlayHandlerBridgeVTable CreateFullScreenVideoOverlayHandlerVTable()
 {
-    NWeb::FullScreenVideoOverlayHandlerVTable vtable;
+    FullScreenVideoOverlayHandlerBridgeVTable vtable;
     vtable.destroy = [](void* ptr) {
         delete static_cast<Ace::RefPtr<Ace::FullScreenVideoOverlayHandler>*>(ptr);
     };
@@ -453,7 +453,7 @@ NWeb::FullScreenVideoOverlayHandlerVTable CreateFullScreenVideoOverlayHandlerVTa
             h->RequestMediaControl(action, std::string(param, len));
         }
     };
-    vtable.addListener = [](void* ptr, const NWeb::FullScreenVideoListenerCallbacks* cbs) {
+    vtable.addListener = [](void* ptr, const VideoOverlayListenerCallbacks* cbs) {
         auto& h = *static_cast<Ace::RefPtr<Ace::FullScreenVideoOverlayHandler>*>(ptr);
         if (!h) {
             return;
@@ -489,14 +489,14 @@ void DefaultOnFullScreenVideoOverlayEnter(
     auto vtable = CreateFullScreenVideoOverlayHandlerVTable();
 
     auto* handlerPtr = new Ace::RefPtr<Ace::FullScreenVideoOverlayHandler>(handler);
-    auto* wrapper = new NWeb::FullScreenVideoOverlayHandlerWrapper(handlerPtr, vtable);
+    auto* wrapper = new FullScreenVideoOverlayHandlerBridge(handlerPtr, vtable);
     auto* handlerPeer = reinterpret_cast<void*>(wrapper);
     auto* mediaInfoPeer = new std::string(eventInfo->GetMediaInfo());
 
     auto releaseFunc = [&handlerPeer, &mediaInfoPeer](
         void* peer) mutable {
         if (handlerPeer == peer) {
-            auto* w = static_cast<NWeb::FullScreenVideoOverlayHandlerWrapper*>(peer);
+            auto* w = static_cast<FullScreenVideoOverlayHandlerBridge*>(peer);
             delete w;
             handlerPeer = nullptr;
         } else if (mediaInfoPeer == peer) {
