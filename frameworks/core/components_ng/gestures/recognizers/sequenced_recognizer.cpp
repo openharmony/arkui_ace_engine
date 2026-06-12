@@ -44,7 +44,6 @@ void SequencedRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         return;
     }
     if (callback && *callback) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "SequencedRecognizer SendCallbackMsg!");
         GestureEvent info;
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
