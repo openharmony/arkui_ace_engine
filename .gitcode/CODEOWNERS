@@ -4073,8 +4073,6 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/load.cpp @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/load.h @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/log/log.h @arkui_framework_xnode
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/rich_editor/rich_editor_module.cpp @arkui_rich_editor
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/rich_editor/rich_editor_module.h @arkui_rich_editor
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/stateMgmt/stateMgmt_module.cpp @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/stateMgmt/stateMgmt_module.h @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/styled_string/styled_string_module.cpp @huawei_g_five
@@ -4352,8 +4350,6 @@ frameworks/core/interfaces/native/ani/list_item_group_ani_modifier.h @arkuiscrol
 frameworks/core/interfaces/native/ani/node_ani_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/ani/parallelize_ui_ani_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/ani/parallelize_ui_ani_modifier.h @arkui_framework_xnode
-frameworks/core/interfaces/native/ani/rich_editor_ani_modifier.cpp @arkui_rich_editor
-frameworks/core/interfaces/native/ani/rich_editor_ani_modifier.h @arkui_rich_editor
 frameworks/core/interfaces/native/ani/stateMgmt_ani_modifier.cpp @arkui_statemgmt
 frameworks/core/interfaces/native/ani/stateMgmt_ani_modifier.h @arkui_statemgmt
 frameworks/core/interfaces/native/ani/styled_string_ani_modifier.cpp @huawei_g_five
