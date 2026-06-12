@@ -36,6 +36,7 @@ constexpr Dimension DIVIDER_DRAG_BAR_HEIGHT = 48.0_vp;
 constexpr Dimension DRAG_BAR_ITEM_WIDTH = 2.0_vp;
 constexpr Dimension DRAG_BAR_ITEM_HEIGHT = 24.0_vp;
 constexpr float HALF_RATIO = 0.5f;
+constexpr int32_t DIVIDER_POSITION = 0;
 
 bool IsVirtualStackBasedSplit(const RefPtr<FrameNode>& hostNode)
 {
@@ -140,7 +141,7 @@ void ParallelStageLayoutAlgorithm::MeasureInNewRouterSplitFlow(
         secondaryIndex_ = -1;
     }
     // layout divider node
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_POSITION);
     CHECK_NULL_VOID(dividerWrapper);
     auto dividerProperty = dividerWrapper->GetLayoutProperty();
     auto dividerConstraint = dividerProperty->CreateChildConstraint();
@@ -158,7 +159,7 @@ void ParallelStageLayoutAlgorithm::LayoutInNewRouterSplitFlow(
     CHECK_NULL_VOID(stagePattern);
     // layout divider
     auto dividerOffset = GetDividerOffsetX();
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_POSITION);
     CHECK_NULL_VOID(dividerWrapper);
     auto dividerGeometry = dividerWrapper->GetGeometryNode();
     CHECK_NULL_VOID(dividerGeometry);
@@ -281,7 +282,7 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(forceSplitMgr);
     if (stagePattern->GetIsSplit() && forceSplitMgr->IsForceSplitDragging()) {
         SizeCalculationForForceSplit(hostNode, size);
-        auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+        auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_POSITION);
         CHECK_NULL_VOID(dividerWrapper);
         auto dividerProperty = dividerWrapper->GetLayoutProperty();
         auto dividerConstraint = dividerProperty->CreateChildConstraint();
@@ -317,7 +318,7 @@ void ParallelStageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto primaryPageWrapper = layoutWrapper->GetOrCreateChildByIndex(primaryIndex_);
     MeasurePage(primaryPageWrapper, primarySize_);
     // layout divider node
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_POSITION);
     CHECK_NULL_VOID(dividerWrapper);
     auto dividerProperty = dividerWrapper->GetLayoutProperty();
     auto dividerConstraint = dividerProperty->CreateChildConstraint();
@@ -349,22 +350,17 @@ void ParallelStageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto forceSplitMgr = pipeline->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
     if (stagePattern->GetIsSplit() && forceSplitMgr->IsForceSplitDragging()) {
-        float dragRatio = forceSplitMgr->GetTemporarySplitRatio().has_value() ?
-            forceSplitMgr->GetTemporarySplitRatio().value() : forceSplitMgr->GetSplitRatio();
-        float frameWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-        float navBarOrPrimaryNodeWidth = (frameWidth - dividerSize_.Width()) * (1.0f - dragRatio);
-
-        auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+        auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_POSITION);
         CHECK_NULL_VOID(dividerWrapper);
         auto dividerGeometry = dividerWrapper->GetGeometryNode();
         CHECK_NULL_VOID(dividerGeometry);
+        bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
         OffsetF dividerOffsetF;
-        dividerOffsetF.SetX(navBarOrPrimaryNodeWidth);
+        dividerOffsetF.SetX(isRTL ? secondarySize_.Width() : primarySize_.Width());
         dividerOffsetF.SetY(0.0f);
         dividerGeometry->SetMarginFrameOffset(dividerOffsetF);
         dividerWrapper->Layout();
-
-        LayoutDragBar(layoutWrapper, hostNode, navBarOrPrimaryNodeWidth);
+        LayoutDragBar(layoutWrapper, hostNode, primarySize_.Width());
         LayoutForceSplitMaskNodes(layoutWrapper, hostNode);
         return;
     }
@@ -404,6 +400,7 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
         return;
     }
 
+    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
     // layout primary page
     auto primaryPageWrapper = layoutWrapper->GetOrCreateChildByIndex(primaryIndex_);
     CHECK_NULL_VOID(primaryPageWrapper);
@@ -411,8 +408,9 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     CHECK_NULL_VOID(primaryGeometryNode);
     auto primaryPageWidth = primaryGeometryNode->GetFrameSize().Width();
     auto dividerWidth = dividerSize_.Width();
-    auto dividerOffset = primarySize_.Width();
-    auto primaryOffset = std::max(0.0f, (float)(dividerOffset - primaryPageWidth));
+    auto dividerOffset = isRTL ? secondarySize_.Width() : primarySize_.Width();
+    auto primaryOffset = isRTL ? (dividerOffset + dividerWidth) :
+        std::max(0.0f, (float)(dividerOffset - primaryPageWidth));
     OffsetF offset;
     offset.SetX(primaryOffset);
     offset.SetY(0.0f);
@@ -420,7 +418,7 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     primaryPageWrapper->Layout();
 
     // layout divider
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_POSITION);
     CHECK_NULL_VOID(dividerWrapper);
     auto dividerGeometry = dividerWrapper->GetGeometryNode();
     CHECK_NULL_VOID(dividerGeometry);
@@ -436,7 +434,12 @@ void ParallelStageLayoutAlgorithm::LayoutInSplitMode(const RefPtr<FrameNode>& ho
     if (detailPageWrapper == primaryPageWrapper) {
         return;
     }
-    offset.SetX(dividerOffset + dividerWidth);
+    auto secondaryGeometryNode = detailPageWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(secondaryGeometryNode);
+    auto secondaryPageWidth = secondaryGeometryNode->GetFrameSize().Width();
+    auto secondaryOffset = isRTL ? std::max(0.0f, (float)(dividerOffset - secondaryPageWidth)) :
+        (dividerOffset + dividerWidth);
+    offset.SetX(secondaryOffset);
     offset.SetY(0.0f);
     auto geometryNode = detailPageWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -554,20 +557,20 @@ void ParallelStageLayoutAlgorithm::LayoutDragBar(
     auto index = hostNode->GetChildIndexById(dragBarNode->GetId());
     auto dragWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(dragWrapper);
-    auto geometryNode = dragWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(navigationGeometryNode);
-    auto navigationWidth = navigationGeometryNode->GetFrameSize().Width();
-    auto navigationHeight = navigationGeometryNode->GetFrameSize().Height();
-    auto offsetX = primaryWidth - geometryNode->GetFrameSize().Width() * HALF_RATIO;
-    auto offsetY = navigationHeight * HALF_RATIO - geometryNode->GetFrameSize().Height() * HALF_RATIO;
+    auto dragGeometryNode = dragWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(dragGeometryNode);
+    auto stageGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(stageGeometryNode);
+    auto stageWidth = stageGeometryNode->GetFrameSize().Width();
+    auto stageHeight = stageGeometryNode->GetFrameSize().Height();
+    auto offsetX = primaryWidth - dragGeometryNode->GetFrameSize().Width() * HALF_RATIO;
+    auto offsetY = stageHeight * HALF_RATIO - dragGeometryNode->GetFrameSize().Height() * HALF_RATIO;
     OffsetT<float> dragOffset(offsetX, offsetY);
     auto rtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (rtl) {
-        dragOffset.SetX(navigationWidth - primaryWidth - geometryNode->GetFrameSize().Width() * HALF_RATIO);
+        dragOffset.SetX(stageWidth - primaryWidth - dragGeometryNode->GetFrameSize().Width() * HALF_RATIO);
     }
-    geometryNode->SetMarginFrameOffset(dragOffset);
+    dragGeometryNode->SetMarginFrameOffset(dragOffset);
     dragWrapper->Layout();
 }
 

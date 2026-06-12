@@ -220,9 +220,8 @@ int32_t ParallelPageRouterManager::GetLastPageIndex()
     CHECK_NULL_RETURN(stageNode, -1);
     auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, -1);
-    auto dividerNode = stagePattern->GetDividerNode();
-    if (stagePattern->GetIsSplit() && stageNode->GetChildIndex(dividerNode) >= 0) {
-        return pageRouterStack_.size();
+    if (stagePattern->GetIsSplit()) {
+        return pageRouterStack_.size() - 1 + stagePattern->GetNonPageChildrenSize();
     }
     return pageRouterStack_.size() - 1;
 }

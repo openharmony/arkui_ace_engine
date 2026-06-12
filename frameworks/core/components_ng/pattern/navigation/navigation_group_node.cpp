@@ -55,16 +55,24 @@ const RefPtr<CubicCurve> replaceCurve = AceType::MakeRefPtr<CubicCurve>(0.33, 0.
 const RefPtr<InterpolatingSpring> SPLIT_POP_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 const RefPtr<InterpolatingSpring> SPLIT_PUSH_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
+constexpr int32_t FORCESPLIT_DRAGMASK_ZINDEX = 3;
 
 void UpdateDividerOpacityForForceSplitAnimation(const RefPtr<NavigationGroupNode>& navigation, bool isVisible)
 {
     CHECK_NULL_VOID(navigation);
     auto dividerNode = AceType::DynamicCast<FrameNode>(navigation->GetDividerNode());
-    CHECK_NULL_VOID(dividerNode);
-    auto dividerRenderContext = dividerNode->GetRenderContext();
-    CHECK_NULL_VOID(dividerRenderContext);
-    dividerRenderContext->UpdateOpacity(isVisible ? 1.0f : 0.0f);
-    dividerNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    do {
+        CHECK_NULL_BREAK(dividerNode);
+        auto dividerRenderContext = dividerNode->GetRenderContext();
+        CHECK_NULL_BREAK(dividerRenderContext);
+        dividerRenderContext->UpdateOpacity(isVisible ? 1.0f : 0.0f);
+        dividerNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    } while (false);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigation->GetDragBarNode());
+    CHECK_NULL_VOID(dragBarNode);
+    auto property = dragBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
 }
 
 void UpdateContainerClipToBoundsForForceSplitAnimation(const RefPtr<UINode>& node, bool enableClip)
@@ -3398,43 +3406,6 @@ void NavigationGroupNode::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
     mgr->OnPageTransitionEnd(keyNode);
 }
 
-RefPtr<FrameNode> NavigationGroupNode::GetMaskContentNode(bool isLeft)
-{
-    if (!isLeft) {
-        auto navContent = AceType::DynamicCast<FrameNode>(GetContentNode());
-        CHECK_NULL_RETURN(navContent, nullptr);
-        if (!navContent->GetChildren().empty()) {
-            return navContent;
-        }
-        if (relatedPageDestinationNode_) {
-            return AceType::DynamicCast<FrameNode>(relatedPageDestinationNode_);
-        }
-        return AceType::DynamicCast<FrameNode>(forceSplitPlaceHolderNode_);
-    }
-    do {
-        auto primaryContent = AceType::DynamicCast<FrameNode>(primaryContentNode_);
-        CHECK_NULL_BREAK(primaryContent);
-        if (primaryContent->GetChildren().empty()) {
-            break;
-        }
-        return primaryContent;
-    } while (false);
-    return AceType::DynamicCast<FrameNode>(GetNavBarOrHomeDestinationNode());
-}
-
-void NavigationGroupNode::UpdateMaskNodeContent(bool isLeft)
-{
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    auto forceSplitMgr = context->GetForceSplitManager();
-    CHECK_NULL_VOID(forceSplitMgr);
-    auto maskNode = AceType::DynamicCast<FrameNode>(GetOrCreateMaskNode(isLeft));
-    CHECK_NULL_VOID(maskNode);
-    auto contentNode = AceType::DynamicCast<FrameNode>(GetMaskContentNode(isLeft));
-    CHECK_NULL_VOID(contentNode);
-    forceSplitMgr->UpdateDragMaskNodeContent(maskNode, contentNode);
-}
-
 RefPtr<FrameNode> NavigationGroupNode::GetOrCreateMaskNode(bool isLeft)
 {
     if (isLeft) {
@@ -3452,6 +3423,9 @@ RefPtr<FrameNode> NavigationGroupNode::GetOrCreateMaskNode(bool isLeft)
     CHECK_NULL_RETURN(forceSplitMgr, nullptr);
     auto maskNode = forceSplitMgr->CreateDragMaskNode();
     CHECK_NULL_RETURN(maskNode, nullptr);
+    auto renderContext = maskNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateZIndex(FORCESPLIT_DRAGMASK_ZINDEX);
     if (isLeft) {
         leftMaskNode_ = maskNode;
     } else {

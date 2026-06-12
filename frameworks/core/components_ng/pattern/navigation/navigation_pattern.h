@@ -800,15 +800,18 @@ private:
     void DoAnimation(NavigationMode usrNavigationMode);
     void HandleForceSplitDragStart();
     void HandleForceSplitDragUpdate(float xOffset);
-    void HandleForceSplitDragEnd();
+    void HandleForceSplitDragEnd(bool isDragCanceled = false);
+    void UpdateForceSplitScaleAndTranslateByRatio(float ratio);
+    void UpdateForceSplitScaleAndTranslate(
+        float primaryScale, float primaryTranslateX, float secondaryScale, float secondaryTranslateX);
     void CreateForceSplitMaskNodes();
-    void ShowForceSplitMask();
-    void RemoveForceSplitMask();
+    void OnForceSplitDragStart();
+    void UpdateForceSplitDragZIndex(bool isDragging);
+    void OnForceSplitDragEnd();
     void InitForceSplitDragEvent();
-    void CreateForceSplitSnapProperty();
-    void PlayForceSplitSnapAnimation(float fromRatio, float toRatio);
-    void OnForceSplitSnapAnimationFinish(float finalRatio);
-    void StopForceSplitSnapAnimation();
+    void PlayForceSplitSnapAnimation(ForceSplitMode mode, float fromRatio, float toRatio);
+    void OnForceSplitSnapAnimationEnd(float toRatio);
+    void OnForceSplitSnapAnimationFinish(ForceSplitMode mode, float finalRatio);
     void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopDestination);
     bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node);
@@ -1056,6 +1059,10 @@ private:
         const RefPtr<NavDestinationGroupNode>& preTopDest,
         const RefPtr<NavDestinationGroupNode>& curTopDest);
     void CollectActiveNodes(std::vector<RefPtr<NavDestinationGroupNode>>& destNodes);
+    bool UpdateForceSplitDividerColor(const RefPtr<FrameNode>& dividerNode);
+    void OnForceSplitIsDraggableChange(bool isDraggable);
+    void ClearForceSplitDragBarEvent();
+    void AbortForceSplitDragging();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
@@ -1156,6 +1163,10 @@ private:
     WeakPtr<NavDestinationNodeBase> splitPopEnterNode_ = nullptr;
     RefPtr<PanEvent> forceSplitDragEvent_;
     std::shared_ptr<AnimationUtils::Animation> forceSplitSnapAnimation_;
+    bool forceSplitSnapAnimationAborted_ = false;
+    float primaryPartitionWidth_ = 0.0f;
+    float forceSplitDividerWidth_ = 1.0f;
+    float secondaryPartitionWidth_ = 0.0f;
     //-------for force split------- end  ------
 };
 

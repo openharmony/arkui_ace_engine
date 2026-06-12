@@ -57,6 +57,94 @@ namespace {
 const std::string PAGE01 = "Page01";
 const std::string PAGE02 = "Page02";
 const std::string PAGE03 = "Page03";
+constexpr char FORCESPLIT_DRAG_MASKNODE_TAG[] = "ForceSplitDragMask";
+
+constexpr int32_t FORCESPLIT_DRAG_DIVIDER_ZINDEX_TEST = 4;
+constexpr int32_t FORCESPLIT_DRAGBAR_ZINDEX_TEST = 5;
+constexpr int32_t FORCESPLIT_DRAGBAR_ITEM_ZINDEX_TEST = 6;
+constexpr int32_t SECOND_ZINDEX_VALUE_TEST = 2;
+constexpr int32_t ZINDEX_DEFAULT_VALUE_TEST = 0;
+constexpr int32_t DRAGBAR_NORMAL_ZINDEX = 1;
+constexpr float TEST_SPLIT_RATIO_HALF = 0.5f;
+constexpr float TEST_FRAME_WIDTH = 1000.0f;
+constexpr float TEST_DIVIDER_WIDTH_PX = 1.0f;
+constexpr float TEST_PRIMARY_PARTITION_WIDTH = 500.0f;
+constexpr float TEST_SECONDARY_PARTITION_WIDTH = 500.0f;
+constexpr float TEST_X_OFFSET_LTR = 100.0f;
+constexpr float TEST_X_OFFSET_RTL = -100.0f;
+
+void CreateDividerNodeForTest(const RefPtr<NavigationGroupNode>& navNode)
+{
+    CHECK_NULL_VOID(navNode);
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    dividerLayoutProperty->UpdateVertical(true);
+    navNode->SetDividerNode(dividerNode);
+}
+
+void CreateDragBarNodeForTest(const RefPtr<NavigationGroupNode>& navNode)
+{
+    CHECK_NULL_VOID(navNode);
+    auto dragBarNode = FrameNode::GetOrCreateFrameNode("DragBar", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationDragBarPattern>(); });
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragBarItemNode = FrameNode::GetOrCreateFrameNode("DragBarItem",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    CHECK_NULL_VOID(dragBarItemNode);
+    dragBarItemNode->MountToParent(dragBarNode);
+    dragBarNode->MountToParent(navNode);
+    navNode->SetDragBarNode(dragBarNode);
+}
+
+void CreateForceSplitMaskNodesForTest(const RefPtr<NavigationGroupNode>& navNode)
+{
+    CHECK_NULL_VOID(navNode);
+    auto leftMask = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    CHECK_NULL_VOID(leftMask);
+    leftMask->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    navNode->leftMaskNode_ = leftMask;
+    auto rightMask = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    CHECK_NULL_VOID(rightMask);
+    rightMask->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    navNode->rightMaskNode_ = rightMask;
+}
+
+class ScopeIsRightToLeft {
+public:
+    explicit ScopeIsRightToLeft(bool isRightToLeft)
+    {
+        backupIsRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+        AceApplicationInfo::GetInstance().isRightToLeft_ = isRightToLeft;
+    }
+    ~ScopeIsRightToLeft()
+    {
+        AceApplicationInfo::GetInstance().isRightToLeft_ = backupIsRightToLeft_;
+    }
+
+private:
+    bool backupIsRightToLeft_;
+};
+
+class ScopeColorMode {
+public:
+    explicit ScopeColorMode(ColorMode mode)
+    {
+        backupColorMode_ = MockContainer::Current()->GetColorMode();
+        MockContainer::Current()->SetColorMode(mode);
+    }
+    ~ScopeColorMode()
+    {
+        MockContainer::Current()->SetColorMode(backupColorMode_);
+    }
+
+private:
+    ColorMode backupColorMode_;
+};
 
 class TestNavigationStack : public MockNavigationStack {
 public:
@@ -152,6 +240,8 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void MockPipelineContextGetTheme();
+
+    void SetUp() override;
 };
 
 RefPtr<NavigationBarTheme> NavigationPatternTestNineNg::navigationBarTheme_ = nullptr;
@@ -185,6 +275,16 @@ void NavigationPatternTestNineNg::MockPipelineContextGetTheme()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+}
+
+void NavigationPatternTestNineNg::SetUp()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    if (pipeline) {
+        auto mgr = AceType::MakeRefPtr<ForceSplitManager>();
+        mgr->SetPipelineContext(WeakPtr(pipeline));
+        pipeline->forceSplitMgr_ = mgr;
+    }
 }
 
 /**
@@ -1507,7 +1607,7 @@ HWTEST_F(NavigationPatternTestNineNg, GetOrCreateMaskNode003, TestSize.Level1)
 
     auto result = context.navNode->GetOrCreateMaskNode(true);
     ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->GetTag(), V2::STACK_ETS_TAG);
+    EXPECT_EQ(result->GetTag(), FORCESPLIT_DRAG_MASKNODE_TAG);
     EXPECT_EQ(context.navNode->leftMaskNode_, result);
 }
 
@@ -1526,7 +1626,7 @@ HWTEST_F(NavigationPatternTestNineNg, GetOrCreateMaskNode004, TestSize.Level1)
 
     auto result = context.navNode->GetOrCreateMaskNode(false);
     ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->GetTag(), V2::STACK_ETS_TAG);
+    EXPECT_EQ(result->GetTag(), FORCESPLIT_DRAG_MASKNODE_TAG);
     EXPECT_EQ(context.navNode->rightMaskNode_, result);
 }
 
@@ -1585,5 +1685,566 @@ HWTEST_F(NavigationPatternTestNineNg, PageTransitionReport001, TestSize.Level1)
     context.pattern->PageTransitionReport("fromPage", "toPage", "fromCompoent", "toComponent");
     EXPECT_NE(context.pattern, nullptr);
     MockPipelineContext::pipeline_ = pipeline_bak;
+}
+
+/**
+ * @tc.name: UpdateForceSplitDragZIndex001
+ * @tc.desc: Test UpdateForceSplitDragZIndex with isDragging true/false
+ *           isDragging=true: sets ZIndex (divider=4, dragBar=5, item=6)
+ *           isDragging=false: resets ZIndex (divider=0, dragBar=1, item=2)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, UpdateForceSplitDragZIndex001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    CreateDividerNodeForTest(context.navNode);
+    CreateDragBarNodeForTest(context.navNode);
+
+    // Branch: isDragging=true
+    context.pattern->UpdateForceSplitDragZIndex(true);
+    auto divider = context.pattern->GetDividerNode();
+    auto dragBar = context.pattern->GetDragBarNode();
+    ASSERT_NE(divider, nullptr);
+    ASSERT_NE(dragBar, nullptr);
+    EXPECT_EQ(divider->GetRenderContext()->GetZIndex(), FORCESPLIT_DRAG_DIVIDER_ZINDEX_TEST);
+    EXPECT_EQ(dragBar->GetRenderContext()->GetZIndex(), FORCESPLIT_DRAGBAR_ZINDEX_TEST);
+    auto dragBarItem = AceType::DynamicCast<FrameNode>(dragBar->GetChildren().front());
+    ASSERT_NE(dragBarItem, nullptr);
+    EXPECT_EQ(dragBarItem->GetRenderContext()->GetZIndex(), FORCESPLIT_DRAGBAR_ITEM_ZINDEX_TEST);
+
+    // Branch: isDragging=false
+    context.pattern->UpdateForceSplitDragZIndex(false);
+    EXPECT_EQ(divider->GetRenderContext()->GetZIndex().value_or(ZINDEX_DEFAULT_VALUE), ZINDEX_DEFAULT_VALUE_TEST);
+    EXPECT_EQ(dragBar->GetRenderContext()->GetZIndex(), DRAGBAR_NORMAL_ZINDEX);
+    EXPECT_EQ(dragBarItem->GetRenderContext()->GetZIndex(), SECOND_ZINDEX_VALUE_TEST);
+}
+
+/**
+ * @tc.name: UpdateForceSplitDividerColor001
+ * @tc.desc: Test UpdateForceSplitDividerColor early return conditions
+ *           GetIsTargetForceSplitNav=false: returns false
+ *           IsForceSplitEnable=false: returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, UpdateForceSplitDividerColor001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    CreateDividerNodeForTest(context.navNode);
+    auto divider = context.pattern->GetDividerNode();
+    ASSERT_NE(divider, nullptr);
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    // Branch: GetIsTargetForceSplitNav=false
+    context.pattern->SetIsTargetForceSplitNav(false);
+    EXPECT_FALSE(context.pattern->UpdateForceSplitDividerColor(divider));
+
+    // Branch: IsForceSplitEnable=false
+    manager->isForceSplitEnable_ = false;
+    context.pattern->SetIsTargetForceSplitNav(true);
+    EXPECT_FALSE(context.pattern->UpdateForceSplitDividerColor(divider));
+}
+
+/**
+ * @tc.name: UpdateForceSplitDividerColor002
+ * @tc.desc: Test UpdateForceSplitDividerColor with LIGHT/DARK modes and has_value branches
+ *           LIGHT/DARK mode with color: sets color, returns true
+ *           LIGHT mode without color: returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, UpdateForceSplitDividerColor002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    CreateDividerNodeForTest(context.navNode);
+    auto divider = context.pattern->GetDividerNode();
+    ASSERT_NE(divider, nullptr);
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->isForceSplitEnable_ = true;
+    context.pattern->SetIsTargetForceSplitNav(true);
+
+    // Branch: LIGHT mode with color
+    manager->SetSplitDividerColor(Color::RED, std::nullopt);
+    ScopeColorMode colorMode1(ColorMode::LIGHT);
+    EXPECT_TRUE(context.pattern->UpdateForceSplitDividerColor(divider));
+    EXPECT_EQ(divider->GetRenderContext()->GetBackgroundColor().value(), Color::RED);
+
+    // Branch: DARK mode with color
+    manager->SetSplitDividerColor(std::nullopt, Color::BLUE);
+    ScopeColorMode colorMode2(ColorMode::DARK);
+    EXPECT_TRUE(context.pattern->UpdateForceSplitDividerColor(divider));
+    EXPECT_EQ(divider->GetRenderContext()->GetBackgroundColor().value(), Color::BLUE);
+
+    // Branch: LIGHT mode without color
+    manager->SetSplitDividerColor(std::nullopt, Color::BLUE);
+    ScopeColorMode colorMode3(ColorMode::LIGHT);
+    EXPECT_FALSE(context.pattern->UpdateForceSplitDividerColor(divider));
+}
+
+/**
+ * @tc.name: OnForceSplitIsDraggableChange001
+ * @tc.desc: Test OnForceSplitIsDraggableChange when conditions not met
+ *           isDraggable=false: clears drag bar
+ *           IsForceSplitSuccess=false: clears drag bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, OnForceSplitIsDraggableChange001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    CreateDragBarNodeForTest(context.navNode);
+    auto dragBarNode = context.navNode->GetDragBarNode();
+    ASSERT_NE(dragBarNode, nullptr);
+
+    // Branch: isDraggable=false
+    context.pattern->OnForceSplitIsDraggableChange(false);
+    EXPECT_EQ(context.navNode->GetChildIndexById(dragBarNode), -1);
+
+    // Branch: IsForceSplitSuccess=false
+    CreateDragBarNodeForTest(context.navNode);
+    dragBarNode = context.navNode->GetDragBarNode();
+    ASSERT_NE(dragBarNode, nullptr);
+    context.pattern->forceSplitSuccess_ = false;
+    context.pattern->OnForceSplitIsDraggableChange(true);
+    EXPECT_EQ(context.navNode->GetChildIndexById(dragBarNode), -1);
+}
+
+/**
+ * @tc.name: OnForceSplitIsDraggableChange002
+ * @tc.desc: Test OnForceSplitIsDraggableChange when conditions met
+ *           dragBar=null: creates new
+ *           dragBar exists: reuse
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, OnForceSplitIsDraggableChange002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    context.pattern->forceSplitSuccess_ = true;
+
+    // Branch: dragBar=null => creates new
+    context.navNode->SetDragBarNode(nullptr);
+    context.pattern->OnForceSplitIsDraggableChange(true);
+    ASSERT_NE(context.navNode->GetDragBarNode(), nullptr);
+
+    // Branch: dragBar exists => reuse
+    auto existingDragBar = context.navNode->GetDragBarNode();
+    context.pattern->OnForceSplitIsDraggableChange(true);
+    EXPECT_EQ(context.navNode->GetDragBarNode(), existingDragBar);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragUpdate006
+ * @tc.desc: Test HandleForceSplitDragUpdate in LTR/RTL modes
+ *           LTR: newRatio -= xOffset / frameWidth
+ *           RTL: newRatio += xOffset / frameWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragUpdate006, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(TEST_FRAME_WIDTH, 100.0f));
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->splitRatio_ = TEST_SPLIT_RATIO_HALF;
+    manager->SetIsForceSplitDragging(true);
+
+    // Branch: LTR mode
+    ScopeIsRightToLeft isRightToLeft1(false);
+    context.pattern->HandleForceSplitDragUpdate(TEST_X_OFFSET_LTR);
+    auto tempRatio = manager->GetTemporarySplitRatio();
+    ASSERT_TRUE(tempRatio.has_value());
+    EXPECT_FLOAT_EQ(tempRatio.value(), TEST_SPLIT_RATIO_HALF - TEST_X_OFFSET_LTR / TEST_FRAME_WIDTH);
+
+    // Branch: RTL mode
+    manager->splitRatio_ = TEST_SPLIT_RATIO_HALF;
+    ScopeIsRightToLeft isRightToLeft2(true);
+    context.pattern->HandleForceSplitDragUpdate(TEST_X_OFFSET_RTL);
+    tempRatio = manager->GetTemporarySplitRatio();
+    ASSERT_TRUE(tempRatio.has_value());
+    EXPECT_FLOAT_EQ(tempRatio.value(), TEST_SPLIT_RATIO_HALF + TEST_X_OFFSET_RTL / TEST_FRAME_WIDTH);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragStart001
+ * @tc.desc: Test HandleForceSplitDragStart early return
+ *           IsSplitDraggable=false: not start
+ *           IsForceSplitDragging=true: not start again
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragStart001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.pattern, nullptr);
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->isForceSplitDragging_ = false;
+
+    // Branch: if(!IsForceSplitSuccess()) { => true
+    context.pattern->forceSplitSuccess_ = false;
+    context.pattern->HandleForceSplitDragStart();
+    EXPECT_FALSE(manager->IsForceSplitDragging());
+
+    context.pattern->forceSplitSuccess_ = true;
+    // Branch: IsSplitDraggable=false
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+    manager->wideSplitIsDraggable_ = false;
+    context.pattern->HandleForceSplitDragStart();
+    EXPECT_FALSE(manager->IsForceSplitDragging());
+
+    // Branch: IsForceSplitDragging=true
+    manager->wideSplitIsDraggable_ = true;
+    manager->SetIsForceSplitDragging(true);
+    context.pattern->HandleForceSplitDragStart();
+    EXPECT_TRUE(manager->IsForceSplitDragging());
+}
+
+/**
+ * @tc.name: HandleForceSplitDragStart002
+ * @tc.desc: Test HandleForceSplitDragStart success
+ *           Starts drag and initializes partition widths
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragStart002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    CreateDividerNodeForTest(context.navNode);
+    CreateDragBarNodeForTest(context.navNode);
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(TEST_FRAME_WIDTH, 100.0f));
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
+    manager->wideSplitIsDraggable_ = true;
+    manager->splitRatio_ = TEST_SPLIT_RATIO_HALF;
+    manager->SetIsForceSplitDragging(false);
+
+    context.pattern->forceSplitSuccess_ = true;
+    context.pattern->HandleForceSplitDragStart();
+    EXPECT_TRUE(manager->IsForceSplitDragging());
+    EXPECT_FLOAT_EQ(context.pattern->primaryPartitionWidth_,
+        (TEST_FRAME_WIDTH - TEST_DIVIDER_WIDTH_PX) * (1.0f - TEST_SPLIT_RATIO_HALF));
+}
+
+/**
+ * @tc.name: OnForceSplitDragStart001
+ * @tc.desc: Test OnForceSplitDragStart initialization
+ *           Sets ZIndex and partition widths
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, OnForceSplitDragStart001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    CreateDividerNodeForTest(context.navNode);
+    CreateDragBarNodeForTest(context.navNode);
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(TEST_FRAME_WIDTH, 100.0f));
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->splitRatio_ = TEST_SPLIT_RATIO_HALF;
+
+    context.pattern->OnForceSplitDragStart();
+    auto divider = context.pattern->GetDividerNode();
+    auto dragBar = context.pattern->GetDragBarNode();
+    ASSERT_NE(divider, nullptr);
+    ASSERT_NE(dragBar, nullptr);
+    auto dividerContext = divider->GetRenderContext();
+    ASSERT_NE(dividerContext, nullptr);
+    auto dragBarContext = dragBar->GetRenderContext();
+    ASSERT_NE(dragBarContext, nullptr);
+    EXPECT_EQ(dividerContext->GetZIndex().value_or(ZINDEX_DEFAULT_VALUE), FORCESPLIT_DRAG_DIVIDER_ZINDEX_TEST);
+    EXPECT_EQ(dragBarContext->GetZIndex().value_or(ZINDEX_DEFAULT_VALUE), FORCESPLIT_DRAGBAR_ZINDEX_TEST);
+    EXPECT_FLOAT_EQ(context.pattern->forceSplitDividerWidth_, TEST_DIVIDER_WIDTH_PX);
+}
+
+/**
+ * @tc.name: OnForceSplitDragEnd001
+ * @tc.desc: Test OnForceSplitDragEnd cleanup
+ *           Resets ZIndex to normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, OnForceSplitDragEnd001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    CreateDividerNodeForTest(context.navNode);
+    CreateDragBarNodeForTest(context.navNode);
+    CreateForceSplitMaskNodesForTest(context.navNode);
+
+    context.pattern->OnForceSplitDragEnd();
+    auto divider = context.pattern->GetDividerNode();
+    auto dragBar = context.pattern->GetDragBarNode();
+    ASSERT_NE(divider, nullptr);
+    ASSERT_NE(dragBar, nullptr);
+    auto dividerContext = divider->GetRenderContext();
+    ASSERT_NE(dividerContext, nullptr);
+    auto dragBarContext = dragBar->GetRenderContext();
+    ASSERT_NE(dragBarContext, nullptr);
+    EXPECT_EQ(dividerContext->GetZIndex().value_or(ZINDEX_DEFAULT_VALUE), ZINDEX_DEFAULT_VALUE_TEST);
+    EXPECT_EQ(dragBarContext->GetZIndex().value_or(ZINDEX_DEFAULT_VALUE), DRAGBAR_NORMAL_ZINDEX);
+}
+
+/**
+ * @tc.name: HandleForceSplitDragEnd004
+ * @tc.desc: Test HandleForceSplitDragEnd with isDragCanceled and tempRatio branches
+ *           isDragCanceled=true: uses splitRatio
+ *           isDragCanceled=false + tempRatio: uses tempRatio
+ *           isDragCanceled=false + no tempRatio: uses splitRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragEnd004, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    constexpr float tempRatio = 0.7f;
+    constexpr float splitRatio = 0.5f;
+    manager->splitRatio_ = splitRatio;
+
+    // Branch: isDragCanceled=true
+    manager->SetIsForceSplitDragging(true);
+    manager->SetTemporarySplitRatio(tempRatio);
+    context.pattern->HandleForceSplitDragEnd(true);
+    EXPECT_FALSE(manager->IsForceSplitDragging());
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), splitRatio);
+
+    // Branch: isDragCanceled=false + tempRatio has value
+    manager->SetIsForceSplitDragging(true);
+    manager->SetTemporarySplitRatio(splitRatio);
+    context.pattern->HandleForceSplitDragEnd(false);
+    EXPECT_FALSE(manager->IsForceSplitDragging());
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), splitRatio);
+
+    // Branch: isDragCanceled=false + tempRatio has no value
+    manager->SetIsForceSplitDragging(true);
+    manager->ClearTemporarySplitRatio();
+    manager->splitRatio_ = splitRatio;
+    context.pattern->HandleForceSplitDragEnd(false);
+    EXPECT_FALSE(manager->IsForceSplitDragging());
+}
+
+/**
+ * @tc.name: HandleForceSplitDragEnd005
+ * @tc.desc: Test HandleForceSplitDragEnd plays animation when needed
+ *           isDragCanceled=false + tempRatio != snap point: plays animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, HandleForceSplitDragEnd005, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetIsForceSplitDragging(true);
+    constexpr float tempRatio = 0.6f;
+    manager->SetTemporarySplitRatio(tempRatio);
+
+    context.pattern->HandleForceSplitDragEnd(false);
+    EXPECT_NE(context.pattern->forceSplitSnapAnimation_, nullptr);
+}
+
+/**
+ * @tc.name: AbortForceSplitDragging001
+ * @tc.desc: Test AbortForceSplitDragging with different conditions
+ *           IsRouterForceSplit=true: returns early
+ *           Has animation: stops animation
+ *           No animation: calls HandleTouchUp + HandleForceSplitDragEnd(true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, AbortForceSplitDragging001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    CreateDividerNodeForTest(context.navNode);
+    CreateDragBarNodeForTest(context.navNode);
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    constexpr float tempRatio = 0.7f;
+    constexpr float splitRatio = 0.5f;
+    manager->splitRatio_ = splitRatio;
+
+    // Branch: if (!GetIsTargetForceSplitNav()) { => true
+    manager->SetIsForceSplitDragging(true);
+    context.pattern->SetIsTargetForceSplitNav(false);
+    context.pattern->AbortForceSplitDragging();
+    EXPECT_TRUE(manager->IsForceSplitDragging());
+
+    context.pattern->SetIsTargetForceSplitNav(true);
+    // Branch: IsRouterForceSplit=true
+    manager->SetIsRouter(true);
+    manager->SetIsForceSplitDragging(true);
+    context.pattern->AbortForceSplitDragging();
+    EXPECT_TRUE(manager->IsForceSplitDragging());
+
+    // Branch: Has animation
+    manager->SetIsRouter(false);
+    manager->SetIsForceSplitDragging(true);
+    AnimationOption option;
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f));
+    context.pattern->forceSplitSnapAnimation_ = AnimationUtils::StartAnimation(option, [&]() {});
+    context.pattern->AbortForceSplitDragging();
+    EXPECT_EQ(context.pattern->forceSplitSnapAnimation_, nullptr);
+
+    // Branch: No animation
+    manager->SetIsForceSplitDragging(true);
+    manager->SetTemporarySplitRatio(tempRatio);
+    context.pattern->forceSplitSnapAnimation_.reset();
+    context.pattern->AbortForceSplitDragging();
+    EXPECT_FALSE(manager->IsForceSplitDragging());
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), splitRatio);
+}
+
+/**
+ * @tc.name: UpdateForceSplitScaleAndTranslateByRatio001
+ * @tc.desc: Test UpdateForceSplitScaleAndTranslateByRatio invalid width
+ *           frameWidth<=0: returns early
+ *           primaryPartitionWidth<=0: returns early
+ *           secondaryPartitionWidth<=0: returns early
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, UpdateForceSplitScaleAndTranslateByRatio001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+
+    // Branch: frameWidth<=0
+    geometryNode->SetFrameSize(SizeF(0.0f, 100.0f));
+    context.pattern->UpdateForceSplitScaleAndTranslateByRatio(TEST_SPLIT_RATIO_HALF);
+
+    // Branch: primaryPartitionWidth<=0
+    geometryNode->SetFrameSize(SizeF(TEST_FRAME_WIDTH, 100.0f));
+    context.pattern->primaryPartitionWidth_ = 0.0f;
+    context.pattern->UpdateForceSplitScaleAndTranslateByRatio(TEST_SPLIT_RATIO_HALF);
+
+    // Branch: secondaryPartitionWidth<=0
+    context.pattern->primaryPartitionWidth_ = TEST_PRIMARY_PARTITION_WIDTH;
+    context.pattern->secondaryPartitionWidth_ = 0.0f;
+    context.pattern->UpdateForceSplitScaleAndTranslateByRatio(TEST_SPLIT_RATIO_HALF);
+}
+
+/**
+ * @tc.name: UpdateForceSplitScaleAndTranslateByRatio002
+ * @tc.desc: Test UpdateForceSplitScaleAndTranslateByRatio in LTR/RTL
+ *           LTR: calculates correct transforms
+ *           RTL: calculates correct transforms
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, UpdateForceSplitScaleAndTranslateByRatio002, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    auto navBarNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavBarPattern>());
+    ASSERT_NE(navBarNode, nullptr);
+    context.navNode->navBarNode_ = navBarNode;
+    auto geometryNode = context.navNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(TEST_FRAME_WIDTH, 100.0f));
+    context.pattern->primaryPartitionWidth_ = TEST_PRIMARY_PARTITION_WIDTH;
+    context.pattern->secondaryPartitionWidth_ = TEST_SECONDARY_PARTITION_WIDTH;
+
+    // Branch: LTR mode
+    ScopeIsRightToLeft isRightToLeft1(false);
+    context.pattern->UpdateForceSplitScaleAndTranslateByRatio(TEST_SPLIT_RATIO_HALF);
+    auto scale = navBarNode->GetRenderContext()->GetTransformScale();
+    ASSERT_TRUE(scale.has_value());
+    EXPECT_NEAR(scale.value().x, 1.0f, 0.01f);
+
+    // Branch: RTL mode
+    ScopeIsRightToLeft isRightToLeft2(true);
+    context.pattern->UpdateForceSplitScaleAndTranslateByRatio(TEST_SPLIT_RATIO_HALF);
+    scale = navBarNode->GetRenderContext()->GetTransformScale();
+    ASSERT_TRUE(scale.has_value());
+    EXPECT_NEAR(scale.value().x, 1.0f, 0.01f);
+}
+
+/**
+ * @tc.name: OnForceSplitSnapAnimationEnd001
+ * @tc.desc: Test OnForceSplitSnapAnimationEnd sets temporary ratio
+ *           Updates ratio and marks dirty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, OnForceSplitSnapAnimationEnd001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+    auto manager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    context.pattern->OnForceSplitSnapAnimationEnd(TEST_SPLIT_RATIO_HALF);
+    auto tempRatio = manager->GetTemporarySplitRatio();
+    ASSERT_TRUE(tempRatio.has_value());
+    EXPECT_FLOAT_EQ(tempRatio.value(), TEST_SPLIT_RATIO_HALF);
+}
+
+/**
+ * @tc.name: ClearForceSplitDragBarEvent001
+ * @tc.desc: Test ClearForceSplitDragBarEvent clears events and removes node
+ *           No events: removes node
+ *           Has events: clears and removes node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNineNg, ClearForceSplitDragBarEvent001, TestSize.Level1)
+{
+    auto context = CreateNavigationTestContext(true);
+    ASSERT_NE(context.navNode, nullptr);
+    ASSERT_NE(context.pattern, nullptr);
+
+    // Branch: no events, just remove node
+    CreateDragBarNodeForTest(context.navNode);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(context.navNode->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    EXPECT_NE(context.navNode->GetChildIndexById(dragBarNode->GetId()), -1);
+    context.pattern->touchEvent_ = nullptr;
+    context.pattern->forceSplitDragEvent_ = nullptr;
+    context.pattern->ClearForceSplitDragBarEvent();
+    EXPECT_EQ(context.navNode->GetChildIndexById(dragBarNode->GetId()), -1);
+
+    // Branch: has events, clears and removes
+    CreateDragBarNodeForTest(context.navNode);
+    dragBarNode = AceType::DynamicCast<FrameNode>(context.navNode->GetDragBarNode());
+    ASSERT_NE(dragBarNode, nullptr);
+    auto gestureHub = dragBarNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>([](const TouchEventInfo&) {});
+    auto panEvent = AceType::MakeRefPtr<PanEvent>([](const GestureEvent&) {}, [](const GestureEvent&) {},
+        [](const GestureEvent&) {}, []() {});
+    context.pattern->touchEvent_ = touchEvent;
+    context.pattern->forceSplitDragEvent_ = panEvent;
+    gestureHub->AddTouchEvent(touchEvent);
+    gestureHub->AddPanEvent(panEvent, { .type = PanDirection::HORIZONTAL }, 1,
+        { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } });
+    context.pattern->ClearForceSplitDragBarEvent();
+    EXPECT_EQ(context.pattern->touchEvent_, nullptr);
+    EXPECT_EQ(context.pattern->forceSplitDragEvent_, nullptr);
+    EXPECT_EQ(context.navNode->GetChildIndexById(dragBarNode->GetId()), -1);
 }
 } // namespace OHOS::Ace::NG
