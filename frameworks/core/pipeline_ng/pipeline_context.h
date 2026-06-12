@@ -1046,6 +1046,16 @@ public:
     {
         return isFreezeFlushMessage_;
     }
+
+    // Returns true if this pipeline was created in an isolated thread (dc/card scenario).
+    // The flag is determined at construction time from ContainerScope::IsIsolatedThread()
+    // and is immutable for the pipeline's entire lifecycle.
+    // Used for IsolatedThread consistency validation between nodes and pipelines.
+    bool IsIsolatedThread() const
+    {
+        return isIsolatedThread_;
+    }
+
     bool IsContainerModalVisible() const override;
     void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
     {
@@ -1672,6 +1682,10 @@ private:
     bool isWindowSizeDragging_ = false;
     KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
+    // Indicates whether this pipeline was created in an isolated (dc/card) thread.
+    // Set at construction from ContainerScope::IsIsolatedThread() and never changes afterwards.
+    // Used for IsolatedThread consistency validation between nodes and pipelines.
+    bool isIsolatedThread_ = false;
     bool isNeedCallbackAreaChange_ = true;
 
     RefPtr<FrameNode> focusNode_;

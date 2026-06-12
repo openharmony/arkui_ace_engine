@@ -1463,4 +1463,20 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest026, TestSize.Level1)
     ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
     ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
 }
+
+/**
+ * @tc.name: ContainerScopeTest_IsIsolatedThread_Lifecycle001
+ * @tc.desc: Test IsIsolatedThread default false, true after mark, false after reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest_IsIsolatedThread_Lifecycle001, TestSize.Level1)
+{
+    EXPECT_FALSE(ContainerScope::IsIsolatedThread());
+
+    ContainerScope::MarkIsolatedThread();
+    EXPECT_TRUE(ContainerScope::IsIsolatedThread());
+
+    ContainerScope::ResetIsolatedThread();
+    EXPECT_FALSE(ContainerScope::IsIsolatedThread());
+}
 } // namespace OHOS::Ace
