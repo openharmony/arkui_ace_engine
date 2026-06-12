@@ -27,7 +27,7 @@ constexpr char KEY_PAGE_NAME[] = "pageName";
 constexpr char KEY_PATH[] = "path";
 constexpr char KEY_INDEX[] = "index";
 constexpr char KEY_COMPONENT_TYPE[] = "componentType";
-constexpr int32_t DEFAULT_WINDOW_ID = 0;
+constexpr int32_t DEFAULT_WINDOW_ID = -1;
 constexpr int32_t DEFAULT_CONTAINER_ID = -1;
 constexpr int32_t MAX_PATH_LENGTH = 1024;
 
@@ -38,12 +38,12 @@ bool CheckPath(std::unordered_map<std::string, std::string>& extInfo)
     return !pathStr.empty() && pathStr.size() < MAX_PATH_LENGTH;
 }
 
-bool CheckWindowId(std::unordered_map<std::string, std::string>& extInfo)
+bool CheckWindowId(std::unordered_map<std::string, std::string>& extInfo, int32_t& windowId)
 {
     CHECK_EQUAL_RETURN(extInfo.find(KEY_WINDOW_ID), extInfo.end(), false);
     auto windowIdStr = extInfo.find(KEY_WINDOW_ID)->second;
     CHECK_EQUAL_RETURN(StringUtils::IsNumber(windowIdStr), false, false);
-    int32_t windowId = StringUtils::StringToInt(windowIdStr, DEFAULT_WINDOW_ID);
+    windowId = StringUtils::StringToInt(windowIdStr, DEFAULT_WINDOW_ID);
     CHECK_EQUAL_RETURN(windowId, DEFAULT_WINDOW_ID, false);
     return true;
 }
@@ -54,7 +54,18 @@ bool CheckNumber(std::unordered_map<std::string, std::string>& extInfo, const ch
     return StringUtils::IsNumber(extInfo.find(parameterKey)->second);
 }
 
-bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo)
+bool CheckPageName(std::unordered_map<std::string, std::string>& extInfo, std::string& pageName)
+{
+    auto iter = extInfo.find(KEY_PAGE_NAME);
+    if (iter != extInfo.end()) {
+        pageName = iter->second;
+        return true;
+    }
+    return false;
+}
+
+bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo,
+    int32_t& windowId, std::string& pageName)
 {
     if (!CheckNumber(extInfo, KEY_COMPONENT_TYPE)) {
         LOGE("CheckParameterValid parameter component type is invalid");
@@ -68,18 +79,18 @@ bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo)
         LOGE("CheckParameterValid parameter path is invalid");
         return false;
     }
-    if (extInfo.find(KEY_PAGE_NAME) == extInfo.end()) {
+    if (!CheckPageName(extInfo, pageName)) {
         LOGE("CheckParameterValid parameter pageName is invalid");
         return false;
     }
-    if (!CheckWindowId(extInfo)) {
+    if (!CheckWindowId(extInfo, windowId)) {
         LOGE("CheckParameterValid parameter windowId is invalid");
         return false;
     }
     return true;
 }
 
-bool CheckPageName(std::string& pageName, std::string& curPageName)
+bool IsPageNameMatch(const std::string& pageName, const std::string& curPageName)
 {
     std::vector<std::string> splits;
     StringUtils::StringSplitter(curPageName, ',', splits);
@@ -109,13 +120,15 @@ void ResschedEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventVal
 
 void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, std::string>& extInfo)
 {
-    if (!CheckParameterValid(extInfo)) {
+    std::string pageName;
+    int32_t windowId = -1;
+    if (!CheckParameterValid(extInfo, windowId, pageName)) {
         return;
     }
-    int32_t windowId = StringUtils::StringToInt(extInfo.find(KEY_WINDOW_ID)->second);
+
     int32_t instanceId = GetContainerId(windowId);
     if (instanceId == DEFAULT_CONTAINER_ID) {
-        LOGE("OnComponentPreMake windowId not registered");
+        LOGE("OnComponentPreMake windowId not registered, windowId:%{public}d", windowId);
         return;
     }
     auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
@@ -124,10 +137,10 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
         return;
     }
 
-    auto pageName = extInfo.find(KEY_PAGE_NAME)->second;
     auto curPageName = context->GetCurrentPageName();
-    if (!CheckPageName(pageName, curPageName)) {
-        LOGE("OnComponentPreMake page name does not match");
+    if (!IsPageNameMatch(pageName, curPageName)) {
+        LOGE("OnComponentPreMake page name does not match, pageName:%{public}s, curPageName:%{public}s",
+            pageName.c_str(), curPageName.c_str());
         return;
     }
 

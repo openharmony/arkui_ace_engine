@@ -14,7 +14,7 @@
  */
 
 #include "gtest/gtest.h"
-#defind private public
+#define private public
 #define protected public
 #include "adapter/ohos/entrance/listener/ressched_event_listener.h"
 #include "base/utils/string_utils.h"
@@ -134,8 +134,8 @@ HWTEST_F(ResschedEventListenerTest, OnComponentPreMake006, TestSize.Level1)
     extInfo["index"] = "1";
     extInfo["path"] = "";
     ResschedEventListener::GetInstance()->OnComponentPreMake(extInfo);
-    auto path = extInfo.find("path")->second;
-    EXPECT_TRUE(path.empty());
+    auto pathStr = extInfo.find("path")->second;
+    EXPECT_TRUE(pathStr.empty());
 }
 
 /**
