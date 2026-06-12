@@ -466,10 +466,9 @@ napi_modules = [
         lib_names = [ "hilog_napi" ]
       },
       {
-        label = "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages"
+        label = "//commonlibrary/ets_utils/js_api_module/buffer:buffer"
         subsystem_name = "commonlibrary"
         part_name = "ets_utils"
-        lib_names = [ "buffer" ]
       },
       {
         label =
@@ -514,26 +513,79 @@ napi_modules = [
     prefix = "util"
     shard_libs = [
       {
-        label = "//commonlibrary/ets_utils/js_util_module/container:container_packages"
+        label = "//commonlibrary/ets_utils/js_util_module/container:arraylist"
         subsystem_name = "commonlibrary"
         part_name = "ets_utils"
-        lib_names = [
-          "arraylist",
-          "deque",
-          "queue",
-          "vector",
-          "linkedlist",
-          "list",
-          "stack",
-          "struct",
-          "treemap",
-          "treeset",
-          "hashmap",
-          "hashset",
-          "lightweightmap",
-          "lightweightset",
-          "plainarray",
-        ]
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:deque"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:queue"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:vector"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:linkedlist"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:list"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:stack"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:struct"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:treemap"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:treeset"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:hashmap"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:hashset"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:lightweightmap"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:lightweightset"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
+      },
+      {
+        label = "//commonlibrary/ets_utils/js_util_module/container:plainarray"
+        subsystem_name = "commonlibrary"
+        part_name = "ets_utils"
       },
     ]
   },
