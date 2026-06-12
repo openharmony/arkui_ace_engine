@@ -7666,7 +7666,13 @@ void JsAccessibilityManager::WebFocusMoveSearch(const int64_t elementId, const i
     const RefPtr<NG::WebPattern>& webPattern)
 {
     AccessibilityElementInfo nodeInfo;
-    auto context = GetPipelineByWindowId(windowId);
+    CHECK_NULL_VOID(webPattern);
+    auto frameNode = webPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    uint32_t realWindowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
+    auto context = GetPipelineByWindowId(realWindowId);
     if (!context) {
         nodeInfo.SetValidElement(false);
         SetFocusMoveSearchResult(callback, nodeInfo, requestId);
@@ -7677,11 +7683,14 @@ void JsAccessibilityManager::WebFocusMoveSearch(const int64_t elementId, const i
     WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, context);
     TAG_LOGD(AceLogTag::ACE_WEB,
         "JsAccessibilityManager WebFocusMoveSearch AccessibilityId: %{public}" PRId64
-        ", ComponentType: %{public}s, ParentNodeId: %{public}" PRId64 ", TreeId: %{public}d",
+        ", ComponentType: %{public}s, ParentNodeId: %{public}" PRId64
+        ", TreeId: %{public}d, WindowId: %{public}d, ParentWindowId: %{public}d",
         nodeInfo.GetAccessibilityId(),
         nodeInfo.GetComponentType().c_str(),
         nodeInfo.GetParentNodeId(),
-        nodeInfo.GetBelongTreeId());
+        nodeInfo.GetBelongTreeId(),
+        nodeInfo.GetWindowId(),
+        nodeInfo.GetParentWindowId());
     SetFocusMoveSearchResult(callback, nodeInfo, requestId);
 }
 
@@ -7791,7 +7800,6 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
 
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, accessibilityId);
 
-    uint32_t parentWindowId = GetWindowId();
     auto pattern = webPattern.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
     auto frameNode = pattern->GetHost();
@@ -7799,6 +7807,7 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     uint32_t windowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
+    uint32_t parentWindowId = windowId;
     auto interactionOperation = std::make_shared<WebInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
     interactionOperation->SetWebPattern(webPattern);
