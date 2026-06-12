@@ -423,7 +423,7 @@ class JSTextClock extends JSViewAbstract {
     __Common__.onAppear(value);
   }
   static onDetach(value: any): void {
-    __Common__.onAttach(value);
+    __Common__.onDetach(value);
   }
   static onDisAppear(value: any): void {
     __Common__.onDisAppear(value);
