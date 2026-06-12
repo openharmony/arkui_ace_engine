@@ -1703,8 +1703,8 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
         corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] = transformCorner(position.leftBottom);
         corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] = transformCorner(position.rightBottom);
         variantPara->position = corners;
-    } else {
-        variantPara->position = params.depth;
+    } else if (params.depth.has_value()) {
+        variantPara->position = params.depth.value();
     }
     variantPara->occlusionWeight = params.occlusionWeight;
     rsNode_->SetSpatialEffectPara(variantPara);

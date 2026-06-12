@@ -112,7 +112,7 @@ struct ACE_EXPORT DepthPosition {
 struct ACE_EXPORT SpatialEffectParams {
     std::optional<DepthPosition> position;
     float occlusionWeight = 0.0f;
-    float depth = 0.0f;
+    std::optional<float> depth;
     std::optional<CropOffset> cropOffset;
     float cropScale = 1.0f;
 
@@ -120,7 +120,8 @@ struct ACE_EXPORT SpatialEffectParams {
     {
         return position == other.position
             && NearEqual(occlusionWeight, other.occlusionWeight)
-            && NearEqual(depth, other.depth)
+            && (depth.has_value() == other.depth.has_value())
+            && (!depth.has_value() || NearEqual(depth.value(), other.depth.value()))
             && cropOffset == other.cropOffset
             && NearEqual(cropScale, other.cropScale);
     }
@@ -134,7 +135,7 @@ struct ACE_EXPORT SpatialEffectParams {
     {
         position.reset();
         occlusionWeight = 0.0f;
-        depth = 0.0f;
+        depth.reset();
         cropOffset.reset();
         cropScale = 1.0f;
     }
