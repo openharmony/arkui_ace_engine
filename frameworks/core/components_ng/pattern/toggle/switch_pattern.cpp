@@ -24,6 +24,7 @@
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/border_property.h"

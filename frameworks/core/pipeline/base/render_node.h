@@ -30,7 +30,6 @@
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/motion_path_option.h"
-#include "core/components/common/properties/text_enums.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_raw_recognizer.h"

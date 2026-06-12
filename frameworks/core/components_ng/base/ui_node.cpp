@@ -37,6 +37,7 @@
 #include "core/pipeline_ng/environment_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
+#include "ui/base/versions.h"
 
 namespace OHOS::Ace::NG {
 
@@ -3260,5 +3261,92 @@ void UINode::AddFlexLayouts()
     if (nodeInfo_) {
         nodeInfo_->flexLayouts++;
     }
+}
+
+void UINode::UpdateModalUiextensionCount(bool addNode)
+{
+    if (addNode) {
+        modalUiextensionCount_++;
+    } else {
+        modalUiextensionCount_--;
+    }
+}
+
+void UINode::SetDepth(int32_t depth)
+{
+    depth_ = depth;
+    for (auto& child : children_) {
+        child->SetDepth(depth_ + 1);
+    }
+}
+
+void UINode::SetHostPageId(int32_t id)
+{
+    hostPageId_ = id;
+    for (auto& child : children_) {
+        child->SetHostPageId(id);
+    }
+}
+
+void UINode::FlushUpdateAndMarkDirty()
+{
+    for (const auto& child : children_) {
+        child->FlushUpdateAndMarkDirty();
+    }
+}
+
+void UINode::MarkForceMeasure()
+{
+    MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    for (const auto& child : children_) {
+        child->MarkForceMeasure();
+    }
+}
+
+void UINode::SetAccessibilityNodeVirtual()
+{
+    isAccessibilityVirtualNode_ = true;
+    for (auto& it : GetChildren()) {
+        it->SetAccessibilityNodeVirtual();
+    }
+}
+
+void UINode::SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent)
+{
+    parentForAccessibilityVirtualNode_ = parent;
+    for (auto& it : GetChildren()) {
+        it->SetAccessibilityVirtualNodeParent(parent);
+    }
+}
+
+void UINode::setIsMoving(bool isMoving)
+{
+    isMoving_ = isMoving;
+    for (auto& child : children_) {
+        child->setIsMoving(isMoving);
+    }
+}
+
+void UINode::SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
+{
+    for (const auto& child : GetChildren()) {
+        child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+    }
+}
+
+RefPtr<UINode> UINode::GetLastChild() const
+{
+    if (children_.empty()) {
+        return nullptr;
+    }
+    return children_.back();
+}
+
+RefPtr<UINode> UINode::GetFirstChild() const
+{
+    if (children_.empty()) {
+        return nullptr;
+    }
+    return children_.front();
 }
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/property/position_property.h"
+#include "core/components_ng/event/state_style_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

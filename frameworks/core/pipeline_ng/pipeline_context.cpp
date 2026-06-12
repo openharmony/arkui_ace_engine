@@ -69,6 +69,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/back_press_handler_manager.h"
+#include "core/common/color_inverter.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
@@ -82,6 +83,7 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -8462,6 +8464,161 @@ RefPtr<DynamicComponentSafeManager> PipelineContext::GetDynamicComponentSafeMana
         dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     }
     return dynamicComponentSafeManager_;
+}
+
+int32_t PipelineContext::RegisterSurfaceChangedCallback(
+    std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
+{
+    if (callback) {
+        surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnregisterSurfaceChangedCallback(int32_t callbackId)
+{
+    surfaceChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
+{
+    if (callback) {
+        foldStatusChangedCallbackMap_.emplace(callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnRegisterFoldStatusChangedCallback(int32_t callbackId)
+{
+    foldStatusChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
+{
+    if (callback) {
+        halfFoldHoverChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId)
+{
+    halfFoldHoverChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterRawKeyboardChangedCallback(std::function<void()>&& callback)
+{
+    if (callback) {
+        rawKeyboardChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnRegisterRawKeyboardChangedCallback(int32_t callbackId)
+{
+    rawKeyboardChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
+{
+    if (callback) {
+        foldDisplayModeChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnRegisterFoldDisplayModeChangedCallback(int32_t callbackId)
+{
+    foldDisplayModeChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
+{
+    if (callback) {
+        surfacePositionChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnregisterSurfacePositionChangedCallback(int32_t callbackId)
+{
+    surfacePositionChangedCallbackMap_.erase(callbackId);
+}
+
+int32_t PipelineContext::RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback)
+{
+    if (callback) {
+        transformHintChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void PipelineContext::UnregisterTransformHintChangedCallback(int32_t callbackId)
+{
+    transformHintChangedCallbackMap_.erase(callbackId);
+}
+
+void PipelineContext::RemoveGestureTask(const DelayedTask& task)
+{
+    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+        if (iter->recognizer == task.recognizer) {
+            iter = delayedTasks_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+RectF PipelineContext::GetRootRect()
+{
+    CHECK_NULL_RETURN(rootNode_, RectF());
+    auto geometryNode = rootNode_->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    return geometryNode->GetFrameRect();
+}
+
+void PipelineContext::OnFlushReloadFinish()
+{
+    auto tasks = std::move(afterReloadAnimationTasks_);
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void PipelineContext::SetAreaChangeNodeMinDepth(int32_t depth)
+{
+    if (areaChangeNodeMinDepth_ > 0) {
+        areaChangeNodeMinDepth_ = std::min(areaChangeNodeMinDepth_, depth);
+    } else {
+        areaChangeNodeMinDepth_ = depth;
+    }
+}
+
+void PipelineContext::SetIsDisappearChangeNodeMinDepth(int32_t depth)
+{
+    if (isDisappearChangeNodeMinDepth_ > 0) {
+        isDisappearChangeNodeMinDepth_ = std::min(isDisappearChangeNodeMinDepth_, depth);
+    } else {
+        isDisappearChangeNodeMinDepth_ = depth;
+    }
+}
+
+int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& callback)
+{
+    if (callback) {
+        rotationEndCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
 }
 
 } // namespace OHOS::Ace::NG

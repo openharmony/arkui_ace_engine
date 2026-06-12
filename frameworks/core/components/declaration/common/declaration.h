@@ -23,14 +23,12 @@
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
-#include "core/animation/scheduler.h"
 #include "core/components/declaration/common/attribute.h"
 #include "core/components/declaration/common/event.h"
 #include "core/components/declaration/common/method.h"
 #include "core/components/declaration/common/style.h"
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/pipeline/pipeline_base.h"
-#include "frameworks/core/components/transform/click_spring_effect.h"
 #include "base/geometry/calc_dimension.h"
 
 namespace OHOS::Ace {

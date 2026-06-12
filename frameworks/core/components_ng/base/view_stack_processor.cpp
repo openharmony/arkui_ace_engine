@@ -22,6 +22,7 @@
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"

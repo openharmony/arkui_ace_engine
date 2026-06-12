@@ -266,15 +266,9 @@ public:
 
     // Get the creation timestamp of this container (in milliseconds since epoch)
     // Returns timestamp recorded at container construction time
-    int64_t GetCreateTime() const
-    {
-        return createTime_;
-    }
+    int64_t GetCreateTime() const;
 
-    void SetCreateTime(int64_t time)
-    {
-        createTime_ = time;
-    }
+    void SetCreateTime(int64_t time);
 
     bool IsFirstUpdate() const
     {
@@ -390,49 +384,23 @@ public:
     static ColorMode CurrentColorMode();
     static std::string CurrentBundleName();
 
-    void SetUseNewPipeline()
-    {
-        useNewPipeline_ = true;
-    }
+    void SetUseNewPipeline();
 
-    void SetUsePartialUpdate()
-    {
-        usePartialUpdate_ = true;
-    }
+    void SetUsePartialUpdate();
 
-    bool IsUseNewPipeline() const
-    {
-        return useNewPipeline_;
-    }
+    bool IsUseNewPipeline() const;
 
     static bool IsCurrentUseNewPipeline();
 
     // SetCurrentUsePartialUpdate is called when initial render on a page
     // starts, see zyz_view_register loadDocument() implementation
-    static bool IsCurrentUsePartialUpdate()
-    {
-        auto container = Current();
-        return container ? container->usePartialUpdate_ : false;
-    }
+    static bool IsCurrentUsePartialUpdate();
 
-    static void SetCurrentUsePartialUpdate(bool useIt = false)
-    {
-        auto container = Current();
-        if (container) {
-            container->usePartialUpdate_ = useIt;
-        }
-    }
+    static void SetCurrentUsePartialUpdate(bool useIt = false);
 
-    static bool IsInFormContainer() {
-        auto container = Current();
-        return container ? container->isFRSCardContainer_ : false;
-    }
+    static bool IsInFormContainer();
 
-    static bool IsInSubContainer()
-    {
-        auto container = Current();
-        return container ? container->IsSubContainer() : false;
-    }
+    static bool IsInSubContainer();
 
     Window* GetWindow() const;
 
@@ -635,13 +603,7 @@ public:
      * @return: return the compare result.
      */
     [[deprecated("using GreatOrEqualAPITargetVersion. Note: Logic is inverted")]]
-    static bool LessThanAPITargetVersion(PlatformVersion version)
-    {
-        auto container = Current();
-        CHECK_NULL_RETURN(container, false);
-        auto apiTargetVersion = container->GetApiTargetVersion();
-        return apiTargetVersion < static_cast<int32_t>(version);
-    }
+    static bool LessThanAPITargetVersion(PlatformVersion version);
 
     /**
      * @description: Compare whether the target api version of the application is greater than or equal to the incoming
@@ -649,25 +611,9 @@ public:
      * @param: Target version to be isolated.
      * @return: return the compare result.
      */
-    static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
-    {
-        auto container = Current();
-        if (!container) {
-            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-            return apiTargetVersion >= static_cast<int32_t>(version);
-        }
-        auto apiTargetVersion = container->GetApiTargetVersion();
-        return apiTargetVersion >= static_cast<int32_t>(version);
-    }
+    static bool GreatOrEqualAPITargetVersion(PlatformVersion version);
 
-    static int32_t GetCurrentApiTargetVersion()
-    {
-        auto container = Current();
-        if (!container) {
-            return AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-        }
-        return container->GetApiTargetVersion();
-    }
+    static int32_t GetCurrentApiTargetVersion();
 
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar);
 
@@ -688,19 +634,13 @@ public:
      * @description: Get the target api version of the application.
      * @return: The target api version of the application.
      */
-    int32_t GetApiTargetVersion() const
-    {
-        return apiTargetVersion_;
-    }
+    int32_t GetApiTargetVersion() const;
 
     /**
      * @description: Set the target api version of the application.
      * @param: The target api version of the application.
      */
-    void SetApiTargetVersion(int32_t apiTargetVersion)
-    {
-        apiTargetVersion_ = apiTargetVersion % 1000;
-    }
+    void SetApiTargetVersion(int32_t apiTargetVersion);
 
     UIContentType GetUIContentType() const
     {

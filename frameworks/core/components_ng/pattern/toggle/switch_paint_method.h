@@ -19,7 +19,6 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/toggle/switch_modifier.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"

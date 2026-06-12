@@ -33,6 +33,7 @@
 #include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
 #include "core/event/coasting_axis_event_generator.h"
+#include "core/event/resample_algo.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef RELAXED_INTERACTION_SUPPORT

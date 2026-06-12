@@ -18,6 +18,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 namespace OHOS::Ace::NG {

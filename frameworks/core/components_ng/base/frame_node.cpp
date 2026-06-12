@@ -8979,4 +8979,121 @@ template RefPtr<WaterFlowAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<WaterFlowAccessibilityProperty>() const;
 template RefPtr<WebAccessibilityProperty> FrameNode::GetAccessibilityProperty<WebAccessibilityProperty>() const;
 
+RectF FrameNode::GetVirtualNodeTransformRectRelativeToWindow()
+{
+    auto parentUinode = GetVirtualNodeParent().Upgrade();
+    CHECK_NULL_RETURN(parentUinode, RectF {});
+    auto parentFrame = AceType::DynamicCast<FrameNode>(parentUinode);
+    CHECK_NULL_RETURN(parentFrame, RectF {});
+    auto parentRect = parentFrame->GetTransformRectRelativeToWindow();
+    auto currentRect = GetTransformRectRelativeToWindow();
+    currentRect.SetTop(currentRect.Top() + parentRect.Top());
+    currentRect.SetLeft(currentRect.Left() + parentRect.Left());
+    return currentRect;
+}
+
+void FrameNode::ProcessPropertyDiff()
+{
+    if (isPropertyDiffMarked_) {
+        MarkModifyDone();
+        MarkDirtyNode();
+        isPropertyDiffMarked_ = false;
+    }
+}
+
+void FrameNode::SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
+{
+    CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
+    eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
+}
+
+void FrameNode::SetVisibleAreaInnerCallback(
+    const std::vector<double>& ratios, const VisibleCallbackInfo& callback, bool isCalculateInnerClip)
+{
+    isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
+    eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
+}
+
+void FrameNode::SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
+{
+    isNeedRefreshBackgroundBuilder_ = true;
+    builderFunc_ = std::move(buildFunc);
+    backgroundNode_ = nullptr;
+}
+
+void FrameNode::SetDraggable(bool draggable)
+{
+    draggable_ = draggable;
+    userSet_ = true;
+    customerSet_ = false;
+}
+
+void FrameNode::SetCustomerDraggable(bool draggable)
+{
+    draggable_ = draggable;
+    userSet_ = true;
+    customerSet_ = true;
+}
+
+void FrameNode::CleanVisibleAreaInnerCallback()
+{
+    CHECK_NULL_VOID(eventHub_);
+    eventHub_->CleanVisibleAreaCallback(false);
+}
+
+void FrameNode::SetConfigurationModeUpdateCallback(
+    const std::function<void(const ConfigurationChange& configurationChange)>&& callback)
+{
+    configurationUpdateCallback_ = callback;
+}
+
+void FrameNode::SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
+{
+    std::unique_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
+    ndkFontUpdateCallback_ = callback;
+}
+
+void FrameNode::SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    layoutProperty_ = layoutProperty;
+    layoutProperty_->SetHost(WeakClaim(this));
+}
+
+void FrameNode::AddDelayLayoutChild(const RefPtr<FrameNode>& child)
+{
+    if (child) {
+        delayLayoutChildren_.emplace_back(child);
+    }
+}
+
+void FrameNode::SetRemoveCustomProperties(std::function<void()> func)
+{
+    if (!removeCustomProperties_) {
+        removeCustomProperties_ = func;
+    }
+}
+
+void FrameNode::SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
+{
+    SetIsGeometryTransitionIn(isGeometryTransitionIn);
+    UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+}
+
+void FrameNode::SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
+{
+    if (visibleAreaChangeTriggerReason_ != triggerReason) {
+        visibleAreaChangeTriggerReason_ = triggerReason;
+    }
+}
+
+void FrameNode::ResetLastFrameNodeRect()
+{
+    if (lastFrameNodeRect_) {
+        lastFrameNodeRect_.reset();
+    }
+}
+
 } // namespace OHOS::Ace::NG

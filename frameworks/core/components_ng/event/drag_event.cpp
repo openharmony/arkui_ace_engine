@@ -77,6 +77,46 @@ constexpr float MENU_DRAG_SCALE = 0.05f;
 constexpr Dimension DEFAULT_DRAG_DISTANCE = 10.0_vp;
 } // namespace
 
+const GestureEventFunc& DragEvent::GetActionStartEventFunc() const
+{
+    return actionStart_;
+}
+
+const GestureEventFunc& DragEvent::GetActionUpdateEventFunc() const
+{
+    return actionUpdate_;
+}
+
+const GestureEventFunc& DragEvent::GetActionEndEventFunc() const
+{
+    return actionEnd_;
+}
+
+const GestureEventNoParameter& DragEvent::GetActionCancelEventFunc() const
+{
+    return actionCancel_;
+}
+
+const GestureEventFunc& DragEvent::GetLongPressEventFunc() const
+{
+    return actionLongPress_;
+}
+
+void DragEvent::SetLongPressEventFunc(GestureEventFunc&& actionLongPress)
+{
+    actionLongPress_ = std::move(actionLongPress);
+}
+
+const std::vector<KeyCode>& DragEvent::GetPressedKeyCodes() const
+{
+    return pressedKeyCodes_;
+}
+
+void DragEvent::SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+{
+    pressedKeyCodes_ = pressedKeyCodes;
+}
+
 DragEventActuator::DragEventActuator(
     const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance)
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
@@ -118,6 +158,96 @@ DragEventActuator::DragEventActuator(const WeakPtr<GestureEventHub>& gestureEven
 }
 
 DragEventActuator::~DragEventActuator() = default;
+
+bool DragEventActuator::HasDragEvent() const
+{
+    return static_cast<bool>(userCallback_);
+}
+
+PanDirection DragEventActuator::GetDirection() const
+{
+    return direction_;
+}
+
+int32_t DragEventActuator::GetFingers() const
+{
+    return fingers_;
+}
+
+float DragEventActuator::GetDistance() const
+{
+    return distance_;
+}
+
+void DragEventActuator::SetIsNotInPreviewState(bool isNotInPreviewState)
+{
+    isNotInPreviewState_ = isNotInPreviewState;
+}
+
+void DragEventActuator::SetIsDragUserReject(bool isDragUserReject)
+{
+    isDragUserReject_ = isDragUserReject;
+}
+
+bool DragEventActuator::IsDragUserReject() const
+{
+    return isDragUserReject_;
+}
+
+void DragEventActuator::SetIsDefaultOnDragStartExecuted(bool defaultOnDragStartExecuted)
+{
+    defaultOnDragStartExecuted_ = defaultOnDragStartExecuted;
+}
+
+bool DragEventActuator::IsDefaultOnDragStartExecuted() const
+{
+    return defaultOnDragStartExecuted_;
+}
+
+void DragEventActuator::SetIsForDragDrop(bool isForDragDrop)
+{
+    isForDragDrop_ = isForDragDrop;
+}
+
+void DragEventActuator::SetRestartDrag(bool isRestartDrag)
+{
+    isRestartDrag_ = isRestartDrag;
+}
+
+bool DragEventActuator::GetRestartDrag() const
+{
+    return isRestartDrag_;
+}
+
+bool DragEventActuator::GetIsNewFwk() const
+{
+    return isNewFwk_;
+}
+
+void DragEventActuator::SetIsNewFwk(bool isNewFwk)
+{
+    isNewFwk_ = isNewFwk;
+}
+
+int32_t DragEventActuator::GetLastTouchFingerId()
+{
+    return lastTouchFingerId_;
+}
+
+void DragEventActuator::SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
+{
+    isThumbnailCallbackTriggered_ = isThumbnailCallbackTriggered;
+}
+
+void DragEventActuator::RecordTouchDownPoint(const TouchEvent& downTouchEvent)
+{
+    touchDownPoint_ = downTouchEvent;
+}
+
+const TouchEvent& DragEventActuator::GetTouchDownPoint()
+{
+    return touchDownPoint_;
+}
 
 void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
 {

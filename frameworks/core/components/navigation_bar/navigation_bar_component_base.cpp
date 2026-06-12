@@ -15,6 +15,7 @@
 
 #include "core/components/navigation_bar/navigation_bar_component_base.h"
 
+#include "core/components/common/properties/background_image.h"
 #include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/box/box_component.h"
