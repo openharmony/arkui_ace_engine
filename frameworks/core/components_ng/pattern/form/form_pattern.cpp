@@ -523,6 +523,10 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         return;
     }
 
+    std::string captureName = "FormSnapshot_" + cardInfo_.bundleName + "_" + cardInfo_.cardName + "_" +
+        std::to_string(pixelMap->GetWidth()) + "x" + std::to_string(pixelMap->GetHeight());
+    pixelMap->SetMemoryName(captureName);
+
     auto uiTaskExecutor =
         SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this), pixelMap] {
