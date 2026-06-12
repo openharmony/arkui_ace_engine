@@ -17,6 +17,10 @@
 
 namespace OHOS::Ace {
 
+namespace {
+constexpr size_t MAX_CSS_STYLE_LENGTH = 1024 * 1024; // 1MB max for CSS style text
+}
+
 RefPtr<SvgNode> SvgStyle::Create()
 {
     return AceType::MakeRefPtr<SvgStyle>();
@@ -26,6 +30,10 @@ void SvgStyle::ParseCssStyle(const std::string& styleValue, const PushAttr& call
 {
     if (callback == nullptr) {
         LOGE("ParseCssStyle failed, callback is null");
+        return;
+    }
+    if (styleValue.size() > MAX_CSS_STYLE_LENGTH) {
+        LOGW("ParseCssStyle rejected, style too long: %{public}zu", styleValue.size());
         return;
     }
     std::string newStyle = styleValue;
@@ -63,19 +71,20 @@ void SvgStyle::ParseCssAttrs(const std::string& styleName, const std::string& at
     }
 }
 
-std::vector<std::string> SvgStyle::SplitString(const std::string& source, const std::string& mark)
+std::vector<std::string> SvgStyle::SplitString(const std::string& source, const std::string& mark, size_t maxCount)
 {
-    std::string::size_type pos1;
-    std::string::size_type pos2;
+    std::string::size_type pos1 = 0;
+    std::string::size_type pos2 = source.find(mark);
     std::vector<std::string> res;
-    pos2 = source.find(mark);
-    pos1 = 0;
     while (std::string::npos != pos2) {
+        if (res.size() >= maxCount) {
+            return res;
+        }
         res.push_back(source.substr(pos1, pos2 - pos1));
         pos1 = pos2 + mark.size();
         pos2 = source.find(mark, pos1);
     }
-    if (pos1 != source.length()) {
+    if (pos1 != source.length() && res.size() < maxCount) {
         res.push_back(source.substr(pos1));
     }
     return res;
