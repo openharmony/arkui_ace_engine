@@ -21,19 +21,17 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/divider_modifier.h"
 
 namespace OHOS::Ace::NG {
 
 inline RefPtr<FrameNode> CreateDividerFrameNode(int32_t nodeId)
 {
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, nullptr);
-    auto dividerModifier = nodeModifiers->getDividerModifier();
-    CHECK_NULL_RETURN(dividerModifier, nullptr);
-    CHECK_NULL_RETURN(dividerModifier->createFrameNode, nullptr);
-    auto nodeHandle = dividerModifier->createFrameNode(nodeId);
-    auto* frameNode = reinterpret_cast<FrameNode*>(nodeHandle);
+    auto nodeModifiers = NG::NodeModifier::GetDividerModifier();
+    CHECK_NULL_RETURN(nodeModifiers && nodeModifiers->createFrameNode, nullptr);
+    auto arkUINodeHandle = nodeModifiers->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
     return Referenced::Claim<FrameNode>(frameNode);
 }

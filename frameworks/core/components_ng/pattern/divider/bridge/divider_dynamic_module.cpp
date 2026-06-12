@@ -30,9 +30,11 @@ namespace OHOS::Ace {
 namespace NG {
 const ArkUIDividerModifier* GetDividerDynamicModifier();
 const CJUIDividerModifier* GetCJUIDividerDynamicModifier();
+#ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
 const GENERATED_ArkUIDividerModifier* GetDividerStaticModifier();
 }
+#endif
 } // namespace NG
 
 void DividerDynamicModule::RegisterAttributes(panda::Local<panda::ObjectRef> object, panda::ecmascript::EcmaVM* vm)
@@ -47,7 +49,11 @@ const void* DividerDynamicModule::GetDynamicModifier()
 
 const void* DividerDynamicModule::GetStaticModifier()
 {
+#ifdef INCLUDE_GENERATED_SOURCES
     return NG::GeneratedModifier::GetDividerStaticModifier();
+#else
+    return nullptr;
+#endif
 }
 
 const void* DividerDynamicModule::GetCjModifier()
